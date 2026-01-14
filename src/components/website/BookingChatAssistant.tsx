@@ -817,12 +817,13 @@ interface VoiceSettings {
 }
 
 // Text-to-Speech hook using ElevenLabs API for high-quality voice
-function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
+function useTextToSpeech(language: string, onSpeakEnd?: () => void, mobileFloating?: boolean) {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
+  // Mobile: start with voice disabled (text mode), Desktop: voice enabled
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(!mobileFloating);
   const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
-  const [speechRate, setSpeechRate] = useState(0.85); // Slower for better comprehension
+  const [speechRate, setSpeechRate] = useState(1.15); // Faster, more natural speech
   // Optimized voice settings for slow, clear, natural speech
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
     stability: 0.75,       // High stability for clear, consistent pronunciation
@@ -1084,9 +1085,9 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
           audio.play().catch(reject);
         });
 
-        // Small pause between sentences for natural flow (100-200ms)
+        // Minimal pause between sentences for natural but fast flow (50ms)
         if (i < sentences.length - 1 && !shouldStopRef.current) {
-          await new Promise(resolve => setTimeout(resolve, 150));
+          await new Promise(resolve => setTimeout(resolve, 50));
         }
       }
 
@@ -1439,7 +1440,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   }, [isRecording, isProcessing, isOpen]);
 
   // Text-to-Speech with callback when speech ends
-  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate, voiceSettings, changeVoiceSettings } = useTextToSpeech(language, handleSpeakEnd);
+  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate, voiceSettings, changeVoiceSettings } = useTextToSpeech(language, handleSpeakEnd, mobileFloating);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   
   // Toggle continuous conversation mode
@@ -2245,9 +2246,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Speak the assistant response
+      // Speak the assistant response (stop any ongoing speech first to prevent overlap)
       if (isVoiceEnabled) {
-        speak(assistantMessage.content);
+        stopSpeaking(); // Prevent audio overlap
+        // Small delay to ensure previous audio is fully stopped
+        setTimeout(() => speak(assistantMessage.content), 100);
       }
       
       // If AI triggered form redirect and we have booking data, auto-apply it

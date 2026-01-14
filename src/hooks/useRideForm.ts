@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format, parse } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -152,13 +152,24 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     if (data.time) setTime(data.time);
     if (data.passengers) setPassengers(data.passengers.toString());
     if (data.vehicleType) {
+      // Extended vehicle mapping for AI assistant sync
       const vehicleMap: Record<string, string> = {
         'mercedes-vito': 'mercedes-vito',
         'vip-mercedes': 'vip-mercedes',
         'maybach-minibus': 'maybach-minibus',
-        'minibus': 'minibus'
+        'minibus': 'minibus',
+        // Alternative names from AI
+        'sedan': 'mercedes-vito',
+        'vip': 'vip-mercedes',
+        'minivan': 'vip-mercedes',
+        'vip-minivan': 'vip-mercedes',
+        'vip minivan': 'vip-mercedes',
+        'maybach': 'maybach-minibus',
+        'minibüs': 'minibus',
+        'sprinter': 'minibus',
       };
-      setVehicleType(vehicleMap[data.vehicleType] || 'mercedes-vito');
+      const normalizedType = data.vehicleType.toLowerCase().trim();
+      setVehicleType(vehicleMap[normalizedType] || vehicleMap[data.vehicleType] || 'mercedes-vito');
     }
     toast.success(t("bookingDetailsApplied") || "Booking details applied!");
     document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
