@@ -115,6 +115,13 @@ export interface UseRideFormReturn {
   transferPriceCurrency: string;
   loadingTransferPrice: boolean;
   appliedPromoCode: string;
+  // Return trip
+  returnDate: Date | undefined;
+  returnTime: string;
+  hasReturnTrip: boolean;
+  // Extras
+  babySeatCount: number;
+  luggageCount: number;
   
   // Handlers
   handlePickupSelected: (value: string, details?: PlaceDetails) => void;
@@ -124,6 +131,11 @@ export interface UseRideFormReturn {
   handleSetTime: (t: string) => void;
   handleSetPassengers: (p: string) => void;
   handleSetVehicleType: (v: string) => void;
+  handleSetReturnDate: (d: Date | undefined) => void;
+  handleSetReturnTime: (t: string) => void;
+  handleSetHasReturnTrip: (v: boolean) => void;
+  handleSetBabySeatCount: (n: number) => void;
+  handleSetLuggageCount: (n: number) => void;
   handleRideContinue: () => void;
   handleApplyBooking: (data: BookingData) => void;
   handleApplyPromoCode: (code: string) => void;
@@ -150,6 +162,15 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   const [transferPriceCurrency, setTransferPriceCurrency] = useState("EUR");
   const [loadingTransferPrice, setLoadingTransferPrice] = useState(false);
   const [appliedPromoCode, setAppliedPromoCode] = useState<string>("");
+  
+  // Return trip state
+  const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
+  const [returnTime, setReturnTime] = useState("");
+  const [hasReturnTrip, setHasReturnTrip] = useState(false);
+  
+  // Extras state
+  const [babySeatCount, setBabySeatCount] = useState(0);
+  const [luggageCount, setLuggageCount] = useState(0);
 
   // Fetch transfer prices when locations change
   useEffect(() => {
@@ -209,6 +230,15 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   const handleSetTime = useCallback((t: string) => setTime(t), []);
   const handleSetPassengers = useCallback((p: string) => setPassengers(p), []);
   const handleSetVehicleType = useCallback((v: string) => setVehicleType(v), []);
+  
+  // Return trip handlers
+  const handleSetReturnDate = useCallback((d: Date | undefined) => setReturnDate(d), []);
+  const handleSetReturnTime = useCallback((t: string) => setReturnTime(t), []);
+  const handleSetHasReturnTrip = useCallback((v: boolean) => setHasReturnTrip(v), []);
+  
+  // Extras handlers
+  const handleSetBabySeatCount = useCallback((n: number) => setBabySeatCount(n), []);
+  const handleSetLuggageCount = useCallback((n: number) => setLuggageCount(n), []);
 
   const handleRideContinue = useCallback(() => {
     const missing: string[] = [];
@@ -302,6 +332,45 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
       console.log("[Form Sync] Vehicle mapped:", data.vehicleType, "->", mappedVehicle);
     }
     
+    // Return trip sync
+    if (data.hasReturnTrip !== undefined && data.hasReturnTrip !== null) {
+      setHasReturnTrip(data.hasReturnTrip);
+      hasChanges = true;
+      console.log("[Form Sync] Has return trip:", data.hasReturnTrip);
+    }
+    if (data.returnDate) {
+      const parsedReturnDate = parseFlexibleDate(data.returnDate);
+      if (parsedReturnDate) {
+        setReturnDate(parsedReturnDate);
+        setHasReturnTrip(true);
+        hasChanges = true;
+        console.log("[Form Sync] Return date parsed:", data.returnDate, "->", parsedReturnDate);
+      }
+    }
+    if (data.returnTime) {
+      const parsedReturnTime = parseFlexibleTime(data.returnTime);
+      if (parsedReturnTime) {
+        setReturnTime(parsedReturnTime);
+        hasChanges = true;
+        console.log("[Form Sync] Return time parsed:", data.returnTime, "->", parsedReturnTime);
+      } else if (/^\d{1,2}:\d{2}/.test(data.returnTime)) {
+        setReturnTime(data.returnTime);
+        hasChanges = true;
+      }
+    }
+    
+    // Extras sync
+    if (data.babySeatCount !== undefined && data.babySeatCount !== null && data.babySeatCount >= 0) {
+      setBabySeatCount(data.babySeatCount);
+      hasChanges = true;
+      console.log("[Form Sync] Baby seat count:", data.babySeatCount);
+    }
+    if (data.luggageCount !== undefined && data.luggageCount !== null && data.luggageCount >= 0) {
+      setLuggageCount(data.luggageCount);
+      hasChanges = true;
+      console.log("[Form Sync] Luggage count:", data.luggageCount);
+    }
+    
     // Only show toast and scroll if there are actual changes
     if (hasChanges) {
       toast.success(t("bookingDetailsApplied") || "Booking details applied!");
@@ -334,6 +403,14 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     transferPriceCurrency,
     loadingTransferPrice,
     appliedPromoCode,
+    // Return trip
+    returnDate,
+    returnTime,
+    hasReturnTrip,
+    // Extras
+    babySeatCount,
+    luggageCount,
+    // Handlers
     handlePickupSelected,
     handleDropoffSelected,
     handleSwapLocations,
@@ -341,6 +418,11 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     handleSetTime,
     handleSetPassengers,
     handleSetVehicleType,
+    handleSetReturnDate,
+    handleSetReturnTime,
+    handleSetHasReturnTrip,
+    handleSetBabySeatCount,
+    handleSetLuggageCount,
     handleRideContinue,
     handleApplyBooking,
     handleApplyPromoCode,

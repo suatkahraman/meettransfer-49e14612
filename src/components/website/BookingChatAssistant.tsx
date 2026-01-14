@@ -26,6 +26,7 @@ import { ChatSpeakingWaveform } from "./ChatSpeakingWaveform";
 import { ChatQuickReplyButtons, QuickReplyType } from "./ChatQuickReplyButtons";
 import { ChatLanguageDetectedBanner } from "./ChatLanguageDetectedBanner";
 import { ChatDateTimePicker } from "./ChatDateTimePicker";
+import { SoundWaveInline } from "@/components/ui/SoundWaveAnimation";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -79,6 +80,13 @@ interface BookingData {
   paymentMethod?: "card" | "cash" | null;
   discountApplied?: boolean;
   discountPercentage?: number | null;
+  // Return trip info
+  returnDate?: string | null;
+  returnTime?: string | null;
+  hasReturnTrip?: boolean | null;
+  // Extras
+  babySeatCount?: number | null;
+  luggageCount?: number | null;
 }
 
 interface VehicleFeatures {
@@ -2906,7 +2914,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               >
                                 {speakingMessageId === msg.id && isSpeaking ? (
                                   <>
-                                    <Square className="h-2.5 w-2.5" />
+                                    <SoundWaveInline isPlaying={true} className="text-primary" />
                                     <span>{language === "TR" ? "Durdur" : "Stop"}</span>
                                   </>
                                 ) : (
@@ -3500,7 +3508,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     >
                       {speakingMessageId === msg.id && isSpeaking ? (
                         <>
-                          <Square className="h-3 w-3" />
+                          <SoundWaveInline isPlaying={true} className="text-primary" />
                           <span>{language === "TR" ? "Durdur" : "Stop"}</span>
                         </>
                       ) : (
