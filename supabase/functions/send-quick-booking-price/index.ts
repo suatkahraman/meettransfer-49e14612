@@ -122,15 +122,33 @@ const handler = async (req: Request): Promise<Response> => {
     // Calculate discount if promo code exists
     const hasReturnTrip = return_price !== undefined && return_date && return_time;
     
-    // Get discount percentage from promo code - default is 25%
-    const PROMO_CODE_CONFIG: Record<string, number> = {
-      'MEET25RETURN': 25,
-      'GIDISDONUS': 25,
-      'RETURN25': 25,
-      'MEET10': 10,
-      'WELCOME10': 10,
-    };
-    const discountPercent = promo_code ? (PROMO_CODE_CONFIG[promo_code.toUpperCase()] || 25) : 25;
+    // Get discount percentage from database - fallback to default config
+    let discountPercent = 25; // Default fallback
+    
+    if (promo_code) {
+      const { data: promoData, error: promoError } = await supabase
+        .from('promo_codes')
+        .select('discount_percentage')
+        .eq('code', promo_code.toUpperCase())
+        .eq('is_active', true)
+        .maybeSingle();
+      
+      if (promoData && !promoError) {
+        discountPercent = promoData.discount_percentage;
+        console.log(`Using discount from DB: ${discountPercent}% for code ${promo_code}`);
+      } else {
+        // Fallback to hardcoded config only if DB lookup fails
+        const PROMO_CODE_CONFIG: Record<string, number> = {
+          'MEET25RETURN': 25,
+          'GIDISDONUS': 25,
+          'RETURN25': 25,
+          'MEET10': 10,
+          'WELCOME10': 10,
+        };
+        discountPercent = PROMO_CODE_CONFIG[promo_code.toUpperCase()] || 25;
+        console.log(`Using fallback discount: ${discountPercent}% for code ${promo_code}`);
+      }
+    }
     
     // Use original_return_price if provided, otherwise calculate from discounted price
     const originalReturnPrice = hasReturnTrip && promo_code && original_return_price !== undefined

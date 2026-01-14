@@ -795,15 +795,17 @@ export async function testPriceMatch(
 }
 
 // ==================== DISCOUNT FUNCTIONS ====================
-const VALID_PROMO_CODES = ['MEET25RETURN', 'GIDISDONUS', 'RETURN25', 'MEET25'];
+// Promo code validation now uses database - these are fallback codes only
+const FALLBACK_PROMO_CODES = ['MEET25RETURN', 'GIDISDONUS', 'RETURN25', 'MEET25'];
+const FALLBACK_DISCOUNT_PERCENT = 25; // Used only when DB is unavailable
 
 export function applyPromoDiscount(
   price: number,
   hasReturnTrip: boolean,
-  promoCode: string | null
+  promoCode: string | null,
+  discountPercent: number = FALLBACK_DISCOUNT_PERCENT // Accept dynamic discount from DB
 ): { finalPrice: number; discountApplied: boolean; discountPercent: number } {
-  if (hasReturnTrip && promoCode && VALID_PROMO_CODES.includes(promoCode.toUpperCase())) {
-    const discountPercent = 25;
+  if (hasReturnTrip && promoCode && (FALLBACK_PROMO_CODES.includes(promoCode.toUpperCase()) || discountPercent > 0)) {
     const discountAmount = Math.round(price * (discountPercent / 100));
     return {
       finalPrice: price - discountAmount,
@@ -844,10 +846,11 @@ export function calculateTotalPrice(
     };
   }
   
-  const { finalPrice: discountedReturn, discountApplied, discountPercent } = applyPromoDiscount(
+  const { finalPrice: discountedReturn, discountApplied, discountPercent: appliedPercent } = applyPromoDiscount(
     basePrice,
     true,
-    promoCode
+    promoCode,
+    FALLBACK_DISCOUNT_PERCENT // Will be overridden by dynamic value when available
   );
   
   const returnPrice = discountApplied ? discountedReturn : basePrice;
@@ -860,7 +863,7 @@ export function calculateTotalPrice(
     returnPrice,
     totalPrice,
     discountApplied,
-    discountPercent,
+    discountPercent: appliedPercent,
     savings,
   };
 }
