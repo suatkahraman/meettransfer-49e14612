@@ -63,6 +63,12 @@ interface BookingData {
   estimatedPrice?: number | null;
   currency?: string | null;
   isComplete?: boolean;
+  serviceType?: "transfer" | "hourly";
+  city?: string | null;
+  durationHours?: number | null;
+  paymentMethod?: "card" | "cash" | null;
+  discountApplied?: boolean;
+  discountPercentage?: number | null;
 }
 
 interface Message {
@@ -70,6 +76,8 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   bookingData?: BookingData | null;
+  showVehicleCards?: boolean;
+  showRedirectButton?: boolean;
 }
 
 interface BookingChatAssistantProps {
@@ -1049,16 +1057,16 @@ const placeholderMessages: Record<string, string> = {
 };
 
 const welcomeMessages: Record<string, string> = {
-  EN: "Hello! I'm MT, your VIP transfer assistant. How can I help you?",
-  TR: "Merhaba! Ben MT, VIP transfer asistanınız. Size nasıl yardımcı olabilirim?",
-  DE: "Hallo! Ich bin MT, Ihr VIP-Transfer-Assistent. Wie kann ich Ihnen helfen?",
-  FR: "Bonjour! Je suis MT, votre assistant de transfert VIP. Comment puis-je vous aider?",
-  RU: "Здравствуйте! Я MT, ваш VIP-ассистент по трансферу. Чем могу помочь?",
-  AR: "مرحباً! أنا MT، مساعدك للنقل VIP. كيف يمكنني مساعدتك؟",
-  ES: "¡Hola! Soy MT, tu asistente de transfer VIP. ¿Cómo puedo ayudarte?",
-  IT: "Ciao! Sono MT, il tuo assistente VIP per i trasferimenti. Come posso aiutarti?",
-  UK: "Вітаю! Я MT, ваш VIP-асистент з трансферу. Чим можу допомогти?",
-  JA: "こんにちは！VIPトランスファーアシスタントのMTです。どのようにお手伝いしましょうか？"
+  EN: "Hello! I'm MT, your VIP transfer assistant. 🚗✨ To provide you with the best service, may I have your name please?",
+  TR: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
+  DE: "Hallo! Ich bin MT, Ihr VIP-Transfer-Assistent. 🚗✨ Darf ich Ihren Namen erfahren, um Ihnen den besten Service zu bieten?",
+  FR: "Bonjour! Je suis MT, votre assistant de transfert VIP. 🚗✨ Puis-je avoir votre nom pour vous offrir le meilleur service?",
+  RU: "Здравствуйте! Я MT, ваш VIP-ассистент по трансферу. 🚗✨ Могу узнать ваше имя, чтобы предоставить лучший сервис?",
+  AR: "مرحباً! أنا MT، مساعدك للنقل VIP. 🚗✨ هل يمكنني معرفة اسمك لتقديم أفضل خدمة لك؟",
+  ES: "¡Hola! Soy MT, tu asistente de transfer VIP. 🚗✨ ¿Puedo saber tu nombre para brindarte el mejor servicio?",
+  IT: "Ciao! Sono MT, il tuo assistente VIP per i trasferimenti. 🚗✨ Posso avere il tuo nome per offrirti il miglior servizio?",
+  UK: "Вітаю! Я MT, ваш VIP-асистент з трансферу. 🚗✨ Чи можу дізнатися ваше ім'я для найкращого сервісу?",
+  JA: "こんにちは！VIPトランスファーアシスタントのMTです。🚗✨ 最高のサービスをご提供するため、お名前をお聞かせいただけますか？"
 };
 
 // Generate or get visitor ID for conversation persistence
@@ -1087,7 +1095,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [visitorId] = useState(() => getVisitorId());
+  const [customerName, setCustomerName] = useState<string | null>(null);
   const [bookingCreated, setBookingCreated] = useState<{ id: string; token: string } | null>(null);
+  const [showRedirectPrompt, setShowRedirectPrompt] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const baselineViewportHeightRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -1641,6 +1651,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           language,
           conversationHistory,
           visitorId,
+          customerName,
           stream: true,
         }),
       });
@@ -1739,9 +1750,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
             language,
             conversationHistory,
             visitorId,
+            customerName,
             stream: false
           }
         });
+        
+        // Update customer name if returned
+        if (bookingResult?.customerName && !customerName) {
+          setCustomerName(bookingResult.customerName);
+        }
 
         if (!bookingError && bookingResult?.quickBookingId && bookingResult?.confirmationToken) {
           console.log("Booking created! Navigating to confirmation page...");
