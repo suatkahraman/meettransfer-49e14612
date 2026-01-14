@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { HelpCircle, Sparkles, ChevronDown, MessageCircle } from "lucide-react";
+import { usePromo } from "@/contexts/PromoContext";
+import { HelpCircle, Sparkles, ChevronDown, MessageCircle, Tag, ArrowLeftRight } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -375,7 +376,9 @@ const faqTranslations: Record<string, {
 
 const HomeFAQ = () => {
   const { language, getLocalizedPath } = useLanguage();
+  const { promoCode: activePromo } = usePromo();
   const lang = language || "EN";
+  const discountPercent = activePromo?.discountPercentage || 25;
 
   const t = faqTranslations[lang] || faqTranslations["EN"];
 
@@ -449,12 +452,44 @@ const HomeFAQ = () => {
         </motion.div>
 
         {/* CTA Section */}
+        {/* Dynamic Promo Banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+          className="mt-10"
+        >
+          <div className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 border border-green-500/20 rounded-xl p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+              <div className="flex items-center gap-3">
+                <div className="bg-green-500 text-white p-2 rounded-full shrink-0">
+                  <ArrowLeftRight className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="font-bold text-green-700 dark:text-green-400">
+                    {discountPercent}% OFF Return Transfers
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Code: <span className="font-mono font-semibold text-green-600 dark:text-green-400">{activePromo?.code || 'MEET25RETURN'}</span>
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 bg-green-500/20 text-green-700 dark:text-green-400 px-2.5 py-1 rounded-full text-xs font-semibold">
+                <Tag className="h-3.5 w-3.5" />
+                Limited Offer
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* CTA Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="mt-12 text-center"
+          className="mt-8 text-center"
         >
           <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 bg-card rounded-2xl border">
             <div className="text-center sm:text-left">
