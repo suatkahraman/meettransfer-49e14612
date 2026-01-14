@@ -1781,22 +1781,44 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     };
   }, []);
 
-  // Add welcome message when opened and no messages
+  // Track previous language to detect changes
+  const prevLanguageRef = useRef(language);
+
+  // Add welcome message when opened and no messages, or update when language changes
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    const languageChanged = prevLanguageRef.current !== language;
+    prevLanguageRef.current = language;
+    
+    if (isOpen) {
       const welcomeMessage = welcomeMessages[language] || welcomeMessages.EN;
-      setMessages([{
-        id: "welcome",
-        role: "assistant",
-        content: welcomeMessage
-      }]);
       
-      // Store the welcome message for speaking after voices are loaded
-      if (!hasSpokenWelcomeRef.current) {
-        welcomeMessageRef.current = welcomeMessage;
+      // If no messages or only the welcome message exists, set/update it
+      if (messages.length === 0 || (messages.length === 1 && messages[0].id === "welcome")) {
+        setMessages([{
+          id: "welcome",
+          role: "assistant",
+          content: welcomeMessage
+        }]);
+        
+        // Store the welcome message for speaking after voices are loaded
+        if (!hasSpokenWelcomeRef.current) {
+          welcomeMessageRef.current = welcomeMessage;
+        }
+        
+        // If language changed, speak the new welcome message
+        if (languageChanged && isVoiceEnabled) {
+          hasSpokenWelcomeRef.current = false;
+          welcomeMessageRef.current = welcomeMessage;
+          setTimeout(() => {
+            if (!hasSpokenWelcomeRef.current && isVoiceEnabled) {
+              hasSpokenWelcomeRef.current = true;
+              speak(welcomeMessage);
+            }
+          }, 300);
+        }
       }
     }
-  }, [isOpen, language, messages.length]);
+  }, [isOpen, language, messages.length, isVoiceEnabled, speak]);
 
   // Function to speak welcome message - simplified for ElevenLabs
   const speakWelcome = useCallback(() => {
