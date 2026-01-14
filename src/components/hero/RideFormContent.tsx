@@ -1,5 +1,5 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, Baby, Briefcase, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, Baby, Briefcase, RotateCcw, ChevronDown, ChevronUp, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
-
+import { usePromo } from "@/contexts/PromoContext";
 // Memoize time options generation - only compute once
 const timeOptions = (() => {
   const times: string[] = [];
@@ -101,6 +101,10 @@ export const RideFormContent = memo(({
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
   const [showExtras, setShowExtras] = useState(false);
+  
+  // Get dynamic promo discount from context
+  const { promoCode } = usePromo();
+  const discountPercent = promoCode?.discountPercentage || 25;
   
   const hasRoute = !!(pickup && dropoff);
   const hasExtras = hasReturnTrip || babySeatCount > 0 || luggageCount > 0;
@@ -293,19 +297,45 @@ export const RideFormContent = memo(({
         </CollapsibleTrigger>
         
         <CollapsibleContent className="mt-2 space-y-3">
-          {/* Return Trip Toggle */}
+          {/* Return Trip Toggle with Discount Badge */}
           {setHasReturnTrip && (
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
-              <div className="flex items-center gap-2">
-                <RotateCcw className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">
-                  {t("returnTrip") || "Return Trip"}
-                </span>
+            <div className={cn(
+              "p-3 rounded-lg border transition-all",
+              hasReturnTrip 
+                ? "bg-green-50 dark:bg-green-950/30 border-green-300 dark:border-green-700" 
+                : "bg-muted/30 border-border/50"
+            )}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <RotateCcw className={cn(
+                    "h-4 w-4",
+                    hasReturnTrip ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
+                  )} />
+                  <span className="text-sm font-medium">
+                    {t("returnTrip") || "Return Trip"}
+                  </span>
+                  {/* Discount Badge */}
+                  <span className={cn(
+                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold transition-all",
+                    hasReturnTrip 
+                      ? "bg-green-500 text-white animate-pulse" 
+                      : "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"
+                  )}>
+                    <Tag className="h-3 w-3" />
+                    {discountPercent}% {t("off") || "OFF"}
+                  </span>
+                </div>
+                <Switch
+                  checked={hasReturnTrip}
+                  onCheckedChange={setHasReturnTrip}
+                />
               </div>
-              <Switch
-                checked={hasReturnTrip}
-                onCheckedChange={setHasReturnTrip}
-              />
+              {/* Discount info text when enabled */}
+              {hasReturnTrip && (
+                <p className="text-xs text-green-600 dark:text-green-400 mt-2 flex items-center gap-1 animate-in slide-in-from-top-1 duration-200">
+                  🎉 {t("returnTripDiscountApplied") || `${discountPercent}% discount will be applied to your return trip!`}
+                </p>
+              )}
             </div>
           )}
           

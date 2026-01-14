@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, Tag, CheckCircle2, Briefcase, Sparkles, ThumbsUp, Timer, Hourglass, Building2 } from "lucide-react";
+import { CheckCircle, Loader2, XCircle, MapPin, Calendar, Clock, Car, Users, DollarSign, RefreshCw, Tag, CheckCircle2, Briefcase, Sparkles, ThumbsUp, Timer, Hourglass, Building2, Baby, RotateCcw } from "lucide-react";
 import confetti from "canvas-confetti";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -1031,12 +1031,39 @@ export default function QuickBookingConfirm() {
               </div>
             </div>
 
-            {(booking.luggage_count || booking.baby_seat_count) && (
-              <div className="flex gap-4 mt-3 pt-3 border-t border-border/50">
-                {booking.luggage_count && booking.luggage_count > 0 && (
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                    <Briefcase className="h-4 w-4" />
-                    <span>{booking.luggage_count} {t("qbLuggage")}</span>
+            {/* Extras: Luggage, Baby Seat, Return Trip */}
+            {(booking.luggage_count || booking.baby_seat_count || booking.has_return_trip) && (
+              <div className="space-y-2 mt-3 pt-3 border-t border-border/50">
+                <div className="flex flex-wrap gap-3">
+                  {booking.luggage_count && booking.luggage_count > 0 && (
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+                      <Briefcase className="h-4 w-4" />
+                      <span>{booking.luggage_count} {t("qbLuggage") || "Luggage"}</span>
+                    </div>
+                  )}
+                  {booking.baby_seat_count && booking.baby_seat_count > 0 && (
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+                      <Baby className="h-4 w-4" />
+                      <span>{booking.baby_seat_count} {t("qbBabySeat") || "Baby Seat"}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Return Trip Info with Discount */}
+                {booking.has_return_trip && (
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-700">
+                    <RotateCcw className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <div className="flex-1">
+                      <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">
+                        {t("qbReturnTrip") || "Return Trip"}: {booking.return_date && format(parseISO(booking.return_date), "dd/MM")} {booking.return_time && `- ${booking.return_time}`}
+                      </p>
+                    </div>
+                    {booking.return_price && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-500 text-white">
+                        <Tag className="h-3 w-3" />
+                        {t("qbDiscounted") || "Discounted"}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

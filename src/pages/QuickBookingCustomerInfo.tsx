@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, User, Phone, Mail, MapPin, Calendar, Clock, Car, CheckCircle, Lock, Eye, EyeOff, ArrowLeftRight, Tag, CreditCard, Banknote, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, User, Phone, Mail, MapPin, Calendar, Clock, Car, CheckCircle, Lock, Eye, EyeOff, ArrowLeftRight, Tag, CreditCard, Banknote, CheckCircle2, XCircle, Baby, Briefcase, RotateCcw } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -84,6 +84,14 @@ export default function QuickBookingCustomerInfo() {
     customer_email?: string | null;
     customer_phone?: string | null;
     customer_name?: string | null;
+    // Extras from first page
+    has_return_trip?: boolean | null;
+    return_date?: string | null;
+    return_time?: string | null;
+    return_price?: number | null;
+    baby_seat_count?: number | null;
+    luggage_count?: number | null;
+    promo_code?: string | null;
   } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -252,8 +260,33 @@ export default function QuickBookingCustomerInfo() {
         customer_email: data.customer_email,
         customer_phone: data.customer_phone,
         customer_name: data.customer_name,
+        // Include extras from first page
+        has_return_trip: data.has_return_trip,
+        return_date: data.return_date,
+        return_time: data.return_time,
+        return_price: data.return_price,
+        baby_seat_count: data.baby_seat_count,
+        luggage_count: data.luggage_count,
+        promo_code: data.promo_code,
       });
       setSelectedVehicle(selectedVehicleParam || data.vehicle_type);
+      
+      // Pre-fill return trip state if already set
+      if (data.has_return_trip) {
+        setHasReturnTrip(true);
+        if (data.return_date || data.return_time) {
+          setReturnTripData({
+            date: data.return_date || "",
+            time: data.return_time || "",
+          });
+        }
+      }
+      
+      // Pre-fill promo code if already applied
+      if (data.promo_code) {
+        setPromoCode(data.promo_code);
+        setIsPromoCodeValid(true);
+      }
 
       if (data.customer_name || data.customer_email || data.customer_phone) {
         setFormData(prev => ({
@@ -305,10 +338,16 @@ export default function QuickBookingCustomerInfo() {
   };
 
   const getReturnPrice = () => {
+    // If return price is pre-calculated from first page, use it
+    if (bookingData?.has_return_trip && bookingData?.return_price) {
+      return bookingData.return_price;
+    }
+    
     if (!hasReturnTrip) return null;
     const price = getSelectedPrice();
     if (isPromoCodeValid) {
-      return Math.round(price * 0.75); // 25% discount
+      const discountPercent = activePromo?.discountPercentage || 25;
+      return Math.round(price * (100 - discountPercent) / 100);
     }
     return price;
   };
@@ -642,12 +681,59 @@ export default function QuickBookingCustomerInfo() {
                 </div>
               </div>
               
+              {/* Extras Display: Baby Seat & Luggage */}
+              {(bookingData.baby_seat_count || bookingData.luggage_count) && (
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
+                  {bookingData.baby_seat_count && bookingData.baby_seat_count > 0 && (
+                    <div className="flex items-center gap-1.5 text-xs bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-md">
+                      <Baby className="h-3.5 w-3.5" />
+                      <span>{bookingData.baby_seat_count} {t("qbBabySeat") || "Baby Seat"}</span>
+                    </div>
+                  )}
+                  {bookingData.luggage_count && bookingData.luggage_count > 0 && (
+                    <div className="flex items-center gap-1.5 text-xs bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-md">
+                      <Briefcase className="h-3.5 w-3.5" />
+                      <span>{bookingData.luggage_count} {t("qbLuggage") || "Luggage"}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Pre-selected Return Trip from first page */}
+              {bookingData.has_return_trip && bookingData.return_date && (
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-700 mt-3">
+                  <RotateCcw className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <div className="flex-1">
+                    <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">
+                      {t("qbReturnTrip") || "Return Trip"}: {format(parseISO(bookingData.return_date), "dd/MM")} {bookingData.return_time && `- ${bookingData.return_time}`}
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-500 text-white">
+                    <Tag className="h-3 w-3" />
+                    {activePromo?.discountPercentage || 25}% OFF
+                  </span>
+                </div>
+              )}
+              
               {/* Price Display */}
               <div className="pt-3 border-t border-border">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-muted-foreground">{t("outboundTransfer") || "Outbound Transfer"}</p>
                   <p className="text-xl font-bold text-primary">{currencySymbol}{currentPrice}</p>
                 </div>
+                
+                {/* Show pre-calculated return price if from first page */}
+                {bookingData.has_return_trip && bookingData.return_price && (
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      {t("returnTransfer") || "Return Transfer"}
+                    </p>
+                    <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                      {currencySymbol}{bookingData.return_price}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
