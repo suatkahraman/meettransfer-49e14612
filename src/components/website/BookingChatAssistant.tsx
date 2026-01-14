@@ -2935,6 +2935,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               selectedVehicle={msg.bookingData?.vehicleType || undefined}
                               language={language}
                               discountPercentage={msg.bookingData?.discountPercentage || undefined}
+                              onSelectVehicle={(vehicleType) => {
+                                // Sync selected vehicle to form
+                                if (onApplyBooking) {
+                                  console.log("[ChatVehicleCards Mobile] Syncing vehicle to form:", vehicleType);
+                                  onApplyBooking({ vehicleType } as BookingData);
+                                }
+                                // Update message's bookingData to reflect selection
+                                setMessages(prev => prev.map((m, i) => 
+                                  i === msgIndex && m.bookingData 
+                                    ? { ...m, bookingData: { ...m.bookingData, vehicleType } }
+                                    : m
+                                ));
+                              }}
                             />
                           )}
 
@@ -3529,6 +3542,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     selectedVehicle={msg.bookingData?.vehicleType || undefined}
                     language={language}
                     discountPercentage={msg.bookingData?.discountPercentage || undefined}
+                    onSelectVehicle={(vehicleType) => {
+                      // Sync selected vehicle to form
+                      if (onApplyBooking) {
+                        console.log("[ChatVehicleCards Desktop] Syncing vehicle to form:", vehicleType);
+                        onApplyBooking({ vehicleType } as BookingData);
+                      }
+                      // Update message's bookingData to reflect selection
+                      setMessages(prev => prev.map((m, idx) => 
+                        idx === msgIndex && m.bookingData 
+                          ? { ...m, bookingData: { ...m.bookingData, vehicleType } }
+                          : m
+                      ));
+                    }}
                   />
                 )}
 
