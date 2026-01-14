@@ -5,19 +5,19 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, memo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Import city images
-import istanbulImg from "@/assets/destinations/istanbul-city.jpg";
-import antalyaImg from "@/assets/destinations/antalya-city.jpg";
-import bodrumImg from "@/assets/destinations/bodrum-city.jpg";
-import dalamanImg from "@/assets/destinations/dalaman-city.jpg";
-import izmirImg from "@/assets/destinations/izmir-city.jpg";
-import cappadociaImg from "@/assets/destinations/cappadocia-city.jpg";
-import dubaiImg from "@/assets/destinations/dubai-city.jpg";
-import cyprusImg from "@/assets/destinations/cyprus-city.jpg";
-import fethiyeImg from "@/assets/destinations/fethiye-city.jpg";
-import marmarisImg from "@/assets/destinations/marmaris-city.jpg";
-import frankfurtImg from "@/assets/destinations/frankfurt-city.jpg";
-import athensImg from "@/assets/destinations/athens-city.jpg";
+// Import optimized WebP city images
+import istanbulImg from "@/assets/destinations/istanbul-city.webp";
+import antalyaImg from "@/assets/destinations/antalya-city.webp";
+import bodrumImg from "@/assets/destinations/bodrum-city.webp";
+import dalamanImg from "@/assets/destinations/dalaman-city.webp";
+import izmirImg from "@/assets/destinations/izmir-city.webp";
+import cappadociaImg from "@/assets/destinations/cappadocia-city.webp";
+import dubaiImg from "@/assets/destinations/dubai-city.webp";
+import cyprusImg from "@/assets/destinations/cyprus-city.webp";
+import fethiyeImg from "@/assets/destinations/fethiye-city.webp";
+import marmarisImg from "@/assets/destinations/marmaris-city.webp";
+import frankfurtImg from "@/assets/destinations/frankfurt-city.webp";
+import athensImg from "@/assets/destinations/athens-city.webp";
 
 // Preload critical images for faster display
 const preloadImages = (images: string[]) => {
