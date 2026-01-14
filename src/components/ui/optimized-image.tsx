@@ -59,7 +59,13 @@ const getWebPUrl = (src: string): string | null => {
   if (src.startsWith('http') && !src.includes('supabase.co')) return null;
   if (src.startsWith('data:')) return null;
   
-  // Convert jpg/jpeg/png to webp
+  // For Vite bundled assets, don't try to convert - use original
+  // Vite already handles these with hashed filenames like /assets/image-abc123.png
+  if (src.includes('/assets/') && src.match(/-[a-zA-Z0-9]{8}\./)) {
+    return null;
+  }
+  
+  // Convert jpg/jpeg/png to webp only for non-bundled assets
   const webpUrl = src.replace(/\.(jpg|jpeg|png)$/i, '.webp');
   return webpUrl !== src ? webpUrl : null;
 };
@@ -114,6 +120,7 @@ export const OptimizedImage = memo(function OptimizedImage({
   ...props
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const [supportsWebP, setSupportsWebP] = useState<boolean | null>(null);
   const [currentSrc, setCurrentSrc] = useState<string>('');
@@ -152,13 +159,23 @@ export const OptimizedImage = memo(function OptimizedImage({
     };
   }, [priority, isInView]);
 
-  // Determine the best image source
+  // Determine the best image source - use original directly for bundled assets
   useEffect(() => {
-    if (!isInView || supportsWebP === null) return;
+    if (!isInView) return;
+    
+    // For bundled assets or when WebP check is pending, use original source directly
+    // This ensures images load immediately without waiting for WebP check
+    setCurrentSrc(src);
+  }, [src, isInView]);
 
-    const webpUrl = supportsWebP ? getWebPUrl(src) : null;
-    setCurrentSrc(webpUrl || src);
-  }, [src, isInView, supportsWebP]);
+  // Handle image error - fallback to original src if WebP fails
+  const handleError = () => {
+    setHasError(true);
+    // If current src is different from original, try original
+    if (currentSrc !== src) {
+      setCurrentSrc(src);
+    }
+  };
 
   const srcSet = isInView ? generateSrcSet(currentSrc || src, srcSetWidths) : undefined;
 
@@ -221,6 +238,7 @@ export const OptimizedImage = memo(function OptimizedImage({
             className="w-full h-full"
             style={imageStyle}
             onLoad={() => setIsLoaded(true)}
+            onError={handleError}
             {...props}
           />
         </picture>
