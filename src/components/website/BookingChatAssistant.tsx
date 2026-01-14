@@ -25,8 +25,7 @@ import { ChatVehicleFeaturesCard } from "./ChatVehicleFeaturesCard";
 import { ChatSpeakingWaveform } from "./ChatSpeakingWaveform";
 import { ChatQuickReplyButtons, QuickReplyType } from "./ChatQuickReplyButtons";
 import { ChatLanguageDetectedBanner } from "./ChatLanguageDetectedBanner";
-import { ChatDatePicker } from "./ChatDatePicker";
-import { ChatTimePicker } from "./ChatTimePicker";
+import { ChatDateTimePicker } from "./ChatDateTimePicker";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -105,8 +104,7 @@ interface Message {
   showPaymentMethod?: boolean;
   showPassengerCount?: boolean;
   showExtras?: boolean;
-  showDatePicker?: boolean;
-  showTimePicker?: boolean;
+  showDateTimePicker?: boolean;
   vehiclePrices?: Record<string, number>;
   passengerCount?: number;
   vehicleFeatures?: VehicleFeatures;
@@ -2196,51 +2194,40 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       ];
       const showExtras = extrasQuestionPatterns.some(pattern => pattern.test(cleanedContent));
 
-      // Detect date question patterns
-      const dateQuestionPatterns = [
+      // Detect date/time question patterns
+      const dateTimeQuestionPatterns = [
         /ne.*zaman/i,
         /hangi.*tarih/i,
         /hangi.*gün/i,
         /tarih.*nedir/i,
         /tarih.*seç/i,
+        /saat.*kaç/i,
+        /ne.*saat/i,
+        /hangi.*saat/i,
         /when/i,
         /what.*date/i,
         /which.*date/i,
         /pickup.*date/i,
         /transfer.*date/i,
-        /wann/i,
-        /welches.*datum/i,
-        /quelle.*date/i,
-        /когда/i,
-        /какая.*дата/i,
-        /cuándo/i,
-        /qué.*fecha/i,
-        /quando/i,
-        /quale.*data/i,
-      ];
-      const showDatePicker = dateQuestionPatterns.some(pattern => pattern.test(cleanedContent));
-
-      // Detect time question patterns
-      const timeQuestionPatterns = [
-        /saat.*kaç/i,
-        /ne.*saat/i,
-        /hangi.*saat/i,
-        /saat.*nedir/i,
-        /saat.*seç/i,
         /what.*time/i,
         /which.*time/i,
         /pickup.*time/i,
-        /transfer.*time/i,
+        /wann/i,
+        /welches.*datum/i,
         /um.*wieviel.*uhr/i,
-        /welche.*uhrzeit/i,
+        /quelle.*date/i,
         /à.*quelle.*heure/i,
+        /когда/i,
+        /какая.*дата/i,
         /во.*сколько/i,
-        /какое.*время/i,
+        /cuándo/i,
+        /qué.*fecha/i,
         /a.*qué.*hora/i,
+        /quando/i,
+        /quale.*data/i,
         /che.*ora/i,
-        /a.*che.*ora/i,
       ];
-      const showTimePicker = timeQuestionPatterns.some(pattern => pattern.test(cleanedContent));
+      const showDateTimePicker = dateTimeQuestionPatterns.some(pattern => pattern.test(cleanedContent));
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -2253,8 +2240,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         showPaymentMethod,
         showPassengerCount,
         showExtras,
-        showDatePicker,
-        showTimePicker,
+        showDateTimePicker,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -2972,45 +2958,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             />
                           )}
 
-                          {/* Date Picker - Mobile */}
-                          {msgIndex === messages.length - 1 && !isLoading && msg.showDatePicker && (
-                            <ChatDatePicker
+                          {/* Date Time Picker - Mobile */}
+                          {msgIndex === messages.length - 1 && !isLoading && msg.showDateTimePicker && (
+                            <ChatDateTimePicker
                               language={language}
-                              onSelectDate={(date, formattedDate, returnDate, formattedReturnDate) => {
+                              onSelectDateTime={(date, formattedDate, time, formattedTime, returnDate, formattedReturnDate, returnTime, formattedReturnTime) => {
                                 // Sync to form
                                 if (onApplyBooking) {
                                   const dateStr = date.toISOString().split('T')[0];
-                                  console.log("[DatePicker] Syncing to form:", dateStr, returnDate ? returnDate.toISOString().split('T')[0] : 'no return');
-                                  onApplyBooking({ date: dateStr } as BookingData);
+                                  console.log("[DateTimePicker] Syncing to form:", dateStr, time, returnDate ? returnDate.toISOString().split('T')[0] : 'no return');
+                                  onApplyBooking({ date: dateStr, time } as BookingData);
                                 }
                                 
-                                // Send message to chat with both dates if return exists
-                                const message = returnDate && formattedReturnDate 
-                                  ? `${formattedDate} → ${formattedReturnDate}` 
-                                  : formattedDate;
+                                // Build message
+                                let message = `${formattedDate} ${time}`;
+                                if (returnDate && formattedReturnDate && returnTime) {
+                                  message += ` → ${formattedReturnDate} ${returnTime}`;
+                                }
                                 setInput(message);
-                                setTimeout(() => {
-                                  const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
-                                  if (submitButton) submitButton.click();
-                                }, 100);
-                              }}
-                              disabled={isLoading}
-                            />
-                          )}
-
-                          {/* Time Picker - Mobile */}
-                          {msgIndex === messages.length - 1 && !isLoading && msg.showTimePicker && (
-                            <ChatTimePicker
-                              language={language}
-                              onSelectTime={(time, formattedTime) => {
-                                // Sync to form
-                                if (onApplyBooking) {
-                                  console.log("[TimePicker] Syncing to form:", time);
-                                  onApplyBooking({ time } as BookingData);
-                                }
-                                
-                                // Send message to chat
-                                setInput(formattedTime);
                                 setTimeout(() => {
                                   const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
                                   if (submitButton) submitButton.click();
@@ -3557,45 +3522,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   />
                 )}
 
-                {/* Date Picker - Desktop */}
-                {msgIndex === messages.length - 1 && !isLoading && msg.showDatePicker && (
-                  <ChatDatePicker
+                {/* Date Time Picker - Desktop */}
+                {msgIndex === messages.length - 1 && !isLoading && msg.showDateTimePicker && (
+                  <ChatDateTimePicker
                     language={language}
-                    onSelectDate={(date, formattedDate, returnDate, formattedReturnDate) => {
+                    onSelectDateTime={(date, formattedDate, time, formattedTime, returnDate, formattedReturnDate, returnTime, formattedReturnTime) => {
                       // Sync to form
                       if (onApplyBooking) {
                         const dateStr = date.toISOString().split('T')[0];
-                        console.log("[DatePicker] Syncing to form:", dateStr, returnDate ? returnDate.toISOString().split('T')[0] : 'no return');
-                        onApplyBooking({ date: dateStr } as BookingData);
+                        console.log("[DateTimePicker] Syncing to form:", dateStr, time, returnDate ? returnDate.toISOString().split('T')[0] : 'no return');
+                        onApplyBooking({ date: dateStr, time } as BookingData);
                       }
                       
-                      // Send message to chat with both dates if return exists
-                      const message = returnDate && formattedReturnDate 
-                        ? `${formattedDate} → ${formattedReturnDate}` 
-                        : formattedDate;
+                      // Build message
+                      let message = `${formattedDate} ${time}`;
+                      if (returnDate && formattedReturnDate && returnTime) {
+                        message += ` → ${formattedReturnDate} ${returnTime}`;
+                      }
                       setInput(message);
-                      setTimeout(() => {
-                        const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
-                        if (submitButton) submitButton.click();
-                      }, 100);
-                    }}
-                    disabled={isLoading}
-                  />
-                )}
-
-                {/* Time Picker - Desktop */}
-                {msgIndex === messages.length - 1 && !isLoading && msg.showTimePicker && (
-                  <ChatTimePicker
-                    language={language}
-                    onSelectTime={(time, formattedTime) => {
-                      // Sync to form
-                      if (onApplyBooking) {
-                        console.log("[TimePicker] Syncing to form:", time);
-                        onApplyBooking({ time } as BookingData);
-                      }
-                      
-                      // Send message to chat
-                      setInput(formattedTime);
                       setTimeout(() => {
                         const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
                         if (submitButton) submitButton.click();
