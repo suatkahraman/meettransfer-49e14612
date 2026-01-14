@@ -23,7 +23,8 @@ import { ChatPriceSummaryCard } from "./ChatPriceSummaryCard";
 import { ChatRouteMap } from "./ChatRouteMap";
 import { ChatVehicleFeaturesCard } from "./ChatVehicleFeaturesCard";
 import { ChatSpeakingWaveform } from "./ChatSpeakingWaveform";
-import { ChatQuickReplyButtons } from "./ChatQuickReplyButtons";
+import { ChatQuickReplyButtons, QuickReplyType } from "./ChatQuickReplyButtons";
+import { ChatLanguageDetectedBanner } from "./ChatLanguageDetectedBanner";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -98,6 +99,10 @@ interface Message {
   showPriceSummary?: boolean;
   showVehicleFeatures?: boolean;
   showReturnQuestion?: boolean;
+  showVehicleSelection?: boolean;
+  showPaymentMethod?: boolean;
+  showPassengerCount?: boolean;
+  showExtras?: boolean;
   vehiclePrices?: Record<string, number>;
   passengerCount?: number;
   vehicleFeatures?: VehicleFeatures;
@@ -1298,6 +1303,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [showRedirectPrompt, setShowRedirectPrompt] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [waitingForPrice, setWaitingForPrice] = useState(false);
+  const [detectedCountryCode, setDetectedCountryCode] = useState<string | null>(null);
+  const [showLanguageBanner, setShowLanguageBanner] = useState(true);
   const baselineViewportHeightRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1820,7 +1827,28 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     }
   }, [isOpen, language, messages.length, isVoiceEnabled, speak]);
 
-  // Function to speak welcome message - simplified for ElevenLabs
+  // Load detected country code from localStorage and hide banner after delay
+  useEffect(() => {
+    if (isOpen) {
+      try {
+        // Try to get country code from geo detection storage
+        const geoData = localStorage.getItem('meet_transfer_geo_country');
+        if (geoData) {
+          setDetectedCountryCode(geoData);
+        }
+      } catch {
+        // Ignore storage errors
+      }
+      
+      // Show banner for 5 seconds then hide
+      setShowLanguageBanner(true);
+      const timer = setTimeout(() => {
+        setShowLanguageBanner(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
   const speakWelcome = useCallback(() => {
     if (!welcomeMessageRef.current || hasSpokenWelcomeRef.current || !isVoiceEnabled) {
       console.log('🎙️ [Welcome] speakWelcome skipped:', {
@@ -2108,13 +2136,73 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       ];
       const showReturnQuestion = returnQuestionPatterns.some(pattern => pattern.test(cleanedContent));
 
+      // Detect vehicle selection question patterns
+      const vehicleQuestionPatterns = [
+        /hangi.*araç/i,
+        /araç.*tipi/i,
+        /araç.*seç/i,
+        /which.*vehicle/i,
+        /vehicle.*type/i,
+        /choose.*vehicle/i,
+        /select.*vehicle/i,
+        /sedan.*minivan/i,
+        /welches.*fahrzeug/i,
+        /quel.*véhicule/i,
+        /какой.*автомобиль/i,
+      ];
+      const showVehicleSelection = vehicleQuestionPatterns.some(pattern => pattern.test(cleanedContent));
+
+      // Detect payment method question patterns
+      const paymentQuestionPatterns = [
+        /ödeme.*yöntemi/i,
+        /nasıl.*ödeme/i,
+        /ödeme.*şekli/i,
+        /payment.*method/i,
+        /how.*pay/i,
+        /pay.*card.*cash/i,
+        /zahlungsmethode/i,
+        /comment.*payer/i,
+        /способ.*оплаты/i,
+      ];
+      const showPaymentMethod = paymentQuestionPatterns.some(pattern => pattern.test(cleanedContent));
+
+      // Detect passenger count question patterns
+      const passengerQuestionPatterns = [
+        /kaç.*kişi/i,
+        /kaç.*yolcu/i,
+        /how.*many.*passenger/i,
+        /number.*passenger/i,
+        /wie.*viele.*passagiere/i,
+        /combien.*passager/i,
+        /сколько.*пассажир/i,
+      ];
+      const showPassengerCount = passengerQuestionPatterns.some(pattern => pattern.test(cleanedContent));
+
+      // Detect extras question patterns
+      const extrasQuestionPatterns = [
+        /bebek.*koltuk/i,
+        /ekstra.*hizmet/i,
+        /child.*seat/i,
+        /baby.*seat/i,
+        /extra.*luggage/i,
+        /additional.*service/i,
+        /kindersitz/i,
+        /siège.*enfant/i,
+        /детское.*кресло/i,
+      ];
+      const showExtras = extrasQuestionPatterns.some(pattern => pattern.test(cleanedContent));
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: cleanResponseForDisplay(cleanedContent),
         bookingData,
-        showRedirectButton: hasFormRedirect, // Show redirect button if AI says so
-        showReturnQuestion, // Show Yes/No buttons for return transfer question
+        showRedirectButton: hasFormRedirect,
+        showReturnQuestion,
+        showVehicleSelection,
+        showPaymentMethod,
+        showPassengerCount,
+        showExtras,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -2724,12 +2812,21 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               : "bg-muted"
                           )}
                         >
+                          {/* Language Detection Banner - Show on welcome message */}
+                          {msg.id === "welcome" && showLanguageBanner && (
+                            <ChatLanguageDetectedBanner
+                              language={language}
+                              countryCode={detectedCountryCode || undefined}
+                              className="mb-2"
+                            />
+                          )}
                           {msg.role === "assistant" ? (
                             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                               {cleanResponseForDisplay(msg.content)}
                             </ReactMarkdown>
                           ) : (
                             msg.content
+                          )}
                           )}
                           
                           {/* Vehicle Cards for Mobile */}
@@ -2789,11 +2886,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             </div>
                           )}
 
-                          {/* Quick Reply Buttons for Return Transfer Question - Mobile */}
-                          {msg.showReturnQuestion && msgIndex === messages.length - 1 && !isLoading && (
+                          {/* Quick Reply Buttons - Mobile */}
+                          {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showVehicleSelection || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras) && (
                             <ChatQuickReplyButtons
                               language={language}
-                              type="return_transfer"
+                              type={
+                                msg.showReturnQuestion ? "return_transfer" :
+                                msg.showVehicleSelection ? "vehicle_selection" :
+                                msg.showPaymentMethod ? "payment_method" :
+                                msg.showPassengerCount ? "passenger_count" :
+                                "extras"
+                              }
                               onReply={(answer) => {
                                 setInput(answer);
                                 setTimeout(() => {
@@ -3307,11 +3410,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   </div>
                 )}
 
-                {/* Quick Reply Buttons for Return Transfer Question - Desktop */}
-                {msg.showReturnQuestion && msgIndex === messages.length - 1 && !isLoading && (
+                {/* Quick Reply Buttons - Desktop */}
+                {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showVehicleSelection || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras) && (
                   <ChatQuickReplyButtons
                     language={language}
-                    type="return_transfer"
+                    type={
+                      msg.showReturnQuestion ? "return_transfer" :
+                      msg.showVehicleSelection ? "vehicle_selection" :
+                      msg.showPaymentMethod ? "payment_method" :
+                      msg.showPassengerCount ? "passenger_count" :
+                      "extras"
+                    }
                     onReply={(answer) => {
                       setInput(answer);
                       setTimeout(() => {
