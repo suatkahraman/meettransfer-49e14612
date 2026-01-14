@@ -24,6 +24,7 @@ const ReviewPlatformLogos = lazy(() => import("@/components/website/ReviewPlatfo
 const AIAssistantPromo = lazy(() => import("@/components/website/AIAssistantPromo"));
 const TrustedPartners = lazy(() => import("@/components/website/TrustedPartners"));
 const PWAPromoBanner = lazy(() => import("@/components/website/PWAPromoBanner").then(m => ({ default: m.PWAPromoBanner })));
+const PromoBannerCarousel = lazy(() => import("@/components/website/PromoBannerCarousel"));
 
 // Minimal loading placeholder for lazy sections
 const SectionPlaceholder = () => (
@@ -60,6 +61,10 @@ const Index = () => {
       <TrustBar />
       
       {/* Below-the-fold content - lazy loaded for better TTFB */}
+      <Suspense fallback={<SectionPlaceholder />}>
+        <PromoBannerCarousel />
+      </Suspense>
+      
       <Suspense fallback={<SectionPlaceholder />}>
         <CoreServices />
       </Suspense>
