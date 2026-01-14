@@ -66,6 +66,7 @@ import {
   UserX,
   Sparkles,
   Wand2,
+  Bot,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
@@ -108,6 +109,8 @@ interface QuickBookingRequest {
   return_time: string | null;
   return_price: number | null;
   promo_code: string | null;
+  // AI assistant tracking
+  created_via_ai: boolean | null;
 }
 
 // Interface for linked reservation customer status
@@ -856,6 +859,12 @@ export default function AdminQuickBookings() {
                                   {request.agency.agency_name}
                                 </Badge>
                               )}
+                              {request.created_via_ai && (
+                                <Badge variant="outline" className="w-fit mt-1 text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400">
+                                  <Bot className="h-3 w-3 mr-1" />
+                                  AI Asistan
+                                </Badge>
+                              )}
                               {/* Customer Account Status for Confirmed Bookings */}
                               {request.status === "confirmed" && linkedReservations[request.id] && (
                                 <Badge 
@@ -1008,6 +1017,12 @@ export default function AdminQuickBookings() {
                         <div className="flex flex-wrap items-center gap-2 text-xs">
                           {request.customer_name && (
                             <span className="text-muted-foreground">{request.customer_name}</span>
+                          )}
+                          {request.created_via_ai && (
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400">
+                              <Bot className="h-3 w-3 mr-1" />
+                              AI Asistan
+                            </Badge>
                           )}
                           {request.agency && (
                             <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
@@ -1266,6 +1281,15 @@ export default function AdminQuickBookings() {
                         <Building2 className="h-4 w-4 text-muted-foreground" />
                         <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                           {selectedRequest.agency.agency_name}
+                        </Badge>
+                      </div>
+                    )}
+                    {selectedRequest.created_via_ai && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Bot className="h-4 w-4 text-blue-600" />
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700">
+                          <Bot className="h-3 w-3 mr-1" />
+                          AI Asistan ile Oluşturuldu
                         </Badge>
                       </div>
                     )}

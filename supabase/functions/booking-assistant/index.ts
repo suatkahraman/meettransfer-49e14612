@@ -751,7 +751,9 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         return_time: bookingData.returnTime || null,
         return_price: calculatedReturnPrice,
         // Set dynamic promo_code from database if there's a return trip
-        promo_code: hasReturnTrip ? (returnTransferPromo?.code || 'MEET25RETURN') : null
+        promo_code: hasReturnTrip ? (returnTransferPromo?.code || 'MEET25RETURN') : null,
+        // Mark as created via AI assistant
+        created_via_ai: true
       };
 
       if (isHourlyRental) {
