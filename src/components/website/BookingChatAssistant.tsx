@@ -1095,7 +1095,6 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void, mobileFloati
 
         // No pause between sentences for continuous flow
       }
-      }
 
       console.log('🔊 [ElevenLabs] All sentences completed');
       setIsSpeaking(false);
