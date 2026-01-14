@@ -217,15 +217,55 @@ ${customerName ? customerName + ' Bey/Hanım, ' : ''}7 ve üzeri yolcu için Spr
 ${customerName ? customerName + ', ' : ''}for 7+ passengers, our Sprinter is the best choice!"
 `}
 
-### PHASE 5: ASK FOR PRICE CONFIRMATION
-After showing vehicles, ask:
+### PHASE 5: ASK FOR RETURN TRANSFER (IMPORTANT!)
+**AFTER showing vehicle options and BEFORE asking price confirmation:**
+
+**If customer HAS PROVIDED a return date in their booking:**
+${language === 'TR' ? `
+"${customerName ? customerName + ' Bey/Hanım, ' : ''}dönüş transferiniz için size harika bir haber var! 🎉 **Dönüş transferinize %30 indirim** uyguluyorum!
+
+🔄 **Dönüş Transferi:**
+   📅 Tarih: [return_date]
+   💰 Normal fiyat: €[return_price]
+   💰 İndirimli fiyat: €[discounted_return_price] (%30 indirim!)
+   
+Toplam: €[total_price] (gidiş + dönüş)"
+` : `
+"${customerName ? customerName + ', ' : ''}great news for your return transfer! 🎉 I'm applying a **30% discount** on your return trip!
+
+🔄 **Return Transfer:**
+   📅 Date: [return_date]
+   💰 Regular price: €[return_price]
+   💰 Discounted price: €[discounted_return_price] (30% off!)
+   
+Total: €[total_price] (outbound + return)"
+`}
+
+**If customer has NOT provided a return date, ASK them:**
+${language === 'TR' ? `
+"${customerName ? customerName + ' Bey/Hanım, ' : ''}dönüş transferine ihtiyacınız var mı? 🚗 Sizin için **%30 özel indirim** yapabilirim!
+
+Dönüş tarihinizi paylaşırsanız, gidiş-dönüş paketinizi oluştururum."
+` : `
+"${customerName ? customerName + ', ' : ''}do you need a return transfer? 🚗 I can offer you a **30% discount**!
+
+If you share your return date, I'll create your round-trip package."
+`}
+
+When return discount is applied, include:
+\`\`\`returnDiscount
+{"applied": true, "percentage": 30, "returnPrice": [original], "discountedReturnPrice": [new]}
+\`\`\`
+
+### PHASE 6: ASK FOR PRICE CONFIRMATION
+After showing vehicles and return transfer offer, ask:
 ${language === 'TR' ? `
 "${customerName ? customerName + ' Bey/Hanım, ' : ''}bu fiyatlar sizin için uygun mu? Hangi aracı tercih edersiniz?"
 ` : `
 "${customerName ? customerName + ', ' : ''}are these prices suitable for you? Which vehicle would you prefer?"
 `}
 
-### PHASE 6: OFFER DISCOUNT IF NO RESPONSE OR HESITATION
+### PHASE 7: OFFER DISCOUNT IF NO RESPONSE OR HESITATION
 If customer hesitates, doesn't respond clearly, or says prices are high:
 ${language === 'TR' ? `
 "${customerName ? customerName + ' Bey/Hanım, ' : ''}sizin için bir güzellik yapabilirim! 🎉 **%3 özel indirim** uygulayabilirim.
@@ -246,7 +286,7 @@ When discount is applied, include:
 {"applied": true, "percentage": 3, "originalPrice": [original], "discountedPrice": [new]}
 \`\`\`
 
-### PHASE 7: SHOW FINAL BOOKING FORM (WHEN CUSTOMER ACCEPTS)
+### PHASE 8: SHOW FINAL BOOKING FORM (WHEN CUSTOMER ACCEPTS)
 When customer accepts a price/vehicle:
 ${language === 'TR' ? `
 "Harika seçim ${customerName ? customerName + ' Bey/Hanım' : ''}! 🎉 Rezervasyonunuz hazır:
@@ -346,6 +386,12 @@ ${pricingContext}
   "currency": "EUR",
   "discountApplied": boolean,
   "discountPercentage": number or null,
+  "hasReturnTrip": boolean,
+  "returnDate": "YYYY-MM-DD or null",
+  "returnTime": "HH:MM or null",
+  "returnPrice": number or null,
+  "returnDiscountApplied": boolean,
+  "returnDiscountPercentage": 30,
   "isComplete": true only when ALL required fields are present
 }
 \`\`\`
@@ -675,5 +721,17 @@ function extractReadyToBook(response: string): boolean {
     return false;
   } catch (e) {
     return false;
+  }
+}
+
+function extractReturnDiscountData(response: string): any | null {
+  try {
+    const returnDiscountMatch = response.match(/```returnDiscount\s*([\s\S]*?)```/);
+    if (returnDiscountMatch) {
+      return JSON.parse(returnDiscountMatch[1].trim());
+    }
+    return null;
+  } catch (e) {
+    return null;
   }
 }
