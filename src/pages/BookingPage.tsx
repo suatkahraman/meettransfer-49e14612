@@ -116,6 +116,7 @@ const BookingPage = () => {
   const [promoCode, setPromoCode] = useState(urlPromoCode);
   const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
   const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
+  const [promoDiscountPercent, setPromoDiscountPercent] = useState<number | null>(null);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   
   // Hourly rental state
@@ -306,6 +307,7 @@ const BookingPage = () => {
   const handlePromoCodeChange = async (value: string) => {
     setPromoCode(value);
     setPromoCodeError(null);
+    setPromoDiscountPercent(null);
     
     if (value.trim() === "") {
       setIsPromoCodeValid(null);
@@ -318,13 +320,16 @@ const BookingPage = () => {
       
       if (result.valid) {
         setIsPromoCodeValid(true);
+        setPromoDiscountPercent(result.discount);
         setPromoCodeError(null);
       } else {
         setIsPromoCodeValid(false);
+        setPromoDiscountPercent(null);
         setPromoCodeError('errorMessage' in result ? result.errorMessage : null);
       }
     } catch (err) {
       setIsPromoCodeValid(false);
+      setPromoDiscountPercent(null);
       setPromoCodeError(t("errorValidatingPromoCode") || "Error validating promo code");
     } finally {
       setIsValidatingPromo(false);
@@ -352,9 +357,10 @@ const BookingPage = () => {
         ? getHourlyPrice(vehicleType, selectedDuration) 
         : selectedPrice;
       
-      // Calculate return price with discount if applicable
+      // Calculate return price with discount if applicable (use dynamic discount percentage)
+      const discountMultiplier = promoDiscountPercent ? (100 - promoDiscountPercent) / 100 : 1;
       const returnPrice = hasReturnTrip && currentPrice
-        ? (isPromoCodeValid ? Math.round(currentPrice * 0.7) : currentPrice)
+        ? (isPromoCodeValid && promoDiscountPercent ? Math.round(currentPrice * discountMultiplier) : currentPrice)
         : null;
       
       const bookingData = isHourlyBooking 
@@ -1585,8 +1591,8 @@ const BookingPage = () => {
                               <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                             )}
                           </div>
-                          {isPromoCodeValid === true && (
-                            <p className="text-green-600 text-sm mt-1">✓ {t("promoCodeAccepted") || "30% discount will be applied!"}</p>
+                          {isPromoCodeValid === true && promoDiscountPercent && (
+                            <p className="text-green-600 text-sm mt-1">✓ {promoDiscountPercent}% {t("discountWillBeApplied") || "discount will be applied!"}</p>
                           )}
                           {isPromoCodeValid === false && promoCodeError && (
                             <p className="text-red-500 text-sm mt-1">✗ {promoCodeError}</p>
