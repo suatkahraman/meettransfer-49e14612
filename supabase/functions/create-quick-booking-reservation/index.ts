@@ -93,8 +93,14 @@ serve(async (req) => {
     console.log("Main reservation created:", reservation.id, reservation.reservation_code);
 
     // Create return trip reservation if enabled
+    // IMPORTANT: Use exact returnPrice from frontend - no automatic calculation
     let returnReservation = null;
     if (requestData.hasReturnTrip && requestData.returnDate && requestData.returnTime) {
+      // Use the exact price sent from frontend (already includes any discounts)
+      const finalReturnPrice = requestData.returnPrice;
+      
+      console.log("Creating return reservation with exact price:", finalReturnPrice, "(no automatic calculation)");
+      
       const { data: returnRes, error: returnError } = await supabase
         .from("reservations")
         .insert({
@@ -108,7 +114,7 @@ serve(async (req) => {
           vehicle_type: requestData.vehicleType,
           payment_type: requestData.paymentMethod,
           status: "pending_customer_info",
-          price: requestData.returnPrice || requestData.price,
+          price: finalReturnPrice, // Use exact frontend price - NO FALLBACK to main price
           price_currency: requestData.priceCurrency,
           is_return_transfer: true,
           original_reservation_id: reservation.id,
@@ -127,7 +133,7 @@ serve(async (req) => {
         // Don't fail the whole operation, just log the error
       } else {
         returnReservation = returnRes;
-        console.log("Return reservation created:", returnRes.id, returnRes.reservation_code);
+        console.log("Return reservation created:", returnRes.id, returnRes.reservation_code, "with price:", finalReturnPrice);
       }
     }
 
