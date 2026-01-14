@@ -164,8 +164,8 @@ export default function AdminQuickBookings() {
   });
   const [deleting, setDeleting] = useState(false);
   
-  // Return trip discount percentage (fetched from promo_codes)
-  const [returnDiscountPercent, setReturnDiscountPercent] = useState(30);
+  // Return trip discount percentage (fetched from promo_codes, default 25%)
+  const [returnDiscountPercent, setReturnDiscountPercent] = useState(25);
   
   // AI Price Suggestion state
   const [suggestingPrice, setSuggestingPrice] = useState(false);
@@ -552,8 +552,8 @@ export default function AdminQuickBookings() {
       }
 
       try {
-        // discountedReturnPrice is already calculated above with 30% discount if promo code exists
-        // returnPriceValue is the original price admin entered
+        // discountedReturnPrice is already calculated above with discount if promo code exists
+        // returnPriceValue is the original price admin entered (discount % is fetched from DB)
         
         const { data, error: fnError } = await supabase.functions.invoke(
           "send-quick-booking-price",
