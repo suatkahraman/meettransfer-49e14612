@@ -1844,7 +1844,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       setShowLanguageBanner(true);
       const timer = setTimeout(() => {
         setShowLanguageBanner(false);
-      }, 5000);
+      }, 10000);
       
       return () => clearTimeout(timer);
     }
