@@ -25,6 +25,7 @@ const AIAssistantPromo = lazy(() => import("@/components/website/AIAssistantProm
 const TrustedPartners = lazy(() => import("@/components/website/TrustedPartners"));
 const PWAPromoBanner = lazy(() => import("@/components/website/PWAPromoBanner").then(m => ({ default: m.PWAPromoBanner })));
 const PromoBannerCarousel = lazy(() => import("@/components/website/PromoBannerCarousel"));
+const HomeFAQ = lazy(() => import("@/components/website/HomeFAQ"));
 
 // Minimal loading placeholder for lazy sections
 const SectionPlaceholder = () => (
