@@ -16,6 +16,7 @@ import cyprusImg from "@/assets/destinations/cyprus-city.jpg";
 import fethiyeImg from "@/assets/destinations/fethiye-city.jpg";
 import marmarisImg from "@/assets/destinations/marmaris-city.jpg";
 import frankfurtImg from "@/assets/destinations/frankfurt-city.jpg";
+import athensImg from "@/assets/destinations/athens-city.jpg";
 
 // City data with images and starting prices
 const cities = [
@@ -128,6 +129,16 @@ const cities = [
     rating: 4.9,
     popular: true,
     gradient: "from-slate-500/60 to-zinc-600/60",
+  },
+  {
+    name: "Athens",
+    nameTR: "Atina",
+    image: athensImg,
+    fromPrice: 45,
+    airports: ["ATH"],
+    rating: 4.9,
+    popular: true,
+    gradient: "from-blue-500/60 to-indigo-600/60",
   },
 ];
 
