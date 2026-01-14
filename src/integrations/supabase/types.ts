@@ -1717,6 +1717,51 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_interactions: {
+        Row: {
+          active_time_ms: number | null
+          click_count: number | null
+          click_heatmap: Json | null
+          created_at: string
+          engagement_score: number | null
+          form_interactions: Json | null
+          id: string
+          idle_time_ms: number | null
+          max_scroll_depth: number | null
+          page_path: string
+          scroll_depths: number[] | null
+          visitor_id: string
+        }
+        Insert: {
+          active_time_ms?: number | null
+          click_count?: number | null
+          click_heatmap?: Json | null
+          created_at?: string
+          engagement_score?: number | null
+          form_interactions?: Json | null
+          id?: string
+          idle_time_ms?: number | null
+          max_scroll_depth?: number | null
+          page_path: string
+          scroll_depths?: number[] | null
+          visitor_id: string
+        }
+        Update: {
+          active_time_ms?: number | null
+          click_count?: number | null
+          click_heatmap?: Json | null
+          created_at?: string
+          engagement_score?: number | null
+          form_interactions?: Json | null
+          id?: string
+          idle_time_ms?: number | null
+          max_scroll_depth?: number | null
+          page_path?: string
+          scroll_depths?: number[] | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_booking_confirmations: {
         Row: {
           confirmation_token: string
