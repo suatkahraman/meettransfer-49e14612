@@ -2954,10 +2954,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               language={language}
                               discountPercentage={msg.bookingData?.discountPercentage || undefined}
                               onSelectVehicle={(vehicleType) => {
-                                // Sync selected vehicle to form
+                                // Sync selected vehicle AND passenger count to form
                                 if (onApplyBooking) {
-                                  console.log("[ChatVehicleCards Mobile] Syncing vehicle to form:", vehicleType);
-                                  onApplyBooking({ vehicleType } as BookingData);
+                                  const passengerCount = msg.passengerCount || msg.bookingData?.passengers || 2;
+                                  console.log("[ChatVehicleCards Mobile] Syncing to form - vehicle:", vehicleType, "passengers:", passengerCount);
+                                  onApplyBooking({ vehicleType, passengers: passengerCount } as BookingData);
                                 }
                                 // Update message's bookingData to reflect selection
                                 setMessages(prev => prev.map((m, i) => 
@@ -3561,10 +3562,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     language={language}
                     discountPercentage={msg.bookingData?.discountPercentage || undefined}
                     onSelectVehicle={(vehicleType) => {
-                      // Sync selected vehicle to form
+                      // Sync selected vehicle AND passenger count to form
                       if (onApplyBooking) {
-                        console.log("[ChatVehicleCards Desktop] Syncing vehicle to form:", vehicleType);
-                        onApplyBooking({ vehicleType } as BookingData);
+                        const passengerCount = msg.passengerCount || msg.bookingData?.passengers || 2;
+                        console.log("[ChatVehicleCards Desktop] Syncing to form - vehicle:", vehicleType, "passengers:", passengerCount);
+                        onApplyBooking({ vehicleType, passengers: passengerCount } as BookingData);
                       }
                       // Update message's bookingData to reflect selection
                       setMessages(prev => prev.map((m, idx) => 
