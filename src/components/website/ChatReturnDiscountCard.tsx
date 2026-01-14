@@ -19,7 +19,7 @@ export const ChatReturnDiscountCard = memo(function ChatReturnDiscountCard({
   returnDate,
   originalPrice,
   discountedPrice,
-  discountPercentage = 30,
+  discountPercentage = 25, // Default fallback - should be passed dynamically from usePromo
   currency = "EUR",
   hasReturnTrip = false,
   onAcceptReturn,

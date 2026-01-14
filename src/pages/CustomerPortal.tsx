@@ -44,6 +44,7 @@ import {
 
 import UniversalLanguageSelector, { LANGUAGES } from '@/components/UniversalLanguageSelector';
 import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from "@/lib/contact";
+import { usePromo } from "@/contexts/PromoContext";
 
 interface Reservation {
   id: string;
@@ -101,6 +102,9 @@ export default function CustomerPortal() {
   const typingChannelRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Get dynamic promo code from context
+  const { promoCode: activePromo } = usePromo();
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -684,7 +688,7 @@ export default function CustomerPortal() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <Badge className="bg-green-500 text-white text-xs font-bold px-2 py-0.5">
-                        25% OFF
+                        {activePromo?.discountPercentage || 25}% OFF
                       </Badge>
                       <Sparkles className="h-4 w-4 text-green-500" />
                     </div>
