@@ -410,10 +410,11 @@ Hourly rental keywords: "saatlik", "hourly", "X saat", "X hours", "kiralama", "r
 Transfer keywords: "transfer", "havalimanı", "airport", "nereden nereye", "from to", no duration mentioned
 
 ## Vehicle Types:
-1. **Mercedes Vito** (mercedes-vito): Up to 5 passengers - DEFAULT for 1-5 people (standard features, water service available)
-2. **Mercedes Vito VIP** (vip-mercedes): Luxury, up to 5 passengers - Has TV, WiFi, minibar, water service - Recommend when customer wants premium features
-3. **Maybach** (maybach-minibus): Ultra-luxury, up to 3 passengers - Has TV, WiFi, minibar, premium water/drink service - For ultimate luxury seekers
-4. **Sprinter Minibus** (minibus): Up to 16 passengers - for 7+ people (standard features, water service available)
+1. **Sedan** (sedan): Up to 3 passengers - Elegant sedan for solo travelers or couples, economical choice
+2. **Mercedes Vito** (mercedes-vito): Up to 6 passengers - Comfortable minivan for families (standard features, water service available)
+3. **Mercedes Vito VIP** (vip-mercedes): Luxury, up to 5 passengers - Has TV, WiFi, minibar, water service - Recommend when customer wants premium features
+4. **Maybach** (maybach-minibus): Ultra-luxury, up to 4 passengers - Has TV, WiFi, minibar, premium water/drink service - For ultimate luxury seekers
+5. **Sprinter Minibus** (minibus): Up to 16 passengers - for 7+ people (standard features, water service available)
 
 ## Service Areas:
 - Turkey: Istanbul (IST, SAW), Antalya (AYT), Bodrum (BJV), Dalaman (DLM), Izmir (ADB), Cappadocia
@@ -501,7 +502,7 @@ ${pricingContext}
   "date": "YYYY-MM-DD or null",
   "time": "HH:MM or null",
   "passengers": number or null,
-  "vehicleType": "mercedes-vito|vip-mercedes|maybach-minibus|minibus or null",
+  "vehicleType": "sedan|mercedes-vito|vip-mercedes|maybach-minibus|minibus or null",
   "paymentMethod": "card|cash or null",
   "estimatedPrice": number or null,
   "currency": "EUR",
