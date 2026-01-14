@@ -4,11 +4,11 @@ import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase, ChevronLeft, ChevronR
 import { CityVideo } from "./types";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 
-// Futuristic hero images for gallery - local assets for fast loading
+// Optimized WebP hero images for gallery
+import heroAirportFleet from "@/assets/hero/hero-airport-fleet.webp";
+import heroSkyline from "@/assets/hero/hero-city-skyline.webp";
 import heroFuturistic1 from "@/assets/hero-futuristic-1.jpg";
 import heroFuturistic2 from "@/assets/hero-futuristic-2.jpg";
-import heroFuturistic3 from "@/assets/hero-futuristic-3.jpg";
-import heroFuturistic4 from "@/assets/hero-futuristic-4.jpg";
 
 // Gallery images configuration with optimized local assets - multilingual labels
 type GalleryLabels = Record<string, string>;
@@ -18,20 +18,20 @@ const GALLERY_IMAGES: { src: string; labels: GalleryLabels }[] = [
     labels: { EN: "Mercedes Vito", TR: "Mercedes Vito", DE: "Mercedes Vito", FR: "Mercedes Vito", RU: "Mercedes Vito", IT: "Mercedes Vito", ES: "Mercedes Vito", AR: "مرسيدس فيتو", UK: "Mercedes Vito", JA: "メルセデス Vito" }
   },
   { 
+    src: heroAirportFleet, 
+    labels: { EN: "Airport Fleet", TR: "Havalimanı Filosu", DE: "Flughafenflotte", FR: "Flotte aéroport", RU: "Автопарк аэропорта", IT: "Flotta aeroporto", ES: "Flota aeropuerto", AR: "أسطول المطار", UK: "Автопарк аеропорту", JA: "空港車両" }
+  },
+  { 
+    src: heroSkyline, 
+    labels: { EN: "City Skyline", TR: "Şehir Silüeti", DE: "Stadtskyline", FR: "Horizon urbain", RU: "Городской пейзаж", IT: "Skyline città", ES: "Horizonte urbano", AR: "أفق المدينة", UK: "Міський пейзаж", JA: "都市スカイライン" }
+  },
+  { 
     src: heroFuturistic1, 
-    labels: { EN: "City Night", TR: "Gece Şehir", DE: "Nachtstadt", FR: "Ville de nuit", RU: "Ночной город", IT: "Città notturna", ES: "Ciudad nocturna", AR: "مدينة ليلية", UK: "Нічне місто", JA: "夜の街" }
+    labels: { EN: "VIP Transfer", TR: "VIP Transfer", DE: "VIP Transfer", FR: "Transfert VIP", RU: "VIP трансфер", IT: "Trasferimento VIP", ES: "Transfer VIP", AR: "نقل VIP", UK: "VIP трансфер", JA: "VIPトランスファー" }
   },
   { 
     src: heroFuturistic2, 
-    labels: { EN: "Airport Transfer", TR: "Havalimanı Transfer", DE: "Flughafentransfer", FR: "Transfert aéroport", RU: "Трансфер аэропорт", IT: "Trasferimento aeroporto", ES: "Transfer aeropuerto", AR: "نقل المطار", UK: "Трансфер з аеропорту", JA: "空港送迎" }
-  },
-  { 
-    src: heroFuturistic3, 
-    labels: { EN: "VIP Interior", TR: "VIP İç Mekan", DE: "VIP Innenraum", FR: "Intérieur VIP", RU: "VIP интерьер", IT: "Interni VIP", ES: "Interior VIP", AR: "داخلية VIP", UK: "VIP інтер'єр", JA: "VIP内装" }
-  },
-  { 
-    src: heroFuturistic4, 
-    labels: { EN: "Luxury Fleet", TR: "Lüks Filo", DE: "Luxusflotte", FR: "Flotte de luxe", RU: "Люксовый автопарк", IT: "Flotta di lusso", ES: "Flota de lujo", AR: "أسطول فاخر", UK: "Люксовий автопарк", JA: "高級車両" }
+    labels: { EN: "Luxury Journey", TR: "Lüks Yolculuk", DE: "Luxusreise", FR: "Voyage de luxe", RU: "Люксовая поездка", IT: "Viaggio di lusso", ES: "Viaje de lujo", AR: "رحلة فاخرة", UK: "Люксова подорож", JA: "豪華な旅" }
   },
 ];
 
@@ -71,6 +71,9 @@ export const HeroVisualSection = memo(({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Mobile image slider state
+  const [mobileImageIndex, setMobileImageIndex] = useState(0);
+
   // Combine videos and images into unified media array
   const mediaItems: MediaItem[] = useMemo(() => {
     const items: MediaItem[] = [];
@@ -89,6 +92,15 @@ export const HeroVisualSection = memo(({
     
     return items;
   }, [isMobile, videosLoaded, cityVideos]);
+
+  // Auto-rotate mobile images
+  useEffect(() => {
+    if (!isMobile) return;
+    const interval = setInterval(() => {
+      setMobileImageIndex((prev) => (prev + 1) % GALLERY_IMAGES.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isMobile]);
 
   const currentMedia = mediaItems[currentMediaIndex] || mediaItems[0];
 
@@ -116,12 +128,17 @@ export const HeroVisualSection = memo(({
   const nextMedia = () => setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
   const prevMedia = () => setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
 
+  const currentMobileImage = GALLERY_IMAGES[mobileImageIndex];
+  const nextMobileImage = () => setMobileImageIndex((prev) => (prev + 1) % GALLERY_IMAGES.length);
+  const prevMobileImage = () => setMobileImageIndex((prev) => (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length);
+
   return (
     <>
-      {/* Mobile Visual Section - Static image only, no video for performance */}
+      {/* Mobile Visual Section - Image Slider */}
       <div className="order-2 md:hidden">
         <div className="relative rounded-xl overflow-hidden shadow-lg">
-          <div className="relative h-36">
+          <div className="relative h-40">
+            {/* Base fallback image */}
             <img
               src={heroMercedes}
               alt="VIP Transfer"
@@ -130,7 +147,61 @@ export const HeroVisualSection = memo(({
               decoding="async"
               fetchPriority="high"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+            
+            {/* Animated image slider */}
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={mobileImageIndex}
+                src={currentMobileImage.src}
+                alt={getGalleryLabel(currentMobileImage.labels, language)}
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                loading="eager"
+              />
+            </AnimatePresence>
+            
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            
+            {/* Navigation arrows */}
+            <button
+              onClick={prevMobileImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white z-10"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={nextMobileImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white z-10"
+              aria-label="Next"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            
+            {/* Image label */}
+            <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1 z-10">
+              <Image className="h-2.5 w-2.5 text-yellow-400" />
+              <span className="text-[10px] text-white font-medium">
+                {getGalleryLabel(currentMobileImage.labels, language)}
+              </span>
+            </div>
+            
+            {/* Dots navigation */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+              {GALLERY_IMAGES.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setMobileImageIndex(idx)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    idx === mobileImageIndex ? 'bg-white w-4' : 'bg-white/50 w-1.5'
+                  }`}
+                  aria-label={`Go to image ${idx + 1}`}
+                />
+              ))}
+            </div>
             
             <div className="absolute bottom-0 left-0 right-0 p-2.5">
               <div className="text-white">
