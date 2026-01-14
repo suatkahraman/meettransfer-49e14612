@@ -119,6 +119,18 @@ const cityCoordinates: Record<string, { center: { lat: number; lng: number }; zo
       { name: "Kyrenia", nameTR: "Girne", lat: 35.3403, lng: 33.3192, type: 'marina', description: "Picturesque harbor town in North Cyprus with castle, old harbor, and mountain views.", descriptionTR: "Kalesi, eski limanı ve dağ manzaralarıyla Kuzey Kıbrıs'ta pitoresk liman kasabası.", transferTime: "75-90 min", distance: "85 km" },
     ]
   },
+  athens: {
+    center: { lat: 37.9838, lng: 23.7275 },
+    zoom: 10,
+    locations: [
+      { name: "Athens International Airport (ATH)", nameTR: "Atina Uluslararası Havalimanı (ATH)", lat: 37.9364, lng: 23.9445, type: 'airport', description: "Greece's largest airport, serving the greater Athens area and nearby islands.", descriptionTR: "Yunanistan'ın en büyük havalimanı, Atina bölgesine ve yakın adalara hizmet verir." },
+      { name: "Acropolis", nameTR: "Akropolis", lat: 37.9715, lng: 23.7267, type: 'landmark', description: "Ancient citadel with the iconic Parthenon temple. UNESCO World Heritage Site.", descriptionTR: "İkonik Parthenon tapınağıyla antik kale. UNESCO Dünya Mirası.", transferTime: "35-50 min", distance: "30 km" },
+      { name: "Piraeus Port", nameTR: "Pire Limanı", lat: 37.9422, lng: 23.6467, type: 'marina', description: "Europe's largest passenger port. Gateway to Greek islands including Santorini and Mykonos.", descriptionTR: "Avrupa'nın en büyük yolcu limanı. Santorini ve Mykonos dahil Yunan adalarına kapı.", transferTime: "45-60 min", distance: "40 km" },
+      { name: "Syntagma Square", nameTR: "Syntagma Meydanı", lat: 37.9755, lng: 23.7348, type: 'landmark', description: "Central square with Parliament building and changing of the guard ceremony.", descriptionTR: "Parlamento binası ve muhafız değişim töreniyle merkezi meydan.", transferTime: "35-45 min", distance: "28 km" },
+      { name: "Plaka District", nameTR: "Plaka Semti", lat: 37.9725, lng: 23.7300, type: 'shopping', description: "Historic neighborhood with neoclassical architecture, tavernas, and souvenir shops.", descriptionTR: "Neoklasik mimarisi, tavernaları ve hediyelik eşya dükkanlarıyla tarihi mahalle.", transferTime: "35-50 min", distance: "29 km" },
+      { name: "Glyfada Beach", nameTR: "Glyfada Plajı", lat: 37.8600, lng: 23.7500, type: 'beach', description: "Upscale coastal suburb with sandy beaches, shops, and seaside restaurants.", descriptionTR: "Kumlu plajları, dükkanları ve deniz kenarı restoranlarıyla üst düzey kıyı banliyösü.", transferTime: "25-35 min", distance: "22 km" },
+    ]
+  },
   fethiye: {
     center: { lat: 36.6214, lng: 29.1167 },
     zoom: 11,
