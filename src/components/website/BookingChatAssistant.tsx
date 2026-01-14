@@ -21,6 +21,7 @@ import { ChatRedirectButton } from "./ChatRedirectButton";
 import { ChatReturnDiscountCard } from "./ChatReturnDiscountCard";
 import { ChatPriceSummaryCard } from "./ChatPriceSummaryCard";
 import { ChatRouteMap } from "./ChatRouteMap";
+import { ChatVehicleFeaturesCard } from "./ChatVehicleFeaturesCard";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -76,6 +77,13 @@ interface BookingData {
   discountPercentage?: number | null;
 }
 
+interface VehicleFeatures {
+  wifi?: boolean;
+  tv?: boolean;
+  minibar?: boolean;
+  waterService?: boolean;
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -86,8 +94,12 @@ interface Message {
   showRouteMap?: boolean;
   showReturnDiscount?: boolean;
   showPriceSummary?: boolean;
+  showVehicleFeatures?: boolean;
   vehiclePrices?: Record<string, number>;
   passengerCount?: number;
+  vehicleFeatures?: VehicleFeatures;
+  babySeatCount?: number;
+  luggageCount?: number;
   returnDiscountData?: {
     originalPrice: number;
     discountedPrice: number;
@@ -1119,13 +1131,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [bookingCreated, setBookingCreated] = useState<{ id: string; token: string } | null>(null);
   const [showRedirectPrompt, setShowRedirectPrompt] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [waitingForPrice, setWaitingForPrice] = useState(false);
   const baselineViewportHeightRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dragControls = useDragControls();
   const hasLoadedRef = useRef(false);
   const hasHandledAIParamRef = useRef(false);
-
   // Sync isOpen state with global AIChatContext (for hiding BottomNav/WhatsApp)
   useEffect(() => {
     if (mobileFloating) {
@@ -1259,6 +1271,57 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const toggleContinuousMode = useCallback(() => {
     setContinuousMode(prev => !prev);
   }, []);
+
+  // Realtime subscription for price updates from admin
+  useEffect(() => {
+    if (!waitingForPrice || !visitorId) return;
+
+    console.log('🔔 Setting up realtime subscription for price updates, visitorId:', visitorId);
+
+    const channel = supabase
+      .channel(`price-updates-${visitorId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'quick_booking_requests',
+          filter: `customer_session_id=eq.${visitorId}`
+        },
+        (payload) => {
+          console.log('🔔 Price update received:', payload);
+          
+          const newRecord = payload.new as any;
+          
+          // Check if price was added
+          if (newRecord.price && newRecord.price > 0) {
+            const priceMessage = language === 'TR'
+              ? `Harika haber! 🎉 Operasyon yetkilimiz fiyatı belirledi. ${newRecord.vehicle_type === 'mercedes-vito' ? 'Mercedes Vito' : newRecord.vehicle_type} için fiyatınız: **${newRecord.price_currency === 'TRY' ? '₺' : '€'}${newRecord.price}**. Devam etmek ister misiniz?`
+              : `Great news! 🎉 Our operations officer has set the price. Your price for ${newRecord.vehicle_type === 'mercedes-vito' ? 'Mercedes Vito' : newRecord.vehicle_type}: **${newRecord.price_currency === 'TRY' ? '₺' : '€'}${newRecord.price}**. Would you like to proceed?`;
+            
+            // Add message from AI
+            setMessages(prev => [...prev, {
+              id: `price-update-${Date.now()}`,
+              role: 'assistant',
+              content: priceMessage
+            }]);
+            
+            setWaitingForPrice(false);
+            
+            // Speak the message if voice is enabled
+            if (isVoiceEnabled) {
+              speak(priceMessage);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔔 Cleaning up price update subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [waitingForPrice, visitorId, language, isVoiceEnabled, speak]);
 
   // Ref to store pending auto-send message
   const pendingAutoSendRef = useRef<string | null>(null);
@@ -1808,8 +1871,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           setCustomerName(bookingResult.customerName);
         }
 
-        // Update the assistant message with vehicle cards and redirect button
-        if (bookingResult?.showVehicleCards || bookingResult?.showRedirectButton || bookingResult?.vehiclePrices) {
+        // Update the assistant message with vehicle cards, features and redirect button
+        if (bookingResult?.showVehicleCards || bookingResult?.showRedirectButton || bookingResult?.vehiclePrices || bookingResult?.showVehicleFeatures) {
           setMessages(prev => {
             const newMessages = [...prev];
             const lastIdx = newMessages.findIndex(m => m.id === assistantMessage.id);
@@ -1818,12 +1881,22 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 ...newMessages[lastIdx],
                 showVehicleCards: bookingResult?.showVehicleCards || false,
                 showRedirectButton: bookingResult?.showRedirectButton || false,
+                showVehicleFeatures: bookingResult?.showVehicleFeatures || false,
                 vehiclePrices: bookingResult?.vehiclePrices || undefined,
-                passengerCount: bookingResult?.passengerCount || bookingData?.passengers || 2
+                vehicleFeatures: bookingResult?.vehicleFeatures || undefined,
+                passengerCount: bookingResult?.passengerCount || bookingData?.passengers || 2,
+                babySeatCount: bookingResult?.babySeatCount || 0,
+                luggageCount: bookingResult?.luggageCount || null
               };
             }
             return newMessages;
           });
+        }
+
+        // If price request was sent to admin, set waiting state
+        if (bookingResult?.priceRequestSent) {
+          console.log("Price request sent to admin, setting up realtime subscription...");
+          setWaitingForPrice(true);
         }
 
         if (!bookingError && bookingResult?.quickBookingId && bookingResult?.confirmationToken) {
@@ -2196,6 +2269,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               selectedVehicle={msg.bookingData?.vehicleType || undefined}
                               language={language}
                               discountPercentage={msg.bookingData?.discountPercentage || undefined}
+                            />
+                          )}
+
+                          {/* Vehicle Features Card for Mobile */}
+                          {msg.showVehicleFeatures && msg.vehicleFeatures && (
+                            <ChatVehicleFeaturesCard
+                              language={language}
+                              features={msg.vehicleFeatures}
+                              vehicleType={msg.bookingData?.vehicleType || undefined}
                             />
                           )}
 
@@ -2647,6 +2729,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     selectedVehicle={msg.bookingData?.vehicleType || undefined}
                     language={language}
                     discountPercentage={msg.bookingData?.discountPercentage || undefined}
+                  />
+                )}
+
+                {/* Vehicle Features Card for Desktop */}
+                {msg.showVehicleFeatures && msg.vehicleFeatures && (
+                  <ChatVehicleFeaturesCard
+                    language={language}
+                    features={msg.vehicleFeatures}
+                    vehicleType={msg.bookingData?.vehicleType || undefined}
                   />
                 )}
 
