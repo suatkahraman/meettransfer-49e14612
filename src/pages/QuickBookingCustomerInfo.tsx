@@ -219,6 +219,17 @@ export default function QuickBookingCustomerInfo() {
     e.preventDefault();
     setErrors({});
 
+    console.log("Form submit started with data:", {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      hasPassword: !!formData.password,
+      bookingId,
+      selectedVehicle,
+      hasReturnTrip,
+      returnTripData,
+    });
+
     const result = customerInfoSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -228,12 +239,20 @@ export default function QuickBookingCustomerInfo() {
         }
       });
       setErrors(fieldErrors);
-      toast.error("Please fix the validation errors");
+      console.error("Validation errors:", fieldErrors);
+      toast.error(t("pleaseFixValidationErrors") || "Please fix the validation errors");
       return;
     }
 
     if (hasReturnTrip && (!returnTripData.date || !returnTripData.time)) {
-      toast.error("Please enter return date and time");
+      console.error("Return trip missing date/time:", returnTripData);
+      toast.error(t("pleaseEnterReturnDateTime") || "Please enter return date and time");
+      return;
+    }
+
+    if (!bookingId) {
+      console.error("No booking ID available");
+      toast.error(t("bookingDataMissing") || "Booking data is missing. Please go back and try again.");
       return;
     }
 
@@ -242,6 +261,15 @@ export default function QuickBookingCustomerInfo() {
     try {
       const selectedPrice = getSelectedPrice();
       const returnPrice = getReturnPrice();
+
+      console.log("Calling edge function with:", {
+        bookingId,
+        vehicleType: selectedVehicle,
+        price: selectedPrice,
+        hasReturnTrip,
+        returnPrice,
+        paymentMethod,
+      });
 
       // Create reservation via edge function
       const { data: reservationResult, error: reservationError } = await supabase.functions.invoke(
@@ -271,10 +299,13 @@ export default function QuickBookingCustomerInfo() {
         }
       );
 
+      console.log("Edge function response:", reservationResult, "Error:", reservationError);
+
       if (reservationError) throw reservationError;
-      if (!reservationResult.success) throw new Error(reservationResult.error || "Failed to create reservation");
+      if (!reservationResult?.success) throw new Error(reservationResult?.error || "Failed to create reservation");
 
       // Sign in the user
+      console.log("Attempting auto sign-in for:", formData.email.trim());
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email.trim(),
         password: formData.password,
@@ -282,13 +313,16 @@ export default function QuickBookingCustomerInfo() {
 
       if (signInError) {
         console.error("Auto sign-in error:", signInError);
+        // Don't fail - user can sign in manually later
+      } else {
+        console.log("Auto sign-in successful");
       }
 
       setSubmitted(true);
-      toast.success("Account created and booking confirmed!");
+      toast.success(t("accountCreatedAndBookingConfirmed") || "Account created and booking confirmed!");
     } catch (err: any) {
       console.error("Submit error:", err);
-      toast.error(err.message || "Failed to complete booking");
+      toast.error(err.message || t("failedToCompleteBooking") || "Failed to complete booking");
     } finally {
       setSubmitting(false);
     }
