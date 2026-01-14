@@ -164,6 +164,9 @@ export default function AdminQuickBookings() {
   });
   const [deleting, setDeleting] = useState(false);
   
+  // Return trip discount percentage (fetched from promo_codes)
+  const [returnDiscountPercent, setReturnDiscountPercent] = useState(30);
+  
   // AI Price Suggestion state
   const [suggestingPrice, setSuggestingPrice] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<{
@@ -188,6 +191,21 @@ export default function AdminQuickBookings() {
 
   useEffect(() => {
     fetchRequests();
+    // Fetch active return trip discount percentage
+    const fetchDiscount = async () => {
+      const { data } = await supabase
+        .from('promo_codes')
+        .select('discount_percentage')
+        .eq('is_active', true)
+        .eq('applies_to', 'return_transfer')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data?.discount_percentage) {
+        setReturnDiscountPercent(data.discount_percentage);
+      }
+    };
+    fetchDiscount();
 
     const channel = supabase
       .channel("quick-booking-requests")
@@ -461,7 +479,8 @@ export default function AdminQuickBookings() {
       // The admin enters the NORMAL price, and we calculate the discounted price
       let discountedReturnPrice = returnPriceValue;
       if (returnPriceValue && selectedRequest.promo_code) {
-        discountedReturnPrice = Math.round(returnPriceValue * 0.7); // Apply 30% discount
+        const discountMultiplier = (100 - returnDiscountPercent) / 100;
+        discountedReturnPrice = Math.round(returnPriceValue * discountMultiplier);
       }
       
       // Store the DISCOUNTED return price in database
@@ -1721,7 +1740,7 @@ export default function AdminQuickBookings() {
                 <Label className="font-medium flex items-center gap-2">
                   🔄 Dönüş Fiyatı
                   {selectedRequest.promo_code && (
-                    <span className="text-xs text-green-600 font-normal">(%30 indirim otomatik uygulanacak)</span>
+                    <span className="text-xs text-green-600 font-normal">(%{returnDiscountPercent} indirim otomatik uygulanacak)</span>
                   )}
                 </Label>
                 <div className="flex items-center gap-2">
@@ -1739,7 +1758,7 @@ export default function AdminQuickBookings() {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground line-through">Normal: {returnPrice} {currency}</span>
                       <span className="text-green-600 font-medium">
-                        İndirimli: {Math.round(parseFloat(returnPrice) * 0.7)} {currency}
+                        İndirimli: {Math.round(parseFloat(returnPrice) * (100 - returnDiscountPercent) / 100)} {currency}
                       </span>
                     </div>
                   </div>

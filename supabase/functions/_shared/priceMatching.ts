@@ -1193,8 +1193,16 @@ export function checkPriceSanity(
   price: number,
   currency: string,
   vehicleType?: string,
-  airport?: string | null
+  airport?: string | null,
+  isReturnTrip?: boolean,
+  hasReturnDiscount?: boolean
 ): PriceSanityResult {
+  // Skip sanity check for return trips with discount applied
+  // Return trip discounts are legitimate business promotions and should not trigger low price warnings
+  if (isReturnTrip && hasReturnDiscount) {
+    console.log(`✅ Skipping price sanity check for return trip with discount applied. Price: ${price}${currency}`);
+    return { isValid: true, confidence: 'high' };
+  }
   // Convert TRY to EUR for comparison (approximate)
   let priceInEur = price;
   if (currency === 'TRY') {

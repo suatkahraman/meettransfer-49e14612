@@ -1522,31 +1522,63 @@ const BookingPage = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center gap-3">
+                    {/* Return trip checkbox with enhanced promo highlight */}
+                    <div 
+                      className={cn(
+                        "flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer",
+                        hasReturnTrip 
+                          ? "bg-green-50 dark:bg-green-950/30 border-green-500" 
+                          : "bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-300 hover:border-green-400"
+                      )}
+                      onClick={() => {
+                        const newValue = !hasReturnTrip;
+                        setHasReturnTrip(newValue);
+                        // Auto-apply promo code when return trip is selected
+                        if (newValue && activePromo.code && !promoCode) {
+                          handlePromoCodeChange(activePromo.code);
+                        }
+                      }}
+                    >
                       <Checkbox
                         id="returnTrip"
                         checked={hasReturnTrip}
-                        onCheckedChange={(checked) => setHasReturnTrip(checked === true)}
+                        onCheckedChange={(checked) => {
+                          const newValue = checked === true;
+                          setHasReturnTrip(newValue);
+                          // Auto-apply promo code when return trip is selected
+                          if (newValue && activePromo.code && !promoCode) {
+                            handlePromoCodeChange(activePromo.code);
+                          }
+                        }}
+                        className="h-5 w-5"
                       />
-                      <Label htmlFor="returnTrip" className="cursor-pointer font-medium">
-                        {t("addReturnTrip") || "Add return trip"}
-                      </Label>
+                      <div className="flex-1">
+                        <Label htmlFor="returnTrip" className="cursor-pointer font-semibold text-base flex items-center gap-2">
+                          {t("addReturnTrip") || "Add return trip"}
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500 text-white text-xs font-bold animate-pulse">
+                            <Sparkles className="h-3 w-3" />
+                            {activePromo.discountPercentage}% {t("discount") || "OFF"}
+                          </span>
+                        </Label>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {language === 'TR' 
+                            ? `Dönüş yolculuğunuzda %${activePromo.discountPercentage} indirim otomatik uygulanır!`
+                            : `${activePromo.discountPercentage}% discount automatically applied on your return!`}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2 text-sm text-accent bg-accent/10 px-4 py-3 rounded-lg">
-                        <Tag className="h-4 w-4 shrink-0" />
-                        <span>{getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language).returnTripDiscount}</span>
+                    {/* Show discount applied confirmation when return trip is selected */}
+                    {hasReturnTrip && isPromoCodeValid && promoDiscountPercent && (
+                      <div className="flex items-center gap-2 text-sm bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg border border-green-300 dark:border-green-700">
+                        <CheckCircle className="h-5 w-5 shrink-0" />
+                        <span className="font-medium">
+                          {language === 'TR'
+                            ? `✨ %${promoDiscountPercent} indirim uygulandı! Dönüş fiyatınız otomatik düşürüldü.`
+                            : `✨ ${promoDiscountPercent}% discount applied! Your return price is automatically reduced.`}
+                        </span>
                       </div>
-                      {activePromo.validUntil && (
-                        <p className="text-xs text-muted-foreground px-4 flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {language === 'TR' 
-                            ? `Son kullanım: ${new Date(activePromo.validUntil).toLocaleDateString('tr-TR')}` 
-                            : `Valid until: ${new Date(activePromo.validUntil).toLocaleDateString('en-US')}`}
-                        </p>
-                      )}
-                    </div>
+                    )}
 
                     {hasReturnTrip && (
                       <div className="grid sm:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2">
@@ -1572,32 +1604,36 @@ const BookingPage = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="sm:col-span-2">
-                          <Label className="text-sm text-muted-foreground mb-2 block">{t("promoCode") || "Promo Code"}</Label>
-                          <div className="relative">
-                            <Input
-                              placeholder={activePromo.code}
-                              value={promoCode}
-                              onChange={(e) => handlePromoCodeChange(e.target.value)}
-                              className={cn(
-                                isPromoCodeValid === true && "border-green-500 ring-1 ring-green-500",
-                                isPromoCodeValid === false && "border-red-500 ring-1 ring-red-500"
+                        
+                        {/* Hidden promo code - auto-applied, show only if different code entered */}
+                        {promoCode !== activePromo.code && (
+                          <div className="sm:col-span-2">
+                            <Label className="text-sm text-muted-foreground mb-2 block">{t("promoCode") || "Promo Code"}</Label>
+                            <div className="relative">
+                              <Input
+                                placeholder={activePromo.code}
+                                value={promoCode}
+                                onChange={(e) => handlePromoCodeChange(e.target.value)}
+                                className={cn(
+                                  isPromoCodeValid === true && "border-green-500 ring-1 ring-green-500",
+                                  isPromoCodeValid === false && "border-red-500 ring-1 ring-red-500"
+                                )}
+                              />
+                              {isValidatingPromo && (
+                                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground animate-spin" />
                               )}
-                            />
-                            {isValidatingPromo && (
-                              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground animate-spin" />
+                              {!isValidatingPromo && isPromoCodeValid === true && (
+                                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                              )}
+                            </div>
+                            {isPromoCodeValid === true && promoDiscountPercent && (
+                              <p className="text-green-600 text-sm mt-1">✓ {promoDiscountPercent}% {t("discountWillBeApplied") || "discount will be applied!"}</p>
                             )}
-                            {!isValidatingPromo && isPromoCodeValid === true && (
-                              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
+                            {isPromoCodeValid === false && promoCodeError && (
+                              <p className="text-red-500 text-sm mt-1">✗ {promoCodeError}</p>
                             )}
                           </div>
-                          {isPromoCodeValid === true && promoDiscountPercent && (
-                            <p className="text-green-600 text-sm mt-1">✓ {promoDiscountPercent}% {t("discountWillBeApplied") || "discount will be applied!"}</p>
-                          )}
-                          {isPromoCodeValid === false && promoCodeError && (
-                            <p className="text-red-500 text-sm mt-1">✗ {promoCodeError}</p>
-                          )}
-                        </div>
+                        )}
                       </div>
                     )}
                   </CardContent>
