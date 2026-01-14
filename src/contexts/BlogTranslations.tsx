@@ -224,10 +224,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItDesc: "We break down the real costs and benefits of private airport transfers in Turkey.",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% OFF on return transfers",
+    blogCtaDiscountBadge: "25% OFF on return transfers",
     blogCtaTitle: "Book Your Premium Transfer",
-    blogCtaReturnDiscount: "Round-Trip Transfers – 30% OFF!",
-    blogCtaReturnDiscountDesc: "Book your airport and return transfers together and save 30% instantly",
+    blogCtaReturnDiscount: "Round-Trip Transfers – 25% OFF!",
+    blogCtaReturnDiscountDesc: "Book your airport and return transfers together and save 25% instantly",
     blogCtaPromoCode: "Return trip promo code",
     blogCtaDescription: "Professional drivers, luxury Mercedes fleet, 24/7 meet & greet. Fixed prices with no hidden fees.",
     blogCtaRequestPrice: "Request Price",
@@ -986,10 +986,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogDubaiSeoDesc: "Kompletter Guide zu Dubai Flughafentransfers. Privater VIP ab DXB nach Downtown, Palm Jumeirah, Marina ab $45. 24/7 Meet & Greet.",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% RABATT auf Rücktransfers",
+    blogCtaDiscountBadge: "25% RABATT auf Rücktransfers",
     blogCtaTitle: "Buchen Sie Ihren Premium-Transfer",
-    blogCtaReturnDiscount: "Hin- und Rücktransfers – 30% RABATT!",
-    blogCtaReturnDiscountDesc: "Buchen Sie Ihren Flughafen- und Rücktransfer zusammen und sparen Sie sofort 30%",
+    blogCtaReturnDiscount: "Hin- und Rücktransfers – 25% RABATT!",
+    blogCtaReturnDiscountDesc: "Buchen Sie Ihren Flughafen- und Rücktransfer zusammen und sparen Sie sofort 25%",
     blogCtaPromoCode: "Promo-Code für Rückfahrt",
     blogCtaDescription: "Professionelle Fahrer, luxuriöse Mercedes-Flotte, 24/7 Meet & Greet. Festpreise ohne versteckte Gebühren.",
     blogCtaRequestPrice: "Preis anfordern",
@@ -1767,10 +1767,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItDesc: "Nous analysons les coûts et avantages réels des transferts aéroport privés en Turquie.",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% DE RÉDUCTION sur les retours",
+    blogCtaDiscountBadge: "25% DE RÉDUCTION sur les retours",
     blogCtaTitle: "Réservez votre transfert premium",
-    blogCtaReturnDiscount: "Transferts aller-retour – 30% DE RÉDUCTION!",
-    blogCtaReturnDiscountDesc: "Réservez vos transferts aéroport aller et retour ensemble et économisez 30% instantanément",
+    blogCtaReturnDiscount: "Transferts aller-retour – 25% DE RÉDUCTION!",
+    blogCtaReturnDiscountDesc: "Réservez vos transferts aéroport aller et retour ensemble et économisez 25% instantanément",
     blogCtaPromoCode: "Code promo retour",
     blogCtaDescription: "Chauffeurs professionnels, flotte Mercedes de luxe, accueil 24h/24. Prix fixes sans frais cachés.",
     blogCtaRequestPrice: "Demander un prix",
@@ -2528,10 +2528,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItDesc: "Анализируем реальные затраты и преимущества частных трансферов.",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% СКИДКА на обратные трансферы",
+    blogCtaDiscountBadge: "25% СКИДКА на обратные трансферы",
     blogCtaTitle: "Забронируйте ваш премиум-трансфер",
-    blogCtaReturnDiscount: "Трансферы туда-обратно – 30% СКИДКА!",
-    blogCtaReturnDiscountDesc: "Закажите трансфер из аэропорта и обратно вместе и сэкономьте 30% мгновенно",
+    blogCtaReturnDiscount: "Трансферы туда-обратно – 25% СКИДКА!",
+    blogCtaReturnDiscountDesc: "Закажите трансфер из аэропорта и обратно вместе и сэкономьте 25% мгновенно",
     blogCtaPromoCode: "Промокод на обратный рейс",
     blogCtaDescription: "Профессиональные водители, люксовый парк Mercedes, встреча 24/7. Фиксированные цены без скрытых платежей.",
     blogCtaRequestPrice: "Запросить цену",
@@ -3154,10 +3154,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItDesc: "Analizziamo i veri costi e benefici dei trasferimenti aeroportuali privati.",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% DI SCONTO sui ritorni",
+    blogCtaDiscountBadge: "25% DI SCONTO sui ritorni",
     blogCtaTitle: "Prenota il tuo trasferimento premium",
-    blogCtaReturnDiscount: "Trasferimenti andata e ritorno – 30% DI SCONTO!",
-    blogCtaReturnDiscountDesc: "Prenota i trasferimenti aeroportuali andata e ritorno insieme e risparmia subito il 30%",
+    blogCtaReturnDiscount: "Trasferimenti andata e ritorno – 25% DI SCONTO!",
+    blogCtaReturnDiscountDesc: "Prenota i trasferimenti aeroportuali andata e ritorno insieme e risparmia subito il 25%",
     blogCtaPromoCode: "Codice promo ritorno",
     blogCtaDescription: "Autisti professionisti, flotta Mercedes di lusso, accoglienza 24/7. Prezzi fissi senza costi nascosti.",
     blogCtaRequestPrice: "Richiedi prezzo",
@@ -3777,10 +3777,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItDesc: "Analizamos los costos y beneficios reales de los traslados aeroportuarios privados.",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% DE DESCUENTO en regresos",
+    blogCtaDiscountBadge: "25% DE DESCUENTO en regresos",
     blogCtaTitle: "Reserva tu traslado premium",
-    blogCtaReturnDiscount: "Traslados ida y vuelta – ¡30% DE DESCUENTO!",
-    blogCtaReturnDiscountDesc: "Reserva tus traslados aeroportuarios ida y vuelta juntos y ahorra 30% al instante",
+    blogCtaReturnDiscount: "Traslados ida y vuelta – ¡25% DE DESCUENTO!",
+    blogCtaReturnDiscountDesc: "Reserva tus traslados aeroportuarios ida y vuelta juntos y ahorra 25% al instante",
     blogCtaPromoCode: "Código promo regreso",
     blogCtaDescription: "Conductores profesionales, flota Mercedes de lujo, bienvenida 24/7. Precios fijos sin costos ocultos.",
     blogCtaRequestPrice: "Solicitar precio",
@@ -4441,10 +4441,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogIsWorthItDesc: "نحلل التكاليف والفوائد الحقيقية للنقل الخاص من المطار.",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "خصم 30% على رحلات العودة",
+    blogCtaDiscountBadge: "خصم 25% على رحلات العودة",
     blogCtaTitle: "احجز نقلك المميز",
-    blogCtaReturnDiscount: "رحلات الذهاب والعودة – خصم 30%!",
-    blogCtaReturnDiscountDesc: "احجز نقل المطار ذهاباً وإياباً معاً ووفر 30% فوراً",
+    blogCtaReturnDiscount: "رحلات الذهاب والعودة – خصم 25%!",
+    blogCtaReturnDiscountDesc: "احجز نقل المطار ذهاباً وإياباً معاً ووفر 25% فوراً",
     blogCtaPromoCode: "رمز ترويجي للعودة",
     blogCtaDescription: "سائقون محترفون، أسطول مرسيدس فاخر، استقبال 24/7. أسعار ثابتة بدون رسوم مخفية.",
     blogCtaRequestPrice: "اطلب السعر",
@@ -5901,10 +5901,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogCyprusTablePrice: "Ціна приватного трансферу",
 
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% ЗНИЖКА на зворотні трансфери",
+    blogCtaDiscountBadge: "25% ЗНИЖКА на зворотні трансфери",
     blogCtaTitle: "Забронюйте ваш преміум-трансфер",
-    blogCtaReturnDiscount: "Трансфери туди-назад – 30% ЗНИЖКА!",
-    blogCtaReturnDiscountDesc: "Замовте трансфер з аеропорту і назад разом і заощадьте 30% миттєво",
+    blogCtaReturnDiscount: "Трансфери туди-назад – 25% ЗНИЖКА!",
+    blogCtaReturnDiscountDesc: "Замовте трансфер з аеропорту і назад разом і заощадьте 25% миттєво",
     blogCtaPromoCode: "Промокод на зворотний рейс",
     blogCtaDescription: "Професійні водії, люксовий парк Mercedes, зустріч 24/7. Фіксовані ціни без прихованих платежів.",
     blogCtaRequestPrice: "Запитати ціну",
@@ -6694,10 +6694,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogHourlyEvents: "イベント",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "復路送迎30%オフ",
+    blogCtaDiscountBadge: "復路送迎25%オフ",
     blogCtaTitle: "プレミアム送迎を予約",
-    blogCtaReturnDiscount: "往復送迎 – 30%オフ！",
-    blogCtaReturnDiscountDesc: "空港送迎の往路と復路を一緒に予約して、即座に30%節約",
+    blogCtaReturnDiscount: "往復送迎 – 25%オフ！",
+    blogCtaReturnDiscountDesc: "空港送迎の往路と復路を一緒に予約して、即座に25%節約",
     blogCtaPromoCode: "復路プロモーションコード",
     blogCtaDescription: "プロのドライバー、高級メルセデス車両、24時間365日のお出迎え。隠れた料金なしの固定価格。",
     blogCtaRequestPrice: "料金をリクエスト",

@@ -744,11 +744,22 @@ export default function QuickBookingCustomerInfo() {
               <Checkbox
                 id="returnTrip"
                 checked={hasReturnTrip}
-                onCheckedChange={(checked) => setHasReturnTrip(checked === true)}
+                onCheckedChange={(checked) => {
+                  const isChecked = checked === true;
+                  setHasReturnTrip(isChecked);
+                  // Auto-apply promo code when return trip is selected
+                  if (isChecked && !promoCode) {
+                    const autoPromoCode = activePromo?.code || 'MEET25RETURN';
+                    handlePromoCodeChange(autoPromoCode);
+                  }
+                }}
               />
               <Label htmlFor="returnTrip" className="flex items-center gap-2 cursor-pointer font-medium">
                 <ArrowLeftRight className="h-4 w-4 text-primary" />
                 {t("qbAddReturnTransfer") || "Add Return Transfer"}
+                <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                  {activePromo?.discountPercentage || 25}% OFF
+                </span>
               </Label>
             </div>
 
