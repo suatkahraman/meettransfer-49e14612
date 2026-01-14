@@ -387,15 +387,26 @@ export default function QuickBookingCustomerInfo() {
     }
 
     // Validate return trip date/time if selected
-    if (hasReturnTrip && (!returnTripData.date || !returnTripData.time)) {
-      console.error("Return trip missing date/time:", returnTripData);
+    if (hasReturnTrip) {
       const returnErrors: Record<string, string> = {};
-      if (!returnTripData.date) returnErrors.returnDate = t("returnDateRequired") || "Return date is required";
-      if (!returnTripData.time) returnErrors.returnTime = t("returnTimeRequired") || "Return time is required";
-      setErrors(prev => ({ ...prev, ...returnErrors }));
-      toast.error(t("pleaseEnterReturnDateTime") || "Please enter return date and time");
-      setAutoSubmitting(false);
-      return;
+      
+      if (!returnTripData.date) {
+        returnErrors.returnDate = t("returnDateRequired") || "Return date is required";
+      } else if (bookingData?.pickup_date && returnTripData.date < bookingData.pickup_date) {
+        returnErrors.returnDate = t("returnDateMustBeAfterPickup") || "Return date must be on or after pickup date";
+      }
+      
+      if (!returnTripData.time) {
+        returnErrors.returnTime = t("returnTimeRequired") || "Return time is required";
+      }
+      
+      if (Object.keys(returnErrors).length > 0) {
+        console.error("Return trip validation errors:", returnErrors);
+        setErrors(prev => ({ ...prev, ...returnErrors }));
+        toast.error(t("pleaseEnterReturnDateTime") || "Please enter valid return date and time");
+        setAutoSubmitting(false);
+        return;
+      }
     }
 
     if (!bookingId) {
@@ -490,14 +501,25 @@ export default function QuickBookingCustomerInfo() {
       return;
     }
 
-    if (hasReturnTrip && (!returnTripData.date || !returnTripData.time)) {
-      console.error("Return trip missing date/time:", returnTripData);
+    if (hasReturnTrip) {
       const returnErrors: Record<string, string> = {};
-      if (!returnTripData.date) returnErrors.returnDate = t("returnDateRequired") || "Return date is required";
-      if (!returnTripData.time) returnErrors.returnTime = t("returnTimeRequired") || "Return time is required";
-      setErrors(prev => ({ ...prev, ...returnErrors }));
-      toast.error(t("pleaseEnterReturnDateTime") || "Please enter return date and time");
-      return;
+      
+      if (!returnTripData.date) {
+        returnErrors.returnDate = t("returnDateRequired") || "Return date is required";
+      } else if (bookingData?.pickup_date && returnTripData.date < bookingData.pickup_date) {
+        returnErrors.returnDate = t("returnDateMustBeAfterPickup") || "Return date must be on or after pickup date";
+      }
+      
+      if (!returnTripData.time) {
+        returnErrors.returnTime = t("returnTimeRequired") || "Return time is required";
+      }
+      
+      if (Object.keys(returnErrors).length > 0) {
+        console.error("Return trip validation errors:", returnErrors);
+        setErrors(prev => ({ ...prev, ...returnErrors }));
+        toast.error(t("pleaseEnterReturnDateTime") || "Please enter valid return date and time");
+        return;
+      }
     }
 
     if (!bookingId) {
