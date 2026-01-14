@@ -370,6 +370,37 @@ const destinationData: Record<string, {
     locations: ["City Center", "Messe Frankfurt", "Financial District", "Sachsenhausen", "Wiesbaden", "Mainz"],
     gradient: "from-slate-500/80 to-zinc-600/80",
   },
+  athens: {
+    name: "Athens",
+    nameTR: "Atina",
+    airports: ["ATH"],
+    rating: 4.9,
+    fromPrice: 45,
+    popular: true,
+    description: {
+      en: "Welcome to Athens, the historic capital of Greece and cradle of Western civilization. From Athens International Airport (ATH), we provide premium transfers to the city center, Acropolis area, Piraeus port for island ferries, and all surrounding destinations.",
+      tr: "Batı medeniyetinin beşiği ve Yunanistan'ın tarihi başkenti Atina'ya hoş geldiniz. Atina Uluslararası Havalimanı'ndan (ATH) şehir merkezine, Akropolis bölgesine, ada feribotları için Pire limanına ve tüm çevre destinasyonlara premium transferler sağlıyoruz."
+    },
+    highlights: {
+      en: ["Piraeus port for island ferries", "Acropolis & historic sites", "Cruise terminal transfers", "Glyfada beach access"],
+      tr: ["Ada feribotları için Pire limanı", "Akropolis ve tarihi mekanlar", "Kruvaziyer terminali transferleri", "Glyfada plajı erişimi"]
+    },
+    prices: [
+      { route: "ATH → Athens City Center", price: "€45" },
+      { route: "ATH → Piraeus Port", price: "€50" },
+      { route: "ATH → Acropolis Area", price: "€45" },
+      { route: "ATH → Glyfada", price: "€40" },
+      { route: "ATH → Vouliagmeni", price: "€45" },
+      { route: "ATH → Syntagma Square", price: "€45" },
+    ],
+    faqItems: [
+      { question: "How long is the transfer from Athens Airport to Piraeus Port?", answer: "The transfer takes approximately 45-60 minutes depending on traffic. We recommend booking in advance for ferry connections to ensure timely arrival." },
+      { question: "Can you transfer us to the cruise terminal?", answer: "Yes! We provide direct transfers to all cruise terminals in Piraeus. Our drivers can drop you right at the terminal entrance." },
+      { question: "Do you offer transfers to Santorini or Mykonos?", answer: "We provide airport to Piraeus port transfers where you can catch ferries to Greek islands. For island transfers, please contact us for special arrangements." },
+    ],
+    locations: ["City Center", "Piraeus Port", "Acropolis", "Plaka", "Glyfada", "Vouliagmeni", "Syntagma"],
+    gradient: "from-blue-500/80 to-indigo-600/80",
+  },
 };
 
 const DestinationDetail = () => {
