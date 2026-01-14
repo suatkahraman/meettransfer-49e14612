@@ -937,6 +937,46 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
     return cleaned;
   }, []);
 
+  // Split text into sentences for more natural reading
+  const splitIntoSentences = useCallback((text: string): string[] => {
+    // Split on sentence-ending punctuation, keeping the punctuation
+    const sentences = text
+      .split(/(?<=[.!?])\s+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+    
+    // If no sentences found (no proper punctuation), try to split on commas or other breaks
+    if (sentences.length === 1 && text.length > 150) {
+      // Split long text on commas or semicolons for natural pauses
+      const parts = text
+        .split(/(?<=[,;:])\s+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+      
+      // Group small parts together (aim for ~50-150 chars per chunk)
+      const groupedParts: string[] = [];
+      let currentGroup = '';
+      
+      for (const part of parts) {
+        if (currentGroup.length + part.length < 150) {
+          currentGroup = currentGroup ? `${currentGroup} ${part}` : part;
+        } else {
+          if (currentGroup) groupedParts.push(currentGroup);
+          currentGroup = part;
+        }
+      }
+      if (currentGroup) groupedParts.push(currentGroup);
+      
+      return groupedParts.length > 1 ? groupedParts : sentences;
+    }
+    
+    return sentences;
+  }, []);
+
+  // Reference to track if we should stop speaking
+  const shouldStopRef = useRef(false);
+  const sentenceQueueRef = useRef<string[]>([]);
+
   const speakWithElevenLabs = useCallback(async (text: string) => {
     console.log('🔊 [ElevenLabs] Speaking text:', text.substring(0, 50) + '...');
     
@@ -950,72 +990,104 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
     
     console.log('🔊 [ElevenLabs] Cleaned text:', cleanText.substring(0, 100) + '...');
 
+    // Split into sentences for more natural reading
+    const sentences = splitIntoSentences(cleanText);
+    console.log('🔊 [ElevenLabs] Split into', sentences.length, 'sentences');
+    
+    sentenceQueueRef.current = sentences;
+    shouldStopRef.current = false;
+
     try {
       setIsSpeaking(true);
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({
-            text: cleanText,
-            voiceId: selectedVoiceId || 'FGY2WhTYpPnrIDTdsKH5',
-            stability: voiceSettings.stability,
-            similarityBoost: voiceSettings.similarityBoost,
-            style: voiceSettings.style,
-            speed: speechRate,
-          }),
+      // Process sentences sequentially with request stitching for natural flow
+      for (let i = 0; i < sentences.length; i++) {
+        if (shouldStopRef.current) {
+          console.log('🔊 [ElevenLabs] Stopped by user');
+          break;
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('🔊 [ElevenLabs] API error:', response.status, errorData);
-        throw new Error(`ElevenLabs API error: ${response.status}`);
+        const currentSentence = sentences[i];
+        const previousSentence = i > 0 ? sentences[i - 1] : undefined;
+        const nextSentence = i < sentences.length - 1 ? sentences[i + 1] : undefined;
+
+        console.log(`🔊 [ElevenLabs] Speaking sentence ${i + 1}/${sentences.length}:`, currentSentence.substring(0, 50) + '...');
+
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({
+              text: currentSentence,
+              voiceId: selectedVoiceId || 'EXAVITQu4vr4xnSDxMaL',
+              stability: voiceSettings.stability,
+              similarityBoost: voiceSettings.similarityBoost,
+              style: voiceSettings.style,
+              speed: speechRate,
+              // Request stitching for natural flow between sentences
+              previousText: previousSentence,
+              nextText: nextSentence,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('🔊 [ElevenLabs] API error:', response.status, errorData);
+          throw new Error(`ElevenLabs API error: ${response.status}`);
+        }
+
+        if (shouldStopRef.current) break;
+
+        const audioBlob = await response.blob();
+        
+        // Cleanup previous audio URL
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+        }
+
+        const audioUrl = URL.createObjectURL(audioBlob);
+        audioUrlRef.current = audioUrl;
+
+        // Create and play audio
+        const audio = new Audio(audioUrl);
+        audio.playbackRate = speechRate;
+        audioRef.current = audio;
+
+        // Wait for audio to finish before playing next sentence
+        await new Promise<void>((resolve, reject) => {
+          audio.onended = () => {
+            console.log(`🔊 [ElevenLabs] Sentence ${i + 1} ended`);
+            resolve();
+          };
+
+          audio.onerror = (e) => {
+            console.error('🔊 [ElevenLabs] Audio playback error:', e);
+            reject(e);
+          };
+
+          audio.play().catch(reject);
+        });
+
+        // Small pause between sentences for natural flow (100-200ms)
+        if (i < sentences.length - 1 && !shouldStopRef.current) {
+          await new Promise(resolve => setTimeout(resolve, 150));
+        }
       }
 
-      const audioBlob = await response.blob();
+      console.log('🔊 [ElevenLabs] All sentences completed');
+      setIsSpeaking(false);
       
-      // Cleanup previous audio URL
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
+      if (onSpeakEndRef.current && !shouldStopRef.current) {
+        setTimeout(() => {
+          onSpeakEndRef.current?.();
+        }, 100);
       }
-
-      const audioUrl = URL.createObjectURL(audioBlob);
-      audioUrlRef.current = audioUrl;
-
-      // Create and play audio
-      const audio = new Audio(audioUrl);
-      audio.playbackRate = speechRate;
-      audioRef.current = audio;
-
-      audio.onended = () => {
-        console.log('🔊 [ElevenLabs] Audio ended');
-        setIsSpeaking(false);
-        if (onSpeakEndRef.current) {
-          setTimeout(() => {
-            onSpeakEndRef.current?.();
-          }, 100);
-        }
-      };
-
-      audio.onerror = (e) => {
-        console.error('🔊 [ElevenLabs] Audio playback error:', e);
-        setIsSpeaking(false);
-        if (onSpeakEndRef.current) {
-          setTimeout(() => {
-            onSpeakEndRef.current?.();
-          }, 100);
-        }
-      };
-
-      await audio.play();
-      console.log('🔊 [ElevenLabs] Audio playing');
 
     } catch (error) {
       console.error('🔊 [ElevenLabs] Error:', error);
@@ -1024,7 +1096,7 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
       console.log('🔊 [ElevenLabs] Falling back to Web Speech API');
       speakWithWebSpeech(text);
     }
-  }, [selectedVoiceId, speechRate, voiceSettings]);
+  }, [language, selectedVoiceId, speechRate, voiceSettings, cleanTextForSpeech, splitIntoSentences]);
 
   // Fallback Web Speech API
   const speakWithWebSpeech = useCallback((text: string) => {
@@ -1086,6 +1158,10 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   }, [isVoiceEnabled, useElevenLabs, speakWithElevenLabs, speakWithWebSpeech]);
 
   const stopSpeaking = useCallback(() => {
+    // Signal to stop sentence queue
+    shouldStopRef.current = true;
+    sentenceQueueRef.current = [];
+    
     // Stop ElevenLabs audio
     if (audioRef.current) {
       audioRef.current.pause();
