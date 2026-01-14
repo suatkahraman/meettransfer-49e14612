@@ -1158,8 +1158,9 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void, mobileFloati
     window.speechSynthesis.speak(utterance);
   }, [language, speechRate]);
 
+  // Main speak function - used for auto-speak after AI response
   const speak = useCallback((text: string) => {
-    console.log('🔊 [TTS] speak() called, useElevenLabs:', useElevenLabs);
+    console.log('🔊 [TTS] speak() called, useElevenLabs:', useElevenLabs, 'isVoiceEnabled:', isVoiceEnabled);
     
     if (!isVoiceEnabled || !text) {
       console.log('🔊 [TTS] Voice disabled or no text');
@@ -1172,6 +1173,22 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void, mobileFloati
       speakWithWebSpeech(text);
     }
   }, [isVoiceEnabled, useElevenLabs, speakWithElevenLabs, speakWithWebSpeech]);
+
+  // Force speak function - used for manual "Read Aloud" button, bypasses isVoiceEnabled check
+  const forceSpeak = useCallback((text: string) => {
+    console.log('🔊 [TTS] forceSpeak() called, useElevenLabs:', useElevenLabs);
+    
+    if (!text) {
+      console.log('🔊 [TTS] No text to speak');
+      return;
+    }
+
+    if (useElevenLabs) {
+      speakWithElevenLabs(text);
+    } else {
+      speakWithWebSpeech(text);
+    }
+  }, [useElevenLabs, speakWithElevenLabs, speakWithWebSpeech]);
 
   const stopSpeaking = useCallback(() => {
     // Signal to stop sentence queue
@@ -1218,6 +1235,7 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void, mobileFloati
     isSpeaking, 
     isVoiceEnabled, 
     speak, 
+    forceSpeak,
     stopSpeaking, 
     toggleVoice, 
     availableVoices, 
@@ -1445,16 +1463,16 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   }, [isRecording, isProcessing, isOpen]);
 
   // Text-to-Speech with callback when speech ends
-  const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate, voiceSettings, changeVoiceSettings } = useTextToSpeech(language, handleSpeakEnd, mobileFloating);
+  const { isSpeaking, isVoiceEnabled, speak, forceSpeak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate, voiceSettings, changeVoiceSettings } = useTextToSpeech(language, handleSpeakEnd, mobileFloating);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   
-  // Function to speak a specific message
+  // Function to speak a specific message - uses forceSpeak to bypass isVoiceEnabled check
   const speakMessage = useCallback((messageId: string, content: string) => {
     stopSpeaking(); // Stop any ongoing speech
     setSpeakingMessageId(messageId);
-    setTimeout(() => speak(content), 100);
-  }, [speak, stopSpeaking]);
+    setTimeout(() => forceSpeak(content), 100);
+  }, [forceSpeak, stopSpeaking]);
   
   // Clear speaking message ID when speech ends
   useEffect(() => {
