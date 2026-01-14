@@ -688,19 +688,27 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       const sessionId = visitorId || `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       // Build insert data based on service type
-      // Extract return discount data
+      // Extract return discount data from AI response
       const returnDiscountData = extractReturnDiscountData(aiResponse);
+      
+      // Check if return trip exists - if so, ALWAYS apply 30% discount
+      const hasReturnTrip = bookingData.hasReturnTrip && bookingData.returnDate;
       
       // Calculate return price if return trip exists
       let calculatedReturnPrice = null;
-      if (bookingData.hasReturnTrip && bookingData.returnDate) {
-        // If return discount was applied, use discounted price
-        if (returnDiscountData?.applied || bookingData.returnDiscountApplied) {
-          calculatedReturnPrice = returnDiscountData?.discountedReturnPrice || bookingData.returnPrice || null;
-        } else {
-          // Use base price for return (same as outbound)
-          calculatedReturnPrice = bookingData.returnPrice || bookingData.estimatedPrice || null;
+      if (hasReturnTrip) {
+        const basePrice = bookingData.estimatedPrice || 0;
+        // Return price is always 30% off the outbound price
+        // Check if AI already calculated it, otherwise calculate ourselves
+        if (returnDiscountData?.discountedReturnPrice) {
+          calculatedReturnPrice = returnDiscountData.discountedReturnPrice;
+        } else if (bookingData.returnPrice) {
+          calculatedReturnPrice = bookingData.returnPrice;
+        } else if (basePrice > 0) {
+          // Calculate 30% discount on the base price
+          calculatedReturnPrice = Math.round(basePrice * 0.7);
         }
+        console.log(`Return trip detected. Base price: ${basePrice}, Return price (30% off): ${calculatedReturnPrice}`);
       }
 
       const insertData: Record<string, any> = {
@@ -719,12 +727,12 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         baby_seat_count: bookingData.babySeatCount || 0,
         luggage_count: bookingData.luggageCount || null,
         // Return trip fields
-        has_return_trip: bookingData.hasReturnTrip || false,
+        has_return_trip: hasReturnTrip || false,
         return_date: bookingData.returnDate || null,
         return_time: bookingData.returnTime || null,
         return_price: calculatedReturnPrice,
-        // Set promo_code if 30% return discount was applied
-        promo_code: (returnDiscountData?.applied || bookingData.returnDiscountApplied) ? 'RETURN30' : null
+        // ALWAYS set promo_code to RETURN30 if there's a return trip (30% discount is automatic)
+        promo_code: hasReturnTrip ? 'RETURN30' : null
       };
 
       if (isHourlyRental) {
