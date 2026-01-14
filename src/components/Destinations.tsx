@@ -4,11 +4,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { OptimizedImage } from "@/components/ui/optimized-image";
-import cappadociaTransfer from "@/assets/cappadocia-transfer.png";
-import bodrumTransfer from "@/assets/bodrum-transfer.png";
-import istanbulTransfer from "@/assets/istanbul-transfer.png";
-import antalyaTransfer from "@/assets/antalya-transfer.png";
-import bursaTransfer from "@/assets/bursa-transfer-hero.jpg";
+import cappadociaTransfer from "@/assets/cappadocia-transfer.webp";
+import bodrumTransfer from "@/assets/bodrum-transfer.webp";
+import istanbulTransfer from "@/assets/istanbul-transfer.webp";
+import antalyaTransfer from "@/assets/antalya-transfer.webp";
+import bursaTransfer from "@/assets/bursa-transfer.webp";
 
 export const Destinations = () => {
   const { t, getLocalizedPath } = useLanguage();
