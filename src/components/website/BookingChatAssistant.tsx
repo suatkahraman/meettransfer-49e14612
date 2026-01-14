@@ -2827,7 +2827,6 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           ) : (
                             msg.content
                           )}
-                          )}
                           
                           {/* Vehicle Cards for Mobile */}
                           {msg.showVehicleCards && msg.vehiclePrices && (
