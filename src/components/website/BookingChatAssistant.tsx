@@ -2976,16 +2976,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           {msgIndex === messages.length - 1 && !isLoading && msg.showDatePicker && (
                             <ChatDatePicker
                               language={language}
-                              onSelectDate={(date, formattedDate) => {
+                              onSelectDate={(date, formattedDate, returnDate, formattedReturnDate) => {
                                 // Sync to form
                                 if (onApplyBooking) {
                                   const dateStr = date.toISOString().split('T')[0];
-                                  console.log("[DatePicker] Syncing to form:", dateStr);
+                                  console.log("[DatePicker] Syncing to form:", dateStr, returnDate ? returnDate.toISOString().split('T')[0] : 'no return');
                                   onApplyBooking({ date: dateStr } as BookingData);
                                 }
                                 
-                                // Send message to chat
-                                setInput(formattedDate);
+                                // Send message to chat with both dates if return exists
+                                const message = returnDate && formattedReturnDate 
+                                  ? `${formattedDate} → ${formattedReturnDate}` 
+                                  : formattedDate;
+                                setInput(message);
                                 setTimeout(() => {
                                   const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
                                   if (submitButton) submitButton.click();
@@ -3558,16 +3561,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 {msgIndex === messages.length - 1 && !isLoading && msg.showDatePicker && (
                   <ChatDatePicker
                     language={language}
-                    onSelectDate={(date, formattedDate) => {
+                    onSelectDate={(date, formattedDate, returnDate, formattedReturnDate) => {
                       // Sync to form
                       if (onApplyBooking) {
                         const dateStr = date.toISOString().split('T')[0];
-                        console.log("[DatePicker] Syncing to form:", dateStr);
+                        console.log("[DatePicker] Syncing to form:", dateStr, returnDate ? returnDate.toISOString().split('T')[0] : 'no return');
                         onApplyBooking({ date: dateStr } as BookingData);
                       }
                       
-                      // Send message to chat
-                      setInput(formattedDate);
+                      // Send message to chat with both dates if return exists
+                      const message = returnDate && formattedReturnDate 
+                        ? `${formattedDate} → ${formattedReturnDate}` 
+                        : formattedDate;
+                      setInput(message);
                       setTimeout(() => {
                         const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
                         if (submitButton) submitButton.click();
