@@ -250,7 +250,7 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Galata': { priority: 1, keywords: ['galata', 'galata tower', 'galata kulesi'], city: 'Istanbul' },
   'Karakoy': { priority: 1, keywords: ['karakoy', 'karaköy'], city: 'Istanbul' },
   'Cihangir': { priority: 1, keywords: ['cihangir'], city: 'Istanbul' },
-  'Sisli': { priority: 1, keywords: ['sisli', 'şişli', 'osmanbey', 'bomonti'], city: 'Istanbul' },
+  'Sisli': { priority: 1, keywords: ['sisli', 'şişli', 'osmanbey', 'bomonti', 'harbiye'], city: 'Istanbul' },
   'Mecidiyekoy': { priority: 1, keywords: ['mecidiyekoy', 'mecidiyeköy'], city: 'Istanbul' },
   'Nisantasi': { priority: 1, keywords: ['nisantasi', 'nişantaşı'], city: 'Istanbul' },
   'Besiktas': { priority: 1, keywords: ['besiktas', 'beşiktaş', 'etiler'], city: 'Istanbul' },
