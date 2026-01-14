@@ -294,30 +294,22 @@ serve(async (req) => {
             : requestData.priceCurrency === "AUD" ? "A$"
             : requestData.priceCurrency;
 
+          // Use exact prices from frontend - no automatic calculation
           const totalPrice = returnReservation 
-            ? requestData.price + (requestData.returnPrice || requestData.price)
+            ? requestData.price + (requestData.returnPrice || 0)
             : requestData.price;
 
-          // Get discount percentage from promo code - all return codes are 30%
-          const PROMO_CODE_CONFIG: Record<string, number> = {
-            'MEET30RETURN': 30,
-            'GIDISDONUS': 30,
-            'RETURN30': 30,
-            'MEET30': 30,
-            'MEET10': 10,
-            'WELCOME10': 10,
-          };
-          const discountPercent = requestData.promoCode ? (PROMO_CODE_CONFIG[requestData.promoCode.toUpperCase()] || 30) : 30;
+          // Return trip discount is always 30% - calculated from main price
+          const discountPercent = 30;
           
-          // Calculate discount amount for return trip
-          const originalReturnPrice = requestData.promoCode && requestData.returnPrice 
-            ? Math.round(requestData.returnPrice / (1 - discountPercent / 100)) // Original price before discount
-            : null;
-          const discountAmount = originalReturnPrice 
-            ? originalReturnPrice - requestData.returnPrice!
+          // Calculate discount based on frontend prices
+          // If return price is less than main price, calculate the discount
+          const originalReturnPrice = returnReservation ? requestData.price : null;
+          const discountAmount = returnReservation && requestData.returnPrice && requestData.returnPrice < requestData.price
+            ? requestData.price - requestData.returnPrice
             : null;
 
-          // Build return trip section
+          // Build return trip section - use frontend prices directly
           const returnTripText = returnReservation ? `
 Return Transfer:
 - Code: ${returnReservation.reservation_code}
@@ -325,10 +317,9 @@ Return Transfer:
 - To: ${requestData.pickup}
 - Date: ${formattedReturnDate}
 - Time: ${requestData.returnTime}
-${requestData.promoCode && originalReturnPrice ? `- Original Price: ${currencySymbol}${originalReturnPrice}` : ''}
-${requestData.promoCode && discountAmount ? `- Discount (${discountPercent}%): -${currencySymbol}${discountAmount}` : ''}
-- Price: ${currencySymbol}${requestData.returnPrice || requestData.price}
-${requestData.promoCode ? `- Promo Code: ${requestData.promoCode}` : ''}
+${discountAmount ? `- Original Price: ${currencySymbol}${originalReturnPrice}` : ''}
+${discountAmount ? `- Discount (${discountPercent}%): -${currencySymbol}${discountAmount}` : ''}
+- Price: ${currencySymbol}${requestData.returnPrice || 0}
 ` : '';
 
           const returnTripHtml = returnReservation ? `
@@ -340,25 +331,28 @@ ${requestData.promoCode ? `- Promo Code: ${requestData.promoCode}` : ''}
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>To:</strong> ${requestData.pickup}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Date:</strong> ${formattedReturnDate}</p>
             <p style="margin:5px 0;color:#333;font-size:14px;"><strong>Time:</strong> ${requestData.returnTime}</p>
-            ${requestData.promoCode && originalReturnPrice ? `
+            ${discountAmount ? `
             <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff;border-radius:6px;margin:10px 0;border:1px dashed #2e7d32;">
               <tr><td style="padding:12px;">
                 <p style="margin:0 0 5px;color:#666;font-size:13px;text-decoration:line-through;">Original: ${currencySymbol}${originalReturnPrice}</p>
-                <p style="margin:0 0 5px;color:#2e7d32;font-size:14px;font-weight:bold;">🎉 Discount (${discountPercent}%): -${currencySymbol}${discountAmount}</p>
+                <p style="margin:0 0 5px;color:#2e7d32;font-size:14px;font-weight:bold;">🎉 ${discountPercent}% Discount: -${currencySymbol}${discountAmount}</p>
                 <p style="margin:0;color:#1a365d;font-size:16px;font-weight:bold;">Final Price: ${currencySymbol}${requestData.returnPrice}</p>
-                <p style="margin:8px 0 0;color:#2e7d32;font-size:12px;background-color:#e8f5e9;padding:4px 8px;border-radius:4px;display:inline-block;">✓ Promo Code: ${requestData.promoCode}</p>
               </td></tr>
             </table>
-            ` : `<p style="margin:5px 0;color:#333;font-size:14px;"><strong>Price:</strong> ${currencySymbol}${requestData.returnPrice || requestData.price}</p>`}
+            ` : `<p style="margin:5px 0;color:#333;font-size:14px;"><strong>Price:</strong> ${currencySymbol}${requestData.returnPrice || 0}</p>`}
           </td></tr>
         </table>
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a365d;border-radius:8px;margin:20px 0;">
           <tr><td style="padding:15px;text-align:center;">
             <p style="margin:0;color:#fff;font-size:18px;"><strong>Total:</strong> ${currencySymbol}${totalPrice}</p>
-            ${requestData.promoCode && discountAmount ? `<p style="margin:5px 0 0;color:#48bb78;font-size:14px;">You saved ${currencySymbol}${discountAmount} with promo code!</p>` : ''}
+            ${discountAmount ? `<p style="margin:5px 0 0;color:#48bb78;font-size:14px;">You saved ${currencySymbol}${discountAmount} on return trip!</p>` : ''}
           </td></tr>
         </table>
           ` : '';
+
+          const customerLoginText = customerId 
+            ? `\nYour account is ready! View your reservations at: https://meettransfer.lovable.app/customer\n`
+            : '';
 
           const plainText = `
 Meet Transfer - Booking Confirmed
@@ -376,13 +370,12 @@ Outbound Transfer:
 - Price: ${currencySymbol}${requestData.price}
 ${returnTripText}
 ${returnReservation ? `Total: ${currencySymbol}${totalPrice}` : ''}
-
-Next Step: Please complete your booking by providing your contact details.
-
-Need help? Contact us via WhatsApp or reply to this email.
+${customerLoginText}
+Need help? Contact us via WhatsApp: +1 (555) 805-1101 or email: info@meettransfer.app
 
 Best regards,
-Meet Transfer Team
+Meet Transfer USA, LLC
+30 N Gould St, Sheridan, WY 82801, USA
           `.trim();
 
           const emailHtml = `
@@ -424,11 +417,21 @@ Meet Transfer Team
 
         ${returnTripHtml}
 
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff3cd;border-radius:8px;margin:20px 0;">
-          <tr><td style="padding:15px;">
-            <p style="margin:0;color:#856404;font-size:14px;"><strong>Next Step:</strong> Please complete your booking by providing your contact details.</p>
+        ${customerId ? `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#e3f2fd;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:20px;text-align:center;">
+            <p style="margin:0 0 10px;color:#1565c0;font-weight:bold;font-size:16px;">🔐 Your Account is Ready!</p>
+            <p style="margin:0 0 15px;color:#333;font-size:14px;">Track your reservations and manage your bookings online.</p>
+            <a href="https://meettransfer.lovable.app/customer" style="display:inline-block;background-color:#1a365d;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;">View My Reservations</a>
           </td></tr>
         </table>
+        ` : `
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff3cd;border-radius:8px;margin:20px 0;">
+          <tr><td style="padding:15px;">
+            <p style="margin:0;color:#856404;font-size:14px;"><strong>📋 Booking Confirmed!</strong> Your transfer details have been saved.</p>
+          </td></tr>
+        </table>
+        `}
 
         <p style="color:#666;font-size:13px;margin:20px 0 0;">
           Professional driver • Flight tracking • Free waiting time • 24/7 support
@@ -436,8 +439,11 @@ Meet Transfer Team
       </td>
     </tr>
     <tr>
-      <td style="background-color:#f0f0f0;padding:15px;text-align:center;">
-        <p style="color:#666;margin:0;font-size:12px;">Meet Transfer | info@meettransfer.app</p>
+      <td style="background-color:#1a365d;padding:20px;text-align:center;">
+        <p style="color:#fff;margin:0 0 10px;font-size:14px;font-weight:bold;">Meet Transfer USA, LLC</p>
+        <p style="color:#ccc;margin:0 0 5px;font-size:12px;">📍 30 N Gould St, Sheridan, WY 82801, USA</p>
+        <p style="color:#ccc;margin:0 0 10px;font-size:12px;">📧 info@meettransfer.app</p>
+        <a href="https://wa.me/15558051101" style="display:inline-block;background-color:#25D366;color:#fff;padding:8px 16px;text-decoration:none;border-radius:4px;font-size:12px;">💬 WhatsApp: +1 (555) 805-1101</a>
       </td>
     </tr>
   </table>
