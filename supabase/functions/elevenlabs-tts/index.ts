@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voiceId, stability, similarityBoost, style, speed } = await req.json();
+    const { text, voiceId, stability, similarityBoost, style, speed, previousText, nextText } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
 
     if (!ELEVENLABS_API_KEY) {
@@ -50,6 +50,23 @@ serve(async (req) => {
     console.log('Generating speech for text:', text.substring(0, 100), '...');
     console.log('Using voice ID:', selectedVoiceId);
     console.log('Voice settings:', voiceSettings);
+    if (previousText) console.log('Previous text context:', previousText.substring(0, 50), '...');
+    if (nextText) console.log('Next text context:', nextText.substring(0, 50), '...');
+
+    // Build request body with optional request stitching for natural flow
+    const requestBody: Record<string, unknown> = {
+      text,
+      model_id: 'eleven_multilingual_v2', // Best for Turkish
+      voice_settings: voiceSettings,
+    };
+
+    // Add request stitching context for natural prosody between sentences
+    if (previousText) {
+      requestBody.previous_text = previousText;
+    }
+    if (nextText) {
+      requestBody.next_text = nextText;
+    }
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}?output_format=mp3_44100_128`,
@@ -59,11 +76,7 @@ serve(async (req) => {
           'xi-api-key': ELEVENLABS_API_KEY,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          text,
-          model_id: 'eleven_multilingual_v2', // Best for Turkish
-          voice_settings: voiceSettings,
-        }),
+        body: JSON.stringify(requestBody),
       }
     );
 
