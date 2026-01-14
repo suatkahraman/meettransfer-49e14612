@@ -1,5 +1,5 @@
 import { memo, lazy, Suspense, useState, useCallback, useRef } from "react";
-import { Users, Check, Info, Briefcase, Snowflake, Wifi, Star, Tv, Crown, Armchair } from "lucide-react";
+import { Users, Check, Briefcase, Snowflake, Wifi, Star, Tv, Crown, Armchair } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,7 +23,6 @@ import sprinterImg from "@/assets/sprinter-1.jpg";
 
 // Lazy load heavy components
 const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
-const VehicleDetailModal = lazy(() => import("@/components/website/VehicleDetailModal").then(m => ({ default: m.VehicleDetailModal })));
 
 const vehicleImages: Record<string, string> = {
   'mercedes-vito': vitoImg,
@@ -55,8 +54,6 @@ export const VehicleSelector = memo(({
   currency = "EUR"
 }: VehicleSelectorProps) => {
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
-  const [selectedVehicleForDetail, setSelectedVehicleForDetail] = useState<typeof VEHICLE_TYPES[0] | null>(null);
-  const [isVehicleDetailOpen, setIsVehicleDetailOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Simple click handler
@@ -64,14 +61,6 @@ export const VehicleSelector = memo(({
     if (isDisabled) return;
     onSelectVehicle(vehicle.value);
   }, [onSelectVehicle]);
-
-  // Info button handler
-  const handleInfoClick = useCallback((e: React.MouseEvent, vehicle: typeof VEHICLE_TYPES[0]) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setSelectedVehicleForDetail(vehicle);
-    setIsVehicleDetailOpen(true);
-  }, []);
 
   // Hover handlers for desktop carousel
   const handleMouseEnter = useCallback((vehicleValue: string) => {
@@ -83,149 +72,118 @@ export const VehicleSelector = memo(({
   }, []);
 
   return (
-    <>
-      <div ref={containerRef} className="grid grid-cols-2 gap-2.5 sm:gap-3">
-        {VEHICLE_TYPES.map((vehicle, index) => {
-          const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
-          const isSelected = selectedVehicle === vehicle.value;
-          const isDisabled = vehicle.passengers < parseInt(passengers);
-          const isHovered = hoveredVehicle === vehicle.value;
-          
-          return (
-            <div 
-              key={vehicle.value}
-              className="relative"
-              data-vehicle-card
-              onMouseEnter={() => handleMouseEnter(vehicle.value)}
-              onMouseLeave={handleMouseLeave}
+    <div ref={containerRef} className="grid grid-cols-2 gap-2.5 sm:gap-3">
+      {VEHICLE_TYPES.map((vehicle, index) => {
+        const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
+        const isSelected = selectedVehicle === vehicle.value;
+        const isDisabled = vehicle.passengers < parseInt(passengers);
+        const isHovered = hoveredVehicle === vehicle.value;
+        
+        return (
+          <div 
+            key={vehicle.value}
+            className="relative"
+            data-vehicle-card
+            onMouseEnter={() => handleMouseEnter(vehicle.value)}
+            onMouseLeave={handleMouseLeave}
+          >
+            <button
+              type="button"
+              onClick={() => handleVehicleClick(vehicle, isDisabled)}
+              disabled={isDisabled}
+              className={cn(
+                "w-full rounded-xl border-2 p-3 sm:p-2.5 text-center overflow-hidden",
+                "transition-all duration-200 ease-out select-none",
+                "active:scale-[0.97] active:opacity-90",
+                "shadow-sm hover:shadow-md",
+                isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
+                isSelected 
+                  ? "border-primary bg-primary/5 ring-2 ring-primary/30 shadow-primary/20" 
+                  : "border-border bg-card hover:border-primary/50 active:border-primary"
+              )}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <button
-                type="button"
-                onClick={() => handleVehicleClick(vehicle, isDisabled)}
-                disabled={isDisabled}
-                className={cn(
-                  "w-full rounded-xl border-2 p-3 sm:p-2.5 text-center overflow-hidden",
-                  "transition-all duration-200 ease-out select-none",
-                  "active:scale-[0.97] active:opacity-90",
-                  "shadow-sm hover:shadow-md",
-                  isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer",
-                  isSelected 
-                    ? "border-primary bg-primary/5 ring-2 ring-primary/30 shadow-primary/20" 
-                    : "border-border bg-card hover:border-primary/50 active:border-primary"
+              {/* Vehicle Image - Square aspect ratio with carousel */}
+              <div className="w-full aspect-[4/3] sm:aspect-square rounded-lg overflow-hidden mb-2 sm:mb-2 bg-muted relative">
+                <Suspense fallback={
+                  <img 
+                    src={vehicleImages[vehicle.value]} 
+                    alt={vehicle.label}
+                    className="w-full h-full object-cover"
+                    loading={index === 0 ? "eager" : "lazy"}
+                  />
+                }>
+                  <VehicleImageCarousel
+                    images={vehicle.images.slice(0, 4).map(img => img.src)}
+                    alt={vehicle.label}
+                    className="w-full h-full"
+                    interval={4000}
+                    isHovered={isHovered}
+                  />
+                </Suspense>
+                
+                {/* Selected Overlay */}
+                {isSelected && (
+                  <div className="absolute inset-0 bg-primary/25 flex items-center justify-center z-10 pointer-events-none">
+                    <div className="w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                      <Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
+                    </div>
+                  </div>
                 )}
-                style={{ WebkitTapHighlightColor: 'transparent' }}
-              >
-                {/* Vehicle Image - Square aspect ratio with carousel */}
-                <div className="w-full aspect-[4/3] sm:aspect-square rounded-lg overflow-hidden mb-2 sm:mb-2 bg-muted relative">
-                  <Suspense fallback={
-                    <img 
-                      src={vehicleImages[vehicle.value]} 
-                      alt={vehicle.label}
-                      className="w-full h-full object-cover"
-                      loading={index === 0 ? "eager" : "lazy"}
-                    />
-                  }>
-                    <VehicleImageCarousel
-                      images={vehicle.images.slice(0, 4).map(img => img.src)}
-                      alt={vehicle.label}
-                      className="w-full h-full"
-                      interval={4000}
-                      isHovered={isHovered}
-                    />
-                  </Suspense>
-                  
-                  {/* Info Button */}
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={(e) => handleInfoClick(e, vehicle)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleInfoClick(e as unknown as React.MouseEvent, vehicle)}
-                    className="absolute top-1.5 right-1.5 w-9 h-9 md:w-7 md:h-7 min-w-[36px] min-h-[36px] md:min-w-[28px] md:min-h-[28px] rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white z-20 cursor-pointer backdrop-blur-sm touch-manipulation"
-                  >
-                    <Info className="h-4 w-4 md:h-3.5 md:w-3.5" />
-                  </div>
-                  
-                  {/* Selected Overlay */}
-                  {isSelected && (
-                    <div className="absolute inset-0 bg-primary/25 flex items-center justify-center z-10 pointer-events-none">
-                      <div className="w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                        <Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
-                      </div>
+              </div>
+              
+              {/* Vehicle Name - Full label */}
+              <div className="text-sm sm:text-sm font-bold truncate mb-1.5 pointer-events-none text-foreground leading-tight">
+                {vehicle.label}
+              </div>
+              
+              {/* Feature Icons Row */}
+              <div className="flex items-center justify-center gap-1.5 sm:gap-1.5 mb-1.5 pointer-events-none">
+                {vehicle.features.slice(0, 3).map((feature, idx) => {
+                  const IconComponent = featureIcons[feature.icon];
+                  return IconComponent ? (
+                    <div 
+                      key={idx} 
+                      className="w-5 h-5 sm:w-5 sm:h-5 rounded-full bg-muted/80 flex items-center justify-center"
+                      title={language === 'TR' ? feature.labelTr : feature.label}
+                    >
+                      <IconComponent className="h-3 w-3 sm:h-3 sm:w-3 text-primary" />
                     </div>
-                  )}
+                  ) : null;
+                })}
+              </div>
+              
+              {/* Passenger & Luggage Count */}
+              <div className="flex items-center justify-center gap-3 text-xs sm:text-xs text-muted-foreground pointer-events-none">
+                <div className="flex items-center gap-1">
+                  <Users className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5" />
+                  <span className="font-medium">{vehicle.passengers}</span>
                 </div>
-                
-                {/* Vehicle Name - Full label */}
-                <div className="text-sm sm:text-sm font-bold truncate mb-1.5 pointer-events-none text-foreground leading-tight">
-                  {vehicle.label}
+                <div className="flex items-center gap-1">
+                  <Briefcase className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5" />
+                  <span className="font-medium">{vehicle.luggage}</span>
                 </div>
-                
-                {/* Feature Icons Row */}
-                <div className="flex items-center justify-center gap-1.5 sm:gap-1.5 mb-1.5 pointer-events-none">
-                  {vehicle.features.slice(0, 3).map((feature, idx) => {
-                    const IconComponent = featureIcons[feature.icon];
-                    return IconComponent ? (
-                      <div 
-                        key={idx} 
-                        className="w-5 h-5 sm:w-5 sm:h-5 rounded-full bg-muted/80 flex items-center justify-center"
-                        title={language === 'TR' ? feature.labelTr : feature.label}
-                      >
-                        <IconComponent className="h-3 w-3 sm:h-3 sm:w-3 text-primary" />
-                      </div>
-                    ) : null;
-                  })}
-                </div>
-                
-                {/* Passenger & Luggage Count */}
-                <div className="flex items-center justify-center gap-3 text-xs sm:text-xs text-muted-foreground pointer-events-none">
-                  <div className="flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5" />
-                    <span className="font-medium">{vehicle.passengers}</span>
+              </div>
+              
+              {/* Price */}
+              <div className="pointer-events-none mt-1.5">
+                {vehiclePrice ? (
+                  <div className="text-sm sm:text-sm font-bold text-primary">
+                    {currency === "EUR" ? "€" : currency}{vehiclePrice.price}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Briefcase className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5" />
-                    <span className="font-medium">{vehicle.luggage}</span>
+                ) : loadingPrices && hasRoute ? (
+                  <div className="h-5 sm:h-5 flex items-center justify-center">
+                    <Skeleton className="h-4 sm:h-4 w-12 sm:w-10" />
                   </div>
-                </div>
-                
-                {/* Price */}
-                <div className="pointer-events-none mt-1.5">
-                  {vehiclePrice ? (
-                    <div className="text-sm sm:text-sm font-bold text-primary">
-                      {currency === "EUR" ? "€" : currency}{vehiclePrice.price}
-                    </div>
-                  ) : loadingPrices && hasRoute ? (
-                    <div className="h-5 sm:h-5 flex items-center justify-center">
-                      <Skeleton className="h-4 sm:h-4 w-12 sm:w-10" />
-                    </div>
-                  ) : (
-                    <div className="h-5 sm:h-5" />
-                  )}
-                </div>
-              </button>
-            </div>
-          );
-        })}
-      </div>
-      
-      {/* Vehicle Detail Modal */}
-      <Suspense fallback={null}>
-        <VehicleDetailModal
-          vehicle={selectedVehicleForDetail}
-          isOpen={isVehicleDetailOpen}
-          onClose={() => setIsVehicleDetailOpen(false)}
-          onSelect={() => {
-            if (selectedVehicleForDetail) {
-              onSelectVehicle(selectedVehicleForDetail.value);
-            }
-          }}
-          isSelected={selectedVehicleForDetail ? selectedVehicle === selectedVehicleForDetail.value : false}
-          price={selectedVehicleForDetail ? prices.find(v => v.vehicleType === selectedVehicleForDetail.value)?.price : undefined}
-          currency={currency}
-          isTurkish={language === 'TR'}
-        />
-      </Suspense>
-    </>
+                ) : (
+                  <div className="h-5 sm:h-5" />
+                )}
+              </div>
+            </button>
+          </div>
+        );
+      })}
+    </div>
   );
 });
 

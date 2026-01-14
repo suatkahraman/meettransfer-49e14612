@@ -10,6 +10,7 @@ import FAQSection from "@/components/website/FAQSection";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
 import VehicleComparison from "@/components/website/VehicleComparison";
 import LazyDestinationMap from "@/components/website/LazyDestinationMap";
+import DestinationGallery from "@/components/website/DestinationGallery";
 import { motion } from "framer-motion";
 import { 
   MapPin, Star, Plane, Users, Luggage, Clock, Shield, 
@@ -38,6 +39,7 @@ const destinationData: Record<string, {
   faqItems: { question: string; answer: string }[];
   locations: string[];
   gradient: string;
+  galleryImages?: { src: string; alt: string }[];
 }> = {
   istanbul: {
     name: "Istanbul",
@@ -69,6 +71,14 @@ const destinationData: Record<string, {
     ],
     locations: ["Taksim", "Sultanahmet", "Beşiktaş", "Levent", "Galataport", "Kadıköy", "Üsküdar"],
     gradient: "from-blue-600/80 to-purple-600/80",
+    galleryImages: [
+      { src: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800", alt: "Istanbul Bosphorus Bridge" },
+      { src: "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=800", alt: "Galata Tower" },
+      { src: "https://images.unsplash.com/photo-1527838832700-5059252407fa?w=800", alt: "Blue Mosque" },
+      { src: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800", alt: "Istanbul Airport" },
+      { src: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800", alt: "Hagia Sophia" },
+      { src: "https://images.unsplash.com/photo-1415804941191-84b81eaeacae?w=800", alt: "Taksim Square" },
+    ],
   },
   antalya: {
     name: "Antalya",
@@ -99,6 +109,14 @@ const destinationData: Record<string, {
     ],
     locations: ["Lara", "Kundu", "Belek", "Side", "Alanya", "Kaş", "Kemer"],
     gradient: "from-amber-500/80 to-orange-600/80",
+    galleryImages: [
+      { src: "https://images.unsplash.com/photo-1531777319985-9dca28eeae18?w=800", alt: "Antalya Beach" },
+      { src: "https://images.unsplash.com/photo-1604931672012-b9a8c12d6bf4?w=800", alt: "Antalya Old Town" },
+      { src: "https://images.unsplash.com/photo-1601918774946-25832a4be0d6?w=800", alt: "Düden Waterfall" },
+      { src: "https://images.unsplash.com/photo-1596402184320-417e7178b2cd?w=800", alt: "Belek Golf Resort" },
+      { src: "https://images.unsplash.com/photo-1568702846914-96b305d2uj16?w=800", alt: "Alanya Castle" },
+      { src: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800", alt: "Mediterranean Coast" },
+    ],
   },
   bodrum: {
     name: "Bodrum",
@@ -129,6 +147,12 @@ const destinationData: Record<string, {
     ],
     locations: ["Yalıkavak", "Türkbükü", "Gündoğan", "Torba", "Bitez", "Gümüşlük", "Bodrum Center"],
     gradient: "from-emerald-500/80 to-teal-600/80",
+    galleryImages: [
+      { src: "https://images.unsplash.com/photo-1566379888649-2a9308c09040?w=800", alt: "Bodrum Castle" },
+      { src: "https://images.unsplash.com/photo-1589991805054-8edb08b3d8ef?w=800", alt: "Bodrum Marina" },
+      { src: "https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=800", alt: "Bodrum Beach" },
+      { src: "https://images.unsplash.com/photo-1544885935-98dd03b09034?w=800", alt: "Yalıkavak" },
+    ],
   },
   dalaman: {
     name: "Dalaman",
@@ -219,6 +243,13 @@ const destinationData: Record<string, {
     ],
     locations: ["Göreme", "Ürgüp", "Avanos", "Uçhisar", "Ortahisar", "Mustafapaşa", "Derinkuyu"],
     gradient: "from-violet-500/80 to-purple-600/80",
+    galleryImages: [
+      { src: "https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=800", alt: "Cappadocia Hot Air Balloons" },
+      { src: "https://images.unsplash.com/photo-1570939274717-7eda259b50ed?w=800", alt: "Fairy Chimneys" },
+      { src: "https://images.unsplash.com/photo-1533823454707-f0b67b5b2c15?w=800", alt: "Cave Hotels" },
+      { src: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800", alt: "Cappadocia Valley" },
+      { src: "https://images.unsplash.com/photo-1562182384-08115de5ee97?w=800", alt: "Underground City" },
+    ],
   },
   dubai: {
     name: "Dubai",
@@ -249,6 +280,13 @@ const destinationData: Record<string, {
     ],
     locations: ["Downtown Dubai", "Palm Jumeirah", "Dubai Marina", "JBR Beach", "Business Bay", "DIFC", "Jumeirah Beach"],
     gradient: "from-amber-500/80 to-yellow-600/80",
+    galleryImages: [
+      { src: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800", alt: "Burj Khalifa" },
+      { src: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=800", alt: "Dubai Marina" },
+      { src: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800", alt: "Palm Jumeirah" },
+      { src: "https://images.unsplash.com/photo-1546412414-e1885259563a?w=800", alt: "Dubai Airport" },
+      { src: "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?w=800", alt: "Dubai Skyline" },
+    ],
   },
   cyprus: {
     name: "Cyprus",
@@ -588,6 +626,14 @@ const DestinationDetail = () => {
             ))}
           </div>
         </motion.section>
+
+        {/* Gallery Section */}
+        {destination.galleryImages && destination.galleryImages.length > 0 && (
+          <DestinationGallery 
+            images={destination.galleryImages} 
+            title={isTR ? "Galeri" : "Gallery"} 
+          />
+        )}
 
         {/* Feature List */}
         <FeatureList />
