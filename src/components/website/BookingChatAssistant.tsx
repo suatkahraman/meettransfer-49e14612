@@ -25,6 +25,7 @@ import { ChatVehicleFeaturesCard } from "./ChatVehicleFeaturesCard";
 import { ChatSpeakingWaveform } from "./ChatSpeakingWaveform";
 import { ChatQuickReplyButtons, QuickReplyType } from "./ChatQuickReplyButtons";
 import { ChatLanguageDetectedBanner } from "./ChatLanguageDetectedBanner";
+import { ChatDatePicker } from "./ChatDatePicker";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -103,6 +104,7 @@ interface Message {
   showPaymentMethod?: boolean;
   showPassengerCount?: boolean;
   showExtras?: boolean;
+  showDatePicker?: boolean;
   vehiclePrices?: Record<string, number>;
   passengerCount?: number;
   vehicleFeatures?: VehicleFeatures;
@@ -2192,6 +2194,30 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       ];
       const showExtras = extrasQuestionPatterns.some(pattern => pattern.test(cleanedContent));
 
+      // Detect date question patterns
+      const dateQuestionPatterns = [
+        /ne.*zaman/i,
+        /hangi.*tarih/i,
+        /hangi.*gün/i,
+        /tarih.*nedir/i,
+        /tarih.*seç/i,
+        /when/i,
+        /what.*date/i,
+        /which.*date/i,
+        /pickup.*date/i,
+        /transfer.*date/i,
+        /wann/i,
+        /welches.*datum/i,
+        /quelle.*date/i,
+        /когда/i,
+        /какая.*дата/i,
+        /cuándo/i,
+        /qué.*fecha/i,
+        /quando/i,
+        /quale.*data/i,
+      ];
+      const showDatePicker = dateQuestionPatterns.some(pattern => pattern.test(cleanedContent));
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -2203,6 +2229,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         showPaymentMethod,
         showPassengerCount,
         showExtras,
+        showDatePicker,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -2919,6 +2946,29 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               disabled={isLoading}
                             />
                           )}
+
+                          {/* Date Picker - Mobile */}
+                          {msgIndex === messages.length - 1 && !isLoading && msg.showDatePicker && (
+                            <ChatDatePicker
+                              language={language}
+                              onSelectDate={(date, formattedDate) => {
+                                // Sync to form
+                                if (onApplyBooking) {
+                                  const dateStr = date.toISOString().split('T')[0];
+                                  console.log("[DatePicker] Syncing to form:", dateStr);
+                                  onApplyBooking({ date: dateStr } as BookingData);
+                                }
+                                
+                                // Send message to chat
+                                setInput(formattedDate);
+                                setTimeout(() => {
+                                  const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
+                                  if (submitButton) submitButton.click();
+                                }, 100);
+                              }}
+                              disabled={isLoading}
+                            />
+                          )}
                         </div>
                         {msg.role === "user" && (
                           <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
@@ -3448,6 +3498,29 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       }
                       
                       setInput(answer);
+                      setTimeout(() => {
+                        const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
+                        if (submitButton) submitButton.click();
+                      }, 100);
+                    }}
+                    disabled={isLoading}
+                  />
+                )}
+
+                {/* Date Picker - Desktop */}
+                {msgIndex === messages.length - 1 && !isLoading && msg.showDatePicker && (
+                  <ChatDatePicker
+                    language={language}
+                    onSelectDate={(date, formattedDate) => {
+                      // Sync to form
+                      if (onApplyBooking) {
+                        const dateStr = date.toISOString().split('T')[0];
+                        console.log("[DatePicker] Syncing to form:", dateStr);
+                        onApplyBooking({ date: dateStr } as BookingData);
+                      }
+                      
+                      // Send message to chat
+                      setInput(formattedDate);
                       setTimeout(() => {
                         const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
                         if (submitButton) submitButton.click();
