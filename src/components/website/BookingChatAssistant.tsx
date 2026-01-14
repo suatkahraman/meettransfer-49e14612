@@ -1442,6 +1442,21 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   // Text-to-Speech with callback when speech ends
   const { isSpeaking, isVoiceEnabled, speak, stopSpeaking, toggleVoice, availableVoices, selectedVoiceId, selectVoice, speechRate, changeRate, voiceSettings, changeVoiceSettings } = useTextToSpeech(language, handleSpeakEnd, mobileFloating);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
+  
+  // Function to speak a specific message
+  const speakMessage = useCallback((messageId: string, content: string) => {
+    stopSpeaking(); // Stop any ongoing speech
+    setSpeakingMessageId(messageId);
+    setTimeout(() => speak(content), 100);
+  }, [speak, stopSpeaking]);
+  
+  // Clear speaking message ID when speech ends
+  useEffect(() => {
+    if (!isSpeaking) {
+      setSpeakingMessageId(null);
+    }
+  }, [isSpeaking]);
   
   // Toggle continuous conversation mode
   const toggleContinuousMode = useCallback(() => {
@@ -2862,9 +2877,39 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             />
                           )}
                           {msg.role === "assistant" ? (
-                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                              {cleanResponseForDisplay(msg.content)}
-                            </ReactMarkdown>
+                            <div className="relative group">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                                {cleanResponseForDisplay(msg.content)}
+                              </ReactMarkdown>
+                              {/* Read Aloud Button - Mobile */}
+                              <button
+                                onClick={() => {
+                                  if (speakingMessageId === msg.id && isSpeaking) {
+                                    stopSpeaking();
+                                  } else {
+                                    speakMessage(msg.id, msg.content);
+                                  }
+                                }}
+                                className={cn(
+                                  "mt-1.5 flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full transition-all",
+                                  speakingMessageId === msg.id && isSpeaking
+                                    ? "bg-primary/20 text-primary"
+                                    : "bg-muted-foreground/10 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                                )}
+                              >
+                                {speakingMessageId === msg.id && isSpeaking ? (
+                                  <>
+                                    <Square className="h-2.5 w-2.5" />
+                                    <span>{language === "TR" ? "Durdur" : "Stop"}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Volume2 className="h-2.5 w-2.5" />
+                                    <span>{language === "TR" ? "Sesli Oku" : "Read Aloud"}</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
                           ) : (
                             msg.content
                           )}
@@ -3426,9 +3471,39 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 )}
               >
                 {msg.role === "assistant" ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                    {cleanResponseForDisplay(msg.content)}
-                  </ReactMarkdown>
+                  <div className="relative group">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                      {cleanResponseForDisplay(msg.content)}
+                    </ReactMarkdown>
+                    {/* Read Aloud Button - Desktop */}
+                    <button
+                      onClick={() => {
+                        if (speakingMessageId === msg.id && isSpeaking) {
+                          stopSpeaking();
+                        } else {
+                          speakMessage(msg.id, msg.content);
+                        }
+                      }}
+                      className={cn(
+                        "mt-2 flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full transition-all",
+                        speakingMessageId === msg.id && isSpeaking
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted-foreground/10 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                      )}
+                    >
+                      {speakingMessageId === msg.id && isSpeaking ? (
+                        <>
+                          <Square className="h-3 w-3" />
+                          <span>{language === "TR" ? "Durdur" : "Stop"}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 className="h-3 w-3" />
+                          <span>{language === "TR" ? "Sesli Oku" : "Read Aloud"}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 ) : (
                   msg.content
                 )}
