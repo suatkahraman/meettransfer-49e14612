@@ -1,7 +1,14 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { MapPin, ArrowRight, Calendar, Clock, Users, Car, CreditCard, Plane, ArrowLeftRight, CheckCircle2, Sparkles } from "lucide-react";
+import { MapPin, ArrowRight, Calendar, Clock, Users, Car, CreditCard, Plane, ArrowLeftRight, CheckCircle2, Sparkles, Baby, Briefcase, Wifi, Tv, Wine, Droplets } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface VehicleFeatures {
+  wifi?: boolean;
+  tv?: boolean;
+  minibar?: boolean;
+  waterService?: boolean;
+}
 
 interface ChatPriceSummaryCardProps {
   language: string;
@@ -20,6 +27,9 @@ interface ChatPriceSummaryCardProps {
   paymentMethod?: string;
   distance?: string;
   duration?: string;
+  babySeatCount?: number;
+  luggageCount?: number;
+  vehicleFeatures?: VehicleFeatures;
 }
 
 export const ChatPriceSummaryCard = memo(function ChatPriceSummaryCard({
@@ -39,6 +49,9 @@ export const ChatPriceSummaryCard = memo(function ChatPriceSummaryCard({
   paymentMethod,
   distance,
   duration,
+  babySeatCount = 0,
+  luggageCount,
+  vehicleFeatures,
 }: ChatPriceSummaryCardProps) {
   const isTurkish = language === "TR";
   const currencySymbol = currency === "TRY" ? "₺" : currency === "USD" ? "$" : "€";
@@ -166,7 +179,55 @@ export const ChatPriceSummaryCard = memo(function ChatPriceSummaryCard({
               <p className="text-xs font-medium truncate">{vehicleLabel || vehicleNames[vehicleType] || vehicleType}</p>
             </div>
           </div>
+          
+          {/* Baby Seat */}
+          {babySeatCount > 0 && (
+            <div className="flex items-center gap-2 p-2 bg-pink-500/10 rounded-lg border border-pink-500/20">
+              <Baby className="h-4 w-4 text-pink-500" />
+              <div>
+                <p className="text-[9px] text-muted-foreground uppercase">{isTurkish ? "Bebek Koltuğu" : "Baby Seat"}</p>
+                <p className="text-xs font-medium text-pink-600">{babySeatCount} {isTurkish ? "adet" : "pc"}</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Luggage */}
+          {luggageCount !== undefined && luggageCount > 0 && (
+            <div className="flex items-center gap-2 p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
+              <Briefcase className="h-4 w-4 text-amber-500" />
+              <div>
+                <p className="text-[9px] text-muted-foreground uppercase">{isTurkish ? "Valiz" : "Luggage"}</p>
+                <p className="text-xs font-medium text-amber-600">{luggageCount} {isTurkish ? "adet" : "pc"}</p>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Vehicle Features */}
+        {vehicleFeatures && (vehicleFeatures.wifi || vehicleFeatures.tv || vehicleFeatures.minibar || vehicleFeatures.waterService) && (
+          <div className="flex flex-wrap gap-2 pt-2">
+            {vehicleFeatures.wifi && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/10 text-blue-600 text-[10px] font-medium rounded-full">
+                <Wifi className="h-3 w-3" /> WiFi
+              </span>
+            )}
+            {vehicleFeatures.tv && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-500/10 text-purple-600 text-[10px] font-medium rounded-full">
+                <Tv className="h-3 w-3" /> TV
+              </span>
+            )}
+            {vehicleFeatures.minibar && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-500/10 text-amber-600 text-[10px] font-medium rounded-full">
+                <Wine className="h-3 w-3" /> Minibar
+              </span>
+            )}
+            {vehicleFeatures.waterService && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-cyan-500/10 text-cyan-600 text-[10px] font-medium rounded-full">
+                <Droplets className="h-3 w-3" /> {isTurkish ? "Su" : "Water"}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Payment Method */}
         {paymentMethod && (
