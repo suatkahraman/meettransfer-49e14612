@@ -46,7 +46,22 @@ serve(async (req) => {
       .eq('is_active', true)
       .limit(30);
 
+    // Fetch active promo codes from database
+    const { data: promoCodes } = await supabase
+      .from('promo_codes')
+      .select('code, discount_percentage, applies_to, description')
+      .eq('is_active', true);
+
+    // Find return transfer discount from promo codes
+    const returnTransferPromo = promoCodes?.find(p => p.applies_to === 'return_transfer');
+    const returnDiscountPercentage = returnTransferPromo?.discount_percentage || 25;
+    
+    // Find general/hesitation discount from promo codes
+    const generalPromo = promoCodes?.find(p => p.applies_to === 'all' || p.applies_to === 'hesitation');
+    const hesitationDiscountPercentage = generalPromo?.discount_percentage || 3;
+
     console.log("Fetched pricing data:", { regionPrices: regionPrices?.length, hourlyPrices: hourlyPrices?.length });
+    console.log("Fetched promo codes:", { promoCodes: promoCodes?.length, returnDiscount: returnDiscountPercentage, hesitationDiscount: hesitationDiscountPercentage });
 
     // Build pricing context
     const pricingContext = buildPricingContext(regionPrices || [], hourlyPrices || []);
@@ -260,42 +275,43 @@ ${customerName ? customerName + ', ' : ''}for 7+ passengers, our Sprinter is the
 
 ### PHASE 5: ASK FOR RETURN TRANSFER (IMPORTANT!)
 **AFTER showing vehicle options and BEFORE asking price confirmation:**
+**IMPORTANT: The current return transfer discount is ${returnDiscountPercentage}% (from promo code system)**
 
 **If customer HAS PROVIDED a return date in their booking:**
 ${language === 'TR' ? `
-"${customerName ? customerName + ' Bey/Hanım, ' : ''}dönüş transferiniz için size harika bir haber var! 🎉 **Dönüş transferinize %30 indirim** uyguluyorum!
+"\${customerName ? customerName + ' Bey/Hanım, ' : ''}dönüş transferiniz için size harika bir haber var! 🎉 **Dönüş transferinize %${returnDiscountPercentage} indirim** uyguluyorum!
 
 🔄 **Dönüş Transferi:**
    📅 Tarih: [return_date]
    💰 Normal fiyat: €[return_price]
-   💰 İndirimli fiyat: €[discounted_return_price] (%30 indirim!)
+   💰 İndirimli fiyat: €[discounted_return_price] (%${returnDiscountPercentage} indirim!)
    
 Toplam: €[total_price] (gidiş + dönüş)"
 ` : `
-"${customerName ? customerName + ', ' : ''}great news for your return transfer! 🎉 I'm applying a **30% discount** on your return trip!
+"\${customerName ? customerName + ', ' : ''}great news for your return transfer! 🎉 I'm applying a **${returnDiscountPercentage}% discount** on your return trip!
 
 🔄 **Return Transfer:**
    📅 Date: [return_date]
    💰 Regular price: €[return_price]
-   💰 Discounted price: €[discounted_return_price] (30% off!)
+   💰 Discounted price: €[discounted_return_price] (${returnDiscountPercentage}% off!)
    
 Total: €[total_price] (outbound + return)"
 `}
 
 **If customer has NOT provided a return date, ASK them (TRIGGERS QUICK BUTTONS):**
 ${language === 'TR' ? `
-"${customerName ? customerName + ' Bey/Hanım, ' : ''}dönüş transferi ister misiniz? 🚗 Sizin için **%30 özel indirim** yapabilirim!
+"\${customerName ? customerName + ' Bey/Hanım, ' : ''}dönüş transferi ister misiniz? 🚗 Sizin için **%${returnDiscountPercentage} özel indirim** yapabilirim!
 
 Dönüş tarihinizi paylaşırsanız, gidiş-dönüş paketinizi oluştururum."
 ` : `
-"${customerName ? customerName + ', ' : ''}would you like a return transfer? 🚗 I can offer you a **30% discount**!
+"\${customerName ? customerName + ', ' : ''}would you like a return transfer? 🚗 I can offer you a **${returnDiscountPercentage}% discount**!
 
 If you share your return date, I'll create your round-trip package."
 `}
 
 When return discount is applied, include:
 \`\`\`returnDiscount
-{"applied": true, "percentage": 30, "returnPrice": [original], "discountedReturnPrice": [new]}
+{"applied": true, "percentage": ${returnDiscountPercentage}, "returnPrice": [original], "discountedReturnPrice": [new]}
 \`\`\`
 
 ### PHASE 6: ASK FOR VEHICLE SELECTION (TRIGGERS QUICK BUTTONS)
@@ -307,15 +323,16 @@ ${language === 'TR' ? `
 `}
 
 ### PHASE 7: OFFER DISCOUNT IF NO RESPONSE OR HESITATION
+**IMPORTANT: The current hesitation discount is ${hesitationDiscountPercentage}% (from promo code system)**
 If customer hesitates, doesn't respond clearly, or says prices are high:
 ${language === 'TR' ? `
-"${customerName ? customerName + ' Bey/Hanım, ' : ''}sizin için bir güzellik yapabilirim! 🎉 **%3 özel indirim** uygulayabilirim.
+"\${customerName ? customerName + ' Bey/Hanım, ' : ''}sizin için bir güzellik yapabilirim! 🎉 **%${hesitationDiscountPercentage} özel indirim** uygulayabilirim.
 
 **Yeni fiyatınız: €[discounted_price]** (€[original_price] yerine)
 
 Bu fırsatı kaçırmayın!"
 ` : `
-"${customerName ? customerName + ', ' : ''}I can do something special for you! 🎉 I can apply a **3% discount**.
+"\${customerName ? customerName + ', ' : ''}I can do something special for you! 🎉 I can apply a **${hesitationDiscountPercentage}% discount**.
 
 **Your new price: €[discounted_price]** (instead of €[original_price])
 
@@ -324,7 +341,7 @@ Don't miss this opportunity!"
 
 When discount is applied, include:
 \`\`\`discount
-{"applied": true, "percentage": 3, "originalPrice": [original], "discountedPrice": [new]}
+{"applied": true, "percentage": ${hesitationDiscountPercentage}, "originalPrice": [original], "discountedPrice": [new]}
 \`\`\`
 
 ### PHASE 8: SHOW FINAL BOOKING FORM (WHEN CUSTOMER ACCEPTS)
@@ -495,7 +512,7 @@ ${pricingContext}
   "returnTime": "HH:MM or null",
   "returnPrice": number or null,
   "returnDiscountApplied": boolean,
-  "returnDiscountPercentage": 30,
+  "returnDiscountPercentage": ${returnDiscountPercentage},
   "babySeatCount": number or 0,
   "luggageCount": number or null,
   "vehicleFeatures": {
@@ -692,24 +709,25 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       // Extract return discount data from AI response
       const returnDiscountData = extractReturnDiscountData(aiResponse);
       
-      // Check if return trip exists - if so, ALWAYS apply 30% discount
+      // Check if return trip exists - if so, apply dynamic return discount from promo codes
       const hasReturnTrip = bookingData.hasReturnTrip && bookingData.returnDate;
       
-      // Calculate return price if return trip exists
+      // Calculate return price if return trip exists using dynamic discount
       let calculatedReturnPrice = null;
       if (hasReturnTrip) {
         const basePrice = bookingData.estimatedPrice || 0;
-        // Return price is always 30% off the outbound price
+        // Return price uses dynamic discount from promo codes
+        const discountMultiplier = (100 - returnDiscountPercentage) / 100;
         // Check if AI already calculated it, otherwise calculate ourselves
         if (returnDiscountData?.discountedReturnPrice) {
           calculatedReturnPrice = returnDiscountData.discountedReturnPrice;
         } else if (bookingData.returnPrice) {
           calculatedReturnPrice = bookingData.returnPrice;
         } else if (basePrice > 0) {
-          // Calculate 30% discount on the base price
-          calculatedReturnPrice = Math.round(basePrice * 0.7);
+          // Calculate discount on the base price using dynamic percentage
+          calculatedReturnPrice = Math.round(basePrice * discountMultiplier);
         }
-        console.log(`Return trip detected. Base price: ${basePrice}, Return price (30% off): ${calculatedReturnPrice}`);
+        console.log(`Return trip detected. Base price: ${basePrice}, Return price (${returnDiscountPercentage}% off): ${calculatedReturnPrice}`);
       }
 
       const insertData: Record<string, any> = {
@@ -732,8 +750,8 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         return_date: bookingData.returnDate || null,
         return_time: bookingData.returnTime || null,
         return_price: calculatedReturnPrice,
-        // ALWAYS set promo_code to RETURN30 if there's a return trip (30% discount is automatic)
-        promo_code: hasReturnTrip ? 'RETURN30' : null
+        // Set dynamic promo_code from database if there's a return trip
+        promo_code: hasReturnTrip ? (returnTransferPromo?.code || 'MEET25RETURN') : null
       };
 
       if (isHourlyRental) {
