@@ -201,7 +201,7 @@ export const Hero = () => {
               </SwipeableBookingCard>
             </Suspense>
 
-            <HeroTrustBadges language={language} />
+            <HeroTrustBadges />
           </div>
 
           {/* Visual Sections */}

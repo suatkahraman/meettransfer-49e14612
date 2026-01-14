@@ -1,11 +1,10 @@
 import { memo } from "react";
 import { Shield, Star, Check } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-interface HeroTrustBadgesProps {
-  language: string;
-}
-
-export const HeroTrustBadges = memo(({ language }: HeroTrustBadgesProps) => {
+export const HeroTrustBadges = memo(() => {
+  const { t } = useLanguage();
+  
   return (
     // CLS fix: Remove initial y offset animation, use opacity only
     <div 
@@ -17,7 +16,7 @@ export const HeroTrustBadges = memo(({ language }: HeroTrustBadgesProps) => {
       >
         <Shield className="h-3.5 w-3.5 text-green-500" />
         <span className="text-xs font-medium text-green-600">
-          {language === 'TR' ? 'Ücretsiz İptal' : 'Free Cancellation'}
+          {t("freeCancellation")}
         </span>
       </div>
       <div 
@@ -31,7 +30,7 @@ export const HeroTrustBadges = memo(({ language }: HeroTrustBadgesProps) => {
       >
         <Check className="h-3.5 w-3.5 text-primary" />
         <span className="text-xs font-medium text-primary">
-          {language === 'TR' ? 'Sabit Fiyat' : 'Fixed Price'}
+          {t("fixedPrice")}
         </span>
       </div>
     </div>

@@ -256,15 +256,13 @@ const translations: Record<Language, Record<string, string>> = {
     support247Desc: "Dedicated customer service team available whenever you need us",
     // Hero Badges
     luxuryTransfer: "Luxury Transfer",
-    vipTransfer: "VIP Transfer",
     safe: "Safe",
     fast: "Fast",
     fixedPrice: "Fixed Price",
     freeCancel: "Free Cancel",
-    freeCancellation: "Free Cancellation",
     proDriver: "Pro",
     getQuote: "Get Quote",
-    babySeat: "Baby",
+    babySeatLabel: "Baby",
     
     // Destinations Section
     topDestinations: "Top Destinations",
@@ -10680,6 +10678,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "En yüksek standartlarda bakımlı modern, konforlu araçlar",
     support247: "7/24 Destek",
     support247Desc: "İhtiyacınız olduğunda her zaman hazır müşteri hizmetleri ekibi",
+    // Hero Badges
+    luxuryTransfer: "Lüks Transfer",
+    safe: "Güvenli",
+    fast: "Hızlı",
+    fixedPrice: "Sabit Fiyat",
+    freeCancel: "Ücretsiz İptal",
+    proDriver: "Pro Şoför",
+    getQuote: "Fiyat Al",
+    babySeatLabel: "Bebek",
     
     // Destinations Section
     topDestinations: "Popüler Destinasyonlar",

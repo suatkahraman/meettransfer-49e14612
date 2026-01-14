@@ -243,7 +243,7 @@ export const RideFormContent = memo(({
           ) : (
             <>
               <Zap className="mr-2 h-5 w-5 md:h-4 md:w-4 animate-pulse" />
-              <span className="tracking-wide">{language === 'TR' ? 'Fiyat Al' : 'Get Quote'}</span>
+              <span className="tracking-wide">{t("getQuote")}</span>
               <ArrowRight className="ml-2 h-6 w-6 md:h-5 md:w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
             </>
           )}

@@ -1,27 +1,17 @@
 import { memo } from "react";
 import { Shield, Zap, Star, Check } from "lucide-react";
-import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-// Vehicle images
-import vitoImg from "@/assets/vito-1.jpg";
-import vitoVipImg from "@/assets/vito-vip-1.jpg";
-import maybachImg from "@/assets/maybach-1.jpg";
-import sprinterImg from "@/assets/sprinter-1.jpg";
+// Logo
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
-
-const vehicleImages: Record<string, string> = {
-  'mercedes-vito': vitoImg,
-  'vip-mercedes': vitoVipImg,
-  'maybach-minibus': maybachImg,
-  'sprinter-minibus': sprinterImg,
-  'minibus': sprinterImg,
-};
 
 interface HeroHeaderProps {
   language: string;
 }
 
 export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
+  const { t } = useLanguage();
+  
   return (
     <div className="mb-3 md:mb-5">
       {/* Compact Header Row - Logo, Title, Badges all in one line on mobile */}
@@ -39,21 +29,17 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <h1 className="text-base md:text-xl lg:text-2xl font-bold text-foreground leading-tight whitespace-nowrap">
-              {language === 'TR' ? (
-                <><span className="text-primary">Lüks</span> Transfer</>
-              ) : (
-                <><span className="text-primary">VIP</span> Transfer</>
-              )}
+              <span className="text-primary">{language === 'TR' ? t("luxuryTransfer").split(" ")[0] : "VIP"}</span> Transfer
             </h1>
             {/* Inline badges on mobile */}
             <div className="flex items-center gap-1">
               <span className="inline-flex items-center gap-0.5 bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
                 <Shield className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                <span className="hidden xs:inline">{language === 'TR' ? 'Güvenli' : 'Safe'}</span>
+                <span className="hidden xs:inline">{t("safe")}</span>
               </span>
               <span className="inline-flex items-center gap-0.5 bg-accent/10 text-accent rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
                 <Zap className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                <span className="hidden xs:inline">{language === 'TR' ? 'Hızlı' : 'Fast'}</span>
+                <span className="hidden xs:inline">{t("fast")}</span>
               </span>
               <span className="inline-flex items-center gap-0.5 bg-yellow-500/10 text-yellow-600 rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
                 <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-current" />
@@ -68,17 +54,17 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
       <div className="flex items-center gap-1.5 md:gap-2 text-[8px] md:text-[10px] text-muted-foreground">
         <div className="flex items-center gap-0.5">
           <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
-          <span>{language === 'TR' ? 'Sabit Fiyat' : 'Fixed Price'}</span>
+          <span>{t("fixedPrice")}</span>
         </div>
         <span className="text-border">•</span>
         <div className="flex items-center gap-0.5">
           <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
-          <span>{language === 'TR' ? 'Ücretsiz İptal' : 'Free Cancel'}</span>
+          <span>{t("freeCancel")}</span>
         </div>
         <span className="text-border">•</span>
         <div className="flex items-center gap-0.5">
           <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
-          <span>{language === 'TR' ? 'Pro Şoför' : 'Pro'}</span>
+          <span>{t("proDriver")}</span>
         </div>
       </div>
     </div>
