@@ -6339,6 +6339,16 @@ const translations: Record<Language, Record<string, string>> = {
     blogCappadociaFaq5A: "Да, мы обслуживаем все пещерные отели в Гёреме, Ургюпе, Учисаре и окрестностях.",
     blogCappadociaFaq6Q: "Доступен ли ночной трансфер?",
     blogCappadociaFaq6A: "Да, мы предлагаем круглосуточный сервис трансфера. Дополнительной платы за ночные рейсы нет.",
+    
+    // Frankfurt & Athens Blog Translations (RU)
+    blogFrankfurtTitle: "Трансфер из аэропорта Франкфурта 2025 | Цены, Опции и Советы",
+    blogFrankfurtDesc: "Полный гид по трансферам из аэропорта Франкфурта. Цены в центр города, на ярмарку, Висбаден, Майнц.",
+    blogFrankfurtH1: "Гид по трансферу из аэропорта Франкфурта 2025",
+    blogFrankfurtIntro: "Аэропорт Франкфурта (FRA) — крупнейший аэропорт Германии и важнейший европейский хаб. Этот гид охватывает все о трансферах из аэропорта.",
+    blogAthensTitle: "Трансфер из аэропорта Афин 2025 | Цены, Опции и Советы",
+    blogAthensDesc: "Полный гид по трансферам из аэропорта Афин. Цены в центр города, порт Пирей, на острова.",
+    blogAthensH1: "Гид по трансферу из аэропорта Афин 2025",
+    blogAthensIntro: "Международный аэропорт Афин (ATH) — ворота в Грецию и её прекрасные острова. Этот гид охватывает все варианты трансфера и цены.",
   },
   IT: {
     // AI Assistant Promo
@@ -7717,6 +7727,16 @@ const translations: Record<Language, Record<string, string>> = {
     blogCappadociaFaq5A: "Sì, serviamo tutti gli hotel grotta a Göreme, Ürgüp, Uçhisar e dintorni.",
     blogCappadociaFaq6Q: "È disponibile transfer notturno?",
     blogCappadociaFaq6A: "Sì, offriamo servizio transfer 24/7. Non c'è supplemento per voli notturni.",
+    
+    // Frankfurt & Athens Blog Translations (IT)
+    blogFrankfurtTitle: "Guida Transfer Aeroporto Francoforte 2025 | Prezzi, Opzioni e Consigli",
+    blogFrankfurtDesc: "Guida completa ai transfer dall'aeroporto di Francoforte. Prezzi per centro città, fiera, Wiesbaden, Magonza.",
+    blogFrankfurtH1: "Guida Transfer Aeroporto Francoforte 2025",
+    blogFrankfurtIntro: "L'aeroporto di Francoforte (FRA) è il più grande aeroporto della Germania e un importante hub europeo. Questa guida copre tutto sui transfer aeroportuali.",
+    blogAthensTitle: "Guida Transfer Aeroporto Atene 2025 | Prezzi, Opzioni e Consigli",
+    blogAthensDesc: "Guida completa ai transfer dall'aeroporto di Atene. Prezzi per centro città, porto del Pireo, isole.",
+    blogAthensH1: "Guida Transfer Aeroporto Atene 2025",
+    blogAthensIntro: "L'aeroporto Internazionale di Atene (ATH) è la porta d'ingresso alla Grecia e alle sue belle isole. Questa guida copre tutte le opzioni di transfer e i prezzi.",
   },
   ES: {
     // AI Assistant Promo
@@ -9095,6 +9115,16 @@ const translations: Record<Language, Record<string, string>> = {
     blogCappadociaFaq5A: "Sí, servimos a todos los hoteles cueva en Göreme, Ürgüp, Uçhisar y alrededores.",
     blogCappadociaFaq6Q: "¿Hay transfer nocturno disponible?",
     blogCappadociaFaq6A: "Sí, ofrecemos servicio de transfer 24/7. No hay cargo extra por vuelos nocturnos.",
+    
+    // Frankfurt & Athens Blog Translations (ES)
+    blogFrankfurtTitle: "Guía Transfer Aeropuerto Fráncfort 2025 | Precios, Opciones y Consejos",
+    blogFrankfurtDesc: "Guía completa de transfers del aeropuerto de Fráncfort. Precios al centro, feria, Wiesbaden, Maguncia.",
+    blogFrankfurtH1: "Guía Transfer Aeropuerto Fráncfort 2025",
+    blogFrankfurtIntro: "El aeropuerto de Fráncfort (FRA) es el más grande de Alemania y un importante hub europeo. Esta guía cubre todo sobre los transfers del aeropuerto.",
+    blogAthensTitle: "Guía Transfer Aeropuerto Atenas 2025 | Precios, Opciones y Consejos",
+    blogAthensDesc: "Guía completa de transfers del aeropuerto de Atenas. Precios al centro, puerto del Pireo, islas.",
+    blogAthensH1: "Guía Transfer Aeropuerto Atenas 2025",
+    blogAthensIntro: "El Aeropuerto Internacional de Atenas (ATH) es la puerta de entrada a Grecia y sus hermosas islas. Esta guía cubre todas las opciones de transfer y precios.",
   },
   AR: {
     // AI Assistant Promo
@@ -11930,6 +11960,16 @@ const translations: Record<Language, Record<string, string>> = {
     blogCtaFeature3: "Dönüş İndirimi",
     blogCtaFeature4: "Mercedes Filosu",
     galleryTitle: "Filo Galerimiz",
+    
+    // Frankfurt & Athens Blog Translations (TR)
+    blogFrankfurtTitle: "Frankfurt Havalimanı Transfer Rehberi 2025 | Fiyatlar, Seçenekler ve İpuçları",
+    blogFrankfurtDesc: "Frankfurt Havalimanı transferleri için tam rehber. Şehir merkezi, fuar, Wiesbaden, Mainz fiyatları.",
+    blogFrankfurtH1: "Frankfurt Havalimanı Transfer Rehberi 2025",
+    blogFrankfurtIntro: "Frankfurt Havalimanı (FRA), Almanya'nın en büyük havalimanı ve önemli bir Avrupa hub'ıdır. Bu rehber havalimanı transferleri hakkında her şeyi kapsar.",
+    blogAthensTitle: "Atina Havalimanı Transfer Rehberi 2025 | Fiyatlar, Seçenekler ve İpuçları",
+    blogAthensDesc: "Atina Havalimanı transferleri için tam rehber. Şehir merkezi, Pire limanı, adalara fiyatlar.",
+    blogAthensH1: "Atina Havalimanı Transfer Rehberi 2025",
+    blogAthensIntro: "Atina Uluslararası Havalimanı (ATH), Yunanistan'a ve güzel adalarına açılan kapıdır. Bu rehber tüm transfer seçeneklerini ve fiyatları kapsar.",
   },
   UK: {
     // AI Assistant Promo
@@ -14426,6 +14466,16 @@ const translations: Record<Language, Record<string, string>> = {
     blogBursaFaq5A: "絶対に！700年の歴史を持つ本物のオスマン帝国時代の村、まさに宝石です。",
     blogBursaFaq6Q: "冬にブルサを訪れることはできますか？",
     blogBursaFaq6A: "はい！冬はウルダーでのスキーに最適。ジュマルクズック村と歴史的な場所は年中営業。",
+    
+    // Frankfurt & Athens Blog Translations (JA)
+    blogFrankfurtTitle: "フランクフルト空港送迎ガイド 2025 | 料金、オプション、ヒント",
+    blogFrankfurtDesc: "フランクフルト空港送迎の完全ガイド。市内中心部、見本市、ヴィースバーデン、マインツへの料金。",
+    blogFrankfurtH1: "フランクフルト空港送迎ガイド 2025",
+    blogFrankfurtIntro: "フランクフルト空港（FRA）はドイツ最大の空港であり、重要なヨーロッパのハブです。このガイドでは空港送迎についてすべてカバーします。",
+    blogAthensTitle: "アテネ空港送迎ガイド 2025 | 料金、オプション、ヒント",
+    blogAthensDesc: "アテネ空港送迎の完全ガイド。市内中心部、ピレウス港、島々への料金。",
+    blogAthensH1: "アテネ空港送迎ガイド 2025",
+    blogAthensIntro: "アテネ国際空港（ATH）はギリシャとその美しい島々への玄関口です。このガイドではすべての送迎オプションと料金をカバーします。",
   },
 };
 
