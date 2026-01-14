@@ -50,6 +50,7 @@ export type Database = {
       agency_applications: {
         Row: {
           agency_name: string
+          city: string | null
           comments: string | null
           contact_name: string
           created_at: string
@@ -65,6 +66,7 @@ export type Database = {
         }
         Insert: {
           agency_name: string
+          city?: string | null
           comments?: string | null
           contact_name: string
           created_at?: string
@@ -80,6 +82,7 @@ export type Database = {
         }
         Update: {
           agency_name?: string
+          city?: string | null
           comments?: string | null
           contact_name?: string
           created_at?: string

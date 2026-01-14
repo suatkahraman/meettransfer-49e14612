@@ -29,6 +29,7 @@ const agencySignupSchema = z.object({
   email: z.string().trim().email('Invalid email address').max(255),
   password: passwordSchema,
   currency: z.enum(['EUR', 'USD', 'TRY', 'GBP']),
+  city: z.string().trim().min(1, 'City is required'),
   comments: z.string().max(500).optional(),
 });
 
@@ -39,14 +40,28 @@ const CURRENCIES = [
   { value: 'GBP', label: '£ GBP - British Pound' },
 ];
 
+const CITIES = [
+  { value: 'istanbul', labelTR: 'İstanbul', labelEN: 'Istanbul' },
+  { value: 'antalya', labelTR: 'Antalya', labelEN: 'Antalya' },
+  { value: 'bodrum', labelTR: 'Bodrum', labelEN: 'Bodrum' },
+  { value: 'dalaman', labelTR: 'Dalaman', labelEN: 'Dalaman' },
+  { value: 'izmir', labelTR: 'İzmir', labelEN: 'Izmir' },
+  { value: 'ankara', labelTR: 'Ankara', labelEN: 'Ankara' },
+  { value: 'cappadocia', labelTR: 'Kapadokya', labelEN: 'Cappadocia' },
+  { value: 'fethiye', labelTR: 'Fethiye', labelEN: 'Fethiye' },
+  { value: 'marmaris', labelTR: 'Marmaris', labelEN: 'Marmaris' },
+  { value: 'other', labelTR: 'Diğer', labelEN: 'Other' },
+];
+
 const AgencySignupScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currency, setCurrency] = useState('EUR');
+  const [city, setCity] = useState('');
   const [copied, setCopied] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   const handleShare = async () => {
@@ -126,6 +141,7 @@ const AgencySignupScreen = () => {
         email: email.trim(), 
         password,
         currency,
+        city,
         comments: comments?.trim() || '',
       });
 
@@ -138,6 +154,7 @@ const AgencySignupScreen = () => {
           email: validation.email,
           phone: validation.phone,
           currency: validation.currency,
+          city: validation.city,
           comments: validation.comments || null,
           password_hash: validation.password,
           status: 'pending',
@@ -162,6 +179,7 @@ const AgencySignupScreen = () => {
             email: validation.email,
             phone: validation.phone,
             currency: validation.currency,
+            city: validation.city,
             comments: validation.comments || null,
           }
         });
@@ -278,6 +296,23 @@ const AgencySignupScreen = () => {
                   autoComplete="email"
                 />
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">{t('city')} *</Label>
+                <Select value={city} onValueChange={setCity}>
+                  <SelectTrigger className="h-12">
+                    <SelectValue placeholder={t('selectCity')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CITIES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {language === 'TR' ? c.labelTR : c.labelEN}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
               </div>
 
               <div className="space-y-2">
