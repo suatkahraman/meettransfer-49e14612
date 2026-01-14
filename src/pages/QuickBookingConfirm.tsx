@@ -383,18 +383,31 @@ export default function QuickBookingConfirm() {
   };
 
   const handleConfirm = async () => {
-    if (!booking) return;
+    if (!booking) {
+      console.error("handleConfirm: No booking available");
+      toast.error("Booking data not available. Please try again.");
+      return;
+    }
 
     setConfirming(true);
     try {
       const selectedPrice = getSelectedPrice();
+      const finalVehicle = selectedVehicle || booking.vehicle_type;
+      const finalPrice = selectedPrice?.toString() || booking.price?.toString() || "0";
+
+      console.log("Navigating to customer info page:", {
+        bookingId: booking.id,
+        vehicle: finalVehicle,
+        price: finalPrice,
+        currency: booking.price_currency,
+      });
 
       // Navigate to customer info page with booking details
       const params = new URLSearchParams();
       params.set("token", booking.confirmation_token);
       params.set("bookingId", booking.id);
-      params.set("selectedVehicle", selectedVehicle || booking.vehicle_type);
-      params.set("selectedPrice", selectedPrice?.toString() || booking.price?.toString() || "0");
+      params.set("selectedVehicle", finalVehicle);
+      params.set("selectedPrice", finalPrice);
       params.set("currency", booking.price_currency);
       params.set("isDiscounted", isDiscountedOffer ? "true" : "false");
 
@@ -402,7 +415,6 @@ export default function QuickBookingConfirm() {
     } catch (err: any) {
       console.error("Navigation error:", err);
       toast.error(err.message || "Failed to proceed");
-    } finally {
       setConfirming(false);
     }
   };
