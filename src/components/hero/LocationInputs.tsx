@@ -40,7 +40,18 @@ const LocationInputsComponent = ({
     <div className="space-y-2">
       <GooglePlacesAutocomplete 
         onPlaceSelected={onPickupSelected} 
-        placeholder={language === 'TR' ? 'Nereden alınacak?' : 'Where to pick you up?'} 
+        placeholder={
+          language === 'TR' ? 'Nereden alınacak?' :
+          language === 'DE' ? 'Wo sollen wir Sie abholen?' :
+          language === 'FR' ? 'Où vous récupérer ?' :
+          language === 'RU' ? 'Откуда вас забрать?' :
+          language === 'IT' ? 'Dove prelevarvi?' :
+          language === 'ES' ? '¿Dónde le recogemos?' :
+          language === 'AR' ? 'من أين نأخذك؟' :
+          language === 'UK' ? 'Звідки вас забрати?' :
+          language === 'JA' ? 'お迎え場所は？' :
+          'Where to pick you up?'
+        } 
         className={cn(
           "bg-background border-2 rounded-xl text-base md:text-sm shadow-sm transition-all h-14 md:h-12 min-h-[56px] md:min-h-[48px]",
           pickupError 
@@ -69,7 +80,18 @@ const LocationInputsComponent = ({
       
       <GooglePlacesAutocomplete 
         onPlaceSelected={onDropoffSelected} 
-        placeholder={language === 'TR' ? 'Nereye gideceksiniz?' : 'Where to drop you off?'} 
+        placeholder={
+          language === 'TR' ? 'Nereye gideceksiniz?' :
+          language === 'DE' ? 'Wohin möchten Sie?' :
+          language === 'FR' ? 'Où allez-vous ?' :
+          language === 'RU' ? 'Куда вас отвезти?' :
+          language === 'IT' ? 'Dove andate?' :
+          language === 'ES' ? '¿A dónde va?' :
+          language === 'AR' ? 'إلى أين تريد الذهاب؟' :
+          language === 'UK' ? 'Куди вас відвезти?' :
+          language === 'JA' ? '行き先は？' :
+          'Where to drop you off?'
+        } 
         className={cn(
           "bg-background border-2 rounded-xl text-base md:text-sm shadow-sm transition-all h-14 md:h-12 min-h-[56px] md:min-h-[48px]",
           dropoffError

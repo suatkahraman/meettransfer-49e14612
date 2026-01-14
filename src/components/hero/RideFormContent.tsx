@@ -299,7 +299,7 @@ export const RideFormContent = memo(({
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">
-                  {language === "TR" ? "Dönüş Transferi" : "Return Trip"}
+                  {t("returnTrip") || "Return Trip"}
                 </span>
               </div>
               <Switch
@@ -313,7 +313,7 @@ export const RideFormContent = memo(({
           {hasReturnTrip && setReturnDate && setReturnTime && (
             <div className="grid grid-cols-2 gap-2 animate-in slide-in-from-top-2 duration-200">
               <FloatingLabelDatePicker 
-                label={language === "TR" ? "Dönüş Tarihi" : "Return Date"} 
+                label={t("returnDate") || "Return Date"} 
                 date={returnDate} 
                 onSelect={setReturnDate} 
                 icon={<CalendarIcon className="h-4 w-4" />} 
@@ -321,7 +321,7 @@ export const RideFormContent = memo(({
                 triggerClassName="h-12 min-h-[48px] text-sm"
               />
               <FloatingLabelSelect 
-                label={language === "TR" ? "Dönüş Saati" : "Return Time"} 
+                label={t("returnTime") || "Return Time"} 
                 value={returnTime || ""} 
                 onValueChange={setReturnTime} 
                 options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
@@ -338,7 +338,7 @@ export const RideFormContent = memo(({
                 <div className="flex items-center gap-2">
                   <Baby className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs sm:text-sm">
-                    {language === "TR" ? "Bebek Koltuğu" : "Baby Seat"}
+                    {t("babySeat") || "Baby Seat"}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -368,7 +368,7 @@ export const RideFormContent = memo(({
                 <div className="flex items-center gap-2">
                   <Briefcase className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs sm:text-sm">
-                    {language === "TR" ? "Büyük Bavul" : "Large Bag"}
+                    {t("largeBag") || "Large Bag"}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
