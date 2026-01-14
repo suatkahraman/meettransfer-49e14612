@@ -40,18 +40,7 @@ const CURRENCIES = [
   { value: 'GBP', label: '£ GBP - British Pound' },
 ];
 
-const CITIES = [
-  { value: 'istanbul', labelTR: 'İstanbul', labelEN: 'Istanbul' },
-  { value: 'antalya', labelTR: 'Antalya', labelEN: 'Antalya' },
-  { value: 'bodrum', labelTR: 'Bodrum', labelEN: 'Bodrum' },
-  { value: 'dalaman', labelTR: 'Dalaman', labelEN: 'Dalaman' },
-  { value: 'izmir', labelTR: 'İzmir', labelEN: 'Izmir' },
-  { value: 'ankara', labelTR: 'Ankara', labelEN: 'Ankara' },
-  { value: 'cappadocia', labelTR: 'Kapadokya', labelEN: 'Cappadocia' },
-  { value: 'fethiye', labelTR: 'Fethiye', labelEN: 'Fethiye' },
-  { value: 'marmaris', labelTR: 'Marmaris', labelEN: 'Marmaris' },
-  { value: 'other', labelTR: 'Diğer', labelEN: 'Other' },
-];
+// City is now a free text input instead of dropdown
 
 const AgencySignupScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -300,18 +289,16 @@ const AgencySignupScreen = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="city">{t('city')} *</Label>
-                <Select value={city} onValueChange={setCity}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder={t('selectCity')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CITIES.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>
-                        {language === 'TR' ? c.labelTR : c.labelEN}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input 
+                  id="city" 
+                  name="city" 
+                  type="text" 
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder={language === 'TR' ? 'Şehir adını yazın' : 'Enter city name'}
+                  required 
+                  className="h-12"
+                />
                 {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
               </div>
 
