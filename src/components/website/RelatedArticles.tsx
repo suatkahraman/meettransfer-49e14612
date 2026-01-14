@@ -96,6 +96,26 @@ export const allBlogPosts = [
     date: "2025-01-10",
     image: "/images/meet-transfer-vclass-interior.jpg",
   },
+  {
+    id: "frankfurt-airport-transfer-guide",
+    titleKey: "blogFrankfurtTitle",
+    descriptionKey: "blogFrankfurtDesc",
+    category: "Frankfurt",
+    categoryKey: "frankfurt",
+    readTime: 15,
+    date: "2025-01-14",
+    image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+  },
+  {
+    id: "athens-airport-transfer-guide",
+    titleKey: "blogAthensTitle",
+    descriptionKey: "blogAthensDesc",
+    category: "Athens",
+    categoryKey: "athens",
+    readTime: 16,
+    date: "2025-01-14",
+    image: "/images/meet-transfer-vclass-interior.jpg",
+  },
 ];
 
 interface RelatedArticlesProps {
