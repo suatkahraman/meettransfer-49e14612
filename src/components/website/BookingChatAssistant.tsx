@@ -18,6 +18,9 @@ import { VoiceSettingsPanel } from "./VoiceSettingsPanel";
 import { MicrophonePermissionAlert } from "./MicrophonePermissionAlert";
 import { ChatVehicleCards } from "./ChatVehicleCards";
 import { ChatRedirectButton } from "./ChatRedirectButton";
+import { ChatReturnDiscountCard } from "./ChatReturnDiscountCard";
+import { ChatPriceSummaryCard } from "./ChatPriceSummaryCard";
+import { ChatRouteMap } from "./ChatRouteMap";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -80,8 +83,16 @@ interface Message {
   bookingData?: BookingData | null;
   showVehicleCards?: boolean;
   showRedirectButton?: boolean;
+  showRouteMap?: boolean;
+  showReturnDiscount?: boolean;
+  showPriceSummary?: boolean;
   vehiclePrices?: Record<string, number>;
   passengerCount?: number;
+  returnDiscountData?: {
+    originalPrice: number;
+    discountedPrice: number;
+    discountPercentage: number;
+  };
 }
 
 interface BookingChatAssistantProps {
@@ -1990,13 +2001,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               data-mobile-panel
               className="fixed inset-x-0 z-[9998] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
               style={{
-                // Position panel above keyboard
-                top: keyboardHeight > 0 ? '0.5rem' : '25%',
+                // Position panel above keyboard - increased size for mobile
+                top: keyboardHeight > 0 ? '0.5rem' : '10%',
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
                 maxHeight: keyboardHeight > 0 
                   ? `calc(100% - ${keyboardHeight}px - 0.5rem)` 
-                  : '75%',
-                minHeight: '200px',
+                  : '90%',
+                minHeight: '300px',
                 touchAction: 'auto',
                 pointerEvents: 'auto',
                 paddingBottom: '0',
@@ -2390,23 +2401,23 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2.5">
                     <Button
                       onClick={isRecording ? stopRecording : startRecording}
                       disabled={isLoading || isProcessing}
                       size="icon"
                       variant="outline"
                       className={cn(
-                        "h-12 w-12 rounded-xl shrink-0 touch-manipulation",
+                        "h-14 w-14 rounded-xl shrink-0 touch-manipulation",
                         isRecording && "bg-destructive/10 border-destructive text-destructive"
                       )}
                     >
                       {isProcessing ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className="h-6 w-6 animate-spin" />
                       ) : isRecording ? (
-                        <Square className="h-5 w-5 fill-current" />
+                        <Square className="h-6 w-6 fill-current" />
                       ) : (
-                        <Mic className="h-5 w-5" />
+                        <Mic className="h-6 w-6" />
                       )}
                     </Button>
                     <Input
@@ -2435,7 +2446,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       }}
                       placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                       disabled={isLoading || isRecording}
-                      className="h-12 rounded-xl text-sm flex-1 touch-manipulation"
+                      className="h-14 rounded-xl text-base flex-1 touch-manipulation"
                       style={{ fontSize: '16px' }}
                       autoComplete="off"
                       autoCorrect="on"
@@ -2449,14 +2460,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       size="icon"
                       data-chat-submit
                       className={cn(
-                        "h-12 w-12 rounded-xl shrink-0 touch-manipulation",
+                        "h-14 w-14 rounded-xl shrink-0 touch-manipulation",
                         input.trim() ? "bg-primary" : "bg-muted"
                       )}
                     >
                       {isLoading ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className="h-6 w-6 animate-spin" />
                       ) : (
-                        <Send className="h-5 w-5" />
+                        <Send className="h-6 w-6" />
                       )}
                     </Button>
                     
@@ -2496,7 +2507,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       )}
 
       {/* Messages Area */}
-      <ScrollArea className="h-[180px] rounded-lg bg-background/50 border border-border mb-2">
+      <ScrollArea className="h-[380px] rounded-xl bg-background/50 border border-border mb-3">
         <div className="p-3 space-y-2">
           {messages.map((msg) => (
             <div
