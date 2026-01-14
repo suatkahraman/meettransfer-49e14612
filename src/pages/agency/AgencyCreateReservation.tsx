@@ -419,49 +419,25 @@ const AgencyCreateReservation = () => {
                 </div>
               </div>
 
-              {/* Payment Type & Currency */}
+              {/* Payment Type */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">{t('payment')}</h3>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="payment_type">{t('paymentType')}</Label>
-                    <Select
-                      value={formData.payment_type}
-                      onValueChange={(value) => setFormData({ ...formData, payment_type: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cash">{t('cash')}</SelectItem>
-                        <SelectItem value="payment_link">{t('onlinePayment')}</SelectItem>
-                        <SelectItem value="agency_pay">{t('agencyPayment')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="currency">{t('currency') || 'Para Birimi'} *</Label>
-                    <Select
-                      value={formData.currency}
-                      onValueChange={(value) => setFormData({ ...formData, currency: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CURRENCY_OPTIONS.map(c => (
-                          <SelectItem key={c.value} value={c.value}>
-                            {c.flag} {c.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                      <span>⚠️</span>
-                      <span>{t('currencyCannotBeChangedAfterApproval') || 'Onaylandıktan sonra para birimi değiştirilemez'}</span>
-                    </p>
-                  </div>
+                <div>
+                  <Label htmlFor="payment_type">{t('paymentType')}</Label>
+                  <Select
+                    value={formData.payment_type}
+                    onValueChange={(value) => setFormData({ ...formData, payment_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cash">{t('cash')}</SelectItem>
+                      <SelectItem value="payment_link">{t('onlinePayment')}</SelectItem>
+                      <SelectItem value="agency_pay">{t('agencyPayment')}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

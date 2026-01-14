@@ -261,6 +261,18 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     params.set("passengers", passengers);
     params.set("vehicleType", vehicleType);
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
+    
+    // Return trip params
+    if (hasReturnTrip && returnDate) {
+      params.set("hasReturnTrip", "true");
+      params.set("returnDate", format(returnDate, "yyyy-MM-dd"));
+      if (returnTime) params.set("returnTime", returnTime);
+    }
+    
+    // Extras params
+    if (babySeatCount > 0) params.set("babySeatCount", babySeatCount.toString());
+    if (luggageCount > 0) params.set("luggageCount", luggageCount.toString());
+    
     navigate(`/book?${params.toString()}`);
   }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t]);
 

@@ -46,6 +46,8 @@ export interface BookingData {
   // Extras
   babySeatCount?: number | null;
   luggageCount?: number | null;
+  // Flight info
+  flightNumber?: string | null;
 }
 
 export type PlaceSelectedHandler = (value: string, details?: PlaceDetails) => void;
