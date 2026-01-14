@@ -401,6 +401,7 @@ export default function QuickBookingConfirm() {
     try {
       if (booking.all_vehicle_prices && Object.keys(booking.all_vehicle_prices).length > 0) {
         const VEHICLE_CONFIG: Record<string, { label: string; passengers: number; luggage: number }> = {
+          'sedan': { label: 'Sedan', passengers: 3, luggage: 2 },
           'mercedes-vito': { label: 'Mercedes Vito', passengers: 6, luggage: 6 },
           'vip-mercedes': { label: 'VIP Mercedes', passengers: 5, luggage: 5 },
           'maybach-minibus': { label: 'Maybach Minibus', passengers: 4, luggage: 4 },
@@ -441,6 +442,7 @@ export default function QuickBookingConfirm() {
         };
         
         const VEHICLE_CONFIG: Record<string, { label: string; passengers: number; luggage: number }> = {
+          'sedan': { label: 'Sedan', passengers: 3, luggage: 2 },
           'mercedes-vito': { label: 'Mercedes Vito', passengers: 6, luggage: 6 },
           'vip-mercedes': { label: 'VIP Mercedes', passengers: 5, luggage: 5 },
           'maybach-minibus': { label: 'Maybach Minibus', passengers: 4, luggage: 4 },

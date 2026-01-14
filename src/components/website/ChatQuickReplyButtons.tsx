@@ -14,7 +14,7 @@ export type QuickReplyType =
 
 // Vehicle type mapping for form sync
 export const VEHICLE_TYPE_MAP: Record<string, string> = {
-  "sedan": "mercedes-vito",
+  "sedan": "sedan",
   "vip": "vip-mercedes",
   "minivan": "vip-mercedes",
   "minibus": "minibus",
@@ -124,7 +124,7 @@ export function ChatQuickReplyButtons({
             icon: Car,
             variant: "outline",
             className: "border-2 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/10 text-blue-600",
-            metadata: { vehicleType: "mercedes-vito" },
+            metadata: { vehicleType: "sedan" },
           },
           {
             text: getLocalizedText(language, { TR: "VIP Minivan (4-6)", EN: "VIP Minivan (4-6)", DE: "VIP Minivan (4-6)", FR: "Minivan VIP (4-6)", RU: "VIP минивэн (4-6)", AR: "ميني فان VIP (4-6)", ES: "Minivan VIP (4-6)", IT: "Minivan VIP (4-6)" }),

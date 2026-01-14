@@ -57,13 +57,14 @@ async function convertCurrency(
 
 // Vehicle type configuration - synced with src/lib/vehicleTypes.ts
 const VEHICLE_CONFIG: Record<string, { label: string; passengers: number; luggage: number }> = {
+  'sedan': { label: 'Sedan', passengers: 3, luggage: 2 },
   'mercedes-vito': { label: 'Mercedes Vito', passengers: 6, luggage: 6 },
   'vip-mercedes': { label: 'VIP Mercedes', passengers: 5, luggage: 5 },
   'maybach-minibus': { label: 'Maybach Minibus', passengers: 4, luggage: 4 },
   'minibus': { label: 'Mercedes Sprinter', passengers: 16, luggage: 16 },
 };
 
-const VEHICLE_TYPES = ['mercedes-vito', 'vip-mercedes', 'maybach-minibus', 'minibus'];
+const VEHICLE_TYPES = ['sedan', 'mercedes-vito', 'vip-mercedes', 'maybach-minibus', 'minibus'];
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
