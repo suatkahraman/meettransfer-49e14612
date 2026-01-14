@@ -34,6 +34,94 @@ interface VoiceSettingsPanelProps {
   triggerClassName?: string;
 }
 
+// Translations for 10 languages
+const translations: Record<string, Record<string, string>> = {
+  voiceSettings: {
+    TR: "Ses Ayarları", EN: "Voice Settings", DE: "Spracheinstellungen", FR: "Paramètres vocaux",
+    RU: "Настройки голоса", IT: "Impostazioni vocali", ES: "Configuración de voz", AR: "إعدادات الصوت", UK: "Налаштування голосу", JA: "音声設定"
+  },
+  voiceResponse: {
+    TR: "Sesli Yanıt", EN: "Voice Response", DE: "Sprachantwort", FR: "Réponse vocale",
+    RU: "Голосовой ответ", IT: "Risposta vocale", ES: "Respuesta de voz", AR: "الاستجابة الصوتية", UK: "Голосова відповідь", JA: "音声応答"
+  },
+  listenToAI: {
+    TR: "AI yanıtlarını sesli dinle", EN: "Listen to AI responses", DE: "KI-Antworten anhören", FR: "Écouter les réponses IA",
+    RU: "Слушать ответы ИИ", IT: "Ascolta le risposte AI", ES: "Escuchar respuestas de IA", AR: "استمع إلى ردود الذكاء الاصطناعي", UK: "Слухати відповіді ШІ", JA: "AI応答を聞く"
+  },
+  on: {
+    TR: "Açık", EN: "On", DE: "An", FR: "Activé",
+    RU: "Вкл", IT: "Attivo", ES: "Activado", AR: "تشغيل", UK: "Увімк", JA: "オン"
+  },
+  off: {
+    TR: "Kapalı", EN: "Off", DE: "Aus", FR: "Désactivé",
+    RU: "Выкл", IT: "Spento", ES: "Desactivado", AR: "إيقاف", UK: "Вимк", JA: "オフ"
+  },
+  continuousMode: {
+    TR: "Sürekli Konuşma", EN: "Continuous Mode", DE: "Dauermodus", FR: "Mode continu",
+    RU: "Непрерывный режим", IT: "Modalità continua", ES: "Modo continuo", AR: "الوضع المستمر", UK: "Безперервний режим", JA: "連続モード"
+  },
+  autoListening: {
+    TR: "Otomatik dinleme modu", EN: "Auto-listening mode", DE: "Automatischer Hörmodus", FR: "Mode d'écoute automatique",
+    RU: "Режим автопрослушивания", IT: "Modalità ascolto automatico", ES: "Modo de escucha automática", AR: "وضع الاستماع التلقائي", UK: "Режим автопрослуховування", JA: "自動リスニングモード"
+  },
+  voiceSelection: {
+    TR: "Ses Seçimi", EN: "Voice Selection", DE: "Stimmauswahl", FR: "Sélection de la voix",
+    RU: "Выбор голоса", IT: "Selezione voce", ES: "Selección de voz", AR: "اختيار الصوت", UK: "Вибір голосу", JA: "音声選択"
+  },
+  femaleVoice: {
+    TR: "Kadın Ses", EN: "Female Voice", DE: "Weibliche Stimme", FR: "Voix féminine",
+    RU: "Женский голос", IT: "Voce femminile", ES: "Voz femenina", AR: "صوت أنثوي", UK: "Жіночий голос", JA: "女性の声"
+  },
+  maleVoice: {
+    TR: "Erkek Ses", EN: "Male Voice", DE: "Männliche Stimme", FR: "Voix masculine",
+    RU: "Мужской голос", IT: "Voce maschile", ES: "Voz masculina", AR: "صوت ذكوري", UK: "Чоловічий голос", JA: "男性の声"
+  },
+  speechRate: {
+    TR: "Konuşma Hızı", EN: "Speech Rate", DE: "Sprechgeschwindigkeit", FR: "Vitesse de parole",
+    RU: "Скорость речи", IT: "Velocità del parlato", ES: "Velocidad del habla", AR: "سرعة الكلام", UK: "Швидкість мовлення", JA: "話速"
+  },
+  slow: {
+    TR: "Yavaş", EN: "Slow", DE: "Langsam", FR: "Lent",
+    RU: "Медленно", IT: "Lento", ES: "Lento", AR: "بطيء", UK: "Повільно", JA: "遅い"
+  },
+  normal: {
+    TR: "Normal", EN: "Normal", DE: "Normal", FR: "Normal",
+    RU: "Нормально", IT: "Normale", ES: "Normal", AR: "عادي", UK: "Нормально", JA: "普通"
+  },
+  fast: {
+    TR: "Hızlı", EN: "Fast", DE: "Schnell", FR: "Rapide",
+    RU: "Быстро", IT: "Veloce", ES: "Rápido", AR: "سريع", UK: "Швидко", JA: "速い"
+  },
+  voiceQuality: {
+    TR: "Ses Kalitesi Ayarları", EN: "Voice Quality Settings", DE: "Sprachqualitätseinstellungen", FR: "Paramètres de qualité vocale",
+    RU: "Настройки качества голоса", IT: "Impostazioni qualità voce", ES: "Configuración de calidad de voz", AR: "إعدادات جودة الصوت", UK: "Налаштування якості голосу", JA: "音声品質設定"
+  },
+  stability: {
+    TR: "Kararlılık", EN: "Stability", DE: "Stabilität", FR: "Stabilité",
+    RU: "Стабильность", IT: "Stabilità", ES: "Estabilidad", AR: "الاستقرار", UK: "Стабільність", JA: "安定性"
+  },
+  stabilityDesc: {
+    TR: "Düşük = daha ifadeli, Yüksek = daha tutarlı", EN: "Low = more expressive, High = more consistent", DE: "Niedrig = ausdrucksvoller, Hoch = konsistenter", FR: "Bas = plus expressif, Haut = plus cohérent",
+    RU: "Низкий = выразительнее, Высокий = стабильнее", IT: "Basso = più espressivo, Alto = più coerente", ES: "Bajo = más expresivo, Alto = más consistente", AR: "منخفض = أكثر تعبيراً، مرتفع = أكثر اتساقاً", UK: "Низький = виразніше, Високий = стабільніше", JA: "低い=より表現力豊か、高い=より一貫性"
+  },
+  similarity: {
+    TR: "Ses Benzerliği", EN: "Similarity", DE: "Ähnlichkeit", FR: "Similarité",
+    RU: "Сходство", IT: "Somiglianza", ES: "Similitud", AR: "التشابه", UK: "Схожість", JA: "類似性"
+  },
+  similarityDesc: {
+    TR: "Orijinal sese yakınlık", EN: "Closeness to original voice", DE: "Nähe zur Originalstimme", FR: "Proximité avec la voix originale",
+    RU: "Близость к оригинальному голосу", IT: "Vicinanza alla voce originale", ES: "Cercanía a la voz original", AR: "القرب من الصوت الأصلي", UK: "Близькість до оригінального голосу", JA: "オリジナル音声への近さ"
+  },
+  styleIntensity: {
+    TR: "Stil Yoğunluğu", EN: "Style Intensity", DE: "Stilintensität", FR: "Intensité du style",
+    RU: "Интенсивность стиля", IT: "Intensità dello stile", ES: "Intensidad del estilo", AR: "شدة الأسلوب", UK: "Інтенсивність стилю", JA: "スタイル強度"
+  },
+  styleDesc: {
+    TR: "Konuşma stili abartısı", EN: "Speaking style exaggeration", DE: "Übertreibung des Sprechstils", FR: "Exagération du style de parole",
+    RU: "Преувеличение стиля речи", IT: "Esagerazione dello stile di parlata", ES: "Exageración del estilo de habla", AR: "مبالغة أسلوب الكلام", UK: "Перебільшення стилю мовлення", JA: "話し方スタイルの誇張"
+  }
+};
+
 export function VoiceSettingsPanel({
   language,
   isVoiceEnabled,
@@ -50,7 +138,8 @@ export function VoiceSettingsPanel({
   triggerClassName,
 }: VoiceSettingsPanelProps) {
   const [open, setOpen] = useState(false);
-
+  
+  const t = (key: string) => translations[key]?.[language] || translations[key]?.["EN"] || key;
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
@@ -74,7 +163,7 @@ export function VoiceSettingsPanel({
           <DrawerHeader className="px-0 pb-4">
             <DrawerTitle className="flex items-center gap-2 text-lg">
               <Settings2 className="h-5 w-5 text-primary" />
-              {language === "TR" ? "Ses Ayarları" : "Voice Settings"}
+              {t("voiceSettings")}
             </DrawerTitle>
           </DrawerHeader>
 
@@ -94,10 +183,10 @@ export function VoiceSettingsPanel({
                 </div>
                 <div>
                   <p className="font-medium text-sm">
-                    {language === "TR" ? "Sesli Yanıt" : "Voice Response"}
+                    {t("voiceResponse")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {language === "TR" ? "AI yanıtlarını sesli dinle" : "Listen to AI responses"}
+                    {t("listenToAI")}
                   </p>
                 </div>
               </div>
@@ -107,10 +196,7 @@ export function VoiceSettingsPanel({
                 onClick={toggleVoice}
                 className="h-9 px-4"
               >
-                {isVoiceEnabled 
-                  ? (language === "TR" ? "Açık" : "On")
-                  : (language === "TR" ? "Kapalı" : "Off")
-                }
+                {isVoiceEnabled ? t("on") : t("off")}
               </Button>
             </div>
 
@@ -136,10 +222,10 @@ export function VoiceSettingsPanel({
                 </div>
                 <div>
                   <p className="font-medium text-sm">
-                    {language === "TR" ? "Sürekli Konuşma" : "Continuous Mode"}
+                    {t("continuousMode")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {language === "TR" ? "Otomatik dinleme modu" : "Auto-listening mode"}
+                    {t("autoListening")}
                   </p>
                 </div>
               </div>
@@ -149,10 +235,7 @@ export function VoiceSettingsPanel({
                 onClick={toggleContinuousMode}
                 className="h-9 px-4"
               >
-                {continuousMode 
-                  ? (language === "TR" ? "Açık" : "On")
-                  : (language === "TR" ? "Kapalı" : "Off")
-                }
+                {continuousMode ? t("on") : t("off")}
               </Button>
             </div>
 
@@ -160,7 +243,7 @@ export function VoiceSettingsPanel({
             {availableVoices.length > 0 && (
               <div className="space-y-3">
                 <p className="text-sm font-medium px-1">
-                  {language === "TR" ? "Ses Seçimi" : "Voice Selection"}
+                  {t("voiceSelection")}
                 </p>
                 
                 {/* Gender Quick Select */}
@@ -175,7 +258,7 @@ export function VoiceSettingsPanel({
                     }}
                   >
                     <span className="text-lg mr-2">♀</span>
-                    {language === "TR" ? "Kadın Ses" : "Female Voice"}
+                    {t("femaleVoice")}
                   </Button>
                   <Button
                     variant="outline"
@@ -187,7 +270,7 @@ export function VoiceSettingsPanel({
                     }}
                   >
                     <span className="text-lg mr-2">♂</span>
-                    {language === "TR" ? "Erkek Ses" : "Male Voice"}
+                    {t("maleVoice")}
                   </Button>
                 </div>
                 
@@ -217,7 +300,7 @@ export function VoiceSettingsPanel({
             <div className="space-y-3">
               <div className="flex items-center justify-between px-1">
                 <p className="text-sm font-medium">
-                  {language === "TR" ? "Konuşma Hızı" : "Speech Rate"}
+                  {t("speechRate")}
                 </p>
                 <span className="text-sm font-mono bg-muted px-2 py-1 rounded-lg">
                   {speechRate.toFixed(2)}x
@@ -300,9 +383,9 @@ export function VoiceSettingsPanel({
               </div>
               
               <div className="flex justify-between text-xs text-muted-foreground px-1">
-                <span>0.7x {language === "TR" ? "Yavaş" : "Slow"}</span>
-                <span>1.0x {language === "TR" ? "Normal" : "Normal"}</span>
-                <span>1.2x {language === "TR" ? "Hızlı" : "Fast"}</span>
+                <span>0.7x {t("slow")}</span>
+                <span>1.0x {t("normal")}</span>
+                <span>1.2x {t("fast")}</span>
               </div>
             </div>
 
@@ -310,7 +393,7 @@ export function VoiceSettingsPanel({
             {changeVoiceSettings && (
               <div className="space-y-4">
                 <p className="text-sm font-medium px-1">
-                  {language === "TR" ? "Ses Kalitesi Ayarları" : "Voice Quality Settings"}
+                  {t("voiceQuality")}
                 </p>
                 
                 {/* Stability Control */}
@@ -318,12 +401,10 @@ export function VoiceSettingsPanel({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">
-                        {language === "TR" ? "Kararlılık" : "Stability"}
+                        {t("stability")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {language === "TR" 
-                          ? "Düşük = daha ifadeli, Yüksek = daha tutarlı" 
-                          : "Low = more expressive, High = more consistent"}
+                        {t("stabilityDesc")}
                       </p>
                     </div>
                     <span className="text-sm font-mono bg-background px-2 py-1 rounded-lg">
@@ -374,12 +455,10 @@ export function VoiceSettingsPanel({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">
-                        {language === "TR" ? "Ses Benzerliği" : "Similarity"}
+                        {t("similarity")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {language === "TR" 
-                          ? "Orijinal sese yakınlık" 
-                          : "Closeness to original voice"}
+                        {t("similarityDesc")}
                       </p>
                     </div>
                     <span className="text-sm font-mono bg-background px-2 py-1 rounded-lg">
@@ -430,12 +509,10 @@ export function VoiceSettingsPanel({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">
-                        {language === "TR" ? "Stil Yoğunluğu" : "Style Intensity"}
+                        {t("styleIntensity")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {language === "TR" 
-                          ? "Konuşma stili abartısı" 
-                          : "Speaking style exaggeration"}
+                        {t("styleDesc")}
                       </p>
                     </div>
                     <span className="text-sm font-mono bg-background px-2 py-1 rounded-lg">
