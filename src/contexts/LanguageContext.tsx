@@ -621,6 +621,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "Sprinter minibus is required for 7+ passengers",
     priceOnRequest: "Price on request",
     promoCodeAccepted: "30% discount will be applied!",
+    discountWillBeApplied: "discount will be applied!",
     
     // Customer Bookings
     myReservationsTitle: "My Reservations",
@@ -2310,6 +2311,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "Sprinter Minibus für 7+ Passagiere erforderlich",
     priceOnRequest: "Preis auf Anfrage",
     promoCodeAccepted: "30% Rabatt wird angewendet!",
+    discountWillBeApplied: "Rabatt wird angewendet!",
     
     // Customer Bookings
     myReservationsTitle: "Meine Reservierungen",
@@ -4105,6 +4107,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "Minibus Sprinter requis pour 7+ passagers",
     priceOnRequest: "Prix sur demande",
     promoCodeAccepted: "30% de réduction sera appliquée!",
+    discountWillBeApplied: "de réduction sera appliquée!",
     
     // Customer Bookings
     myReservationsTitle: "Mes réservations",
@@ -5611,6 +5614,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "Для 7+ пассажиров требуется Sprinter минибус",
     priceOnRequest: "Цена по запросу",
     promoCodeAccepted: "Скидка 30% будет применена!",
+    discountWillBeApplied: "скидка будет применена!",
     
     // Customer Bookings
     myReservationsTitle: "Мои бронирования",
@@ -6981,6 +6985,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "Minibus Sprinter richiesto per 7+ passeggeri",
     priceOnRequest: "Prezzo su richiesta",
     promoCodeAccepted: "Sconto del 30% applicato!",
+    discountWillBeApplied: "di sconto verrà applicato!",
     
     // Customer Bookings
     myReservationsTitle: "Le mie prenotazioni",
@@ -8398,6 +8403,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "Se requiere minibús Sprinter para 7+ pasajeros",
     priceOnRequest: "Precio a consultar",
     promoCodeAccepted: "¡Se aplicará un 30% de descuento!",
+    discountWillBeApplied: "de descuento se aplicará!",
     
     // Customer Bookings
     myReservationsTitle: "Mis reservas",
@@ -9815,6 +9821,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "يتطلب ميني باص سبرينتر لـ 7+ ركاب",
     priceOnRequest: "السعر عند الطلب",
     promoCodeAccepted: "سيتم تطبيق خصم 30%!",
+    discountWillBeApplied: "خصم سيتم تطبيقه!",
     
     // Customer Bookings
     myReservationsTitle: "حجوزاتي",
@@ -11268,6 +11275,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "7+ yolcu için Sprinter minibüs gereklidir",
     priceOnRequest: "Talep üzerine fiyat",
     promoCodeAccepted: "%30 indirim uygulanacak!",
+    discountWillBeApplied: "indirim uygulanacak!",
     
     // Customer Bookings
     myReservationsTitle: "Rezervasyonlarım",
@@ -12746,6 +12754,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "Для 7+ пасажирів потрібен Sprinter мікроавтобус",
     priceOnRequest: "Ціна за запитом",
     promoCodeAccepted: "Знижка 30% буде застосована!",
+    discountWillBeApplied: "знижка буде застосована!",
     hourlyDailyKmLimit: "Денний ліміт: 100 КМ",
     hourlySameCityOnly: "Погодинна оренда діє лише в межах одного міста",
     
@@ -14146,6 +14155,7 @@ const translations: Record<Language, Record<string, string>> = {
     minibusRequiredForPassengers: "7名以上はSpriniterミニバスが必要です",
     priceOnRequest: "お問い合わせください",
     promoCodeAccepted: "30%割引が適用されます！",
+    discountWillBeApplied: "割引が適用されます！",
     
     // Customer Bookings
     myReservationsTitle: "マイ予約",
