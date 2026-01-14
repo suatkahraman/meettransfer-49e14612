@@ -401,6 +401,69 @@ Transfer keywords: "transfer", "havalimanı", "airport", "nereden nereye", "from
 - Dubai: DXB Airport
 - Cyprus: Larnaca (LCA), Ercan (ECN)
 
+## IMPORTANT: HANDLING UNSUPPORTED REGIONS
+If the customer asks for a location NOT in our service areas (e.g., Paris, London, New York, etc.), respond with:
+${language === 'TR' ? `
+"${customerName ? customerName + ' Bey/Hanım, ' : ''}üzgünüm ama şu anda **[location]** bölgesinde hizmet vermiyoruz. 😔
+
+Ancak size harika bir haber verebilirim: **Bu bölge çok yakında hizmet ağımıza eklenecek!** 🚀
+
+Şu an hizmet verdiğimiz bölgeler:
+🇹🇷 Türkiye: İstanbul, Antalya, Bodrum, Dalaman, İzmir, Kapadokya
+🇦🇪 Dubai
+🇨🇾 Kıbrıs: Larnaka, Ercan
+
+Bu bölgelerden birine transfer ihtiyacınız var mı?"
+` : `
+"${customerName ? customerName + ', ' : ''}I'm sorry but we don't currently serve **[location]**. 😔
+
+However, I have great news: **This region will be added to our service network very soon!** 🚀
+
+Our current service areas:
+🇹🇷 Turkey: Istanbul, Antalya, Bodrum, Dalaman, Izmir, Cappadocia
+🇦🇪 Dubai
+🇨🇾 Cyprus: Larnaca, Ercan
+
+Do you need a transfer in any of these regions?"
+`}
+
+## IMPORTANT: AUTOMATIC PRICING
+Prices should be fetched automatically from the database. When showing prices:
+- NEVER wait or delay - show prices immediately if available
+- Calculate prices based on the route and vehicle type from the pricing data provided
+
+## CRITICAL: HANDLING MISSING PRICES
+If you cannot find a price for a specific route in the pricing data:
+${language === 'TR' ? `
+"${customerName ? customerName + ' Bey/Hanım, ' : ''}sizi biraz bekleteceğim çünkü bu güzergah için uygun fiyata karar veremedim. 🤔
+
+**Sizin için operasyon yetkilimizden fiyat istiyorum...**
+
+Lütfen birkaç dakika bekleyin, size en kısa sürede dönüş yapacağım! ⏳"
+` : `
+"${customerName ? customerName + ', ' : ''}I'll need to make you wait a moment as I couldn't determine a suitable price for this route. 🤔
+
+**I'm requesting a price from our Operations Manager for you...**
+
+Please wait a few minutes, I'll get back to you as soon as possible! ⏳"
+`}
+
+When price is missing, include:
+\`\`\`priceRequest
+{"needed": true, "pickup": "[pickup]", "dropoff": "[dropoff]", "vehicleType": "[type]"}
+\`\`\`
+
+When you receive price information later, respond with:
+${language === 'TR' ? `
+"${customerName ? customerName + ' Bey/Hanım, ' : ''}harika haber! 🎉 Fiyatlarımız hazır, şimdi devam edebiliriz!
+
+**Bu güzergah için fiyatınız: €[price]**"
+` : `
+"${customerName ? customerName + ', ' : ''}great news! 🎉 Our prices are ready, we can continue now!
+
+**Your price for this route: €[price]**"
+`}
+
 ## Current Date Context:
 - Today: ${todayStr}
 - Tomorrow: ${tomorrowStr}
@@ -560,8 +623,39 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
     
     // Check if ready to book
     const readyToBook = extractReadyToBook(aiResponse);
+    
+    // Check if price request is needed
+    const priceRequestData = extractPriceRequest(aiResponse);
 
-    console.log("AI Response received, booking data:", bookingData, "customerName:", extractedCustomerName);
+    console.log("AI Response received, booking data:", bookingData, "customerName:", extractedCustomerName, "priceRequest:", priceRequestData);
+
+    // If price request is needed, notify admin
+    let priceRequestSent = false;
+    if (priceRequestData?.needed) {
+      try {
+        // Call the notify-admin-price-request function
+        const { error: notifyError } = await supabase.functions.invoke('notify-admin-price-request', {
+          body: {
+            pickup: priceRequestData.pickup || bookingData?.pickup,
+            dropoff: priceRequestData.dropoff || bookingData?.dropoff,
+            passengers: bookingData?.passengers,
+            vehicleType: priceRequestData.vehicleType || bookingData?.vehicleType,
+            customerName: extractedCustomerName || customerName,
+            customerSessionId: visitorId,
+            language
+          }
+        });
+        
+        if (notifyError) {
+          console.error("Failed to notify admin:", notifyError);
+        } else {
+          priceRequestSent = true;
+          console.log("Admin notified for price request");
+        }
+      } catch (e) {
+        console.error("Error notifying admin:", e);
+      }
+    }
 
     // If booking is complete, create a quick_booking_request
     let quickBookingId = null;
@@ -605,7 +699,9 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         language: language,
         service_type: serviceType,
         payment_method: bookingData.paymentMethod || null,
-        customer_name: extractedCustomerName || customerName || null
+        customer_name: extractedCustomerName || customerName || null,
+        baby_seat_count: bookingData.babySeatCount || 0,
+        luggage_count: bookingData.luggageCount || null
       };
 
       if (isHourlyRental) {
@@ -658,6 +754,14 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       };
     }
 
+    // Determine if we should show vehicle features card
+    const showVehicleFeatures = bookingData?.vehicleFeatures && (
+      bookingData.vehicleFeatures.wifi || 
+      bookingData.vehicleFeatures.tv || 
+      bookingData.vehicleFeatures.minibar || 
+      bookingData.vehicleFeatures.waterService
+    );
+
     return new Response(JSON.stringify({ 
       response: aiResponse,
       bookingData,
@@ -669,7 +773,12 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       showVehicleCards,
       showRedirectButton,
       vehiclePrices,
-      passengerCount: bookingData?.passengers || null
+      passengerCount: bookingData?.passengers || null,
+      priceRequestSent,
+      showVehicleFeatures,
+      vehicleFeatures: bookingData?.vehicleFeatures || null,
+      babySeatCount: bookingData?.babySeatCount || 0,
+      luggageCount: bookingData?.luggageCount || null
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -776,6 +885,18 @@ function extractReturnDiscountData(response: string): any | null {
     const returnDiscountMatch = response.match(/```returnDiscount\s*([\s\S]*?)```/);
     if (returnDiscountMatch) {
       return JSON.parse(returnDiscountMatch[1].trim());
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function extractPriceRequest(response: string): any | null {
+  try {
+    const priceRequestMatch = response.match(/```priceRequest\s*([\s\S]*?)```/);
+    if (priceRequestMatch) {
+      return JSON.parse(priceRequestMatch[1].trim());
     }
     return null;
   } catch (e) {
