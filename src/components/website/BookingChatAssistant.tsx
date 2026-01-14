@@ -3858,8 +3858,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         )}
       </AnimatePresence>
 
-      {/* Centered Microphone Button - Hero Style */}
-      {isSpeechSupported && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && (
+      {/* Centered Microphone Button - Hero Style - Only for mobile floating mode */}
+      {mobileFloating && isSpeechSupported && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -4059,11 +4059,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       {/* Input Area */}
       <div className={cn(
         "flex gap-2",
-        // Hide input area when showing hero mic button (but not during processing)
-        isSpeechSupported && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && "hidden"
+        // Hide input area when showing hero mic button (but not during processing) - only for mobile
+        mobileFloating && isSpeechSupported && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && "hidden"
       )}>
-        {/* Voice recording button */}
-        {isSpeechSupported && (
+        {/* Voice recording button - only show on mobile floating mode */}
+        {mobileFloating && isSpeechSupported && (
           <Button
             onClick={isRecording ? stopRecording : startRecording}
             disabled={isLoading || isProcessing}
@@ -4108,8 +4108,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           )}
         </Button>
         
-        {/* Voice output toggle with settings popover */}
-        <Popover>
+        {/* Voice output toggle with settings popover - only show on mobile */}
+        {mobileFloating && <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -4262,7 +4262,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               </div>
             </div>
           </PopoverContent>
-        </Popover>
+        </Popover>}
       </div>
     </div>
   );
