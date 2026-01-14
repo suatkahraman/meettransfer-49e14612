@@ -1093,10 +1093,8 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void, mobileFloati
           audio.play().catch(reject);
         });
 
-        // Minimal pause between sentences for natural but fast flow (50ms)
-        if (i < sentences.length - 1 && !shouldStopRef.current) {
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
+        // No pause between sentences for continuous flow
+      }
       }
 
       console.log('🔊 [ElevenLabs] All sentences completed');

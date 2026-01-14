@@ -92,20 +92,28 @@ const BookingPage = () => {
   // Hourly-specific params
   const urlCity = searchParams.get("city") || "";
   const urlDuration = searchParams.get("duration") || "4h";
+  
+  // Return trip & extras params from URL
+  const urlHasReturnTrip = searchParams.get("hasReturnTrip") === "true";
+  const urlReturnDate = searchParams.get("returnDate") || "";
+  const urlReturnTime = searchParams.get("returnTime") || "";
+  const urlBabySeatCount = searchParams.get("babySeatCount");
+  const urlLuggageCount = searchParams.get("luggageCount");
+  const urlPromoCode = searchParams.get("promoCode") || "";
 
   // Form state - initialize from URL params if available
   const [vehicleType, setVehicleType] = useState(urlVehicleType || "mercedes-vito");
   const [passengers, setPassengers] = useState(urlPassengers ? parseInt(urlPassengers) : 1);
-  const [luggageCount, setLuggageCount] = useState(1);
-  const [babySeatCount, setBabySeatCount] = useState(0);
+  const [luggageCount, setLuggageCount] = useState(urlLuggageCount ? parseInt(urlLuggageCount) : 1);
+  const [babySeatCount, setBabySeatCount] = useState(urlBabySeatCount ? parseInt(urlBabySeatCount) : 0);
   const [preferredCurrency, setPreferredCurrency] = useState("EUR");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
-  const [hasReturnTrip, setHasReturnTrip] = useState(false);
-  const [returnDate, setReturnDate] = useState("");
-  const [returnTime, setReturnTime] = useState("");
-  const [promoCode, setPromoCode] = useState("");
+  const [hasReturnTrip, setHasReturnTrip] = useState(urlHasReturnTrip);
+  const [returnDate, setReturnDate] = useState(urlReturnDate);
+  const [returnTime, setReturnTime] = useState(urlReturnTime);
+  const [promoCode, setPromoCode] = useState(urlPromoCode);
   const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(null);
   const [promoCodeError, setPromoCodeError] = useState<string | null>(null);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
