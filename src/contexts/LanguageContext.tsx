@@ -1989,6 +1989,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "Moderne, komfortable Fahrzeuge auf höchstem Standard gewartet",
     support247: "24/7 Support",
     support247Desc: "Engagiertes Kundenservice-Team, das Ihnen jederzeit zur Verfügung steht",
+    // Hero Badges
+    luxuryTransfer: "Luxus Transfer",
+    safe: "Sicher",
+    fast: "Schnell",
+    fixedPrice: "Festpreis",
+    freeCancel: "Kostenlos Storno",
+    proDriver: "Profi",
+    getQuote: "Angebot",
+    babySeatLabel: "Baby",
     
     // Destinations Section
     topDestinations: "Top-Reiseziele",
@@ -3755,6 +3764,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "Véhicules modernes et confortables entretenus selon les normes les plus élevées",
     support247: "Support 24/7",
     support247Desc: "Équipe de service client dédiée disponible chaque fois que vous en avez besoin",
+    // Hero Badges
+    luxuryTransfer: "Transfert Luxe",
+    safe: "Sûr",
+    fast: "Rapide",
+    fixedPrice: "Prix Fixe",
+    freeCancel: "Annul. Gratuite",
+    proDriver: "Pro",
+    getQuote: "Devis",
+    babySeatLabel: "Bébé",
     
     // Destinations Section
     topDestinations: "Destinations Populaires",
@@ -5232,6 +5250,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "Современные, комфортные автомобили, обслуживаемые по высшим стандартам",
     support247: "Поддержка 24/7",
     support247Desc: "Выделенная команда службы поддержки, доступная когда вам нужно",
+    // Hero Badges
+    luxuryTransfer: "Люкс Трансфер",
+    safe: "Безопасно",
+    fast: "Быстро",
+    fixedPrice: "Фикс. Цена",
+    freeCancel: "Бесп. Отмена",
+    proDriver: "Профи",
+    getQuote: "Запрос",
+    babySeatLabel: "Детское",
     
     // Destinations Section
     topDestinations: "Популярные направления",
@@ -6573,6 +6600,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "Veicoli moderni e confortevoli mantenuti ai più alti standard",
     support247: "Supporto 24/7",
     support247Desc: "Team di assistenza clienti dedicato disponibile ogni volta che ne hai bisogno",
+    // Hero Badges
+    luxuryTransfer: "Trasferimento Lusso",
+    safe: "Sicuro",
+    fast: "Veloce",
+    fixedPrice: "Prezzo Fisso",
+    freeCancel: "Annul. Gratis",
+    proDriver: "Pro",
+    getQuote: "Preventivo",
+    babySeatLabel: "Bimbo",
     
     // Destinations Section
     topDestinations: "Destinazioni Principali",
@@ -7961,6 +7997,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "Vehículos modernos y cómodos mantenidos con los más altos estándares",
     support247: "Soporte 24/7",
     support247Desc: "Equipo de atención al cliente dedicado disponible cuando lo necesites",
+    // Hero Badges
+    luxuryTransfer: "Traslado de Lujo",
+    safe: "Seguro",
+    fast: "Rápido",
+    fixedPrice: "Precio Fijo",
+    freeCancel: "Cancelar Gratis",
+    proDriver: "Pro",
+    getQuote: "Cotizar",
+    babySeatLabel: "Bebé",
     
     // Destinations Section
     topDestinations: "Destinos Principales",
@@ -9349,6 +9394,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "مركبات حديثة ومريحة تتم صيانتها وفق أعلى المعايير",
     support247: "دعم 24/7",
     support247Desc: "فريق خدمة عملاء مخصص متاح متى احتجت إلينا",
+    // Hero Badges
+    luxuryTransfer: "نقل فاخر",
+    safe: "آمن",
+    fast: "سريع",
+    fixedPrice: "سعر ثابت",
+    freeCancel: "إلغاء مجاني",
+    proDriver: "محترف",
+    getQuote: "عرض سعر",
+    babySeatLabel: "طفل",
     
     // Destinations Section
     topDestinations: "أفضل الوجهات",
@@ -12203,6 +12257,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "Сучасні, комфортні автомобілі, що обслуговуються за найвищими стандартами",
     support247: "Цілодобова підтримка",
     support247Desc: "Віддана команда обслуговування клієнтів, доступна коли вам потрібно",
+    // Hero Badges
+    luxuryTransfer: "Люкс Трансфер",
+    safe: "Безпечно",
+    fast: "Швидко",
+    fixedPrice: "Фікс. Ціна",
+    freeCancel: "Безк. Скасув.",
+    proDriver: "Профі",
+    getQuote: "Запит",
+    babySeatLabel: "Дитяче",
     
     // Destinations Section
     topDestinations: "Популярні напрямки",
@@ -13507,6 +13570,15 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "最高水準で整備された快適な最新車両",
     support247: "24時間サポート",
     support247Desc: "いつでもご利用いただける専任カスタマーサービスチーム",
+    // Hero Badges
+    luxuryTransfer: "ラグジュアリー送迎",
+    safe: "安全",
+    fast: "迅速",
+    fixedPrice: "固定料金",
+    freeCancel: "無料キャンセル",
+    proDriver: "プロ",
+    getQuote: "見積り",
+    babySeatLabel: "ベビー",
     
     // Destinations Section
     topDestinations: "人気の目的地",
