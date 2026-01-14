@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import frankfurtHeroImage from "@/assets/destinations/frankfurt-city.jpg";
+import frankfurtHeroImage from "@/assets/destinations/frankfurt-city.webp";
 // Vito VIP images
 import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
