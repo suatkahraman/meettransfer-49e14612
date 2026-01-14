@@ -91,6 +91,10 @@ const Index = () => {
       </Suspense>
       
       <Suspense fallback={<SectionPlaceholder />}>
+        <HomeFAQ />
+      </Suspense>
+      
+      <Suspense fallback={<SectionPlaceholder />}>
         <HourlyRentalSection />
       </Suspense>
       
