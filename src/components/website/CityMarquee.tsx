@@ -266,12 +266,13 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Set image as loaded immediately since we're using imported modules
+  // Preload the image properly
   useEffect(() => {
-    // Since images are imported as ES modules, they're already bundled
-    // Set loaded to true immediately as the src is a valid bundled asset
     if (city.image) {
-      setImageLoaded(true);
+      const img = new Image();
+      img.onload = () => setImageLoaded(true);
+      img.onerror = () => setImageError(true);
+      img.src = city.image;
     }
   }, [city.image]);
 
@@ -284,22 +285,22 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
     >
       {/* Card */}
       <div className="relative h-64 md:h-72 rounded-2xl overflow-hidden shadow-lg bg-muted">
+        {/* Gradient Background - Always visible as fallback */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${city.gradient}`} />
+        
         {/* Skeleton Loading State */}
         {!imageLoaded && !imageError && (
-          <Skeleton className="absolute inset-0 w-full h-full" />
+          <Skeleton className="absolute inset-0 w-full h-full z-10" />
         )}
         
-        {/* Gradient Fallback Background */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${city.gradient} ${imageLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`} />
-        
         {/* Real Image - Using imported bundled assets */}
-        {!imageError && (
+        {city.image && !imageError && (
           <img
             src={city.image}
             alt={city.name}
             loading="eager"
-            decoding="sync"
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 ${
+            decoding="async"
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 z-20 ${
               imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             } group-hover:scale-110`}
             onLoad={() => setImageLoaded(true)}
@@ -307,12 +308,12 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
           />
         )}
         
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        {/* Gradient Overlay - Always on top of image */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-30" />
         
         {/* Popular Badge */}
         {city.popular && (
-          <div className="absolute top-3 left-3 z-10">
+          <div className="absolute top-3 left-3 z-40">
             <div className="flex items-center gap-1 bg-yellow-500 text-yellow-950 rounded-full px-2.5 py-1 text-xs font-bold shadow-lg">
               <Star className="h-3 w-3 fill-current" />
               {language === 'TR' ? 'Popüler' : 'Popular'}
@@ -321,7 +322,7 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
         )}
         
         {/* Airport Badge */}
-        <div className="absolute top-3 right-3 z-10">
+        <div className="absolute top-3 right-3 z-40">
           <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm text-white rounded-full px-2.5 py-1 text-xs font-medium">
             <Plane className="h-3 w-3" />
             {city.airports.join(", ")}
@@ -329,7 +330,7 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
         </div>
         
         {/* Content */}
-        <div className="absolute inset-x-0 bottom-0 p-4">
+        <div className="absolute inset-x-0 bottom-0 p-4 z-40">
           {/* City Name */}
           <h3 className="text-xl md:text-2xl font-bold text-white mb-1 drop-shadow-lg">
             {language === 'TR' ? city.nameTR : city.name}
