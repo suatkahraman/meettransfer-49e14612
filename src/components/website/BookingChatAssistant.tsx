@@ -861,23 +861,94 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
     };
   }, []);
 
-  const speakWithElevenLabs = useCallback(async (text: string) => {
-    console.log('🔊 [ElevenLabs] Speaking text:', text.substring(0, 50) + '...');
-    
-    // Clean text for speech (remove emojis and special characters)
-    const cleanText = text
+  // Clean text for TTS - make it readable and natural for speech synthesis
+  const cleanTextForSpeech = useCallback((text: string, lang: string): string => {
+    let cleaned = text
+      // Remove all emojis
       .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
       .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
       .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
       .replace(/[\u{2600}-\u{26FF}]/gu, '')
       .replace(/[\u{2700}-\u{27BF}]/gu, '')
-      .replace(/👋|🎤|📍|📅|👥|🚗|💰/g, '')
-      .trim();
+      .replace(/[\u{1F900}-\u{1F9FF}]/gu, '')
+      .replace(/[\u{1FA00}-\u{1FA6F}]/gu, '')
+      .replace(/[\u{1FA70}-\u{1FAFF}]/gu, '')
+      .replace(/[\u{2300}-\u{23FF}]/gu, '')
+      .replace(/[\u{2B50}]/gu, '')
+      .replace(/👋|🎤|📍|📅|👥|🚗|💰|✅|❌|⭐|🌟|💳|📱|✈️|🏨|🚌|🚐|🚕|📞|💬|🔒|🎉|👍|👎|❤️|🙏|😊|😃|😄|🚀|💡|📌|🔔|⚠️|ℹ️|🔗|📧|📝|🎯|💼|🏷️|🛡️|⏰|🕐|🕑|🕒|🕓|🕔|🕕|🕖|🕗|🕘|🕙|🕚|🕛/g, '')
+      
+      // Remove markdown formatting
+      .replace(/\*\*([^*]+)\*\*/g, '$1') // Bold
+      .replace(/\*([^*]+)\*/g, '$1') // Italic
+      .replace(/__([^_]+)__/g, '$1') // Bold underscore
+      .replace(/_([^_]+)_/g, '$1') // Italic underscore
+      .replace(/~~([^~]+)~~/g, '$1') // Strikethrough
+      .replace(/`([^`]+)`/g, '$1') // Inline code
+      .replace(/```[\s\S]*?```/g, '') // Code blocks
+      .replace(/^#+\s*/gm, '') // Headers
+      .replace(/^\s*[-*+]\s+/gm, '') // List items
+      .replace(/^\s*\d+\.\s+/gm, '') // Numbered lists
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Links - keep text
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '') // Images - remove
+      
+      // Clean up price formats for natural reading
+      .replace(/(\d+)\s*€/g, (_, num) => lang === 'TR' ? `${num} Euro` : `${num} Euros`)
+      .replace(/€\s*(\d+)/g, (_, num) => lang === 'TR' ? `${num} Euro` : `${num} Euros`)
+      .replace(/(\d+)\s*\$/g, (_, num) => lang === 'TR' ? `${num} Dolar` : `${num} Dollars`)
+      .replace(/\$\s*(\d+)/g, (_, num) => lang === 'TR' ? `${num} Dolar` : `${num} Dollars`)
+      .replace(/(\d+)\s*TL/gi, (_, num) => lang === 'TR' ? `${num} Türk Lirası` : `${num} Turkish Lira`)
+      .replace(/(\d+)\s*USD/gi, (_, num) => lang === 'TR' ? `${num} Amerikan Doları` : `${num} US Dollars`)
+      .replace(/(\d+)\s*EUR/gi, (_, num) => lang === 'TR' ? `${num} Euro` : `${num} Euros`)
+      .replace(/(\d+)\s*GBP/gi, (_, num) => lang === 'TR' ? `${num} İngiliz Sterlini` : `${num} British Pounds`)
+      
+      // Convert numbers with separators for natural reading
+      .replace(/(\d{1,3})\.(\d{3})/g, '$1$2') // Remove thousand separators (1.500 -> 1500)
+      .replace(/(\d+),(\d{2})(?!\d)/g, (_, int, dec) => `${int} ${lang === 'TR' ? 'virgül' : 'point'} ${dec}`) // Decimal: 15,50 -> "15 virgül 50"
+      
+      // Clean up special characters and symbols
+      .replace(/[<>{}[\]\\|^~]/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, ' ve ')
+      .replace(/&lt;/g, '')
+      .replace(/&gt;/g, '')
+      .replace(/&quot;/g, '')
+      .replace(/&#39;/g, "'")
+      
+      // Clean up punctuation for better speech
+      .replace(/\.{2,}/g, '.') // Multiple dots to single
+      .replace(/,{2,}/g, ',') // Multiple commas to single
+      .replace(/!{2,}/g, '!') // Multiple exclamations to single
+      .replace(/\?{2,}/g, '?') // Multiple questions to single
+      .replace(/\s*[-–—]\s*/g, ', ') // Dashes to commas for pauses
+      .replace(/\s*[/]\s*/g, ' veya ') // Slash to "or"
+      .replace(/\s*\(\s*/g, ', ') // Opening paren to comma
+      .replace(/\s*\)\s*/g, ', ') // Closing paren to comma
+      .replace(/\s*:\s*/g, ': ') // Clean colons
+      
+      // Clean up whitespace
+      .replace(/\n{2,}/g, '. ') // Multiple newlines to sentence break
+      .replace(/\n/g, ' ') // Single newline to space
+      .replace(/\s{2,}/g, ' ') // Multiple spaces to single
+      .replace(/^\s+|\s+$/g, '') // Trim
+      
+      // Ensure proper sentence endings
+      .replace(/([^.!?])$/g, '$1.'); // Add period if missing at end
+    
+    return cleaned;
+  }, []);
+
+  const speakWithElevenLabs = useCallback(async (text: string) => {
+    console.log('🔊 [ElevenLabs] Speaking text:', text.substring(0, 50) + '...');
+    
+    // Clean text for speech
+    const cleanText = cleanTextForSpeech(text, language);
 
     if (!cleanText) {
       console.log('🔊 [ElevenLabs] No clean text to speak');
       return;
     }
+    
+    console.log('🔊 [ElevenLabs] Cleaned text:', cleanText.substring(0, 100) + '...');
 
     try {
       setIsSpeaking(true);
@@ -964,14 +1035,8 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
 
     window.speechSynthesis.cancel();
 
-    const cleanText = text
-      .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
-      .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
-      .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
-      .replace(/[\u{2600}-\u{26FF}]/gu, '')
-      .replace(/[\u{2700}-\u{27BF}]/gu, '')
-      .replace(/👋|🎤|📍|📅|👥|🚗|💰/g, '')
-      .trim();
+    // Use the same cleaning function
+    const cleanText = cleanTextForSpeech(text, language);
 
     if (!cleanText) return;
 
