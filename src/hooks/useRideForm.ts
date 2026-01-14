@@ -274,7 +274,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     if (luggageCount > 0) params.set("luggageCount", luggageCount.toString());
     
     navigate(`/book?${params.toString()}`);
-  }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t]);
+  }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount]);
 
   const handleApplyBooking = useCallback((data: BookingData) => {
     let hasChanges = false;
