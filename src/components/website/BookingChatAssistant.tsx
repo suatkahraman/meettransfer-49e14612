@@ -801,10 +801,11 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const [speechRate, setSpeechRate] = useState(1.0);
+  // Optimized voice settings for natural, persuasive, human-like speech
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
-    stability: 0.5,
-    similarityBoost: 0.75,
-    style: 0.3,
+    stability: 0.65,      // More consistent, professional
+    similarityBoost: 0.80, // Strong voice character
+    style: 0.45,          // Warmer, more expressive
   });
   const [useElevenLabs, setUseElevenLabs] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -817,11 +818,13 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   }, [onSpeakEnd]);
 
   // ElevenLabs voices with Turkish support
+  // Sarah is the default - warm, professional, soft, and persuasive female voice
   const elevenLabsVoices: VoiceOption[] = [
+    { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah ⭐', lang: 'multilingual', gender: 'female' }, // Default - warm, persuasive
+    { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily', lang: 'multilingual', gender: 'female' }, // Soft, gentle
+    { id: 'cgSgspJ2msm6clMCkdW9', name: 'Jessica', lang: 'multilingual', gender: 'female' }, // Natural, conversational
     { id: 'FGY2WhTYpPnrIDTdsKH5', name: 'Laura', lang: 'multilingual', gender: 'female' },
-    { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', lang: 'multilingual', gender: 'female' },
     { id: 'XrExE9yKIg1WjnnlVkGX', name: 'Matilda', lang: 'multilingual', gender: 'female' },
-    { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily', lang: 'multilingual', gender: 'female' },
     { id: 'JBFqnCBsd6RMkjVDRZzb', name: 'George', lang: 'multilingual', gender: 'male' },
     { id: 'N2lVS1w4EtoT3dr4eOWO', name: 'Callum', lang: 'multilingual', gender: 'male' },
     { id: 'TX3LPaxmHKxFdv7VOQHJ', name: 'Liam', lang: 'multilingual', gender: 'male' },
@@ -832,8 +835,8 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void) {
   useEffect(() => {
     setAvailableVoices(elevenLabsVoices);
     if (!selectedVoiceId) {
-      // Default to Laura (female, Turkish-friendly)
-      setSelectedVoiceId('FGY2WhTYpPnrIDTdsKH5');
+      // Default to Sarah - soft, warm, persuasive female voice that sounds human
+      setSelectedVoiceId('EXAVITQu4vr4xnSDxMaL');
     }
   }, []);
 

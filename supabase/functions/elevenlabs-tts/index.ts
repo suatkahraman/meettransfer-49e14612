@@ -30,17 +30,21 @@ serve(async (req) => {
       );
     }
 
-    // Default to a Turkish-supporting voice if not specified
-    // Laura - FGY2WhTYpPnrIDTdsKH5 (supports multilingual including Turkish)
-    const selectedVoiceId = voiceId || 'FGY2WhTYpPnrIDTdsKH5';
+    // Default to a soft, persuasive female voice for booking conversions
+    // Sarah - EXAVITQu4vr4xnSDxMaL (warm, professional, multilingual including Turkish)
+    // Other great options: 
+    // - Lily (pFZP5JQG7iQjIQuC4Bku) - soft, gentle
+    // - Jessica (cgSgspJ2msm6clMCkdW9) - natural, conversational
+    const selectedVoiceId = voiceId || 'EXAVITQu4vr4xnSDxMaL';
 
-    // Voice settings with customizable parameters
+    // Optimized voice settings for natural, persuasive, human-like speech
+    // Higher stability for consistency, moderate style for warmth
     const voiceSettings = {
-      stability: typeof stability === 'number' ? stability : 0.5,
-      similarity_boost: typeof similarityBoost === 'number' ? similarityBoost : 0.75,
-      style: typeof style === 'number' ? style : 0.3,
-      use_speaker_boost: true,
-      speed: typeof speed === 'number' ? speed : 1.0,
+      stability: typeof stability === 'number' ? stability : 0.65, // More consistent, professional
+      similarity_boost: typeof similarityBoost === 'number' ? similarityBoost : 0.80, // Strong voice character
+      style: typeof style === 'number' ? style : 0.45, // Warmer, more expressive
+      use_speaker_boost: true, // Clearer voice
+      speed: typeof speed === 'number' ? speed : 0.95, // Slightly slower for better comprehension
     };
 
     console.log('Generating speech for text:', text.substring(0, 100), '...');
