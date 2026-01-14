@@ -4,21 +4,19 @@ import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase, ChevronLeft, ChevronR
 import { CityVideo } from "./types";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 
-// Additional hero images for gallery
-import vitoVip1 from "@/assets/vito-vip-1.jpg";
-import vitoVipStarlight from "@/assets/vito-vip-starlight-purple.jpg";
-import vitoPassengers from "@/assets/vito-vip-passengers-1.jpg";
-import sprinterInterior from "@/assets/sprinter-interior-starlight.jpg";
-import maybachInterior from "@/assets/maybach-interior-purple.jpg";
+// Futuristic hero images for gallery - local assets for fast loading
+import heroFuturistic1 from "@/assets/hero-futuristic-1.jpg";
+import heroFuturistic2 from "@/assets/hero-futuristic-2.jpg";
+import heroFuturistic3 from "@/assets/hero-futuristic-3.jpg";
+import heroFuturistic4 from "@/assets/hero-futuristic-4.jpg";
 
-// Gallery images configuration
+// Gallery images configuration with optimized local assets
 const GALLERY_IMAGES = [
   { src: heroMercedes, label: "Mercedes Vito", labelTR: "Mercedes Vito" },
-  { src: vitoVip1, label: "VIP Interior", labelTR: "VIP İç Mekan" },
-  { src: vitoVipStarlight, label: "Starlight Ceiling", labelTR: "Yıldızlı Tavan" },
-  { src: vitoPassengers, label: "Premium Comfort", labelTR: "Premium Konfor" },
-  { src: sprinterInterior, label: "Sprinter VIP", labelTR: "Sprinter VIP" },
-  { src: maybachInterior, label: "Ultra Luxury", labelTR: "Ultra Lüks" },
+  { src: heroFuturistic1, label: "City Night", labelTR: "Gece Şehir" },
+  { src: heroFuturistic2, label: "Airport Transfer", labelTR: "Havalimanı Transfer" },
+  { src: heroFuturistic3, label: "VIP Interior", labelTR: "VIP İç Mekan" },
+  { src: heroFuturistic4, label: "Luxury Fleet", labelTR: "Lüks Filo" },
 ];
 
 // Media item type for unified carousel
