@@ -2268,13 +2268,20 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         setTimeout(() => speak(assistantMessage.content), 100);
       }
       
-      // If AI triggered form redirect and we have booking data, auto-apply it
-      if (hasFormRedirect && bookingData && onApplyBooking) {
-        console.log("AI triggered FORM_REDIRECT, applying booking data:", bookingData);
-        // Small delay so user can see the message
-        setTimeout(() => {
-          handleApplyBooking(bookingData);
-        }, 1500);
+      // Auto-sync booking data to form whenever we have new data
+      // This ensures date, time, and other fields stay synchronized
+      if (bookingData && onApplyBooking) {
+        const hasUsefulData = bookingData.pickup || bookingData.dropoff || 
+                              bookingData.date || bookingData.time || 
+                              bookingData.passengers || bookingData.vehicleType;
+        
+        if (hasUsefulData) {
+          console.log("[AI Assistant] Auto-syncing booking data to form:", bookingData);
+          // Small delay so user can see the message first
+          setTimeout(() => {
+            onApplyBooking(bookingData);
+          }, hasFormRedirect ? 1500 : 500);
+        }
       }
 
       // If booking has some data, make a non-streaming call to get additional info

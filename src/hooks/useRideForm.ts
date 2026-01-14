@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { format, parse } from "date-fns";
+import { format, parse, parseISO, isValid } from "date-fns";
+import { tr, enUS, de, fr, ru, es, it } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +8,99 @@ import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { useHeroFormStorage, parseSavedDate, SavedFormData } from "./useHeroFormStorage";
 import type { BookingData } from "@/components/hero/types";
+
+// Helper to parse various date formats from AI
+function parseFlexibleDate(dateStr: string): Date | null {
+  if (!dateStr) return null;
+  
+  const trimmed = dateStr.trim();
+  
+  // Try ISO format first (yyyy-MM-dd or full ISO string)
+  try {
+    const isoDate = parseISO(trimmed);
+    if (isValid(isoDate)) return isoDate;
+  } catch {}
+  
+  // Try yyyy-MM-dd format
+  try {
+    const d = parse(trimmed, "yyyy-MM-dd", new Date());
+    if (isValid(d)) return d;
+  } catch {}
+  
+  // Try dd/MM/yyyy format
+  try {
+    const d = parse(trimmed, "dd/MM/yyyy", new Date());
+    if (isValid(d)) return d;
+  } catch {}
+  
+  // Try dd.MM.yyyy format
+  try {
+    const d = parse(trimmed, "dd.MM.yyyy", new Date());
+    if (isValid(d)) return d;
+  } catch {}
+  
+  // Try dd-MM-yyyy format
+  try {
+    const d = parse(trimmed, "dd-MM-yyyy", new Date());
+    if (isValid(d)) return d;
+  } catch {}
+  
+  // Try locale-specific formats
+  const locales = [tr, enUS, de, fr, ru, es, it];
+  const formats = [
+    "d MMMM yyyy",
+    "dd MMMM yyyy", 
+    "MMMM d, yyyy",
+    "MMMM dd, yyyy",
+    "d MMM yyyy",
+    "dd MMM yyyy",
+  ];
+  
+  for (const locale of locales) {
+    for (const fmt of formats) {
+      try {
+        const d = parse(trimmed, fmt, new Date(), { locale });
+        if (isValid(d)) return d;
+      } catch {}
+    }
+  }
+  
+  return null;
+}
+
+// Helper to parse various time formats
+function parseFlexibleTime(timeStr: string): string | null {
+  if (!timeStr) return null;
+  
+  const trimmed = timeStr.trim();
+  
+  // Already in HH:mm format
+  if (/^\d{1,2}:\d{2}$/.test(trimmed)) {
+    const [h, m] = trimmed.split(':');
+    return `${h.padStart(2, '0')}:${m}`;
+  }
+  
+  // HH:mm:ss format
+  if (/^\d{1,2}:\d{2}:\d{2}$/.test(trimmed)) {
+    const [h, m] = trimmed.split(':');
+    return `${h.padStart(2, '0')}:${m}`;
+  }
+  
+  // 12-hour format with AM/PM
+  const amPmMatch = trimmed.match(/^(\d{1,2}):?(\d{2})?\s*(am|pm|AM|PM)$/i);
+  if (amPmMatch) {
+    let hours = parseInt(amPmMatch[1], 10);
+    const minutes = amPmMatch[2] || '00';
+    const isPM = amPmMatch[3].toLowerCase() === 'pm';
+    
+    if (isPM && hours !== 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  }
+  
+  return null;
+}
 
 export interface UseRideFormReturn {
   // State
@@ -141,16 +235,40 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t]);
 
   const handleApplyBooking = useCallback((data: BookingData) => {
-    if (data.pickup) setPickup(data.pickup);
-    if (data.dropoff) setDropoff(data.dropoff);
-    if (data.date) {
-      try {
-        const d = parse(data.date, "yyyy-MM-dd", new Date());
-        if (!isNaN(d.getTime())) setDate(d);
-      } catch {}
+    let hasChanges = false;
+    
+    if (data.pickup) {
+      setPickup(data.pickup);
+      hasChanges = true;
     }
-    if (data.time) setTime(data.time);
-    if (data.passengers) setPassengers(data.passengers.toString());
+    if (data.dropoff) {
+      setDropoff(data.dropoff);
+      hasChanges = true;
+    }
+    if (data.date) {
+      const parsedDate = parseFlexibleDate(data.date);
+      if (parsedDate) {
+        setDate(parsedDate);
+        hasChanges = true;
+        console.log("[Form Sync] Date parsed:", data.date, "->", parsedDate);
+      }
+    }
+    if (data.time) {
+      const parsedTime = parseFlexibleTime(data.time);
+      if (parsedTime) {
+        setTime(parsedTime);
+        hasChanges = true;
+        console.log("[Form Sync] Time parsed:", data.time, "->", parsedTime);
+      } else if (/^\d{1,2}:\d{2}/.test(data.time)) {
+        // Fallback: if time looks valid, use it directly
+        setTime(data.time);
+        hasChanges = true;
+      }
+    }
+    if (data.passengers) {
+      setPassengers(data.passengers.toString());
+      hasChanges = true;
+    }
     if (data.vehicleType) {
       // Extended vehicle mapping for AI assistant sync
       const vehicleMap: Record<string, string> = {
@@ -158,21 +276,37 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
         'vip-mercedes': 'vip-mercedes',
         'maybach-minibus': 'maybach-minibus',
         'minibus': 'minibus',
-        // Alternative names from AI
+        // Alternative names from AI (multi-language)
         'sedan': 'mercedes-vito',
+        'vito': 'mercedes-vito',
+        'mercedes': 'mercedes-vito',
         'vip': 'vip-mercedes',
         'minivan': 'vip-mercedes',
         'vip-minivan': 'vip-mercedes',
         'vip minivan': 'vip-mercedes',
+        'v-class': 'vip-mercedes',
+        'v class': 'vip-mercedes',
         'maybach': 'maybach-minibus',
+        'maybach-sprinter': 'maybach-minibus',
+        'lux': 'maybach-minibus',
+        'luxury': 'maybach-minibus',
         'minibüs': 'minibus',
         'sprinter': 'minibus',
+        'bus': 'minibus',
+        'van': 'minibus',
       };
       const normalizedType = data.vehicleType.toLowerCase().trim();
-      setVehicleType(vehicleMap[normalizedType] || vehicleMap[data.vehicleType] || 'mercedes-vito');
+      const mappedVehicle = vehicleMap[normalizedType] || vehicleMap[data.vehicleType] || 'mercedes-vito';
+      setVehicleType(mappedVehicle);
+      hasChanges = true;
+      console.log("[Form Sync] Vehicle mapped:", data.vehicleType, "->", mappedVehicle);
     }
-    toast.success(t("bookingDetailsApplied") || "Booking details applied!");
-    document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Only show toast and scroll if there are actual changes
+    if (hasChanges) {
+      toast.success(t("bookingDetailsApplied") || "Booking details applied!");
+      document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }, [t]);
 
   const handleApplyPromoCode = useCallback((code: string) => {
