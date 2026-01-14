@@ -3,75 +3,426 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Globe, Users, Clock, Building2, ArrowRight, Sparkles, Shield, Star, Zap, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// Translations for CoreServices
+const coreTranslations: Record<string, Record<string, string>> = {
+  coreServices: {
+    EN: "Complete Transfer Solutions",
+    TR: "Eksiksiz Transfer Çözümleri",
+    DE: "Komplette Transferlösungen",
+    FR: "Solutions de Transfert Complètes",
+    RU: "Комплексные Трансферные Решения",
+    IT: "Soluzioni di Trasferimento Complete",
+    ES: "Soluciones de Traslado Completas",
+    AR: "حلول النقل الكاملة",
+    UK: "Комплексні Трансферні Рішення",
+    JA: "完全な送迎ソリューション",
+  },
+  coreServicesDesc: {
+    EN: "From airport pickups to hourly chauffeur service, we deliver premium transportation tailored to your every need",
+    TR: "Havalimanı transferlerinden saatlik şoförlü hizmete kadar, her ihtiyacınıza özel premium ulaşım çözümleri sunuyoruz",
+    DE: "Von Flughafen-Abholungen bis zum stündlichen Chauffeurservice bieten wir erstklassigen Transport nach Ihren Wünschen",
+    FR: "Des transferts aéroport au service de chauffeur à l'heure, nous offrons un transport premium adapté à chaque besoin",
+    RU: "От встречи в аэропорту до почасовой услуги шофера — премиальный транспорт под ваши потребности",
+    IT: "Dai prelievi aeroportuali al servizio autista a ore, offriamo trasporti premium su misura per ogni esigenza",
+    ES: "Desde recogidas en aeropuerto hasta servicio de chófer por horas, transporte premium adaptado a sus necesidades",
+    AR: "من الاستقبال في المطار إلى خدمة السائق بالساعة، نقدم نقل فاخر مصمم لكل احتياجاتك",
+    UK: "Від зустрічей в аеропорту до погодинних послуг шофера — преміальний транспорт під ваші потреби",
+    JA: "空港送迎から時間制ドライバーサービスまで、あらゆるニーズに合わせたプレミアム送迎",
+  },
+  premiumServices: {
+    EN: "Premium Services",
+    TR: "Premium Hizmetler",
+    DE: "Premium-Dienste",
+    FR: "Services Premium",
+    RU: "Премиум Услуги",
+    IT: "Servizi Premium",
+    ES: "Servicios Premium",
+    AR: "الخدمات المميزة",
+    UK: "Преміум Послуги",
+    JA: "プレミアムサービス",
+  },
+  airportTransfers: {
+    EN: "Airport Transfers",
+    TR: "Havalimanı Transferi",
+    DE: "Flughafentransfers",
+    FR: "Transferts Aéroport",
+    RU: "Трансферы из Аэропорта",
+    IT: "Trasferimenti Aeroportuali",
+    ES: "Traslados al Aeropuerto",
+    AR: "نقل المطار",
+    UK: "Трансфери з Аеропорту",
+    JA: "空港送迎",
+  },
+  airportTransfersDesc: {
+    EN: "Seamless door-to-door airport transfers with real-time flight tracking and professional meet & greet service",
+    TR: "Gerçek zamanlı uçuş takibi ve profesyonel karşılama hizmeti ile kapıdan kapıya sorunsuz havalimanı transferi",
+    DE: "Nahtloser Tür-zu-Tür-Flughafentransfer mit Echtzeit-Flugverfolgung und professionellem Begrüßungsservice",
+    FR: "Transferts aéroport porte-à-porte avec suivi de vol en temps réel et service d'accueil professionnel",
+    RU: "Бесшовные трансферы от двери до двери с отслеживанием рейса и профессиональной встречей",
+    IT: "Trasferimenti aeroportuali porta a porta con monitoraggio volo e servizio di accoglienza professionale",
+    ES: "Traslados aeropuerto puerta a puerta con seguimiento de vuelos y servicio de bienvenida profesional",
+    AR: "نقل سلس من الباب إلى الباب مع تتبع الرحلات في الوقت الفعلي وخدمة استقبال احترافية",
+    UK: "Безперешкодні трансфери від дверей до дверей з відстеженням рейсу та професійною зустріччю",
+    JA: "リアルタイムフライト追跡とプロフェッショナルな出迎えサービスによるドアツードア空港送迎",
+  },
+  privateTransfers: {
+    EN: "Private Transfers",
+    TR: "Özel Transfer",
+    DE: "Privattransfers",
+    FR: "Transferts Privés",
+    RU: "Частные Трансферы",
+    IT: "Trasferimenti Privati",
+    ES: "Traslados Privados",
+    AR: "النقل الخاص",
+    UK: "Приватні Трансфери",
+    JA: "プライベート送迎",
+  },
+  privateTransfersDesc: {
+    EN: "Exclusive point-to-point transfers with experienced professional drivers and fixed transparent pricing",
+    TR: "Deneyimli profesyonel sürücüler ve sabit şeffaf fiyatlandırma ile özel noktadan noktaya transfer",
+    DE: "Exklusive Punkt-zu-Punkt-Transfers mit erfahrenen professionellen Fahrern und festen transparenten Preisen",
+    FR: "Transferts exclusifs point à point avec chauffeurs professionnels expérimentés et tarification transparente",
+    RU: "Эксклюзивные трансферы от точки до точки с опытными водителями и фиксированными ценами",
+    IT: "Trasferimenti esclusivi punto a punto con autisti professionisti esperti e prezzi fissi trasparenti",
+    ES: "Traslados exclusivos punto a punto con conductores profesionales y precios fijos transparentes",
+    AR: "نقل حصري من نقطة إلى نقطة مع سائقين محترفين ذوي خبرة وأسعار ثابتة وشفافة",
+    UK: "Ексклюзивні трансфери від точки до точки з досвідченими водіями та фіксованими цінами",
+    JA: "経験豊富なプロドライバーと透明な固定価格による専用ポイントツーポイント送迎",
+  },
+  hourlyChauffeur: {
+    EN: "Hourly Chauffeur",
+    TR: "Saatlik Kiralama",
+    DE: "Stündlicher Chauffeur",
+    FR: "Chauffeur à l'Heure",
+    RU: "Почасовой Шофер",
+    IT: "Autista a Ore",
+    ES: "Chófer por Horas",
+    AR: "سائق بالساعة",
+    UK: "Погодинний Шофер",
+    JA: "時間制ドライバー",
+  },
+  hourlyChauffeurDesc: {
+    EN: "Flexible hourly chauffeur service ideal for business meetings, city tours, or special events",
+    TR: "İş toplantıları, şehir turları veya özel etkinlikler için ideal esnek saatlik şoför hizmeti",
+    DE: "Flexibler stündlicher Chauffeurservice ideal für Geschäftstermine, Stadttouren oder besondere Anlässe",
+    FR: "Service de chauffeur à l'heure flexible, idéal pour réunions d'affaires, visites de ville ou événements spéciaux",
+    RU: "Гибкий почасовой сервис шофера для деловых встреч, городских туров или особых мероприятий",
+    IT: "Servizio autista a ore flessibile ideale per riunioni di lavoro, tour della città o eventi speciali",
+    ES: "Servicio de chófer por horas flexible ideal para reuniones de negocios, tours de ciudad o eventos especiales",
+    AR: "خدمة سائق مرنة بالساعة مثالية للاجتماعات التجارية أو جولات المدينة أو المناسبات الخاصة",
+    UK: "Гнучкий погодинний сервіс шофера для ділових зустрічей, міських турів або особливих подій",
+    JA: "ビジネスミーティング、シティツアー、特別イベントに最適なフレキシブル時間制ドライバーサービス",
+  },
+  intercityRides: {
+    EN: "Intercity Rides",
+    TR: "Şehirlerarası Transfer",
+    DE: "Überlandfahrten",
+    FR: "Trajets Interurbains",
+    RU: "Междугородние Поездки",
+    IT: "Viaggi Interurbani",
+    ES: "Viajes Interurbanos",
+    AR: "الرحلات بين المدن",
+    UK: "Міжміські Поїздки",
+    JA: "都市間移動",
+  },
+  intercityRidesDesc: {
+    EN: "Comfortable long-distance transfers between cities with luxury vehicles and experienced drivers",
+    TR: "Lüks araçlar ve deneyimli sürücülerle şehirler arası konforlu uzun mesafe transferleri",
+    DE: "Komfortable Langstrecken-Transfers zwischen Städten mit Luxusfahrzeugen und erfahrenen Fahrern",
+    FR: "Transferts longue distance confortables entre villes avec véhicules de luxe et chauffeurs expérimentés",
+    RU: "Комфортные междугородние трансферы на люксовых автомобилях с опытными водителями",
+    IT: "Trasferimenti confortevoli a lunga distanza tra città con veicoli di lusso e autisti esperti",
+    ES: "Traslados cómodos de larga distancia entre ciudades con vehículos de lujo y conductores expertos",
+    AR: "نقل مريح لمسافات طويلة بين المدن مع سيارات فاخرة وسائقين ذوي خبرة",
+    UK: "Комфортні міжміські трансфери на люксових автомобілях з досвідченими водіями",
+    JA: "高級車両と経験豊富なドライバーによる都市間快適長距離送迎",
+  },
+  flightTracking: {
+    EN: "Flight tracking",
+    TR: "Uçuş takibi",
+    DE: "Flugverfolgung",
+    FR: "Suivi de vol",
+    RU: "Отслеживание рейса",
+    IT: "Monitoraggio volo",
+    ES: "Seguimiento de vuelo",
+    AR: "تتبع الرحلة",
+    UK: "Відстеження рейсу",
+    JA: "フライト追跡",
+  },
+  meetGreet: {
+    EN: "Meet & greet",
+    TR: "Karşılama hizmeti",
+    DE: "Begrüßungsservice",
+    FR: "Accueil personnalisé",
+    RU: "Встреча с табличкой",
+    IT: "Servizio di accoglienza",
+    ES: "Servicio de bienvenida",
+    AR: "خدمة الاستقبال",
+    UK: "Зустріч з табличкою",
+    JA: "お出迎えサービス",
+  },
+  freeWaiting: {
+    EN: "Free waiting",
+    TR: "Ücretsiz bekleme",
+    DE: "Kostenlose Wartezeit",
+    FR: "Attente gratuite",
+    RU: "Бесплатное ожидание",
+    IT: "Attesa gratuita",
+    ES: "Espera gratuita",
+    AR: "انتظار مجاني",
+    UK: "Безкоштовне очікування",
+    JA: "無料待機",
+  },
+  professionalDrivers: {
+    EN: "Professional drivers",
+    TR: "Profesyonel şoförler",
+    DE: "Professionelle Fahrer",
+    FR: "Chauffeurs professionnels",
+    RU: "Профессиональные водители",
+    IT: "Autisti professionisti",
+    ES: "Conductores profesionales",
+    AR: "سائقون محترفون",
+    UK: "Професійні водії",
+    JA: "プロのドライバー",
+  },
+  fixedPrices: {
+    EN: "Fixed prices",
+    TR: "Sabit fiyatlar",
+    DE: "Festpreise",
+    FR: "Prix fixes",
+    RU: "Фиксированные цены",
+    IT: "Prezzi fissi",
+    ES: "Precios fijos",
+    AR: "أسعار ثابتة",
+    UK: "Фіксовані ціни",
+    JA: "固定価格",
+  },
+  service247: {
+    EN: "24/7 service",
+    TR: "7/24 hizmet",
+    DE: "24/7 Service",
+    FR: "Service 24h/24",
+    RU: "Сервис 24/7",
+    IT: "Servizio 24/7",
+    ES: "Servicio 24/7",
+    AR: "خدمة 24/7",
+    UK: "Сервіс 24/7",
+    JA: "24時間サービス",
+  },
+  flexibleHours: {
+    EN: "Flexible hours",
+    TR: "Esnek saatler",
+    DE: "Flexible Stunden",
+    FR: "Horaires flexibles",
+    RU: "Гибкие часы",
+    IT: "Orari flessibili",
+    ES: "Horarios flexibles",
+    AR: "ساعات مرنة",
+    UK: "Гнучкі години",
+    JA: "フレキシブルな時間",
+  },
+  dedicatedDriver: {
+    EN: "Dedicated driver",
+    TR: "Özel şoför",
+    DE: "Persönlicher Fahrer",
+    FR: "Chauffeur dédié",
+    RU: "Персональный водитель",
+    IT: "Autista dedicato",
+    ES: "Conductor dedicado",
+    AR: "سائق مخصص",
+    UK: "Персональний водій",
+    JA: "専属ドライバー",
+  },
+  multipleStops: {
+    EN: "Multiple stops",
+    TR: "Çoklu durak",
+    DE: "Mehrere Stopps",
+    FR: "Arrêts multiples",
+    RU: "Несколько остановок",
+    IT: "Fermate multiple",
+    ES: "Múltiples paradas",
+    AR: "توقفات متعددة",
+    UK: "Кілька зупинок",
+    JA: "複数の停車地点",
+  },
+  longDistance: {
+    EN: "Long distance",
+    TR: "Uzun mesafe",
+    DE: "Langstrecke",
+    FR: "Longue distance",
+    RU: "Дальние расстояния",
+    IT: "Lunga distanza",
+    ES: "Larga distancia",
+    AR: "مسافات طويلة",
+    UK: "Далекі відстані",
+    JA: "長距離",
+  },
+  luxuryComfort: {
+    EN: "Luxury comfort",
+    TR: "Lüks konfor",
+    DE: "Luxuriöser Komfort",
+    FR: "Confort luxueux",
+    RU: "Роскошный комфорт",
+    IT: "Comfort di lusso",
+    ES: "Confort de lujo",
+    AR: "راحة فاخرة",
+    UK: "Розкішний комфорт",
+    JA: "ラグジュアリーな快適さ",
+  },
+  doorToDoor: {
+    EN: "Door-to-door",
+    TR: "Kapıdan kapıya",
+    DE: "Tür zu Tür",
+    FR: "Porte à porte",
+    RU: "От двери до двери",
+    IT: "Porta a porta",
+    ES: "Puerta a puerta",
+    AR: "من الباب إلى الباب",
+    UK: "Від дверей до дверей",
+    JA: "ドアツードア",
+  },
+  learnMore: {
+    EN: "Learn More",
+    TR: "Daha Fazla",
+    DE: "Mehr erfahren",
+    FR: "En savoir plus",
+    RU: "Узнать больше",
+    IT: "Scopri di più",
+    ES: "Saber más",
+    AR: "اعرف المزيد",
+    UK: "Дізнатися більше",
+    JA: "詳細を見る",
+  },
+  happyCustomers: {
+    EN: "Happy Customers",
+    TR: "Mutlu Müşteri",
+    DE: "Zufriedene Kunden",
+    FR: "Clients Satisfaits",
+    RU: "Довольных Клиентов",
+    IT: "Clienti Soddisfatti",
+    ES: "Clientes Felices",
+    AR: "عملاء سعداء",
+    UK: "Задоволених Клієнтів",
+    JA: "満足した顧客",
+  },
+  onTimeArrivals: {
+    EN: "On-Time Arrivals",
+    TR: "Zamanında Varış",
+    DE: "Pünktliche Ankünfte",
+    FR: "Arrivées à l'heure",
+    RU: "Прибытие вовремя",
+    IT: "Arrivi Puntuali",
+    ES: "Llegadas Puntuales",
+    AR: "الوصول في الوقت المحدد",
+    UK: "Прибуття вчасно",
+    JA: "定時到着",
+  },
+  averageRating: {
+    EN: "Average Rating",
+    TR: "Ortalama Puan",
+    DE: "Durchschnittsbewertung",
+    FR: "Note Moyenne",
+    RU: "Средний рейтинг",
+    IT: "Valutazione Media",
+    ES: "Calificación Promedio",
+    AR: "التقييم المتوسط",
+    UK: "Середній рейтинг",
+    JA: "平均評価",
+  },
+  insuredVehicles: {
+    EN: "Insured Vehicles",
+    TR: "Sigortalı Araçlar",
+    DE: "Versicherte Fahrzeuge",
+    FR: "Véhicules Assurés",
+    RU: "Застрахованные Авто",
+    IT: "Veicoli Assicurati",
+    ES: "Vehículos Asegurados",
+    AR: "مركبات مؤمنة",
+    UK: "Застраховані Авто",
+    JA: "保険付き車両",
+  },
+  instantConfirmation: {
+    EN: "Instant Confirmation",
+    TR: "Anında Onay",
+    DE: "Sofortige Bestätigung",
+    FR: "Confirmation Instantanée",
+    RU: "Мгновенное Подтверждение",
+    IT: "Conferma Istantanea",
+    ES: "Confirmación Instantánea",
+    AR: "تأكيد فوري",
+    UK: "Миттєве Підтвердження",
+    JA: "即時確認",
+  },
+  fiveStarService: {
+    EN: "5-Star Service",
+    TR: "5 Yıldızlı Hizmet",
+    DE: "5-Sterne-Service",
+    FR: "Service 5 Étoiles",
+    RU: "5-звездочный Сервис",
+    IT: "Servizio 5 Stelle",
+    ES: "Servicio 5 Estrellas",
+    AR: "خدمة 5 نجوم",
+    UK: "5-зірковий Сервіс",
+    JA: "5つ星サービス",
+  },
+};
+
 const CoreServices = () => {
   const { t, getLocalizedPath, language } = useLanguage();
-  const isTR = language?.toLowerCase() === "tr";
+  const lang = language || "EN";
+
+  // Helper function for translations
+  const ct = (key: string) => coreTranslations[key]?.[lang] || coreTranslations[key]?.["EN"] || key;
 
   const services = [
     {
       icon: Globe,
-      titleKey: "serviceGlobalTitle",
-      titleFallback: "Airport Transfers",
-      titleFallbackTR: "Havalimanı Transferi",
-      descKey: "serviceGlobalDesc",
-      descFallback: "Door-to-door airport transfers with flight tracking, meet & greet service.",
-      descFallbackTR: "Uçuş takipli kapıdan kapıya havalimanı transferleri.",
+      title: ct("airportTransfers"),
+      desc: ct("airportTransfersDesc"),
       link: "/destinations",
       features: [
-        { en: "Flight tracking", tr: "Uçuş takibi" },
-        { en: "Meet & greet", tr: "Karşılama hizmeti" },
-        { en: "Free waiting", tr: "Ücretsiz bekleme" },
+        ct("flightTracking"),
+        ct("meetGreet"),
+        ct("freeWaiting"),
       ],
       gradient: "from-blue-500/20 to-cyan-500/20",
       iconColor: "text-blue-500",
     },
     {
       icon: Users,
-      titleKey: "serviceProfessionalTitle",
-      titleFallback: "Private Transfers",
-      titleFallbackTR: "Özel Transfer",
-      descKey: "serviceProfessionalDesc",
-      descFallback: "Point-to-point private transfers with professional drivers.",
-      descFallbackTR: "Profesyonel şoförlerle noktadan noktaya özel transfer.",
+      title: ct("privateTransfers"),
+      desc: ct("privateTransfersDesc"),
       link: "/about",
       features: [
-        { en: "Professional drivers", tr: "Profesyonel şoförler" },
-        { en: "Fixed prices", tr: "Sabit fiyatlar" },
-        { en: "24/7 service", tr: "7/24 hizmet" },
+        ct("professionalDrivers"),
+        ct("fixedPrices"),
+        ct("service247"),
       ],
       gradient: "from-purple-500/20 to-pink-500/20",
       iconColor: "text-purple-500",
     },
     {
       icon: Clock,
-      titleKey: "serviceHourlyTitle",
-      titleFallback: "Hourly Chauffeur",
-      titleFallbackTR: "Saatlik Kiralama",
-      descKey: "serviceHourlyDesc",
-      descFallback: "Hire a chauffeur by the hour for business meetings or city tours.",
-      descFallbackTR: "İş toplantıları veya şehir turları için saatlik şoför kiralayın.",
+      title: ct("hourlyChauffeur"),
+      desc: ct("hourlyChauffeurDesc"),
       link: "/services",
       features: [
-        { en: "Flexible hours", tr: "Esnek saatler" },
-        { en: "Dedicated driver", tr: "Özel şoför" },
-        { en: "Multiple stops", tr: "Çoklu durak" },
+        ct("flexibleHours"),
+        ct("dedicatedDriver"),
+        ct("multipleStops"),
       ],
       gradient: "from-amber-500/20 to-orange-500/20",
       iconColor: "text-amber-500",
     },
     {
       icon: Building2,
-      titleKey: "serviceCityTitle",
-      titleFallback: "Intercity Rides",
-      titleFallbackTR: "Şehirlerarası",
-      descKey: "serviceCityDesc",
-      descFallback: "Comfortable long-distance transfers between cities.",
-      descFallbackTR: "Şehirler arası konforlu uzun mesafe transferleri.",
+      title: ct("intercityRides"),
+      desc: ct("intercityRidesDesc"),
       link: "/services",
       features: [
-        { en: "Long distance", tr: "Uzun mesafe" },
-        { en: "Luxury comfort", tr: "Lüks konfor" },
-        { en: "Door-to-door", tr: "Kapıdan kapıya" },
+        ct("longDistance"),
+        ct("luxuryComfort"),
+        ct("doorToDoor"),
       ],
       gradient: "from-emerald-500/20 to-teal-500/20",
       iconColor: "text-emerald-500",
@@ -79,9 +430,9 @@ const CoreServices = () => {
   ];
 
   const stats = [
-    { value: "50K+", label: isTR ? "Mutlu Müşteri" : "Happy Customers" },
-    { value: "99%", label: isTR ? "Zamanında Varış" : "On-Time Arrivals" },
-    { value: "4.9", label: isTR ? "Ortalama Puan" : "Average Rating", icon: Star },
+    { value: "50K+", label: ct("happyCustomers") },
+    { value: "99%", label: ct("onTimeArrivals") },
+    { value: "4.9", label: ct("averageRating"), icon: Star },
   ];
 
   return (
@@ -108,16 +459,14 @@ const CoreServices = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6"
           >
             <Sparkles className="h-4 w-4" />
-            {isTR ? "Premium Hizmetler" : "Premium Services"}
+            {ct("premiumServices")}
           </motion.div>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-            {t("coreServices") || (isTR ? "Tüm Transfer İhtiyaçlarınız" : "All Your Transfer Needs")}
+            {ct("coreServices")}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t("coreServicesDesc") || (isTR 
-              ? "Seyahatinizi kusursuz hale getiren premium ulaşım çözümleri" 
-              : "Premium transportation solutions that make your journey seamless")}
+            {ct("coreServicesDesc")}
           </p>
         </motion.div>
 
@@ -151,12 +500,12 @@ const CoreServices = () => {
 
                     {/* Title */}
                     <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                      {t(service.titleKey) || (isTR ? service.titleFallbackTR : service.titleFallback)}
+                      {service.title}
                     </h3>
 
                     {/* Description */}
                     <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                      {t(service.descKey) || (isTR ? service.descFallbackTR : service.descFallback)}
+                      {service.desc}
                     </p>
 
                     {/* Features List */}
@@ -164,14 +513,14 @@ const CoreServices = () => {
                       {service.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
                           <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                          <span>{isTR ? feature.tr : feature.en}</span>
+                          <span>{feature}</span>
                         </li>
                       ))}
                     </ul>
 
                     {/* Learn more link */}
                     <div className="flex items-center gap-1 text-primary font-medium text-sm group-hover:gap-2 transition-all">
-                      {isTR ? "Daha Fazla" : "Learn More"}
+                      {ct("learnMore")}
                       <ArrowRight className="h-4 w-4" />
                     </div>
                   </div>
@@ -215,9 +564,9 @@ const CoreServices = () => {
           className="flex flex-wrap justify-center gap-4 mt-12"
         >
           {[
-            { icon: Shield, text: isTR ? "Sigortalı Araçlar" : "Insured Vehicles" },
-            { icon: Zap, text: isTR ? "Anında Onay" : "Instant Confirmation" },
-            { icon: Star, text: isTR ? "5 Yıldızlı Hizmet" : "5-Star Service" },
+            { icon: Shield, text: ct("insuredVehicles") },
+            { icon: Zap, text: ct("instantConfirmation") },
+            { icon: Star, text: ct("fiveStarService") },
           ].map((badge, index) => (
             <div
               key={index}
