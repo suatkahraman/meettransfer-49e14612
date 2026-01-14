@@ -2896,7 +2896,20 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                 msg.showPassengerCount ? "passenger_count" :
                                 "extras"
                               }
-                              onReply={(answer) => {
+                              onReply={(answer, metadata) => {
+                                // Apply metadata to form if available
+                                if (metadata && onApplyBooking) {
+                                  const partialBookingData: Partial<BookingData> = {};
+                                  if (metadata.vehicleType) partialBookingData.vehicleType = metadata.vehicleType;
+                                  if (metadata.paymentMethod) partialBookingData.paymentMethod = metadata.paymentMethod;
+                                  if (metadata.passengers) partialBookingData.passengers = metadata.passengers;
+                                  
+                                  if (Object.keys(partialBookingData).length > 0) {
+                                    console.log("[QuickReply] Syncing to form:", partialBookingData);
+                                    onApplyBooking(partialBookingData as BookingData);
+                                  }
+                                }
+                                
                                 setInput(answer);
                                 setTimeout(() => {
                                   const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
@@ -3420,7 +3433,20 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       msg.showPassengerCount ? "passenger_count" :
                       "extras"
                     }
-                    onReply={(answer) => {
+                    onReply={(answer, metadata) => {
+                      // Apply metadata to form if available
+                      if (metadata && onApplyBooking) {
+                        const partialBookingData: Partial<BookingData> = {};
+                        if (metadata.vehicleType) partialBookingData.vehicleType = metadata.vehicleType;
+                        if (metadata.paymentMethod) partialBookingData.paymentMethod = metadata.paymentMethod;
+                        if (metadata.passengers) partialBookingData.passengers = metadata.passengers;
+                        
+                        if (Object.keys(partialBookingData).length > 0) {
+                          console.log("[QuickReply] Syncing to form:", partialBookingData);
+                          onApplyBooking(partialBookingData as BookingData);
+                        }
+                      }
+                      
                       setInput(answer);
                       setTimeout(() => {
                         const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;

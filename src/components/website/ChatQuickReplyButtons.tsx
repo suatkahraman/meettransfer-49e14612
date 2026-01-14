@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, X, RotateCcw, ArrowRight, Car, CreditCard, Banknote, Users, Baby, Briefcase } from "lucide-react";
+import { Check, X, RotateCcw, ArrowRight, Car, CreditCard, Banknote, Users, Baby, Briefcase, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -12,10 +12,29 @@ export type QuickReplyType =
   | "passenger_count"
   | "extras";
 
+// Vehicle type mapping for form sync
+export const VEHICLE_TYPE_MAP: Record<string, string> = {
+  "sedan": "mercedes-vito",
+  "vip": "vip-mercedes",
+  "minivan": "vip-mercedes",
+  "minibus": "minibus",
+  "minibüs": "minibus",
+};
+
+// Payment type mapping for form sync
+export const PAYMENT_TYPE_MAP: Record<string, "card" | "cash"> = {
+  "kredi": "card",
+  "credit": "card",
+  "kart": "card",
+  "card": "card",
+  "nakit": "cash",
+  "cash": "cash",
+};
+
 interface ChatQuickReplyButtonsProps {
   language: string;
   type: QuickReplyType;
-  onReply: (answer: string) => void;
+  onReply: (answer: string, metadata?: { vehicleType?: string; paymentMethod?: "card" | "cash"; passengers?: number }) => void;
   disabled?: boolean;
   className?: string;
 }
@@ -26,6 +45,8 @@ interface QuickReplyButton {
   icon: typeof Check;
   variant: "default" | "outline";
   className: string;
+  metadata?: { vehicleType?: string; paymentMethod?: "card" | "cash"; passengers?: number };
+  pulse?: boolean;
 }
 
 const getLocalizedText = (language: string, translations: Record<string, string>): string => {
@@ -103,6 +124,7 @@ export function ChatQuickReplyButtons({
             icon: Car,
             variant: "outline",
             className: "border-2 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/10 text-blue-600",
+            metadata: { vehicleType: "mercedes-vito" },
           },
           {
             text: getLocalizedText(language, { TR: "VIP Minivan (4-6)", EN: "VIP Minivan (4-6)", DE: "VIP Minivan (4-6)", FR: "Minivan VIP (4-6)", RU: "VIP минивэн (4-6)", AR: "ميني فان VIP (4-6)", ES: "Minivan VIP (4-6)", IT: "Minivan VIP (4-6)" }),
@@ -110,6 +132,8 @@ export function ChatQuickReplyButtons({
             icon: Car,
             variant: "default",
             className: "bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-white shadow-lg shadow-amber-500/30",
+            metadata: { vehicleType: "vip-mercedes" },
+            pulse: true,
           },
           {
             text: getLocalizedText(language, { TR: "Minibüs (7-14)", EN: "Minibus (7-14)", DE: "Kleinbus (7-14)", FR: "Minibus (7-14)", RU: "Минибус (7-14)", AR: "ميني باص (7-14)", ES: "Minibús (7-14)", IT: "Minibus (7-14)" }),
@@ -117,6 +141,7 @@ export function ChatQuickReplyButtons({
             icon: Users,
             variant: "outline",
             className: "border-2 border-purple-500/30 hover:border-purple-500/50 hover:bg-purple-500/10 text-purple-600",
+            metadata: { vehicleType: "minibus" },
           },
         ];
 
@@ -128,6 +153,8 @@ export function ChatQuickReplyButtons({
             icon: CreditCard,
             variant: "default",
             className: "bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-white shadow-lg shadow-emerald-500/30",
+            metadata: { paymentMethod: "card" },
+            pulse: true,
           },
           {
             text: getLocalizedText(language, { TR: "Nakit", EN: "Cash", DE: "Bargeld", FR: "Espèces", RU: "Наличные", AR: "نقداً", ES: "Efectivo", IT: "Contanti" }),
@@ -135,6 +162,7 @@ export function ChatQuickReplyButtons({
             icon: Banknote,
             variant: "outline",
             className: "border-2 border-green-500/30 hover:border-green-500/50 hover:bg-green-500/10 text-green-600",
+            metadata: { paymentMethod: "cash" },
           },
         ];
 
@@ -146,6 +174,7 @@ export function ChatQuickReplyButtons({
             icon: Users,
             variant: "outline",
             className: "border-2 border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/10",
+            metadata: { passengers: 2 },
           },
           {
             text: "3-4",
@@ -153,6 +182,8 @@ export function ChatQuickReplyButtons({
             icon: Users,
             variant: "default",
             className: "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-lg shadow-primary/30",
+            metadata: { passengers: 4 },
+            pulse: true,
           },
           {
             text: "5-6",
@@ -160,6 +191,7 @@ export function ChatQuickReplyButtons({
             icon: Users,
             variant: "outline",
             className: "border-2 border-amber-500/30 hover:border-amber-500/50 hover:bg-amber-500/10 text-amber-600",
+            metadata: { passengers: 6 },
           },
           {
             text: "7+",
@@ -167,6 +199,7 @@ export function ChatQuickReplyButtons({
             icon: Users,
             variant: "outline",
             className: "border-2 border-purple-500/30 hover:border-purple-500/50 hover:bg-purple-500/10 text-purple-600",
+            metadata: { passengers: 8 },
           },
         ];
 
@@ -238,33 +271,70 @@ export function ChatQuickReplyButtons({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      initial={{ opacity: 0, y: 15, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -5, scale: 0.95 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className={cn("flex flex-wrap gap-2 mt-3", className)}
+      exit={{ opacity: 0, y: -10, scale: 0.9 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className={cn("flex flex-wrap gap-2.5 mt-4", className)}
     >
+      {/* Sparkle indicator */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+        className="w-full flex items-center gap-1.5 mb-1"
+      >
+        <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+        <span className="text-xs text-muted-foreground font-medium">
+          {getLocalizedText(language, {
+            TR: "Hızlı seçim yapın",
+            EN: "Quick select",
+            DE: "Schnellauswahl",
+            FR: "Sélection rapide",
+            RU: "Быстрый выбор",
+            AR: "اختيار سريع",
+            ES: "Selección rápida",
+            IT: "Selezione rapida",
+          })}
+        </span>
+      </motion.div>
+
       {buttons.map((button, index) => {
         const Icon = button.icon;
         return (
           <motion.div
             key={button.value}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 + 0.1 }}
+            initial={{ opacity: 0, x: -20, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ 
+              delay: index * 0.08 + 0.15,
+              type: "spring",
+              stiffness: 400,
+              damping: 25
+            }}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
             <Button
               size="sm"
               variant={button.variant}
               disabled={disabled}
-              onClick={() => onReply(button.value)}
+              onClick={() => onReply(button.value, button.metadata)}
               className={cn(
-                "h-10 px-4 rounded-xl font-medium transition-all duration-200 touch-manipulation",
-                "active:scale-95",
+                "h-11 px-5 rounded-2xl font-semibold transition-all duration-300 touch-manipulation",
+                "shadow-md hover:shadow-xl",
+                "border-0",
+                button.pulse && "animate-pulse",
                 button.className
               )}
             >
-              <Icon className="h-4 w-4 mr-2" />
+              <motion.span
+                initial={{ rotate: 0 }}
+                animate={button.pulse ? { rotate: [0, -10, 10, 0] } : {}}
+                transition={{ duration: 0.5, repeat: button.pulse ? Infinity : 0, repeatDelay: 2 }}
+              >
+                <Icon className="h-4 w-4 mr-2" />
+              </motion.span>
               {button.text}
             </Button>
           </motion.div>
