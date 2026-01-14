@@ -688,6 +688,21 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       const sessionId = visitorId || `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       // Build insert data based on service type
+      // Extract return discount data
+      const returnDiscountData = extractReturnDiscountData(aiResponse);
+      
+      // Calculate return price if return trip exists
+      let calculatedReturnPrice = null;
+      if (bookingData.hasReturnTrip && bookingData.returnDate) {
+        // If return discount was applied, use discounted price
+        if (returnDiscountData?.applied || bookingData.returnDiscountApplied) {
+          calculatedReturnPrice = returnDiscountData?.discountedReturnPrice || bookingData.returnPrice || null;
+        } else {
+          // Use base price for return (same as outbound)
+          calculatedReturnPrice = bookingData.returnPrice || bookingData.estimatedPrice || null;
+        }
+      }
+
       const insertData: Record<string, any> = {
         pickup_date: bookingData.date,
         pickup_time: bookingData.time,
@@ -702,7 +717,14 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         payment_method: bookingData.paymentMethod || null,
         customer_name: extractedCustomerName || customerName || null,
         baby_seat_count: bookingData.babySeatCount || 0,
-        luggage_count: bookingData.luggageCount || null
+        luggage_count: bookingData.luggageCount || null,
+        // Return trip fields
+        has_return_trip: bookingData.hasReturnTrip || false,
+        return_date: bookingData.returnDate || null,
+        return_time: bookingData.returnTime || null,
+        return_price: calculatedReturnPrice,
+        // Set promo_code if 30% return discount was applied
+        promo_code: (returnDiscountData?.applied || bookingData.returnDiscountApplied) ? 'RETURN30' : null
       };
 
       if (isHourlyRental) {
