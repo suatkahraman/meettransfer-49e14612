@@ -15,7 +15,8 @@ import {
   Smartphone,
   Tablet,
   RefreshCw,
-  Eye
+  Eye,
+  FileText
 } from "lucide-react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -30,6 +31,12 @@ interface CountryStats {
   country_name: string;
   country_code: string;
   count: number;
+}
+
+interface PageStats {
+  page_path: string;
+  views: number;
+  uniqueVisitors: number;
 }
 
 interface ActiveVisitor {
@@ -62,6 +69,7 @@ const AdminAnalytics = () => {
   const [activeVisitors, setActiveVisitors] = useState<ActiveVisitor[]>([]);
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
+  const [pageStats, setPageStats] = useState<PageStats[]>([]);
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -70,7 +78,7 @@ const AdminAnalytics = () => {
       const todayEnd = endOfDay(now).toISOString();
 
       // Parallel fetch for better performance
-      const [todayResult, countryResult, weekResult] = await Promise.all([
+      const [todayResult, countryResult, weekResult, pageResult] = await Promise.all([
         // Today's unique visitors count
         supabase
           .from('page_visits')
@@ -91,6 +99,13 @@ const AdminAnalytics = () => {
           .from('page_visits')
           .select('visitor_id, created_at')
           .gte('created_at', subDays(now, 6).toISOString())
+          .lte('created_at', todayEnd),
+
+        // Page visit stats - today
+        supabase
+          .from('page_visits')
+          .select('page_path, visitor_id')
+          .gte('created_at', todayStart)
           .lte('created_at', todayEnd)
       ]);
 
@@ -156,6 +171,31 @@ const AdminAnalytics = () => {
           });
         }
         setDailyStats(stats);
+      }
+
+      // Process page stats
+      if (pageResult.data) {
+        const pageMap = new Map<string, { views: number; visitors: Set<string> }>();
+        pageResult.data.forEach(visit => {
+          const path = visit.page_path || '/';
+          const existing = pageMap.get(path);
+          if (existing) {
+            existing.views++;
+            existing.visitors.add(visit.visitor_id);
+          } else {
+            pageMap.set(path, { views: 1, visitors: new Set([visit.visitor_id]) });
+          }
+        });
+        setPageStats(
+          Array.from(pageMap.entries())
+            .map(([path, data]) => ({
+              page_path: path,
+              views: data.views,
+              uniqueVisitors: data.visitors.size
+            }))
+            .sort((a, b) => b.views - a.views)
+            .slice(0, 15)
+        );
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -459,6 +499,59 @@ const AdminAnalytics = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Page Stats */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Sayfa Ziyaret Analizi (Bugün)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {pageStats.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                Henüz sayfa verisi yok
+              </p>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {pageStats.map((page, index) => {
+                  const maxViews = pageStats[0]?.views || 1;
+                  return (
+                    <div 
+                      key={page.page_path || index}
+                      className="space-y-1"
+                    >
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium truncate max-w-[300px]" title={page.page_path}>
+                          {page.page_path === '/' ? 'Ana Sayfa' : page.page_path}
+                        </span>
+                        <div className="flex items-center gap-3 text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            {page.views}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {page.uniqueVisitors}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary rounded-full transition-all duration-500"
+                          style={{ 
+                            width: `${Math.min((page.views / maxViews) * 100, 100)}%` 
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
