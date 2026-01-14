@@ -22,6 +22,11 @@ interface CreateReservationRequest {
   returnTime?: string;
   returnPrice?: number;
   promoCode?: string;
+  // Customer info from Step 2
+  customerName?: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  customerPassword?: string;
 }
 
 serve(async (req) => {
@@ -38,11 +43,17 @@ serve(async (req) => {
     const requestData: CreateReservationRequest = await req.json();
 
     console.log("Creating reservation for quick booking:", requestData.bookingId);
+    console.log("Customer info provided:", {
+      name: requestData.customerName,
+      email: requestData.customerEmail,
+      phone: requestData.customerPhone,
+      hasPassword: !!requestData.customerPassword
+    });
 
-    // Fetch the quick booking request to get customer info, agency info, and luggage/baby seat
+    // Fetch the quick booking request to get agency info, luggage/baby seat, and notes
     const { data: quickBooking, error: fetchError } = await supabase
       .from("quick_booking_requests")
-      .select("customer_notes, customer_phone, customer_email, customer_name, agency_id, agency_user_id, luggage_count, baby_seat_count")
+      .select("customer_notes, agency_id, agency_user_id, luggage_count, baby_seat_count")
       .eq("id", requestData.bookingId)
       .maybeSingle();
 
@@ -51,29 +62,89 @@ serve(async (req) => {
     }
 
     const customerNotes = quickBooking?.customer_notes || null;
-    const customerPhone = quickBooking?.customer_phone || "";
-    const customerEmail = quickBooking?.customer_email || null;
-    const customerName = quickBooking?.customer_name || null;
     const agencyId = quickBooking?.agency_id || null;
     const agencyUserId = quickBooking?.agency_user_id || null;
     const luggageCount = quickBooking?.luggage_count || 1;
     const babySeatCount = quickBooking?.baby_seat_count || 0;
 
-    // Create main reservation WITHOUT customer_id (will be set later when customer registers)
-    // If from agency, link to agency
+    // Use customer info from request (Step 2 form) - priority over quick booking data
+    const finalCustomerName = requestData.customerName || "Guest";
+    const finalCustomerPhone = requestData.customerPhone || "";
+    const finalCustomerEmail = requestData.customerEmail || null;
+
+    // Create user account if email and password provided
+    let customerId: string | null = null;
+    if (finalCustomerEmail && requestData.customerPassword) {
+      console.log("Creating user account for:", finalCustomerEmail);
+      
+      // First check if user already exists
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      const existingUser = existingUsers?.users?.find(u => u.email === finalCustomerEmail);
+      
+      if (existingUser) {
+        console.log("User already exists:", existingUser.id);
+        customerId = existingUser.id;
+      } else {
+        // Create new user
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: finalCustomerEmail,
+          password: requestData.customerPassword,
+          email_confirm: true, // Auto-confirm email
+          user_metadata: {
+            full_name: finalCustomerName,
+            phone: finalCustomerPhone,
+          }
+        });
+
+        if (authError) {
+          console.error("Error creating user:", authError);
+          // Don't fail - continue without customer_id
+        } else if (authData.user) {
+          customerId = authData.user.id;
+          console.log("User account created:", customerId);
+
+          // Create customer role
+          const { error: roleError } = await supabase
+            .from("user_roles")
+            .insert({
+              user_id: customerId,
+              role: "customer"
+            });
+
+          if (roleError) {
+            console.error("Error creating user role:", roleError);
+          }
+
+          // Create profile
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert({
+              id: customerId,
+              full_name: finalCustomerName,
+              phone: finalCustomerPhone,
+            });
+
+          if (profileError) {
+            console.error("Error creating profile:", profileError);
+          }
+        }
+      }
+    }
+
+    // Create main reservation with actual customer info
     const { data: reservation, error: reservationError } = await supabase
       .from("reservations")
       .insert({
-        customer_id: null, // Will be filled when customer completes the form
-        customer_name: "Pending Customer Info",
-        customer_phone: customerPhone,
+        customer_id: customerId,
+        customer_name: finalCustomerName,
+        customer_phone: finalCustomerPhone,
         pickup: requestData.pickup,
         dropoff: requestData.dropoff,
         pickup_date: requestData.pickupDate,
         pickup_time: requestData.pickupTime,
         vehicle_type: requestData.vehicleType,
         payment_type: requestData.paymentMethod,
-        status: "pending_customer_info",
+        status: "confirmed", // Now confirmed since customer info is complete
         price: requestData.price,
         price_currency: requestData.priceCurrency,
         customer_notes: customerNotes,
@@ -104,16 +175,16 @@ serve(async (req) => {
       const { data: returnRes, error: returnError } = await supabase
         .from("reservations")
         .insert({
-          customer_id: null, // Will be filled when customer completes the form
-          customer_name: "Pending Customer Info",
-          customer_phone: customerPhone,
+          customer_id: customerId,
+          customer_name: finalCustomerName,
+          customer_phone: finalCustomerPhone,
           pickup: requestData.dropoff, // Swapped for return
           dropoff: requestData.pickup, // Swapped for return
           pickup_date: requestData.returnDate,
           pickup_time: requestData.returnTime,
           vehicle_type: requestData.vehicleType,
           payment_type: requestData.paymentMethod,
-          status: "pending_customer_info",
+          status: "confirmed", // Now confirmed since customer info is complete
           price: finalReturnPrice, // Use exact frontend price - NO FALLBACK to main price
           price_currency: requestData.priceCurrency,
           is_return_transfer: true,
@@ -185,7 +256,7 @@ serve(async (req) => {
     }
 
     // Send confirmation email to customer if email is available
-    if (customerEmail) {
+    if (finalCustomerEmail) {
       try {
         const resendApiKey = Deno.env.get("RESEND_API_KEY");
         if (resendApiKey) {
@@ -376,14 +447,14 @@ Meet Transfer Team
 
           await resend.emails.send({
             from: "Meet Transfer <noreply@mail.meettransfer.app>",
-            to: [customerEmail],
+            to: [finalCustomerEmail],
             reply_to: "info@meettransfer.app",
             subject: `Booking Confirmed - ${reservation.reservation_code}`,
             text: plainText,
             html: emailHtml,
           });
 
-          console.log("Confirmation email sent to customer:", customerEmail);
+          console.log("Confirmation email sent to customer:", finalCustomerEmail);
         }
       } catch (emailError) {
         console.error("Failed to send confirmation email:", emailError);
