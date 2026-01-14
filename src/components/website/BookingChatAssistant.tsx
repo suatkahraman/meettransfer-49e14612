@@ -16,6 +16,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { VoiceSettingsPanel } from "./VoiceSettingsPanel";
 import { MicrophonePermissionAlert } from "./MicrophonePermissionAlert";
+import { ChatVehicleCards } from "./ChatVehicleCards";
+import { ChatRedirectButton } from "./ChatRedirectButton";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -78,6 +80,8 @@ interface Message {
   bookingData?: BookingData | null;
   showVehicleCards?: boolean;
   showRedirectButton?: boolean;
+  vehiclePrices?: Record<string, number>;
+  passengerCount?: number;
 }
 
 interface BookingChatAssistantProps {
@@ -1739,11 +1743,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         speak(assistantMessage.content);
       }
 
-      // If booking is complete, create booking and navigate
-      if (bookingData?.isComplete) {
-        console.log("Complete booking detected, creating booking...");
+      // If booking has some data, make a non-streaming call to get additional info
+      if (bookingData?.pickup && bookingData?.dropoff && bookingData?.passengers) {
+        console.log("Making non-streaming call for additional data...");
         
-        // Make a non-streaming call to actually create the booking
+        // Make a non-streaming call to get vehicle prices and other data
         const { data: bookingResult, error: bookingError } = await supabase.functions.invoke("booking-assistant", {
           body: { 
             message: userMessage.content, 
@@ -1760,27 +1764,42 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           setCustomerName(bookingResult.customerName);
         }
 
+        // Update the assistant message with vehicle cards and redirect button
+        if (bookingResult?.showVehicleCards || bookingResult?.showRedirectButton || bookingResult?.vehiclePrices) {
+          setMessages(prev => {
+            const newMessages = [...prev];
+            const lastIdx = newMessages.findIndex(m => m.id === assistantMessage.id);
+            if (lastIdx !== -1) {
+              newMessages[lastIdx] = {
+                ...newMessages[lastIdx],
+                showVehicleCards: bookingResult?.showVehicleCards || false,
+                showRedirectButton: bookingResult?.showRedirectButton || false,
+                vehiclePrices: bookingResult?.vehiclePrices || undefined,
+                passengerCount: bookingResult?.passengerCount || bookingData?.passengers || 2
+              };
+            }
+            return newMessages;
+          });
+        }
+
         if (!bookingError && bookingResult?.quickBookingId && bookingResult?.confirmationToken) {
-          console.log("Booking created! Navigating to confirmation page...");
+          console.log("Booking created! Setting up redirect button...");
           setBookingCreated({ id: bookingResult.quickBookingId, token: bookingResult.confirmationToken });
           
-          const priceInfo = bookingData?.estimatedPrice 
-            ? `${bookingData.currency === "TRY" ? "₺" : bookingData.currency === "USD" ? "$" : "€"}${bookingData.estimatedPrice}` 
-            : "";
-          
-          const successMessage: Message = {
-            id: (Date.now() + 2).toString(),
-            role: "assistant",
-            content: language === "TR" 
-              ? `✅ Rezervasyonunuz oluşturuldu! ${priceInfo ? `Fiyat: ${priceInfo}` : ""}\n\nBilgilerinizi tamamlamak için onay sayfasına yönlendiriliyorsunuz...`
-              : `✅ Your reservation is ready! ${priceInfo ? `Price: ${priceInfo}` : ""}\n\nRedirecting you to the confirmation page...`
-          };
-          setMessages(prev => [...prev, successMessage]);
-          
-          setTimeout(() => {
-            setIsOpen(false);
-            navigate(`/quick-booking-confirm?token=${bookingResult.confirmationToken}&new=true`);
-          }, 1200);
+          // Update the message to show redirect button instead of auto-navigating
+          setMessages(prev => {
+            const newMessages = [...prev];
+            const lastIdx = newMessages.findIndex(m => m.id === assistantMessage.id);
+            if (lastIdx !== -1) {
+              newMessages[lastIdx] = {
+                ...newMessages[lastIdx],
+                showRedirectButton: true,
+                vehiclePrices: bookingResult?.vehiclePrices || undefined,
+                passengerCount: bookingResult?.passengerCount || bookingData?.passengers || 2
+              };
+            }
+            return newMessages;
+          });
         }
       }
 
@@ -1823,8 +1842,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   };
 
   const cleanResponseForDisplay = (response: string): string => {
-    // Remove the booking JSON block from display
-    return response.replace(/```booking[\s\S]*?```/g, '').replace(/```json[\s\S]*?```/g, '').trim();
+    // Remove all JSON blocks from display (booking, customerName, discount, readyToBook)
+    return response
+      .replace(/```booking[\s\S]*?```/g, '')
+      .replace(/```json[\s\S]*?```/g, '')
+      .replace(/```customerName[\s\S]*?```/g, '')
+      .replace(/```discount[\s\S]*?```/g, '')
+      .replace(/```readyToBook[\s\S]*?```/g, '')
+      .trim();
   };
 
   const markdownComponents = {
@@ -2051,8 +2076,31 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             msg.content
                           )}
                           
+                          {/* Vehicle Cards for Mobile */}
+                          {msg.showVehicleCards && msg.vehiclePrices && (
+                            <ChatVehicleCards
+                              passengers={msg.passengerCount || 2}
+                              prices={msg.vehiclePrices}
+                              currency={msg.bookingData?.currency || "EUR"}
+                              selectedVehicle={msg.bookingData?.vehicleType || undefined}
+                              language={language}
+                              discountPercentage={msg.bookingData?.discountPercentage || undefined}
+                            />
+                          )}
+
+                          {/* Redirect Button for Mobile */}
+                          {msg.showRedirectButton && bookingCreated && (
+                            <ChatRedirectButton
+                              language={language}
+                              onRedirect={() => {
+                                setIsOpen(false);
+                                navigate(`/quick-booking-confirm?token=${bookingCreated.token}&new=true`);
+                              }}
+                            />
+                          )}
+                          
                           {/* Booking Card for Mobile - Compact */}
-                          {msg.bookingData && msg.bookingData.estimatedPrice && (
+                          {msg.bookingData && msg.bookingData.estimatedPrice && !msg.showVehicleCards && (
                             <div className="mt-2 p-2 bg-background rounded-lg border border-border">
                               <div className="flex items-center justify-between">
                                 <span className="text-[11px] text-muted-foreground">
@@ -2479,8 +2527,31 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   msg.content
                 )}
                 
+                {/* Vehicle Cards for Desktop */}
+                {msg.showVehicleCards && msg.vehiclePrices && (
+                  <ChatVehicleCards
+                    passengers={msg.passengerCount || 2}
+                    prices={msg.vehiclePrices}
+                    currency={msg.bookingData?.currency || "EUR"}
+                    selectedVehicle={msg.bookingData?.vehicleType || undefined}
+                    language={language}
+                    discountPercentage={msg.bookingData?.discountPercentage || undefined}
+                  />
+                )}
+
+                {/* Redirect Button for Desktop */}
+                {msg.showRedirectButton && bookingCreated && (
+                  <ChatRedirectButton
+                    language={language}
+                    onRedirect={() => {
+                      setIsOpen(false);
+                      navigate(`/quick-booking-confirm?token=${bookingCreated.token}&new=true`);
+                    }}
+                  />
+                )}
+                
                 {/* Booking Card */}
-                {msg.bookingData && msg.bookingData.estimatedPrice && (
+                {msg.bookingData && msg.bookingData.estimatedPrice && !msg.showVehicleCards && (
                   <div className="mt-2 p-2 bg-background rounded-lg border border-border">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">

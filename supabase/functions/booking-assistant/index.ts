@@ -542,6 +542,29 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       }
     }
 
+    // Determine if we should show vehicle cards based on booking data state
+    const showVehicleCards = bookingData && 
+      bookingData.pickup && 
+      bookingData.dropoff && 
+      bookingData.passengers && 
+      !bookingData.vehicleType;
+
+    // Determine if we should show redirect button
+    const showRedirectButton = readyToBook || (bookingData?.isComplete && quickBookingId);
+
+    // Calculate vehicle prices if we have route info
+    let vehiclePrices: Record<string, number> | null = null;
+    if (bookingData?.estimatedPrice) {
+      // Calculate approximate prices for each vehicle type
+      const basePrice = bookingData.estimatedPrice;
+      vehiclePrices = {
+        'mercedes-vito': basePrice,
+        'vip-mercedes': Math.round(basePrice * 1.3),
+        'maybach-minibus': Math.round(basePrice * 1.6),
+        'minibus': Math.round(basePrice * 1.5)
+      };
+    }
+
     return new Response(JSON.stringify({ 
       response: aiResponse,
       bookingData,
@@ -549,7 +572,11 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       confirmationToken,
       customerName: extractedCustomerName || customerName,
       discountApplied: discountData,
-      readyToBook
+      readyToBook,
+      showVehicleCards,
+      showRedirectButton,
+      vehiclePrices,
+      passengerCount: bookingData?.passengers || null
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
