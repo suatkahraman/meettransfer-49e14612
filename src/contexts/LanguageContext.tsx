@@ -14528,6 +14528,20 @@ const isAuthLanguageRoute = (pathname: string): boolean => {
   return AUTH_LANGUAGE_ROUTES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 };
 
+// Get geo-detected language from localStorage (set by useGeoLanguageDetection hook)
+const getGeoDetectedLanguage = (): Language | null => {
+  try {
+    const detected = localStorage.getItem('meet_transfer_detected_lang');
+    if (detected) {
+      const candidate = detected.toUpperCase() as Language;
+      return candidate in translations ? candidate : null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
 const resolveLanguage = (pathname: string): { language: Language; fromPrefix: boolean } => {
   const prefixLang = getPrefixLanguage(pathname);
   if (prefixLang) {
@@ -14539,10 +14553,16 @@ const resolveLanguage = (pathname: string): { language: Language; fromPrefix: bo
     return { language: getStoredLanguage() ?? "EN", fromPrefix: false };
   }
 
-  // For public website root without prefix, also check stored language
+  // For public website root without prefix, check stored language first
   const stored = getStoredLanguage();
   if (stored) {
     return { language: stored, fromPrefix: false };
+  }
+
+  // Fall back to geo-detected language if available
+  const geoLang = getGeoDetectedLanguage();
+  if (geoLang) {
+    return { language: geoLang, fromPrefix: false };
   }
 
   return { language: "EN", fromPrefix: false };

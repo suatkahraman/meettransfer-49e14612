@@ -12,6 +12,7 @@ import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./component
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense } from "react";
 import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
+import GeoLanguageInitializer from "./components/GeoLanguageInitializer";
 import HashScroll from "@/components/HashScroll";
 import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import { UpdateManager } from "./components/UpdateManager";
@@ -201,6 +202,7 @@ const App = () => (
           <LanguageQueryRedirect />
           <OAuthCallbackHandler>
             <LanguageProvider>
+              <GeoLanguageInitializer />
               <PromoProvider>
               <AIChatProvider>
               <UpdateManager />
