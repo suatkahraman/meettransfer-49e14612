@@ -1086,20 +1086,18 @@ const placeholderMessages: Record<string, string> = {
   JA: "例: '明日15時にアンタルヤ空港からベレクへ4人で'"
 };
 
-// AI ALWAYS starts in Turkish, regardless of user's language setting
-// This is a business decision for Turkish-based Meet Transfer service
+// Welcome messages in each language - AI starts in the user's selected language
 const welcomeMessages: Record<string, string> = {
-  // All languages get the same Turkish welcome message - AI always starts in Turkish
-  EN: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
   TR: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
-  DE: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
-  FR: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
-  RU: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
-  AR: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
-  ES: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
-  IT: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
-  UK: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?",
-  JA: "Merhaba! Ben MT, Meet Transfer VIP transfer asistanınız. 🚗✨ Size en iyi hizmeti sunabilmem için önce adınızı öğrenebilir miyim?"
+  EN: "Hello! I'm MT, your Meet Transfer VIP transfer assistant. 🚗✨ To provide you with the best service, may I first know your name?",
+  DE: "Hallo! Ich bin MT, Ihr Meet Transfer VIP-Transferassistent. 🚗✨ Um Ihnen den besten Service zu bieten, darf ich zunächst Ihren Namen erfahren?",
+  FR: "Bonjour! Je suis MT, votre assistant de transfert VIP Meet Transfer. 🚗✨ Pour vous offrir le meilleur service, puis-je d'abord connaître votre nom?",
+  RU: "Здравствуйте! Я МТ, ваш VIP-трансфер ассистент Meet Transfer. 🚗✨ Чтобы предоставить вам лучший сервис, могу ли я сначала узнать ваше имя?",
+  AR: "مرحباً! أنا MT، مساعد النقل VIP الخاص بك من Meet Transfer. 🚗✨ لتقديم أفضل خدمة لك، هل يمكنني معرفة اسمك أولاً؟",
+  ES: "¡Hola! Soy MT, tu asistente de transferencia VIP de Meet Transfer. 🚗✨ Para brindarte el mejor servicio, ¿puedo saber primero tu nombre?",
+  IT: "Ciao! Sono MT, il tuo assistente VIP transfer di Meet Transfer. 🚗✨ Per offrirti il miglior servizio, posso prima conoscere il tuo nome?",
+  UK: "Привіт! Я МТ, ваш VIP-трансфер асистент Meet Transfer. 🚗✨ Щоб надати вам найкращий сервіс, чи можу я спочатку дізнатися ваше ім'я?",
+  JA: "こんにちは！私はMT、Meet TransferのVIPトランスファーアシスタントです。🚗✨ 最高のサービスを提供するために、まずお名前を教えていただけますか？"
 };
 
 // Generate or get visitor ID for conversation persistence
