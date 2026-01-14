@@ -386,6 +386,18 @@ export default function QuickBookingCustomerInfo() {
       return;
     }
 
+    // Validate return trip date/time if selected
+    if (hasReturnTrip && (!returnTripData.date || !returnTripData.time)) {
+      console.error("Return trip missing date/time:", returnTripData);
+      const returnErrors: Record<string, string> = {};
+      if (!returnTripData.date) returnErrors.returnDate = t("returnDateRequired") || "Return date is required";
+      if (!returnTripData.time) returnErrors.returnTime = t("returnTimeRequired") || "Return time is required";
+      setErrors(prev => ({ ...prev, ...returnErrors }));
+      toast.error(t("pleaseEnterReturnDateTime") || "Please enter return date and time");
+      setAutoSubmitting(false);
+      return;
+    }
+
     if (!bookingId) {
       console.error("No booking ID available");
       toast.error(t("bookingDataMissing") || "Booking data is missing. Please go back and try again.");
@@ -480,6 +492,10 @@ export default function QuickBookingCustomerInfo() {
 
     if (hasReturnTrip && (!returnTripData.date || !returnTripData.time)) {
       console.error("Return trip missing date/time:", returnTripData);
+      const returnErrors: Record<string, string> = {};
+      if (!returnTripData.date) returnErrors.returnDate = t("returnDateRequired") || "Return date is required";
+      if (!returnTripData.time) returnErrors.returnTime = t("returnTimeRequired") || "Return time is required";
+      setErrors(prev => ({ ...prev, ...returnErrors }));
       toast.error(t("pleaseEnterReturnDateTime") || "Please enter return date and time");
       return;
     }
@@ -767,23 +783,43 @@ export default function QuickBookingCustomerInfo() {
               <div className="space-y-4 pl-6 border-l-2 border-primary/30">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="returnDate">{t("qbReturnDate") || "Return Date"}</Label>
+                    <Label htmlFor="returnDate" className="flex items-center gap-1">
+                      {t("qbReturnDate") || "Return Date"}
+                      <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="returnDate"
                       type="date"
                       value={returnTripData.date}
-                      onChange={(e) => setReturnTripData(prev => ({ ...prev, date: e.target.value }))}
+                      onChange={(e) => {
+                        setReturnTripData(prev => ({ ...prev, date: e.target.value }));
+                        if (errors.returnDate) setErrors(prev => ({ ...prev, returnDate: "" }));
+                      }}
                       min={bookingData?.pickup_date}
+                      className={errors.returnDate ? "border-destructive focus-visible:ring-destructive" : ""}
                     />
+                    {errors.returnDate && (
+                      <p className="text-xs text-destructive">{errors.returnDate}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="returnTime">{t("qbReturnTime") || "Return Time"}</Label>
+                    <Label htmlFor="returnTime" className="flex items-center gap-1">
+                      {t("qbReturnTime") || "Return Time"}
+                      <span className="text-destructive">*</span>
+                    </Label>
                     <Input
                       id="returnTime"
                       type="time"
                       value={returnTripData.time}
-                      onChange={(e) => setReturnTripData(prev => ({ ...prev, time: e.target.value }))}
+                      onChange={(e) => {
+                        setReturnTripData(prev => ({ ...prev, time: e.target.value }));
+                        if (errors.returnTime) setErrors(prev => ({ ...prev, returnTime: "" }));
+                      }}
+                      className={errors.returnTime ? "border-destructive focus-visible:ring-destructive" : ""}
                     />
+                    {errors.returnTime && (
+                      <p className="text-xs text-destructive">{errors.returnTime}</p>
+                    )}
                   </div>
                 </div>
 
