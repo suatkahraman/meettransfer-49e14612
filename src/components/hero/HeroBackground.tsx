@@ -4,19 +4,19 @@ import { Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CityVideo } from "./types";
 
-// Futuristic hero backgrounds - local assets for fast loading
+// Optimized WebP hero backgrounds - local assets for fast loading
+import heroAirportFleet from "@/assets/hero/hero-airport-fleet.webp";
+import heroSkylane from "@/assets/hero/hero-city-skyline.webp";
 import heroFuturistic1 from "@/assets/hero-futuristic-1.jpg";
 import heroFuturistic2 from "@/assets/hero-futuristic-2.jpg";
-import heroFuturistic3 from "@/assets/hero-futuristic-3.jpg";
-import heroFuturistic4 from "@/assets/hero-futuristic-4.jpg";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 
-// Background images configuration - optimized for fast loading
+// Background images configuration - optimized WebP format for fast loading
 const HERO_BACKGROUNDS = [
-  { src: heroFuturistic1, label: "City Night", labelTR: "Gece Şehir" },
-  { src: heroFuturistic2, label: "Airport Transfer", labelTR: "Havalimanı Transfer" },
-  { src: heroFuturistic3, label: "VIP Interior", labelTR: "VIP İç Mekan" },
-  { src: heroFuturistic4, label: "Luxury Fleet", labelTR: "Lüks Filo" },
+  { src: heroAirportFleet, label: "Airport Fleet", labelTR: "Havalimanı Filosu" },
+  { src: heroSkylane, label: "City Skyline", labelTR: "Şehir Silüeti" },
+  { src: heroFuturistic1, label: "VIP Transfer", labelTR: "VIP Transfer" },
+  { src: heroFuturistic2, label: "Luxury Journey", labelTR: "Lüks Yolculuk" },
   { src: heroMercedes, label: "Mercedes Vito", labelTR: "Mercedes Vito" },
 ];
 
