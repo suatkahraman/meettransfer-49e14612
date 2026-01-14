@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { MapPin, Plane, Building, Anchor, CheckCircle2 } from "lucide-react";
 import { getWhatsAppUrl } from "@/lib/contact";
-import athensCity from "@/assets/destinations/athens-city.jpg";
+import athensCity from "@/assets/destinations/athens-city.webp";
 
 const GreeceTransfer = () => {
   const { t, getLocalizedPath } = useLanguage();

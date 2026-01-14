@@ -12,21 +12,21 @@ const VIDEO_CONFIG = {
   istanbul: {
     cdn: `${CDN_VIDEO_BASE}/hero-istanbul.mp4`,
     cdnWebm: `${CDN_VIDEO_BASE}/hero-istanbul.webm`,
-    poster: "/images/destinations/istanbul-city.jpg",
+    poster: "/images/destinations/istanbul-city.webp",
     label: "Istanbul",
     labelTR: "İstanbul"
   },
   antalya: {
     cdn: `${CDN_VIDEO_BASE}/hero-antalya.mp4`,
     cdnWebm: `${CDN_VIDEO_BASE}/hero-antalya.webm`,
-    poster: "/images/destinations/antalya-city.jpg",
+    poster: "/images/destinations/antalya-city.webp",
     label: "Antalya",
     labelTR: "Antalya"
   },
   bodrum: {
     cdn: `${CDN_VIDEO_BASE}/hero-bodrum.mp4`,
     cdnWebm: `${CDN_VIDEO_BASE}/hero-bodrum.webm`,
-    poster: "/images/destinations/bodrum-city.jpg",
+    poster: "/images/destinations/bodrum-city.webp",
     label: "Bodrum",
     labelTR: "Bodrum"
   },
