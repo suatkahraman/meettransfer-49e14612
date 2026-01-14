@@ -182,6 +182,8 @@ export const GeoLanguageInitializer = () => {
 
         if (countryCode && COUNTRY_TO_LANGUAGE[countryCode]) {
           detectedLang = COUNTRY_TO_LANGUAGE[countryCode];
+          // Save country code for UI display
+          localStorage.setItem('meet_transfer_geo_country', countryCode);
         } else {
           // Fall back to browser language
           const browserLang = navigator.language || "en";
