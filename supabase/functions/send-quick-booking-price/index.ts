@@ -122,16 +122,17 @@ const handler = async (req: Request): Promise<Response> => {
     // Calculate discount if promo code exists
     const hasReturnTrip = return_price !== undefined && return_date && return_time;
     
-    // Get discount percentage from promo code - all return codes are 30%
+    // Get discount percentage from promo code - default is 25%
     const PROMO_CODE_CONFIG: Record<string, number> = {
+      'MEET25RETURN': 25,
       'MEET30RETURN': 30,
-      'GIDISDONUS': 30,
+      'GIDISDONUS': 25,
+      'RETURN25': 25,
       'RETURN30': 30,
-      'MEET30': 30,
       'MEET10': 10,
       'WELCOME10': 10,
     };
-    const discountPercent = promo_code ? (PROMO_CODE_CONFIG[promo_code.toUpperCase()] || 30) : 30;
+    const discountPercent = promo_code ? (PROMO_CODE_CONFIG[promo_code.toUpperCase()] || 25) : 25;
     
     // Use original_return_price if provided, otherwise calculate from discounted price
     const originalReturnPrice = hasReturnTrip && promo_code && original_return_price !== undefined

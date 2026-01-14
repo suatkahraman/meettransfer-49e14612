@@ -1042,8 +1042,8 @@ const CustomerReservationDetail = () => {
                         const returnTrip = isThisReturn ? reservation : linkedReservation;
                         const outboundPrice = outbound.price || 0;
                         const returnOriginalPrice = returnTrip.price || 0;
-                        // Return trip gets 30% discount with promo code
-                        const returnDiscountedPrice = Math.round(returnOriginalPrice * 0.7);
+                        // Return trip gets 25% discount with promo code
+                        const returnDiscountedPrice = Math.round(returnOriginalPrice * 0.75);
                         const discountAmount = returnOriginalPrice - returnDiscountedPrice;
                         const totalPrice = outboundPrice + returnDiscountedPrice;
                         const currency = reservation.price_currency;

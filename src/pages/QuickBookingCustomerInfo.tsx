@@ -50,7 +50,7 @@ const vehicleLabels: Record<string, string> = {
   minibus: "Mercedes Sprinter",
 };
 
-const VALID_PROMO_CODES = ['Meet30Return', 'MEET30RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30'];
+const VALID_PROMO_CODES = ['Meet25Return', 'MEET25RETURN', 'GIDISDONUS', 'RETURN25', 'MEET30RETURN'];
 
 export default function QuickBookingCustomerInfo() {
   const { t, language } = useLanguage();
@@ -307,7 +307,7 @@ export default function QuickBookingCustomerInfo() {
     if (!hasReturnTrip) return null;
     const price = getSelectedPrice();
     if (isPromoCodeValid) {
-      return Math.round(price * 0.7); // 30% discount
+      return Math.round(price * 0.75); // 25% discount
     }
     return price;
   };

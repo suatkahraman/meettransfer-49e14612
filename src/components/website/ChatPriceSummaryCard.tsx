@@ -43,7 +43,7 @@ export const ChatPriceSummaryCard = memo(function ChatPriceSummaryCard({
   vehicleLabel,
   outboundPrice,
   returnPrice,
-  returnDiscountPercentage = 30,
+  returnDiscountPercentage = 25,
   discountPercentage,
   currency = "EUR",
   paymentMethod,

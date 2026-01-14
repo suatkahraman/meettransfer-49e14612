@@ -620,7 +620,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "Baby Seat",
     minibusRequiredForPassengers: "Sprinter minibus is required for 7+ passengers",
     priceOnRequest: "Price on request",
-    promoCodeAccepted: "30% discount will be applied!",
+    promoCodeAccepted: "25% discount will be applied!",
     discountWillBeApplied: "discount will be applied!",
     
     // Customer Bookings
@@ -2310,7 +2310,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "Kindersitz",
     minibusRequiredForPassengers: "Sprinter Minibus für 7+ Passagiere erforderlich",
     priceOnRequest: "Preis auf Anfrage",
-    promoCodeAccepted: "30% Rabatt wird angewendet!",
+    promoCodeAccepted: "25% Rabatt wird angewendet!",
     discountWillBeApplied: "Rabatt wird angewendet!",
     
     // Customer Bookings
@@ -2685,9 +2685,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbAddReturnTransfer: "Rücktransfer hinzufügen",
     qbReturnDate: "Rückfahrt Datum",
     qbReturnTime: "Rückfahrt Zeit",
-    qbPromoCodeLabel: "Promo-Code (30% Rabatt auf Rückfahrt)",
+    qbPromoCodeLabel: "Promo-Code (25% Rabatt auf Rückfahrt)",
     qbEnterPromoCode: "Promo-Code eingeben",
-    qbDiscountApplied: "30% Rabatt auf Rücktransfer angewendet!",
+    qbDiscountApplied: "25% Rabatt auf Rücktransfer angewendet!",
     qbDiscountWithCode: "Rabatt",
     qbInvalidPromoCode: "Ungültiger Promo-Code",
     qbReturnRoute: "Rückfahrt Route",
@@ -4106,7 +4106,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "Siège bébé",
     minibusRequiredForPassengers: "Minibus Sprinter requis pour 7+ passagers",
     priceOnRequest: "Prix sur demande",
-    promoCodeAccepted: "30% de réduction sera appliquée!",
+    promoCodeAccepted: "25% de réduction sera appliquée!",
     discountWillBeApplied: "de réduction sera appliquée!",
     
     // Customer Bookings
@@ -4481,9 +4481,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbAddReturnTransfer: "Ajouter un transfert retour",
     qbReturnDate: "Date de retour",
     qbReturnTime: "Heure de retour",
-    qbPromoCodeLabel: "Code promo (30% de réduction sur le retour)",
+    qbPromoCodeLabel: "Code promo (25% de réduction sur le retour)",
     qbEnterPromoCode: "Entrez le code promo",
-    qbDiscountApplied: "30% de réduction appliquée au transfert retour!",
+    qbDiscountApplied: "25% de réduction appliquée au transfert retour!",
     qbDiscountWithCode: "Réduction",
     qbInvalidPromoCode: "Code promo invalide",
     qbReturnRoute: "Itinéraire retour",
@@ -5613,7 +5613,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "Детское кресло",
     minibusRequiredForPassengers: "Для 7+ пассажиров требуется Sprinter минибус",
     priceOnRequest: "Цена по запросу",
-    promoCodeAccepted: "Скидка 30% будет применена!",
+    promoCodeAccepted: "Скидка 25% будет применена!",
     discountWillBeApplied: "скидка будет применена!",
     
     // Customer Bookings
@@ -5988,9 +5988,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbAddReturnTransfer: "Добавить обратный трансфер",
     qbReturnDate: "Дата возврата",
     qbReturnTime: "Время возврата",
-    qbPromoCodeLabel: "Промокод (скидка 30% на обратный)",
+    qbPromoCodeLabel: "Промокод (скидка 25% на обратный)",
     qbEnterPromoCode: "Введите промокод",
-    qbDiscountApplied: "Скидка 30% применена к обратному трансферу!",
+    qbDiscountApplied: "Скидка 25% применена к обратному трансферу!",
     qbDiscountWithCode: "Скидка",
     qbInvalidPromoCode: "Недействительный промокод",
     qbReturnRoute: "Обратный маршрут",
@@ -6949,7 +6949,7 @@ const translations: Record<Language, Record<string, string>> = {
     returnFlightNumber: "Numero volo ritorno",
     promoCode: "Codice promozionale",
     promoCodePlaceholder: "Inserisci codice promozionale",
-    promoCodeSuccess: "Riceverai il tuo prezzo con uno sconto del 30%.",
+    promoCodeSuccess: "Riceverai il tuo prezzo con uno sconto del 25%.",
     promoCodeInvalid: "Codice promozionale non valido",
     discount: "sconto",
     contactDetails: "Dettagli contatto",
@@ -6984,7 +6984,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "Seggiolino",
     minibusRequiredForPassengers: "Minibus Sprinter richiesto per 7+ passeggeri",
     priceOnRequest: "Prezzo su richiesta",
-    promoCodeAccepted: "Sconto del 30% applicato!",
+    promoCodeAccepted: "Sconto del 25% applicato!",
     discountWillBeApplied: "di sconto verrà applicato!",
     
     // Customer Bookings
@@ -7359,9 +7359,9 @@ const translations: Record<Language, Record<string, string>> = {
     qbAddReturnTransfer: "Aggiungi trasferimento di ritorno",
     qbReturnDate: "Data di ritorno",
     qbReturnTime: "Ora di ritorno",
-    qbPromoCodeLabel: "Codice promo (30% di sconto sul ritorno)",
+    qbPromoCodeLabel: "Codice promo (25% di sconto sul ritorno)",
     qbEnterPromoCode: "Inserisci codice promo",
-    qbDiscountApplied: "30% di sconto applicato al trasferimento di ritorno!",
+    qbDiscountApplied: "25% di sconto applicato al trasferimento di ritorno!",
     qbDiscountWithCode: "Sconto",
     qbInvalidPromoCode: "Codice promo non valido",
     qbReturnRoute: "Percorso di ritorno",
@@ -8402,7 +8402,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "Silla de bebé",
     minibusRequiredForPassengers: "Se requiere minibús Sprinter para 7+ pasajeros",
     priceOnRequest: "Precio a consultar",
-    promoCodeAccepted: "¡Se aplicará un 30% de descuento!",
+    promoCodeAccepted: "¡Se aplicará un 25% de descuento!",
     discountWillBeApplied: "de descuento se aplicará!",
     
     // Customer Bookings
@@ -9820,7 +9820,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "مقعد الطفل",
     minibusRequiredForPassengers: "يتطلب ميني باص سبرينتر لـ 7+ ركاب",
     priceOnRequest: "السعر عند الطلب",
-    promoCodeAccepted: "سيتم تطبيق خصم 30%!",
+    promoCodeAccepted: "سيتم تطبيق خصم 25%!",
     discountWillBeApplied: "خصم سيتم تطبيقه!",
     
     // Customer Bookings
@@ -11274,7 +11274,7 @@ const translations: Record<Language, Record<string, string>> = {
     luggageCount: "Bavul Sayısı",
     minibusRequiredForPassengers: "7+ yolcu için Sprinter minibüs gereklidir",
     priceOnRequest: "Talep üzerine fiyat",
-    promoCodeAccepted: "%30 indirim uygulanacak!",
+    promoCodeAccepted: "%25 indirim uygulanacak!",
     discountWillBeApplied: "indirim uygulanacak!",
     
     // Customer Bookings
@@ -12753,7 +12753,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "Дитяче крісло",
     minibusRequiredForPassengers: "Для 7+ пасажирів потрібен Sprinter мікроавтобус",
     priceOnRequest: "Ціна за запитом",
-    promoCodeAccepted: "Знижка 30% буде застосована!",
+    promoCodeAccepted: "Знижка 25% буде застосована!",
     discountWillBeApplied: "знижка буде застосована!",
     hourlyDailyKmLimit: "Денний ліміт: 100 КМ",
     hourlySameCityOnly: "Погодинна оренда діє лише в межах одного міста",
@@ -14154,7 +14154,7 @@ const translations: Record<Language, Record<string, string>> = {
     babySeat: "チャイルドシート",
     minibusRequiredForPassengers: "7名以上はSpriniterミニバスが必要です",
     priceOnRequest: "お問い合わせください",
-    promoCodeAccepted: "30%割引が適用されます！",
+    promoCodeAccepted: "25%割引が適用されます！",
     discountWillBeApplied: "割引が適用されます！",
     
     // Customer Bookings
