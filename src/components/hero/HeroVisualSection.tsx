@@ -10,19 +10,40 @@ import heroFuturistic2 from "@/assets/hero-futuristic-2.jpg";
 import heroFuturistic3 from "@/assets/hero-futuristic-3.jpg";
 import heroFuturistic4 from "@/assets/hero-futuristic-4.jpg";
 
-// Gallery images configuration with optimized local assets
-const GALLERY_IMAGES = [
-  { src: heroMercedes, label: "Mercedes Vito", labelTR: "Mercedes Vito" },
-  { src: heroFuturistic1, label: "City Night", labelTR: "Gece Şehir" },
-  { src: heroFuturistic2, label: "Airport Transfer", labelTR: "Havalimanı Transfer" },
-  { src: heroFuturistic3, label: "VIP Interior", labelTR: "VIP İç Mekan" },
-  { src: heroFuturistic4, label: "Luxury Fleet", labelTR: "Lüks Filo" },
+// Gallery images configuration with optimized local assets - multilingual labels
+type GalleryLabels = Record<string, string>;
+const GALLERY_IMAGES: { src: string; labels: GalleryLabels }[] = [
+  { 
+    src: heroMercedes, 
+    labels: { EN: "Mercedes Vito", TR: "Mercedes Vito", DE: "Mercedes Vito", FR: "Mercedes Vito", RU: "Mercedes Vito", IT: "Mercedes Vito", ES: "Mercedes Vito", AR: "مرسيدس فيتو", UK: "Mercedes Vito", JA: "メルセデス Vito" }
+  },
+  { 
+    src: heroFuturistic1, 
+    labels: { EN: "City Night", TR: "Gece Şehir", DE: "Nachtstadt", FR: "Ville de nuit", RU: "Ночной город", IT: "Città notturna", ES: "Ciudad nocturna", AR: "مدينة ليلية", UK: "Нічне місто", JA: "夜の街" }
+  },
+  { 
+    src: heroFuturistic2, 
+    labels: { EN: "Airport Transfer", TR: "Havalimanı Transfer", DE: "Flughafentransfer", FR: "Transfert aéroport", RU: "Трансфер аэропорт", IT: "Trasferimento aeroporto", ES: "Transfer aeropuerto", AR: "نقل المطار", UK: "Трансфер з аеропорту", JA: "空港送迎" }
+  },
+  { 
+    src: heroFuturistic3, 
+    labels: { EN: "VIP Interior", TR: "VIP İç Mekan", DE: "VIP Innenraum", FR: "Intérieur VIP", RU: "VIP интерьер", IT: "Interni VIP", ES: "Interior VIP", AR: "داخلية VIP", UK: "VIP інтер'єр", JA: "VIP内装" }
+  },
+  { 
+    src: heroFuturistic4, 
+    labels: { EN: "Luxury Fleet", TR: "Lüks Filo", DE: "Luxusflotte", FR: "Flotte de luxe", RU: "Люксовый автопарк", IT: "Flotta di lusso", ES: "Flota de lujo", AR: "أسطول فاخر", UK: "Люксовий автопарк", JA: "高級車両" }
+  },
 ];
+
+// Helper function to get label by language
+const getGalleryLabel = (labels: GalleryLabels, language: string): string => {
+  return labels[language] || labels.EN;
+};
 
 // Media item type for unified carousel
 type MediaItem = 
   | { type: 'video'; video: CityVideo; index: number }
-  | { type: 'image'; src: string; label: string; labelTR: string; index: number };
+  | { type: 'image'; src: string; labels: GalleryLabels; index: number };
 
 interface HeroVisualSectionProps {
   videosLoaded: boolean;
@@ -217,7 +238,7 @@ export const HeroVisualSection = memo(({
                   <motion.img
                     key={`image-${currentMediaIndex}`}
                     src={currentMedia.src}
-                    alt={language === 'TR' ? currentMedia.labelTR : currentMedia.label}
+                    alt={getGalleryLabel(currentMedia.labels, language)}
                     className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 z-10"
                     initial={{ opacity: 0, scale: 1.05 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -242,7 +263,7 @@ export const HeroVisualSection = memo(({
                   <>
                     <Image className="h-3.5 w-3.5 text-yellow-400" />
                     <span className="text-xs text-white font-semibold">
-                      {language === 'TR' ? currentMedia.labelTR : currentMedia.label}
+                      {getGalleryLabel(currentMedia.labels, language)}
                     </span>
                   </>
                 ) : null}
@@ -289,22 +310,22 @@ export const HeroVisualSection = memo(({
             <div className="absolute bottom-0 left-0 right-0 p-3 lg:p-6 z-20">
               <div className="text-white drop-shadow-lg">
                 <h3 className="text-sm lg:text-lg font-bold mb-1 lg:mb-2 drop-shadow-md">{t("premiumFleet") || "Premium Mercedes Fleet"}</h3>
-                <div className="flex flex-wrap gap-1.5 lg:gap-3">
-                  <div className="flex items-center gap-1 text-xs lg:text-sm bg-black/40 backdrop-blur-md rounded-full px-2.5 lg:px-3.5 py-1 lg:py-1.5 border border-white/20">
-                    <Wifi className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
-                    <span className="hidden lg:inline font-medium">Free WiFi</span>
-                    <span className="lg:hidden font-medium">WiFi</span>
+                  <div className="flex flex-wrap gap-1.5 lg:gap-3">
+                    <div className="flex items-center gap-1 text-xs lg:text-sm bg-black/40 backdrop-blur-md rounded-full px-2.5 lg:px-3.5 py-1 lg:py-1.5 border border-white/20">
+                      <Wifi className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
+                      <span className="hidden lg:inline font-medium">{t("freeWifi") || "Free WiFi"}</span>
+                      <span className="lg:hidden font-medium">WiFi</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs lg:text-sm bg-black/40 backdrop-blur-md rounded-full px-2.5 lg:px-3.5 py-1 lg:py-1.5 border border-white/20">
+                      <Baby className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
+                      <span className="hidden lg:inline font-medium">{t("babySeat") || "Baby Seat"}</span>
+                      <span className="lg:hidden font-medium">{t("babySeatLabel") || "Baby"}</span>
+                    </div>
+                    <div className="hidden lg:flex items-center gap-1.5 text-sm bg-black/40 backdrop-blur-md rounded-full px-3.5 py-1.5 border border-white/20">
+                      <Briefcase className="h-3.5 w-3.5" />
+                      <span className="font-medium">{t("meetGreet") || "Meet & Greet"}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs lg:text-sm bg-black/40 backdrop-blur-md rounded-full px-2.5 lg:px-3.5 py-1 lg:py-1.5 border border-white/20">
-                    <Baby className="h-3 lg:h-3.5 w-3 lg:w-3.5" />
-                    <span className="hidden lg:inline font-medium">{language === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}</span>
-                    <span className="lg:hidden font-medium">{language === 'TR' ? 'Koltuk' : 'Seat'}</span>
-                  </div>
-                  <div className="hidden lg:flex items-center gap-1.5 text-sm bg-black/40 backdrop-blur-md rounded-full px-3.5 py-1.5 border border-white/20">
-                    <Briefcase className="h-3.5 w-3.5" />
-                    <span className="font-medium">Meet & Greet</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

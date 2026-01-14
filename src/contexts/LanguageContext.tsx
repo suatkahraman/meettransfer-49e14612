@@ -263,6 +263,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro",
     getQuote: "Get Quote",
     babySeatLabel: "Baby",
+    freeWifi: "Free WiFi",
     
     // Destinations Section
     topDestinations: "Top Destinations",
@@ -1998,6 +1999,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Profi",
     getQuote: "Angebot",
     babySeatLabel: "Baby",
+    freeWifi: "Kostenloses WLAN",
     
     // Destinations Section
     topDestinations: "Top-Reiseziele",
@@ -3773,7 +3775,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro",
     getQuote: "Devis",
     babySeatLabel: "Bébé",
-    
+    freeWifi: "WiFi Gratuit",
     // Destinations Section
     topDestinations: "Destinations Populaires",
     topDestinationsDesc: "Découvrez nos itinéraires les plus populaires avec des chauffeurs professionnels et des véhicules de luxe",
@@ -5259,7 +5261,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Профи",
     getQuote: "Запрос",
     babySeatLabel: "Детское",
-    
+    freeWifi: "Бесплатный WiFi",
     // Destinations Section
     topDestinations: "Популярные направления",
     topDestinationsDesc: "Откройте наши самые популярные маршруты с профессиональными водителями и роскошными автомобилями",
@@ -6609,7 +6611,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro",
     getQuote: "Preventivo",
     babySeatLabel: "Bimbo",
-    
+    freeWifi: "WiFi Gratuito",
     // Destinations Section
     topDestinations: "Destinazioni Principali",
     topDestinationsDesc: "Scopri i nostri percorsi più popolari con autisti professionisti e veicoli di lusso",
@@ -8006,7 +8008,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro",
     getQuote: "Cotizar",
     babySeatLabel: "Bebé",
-    
+    freeWifi: "WiFi Gratis",
     // Destinations Section
     topDestinations: "Destinos Principales",
     topDestinationsDesc: "Descubre nuestras rutas más populares con conductores profesionales y vehículos de lujo",
@@ -9403,7 +9405,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "محترف",
     getQuote: "عرض سعر",
     babySeatLabel: "طفل",
-    
+    freeWifi: "واي فاي مجاني",
     // Destinations Section
     topDestinations: "أفضل الوجهات",
     topDestinationsDesc: "اكتشف مساراتنا الأكثر شعبية مع سائقين محترفين ومركبات فاخرة",
@@ -10741,7 +10743,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro Şoför",
     getQuote: "Fiyat Al",
     babySeatLabel: "Bebek",
-    
+    freeWifi: "Ücretsiz WiFi",
     // Destinations Section
     topDestinations: "Popüler Destinasyonlar",
     topDestinationsDesc: "Profesyonel şoförler ve lüks araçlarla en popüler rotalarımızı keşfedin",
@@ -12266,7 +12268,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Профі",
     getQuote: "Запит",
     babySeatLabel: "Дитяче",
-    
+    freeWifi: "Безкоштовний WiFi",
     // Destinations Section
     topDestinations: "Популярні напрямки",
     topDestinationsDesc: "Відкрийте наші найпопулярніші маршрути з професійними водіями та люксовими автомобілями",
@@ -13579,7 +13581,7 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "プロ",
     getQuote: "見積り",
     babySeatLabel: "ベビー",
-    
+    freeWifi: "無料WiFi",
     // Destinations Section
     topDestinations: "人気の目的地",
     topDestinationsDesc: "プロのドライバーと高級車両で人気のルートをご案内",
