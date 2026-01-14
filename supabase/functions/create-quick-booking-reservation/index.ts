@@ -72,24 +72,67 @@ serve(async (req) => {
     const finalCustomerPhone = requestData.customerPhone || "";
     const finalCustomerEmail = requestData.customerEmail || null;
 
-    // Create user account if email and password provided
+    // Handle user account - check existing first (for Google OAuth users)
     let customerId: string | null = null;
-    if (finalCustomerEmail && requestData.customerPassword) {
-      console.log("Creating user account for:", finalCustomerEmail);
+    let isExistingUser = false;
+    
+    if (finalCustomerEmail) {
+      console.log("Checking for existing user:", finalCustomerEmail);
       
-      // First check if user already exists
+      // First check if user already exists (could be Google OAuth user)
       const { data: existingUsers } = await supabase.auth.admin.listUsers();
       const existingUser = existingUsers?.users?.find(u => u.email === finalCustomerEmail);
       
       if (existingUser) {
-        console.log("User already exists:", existingUser.id);
+        // User already exists (Google OAuth or previous registration)
+        console.log("Existing user found:", existingUser.id, "Provider:", existingUser.app_metadata?.provider || "email");
         customerId = existingUser.id;
-      } else {
-        // Create new user
+        isExistingUser = true;
+        
+        // Update profile with latest info if not already set
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({
+            id: customerId,
+            full_name: finalCustomerName,
+            phone: finalCustomerPhone,
+          }, {
+            onConflict: 'id',
+            ignoreDuplicates: false
+          });
+
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+        }
+        
+        // Ensure customer role exists
+        const { data: existingRole } = await supabase
+          .from("user_roles")
+          .select("id")
+          .eq("user_id", customerId)
+          .eq("role", "customer")
+          .maybeSingle();
+          
+        if (!existingRole) {
+          const { error: roleError } = await supabase
+            .from("user_roles")
+            .insert({
+              user_id: customerId,
+              role: "customer"
+            });
+
+          if (roleError && !roleError.message.includes('duplicate')) {
+            console.error("Error creating user role:", roleError);
+          }
+        }
+      } else if (requestData.customerPassword) {
+        // No existing user and password provided - create new account
+        console.log("Creating new user account for:", finalCustomerEmail);
+        
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
           email: finalCustomerEmail,
           password: requestData.customerPassword,
-          email_confirm: true, // Auto-confirm email
+          email_confirm: true,
           user_metadata: {
             full_name: finalCustomerName,
             phone: finalCustomerPhone,
@@ -98,10 +141,9 @@ serve(async (req) => {
 
         if (authError) {
           console.error("Error creating user:", authError);
-          // Don't fail - continue without customer_id
         } else if (authData.user) {
           customerId = authData.user.id;
-          console.log("User account created:", customerId);
+          console.log("New user account created:", customerId);
 
           // Create customer role
           const { error: roleError } = await supabase
@@ -128,6 +170,9 @@ serve(async (req) => {
             console.error("Error creating profile:", profileError);
           }
         }
+      } else {
+        // No password and no existing user - reservation without account
+        console.log("No password provided and no existing user - creating reservation without account");
       }
     }
 
