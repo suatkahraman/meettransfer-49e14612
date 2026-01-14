@@ -5,44 +5,129 @@ import { Link } from "react-router-dom";
 
 const HowItWorks = () => {
   const { t, getLocalizedPath, language } = useLanguage();
-  const isTR = language.toLowerCase() === "tr";
+  const lang = language.toLowerCase();
+
+  // Localized feature tags for all supported languages
+  const getFeatures = (step: number) => {
+    const features: Record<string, string[][]> = {
+      en: [
+        ["Instant pricing", "All vehicles", "24/7 booking"],
+        ["Secure payment", "Instant confirm", "Email voucher"],
+        ["Name sign", "Driver info", "Flight tracking"],
+      ],
+      tr: [
+        ["Anında fiyat", "Tüm araçlar", "7/24 rezervasyon"],
+        ["Güvenli ödeme", "Anında onay", "E-posta voucher"],
+        ["İsim tabelası", "Şoför bilgisi", "Uçuş takibi"],
+      ],
+      de: [
+        ["Sofortpreis", "Alle Fahrzeuge", "24/7 Buchung"],
+        ["Sichere Zahlung", "Sofortige Bestätigung", "E-Mail Gutschein"],
+        ["Namensschild", "Fahrerinfo", "Flugverfolgung"],
+      ],
+      fr: [
+        ["Prix instantané", "Tous véhicules", "Réservation 24/7"],
+        ["Paiement sécurisé", "Confirmation instantanée", "Voucher par e-mail"],
+        ["Panneau nominatif", "Info chauffeur", "Suivi de vol"],
+      ],
+      ru: [
+        ["Мгновенная цена", "Все авто", "Бронь 24/7"],
+        ["Безопасная оплата", "Мгновенное подтверждение", "Ваучер на e-mail"],
+        ["Табличка с именем", "Данные водителя", "Отслеживание рейса"],
+      ],
+      it: [
+        ["Prezzo istantaneo", "Tutti i veicoli", "Prenotazione 24/7"],
+        ["Pagamento sicuro", "Conferma istantanea", "Voucher via e-mail"],
+        ["Cartello con nome", "Info autista", "Tracciamento volo"],
+      ],
+      es: [
+        ["Precio instantáneo", "Todos los vehículos", "Reserva 24/7"],
+        ["Pago seguro", "Confirmación instantánea", "Voucher por e-mail"],
+        ["Cartel con nombre", "Info del conductor", "Seguimiento de vuelo"],
+      ],
+      ar: [
+        ["سعر فوري", "جميع المركبات", "حجز 24/7"],
+        ["دفع آمن", "تأكيد فوري", "قسيمة بالبريد"],
+        ["لافتة باسمك", "بيانات السائق", "تتبع الرحلة"],
+      ],
+      uk: [
+        ["Миттєва ціна", "Всі авто", "Бронювання 24/7"],
+        ["Безпечна оплата", "Миттєве підтвердження", "Ваучер на e-mail"],
+        ["Табличка з іменем", "Дані водія", "Відстеження рейсу"],
+      ],
+      ja: [
+        ["即時価格", "全車両", "24時間予約"],
+        ["安全決済", "即時確認", "メールバウチャー"],
+        ["ネームサイン", "ドライバー情報", "フライト追跡"],
+      ],
+    };
+    return features[lang]?.[step] || features.en[step];
+  };
+
+  // Localized badge text
+  const getBadgeText = () => {
+    const badges: Record<string, string> = {
+      en: "3 Easy Steps",
+      tr: "3 Kolay Adım",
+      de: "3 Einfache Schritte",
+      fr: "3 Étapes Simples",
+      ru: "3 Простых Шага",
+      it: "3 Semplici Passaggi",
+      es: "3 Pasos Fáciles",
+      ar: "3 خطوات سهلة",
+      uk: "3 Прості Кроки",
+      ja: "3つの簡単なステップ",
+    };
+    return badges[lang] || badges.en;
+  };
+
+  // Localized CTA button text
+  const getCtaText = () => {
+    const ctas: Record<string, string> = {
+      en: "Book Your Transfer Now",
+      tr: "Hemen Rezervasyon Yap",
+      de: "Jetzt Transfer Buchen",
+      fr: "Réservez Maintenant",
+      ru: "Забронировать Сейчас",
+      it: "Prenota Ora",
+      es: "Reserva Ahora",
+      ar: "احجز الآن",
+      uk: "Забронювати Зараз",
+      ja: "今すぐ予約",
+    };
+    return ctas[lang] || ctas.en;
+  };
 
   const steps = [
     {
       number: "01",
       icon: Search,
       titleKey: "howStep1Title",
-      titleFallback: "Book Your Transfer",
+      titleFallback: "Select Your Route",
       descKey: "howStep1Desc",
-      descFallback: "Enter your route, select date and time, choose your vehicle. Get instant pricing.",
+      descFallback: "Enter pickup and dropoff locations, select your preferred date and time. Compare all vehicle options with transparent pricing.",
       color: "from-blue-500 to-indigo-600",
-      features: isTR 
-        ? ["Anında fiyat", "Tüm araçlar", "7/24 rezervasyon"]
-        : ["Instant pricing", "All vehicles", "24/7 booking"],
+      features: getFeatures(0),
     },
     {
       number: "02",
       icon: CreditCard,
       titleKey: "howStep2Title",
-      titleFallback: "Confirm & Pay",
+      titleFallback: "Confirm & Pay Securely",
       descKey: "howStep2Desc",
-      descFallback: "Enter passenger details, add extras if needed. Pay securely and receive confirmation.",
+      descFallback: "Add passenger details and any extras. Complete your booking with our secure payment system and receive instant confirmation.",
       color: "from-emerald-500 to-teal-600",
-      features: isTR 
-        ? ["Güvenli ödeme", "Anında onay", "E-posta voucher"]
-        : ["Secure payment", "Instant confirm", "Email voucher"],
+      features: getFeatures(1),
     },
     {
       number: "03",
       icon: Car,
       titleKey: "howStep3Title",
-      titleFallback: "Meet Your Driver",
+      titleFallback: "Meet Your Chauffeur",
       descKey: "howStep3Desc",
-      descFallback: "Receive driver details 6 hours before. They'll wait with your name sign at the pickup point.",
+      descFallback: "Receive your driver's details 6 hours before pickup. They'll greet you with a name sign and track your flight for any delays.",
       color: "from-amber-500 to-orange-600",
-      features: isTR 
-        ? ["İsim tabelası", "Şoför bilgisi", "Uçuş takibi"]
-        : ["Name sign", "Driver info", "Flight tracking"],
+      features: getFeatures(2),
     },
   ];
 
@@ -71,14 +156,14 @@ const HowItWorks = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
           >
             <Sparkles className="h-4 w-4" />
-            {isTR ? "3 Kolay Adım" : "3 Easy Steps"}
+            {getBadgeText()}
           </motion.div>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
             {t("howItWorks") || "How It Works"}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t("howItWorksDesc") || "Book your premium transfer in minutes"}
+            {t("howItWorksDesc") || "Book your premium airport transfer in just a few clicks"}
           </p>
         </motion.div>
 
@@ -155,7 +240,7 @@ const HowItWorks = () => {
             to={getLocalizedPath("/book")}
             className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl hover:scale-105"
           >
-            {isTR ? "Hemen Rezervasyon Yap" : "Book Your Transfer Now"}
+            {getCtaText()}
             <ArrowRight className="h-5 w-5" />
           </Link>
         </motion.div>
