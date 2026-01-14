@@ -254,6 +254,17 @@ const translations: Record<Language, Record<string, string>> = {
     premiumFleetDesc: "Modern, comfortable vehicles maintained to the highest standards",
     support247: "24/7 Support",
     support247Desc: "Dedicated customer service team available whenever you need us",
+    // Hero Badges
+    luxuryTransfer: "Luxury Transfer",
+    vipTransfer: "VIP Transfer",
+    safe: "Safe",
+    fast: "Fast",
+    fixedPrice: "Fixed Price",
+    freeCancel: "Free Cancel",
+    freeCancellation: "Free Cancellation",
+    proDriver: "Pro",
+    getQuote: "Get Quote",
+    babySeat: "Baby",
     
     // Destinations Section
     topDestinations: "Top Destinations",
