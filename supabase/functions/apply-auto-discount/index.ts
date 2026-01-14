@@ -404,11 +404,23 @@ serve(async (req) => {
 
     console.log(`Current price: ${currentPrice} ${currentCurrency}`);
 
-    // Calculate 3% discount
+    // Calculate 3% discount for outbound
     const discountAmount = calculatePercentageDiscount(currentPrice);
     const newPrice = Math.max(currentPrice - discountAmount, 1); // Ensure price doesn't go below 1
 
-    console.log(`Discount (3%): ${discountAmount} ${currentCurrency}, New price: ${newPrice}`);
+    // Calculate 3% discount for return trip if exists
+    const currentReturnPrice = booking.return_price || null;
+    let returnDiscountAmount = 0;
+    let newReturnPrice = currentReturnPrice;
+    
+    if (currentReturnPrice && currentReturnPrice > 0) {
+      returnDiscountAmount = calculatePercentageDiscount(currentReturnPrice);
+      newReturnPrice = Math.max(currentReturnPrice - returnDiscountAmount, 1);
+      console.log(`Return price discount (3%): ${returnDiscountAmount} ${currentCurrency}, New return price: ${newReturnPrice}`);
+    }
+
+    const totalDiscountAmount = discountAmount + returnDiscountAmount;
+    console.log(`Total discount (3%): ${totalDiscountAmount} ${currentCurrency}, New outbound price: ${newPrice}`);
 
     // Update the booking with new price and reset status
     if (bookingType === 'reservation') {
@@ -417,7 +429,7 @@ serve(async (req) => {
         .update({ 
           price: newPrice,
           status: 'waiting_for_customer_approval',
-          discount_amount: discountAmount,
+          discount_amount: totalDiscountAmount,
           discount_percentage: 3,
         })
         .eq('id', reservation_id);
@@ -425,12 +437,16 @@ serve(async (req) => {
       if (updateError) throw updateError;
 
       // Record in price history
+      const discountNote = currentReturnPrice 
+        ? `Otomatik indirim: %3 = Gidiş: ${discountAmount} + Dönüş: ${returnDiscountAmount} = ${totalDiscountAmount} ${currentCurrency}`
+        : `Otomatik indirim: %3 = ${discountAmount} ${currentCurrency}`;
+      
       await supabase.from('price_history').insert({
         reservation_id: reservation_id,
         price: newPrice,
         price_currency: currentCurrency,
         action: 'auto_discount',
-        customer_note: `Otomatik indirim: %3 = ${discountAmount} ${currentCurrency}`,
+        customer_note: discountNote,
       });
 
       // Notify admins
@@ -438,38 +454,54 @@ serve(async (req) => {
         body: {
           type: 'auto_discount_applied',
           title: 'Auto Discount Applied',
-          message: `Customer rejected price. 3% discount (${discountAmount} ${currentCurrency}) applied. New price: ${newPrice} ${currentCurrency}`,
+          message: `Customer rejected price. 3% discount (${totalDiscountAmount} ${currentCurrency}) applied. New price: ${newPrice} ${currentCurrency}`,
           notify_admins: true,
           reservation_id: reservation_id,
           send_push: true,
         }
       });
     } else {
+      // Build update data for quick booking
+      const updateData: any = { 
+        price: newPrice,
+        status: 'price_sent',
+      };
+      
+      // Also update return_price if it exists
+      if (newReturnPrice !== null) {
+        updateData.return_price = newReturnPrice;
+      }
+      
       const { error: updateError } = await supabase
         .from('quick_booking_requests')
-        .update({ 
-          price: newPrice,
-          status: 'price_sent',
-        })
+        .update(updateData)
         .eq('id', quick_booking_id);
 
       if (updateError) throw updateError;
 
       // Record in price history
+      const discountNote = currentReturnPrice 
+        ? `Otomatik indirim: %3 = Gidiş: ${discountAmount} + Dönüş: ${returnDiscountAmount} = ${totalDiscountAmount} ${currentCurrency}`
+        : `Otomatik indirim: %3 = ${discountAmount} ${currentCurrency}`;
+      
       await supabase.from('price_history').insert({
         quick_booking_id: quick_booking_id,
         price: newPrice,
         price_currency: currentCurrency,
         action: 'auto_discount',
-        customer_note: `Otomatik indirim: %3 = ${discountAmount} ${currentCurrency}`,
+        customer_note: discountNote,
       });
 
       // Notify admins
+      const adminMessage = currentReturnPrice
+        ? `Customer rejected price. 3% discount applied. Outbound: ${newPrice}, Return: ${newReturnPrice} ${currentCurrency}`
+        : `Customer rejected price. 3% discount (${discountAmount} ${currentCurrency}) applied. New price: ${newPrice} ${currentCurrency}`;
+      
       await supabase.functions.invoke('create-notification', {
         body: {
           type: 'auto_discount_applied',
           title: 'Auto Discount Applied (Quick Booking)',
-          message: `Customer rejected price. 3% discount (${discountAmount} ${currentCurrency}) applied. New price: ${newPrice} ${currentCurrency}`,
+          message: adminMessage,
           notify_admins: true,
           send_push: true,
         }
@@ -486,13 +518,17 @@ serve(async (req) => {
         const t = getTranslation(customerLang);
         const currencySymbol = getCurrencySymbol(currentCurrency);
         
-        const emailSubject = `${t.subject}: ${currencySymbol}${newPrice} - Meet Transfer`;
+        // Calculate total for email subject
+        const totalNewPrice = newReturnPrice ? newPrice + newReturnPrice : newPrice;
+        const emailSubject = `${t.subject}: ${currencySymbol}${totalNewPrice} - Meet Transfer`;
         
+        // For now, pass total prices to email generator
+        // The discount email shows the outbound transfer details
         const emailHtml = generateDiscountEmail(
           booking,
-          currentPrice,
-          discountAmount,
-          newPrice,
+          currentPrice + (currentReturnPrice || 0), // Original total
+          totalDiscountAmount, // Total discount
+          totalNewPrice, // New total price
           currentCurrency,
           confirmUrl,
           customerLang
@@ -526,8 +562,12 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         original_price: currentPrice,
+        original_return_price: currentReturnPrice,
         discount_amount: discountAmount,
+        return_discount_amount: returnDiscountAmount,
+        total_discount_amount: totalDiscountAmount,
         new_price: newPrice,
+        new_return_price: newReturnPrice,
         currency: currentCurrency,
         email_sent: emailSent,
         can_reject_again: false, // After discount applied, no more rejections allowed
