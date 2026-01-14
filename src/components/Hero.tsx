@@ -168,6 +168,18 @@ export const Hero = () => {
                           setPassengers={rideForm.handleSetPassengers}
                           setVehicleType={rideForm.handleSetVehicleType}
                           handleRideContinue={rideForm.handleRideContinue}
+                          // Return trip
+                          returnDate={rideForm.returnDate}
+                          returnTime={rideForm.returnTime}
+                          hasReturnTrip={rideForm.hasReturnTrip}
+                          setReturnDate={rideForm.handleSetReturnDate}
+                          setReturnTime={rideForm.handleSetReturnTime}
+                          setHasReturnTrip={rideForm.handleSetHasReturnTrip}
+                          // Extras
+                          babySeatCount={rideForm.babySeatCount}
+                          luggageCount={rideForm.luggageCount}
+                          setBabySeatCount={rideForm.handleSetBabySeatCount}
+                          setLuggageCount={rideForm.handleSetLuggageCount}
                         />
                       ) : (
                         <HourlyFormContent

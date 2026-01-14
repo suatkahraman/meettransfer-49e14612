@@ -1,5 +1,5 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap } from "lucide-react";
+import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, Baby, Briefcase, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
@@ -8,6 +8,8 @@ import { VehiclePrice } from "./types";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
 
 // Memoize time options generation - only compute once
 const timeOptions = (() => {
@@ -41,6 +43,18 @@ interface RideFormContentProps {
   setPassengers: (passengers: string) => void;
   setVehicleType: (type: string) => void;
   handleRideContinue: () => void;
+  // Return trip
+  returnDate?: Date | undefined;
+  returnTime?: string;
+  hasReturnTrip?: boolean;
+  setReturnDate?: (date: Date | undefined) => void;
+  setReturnTime?: (time: string) => void;
+  setHasReturnTrip?: (value: boolean) => void;
+  // Extras
+  babySeatCount?: number;
+  luggageCount?: number;
+  setBabySeatCount?: (count: number) => void;
+  setLuggageCount?: (count: number) => void;
 }
 
 interface ValidationErrors {
@@ -71,11 +85,25 @@ export const RideFormContent = memo(({
   setPassengers,
   setVehicleType,
   handleRideContinue,
+  // Return trip
+  returnDate,
+  returnTime,
+  hasReturnTrip = false,
+  setReturnDate,
+  setReturnTime,
+  setHasReturnTrip,
+  // Extras
+  babySeatCount = 0,
+  luggageCount = 0,
+  setBabySeatCount,
+  setLuggageCount,
 }: RideFormContentProps) => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
+  const [showExtras, setShowExtras] = useState(false);
   
   const hasRoute = !!(pickup && dropoff);
+  const hasExtras = hasReturnTrip || babySeatCount > 0 || luggageCount > 0;
   
   // Vehicle selection is always visible; price will appear on each card once available.
 
@@ -228,6 +256,145 @@ export const RideFormContent = memo(({
           currency={transferPriceCurrency} 
         />
       </div>
+
+      {/* Extras Section - Collapsible */}
+      <Collapsible open={showExtras || hasExtras} onOpenChange={setShowExtras}>
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className={cn(
+              "w-full flex items-center justify-between py-2.5 px-3 rounded-lg border transition-all",
+              showExtras || hasExtras 
+                ? "bg-primary/5 border-primary/30 text-primary" 
+                : "bg-muted/30 border-border/50 text-muted-foreground hover:border-primary/30 hover:text-foreground"
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <RotateCcw className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                {language === "TR" ? "Ek Seçenekler" : "Extra Options"}
+              </span>
+              {hasExtras && (
+                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                  {[
+                    hasReturnTrip && (language === "TR" ? "Dönüş" : "Return"),
+                    babySeatCount > 0 && `${babySeatCount} ${language === "TR" ? "koltuk" : "seat"}`,
+                    luggageCount > 0 && `${luggageCount} ${language === "TR" ? "bavul" : "bag"}`
+                  ].filter(Boolean).join(", ")}
+                </span>
+              )}
+            </div>
+            {showExtras || hasExtras ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="mt-2 space-y-3">
+          {/* Return Trip Toggle */}
+          {setHasReturnTrip && (
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">
+                  {language === "TR" ? "Dönüş Transferi" : "Return Trip"}
+                </span>
+              </div>
+              <Switch
+                checked={hasReturnTrip}
+                onCheckedChange={setHasReturnTrip}
+              />
+            </div>
+          )}
+          
+          {/* Return Date/Time - Show when return trip is enabled */}
+          {hasReturnTrip && setReturnDate && setReturnTime && (
+            <div className="grid grid-cols-2 gap-2 animate-in slide-in-from-top-2 duration-200">
+              <FloatingLabelDatePicker 
+                label={language === "TR" ? "Dönüş Tarihi" : "Return Date"} 
+                date={returnDate} 
+                onSelect={setReturnDate} 
+                icon={<CalendarIcon className="h-4 w-4" />} 
+                disabledDates={(d) => d < (date || new Date())} 
+                triggerClassName="h-12 min-h-[48px] text-sm"
+              />
+              <FloatingLabelSelect 
+                label={language === "TR" ? "Dönüş Saati" : "Return Time"} 
+                value={returnTime || ""} 
+                onValueChange={setReturnTime} 
+                options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
+                icon={<Clock className="h-4 w-4" />} 
+                triggerClassName="h-12 min-h-[48px] text-sm"
+              />
+            </div>
+          )}
+          
+          {/* Baby Seat & Luggage */}
+          <div className="grid grid-cols-2 gap-2">
+            {setBabySeatCount && (
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center gap-2">
+                  <Baby className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs sm:text-sm">
+                    {language === "TR" ? "Bebek Koltuğu" : "Baby Seat"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setBabySeatCount(Math.max(0, babySeatCount - 1))}
+                    className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                    disabled={babySeatCount <= 0}
+                  >
+                    -
+                  </button>
+                  <span className="w-6 text-center text-sm font-medium">{babySeatCount}</span>
+                  <button
+                    type="button"
+                    onClick={() => setBabySeatCount(Math.min(4, babySeatCount + 1))}
+                    className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                    disabled={babySeatCount >= 4}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {setLuggageCount && (
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs sm:text-sm">
+                    {language === "TR" ? "Büyük Bavul" : "Large Bag"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setLuggageCount(Math.max(0, luggageCount - 1))}
+                    className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                    disabled={luggageCount <= 0}
+                  >
+                    -
+                  </button>
+                  <span className="w-6 text-center text-sm font-medium">{luggageCount}</span>
+                  <button
+                    type="button"
+                    onClick={() => setLuggageCount(Math.min(10, luggageCount + 1))}
+                    className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                    disabled={luggageCount >= 10}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Submit Button - eye-catching on mobile with pulse animation */}
       <div className="relative">
