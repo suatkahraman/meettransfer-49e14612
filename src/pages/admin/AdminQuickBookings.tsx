@@ -64,6 +64,8 @@ import {
   Baby,
   UserCheck,
   UserX,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
@@ -158,6 +160,13 @@ export default function AdminQuickBookings() {
     request: null,
   });
   const [deleting, setDeleting] = useState(false);
+  
+  // AI Price Suggestion state
+  const [suggestingPrice, setSuggestingPrice] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<{
+    prices: Record<string, number>;
+    reasoning: string;
+  } | null>(null);
   
   // Multi-vehicle pricing state
   const [allVehiclePrices, setAllVehiclePrices] = useState<Record<string, string>>({
@@ -305,6 +314,105 @@ export default function AdminQuickBookings() {
     confirmed: requests.filter(r => r.status === "confirmed").length,
     other: requests.filter(r => ["price_rejected", "rejected", "expired"].includes(r.status)).length,
   }), [requests]);
+
+  // AI Price Suggestion function
+  const suggestPriceWithAI = async () => {
+    if (!selectedRequest) return;
+    
+    setSuggestingPrice(true);
+    setAiSuggestion(null);
+    
+    try {
+      // Fetch similar routes from region_prices
+      const { data: regionPrices } = await supabase
+        .from('region_prices')
+        .select('city, district, airport, price, price_currency, vehicle_type')
+        .eq('is_active', true)
+        .limit(100);
+      
+      // Find matching or similar routes
+      const pickupLower = selectedRequest.pickup.toLowerCase();
+      const dropoffLower = selectedRequest.dropoff.toLowerCase();
+      
+      // Try to find exact match
+      let matchedPrices: Record<string, number> = {};
+      let reasoning = '';
+      
+      if (regionPrices) {
+        // Check for airport-related keywords
+        const isAirportPickup = pickupLower.includes('airport') || pickupLower.includes('havalimanı') || 
+                               pickupLower.includes('havalanı') || pickupLower.match(/(ist|saw|ayt|bjv|dlm|adb|dxb|lca|ecn)/i);
+        const isAirportDropoff = dropoffLower.includes('airport') || dropoffLower.includes('havalimanı') || 
+                                dropoffLower.includes('havalanı') || dropoffLower.match(/(ist|saw|ayt|bjv|dlm|adb|dxb|lca|ecn)/i);
+        
+        // Find relevant prices
+        const relevantPrices = regionPrices.filter(p => {
+          const cityMatch = pickupLower.includes(p.city.toLowerCase()) || dropoffLower.includes(p.city.toLowerCase());
+          const districtMatch = pickupLower.includes(p.district.toLowerCase()) || dropoffLower.includes(p.district.toLowerCase());
+          const airportMatch = p.airport && (pickupLower.includes(p.airport.toLowerCase()) || dropoffLower.includes(p.airport.toLowerCase()));
+          return cityMatch || districtMatch || airportMatch;
+        });
+        
+        if (relevantPrices.length > 0) {
+          // Group by vehicle type and calculate average
+          const pricesByVehicle: Record<string, number[]> = {};
+          relevantPrices.forEach(p => {
+            if (!pricesByVehicle[p.vehicle_type]) {
+              pricesByVehicle[p.vehicle_type] = [];
+            }
+            pricesByVehicle[p.vehicle_type].push(p.price);
+          });
+          
+          // Calculate suggested prices
+          Object.entries(pricesByVehicle).forEach(([vehicle, prices]) => {
+            const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+            matchedPrices[vehicle] = avg;
+          });
+          
+          reasoning = `Benzer ${relevantPrices.length} güzergah bulundu. Ortalama fiyatlar hesaplandı.`;
+        } else {
+          // No exact match, estimate based on distance/complexity
+          // Default estimates for unknown routes
+          matchedPrices = {
+            "mercedes-vito": currency === "EUR" ? 85 : currency === "USD" ? 95 : currency === "TRY" ? 4500 : 85,
+            "vip-mercedes": currency === "EUR" ? 120 : currency === "USD" ? 135 : currency === "TRY" ? 6500 : 120,
+            "maybach-minibus": currency === "EUR" ? 180 : currency === "USD" ? 200 : currency === "TRY" ? 9500 : 180,
+            "minibus": currency === "EUR" ? 150 : currency === "USD" ? 165 : currency === "TRY" ? 8000 : 150,
+          };
+          reasoning = "Benzer güzergah bulunamadı. Tahmini fiyatlar önerildi - lütfen manuel olarak ayarlayın.";
+        }
+      }
+      
+      setAiSuggestion({
+        prices: matchedPrices,
+        reasoning: reasoning
+      });
+      
+      toast.success("AI fiyat önerisi hazır!");
+    } catch (error) {
+      console.error("AI price suggestion error:", error);
+      toast.error("AI fiyat önerisi alınamadı");
+    } finally {
+      setSuggestingPrice(false);
+    }
+  };
+  
+  // Apply AI suggestion to form
+  const applyAiSuggestion = () => {
+    if (!aiSuggestion) return;
+    
+    const newPrices: Record<string, string> = {};
+    Object.entries(aiSuggestion.prices).forEach(([vehicle, price]) => {
+      newPrices[vehicle] = price.toString();
+    });
+    
+    setAllVehiclePrices(prev => ({
+      ...prev,
+      ...newPrices
+    }));
+    
+    toast.success("AI önerisi uygulandı!");
+  };
 
   const sendPrice = async () => {
     if (!selectedRequest) return;
@@ -1465,6 +1573,57 @@ export default function AdminQuickBookings() {
                   <SelectItem value="AUD">$ AUD</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* AI Price Suggestion Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  AI Fiyat Önerisi
+                </Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={suggestPriceWithAI}
+                  disabled={suggestingPrice}
+                  className="gap-2"
+                >
+                  {suggestingPrice ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Wand2 className="h-4 w-4" />
+                  )}
+                  {suggestingPrice ? "Hesaplanıyor..." : "Öneri Al"}
+                </Button>
+              </div>
+              
+              {aiSuggestion && (
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 border border-purple-200 dark:border-purple-800 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+                      {aiSuggestion.reasoning}
+                    </span>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={applyAiSuggestion}
+                      className="gap-1.5 h-7 text-xs bg-purple-600 hover:bg-purple-700"
+                    >
+                      <CheckCircle className="h-3 w-3" />
+                      Uygula
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    {Object.entries(aiSuggestion.prices).map(([vehicle, priceVal]) => (
+                      <div key={vehicle} className="flex justify-between bg-white/50 dark:bg-black/20 rounded px-2 py-1">
+                        <span className="text-muted-foreground">{vehicleLabels[vehicle] || vehicle}:</span>
+                        <span className="font-medium">{getCurrencySymbol(currency)}{priceVal}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* All vehicle prices - 4 vehicles at once */}
