@@ -22,7 +22,7 @@ interface HeroAIAssistantProps {
   onApplyBooking: (data: BookingData) => void;
 }
 
-const quickPrompts = {
+const quickPrompts: Record<string, { label: string; message: string }[]> = {
   TR: [
     { label: "Antalya Havalimanı → Belek", message: "Yarın 15:00'te Antalya Havalimanı'ndan Belek'e 4 kişi transfer istiyorum" },
     { label: "Dalaman Havalimanı → Fethiye", message: "Yarın 12:00'de Dalaman Havalimanı'ndan Fethiye'ye 2 kişi transfer" },
@@ -33,10 +33,64 @@ const quickPrompts = {
     { label: "Dalaman Airport → Fethiye", message: "Transfer from Dalaman Airport to Fethiye tomorrow at noon for 2 people" },
     { label: "Bodrum Airport → Yalıkavak", message: "I'd like a transfer from Bodrum Airport to Yalıkavak tomorrow at 10am for 3 people" },
   ],
+  DE: [
+    { label: "Antalya Flughafen → Belek", message: "Ich brauche einen Transfer vom Antalya Flughafen nach Belek morgen um 15 Uhr für 4 Personen" },
+    { label: "Dalaman Flughafen → Fethiye", message: "Transfer vom Dalaman Flughafen nach Fethiye morgen mittags für 2 Personen" },
+    { label: "Bodrum Flughafen → Yalıkavak", message: "Ich möchte einen Transfer vom Bodrum Flughafen nach Yalıkavak morgen um 10 Uhr für 3 Personen" },
+  ],
+  FR: [
+    { label: "Aéroport Antalya → Belek", message: "J'ai besoin d'un transfert de l'aéroport d'Antalya à Belek demain à 15h pour 4 personnes" },
+    { label: "Aéroport Dalaman → Fethiye", message: "Transfert de l'aéroport de Dalaman à Fethiye demain à midi pour 2 personnes" },
+    { label: "Aéroport Bodrum → Yalıkavak", message: "Je voudrais un transfert de l'aéroport de Bodrum à Yalıkavak demain à 10h pour 3 personnes" },
+  ],
+  RU: [
+    { label: "Аэропорт Анталья → Белек", message: "Мне нужен трансфер из аэропорта Анталья в Белек завтра в 15:00 для 4 человек" },
+    { label: "Аэропорт Даламан → Фетхие", message: "Трансфер из аэропорта Даламан в Фетхие завтра в полдень для 2 человек" },
+    { label: "Аэропорт Бодрум → Ялыкавак", message: "Мне нужен трансфер из аэропорта Бодрум в Ялыкавак завтра в 10:00 для 3 человек" },
+  ],
+  IT: [
+    { label: "Aeroporto Antalya → Belek", message: "Ho bisogno di un trasferimento dall'aeroporto di Antalya a Belek domani alle 15 per 4 persone" },
+    { label: "Aeroporto Dalaman → Fethiye", message: "Trasferimento dall'aeroporto di Dalaman a Fethiye domani a mezzogiorno per 2 persone" },
+    { label: "Aeroporto Bodrum → Yalıkavak", message: "Vorrei un trasferimento dall'aeroporto di Bodrum a Yalıkavak domani alle 10 per 3 persone" },
+  ],
+  ES: [
+    { label: "Aeropuerto Antalya → Belek", message: "Necesito un traslado del aeropuerto de Antalya a Belek mañana a las 15h para 4 personas" },
+    { label: "Aeropuerto Dalaman → Fethiye", message: "Traslado del aeropuerto de Dalaman a Fethiye mañana al mediodía para 2 personas" },
+    { label: "Aeropuerto Bodrum → Yalıkavak", message: "Quiero un traslado del aeropuerto de Bodrum a Yalıkavak mañana a las 10h para 3 personas" },
+  ],
+  AR: [
+    { label: "مطار أنطاليا ← بيليك", message: "أحتاج نقل من مطار أنطاليا إلى بيليك غداً الساعة 3 مساءً لـ 4 أشخاص" },
+    { label: "مطار دالامان ← فتحية", message: "نقل من مطار دالامان إلى فتحية غداً ظهراً لشخصين" },
+    { label: "مطار بودروم ← ياليكاواك", message: "أريد نقل من مطار بودروم إلى ياليكاواك غداً الساعة 10 صباحاً لـ 3 أشخاص" },
+  ],
+  UK: [
+    { label: "Аеропорт Анталія → Белек", message: "Мені потрібен трансфер з аеропорту Анталія до Белека завтра о 15:00 для 4 осіб" },
+    { label: "Аеропорт Даламан → Фетхіє", message: "Трансфер з аеропорту Даламан до Фетхіє завтра опівдні для 2 осіб" },
+    { label: "Аеропорт Бодрум → Яликавак", message: "Мені потрібен трансфер з аеропорту Бодрум до Яликавака завтра о 10:00 для 3 осіб" },
+  ],
+  JA: [
+    { label: "アンタルヤ空港 → ベレク", message: "明日午後3時にアンタルヤ空港からベレクまで4名で送迎をお願いします" },
+    { label: "ダラマン空港 → フェティエ", message: "明日正午にダラマン空港からフェティエまで2名で送迎をお願いします" },
+    { label: "ボドルム空港 → ヤルカヴァク", message: "明日午前10時にボドルム空港からヤルカヴァクまで3名で送迎をお願いします" },
+  ],
+};
+
+const aiLabels: Record<string, { assistant: string; bookWithAI: string; ask: string }> = {
+  TR: { assistant: "AI Asistan", bookWithAI: "AI ile Rezervasyon", ask: "Sor:" },
+  EN: { assistant: "AI Assistant", bookWithAI: "Book with AI", ask: "Ask:" },
+  DE: { assistant: "KI-Assistent", bookWithAI: "Mit KI buchen", ask: "Fragen:" },
+  FR: { assistant: "Assistant IA", bookWithAI: "Réserver avec l'IA", ask: "Demandez:" },
+  RU: { assistant: "ИИ Ассистент", bookWithAI: "Бронировать с ИИ", ask: "Спросите:" },
+  IT: { assistant: "Assistente IA", bookWithAI: "Prenota con IA", ask: "Chiedi:" },
+  ES: { assistant: "Asistente IA", bookWithAI: "Reservar con IA", ask: "Pregunta:" },
+  AR: { assistant: "مساعد الذكاء", bookWithAI: "احجز مع الذكاء", ask: "اسأل:" },
+  UK: { assistant: "ШІ Асистент", bookWithAI: "Забронювати з ШІ", ask: "Запитайте:" },
+  JA: { assistant: "AIアシスタント", bookWithAI: "AIで予約", ask: "質問:" },
 };
 
 export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssistantProps) => {
-  const prompts = quickPrompts[language as keyof typeof quickPrompts] || quickPrompts.EN;
+  const prompts = quickPrompts[language] || quickPrompts.EN;
+  const labels = aiLabels[language] || aiLabels.EN;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [shouldLoadMobile, setShouldLoadMobile] = useState(false);
@@ -81,7 +135,7 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
             <div className="flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
               <span className="text-xs font-medium text-foreground">
-                {language === 'TR' ? 'AI Asistan' : 'AI Assistant'}
+                {labels.assistant}
               </span>
               <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[8px] font-bold rounded">
                 NEW
@@ -89,7 +143,7 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                {language === 'TR' ? 'Transfer & Kiralama' : 'Book with AI'}
+                {labels.bookWithAI}
               </span>
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -119,7 +173,7 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
                     className="h-7 text-[10px] px-2.5 rounded-full border-border bg-background hover:bg-primary/10 hover:border-primary/40 transition-all"
                   >
                     <MessageCircle className="h-3 w-3 mr-1 text-muted-foreground" />
-                    <span>{language === 'TR' ? 'Sor: ' : 'Ask: '}{currentPrompt.label}</span>
+                    <span>{labels.ask} {currentPrompt.label}</span>
                   </Button>
                   
                   {/* Chat Assistant */}
