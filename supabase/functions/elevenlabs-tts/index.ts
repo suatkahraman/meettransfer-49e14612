@@ -37,15 +37,15 @@ serve(async (req) => {
     // - Jessica (cgSgspJ2msm6clMCkdW9) - natural, conversational
     const selectedVoiceId = voiceId || 'EXAVITQu4vr4xnSDxMaL';
 
-    // Optimized voice settings for slow, clear, natural speech
-    // Higher stability = more consistent pronunciation
-    // Lower speed = easier to understand, especially for non-native speakers
+    // Optimized voice settings for natural, fluent speech
+    // Speed 1.1 = slightly faster for better flow while remaining clear
+    // Lower stability = more natural, expressive tone
     const voiceSettings = {
-      stability: typeof stability === 'number' ? stability : 0.75, // High stability for clear pronunciation
-      similarity_boost: typeof similarityBoost === 'number' ? similarityBoost : 0.85, // Strong voice character
-      style: typeof style === 'number' ? style : 0.35, // Moderate style, not too expressive
+      stability: typeof stability === 'number' ? stability : 0.55, // Lower for more natural expression
+      similarity_boost: typeof similarityBoost === 'number' ? similarityBoost : 0.80, // Strong voice character
+      style: typeof style === 'number' ? style : 0.45, // More expressive style
       use_speaker_boost: true, // Enhanced clarity
-      speed: typeof speed === 'number' ? speed : 0.85, // Slower for better comprehension
+      speed: typeof speed === 'number' ? speed : 1.1, // Faster for fluent, natural speech
     };
 
     console.log('Generating speech for text:', text.substring(0, 100), '...');
