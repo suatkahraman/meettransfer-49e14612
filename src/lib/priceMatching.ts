@@ -795,7 +795,7 @@ export async function testPriceMatch(
 }
 
 // ==================== DISCOUNT FUNCTIONS ====================
-const VALID_PROMO_CODES = ['MEET30RETURN', 'GIDISDONUS', 'RETURN30', 'MEET30'];
+const VALID_PROMO_CODES = ['MEET25RETURN', 'GIDISDONUS', 'RETURN25', 'MEET25'];
 
 export function applyPromoDiscount(
   price: number,
@@ -803,7 +803,7 @@ export function applyPromoDiscount(
   promoCode: string | null
 ): { finalPrice: number; discountApplied: boolean; discountPercent: number } {
   if (hasReturnTrip && promoCode && VALID_PROMO_CODES.includes(promoCode.toUpperCase())) {
-    const discountPercent = 30;
+    const discountPercent = 25;
     const discountAmount = Math.round(price * (discountPercent / 100));
     return {
       finalPrice: price - discountAmount,

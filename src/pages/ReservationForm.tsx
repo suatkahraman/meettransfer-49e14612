@@ -1230,11 +1230,11 @@ const ReservationForm = () => {
     
     // Calculate return price - always discounted for return trips
     const RETURN_DISCOUNT_PERCENTAGE = 10; // 10% discount for return trip by default
-    const PROMO_DISCOUNT_PERCENTAGE = 30; // Additional 30% discount with promo code
+    const PROMO_DISCOUNT_PERCENTAGE = 25; // 25% discount with promo code
     
     const getReturnPrice = () => {
       if (!hasReturnTrip || !selectedPrice) return null;
-      // Promo code gives 30% off, otherwise 10% default return discount
+      // Promo code gives 25% off, otherwise 10% default return discount
       const discountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
       return Math.round(selectedPrice * (100 - discountPercent) / 100);
     };
