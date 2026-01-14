@@ -3097,10 +3097,10 @@ const translations: Record<Language, Record<string, string>> = {
     hourlySameCityOnly: "Stündliche Anmietung nur innerhalb derselben Stadt gültig",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% RABATT auf Rücktransfers",
+    blogCtaDiscountBadge: "25% RABATT auf Rücktransfers",
     blogCtaTitle: "Buchen Sie Ihren Premium-Transfer",
-    blogCtaReturnDiscount: "Hin- und Rücktransfers – 30% RABATT!",
-    blogCtaReturnDiscountDesc: "Buchen Sie An- und Abreise-Flughafentransfer zusammen und sparen Sie sofort 30%",
+    blogCtaReturnDiscount: "Hin- und Rücktransfers – 25% RABATT!",
+    blogCtaReturnDiscountDesc: "Buchen Sie An- und Abreise-Flughafentransfer zusammen und sparen Sie sofort 25%",
     blogCtaPromoCode: "Promo-Code für die Rückfahrt",
     blogCtaDescription: "Professionelle Fahrer, luxuriöse Mercedes-Flotte, 24/7 Meet & Greet Service. Festpreise ohne versteckte Gebühren.",
     blogCtaRequestPrice: "Jetzt Preis anfragen",
@@ -6328,10 +6328,10 @@ const translations: Record<Language, Record<string, string>> = {
     hourlySameCityOnly: "Почасовая аренда действует только в пределах одного города",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% СКИДКА на обратные трансферы",
+    blogCtaDiscountBadge: "25% СКИДКА на обратные трансферы",
     blogCtaTitle: "Забронируйте ваш премиум-трансфер",
-    blogCtaReturnDiscount: "Трансферы туда-обратно – 30% СКИДКА!",
-    blogCtaReturnDiscountDesc: "Закажите трансфер из аэропорта и обратно вместе и сэкономьте 30% мгновенно",
+    blogCtaReturnDiscount: "Трансферы туда-обратно – 25% СКИДКА!",
+    blogCtaReturnDiscountDesc: "Закажите трансфер из аэропорта и обратно вместе и сэкономьте 25% мгновенно",
     blogCtaPromoCode: "Промокод на обратный рейс",
     blogCtaDescription: "Профессиональные водители, люксовый парк Mercedes, встреча 24/7. Фиксированные цены без скрытых платежей.",
     blogCtaRequestPrice: "Запросить цену",
@@ -7752,10 +7752,10 @@ const translations: Record<Language, Record<string, string>> = {
     hourlySameCityOnly: "Noleggio orario valido solo nella stessa città",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% DI SCONTO sui trasferimenti di ritorno",
+    blogCtaDiscountBadge: "25% DI SCONTO sui trasferimenti di ritorno",
     blogCtaTitle: "Prenota il tuo trasferimento premium",
-    blogCtaReturnDiscount: "Trasferimenti andata e ritorno – 30% DI SCONTO!",
-    blogCtaReturnDiscountDesc: "Prenota i trasferimenti aeroportuali di andata e ritorno insieme e risparmia subito il 30%",
+    blogCtaReturnDiscount: "Trasferimenti andata e ritorno – 25% DI SCONTO!",
+    blogCtaReturnDiscountDesc: "Prenota i trasferimenti aeroportuali di andata e ritorno insieme e risparmia subito il 25%",
     blogCtaPromoCode: "Usa il codice promo per il ritorno",
     blogCtaDescription: "Autisti professionisti, flotta Mercedes di lusso, servizio meet & greet 24/7. Prezzi fissi senza costi nascosti.",
     blogCtaRequestPrice: "Richiedi un preventivo",
@@ -9170,10 +9170,10 @@ const translations: Record<Language, Record<string, string>> = {
     hourlySameCityOnly: "Alquiler por hora válido solo dentro de la misma ciudad",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "30% DE DESCUENTO en traslados de vuelta",
+    blogCtaDiscountBadge: "25% DE DESCUENTO en traslados de vuelta",
     blogCtaTitle: "Reserva tu traslado premium",
-    blogCtaReturnDiscount: "¡Traslados de ida y vuelta – 30% DE DESCUENTO!",
-    blogCtaReturnDiscountDesc: "Reserva tus traslados de llegada y salida juntos y ahorra 30% instantáneamente",
+    blogCtaReturnDiscount: "¡Traslados de ida y vuelta – 25% DE DESCUENTO!",
+    blogCtaReturnDiscountDesc: "Reserva tus traslados de llegada y salida juntos y ahorra 25% instantáneamente",
     blogCtaPromoCode: "Usa el código promo en el regreso",
     blogCtaDescription: "Conductores profesionales, flota Mercedes de lujo, servicio meet & greet 24/7. Precios fijos sin cargos ocultos.",
     blogCtaRequestPrice: "Solicitar precio",
@@ -10535,10 +10535,10 @@ const translations: Record<Language, Record<string, string>> = {
     hourlySameCityOnly: "الإيجار بالساعة صالح فقط داخل نفس المدينة",
     
     // Blog CTA Component
-    blogCtaDiscountBadge: "خصم 30٪ على رحلات العودة",
+    blogCtaDiscountBadge: "خصم 25٪ على رحلات العودة",
     blogCtaTitle: "احجز رحلتك المميزة",
-    blogCtaReturnDiscount: "رحلات الذهاب والعودة - خصم 30٪!",
-    blogCtaReturnDiscountDesc: "احجز رحلة الوصول والعودة معًا واحصل على خصم 30٪ فورًا",
+    blogCtaReturnDiscount: "رحلات الذهاب والعودة - خصم 25٪!",
+    blogCtaReturnDiscountDesc: "احجز رحلة الوصول والعودة معًا واحصل على خصم 25٪ فورًا",
     blogCtaPromoCode: "استخدم كود الخصم للعودة",
     blogCtaDescription: "سائقون محترفون، أسطول مرسيدس فاخر، خدمة استقبال 24/7. أسعار ثابتة بدون رسوم مخفية.",
     blogCtaRequestPrice: "اطلب السعر",
