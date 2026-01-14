@@ -60,7 +60,7 @@ let isScriptLoaded = false;
 const loadCallbacks: (() => void)[] = [];
 
 const loadGoogleMapsScript = (): Promise<void> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     // If Places is already available (script loaded elsewhere), mark as loaded and resolve.
     if (window.google?.maps?.places) {
       isScriptLoaded = true;
@@ -69,12 +69,12 @@ const loadGoogleMapsScript = (): Promise<void> => {
       return;
     }
 
-    if (isScriptLoaded) {
+    if (isScriptLoaded && window.google?.maps?.places) {
       resolve();
       return;
     }
 
-    // If a script tag already exists, avoid injecting a duplicate.
+    // If a script tag already exists, wait for it to be ready
     const existingScript =
       document.querySelector<HTMLScriptElement>('script[data-google-maps="places"]') ||
       document.querySelector<HTMLScriptElement>('script[src*="maps.googleapis.com/maps/api/js"]');
@@ -88,20 +88,19 @@ const loadGoogleMapsScript = (): Promise<void> => {
           resolve();
           return;
         }
-        if (Date.now() - startedAt > 12000) {
-          // Give up silently; component will still fail gracefully.
-          console.error('Google Maps script present but Places API not available');
-          resolve();
+        if (Date.now() - startedAt > 15000) {
+          console.error('Google Maps script timeout - Places API not available');
+          reject(new Error('Google Maps script timeout'));
           return;
         }
-        setTimeout(poll, 50);
+        setTimeout(poll, 100);
       };
       poll();
       return;
     }
 
     if (isScriptLoading) {
-      loadCallbacks.push(resolve);
+      loadCallbacks.push(() => resolve());
       return;
     }
 
@@ -109,22 +108,29 @@ const loadGoogleMapsScript = (): Promise<void> => {
 
     const script = document.createElement('script');
     script.setAttribute('data-google-maps', 'places');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&loading=async`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
     script.async = true;
-    script.defer = true;
 
     script.onload = () => {
-      isScriptLoaded = true;
-      isScriptLoading = false;
-      resolve();
-      loadCallbacks.forEach((cb) => cb());
-      loadCallbacks.length = 0;
+      // Wait for Places API to be ready
+      const waitForPlaces = () => {
+        if (window.google?.maps?.places) {
+          isScriptLoaded = true;
+          isScriptLoading = false;
+          resolve();
+          loadCallbacks.forEach((cb) => cb());
+          loadCallbacks.length = 0;
+        } else {
+          setTimeout(waitForPlaces, 50);
+        }
+      };
+      waitForPlaces();
     };
 
     script.onerror = () => {
       isScriptLoading = false;
       console.error('Failed to load Google Maps script');
-      resolve();
+      reject(new Error('Failed to load Google Maps script'));
     };
 
     document.head.appendChild(script);
@@ -133,16 +139,10 @@ const loadGoogleMapsScript = (): Promise<void> => {
 
 // Preload Google Maps script on page load for faster autocomplete
 if (typeof window !== 'undefined') {
-  // Use requestIdleCallback for non-blocking preload, or setTimeout as fallback
-  const preload = () => {
+  // Load immediately instead of idle callback for faster availability
+  setTimeout(() => {
     loadGoogleMapsScript().catch(() => {});
-  };
-  
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(preload, { timeout: 2000 });
-  } else {
-    setTimeout(preload, 1000);
-  }
+  }, 100);
 }
 
 export interface GooglePlacesAutocompleteProps {
@@ -208,25 +208,37 @@ export const GooglePlacesAutocomplete = ({
 
   useEffect(() => {
     let isCancelled = false;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     const setupAutocomplete = async () => {
-      if (hasInitializedRef.current) {
-        // Prevent double-init under StrictMode
+      // Skip if already attached to this specific input
+      if (autocompleteRef.current) {
         return;
       }
 
-      await loadGoogleMapsScript();
-
-      if (
-        isCancelled ||
-        !inputRef.current ||
-        autocompleteRef.current || // already attached
-        !window.google?.maps?.places
-      ) {
+      try {
+        await loadGoogleMapsScript();
+      } catch (error) {
+        console.error('Failed to load Google Maps:', error);
+        // Retry loading
+        if (retryCount < maxRetries && !isCancelled) {
+          retryCount++;
+          setTimeout(setupAutocomplete, 1000);
+        }
         return;
       }
 
-      hasInitializedRef.current = true;
+      if (isCancelled || !inputRef.current || !window.google?.maps?.places) {
+        return;
+      }
+
+      // Double check we haven't already attached
+      if (autocompleteRef.current) {
+        return;
+      }
+
+      console.log('Initializing Google Places Autocomplete');
 
       const autocomplete = new window.google.maps.places.Autocomplete(
         inputRef.current,
@@ -283,19 +295,22 @@ export const GooglePlacesAutocomplete = ({
       });
 
       autocompleteRef.current = autocomplete;
+      hasInitializedRef.current = true;
     };
 
-    setupAutocomplete();
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(setupAutocomplete, 50);
 
     return () => {
       isCancelled = true;
+      clearTimeout(timeoutId);
       if (autocompleteRef.current && window.google?.maps?.event) {
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
         autocompleteRef.current = null;
-        hasInitializedRef.current = false;
       }
+      hasInitializedRef.current = false;
     };
-  }, []);
+  }, [onPlaceSelect]);
 
   const isFloating = isFocused || hasValue;
 
