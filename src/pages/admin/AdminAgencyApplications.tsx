@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { ArrowLeft, Check, X, Building2, Clock, Mail, Phone, DollarSign, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Check, X, Building2, Clock, Mail, Phone, DollarSign, MessageSquare, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -19,6 +19,7 @@ interface AgencyApplication {
   email: string;
   phone: string;
   currency: string;
+  city: string | null;
   comments: string | null;
   status: string;
   created_at: string;
@@ -200,6 +201,12 @@ const AdminAgencyApplications = () => {
                             <Phone className="h-4 w-4 text-muted-foreground" />
                             <span>{application.phone}</span>
                           </div>
+                          {application.city && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-muted-foreground" />
+                              <span>Şehir: {application.city}</span>
+                            </div>
+                          )}
                           <div className="flex items-center gap-2">
                             <DollarSign className="h-4 w-4 text-muted-foreground" />
                             <span>Para Birimi: {application.currency}</span>
@@ -261,6 +268,12 @@ const AdminAgencyApplications = () => {
                       </CardHeader>
                       <CardContent className="space-y-2 text-sm">
                         <div className="text-muted-foreground">{application.contact_name}</div>
+                        {application.city && (
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            <span>{application.city}</span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Mail className="h-3 w-3" />
                           <span className="truncate">{application.email}</span>
