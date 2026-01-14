@@ -121,7 +121,7 @@ export const HeroVisualSection = memo(({
                   </div>
                   <div className="flex items-center gap-0.5 text-[9px] bg-white/20 backdrop-blur-sm rounded-full px-1.5 py-0.5">
                     <Baby className="h-2 w-2" />
-                    <span>{language === 'TR' ? 'Bebek' : 'Baby'}</span>
+                    <span>{t("babySeatLabel") || "Baby"}</span>
                   </div>
                   <div className="flex items-center gap-0.5 text-[9px] bg-white/20 backdrop-blur-sm rounded-full px-1.5 py-0.5">
                     <Briefcase className="h-2 w-2" />
