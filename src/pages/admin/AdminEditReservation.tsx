@@ -2166,7 +2166,7 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                 </Badge>
                 <Badge className="bg-emerald-200 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
                   <Percent className="h-3 w-3 mr-1" />
-                  {formData.promo_code} - %30 İndirim
+                  {formData.promo_code} - %25 İndirim
                 </Badge>
               </div>
               
@@ -2175,13 +2175,13 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Normal Fiyat:</span>
                     <span className="line-through text-muted-foreground">
-                      {getCurrencySymbol(formData.price_currency)}{(parseFloat(formData.price) / 0.7).toFixed(0)}
+                      {getCurrencySymbol(formData.price_currency)}{(parseFloat(formData.price) / 0.75).toFixed(0)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">İndirim (%30):</span>
+                    <span className="text-muted-foreground">İndirim (%25):</span>
                     <span className="text-green-600 font-medium">
-                      -{getCurrencySymbol(formData.price_currency)}{((parseFloat(formData.price) / 0.7) - parseFloat(formData.price)).toFixed(0)}
+                      -{getCurrencySymbol(formData.price_currency)}{((parseFloat(formData.price) / 0.75) - parseFloat(formData.price)).toFixed(0)}
                     </span>
                   </div>
                   <div className="border-t pt-2 flex items-center justify-between">

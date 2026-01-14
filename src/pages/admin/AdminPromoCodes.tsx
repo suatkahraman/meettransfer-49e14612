@@ -62,7 +62,7 @@ interface PromoUsageItem {
 
 const initialFormData: PromoCodeFormData = {
   code: "",
-  discount_percentage: 30,
+  discount_percentage: 25,
   description: "",
   applies_to: "return_transfer",
   is_active: true,

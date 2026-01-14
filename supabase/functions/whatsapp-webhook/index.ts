@@ -266,7 +266,7 @@ You can also create new reservations from your account.
 👉 ${customerLink}
 
 🎁 Special offer:
-If you book a round-trip (return transfer), you will receive a 30% discount on your return transfer.`;
+If you book a round-trip (return transfer), you will receive a 25% discount on your return transfer.`;
 
         // Send confirmation message
         console.log(`Sending confirmation to ${customerPhone}, from: ${twilioWhatsAppNumber}`);

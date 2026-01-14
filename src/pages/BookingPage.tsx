@@ -636,7 +636,7 @@ const BookingPage = () => {
       // If return trip (only for transfers), create return reservation
       if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
         const returnPrice = isPromoCodeValid && selectedPrice 
-          ? Math.round(selectedPrice * 0.7) // 30% discount
+          ? Math.round(selectedPrice * 0.75) // 25% discount
           : selectedPrice;
 
         await supabase

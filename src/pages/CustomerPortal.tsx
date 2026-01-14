@@ -684,7 +684,7 @@ export default function CustomerPortal() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <Badge className="bg-green-500 text-white text-xs font-bold px-2 py-0.5">
-                        30% OFF
+                        25% OFF
                       </Badge>
                       <Sparkles className="h-4 w-4 text-green-500" />
                     </div>

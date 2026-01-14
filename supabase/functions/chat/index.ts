@@ -129,7 +129,7 @@ KISA CEVAP ÖRNEKLERİ:
 - "Antalya havalimanından Belek'e 4 kişi için transfer 35€. Uçuş numaranız nedir?"
 - "Tarih ve saat nedir?"
 - "Kaç kişisiniz?"
-- "Dönüş transferi ekleyelim mi? %30 indirimli olur."
+- "Dönüş transferi ekleyelim mi? %25 indirimli olur."
 - "Bilgilerinizi aldım. Formu doldurun, eksik bilgileri orada tamamlayabilirsiniz. [FORM_REDIRECT]"`;
 
 

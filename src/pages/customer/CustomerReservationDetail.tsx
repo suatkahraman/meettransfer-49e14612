@@ -1100,15 +1100,15 @@ const CustomerReservationDetail = () => {
                         <span className="text-muted-foreground line-through text-lg mr-2">
                           {priceDisplay}
                         </span>
-                        {/* Discounted price - 30% off */}
+                        {/* Discounted price - 25% off */}
                         <span className="font-bold text-green-600 dark:text-green-400 text-2xl">
-                          {formatPrice(Math.round(reservation.price * 0.7), reservation.price_currency)}
+                          {formatPrice(Math.round(reservation.price * 0.75), reservation.price_currency)}
                         </span>
                         {/* Discount badge */}
                         <div className="flex items-center justify-end gap-1 mt-1">
                           <Tag className="h-3 w-3 text-green-600 dark:text-green-400" />
                           <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                            30% {t('discount') || 'discount'} ({reservation.promo_code})
+                            25% {t('discount') || 'discount'} ({reservation.promo_code})
                           </span>
                         </div>
                       </div>
