@@ -266,12 +266,13 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Preload image on mount for faster display
+  // Set image as loaded immediately since we're using imported modules
   useEffect(() => {
-    const img = new Image();
-    img.onload = () => setImageLoaded(true);
-    img.onerror = () => setImageError(true);
-    img.src = city.image;
+    // Since images are imported as ES modules, they're already bundled
+    // Set loaded to true immediately as the src is a valid bundled asset
+    if (city.image) {
+      setImageLoaded(true);
+    }
   }, [city.image]);
 
   return (
@@ -291,17 +292,18 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
         {/* Gradient Fallback Background */}
         <div className={`absolute inset-0 bg-gradient-to-br ${city.gradient} ${imageLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`} />
         
-        {/* Real Image - Priority loading with eager decode */}
+        {/* Real Image - Using imported bundled assets */}
         {!imageError && (
           <img
             src={city.image}
             alt={city.name}
             loading="eager"
-            decoding="async"
-            fetchPriority="high"
+            decoding="sync"
             className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 ${
               imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             } group-hover:scale-110`}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
           />
         )}
         
