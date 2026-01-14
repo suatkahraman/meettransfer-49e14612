@@ -1296,11 +1296,73 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     setContinuousMode(prev => !prev);
   }, []);
 
+  // State for waiting time display
+  const [waitingStartTime, setWaitingStartTime] = useState<number | null>(null);
+  const [waitingTimeDisplay, setWaitingTimeDisplay] = useState<string>('');
+
+  // Update waiting time display every second
+  useEffect(() => {
+    if (!waitingForPrice || !waitingStartTime) return;
+    
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - waitingStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      
+      if (minutes > 0) {
+        setWaitingTimeDisplay(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+      } else {
+        setWaitingTimeDisplay(`${seconds}s`);
+      }
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [waitingForPrice, waitingStartTime]);
+
+  // Play notification sound when price arrives
+  const playNotificationSound = useCallback(() => {
+    try {
+      // Create a pleasant notification sound using Web Audio API
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // First tone
+      const oscillator1 = audioContext.createOscillator();
+      const gainNode1 = audioContext.createGain();
+      oscillator1.connect(gainNode1);
+      gainNode1.connect(audioContext.destination);
+      oscillator1.frequency.value = 587; // D5
+      oscillator1.type = 'sine';
+      gainNode1.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      oscillator1.start(audioContext.currentTime);
+      oscillator1.stop(audioContext.currentTime + 0.3);
+      
+      // Second tone (higher)
+      const oscillator2 = audioContext.createOscillator();
+      const gainNode2 = audioContext.createGain();
+      oscillator2.connect(gainNode2);
+      gainNode2.connect(audioContext.destination);
+      oscillator2.frequency.value = 880; // A5
+      oscillator2.type = 'sine';
+      gainNode2.gain.setValueAtTime(0.3, audioContext.currentTime + 0.15);
+      gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      oscillator2.start(audioContext.currentTime + 0.15);
+      oscillator2.stop(audioContext.currentTime + 0.5);
+      
+      console.log('🔔 Notification sound played');
+    } catch (error) {
+      console.log('🔔 Could not play notification sound:', error);
+    }
+  }, []);
+
   // Realtime subscription for price updates from admin
   useEffect(() => {
     if (!waitingForPrice || !visitorId) return;
 
     console.log('🔔 Setting up realtime subscription for price updates, visitorId:', visitorId);
+    
+    // Set waiting start time
+    setWaitingStartTime(Date.now());
 
     const channel = supabase
       .channel(`price-updates-${visitorId}`)
@@ -1319,6 +1381,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           
           // Check if price was added
           if (newRecord.price && newRecord.price > 0) {
+            // Play notification sound
+            playNotificationSound();
+            
             const priceMessage = language === 'TR'
               ? `Harika haber! 🎉 Operasyon yetkilimiz fiyatı belirledi. ${newRecord.vehicle_type === 'mercedes-vito' ? 'Mercedes Vito' : newRecord.vehicle_type} için fiyatınız: **${newRecord.price_currency === 'TRY' ? '₺' : '€'}${newRecord.price}**. Devam etmek ister misiniz?`
               : `Great news! 🎉 Our operations officer has set the price. Your price for ${newRecord.vehicle_type === 'mercedes-vito' ? 'Mercedes Vito' : newRecord.vehicle_type}: **${newRecord.price_currency === 'TRY' ? '₺' : '€'}${newRecord.price}**. Would you like to proceed?`;
@@ -1331,6 +1396,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
             }]);
             
             setWaitingForPrice(false);
+            setWaitingStartTime(null);
+            setWaitingTimeDisplay('');
             
             // Speak the message if voice is enabled
             if (isVoiceEnabled) {
@@ -1344,8 +1411,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     return () => {
       console.log('🔔 Cleaning up price update subscription');
       supabase.removeChannel(channel);
+      setWaitingStartTime(null);
     };
-  }, [waitingForPrice, visitorId, language, isVoiceEnabled, speak]);
+  }, [waitingForPrice, visitorId, language, isVoiceEnabled, speak, playNotificationSound]);
 
   // Ref to store pending auto-send message
   const pendingAutoSendRef = useRef<string | null>(null);
@@ -2609,11 +2677,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
                               {language === "TR" ? "Fiyat Bekleniyor" : "Waiting for Price"}
                             </span>
+                            {/* Waiting time display */}
+                            {waitingTimeDisplay && (
+                              <span className="text-[10px] font-mono bg-amber-200 dark:bg-amber-700 text-amber-800 dark:text-amber-200 px-1.5 py-0.5 rounded">
+                                {waitingTimeDisplay}
+                              </span>
+                            )}
                           </div>
                           <p className="text-[10px] text-amber-600 dark:text-amber-400 leading-relaxed">
                             {language === "TR" 
-                              ? "Operasyon yetkilimiz bu güzergah için en iyi fiyatı belirliyor. Lütfen bekleyin..." 
-                              : "Our team is determining the best price for this route. Please wait..."}
+                              ? "Operasyon yetkilimiz bu güzergah için en iyi fiyatı belirliyor. Tahmini süre: 1-3 dakika" 
+                              : "Our team is determining the best price for this route. Est. time: 1-3 minutes"}
                           </p>
                           <div className="mt-2 flex items-center gap-1.5">
                             <motion.div
