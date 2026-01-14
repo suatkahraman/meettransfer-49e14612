@@ -138,7 +138,7 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
                 {labels.assistant}
               </span>
               <span className="px-1.5 py-0.5 bg-primary/80 text-primary-foreground text-[8px] font-bold rounded">
-                NEW
+                {language === 'TR' ? 'YENİ' : language === 'DE' ? 'NEU' : language === 'FR' ? 'NOUVEAU' : language === 'RU' ? 'НОВЫЙ' : language === 'IT' ? 'NUOVO' : language === 'ES' ? 'NUEVO' : language === 'AR' ? 'جديد' : language === 'UK' ? 'НОВИЙ' : language === 'JA' ? '新規' : 'NEW'}
               </span>
             </div>
             <div className="flex items-center gap-2">

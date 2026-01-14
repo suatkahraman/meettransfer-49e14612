@@ -9,6 +9,26 @@ import { enUS } from "date-fns/locale";
 import type { Locale } from "date-fns";
 import { loadLocale, getCachedLocale } from "@/utils/dateFnsLocaleLoader";
 
+// Multi-language translations for promo banner
+const promoTranslations: Record<string, Record<string, string>> = {
+  return: { TR: "Dönüş", EN: "Return", DE: "Rückfahrt", FR: "Retour", RU: "Возврат", IT: "Ritorno", ES: "Regreso", AR: "العودة", UK: "Повернення", JA: "復路" },
+  discount: { TR: "İndirim", EN: "OFF", DE: "Rabatt", FR: "Réduction", RU: "Скидка", IT: "Sconto", ES: "Descuento", AR: "خصم", UK: "Знижка", JA: "割引" },
+  code: { TR: "Kod", EN: "Code", DE: "Code", FR: "Code", RU: "Код", IT: "Codice", ES: "Código", AR: "الرمز", UK: "Код", JA: "コード" },
+  validUntil: { TR: "Son Geçerlilik:", EN: "Valid until:", DE: "Gültig bis:", FR: "Valable jusqu'au:", RU: "Действует до:", IT: "Valido fino al:", ES: "Válido hasta:", AR: "صالح حتى:", UK: "Дійсний до:", JA: "有効期限:" },
+  click: { TR: "Tıkla →", EN: "Click →", DE: "Klicken →", FR: "Cliquer →", RU: "Нажмите →", IT: "Clicca →", ES: "Haz clic →", AR: "انقر ←", UK: "Натисніть →", JA: "クリック →" },
+  promoApplied: { 
+    TR: 'Promo kodu "{code}" uygulandı! Dönüş yolculuğunuzda %{discount} indirim kazandınız.',
+    EN: 'Promo code "{code}" applied! You\'ll get {discount}% off on your return trip.',
+    DE: 'Promo-Code "{code}" angewendet! Sie erhalten {discount}% Rabatt auf Ihre Rückfahrt.',
+    FR: 'Code promo "{code}" appliqué ! Vous bénéficiez de {discount}% de réduction sur votre trajet retour.',
+    RU: 'Промокод "{code}" применен! Вы получите скидку {discount}% на обратную поездку.',
+    IT: 'Codice promo "{code}" applicato! Riceverai uno sconto del {discount}% sul viaggio di ritorno.',
+    ES: '¡Código promocional "{code}" aplicado! Obtendrás {discount}% de descuento en tu viaje de regreso.',
+    AR: 'تم تطبيق رمز الخصم "{code}"! ستحصل على خصم {discount}% على رحلة العودة.',
+    UK: 'Промокод "{code}" застосовано! Ви отримаєте знижку {discount}% на зворотню поїздку.',
+    JA: 'プロモコード「{code}」が適用されました！復路で{discount}%割引を受けられます。'
+  }
+};
 interface ReturnTripPromoBannerProps {
   language: string;
   onApplyPromoCode?: (code: string) => void;
@@ -79,11 +99,10 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
         colors: ['#22c55e', '#16a34a', '#15803d', '#fbbf24', '#f59e0b']
       });
       
-      toast.success(
-        language === 'TR' 
-          ? `Promo kodu "${promoData.code}" uygulandı! Dönüş yolculuğunuzda %${promoData.discount_percentage} indirim kazandınız.`
-          : `Promo code "${promoData.code}" applied! You'll get ${promoData.discount_percentage}% off on your return trip.`
-      );
+      const message = (promoTranslations.promoApplied[language] || promoTranslations.promoApplied.EN)
+        .replace('{code}', promoData.code)
+        .replace('{discount}', String(promoData.discount_percentage));
+      toast.success(message);
     }
   };
 
@@ -138,15 +157,15 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
                 🎁
               </motion.span>
               <span className="font-bold text-green-700 dark:text-green-400 text-xs md:text-sm">
-                {language === 'TR' ? 'Dönüş' : 'Return'}: 
-                <span className="ml-1 text-sm md:text-base">%{promoData.discount_percentage} {language === 'TR' ? 'İndirim' : 'OFF'}</span>
+                {promoTranslations.return[language] || promoTranslations.return.EN}: 
+                <span className="ml-1 text-sm md:text-base">%{promoData.discount_percentage} {promoTranslations.discount[language] || promoTranslations.discount.EN}</span>
               </span>
             </div>
             
             {/* Promo Code - Visible on all screens */}
             <div className="flex items-center gap-1 bg-green-500/20 rounded-lg px-2 py-1 group-hover:bg-green-500/30 transition-colors">
               <span className="text-[10px] md:text-xs text-green-700 dark:text-green-300 font-medium">
-                {language === 'TR' ? 'Kod' : 'Code'}:
+                {promoTranslations.code[language] || promoTranslations.code.EN}:
               </span>
               <code className="font-mono font-bold text-green-700 dark:text-green-300 text-xs md:text-sm">
                 {promoData.code}
@@ -161,7 +180,7 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3 text-muted-foreground" />
                 <span className="text-[10px] md:text-xs text-muted-foreground">
-                  {language === 'TR' ? 'Son Geçerlilik:' : 'Valid until:'}
+                  {promoTranslations.validUntil[language] || promoTranslations.validUntil.EN}
                 </span>
                 <span className="text-[10px] md:text-xs font-bold text-foreground">
                   {expiryDate}
@@ -175,7 +194,7 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
               animate={{ x: [0, 3, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             >
-              {language === 'TR' ? 'Tıkla →' : 'Click →'}
+              {promoTranslations.click[language] || promoTranslations.click.EN}
             </motion.span>
           </div>
         </div>

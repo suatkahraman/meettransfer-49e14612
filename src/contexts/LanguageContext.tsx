@@ -264,6 +264,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "Get Quote",
     babySeatLabel: "Baby",
     freeWifi: "Free WiFi",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "Extra Options",
     returnShort: "Return",
@@ -2019,6 +2020,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "Angebot",
     babySeatLabel: "Baby",
     freeWifi: "Kostenloses WLAN",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "Zusätzliche Optionen",
     returnShort: "Rückfahrt",
@@ -3814,6 +3816,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "Devis",
     babySeatLabel: "Bébé",
     freeWifi: "WiFi Gratuit",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "Options supplémentaires",
     returnShort: "Retour",
@@ -5319,6 +5322,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "Запрос",
     babySeatLabel: "Детское",
     freeWifi: "Бесплатный WiFi",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "Дополнительные опции",
     returnShort: "Обратно",
@@ -6688,6 +6692,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "Preventivo",
     babySeatLabel: "Bimbo",
     freeWifi: "WiFi Gratuito",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "Opzioni Extra",
     returnShort: "Ritorno",
@@ -8104,6 +8109,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "Cotizar",
     babySeatLabel: "Bebé",
     freeWifi: "WiFi Gratis",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "Opciones Extra",
     returnShort: "Regreso",
@@ -9520,6 +9526,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "عرض سعر",
     babySeatLabel: "طفل",
     freeWifi: "واي فاي مجاني",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "خيارات إضافية",
     returnShort: "العودة",
@@ -10877,6 +10884,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "Fiyat Al",
     babySeatLabel: "Bebek",
     freeWifi: "Ücretsiz WiFi",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "Ek Seçenekler",
     returnShort: "Dönüş",
@@ -12439,6 +12447,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "Запит",
     babySeatLabel: "Дитяче",
     freeWifi: "Безкоштовний WiFi",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "Додаткові опції",
     returnShort: "Назад",
@@ -13771,6 +13780,7 @@ const translations: Record<Language, Record<string, string>> = {
     getQuote: "見積り",
     babySeatLabel: "ベビー",
     freeWifi: "無料WiFi",
+    googleReviews: "Google",
     // Extra Options (Form)
     extraOptions: "追加オプション",
     returnShort: "復路",
