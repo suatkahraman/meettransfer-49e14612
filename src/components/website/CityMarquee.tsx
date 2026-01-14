@@ -250,6 +250,7 @@ interface CityCardProps {
 
 const CityCard = ({ city, language, onClick }: CityCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   return (
     <motion.div
@@ -259,24 +260,30 @@ const CityCard = ({ city, language, onClick }: CityCardProps) => {
       className="relative flex-shrink-0 w-48 md:w-56 cursor-pointer group"
     >
       {/* Card */}
-      <div className="relative h-64 md:h-72 rounded-2xl overflow-hidden shadow-lg">
+      <div className="relative h-64 md:h-72 rounded-2xl overflow-hidden shadow-lg bg-muted">
+        {/* Loading/Fallback Background */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${city.gradient}`} />
+        
         {/* Real Image */}
-        <img
-          src={city.image}
-          alt={city.name}
-          loading="lazy"
-          onLoad={() => setImageLoaded(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${
-            imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-          } group-hover:scale-110`}
-        />
+        {!imageError && (
+          <img
+            src={city.image}
+            alt={city.name}
+            loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${
+              imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            } group-hover:scale-110`}
+          />
+        )}
         
         {/* Gradient Overlay */}
-        <div className={`absolute inset-0 bg-gradient-to-t ${city.gradient} via-transparent to-black/30`} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         
-        {/* Skeleton while loading */}
-        {!imageLoaded && (
-          <div className={`absolute inset-0 bg-gradient-to-br ${city.gradient} animate-pulse`} />
+        {/* Loading pulse animation */}
+        {!imageLoaded && !imageError && (
+          <div className="absolute inset-0 bg-white/10 animate-pulse" />
         )}
         
         {/* Popular Badge */}
@@ -298,7 +305,7 @@ const CityCard = ({ city, language, onClick }: CityCardProps) => {
         </div>
         
         {/* Content */}
-        <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent">
+        <div className="absolute inset-x-0 bottom-0 p-4">
           {/* City Name */}
           <h3 className="text-xl md:text-2xl font-bold text-white mb-1 drop-shadow-lg">
             {language === 'TR' ? city.nameTR : city.name}
