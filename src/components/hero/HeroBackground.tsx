@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useCallback } from "react";
+import { memo, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,7 @@ import heroFuturistic3 from "@/assets/hero-futuristic-3.jpg";
 import heroFuturistic4 from "@/assets/hero-futuristic-4.jpg";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 
-// Background images configuration
+// Background images configuration - optimized for fast loading
 const HERO_BACKGROUNDS = [
   { src: heroFuturistic1, label: "City Night", labelTR: "Gece Şehir" },
   { src: heroFuturistic2, label: "Airport Transfer", labelTR: "Havalimanı Transfer" },

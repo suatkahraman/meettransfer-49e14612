@@ -2,7 +2,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
 import { ArrowRight, Plane, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, memo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Import city images
 import istanbulImg from "@/assets/destinations/istanbul-city.jpg";
@@ -17,6 +18,19 @@ import fethiyeImg from "@/assets/destinations/fethiye-city.jpg";
 import marmarisImg from "@/assets/destinations/marmaris-city.jpg";
 import frankfurtImg from "@/assets/destinations/frankfurt-city.jpg";
 import athensImg from "@/assets/destinations/athens-city.jpg";
+
+// Preload critical images for faster display
+const preloadImages = (images: string[]) => {
+  images.forEach((src) => {
+    const img = new Image();
+    img.src = src;
+  });
+};
+
+// Preload first 4 images immediately (visible in viewport)
+if (typeof window !== 'undefined') {
+  preloadImages([istanbulImg, antalyaImg, bodrumImg, dalamanImg]);
+}
 
 // City data with images and starting prices
 const cities = [
@@ -248,9 +262,17 @@ interface CityCardProps {
   onClick: () => void;
 }
 
-const CityCard = ({ city, language, onClick }: CityCardProps) => {
+const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  // Preload image on mount for faster display
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setImageLoaded(true);
+    img.onerror = () => setImageError(true);
+    img.src = city.image;
+  }, [city.image]);
 
   return (
     <motion.div
@@ -261,18 +283,23 @@ const CityCard = ({ city, language, onClick }: CityCardProps) => {
     >
       {/* Card */}
       <div className="relative h-64 md:h-72 rounded-2xl overflow-hidden shadow-lg bg-muted">
-        {/* Loading/Fallback Background */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${city.gradient}`} />
+        {/* Skeleton Loading State */}
+        {!imageLoaded && !imageError && (
+          <Skeleton className="absolute inset-0 w-full h-full" />
+        )}
         
-        {/* Real Image */}
+        {/* Gradient Fallback Background */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${city.gradient} ${imageLoaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`} />
+        
+        {/* Real Image - Priority loading with eager decode */}
         {!imageError && (
           <img
             src={city.image}
             alt={city.name}
-            loading="lazy"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 ${
               imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             } group-hover:scale-110`}
           />
@@ -280,11 +307,6 @@ const CityCard = ({ city, language, onClick }: CityCardProps) => {
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        
-        {/* Loading pulse animation */}
-        {!imageLoaded && !imageError && (
-          <div className="absolute inset-0 bg-white/10 animate-pulse" />
-        )}
         
         {/* Popular Badge */}
         {city.popular && (
@@ -340,6 +362,8 @@ const CityCard = ({ city, language, onClick }: CityCardProps) => {
       </div>
     </motion.div>
   );
-};
+});
+
+CityCard.displayName = 'CityCard';
 
 export default CityMarquee;
