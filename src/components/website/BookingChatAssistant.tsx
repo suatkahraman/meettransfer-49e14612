@@ -1115,6 +1115,23 @@ function getConversationKey(visitorId: string): string {
   return `meet_transfer_chat_${visitorId}`;
 }
 
+// Check if user has seen onboarding before
+function hasSeenOnboarding(): boolean {
+  try {
+    return localStorage.getItem('meet_transfer_ai_onboarding') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function markOnboardingSeen(): void {
+  try {
+    localStorage.setItem('meet_transfer_ai_onboarding', 'true');
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 export default function BookingChatAssistant({ onApplyBooking, defaultOpen = false, mobileFloating = false }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
   const { setAIChatOpen } = useAIChat();
@@ -1122,7 +1139,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [searchParams, setSearchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [showHelpTooltip, setShowHelpTooltip] = useState(false);
+  const [currentTooltipMessage, setCurrentTooltipMessage] = useState<string>('');
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(!hasSeenOnboarding());
   const helpTooltipTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const tooltipIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -2024,14 +2045,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
 
   // Help tooltip messages
   const helpTooltipMessages: Record<string, string[]> = {
-    TR: ["Size yardımcı olabilirim! 🙋‍♀️", "Benimle daha kolay! ✨", "Rezervasyon yapayım mı? 🚗"],
-    EN: ["I can help you! 🙋‍♀️", "It's easier with me! ✨", "Shall I book for you? 🚗"],
-    DE: ["Ich kann Ihnen helfen! 🙋‍♀️", "Es ist einfacher mit mir! ✨", "Soll ich für Sie buchen? 🚗"],
-    FR: ["Je peux vous aider! 🙋‍♀️", "C'est plus facile avec moi! ✨", "Je réserve pour vous? 🚗"],
-    RU: ["Я могу вам помочь! 🙋‍♀️", "Со мной проще! ✨", "Забронировать для вас? 🚗"],
-    AR: ["يمكنني مساعدتك! 🙋‍♀️", "معي أسهل! ✨", "هل أحجز لك؟ 🚗"],
-    ES: ["¡Puedo ayudarte! 🙋‍♀️", "¡Es más fácil conmigo! ✨", "¿Reservo para ti? 🚗"],
-    IT: ["Posso aiutarti! 🙋‍♀️", "È più facile con me! ✨", "Prenoto per te? 🚗"],
+    TR: ["Size yardımcı olabilirim! 🙋‍♀️", "Benimle daha kolay! ✨", "Rezervasyon yapayım mı? 🚗", "Sadece söyleyin, hallederim! 💪", "Transfer mi? Hemen ayarlayalım! 🚙"],
+    EN: ["I can help you! 🙋‍♀️", "It's easier with me! ✨", "Shall I book for you? 🚗", "Just tell me, I'll handle it! 💪", "Need a transfer? Let's arrange it! 🚙"],
+    DE: ["Ich kann Ihnen helfen! 🙋‍♀️", "Es ist einfacher mit mir! ✨", "Soll ich für Sie buchen? 🚗", "Sagen Sie mir einfach Bescheid! 💪", "Transfer gesucht? Ich arrangiere es! 🚙"],
+    FR: ["Je peux vous aider! 🙋‍♀️", "C'est plus facile avec moi! ✨", "Je réserve pour vous? 🚗", "Dites-moi, je m'en occupe! 💪", "Besoin d'un transfert? Organisons-le! 🚙"],
+    RU: ["Я могу вам помочь! 🙋‍♀️", "Со мной проще! ✨", "Забронировать для вас? 🚗", "Скажите мне, я всё сделаю! 💪", "Нужен трансфер? Организуем! 🚙"],
+    AR: ["يمكنني مساعدتك! 🙋‍♀️", "معي أسهل! ✨", "هل أحجز لك؟ 🚗", "فقط أخبرني! 💪", "تحتاج نقل؟ سأرتبه! 🚙"],
+    ES: ["¡Puedo ayudarte! 🙋‍♀️", "¡Es más fácil conmigo! ✨", "¿Reservo para ti? 🚗", "¡Dímelo, yo me encargo! 💪", "¿Necesitas transfer? ¡Lo arreglo! 🚙"],
+    IT: ["Posso aiutarti! 🙋‍♀️", "È più facile con me! ✨", "Prenoto per te? 🚗", "Dimmi, ci penso io! 💪", "Serve un transfer? Lo organizzo! 🚙"],
   };
 
   const getRandomHelpMessage = useCallback(() => {
@@ -2039,13 +2060,186 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     return messages[Math.floor(Math.random() * messages.length)];
   }, [language]);
 
+  // Show tooltip every 30 seconds with different messages
+  useEffect(() => {
+    if (!mobileFloating || isOpen) {
+      // Clear timers when chat is open
+      if (helpTooltipTimerRef.current) {
+        clearTimeout(helpTooltipTimerRef.current);
+        helpTooltipTimerRef.current = null;
+      }
+      if (tooltipIntervalRef.current) {
+        clearInterval(tooltipIntervalRef.current);
+        tooltipIntervalRef.current = null;
+      }
+      setShowHelpTooltip(false);
+      return;
+    }
+
+    // Show first tooltip after 3 seconds
+    helpTooltipTimerRef.current = setTimeout(() => {
+      setCurrentTooltipMessage(getRandomHelpMessage());
+      setShowHelpTooltip(true);
+      
+      // Hide after 5 seconds
+      setTimeout(() => setShowHelpTooltip(false), 5000);
+    }, 3000);
+
+    // Then show tooltip every 30 seconds with a new random message
+    tooltipIntervalRef.current = setInterval(() => {
+      if (!isOpen) {
+        setCurrentTooltipMessage(getRandomHelpMessage());
+        setShowHelpTooltip(true);
+        
+        // Hide after 5 seconds
+        setTimeout(() => setShowHelpTooltip(false), 5000);
+      }
+    }, 30000);
+
+    return () => {
+      if (helpTooltipTimerRef.current) {
+        clearTimeout(helpTooltipTimerRef.current);
+      }
+      if (tooltipIntervalRef.current) {
+        clearInterval(tooltipIntervalRef.current);
+      }
+    };
+  }, [mobileFloating, isOpen, getRandomHelpMessage]);
+
+  // Handle first-time user click with onboarding animation
+  const handleAIButtonClick = useCallback(() => {
+    if (isFirstTimeUser) {
+      setShowOnboarding(true);
+      markOnboardingSeen();
+      setIsFirstTimeUser(false);
+      
+      // Show onboarding for 2 seconds before opening chat
+      setTimeout(() => {
+        setShowOnboarding(false);
+        setIsOpen(true);
+      }, 2000);
+    } else {
+      setIsOpen(true);
+    }
+  }, [isFirstTimeUser]);
+
+  // Onboarding messages
+  const onboardingMessages: Record<string, { title: string; subtitle: string }> = {
+    TR: { title: "Merhaba! Ben MT 🤖", subtitle: "Size transfer rezervasyonunda yardımcı olacağım!" },
+    EN: { title: "Hello! I'm MT 🤖", subtitle: "I'll help you with your transfer booking!" },
+    DE: { title: "Hallo! Ich bin MT 🤖", subtitle: "Ich helfe Ihnen bei Ihrer Transfer-Buchung!" },
+    FR: { title: "Bonjour! Je suis MT 🤖", subtitle: "Je vous aide pour votre réservation de transfert!" },
+    RU: { title: "Привет! Я MT 🤖", subtitle: "Помогу вам с бронированием трансфера!" },
+    AR: { title: "مرحباً! أنا MT 🤖", subtitle: "سأساعدك في حجز النقل!" },
+    ES: { title: "¡Hola! Soy MT 🤖", subtitle: "¡Te ayudaré con tu reserva de transfer!" },
+    IT: { title: "Ciao! Sono MT 🤖", subtitle: "Ti aiuterò con la prenotazione del transfer!" },
+  };
+
   // Mobile floating mode - only show floating button and panel
   if (mobileFloating) {
     return (
       <>
+        {/* Onboarding Animation Overlay */}
+        <AnimatePresence>
+          {showOnboarding && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[10000] flex items-center justify-center bg-background/90 backdrop-blur-md"
+            >
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="flex flex-col items-center gap-4 text-center px-8"
+              >
+                {/* Animated Robot Icon */}
+                <motion.div
+                  className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-2xl shadow-primary/40"
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                    rotate: [0, 5, -5, 0]
+                  }}
+                  transition={{ 
+                    duration: 1.5, 
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <Bot className="h-12 w-12 text-primary-foreground" />
+                </motion.div>
+                
+                {/* Welcome Text */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h2 className="text-2xl font-bold text-foreground mb-2">
+                    {(onboardingMessages[language] || onboardingMessages.EN).title}
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    {(onboardingMessages[language] || onboardingMessages.EN).subtitle}
+                  </p>
+                </motion.div>
+                
+                {/* Animated Features */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="flex gap-3 mt-2"
+                >
+                  {['🚗', '✈️', '💬'].map((emoji, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-xl"
+                      animate={{ 
+                        y: [0, -8, 0],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        duration: 1,
+                        repeat: Infinity,
+                        delay: i * 0.2,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      {emoji}
+                    </motion.div>
+                  ))}
+                </motion.div>
+                
+                {/* Loading indicator */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                  className="flex gap-1 mt-4"
+                >
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="w-2 h-2 rounded-full bg-primary"
+                      animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+                      transition={{ 
+                        duration: 0.6, 
+                        repeat: Infinity, 
+                        delay: i * 0.15 
+                      }}
+                    />
+                  ))}
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Mobile Floating Toggle Button - More prominent with animation */}
         <AnimatePresence>
-          {!isOpen && (
+          {!isOpen && !showOnboarding && (
             <>
               {/* Animated Help Tooltip */}
               <AnimatePresence>
@@ -2075,7 +2269,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       </motion.span>
                       
                       <p className="text-sm font-medium text-foreground whitespace-nowrap pr-2">
-                        {getRandomHelpMessage()}
+                        {currentTooltipMessage || getRandomHelpMessage()}
                       </p>
                       
                       {/* Arrow pointing to button */}
@@ -2102,7 +2296,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.9, opacity: 0 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsOpen(true)}
+                  onClick={handleAIButtonClick}
                   data-chat-trigger
                   className="fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
                   style={{
@@ -2111,8 +2305,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       "0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 3px hsl(var(--primary) / 0.2)",
                   }}
                 >
+                  {/* First-time user attention effect */}
+                  {isFirstTimeUser && (
+                    <>
+                      <motion.div
+                        className="absolute inset-0 rounded-full bg-primary"
+                        animate={{ scale: [1, 1.8, 1.8], opacity: [0.6, 0, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      <motion.div
+                        className="absolute inset-0 rounded-full bg-primary"
+                        animate={{ scale: [1, 1.5, 1.5], opacity: [0.4, 0, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+                      />
+                    </>
+                  )}
+                  
                   {/* Attention-grabbing pulse when tooltip is shown */}
-                  {showHelpTooltip && (
+                  {showHelpTooltip && !isFirstTimeUser && (
                     <motion.div
                       className="absolute inset-0 rounded-full bg-primary"
                       animate={{ scale: [1, 1.5, 1.5], opacity: [0.5, 0, 0] }}
