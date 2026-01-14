@@ -480,21 +480,8 @@ const BookingPage = () => {
           throw new Error("Failed to create reservation");
         }
 
-        // Navigate to customer info page with reservation code and pre-filled data
-        const customerInfoParams = new URLSearchParams({
-          reservationCode: reservationData.reservation.reservationCode,
-          reservationId: reservationData.reservation.id,
-        });
-        if (customerPhone) customerInfoParams.set("phone", customerPhone.trim());
-        if (customerEmail) customerInfoParams.set("email", customerEmail.trim());
-        if (customerName) customerInfoParams.set("name", customerName.trim());
-        
-        // Add return reservation code if exists
-        if (reservationData.returnReservation?.reservationCode) {
-          customerInfoParams.set("returnReservationCode", reservationData.returnReservation.reservationCode);
-        }
-        
-        navigate(`/quick-booking-info?${customerInfoParams.toString()}`);
+        // Navigate directly to confirm page with token
+        navigate(`/quick-booking-confirm?token=${data.confirmation_token}`);
         toast.success(t("bookingConfirmed") || "Booking confirmed! Please complete your details.");
       } else {
         // No price available - use old flow (waiting for admin to set price)
