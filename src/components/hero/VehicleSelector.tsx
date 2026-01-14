@@ -20,11 +20,13 @@ import vitoImg from "@/assets/vito-1.jpg";
 import vitoVipImg from "@/assets/vito-vip-1.jpg";
 import maybachImg from "@/assets/maybach-1.jpg";
 import sprinterImg from "@/assets/sprinter-1.jpg";
+import sedanImg from "@/assets/sedan-airport-1.jpg";
 
 // Lazy load heavy components
 const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
 
 const vehicleImages: Record<string, string> = {
+  'sedan': sedanImg,
   'mercedes-vito': vitoImg,
   'vip-mercedes': vitoVipImg,
   'maybach-minibus': maybachImg,
