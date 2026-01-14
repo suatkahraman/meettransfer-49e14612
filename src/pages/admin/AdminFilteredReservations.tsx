@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X, Car, Briefcase, Baby, Trash2 } from 'lucide-react';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X, Car, Briefcase, Baby, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { getCurrencySymbol } from '@/lib/currency';
 import { toast } from 'sonner';
 import {
@@ -90,11 +91,21 @@ const statusLabels: Record<string, string> = {
 };
 
 const filterTitles: Record<string, string> = {
-  'completed': 'Aylık Tamamlanan Transferler',
+  'completed': 'Tamamlanan Transferler',
   'new': 'Atama Bekleyen Transferler',
   'active': 'Aktif Transferler',
   'pending_admin_review': 'Admin Onayı Bekleyen Transferler',
 };
+
+interface GroupedDay {
+  date: string;
+  reservations: Reservation[];
+}
+
+interface GroupedMonth {
+  monthKey: string;
+  days: GroupedDay[];
+}
 
 const AdminFilteredReservations = () => {
   const navigate = useNavigate();
@@ -106,6 +117,8 @@ const AdminFilteredReservations = () => {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reservationToDelete, setReservationToDelete] = useState<Reservation | null>(null);
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
 
   const formatPrice = (price: number | null, currency: string | null) => {
     if (price === null) return '-';
@@ -130,15 +143,14 @@ const AdminFilteredReservations = () => {
         .order('pickup_date', { ascending: false });
 
       if (filter === 'completed') {
-        // Monthly completed reservations
+        // Last 3 months completed reservations
         const today = new Date();
-        const monthStart = startOfMonth(today);
-        const monthEnd = endOfMonth(today);
+        const threeMonthsAgo = subMonths(startOfMonth(today), 2);
         
         query = query
           .eq('status', 'completed')
-          .gte('updated_at', monthStart.toISOString())
-          .lte('updated_at', monthEnd.toISOString());
+          .gte('pickup_date', threeMonthsAgo.toISOString().split('T')[0])
+          .order('pickup_date', { ascending: false });
       } else if (filter === 'new') {
         // Pending assignment (new status = awaiting driver)
         query = query.eq('status', 'new');
@@ -162,6 +174,82 @@ const AdminFilteredReservations = () => {
 
     fetchReservations();
   }, [filter]);
+
+  // Group reservations by month and day for completed filter
+  const groupedReservations = useMemo((): GroupedMonth[] => {
+    if (filter !== 'completed') return [];
+
+    const monthGroups: Record<string, Record<string, Reservation[]>> = {};
+    
+    reservations.forEach(reservation => {
+      const date = reservation.pickup_date;
+      const monthKey = date.slice(0, 7); // "2026-01"
+      
+      if (!monthGroups[monthKey]) {
+        monthGroups[monthKey] = {};
+      }
+      if (!monthGroups[monthKey][date]) {
+        monthGroups[monthKey][date] = [];
+      }
+      monthGroups[monthKey][date].push(reservation);
+    });
+
+    // Sort months descending
+    const sortedMonths = Object.keys(monthGroups).sort((a, b) => b.localeCompare(a));
+    
+    return sortedMonths.map(monthKey => ({
+      monthKey,
+      days: Object.keys(monthGroups[monthKey])
+        .sort((a, b) => b.localeCompare(a))
+        .map(date => ({
+          date,
+          reservations: monthGroups[monthKey][date].sort((a, b) => 
+            a.pickup_time.localeCompare(b.pickup_time)
+          )
+        }))
+    }));
+  }, [reservations, filter]);
+
+  // Auto-expand current month
+  useEffect(() => {
+    if (groupedReservations.length > 0) {
+      const currentMonth = format(new Date(), 'yyyy-MM');
+      if (groupedReservations.some(g => g.monthKey === currentMonth)) {
+        setExpandedMonths(new Set([currentMonth]));
+      } else if (groupedReservations.length > 0) {
+        setExpandedMonths(new Set([groupedReservations[0].monthKey]));
+      }
+    }
+  }, [groupedReservations]);
+
+  const toggleMonth = (monthKey: string) => {
+    setExpandedMonths(prev => {
+      const next = new Set(prev);
+      if (next.has(monthKey)) {
+        next.delete(monthKey);
+      } else {
+        next.add(monthKey);
+      }
+      return next;
+    });
+  };
+
+  const toggleDay = (dayKey: string) => {
+    setExpandedDays(prev => {
+      const next = new Set(prev);
+      if (next.has(dayKey)) {
+        next.delete(dayKey);
+      } else {
+        next.add(dayKey);
+      }
+      return next;
+    });
+  };
+
+  const formatMonthLabel = (monthKey: string) => {
+    const date = new Date(monthKey + '-01');
+    return format(date, 'MMMM yyyy', { locale: tr });
+  };
 
   const handleApprove = async (reservation: Reservation) => {
     setProcessingId(reservation.id);
@@ -301,7 +389,160 @@ const AdminFilteredReservations = () => {
           <div className="text-center py-8 text-muted-foreground">Yükleniyor...</div>
         ) : reservations.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">Rezervasyon bulunamadı</div>
+        ) : filter === 'completed' ? (
+          // Grouped view for completed reservations
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground mb-4">
+              Toplam {reservations.length} tamamlanan transfer (son 3 ay)
+            </div>
+            
+            {groupedReservations.map(({ monthKey, days }) => (
+              <Collapsible
+                key={monthKey}
+                open={expandedMonths.has(monthKey)}
+                onOpenChange={() => toggleMonth(monthKey)}
+              >
+                <CollapsibleTrigger className="w-full">
+                  <Card className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {expandedMonths.has(monthKey) ? (
+                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                          )}
+                          <Calendar className="h-5 w-5 text-primary" />
+                          <span className="text-lg font-semibold capitalize">
+                            {formatMonthLabel(monthKey)}
+                          </span>
+                        </div>
+                        <Badge variant="secondary" className="text-sm">
+                          {days.reduce((sum, d) => sum + d.reservations.length, 0)} transfer
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent className="mt-2 ml-4 space-y-3">
+                  {days.map(({ date, reservations: dayReservations }) => (
+                    <Collapsible
+                      key={date}
+                      open={expandedDays.has(date)}
+                      onOpenChange={() => toggleDay(date)}
+                    >
+                      <CollapsibleTrigger className="w-full">
+                        <Card className="hover:shadow-sm transition-shadow border-l-4 border-l-primary/30">
+                          <CardContent className="p-3">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {expandedDays.has(date) ? (
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                )}
+                                <span className="font-medium">
+                                  {format(new Date(date), 'dd MMMM EEEE', { locale: tr })}
+                                </span>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {dayReservations.length} transfer
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent className="mt-2 ml-4 space-y-2">
+                        {dayReservations.map((reservation) => (
+                          <Card key={reservation.id} className="hover:shadow-md transition-shadow">
+                            <CardContent className="p-4">
+                              <div className="flex flex-col md:flex-row justify-between gap-4">
+                                <div className="flex-1 space-y-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <Badge className={statusColors[reservation.status] || 'bg-gray-100'}>
+                                      {statusLabels[reservation.status] || reservation.status}
+                                    </Badge>
+                                    {reservation.reservation_code && (
+                                      <Badge variant="outline" className="font-mono">
+                                        {reservation.reservation_code}
+                                      </Badge>
+                                    )}
+                                    <span className="font-medium">{formatPrice(reservation.price, reservation.price_currency)}</span>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Clock className="h-4 w-4 text-muted-foreground" />
+                                    <span>{reservation.pickup_time}</span>
+                                    <User className="h-4 w-4 text-muted-foreground ml-2" />
+                                    <span className="font-medium">{reservation.customer_name}</span>
+                                  </div>
+
+                                  <div className="flex items-start gap-2 text-sm">
+                                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                    <div className="flex flex-col">
+                                      <LocationDisplay 
+                                        address={reservation.pickup} 
+                                        placeName={reservation.pickup_place_name}
+                                        className="text-green-700"
+                                      />
+                                      <span className="text-muted-foreground">→</span>
+                                      <LocationDisplay 
+                                        address={reservation.dropoff} 
+                                        placeName={reservation.dropoff_place_name}
+                                        className="text-red-700"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {reservation.drivers && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <UserCheck className="h-4 w-4 text-muted-foreground" />
+                                      <span className="text-primary">{reservation.drivers.name}</span>
+                                    </div>
+                                  )}
+
+                                  <div className="flex items-center gap-3 text-sm flex-wrap">
+                                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                                      <Car className="h-3.5 w-3.5 text-primary" />
+                                      <span className="font-medium">{vehicleLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteClick(reservation); }}
+                                    disabled={processingId === reservation.id}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                    Sil
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={(e) => { e.stopPropagation(); navigate(`/admin/reservations/${reservation.id}?returnTo=${encodeURIComponent(currentPath)}`); }}
+                                  >
+                                    <Pencil className="h-4 w-4 mr-1" />
+                                    Düzenle
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            ))}
+          </div>
         ) : (
+          // Flat view for other filters
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground mb-4">
               Toplam {reservations.length} rezervasyon
@@ -361,7 +602,6 @@ const AdminFilteredReservations = () => {
                         </div>
                       )}
 
-                      {/* Vehicle & Capacity Info */}
                       <div className="flex items-center gap-3 text-sm flex-wrap">
                         <span className="flex items-center gap-1.5 text-muted-foreground">
                           <Car className="h-3.5 w-3.5 text-primary" />
