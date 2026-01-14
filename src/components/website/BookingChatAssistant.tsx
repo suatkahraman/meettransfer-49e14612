@@ -1109,6 +1109,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [showHelpTooltip, setShowHelpTooltip] = useState(false);
+  const helpTooltipTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -1563,6 +1565,34 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       hasAutoStartedRef.current = false;
     }
   }, [isOpen]);
+
+  // Show help tooltip animation after page load
+  useEffect(() => {
+    // Only show tooltip when chat is closed
+    if (isOpen) {
+      setShowHelpTooltip(false);
+      if (helpTooltipTimerRef.current) {
+        clearTimeout(helpTooltipTimerRef.current);
+      }
+      return;
+    }
+
+    // Show tooltip after 3 seconds delay
+    helpTooltipTimerRef.current = setTimeout(() => {
+      setShowHelpTooltip(true);
+      
+      // Hide tooltip after 5 seconds
+      helpTooltipTimerRef.current = setTimeout(() => {
+        setShowHelpTooltip(false);
+      }, 5000);
+    }, 3000);
+
+    return () => {
+      if (helpTooltipTimerRef.current) {
+        clearTimeout(helpTooltipTimerRef.current);
+      }
+    };
+  }, [isOpen]);
   
   // Auto-start recording after welcome message when voice is disabled or not available
   useEffect(() => {
@@ -1919,6 +1949,23 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     }
   };
 
+  // Help tooltip messages
+  const helpTooltipMessages: Record<string, string[]> = {
+    TR: ["Size yardımcı olabilirim! 🙋‍♀️", "Benimle daha kolay! ✨", "Rezervasyon yapayım mı? 🚗"],
+    EN: ["I can help you! 🙋‍♀️", "It's easier with me! ✨", "Shall I book for you? 🚗"],
+    DE: ["Ich kann Ihnen helfen! 🙋‍♀️", "Es ist einfacher mit mir! ✨", "Soll ich für Sie buchen? 🚗"],
+    FR: ["Je peux vous aider! 🙋‍♀️", "C'est plus facile avec moi! ✨", "Je réserve pour vous? 🚗"],
+    RU: ["Я могу вам помочь! 🙋‍♀️", "Со мной проще! ✨", "Забронировать для вас? 🚗"],
+    AR: ["يمكنني مساعدتك! 🙋‍♀️", "معي أسهل! ✨", "هل أحجز لك؟ 🚗"],
+    ES: ["¡Puedo ayudarte! 🙋‍♀️", "¡Es más fácil conmigo! ✨", "¿Reservo para ti? 🚗"],
+    IT: ["Posso aiutarti! 🙋‍♀️", "È più facile con me! ✨", "Prenoto per te? 🚗"],
+  };
+
+  const getRandomHelpMessage = useCallback(() => {
+    const messages = helpTooltipMessages[language] || helpTooltipMessages.EN;
+    return messages[Math.floor(Math.random() * messages.length)];
+  }, [language]);
+
   // Mobile floating mode - only show floating button and panel
   if (mobileFloating) {
     return (
@@ -1926,45 +1973,95 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         {/* Mobile Floating Toggle Button - More prominent with animation */}
         <AnimatePresence>
           {!isOpen && (
-            <MobileTooltip
-              content={
-                <span className="font-medium">
-                  {language === "TR" ? "AI Rezervasyon Asistanı" : "AI Booking Assistant"}
-                </span>
-              }
-              side="left"
-              contentClassName="bg-primary text-primary-foreground border border-primary"
-              longPressThreshold={400}
-              autoHideDelay={2500}
-            >
-              <motion.button
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsOpen(true)}
-                data-chat-trigger
-                className="fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
-                style={{
-                  WebkitTapHighlightColor: "transparent",
-                  boxShadow:
-                    "0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 3px hsl(var(--primary) / 0.2)",
-                }}
+            <>
+              {/* Animated Help Tooltip */}
+              <AnimatePresence>
+                {showHelpTooltip && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20, scale: 0.8 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: 20, scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    className="fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] right-[5rem] z-[9999] pointer-events-none"
+                  >
+                    <div className="relative bg-card border-2 border-primary/30 rounded-2xl shadow-xl px-4 py-2.5">
+                      {/* Hand wave animation */}
+                      <motion.span
+                        className="absolute -left-3 -top-3 text-2xl"
+                        animate={{ 
+                          rotate: [0, 20, -10, 20, 0],
+                          scale: [1, 1.1, 1, 1.1, 1]
+                        }}
+                        transition={{ 
+                          duration: 1.5, 
+                          repeat: Infinity, 
+                          ease: "easeInOut"
+                        }}
+                      >
+                        👋
+                      </motion.span>
+                      
+                      <p className="text-sm font-medium text-foreground whitespace-nowrap pr-2">
+                        {getRandomHelpMessage()}
+                      </p>
+                      
+                      {/* Arrow pointing to button */}
+                      <div className="absolute right-[-8px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-l-8 border-transparent border-l-card" />
+                      <div className="absolute right-[-10px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-8 border-b-8 border-l-8 border-transparent border-l-primary/30" style={{ zIndex: -1 }} />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              
+              <MobileTooltip
+                content={
+                  <span className="font-medium">
+                    {language === "TR" ? "AI Rezervasyon Asistanı" : "AI Booking Assistant"}
+                  </span>
+                }
+                side="left"
+                contentClassName="bg-primary text-primary-foreground border border-primary"
+                longPressThreshold={400}
+                autoHideDelay={2500}
               >
-                <motion.div
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                <motion.button
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsOpen(true)}
+                  data-chat-trigger
+                  className="fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
+                  style={{
+                    WebkitTapHighlightColor: "transparent",
+                    boxShadow:
+                      "0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 3px hsl(var(--primary) / 0.2)",
+                  }}
                 >
-                  <Sparkles className="h-4 w-4" />
-                </motion.div>
-                <span className="font-bold text-sm">AI</span>
-                <motion.span
-                  className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
-              </motion.button>
-            </MobileTooltip>
+                  {/* Attention-grabbing pulse when tooltip is shown */}
+                  {showHelpTooltip && (
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-primary"
+                      animate={{ scale: [1, 1.5, 1.5], opacity: [0.5, 0, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                  )}
+                  
+                  <motion.div
+                    animate={{ rotate: [0, 15, -15, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                  </motion.div>
+                  <span className="font-bold text-sm">AI</span>
+                  <motion.span
+                    className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-white"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                </motion.button>
+              </MobileTooltip>
+            </>
           )}
         </AnimatePresence>
 
