@@ -43,8 +43,8 @@ export const useActivePromoCode = (appliesTo: string = "return_transfer") => {
         // Fallback to hardcoded value if DB fetch fails
         setPromoCode({
           id: "fallback",
-          code: "MEET30RETURN",
-          discount_percentage: 30,
+          code: "MEET25RETURN",
+          discount_percentage: 25,
           description: null,
           applies_to: "return_transfer",
           is_active: true,

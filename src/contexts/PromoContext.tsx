@@ -16,8 +16,8 @@ interface PromoContextType {
 
 // Default fallback values
 const DEFAULT_PROMO: PromoCodeData = {
-  code: "MEET30RETURN",
-  discountPercentage: 30,
+  code: "MEET25RETURN",
+  discountPercentage: 25,
   isActive: true,
   validUntil: null,
 };
