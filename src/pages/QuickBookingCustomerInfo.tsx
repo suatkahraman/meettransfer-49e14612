@@ -50,7 +50,8 @@ const vehicleLabels: Record<string, string> = {
   minibus: "Mercedes Sprinter",
 };
 
-const VALID_PROMO_CODES = ['Meet25Return', 'MEET25RETURN', 'GIDISDONUS', 'RETURN25', 'MEET30RETURN'];
+// Valid promo codes - dynamically validated against database, these are just fallback hints
+const FALLBACK_PROMO_CODES = ['MEET25RETURN', 'GIDISDONUS', 'RETURN25'];
 
 export default function QuickBookingCustomerInfo() {
   const { t, language } = useLanguage();

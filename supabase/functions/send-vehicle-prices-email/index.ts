@@ -310,6 +310,8 @@ const getLocale = (lang: string): string => {
   return locales[lang] || 'en-GB';
 };
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -323,6 +325,34 @@ serve(async (req) => {
         JSON.stringify({ success: false, error: "Email service not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Initialize Supabase client to fetch active promo code
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Fetch active promo code from database
+    let activePromoCode = "MEET25RETURN";
+    let activePromoDiscount = 25;
+    
+    try {
+      const { data: promoData, error: promoError } = await supabase
+        .from('promo_codes')
+        .select('code, discount_percentage')
+        .eq('is_active', true)
+        .eq('applies_to', 'return_transfer')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (promoData && !promoError) {
+        activePromoCode = promoData.code;
+        activePromoDiscount = promoData.discount_percentage;
+        console.log(`Using active promo from DB: ${activePromoCode} (${activePromoDiscount}%)`);
+      }
+    } catch (e) {
+      console.log('Failed to fetch promo from DB, using defaults');
     }
 
     const resend = new Resend(resendApiKey);
@@ -511,12 +541,12 @@ ${getEmailHeader(`💰 ${t.yourPriceQuote}`, undefined, lang)}
       </tr>
     </table>
 
-    <!-- Special Offer -->
+    <!-- Special Offer - Dynamic from DB -->
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 24px; background: linear-gradient(135deg, #faf089 0%, #f6e05e 100%); border-radius: 8px;">
       <tr>
         <td style="padding: 16px; text-align: center;">
           <p style="margin: 0; font-size: 16px;">🎁 <strong>${t.roundTripDiscount}</strong></p>
-          <p style="margin: 8px 0 0; color: #744210; font-size: 14px;">${t.bookReturn} <strong>25% ${t.offReturn}</strong> ${t.useCode}: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">MEET25RETURN</code></p>
+          <p style="margin: 8px 0 0; color: #744210; font-size: 14px;">${t.bookReturn} <strong>${activePromoDiscount}% ${t.offReturn}</strong> ${t.useCode}: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">${activePromoCode}</code></p>
         </td>
       </tr>
     </table>
@@ -549,8 +579,8 @@ ${vehiclePrices
 
 ${t.completeBooking}: https://meet-transfer.com
 
-🎁 ${t.roundTripDiscount} ${t.bookReturn} 25% ${t.offReturn}!
-${t.useCode}: MEET25RETURN
+🎁 ${t.roundTripDiscount} ${t.bookReturn} ${activePromoDiscount}% ${t.offReturn}!
+${t.useCode}: ${activePromoCode}
 
 ${t.needHelp}:
 📧 info@meettransfer.app

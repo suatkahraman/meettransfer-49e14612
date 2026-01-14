@@ -1648,7 +1648,7 @@ const ReservationForm = () => {
                     {isPromoCodeValid === true && (
                       <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 flex items-center gap-1 bg-green-50 dark:bg-green-950/30 px-2 py-1 rounded">
                         <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                        {language === 'TR' ? 'Dönüşte %30 indirim kazandınız!' : '30% off on return transfer!'}
+                        {language === 'TR' ? `Dönüşte %${PROMO_DISCOUNT_PERCENTAGE} indirim kazandınız!` : `${PROMO_DISCOUNT_PERCENTAGE}% off on return transfer!`}
                       </p>
                     )}
                     {isPromoCodeValid === false && promoCodeError && (
@@ -1724,7 +1724,7 @@ const ReservationForm = () => {
                               : (t('language') === 'TR' ? 'Dönüş İndirimi' : 'Return Discount')}
                           </span>
                           <span className="font-bold">
-                            ({isPromoCodeValid ? '30%' : '10%'})
+                            ({isPromoCodeValid ? `${PROMO_DISCOUNT_PERCENTAGE}%` : `${RETURN_DISCOUNT_PERCENTAGE}%`})
                           </span>
                         </span>
                         <span className="font-semibold text-xs sm:text-sm text-green-600 dark:text-green-400">

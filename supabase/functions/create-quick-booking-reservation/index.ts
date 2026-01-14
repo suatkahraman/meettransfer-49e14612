@@ -346,8 +346,8 @@ serve(async (req) => {
             ? requestData.price + (requestData.returnPrice || 0)
             : requestData.price;
 
-          // Return trip discount is always 25% - calculated from main price
-          const discountPercent = 25;
+          // Return trip discount is dynamically fetched from DB or calculated from frontend prices
+          const discountPercent = requestData.returnPrice && requestData.price ? Math.round((1 - requestData.returnPrice / requestData.price) * 100) : 25;
           
           // Calculate discount based on frontend prices
           // If return price is less than main price, calculate the discount

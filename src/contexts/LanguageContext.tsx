@@ -12227,11 +12227,11 @@ const translations: Record<Language, Record<string, string>> = {
     hourlyDailyKmLimit: "Günlük Limit: 100 KM",
     hourlySameCityOnly: "Saatlik Kiralama Sadece Aynı Şehir İçinde Geçerlidir",
     
-    // Blog CTA Component
-    blogCtaDiscountBadge: "Dönüş transferlerinde %30 İNDİRİM",
+    // Blog CTA Component - Note: BlogCTA now uses dynamic values from usePromo
+    blogCtaDiscountBadge: "Dönüş transferlerinde %25 İNDİRİM",
     blogCtaTitle: "Premium Transferinizi Rezerve Edin",
-    blogCtaReturnDiscount: "Gidiş-Dönüş Transferler – %30 İNDİRİM!",
-    blogCtaReturnDiscountDesc: "Varış ve dönüş havalimanı transferini birlikte rezerve edin ve anında %30 tasarruf edin",
+    blogCtaReturnDiscount: "Gidiş-Dönüş Transferler – %25 İNDİRİM!",
+    blogCtaReturnDiscountDesc: "Varış ve dönüş havalimanı transferini birlikte rezerve edin ve anında %25 tasarruf edin",
     blogCtaPromoCode: "Dönüşte Promosyon Kodu kullanın",
     blogCtaDescription: "Profesyonel şoförler, lüks Mercedes filosu, 7/24 karşılama hizmeti. Gizli ücret olmadan sabit fiyatlar.",
     blogCtaRequestPrice: "Şimdi Fiyat Alın",

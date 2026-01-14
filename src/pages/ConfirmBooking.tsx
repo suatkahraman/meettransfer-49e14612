@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { usePromo } from "@/contexts/PromoContext";
 
 export default function ConfirmBooking() {
   const [searchParams] = useSearchParams();
@@ -11,6 +12,10 @@ export default function ConfirmBooking() {
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { promoCode } = usePromo();
+  
+  // Get dynamic discount from context
+  const discountPercent = promoCode?.discountPercentage || 25;
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -89,7 +94,7 @@ export default function ConfirmBooking() {
           <div className="bg-muted/50 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium mb-2">🎁 Special Offer</p>
             <p className="text-sm text-muted-foreground">
-              Book a round-trip (return transfer) and receive a <strong>25% discount</strong> on
+              Book a round-trip (return transfer) and receive a <strong>{discountPercent}% discount</strong> on
               your return transfer!
             </p>
           </div>

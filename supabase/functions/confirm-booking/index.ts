@@ -20,6 +20,25 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Fetch active promo code from database
+    let activePromoDiscount = 25;
+    try {
+      const { data: promoData } = await supabase
+        .from('promo_codes')
+        .select('discount_percentage')
+        .eq('is_active', true)
+        .eq('applies_to', 'return_transfer')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (promoData) {
+        activePromoDiscount = promoData.discount_percentage;
+      }
+    } catch (e) {
+      console.log('Failed to fetch promo from DB, using default 25%');
+    }
+
     const { token } = await req.json();
 
     if (!token) {
@@ -101,7 +120,7 @@ You can also create new reservations from your account.
 👉 ${customerLink}
 
 🎁 Special offer:
-If you book a round-trip (return transfer), you will receive a 25% discount on your return transfer.`;
+If you book a round-trip (return transfer), you will receive a ${activePromoDiscount}% discount on your return transfer.`;
 
       // Send WhatsApp confirmation
       await sendWhatsAppMessage(
