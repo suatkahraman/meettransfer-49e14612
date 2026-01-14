@@ -39,6 +39,11 @@ import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 // New premium images
 import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+
+// Sedan images
+import sedanAirport1 from "@/assets/sedan-airport-1.jpg";
+import sedanExterior2 from "@/assets/sedan-exterior-2.jpg";
+import sedanInterior3 from "@/assets/sedan-interior-3.jpg";
 import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
 import maybachUltraLuxury from "@/assets/maybach-ultra-luxury.jpg";
 import sprinterHotelArrival from "@/assets/sprinter-hotel-arrival.jpg";
@@ -103,9 +108,9 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
     ],
     images: [
-      { src: vitoAirportPremium, alt: "Luxury sedan airport transfer with professional chauffeur" },
-      { src: luxuryAirportTransferTurkey, alt: "Executive sedan transfer Turkey" },
-      { src: meetTransferChauffeurPromo, alt: "Meet Transfer sedan chauffeur service" },
+      { src: sedanAirport1, alt: "Executive sedan airport transfer with professional chauffeur" },
+      { src: sedanExterior2, alt: "Elegant silver sedan for business transfers" },
+      { src: sedanInterior3, alt: "Premium sedan interior with leather seats" },
     ],
   },
   {
