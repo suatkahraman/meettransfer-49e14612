@@ -27,6 +27,8 @@ import marmarisHero from "@/assets/blog/marmaris-transfer-hero.jpg";
 import oludenizHero from "@/assets/blog/oludeniz-transfer-hero.jpg";
 import aydinHero from "@/assets/blog/aydin-transfer-hero.jpg";
 import muglaHero from "@/assets/blog/mugla-transfer-hero.jpg";
+import frankfurtHero from "@/assets/blog/frankfurt-transfer-hero.jpg";
+import athensHero from "@/assets/blog/athens-transfer-hero.jpg";
 
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -174,6 +176,26 @@ const BlogPage = () => {
       readTime: 14,
       date: "2025-01-12",
       image: muglaHero,
+    },
+    {
+      id: "frankfurt-airport-transfer-guide",
+      titleKey: "blogFrankfurtTitle",
+      descriptionKey: "blogFrankfurtDesc",
+      category: "Frankfurt",
+      categoryKey: "frankfurt",
+      readTime: 15,
+      date: "2025-01-14",
+      image: frankfurtHero,
+    },
+    {
+      id: "athens-airport-transfer-guide",
+      titleKey: "blogAthensTitle",
+      descriptionKey: "blogAthensDesc",
+      category: "Athens",
+      categoryKey: "athens",
+      readTime: 16,
+      date: "2025-01-14",
+      image: athensHero,
     },
   ], []);
 
