@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown, Trash2, CheckCircle2 } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown, Trash2, CheckCircle2, Clock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MobileTooltip } from "@/components/ui/mobile-tooltip";
@@ -2561,6 +2561,79 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       </div>
                     )}
                     
+                    {/* Waiting for Admin Price Animation - Mobile */}
+                    {waitingForPrice && !isLoading && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex gap-2"
+                      >
+                        <motion.div 
+                          className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30"
+                          animate={{ 
+                            scale: [1, 1.15, 1],
+                            rotate: [0, 5, -5, 0]
+                          }}
+                          transition={{ 
+                            duration: 2, 
+                            repeat: Infinity, 
+                            ease: "easeInOut" 
+                          }}
+                        >
+                          <Clock className="h-3 w-3 text-white" />
+                        </motion.div>
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl px-3 py-2.5 border border-amber-200 dark:border-amber-800 max-w-[85%]">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <motion.div
+                              className="flex gap-0.5"
+                            >
+                              {[0, 1, 2].map((i) => (
+                                <motion.div
+                                  key={i}
+                                  className="w-1.5 h-1.5 bg-amber-500 rounded-full"
+                                  animate={{
+                                    scale: [1, 1.3, 1],
+                                    opacity: [1, 0.6, 1],
+                                  }}
+                                  transition={{
+                                    duration: 1,
+                                    repeat: Infinity,
+                                    delay: i * 0.2,
+                                  }}
+                                />
+                              ))}
+                            </motion.div>
+                            <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                              {language === "TR" ? "Fiyat Bekleniyor" : "Waiting for Price"}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-amber-600 dark:text-amber-400 leading-relaxed">
+                            {language === "TR" 
+                              ? "Operasyon yetkilimiz bu güzergah için en iyi fiyatı belirliyor. Lütfen bekleyin..." 
+                              : "Our team is determining the best price for this route. Please wait..."}
+                          </p>
+                          <div className="mt-2 flex items-center gap-1.5">
+                            <motion.div
+                              className="h-1 flex-1 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden"
+                            >
+                              <motion.div
+                                className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+                                animate={{
+                                  x: ["-100%", "200%"],
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  ease: "easeInOut",
+                                }}
+                                style={{ width: "50%" }}
+                              />
+                            </motion.div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                    
                     {/* AI Speaking Indicator - Mobile */}
                     {isSpeaking && !isLoading && (
                       <motion.div 
@@ -3062,6 +3135,75 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       />
                     ))}
                   </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+          
+          {/* Waiting for Admin Price Animation - Desktop */}
+          {waitingForPrice && !isTyping && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex gap-2.5 justify-start"
+            >
+              <motion.div 
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30"
+                animate={{ 
+                  scale: [1, 1.15, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
+              >
+                <Clock className="h-4 w-4 text-white" />
+              </motion.div>
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl px-4 py-3 border border-amber-200 dark:border-amber-800 max-w-[85%]">
+                <div className="flex items-center gap-2 mb-2">
+                  <motion.div className="flex gap-1">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-2 h-2 bg-amber-500 rounded-full"
+                        animate={{
+                          scale: [1, 1.3, 1],
+                          opacity: [1, 0.6, 1],
+                        }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                  <span className="text-sm font-bold text-amber-700 dark:text-amber-300">
+                    {language === "TR" ? "Fiyat Bekleniyor" : "Waiting for Price"}
+                  </span>
+                </div>
+                <p className="text-xs text-amber-600 dark:text-amber-400 leading-relaxed">
+                  {language === "TR" 
+                    ? "Operasyon yetkilimiz bu güzergah için en iyi fiyatı belirliyor. Lütfen bekleyin..." 
+                    : "Our team is determining the best price for this route. Please wait..."}
+                </p>
+                <div className="mt-3 flex items-center gap-2">
+                  <motion.div className="h-1.5 flex-1 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+                      animate={{
+                        x: ["-100%", "200%"],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      style={{ width: "50%" }}
+                    />
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
