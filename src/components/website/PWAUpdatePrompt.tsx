@@ -1,9 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, X, Sparkles, Rocket } from "lucide-react";
+import { RefreshCw, X, Sparkles, Rocket, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { registerSW } from "virtual:pwa-register";
+
+interface VersionInfo {
+  version: string;
+  releaseDate: string;
+  notes: {
+    TR: string;
+    EN: string;
+    DE: string;
+    FR: string;
+  };
+}
 
 /**
  * Registers the PWA service worker (vite-plugin-pwa, registerType=prompt)
@@ -28,6 +39,7 @@ export function PWAUpdatePrompt() {
   const { language } = useLanguage();
   const [showPrompt, setShowPrompt] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null);
   const lastPromptedSwUrlRef = useRef<string | null>(null);
 
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
@@ -47,7 +59,7 @@ export function PWAUpdatePrompt() {
       return;
     }
 
-    const showUpdatePrompt = () => {
+    const showUpdatePrompt = async () => {
       const waitingUrl = registrationRef.current?.waiting?.scriptURL ?? null;
       console.log("[PWA Update] 🚀 Showing update prompt!", { waitingUrl });
 
@@ -55,6 +67,18 @@ export function PWAUpdatePrompt() {
       if (waitingUrl && lastPromptedSwUrlRef.current === waitingUrl) {
         console.log("[PWA Update] Prompt already shown for this version, skipping");
         return;
+      }
+
+      // Fetch version info with cache busting
+      try {
+        const response = await fetch(`/version.json?t=${Date.now()}`);
+        if (response.ok) {
+          const data = await response.json();
+          setVersionInfo(data);
+          console.log("[PWA Update] Version info loaded:", data);
+        }
+      } catch (e) {
+        console.log("[PWA Update] Could not fetch version info:", e);
       }
 
       lastPromptedSwUrlRef.current = waitingUrl;
@@ -303,6 +327,11 @@ export function PWAUpdatePrompt() {
                 <div className="flex-1 min-w-0">
                   <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
                     {texts.title}
+                    {versionInfo && (
+                      <span className="text-xs font-normal text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                        v{versionInfo.version}
+                      </span>
+                    )}
                     <motion.div
                       animate={{ rotate: [0, 20, -20, 0], scale: [1, 1.2, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
@@ -310,9 +339,30 @@ export function PWAUpdatePrompt() {
                       <Sparkles className="h-4 w-4 text-accent" />
                     </motion.div>
                   </h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {texts.description}
-                  </p>
+                  
+                  {/* Version notes */}
+                  {versionInfo && (
+                    <p className="text-xs text-foreground/80 mt-1 line-clamp-2">
+                      {versionInfo.notes[language as keyof typeof versionInfo.notes] || versionInfo.notes.EN}
+                    </p>
+                  )}
+                  
+                  {/* Release date */}
+                  {versionInfo && (
+                    <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(versionInfo.releaseDate).toLocaleDateString(
+                        language === 'TR' ? 'tr-TR' : language === 'DE' ? 'de-DE' : language === 'FR' ? 'fr-FR' : 'en-US',
+                        { day: 'numeric', month: 'long', year: 'numeric' }
+                      )}
+                    </p>
+                  )}
+                  
+                  {!versionInfo && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {texts.description}
+                    </p>
+                  )}
                 </div>
                 
                 {/* Dismiss button */}

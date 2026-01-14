@@ -1,0 +1,10 @@
+{
+  "version": "2.5.0",
+  "releaseDate": "2025-01-14",
+  "notes": {
+    "TR": "Acenta şehir seçimi güncellendi, PWA güncelleme sistemi iyileştirildi",
+    "EN": "Agency city selection updated, PWA update system improved",
+    "DE": "Agenturstadt-Auswahl aktualisiert, PWA-Update-System verbessert",
+    "FR": "Sélection de ville d'agence mise à jour, système de mise à jour PWA amélioré"
+  }
+}
