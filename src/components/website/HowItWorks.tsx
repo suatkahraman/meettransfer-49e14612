@@ -1,135 +1,265 @@
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Search, CreditCard, Car, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { MapPin, Shield, Car, ArrowRight, CheckCircle2, Sparkles, Clock, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// Complete translations for all languages
+const translations: Record<string, {
+  badge: string;
+  title: string;
+  subtitle: string;
+  cta: string;
+  steps: Array<{
+    title: string;
+    desc: string;
+    features: string[];
+  }>;
+}> = {
+  en: {
+    badge: "Simple Booking Process",
+    title: "How It Works",
+    subtitle: "Book your premium airport transfer in 3 simple steps. Fast, secure, and hassle-free.",
+    cta: "Book Your Transfer Now",
+    steps: [
+      {
+        title: "Enter Your Journey Details",
+        desc: "Select pickup and drop-off locations, choose your travel date and time. View all available vehicles with transparent, fixed pricing.",
+        features: ["Instant price quote", "All vehicle options", "24/7 availability"],
+      },
+      {
+        title: "Secure Your Booking",
+        desc: "Add passenger details and special requests. Complete payment securely and receive instant confirmation with your digital voucher.",
+        features: ["256-bit encryption", "Instant confirmation", "Free cancellation"],
+      },
+      {
+        title: "Enjoy Your Transfer",
+        desc: "Your professional chauffeur will meet you with a name sign. We track your flight and adjust pickup time for any delays.",
+        features: ["Meet & greet service", "Flight monitoring", "Professional drivers"],
+      },
+    ],
+  },
+  tr: {
+    badge: "Kolay Rezervasyon Süreci",
+    title: "Nasıl Çalışır",
+    subtitle: "Premium havalimanı transferinizi 3 kolay adımda rezerve edin. Hızlı, güvenli ve zahmetsiz.",
+    cta: "Hemen Rezervasyon Yap",
+    steps: [
+      {
+        title: "Yolculuk Detaylarını Girin",
+        desc: "Alış ve bırakış noktalarını seçin, seyahat tarihi ve saatinizi belirleyin. Şeffaf ve sabit fiyatlarla tüm araç seçeneklerini görüntüleyin.",
+        features: ["Anında fiyat teklifi", "Tüm araç seçenekleri", "7/24 müsaitlik"],
+      },
+      {
+        title: "Rezervasyonunuzu Tamamlayın",
+        desc: "Yolcu bilgilerini ve özel isteklerinizi ekleyin. Güvenli ödeme yapın ve dijital voucherınızla anında onay alın.",
+        features: ["256-bit şifreleme", "Anında onay", "Ücretsiz iptal"],
+      },
+      {
+        title: "Transferin Keyfini Çıkarın",
+        desc: "Profesyonel şoförünüz sizi isim tabelasıyla karşılayacak. Uçuşunuzu takip eder, gecikmelerde alış saatini ayarlarız.",
+        features: ["Karşılama hizmeti", "Uçuş takibi", "Profesyonel sürücüler"],
+      },
+    ],
+  },
+  de: {
+    badge: "Einfacher Buchungsprozess",
+    title: "So Funktioniert Es",
+    subtitle: "Buchen Sie Ihren Premium-Flughafentransfer in 3 einfachen Schritten. Schnell, sicher und unkompliziert.",
+    cta: "Jetzt Transfer Buchen",
+    steps: [
+      {
+        title: "Reisedetails Eingeben",
+        desc: "Wählen Sie Abhol- und Zielort, Datum und Uhrzeit. Sehen Sie alle Fahrzeuge mit transparenten Festpreisen.",
+        features: ["Sofortiger Preis", "Alle Fahrzeugoptionen", "24/7 verfügbar"],
+      },
+      {
+        title: "Buchung Bestätigen",
+        desc: "Fügen Sie Passagierdaten und Sonderwünsche hinzu. Bezahlen Sie sicher und erhalten Sie sofortige Bestätigung.",
+        features: ["256-Bit Verschlüsselung", "Sofortige Bestätigung", "Kostenlose Stornierung"],
+      },
+      {
+        title: "Transfer Genießen",
+        desc: "Ihr professioneller Chauffeur erwartet Sie mit Namensschild. Wir verfolgen Ihren Flug und passen die Abholzeit an.",
+        features: ["Meet & Greet", "Flugüberwachung", "Professionelle Fahrer"],
+      },
+    ],
+  },
+  fr: {
+    badge: "Processus de Réservation Simple",
+    title: "Comment Ça Marche",
+    subtitle: "Réservez votre transfert aéroport premium en 3 étapes simples. Rapide, sécurisé et sans tracas.",
+    cta: "Réserver Maintenant",
+    steps: [
+      {
+        title: "Entrez Vos Détails de Voyage",
+        desc: "Sélectionnez les lieux de prise en charge et de dépose, choisissez date et heure. Consultez tous les véhicules avec prix fixes transparents.",
+        features: ["Devis instantané", "Tous les véhicules", "Disponible 24/7"],
+      },
+      {
+        title: "Confirmez Votre Réservation",
+        desc: "Ajoutez les détails passagers et demandes spéciales. Payez en sécurité et recevez une confirmation instantanée.",
+        features: ["Cryptage 256-bit", "Confirmation instantanée", "Annulation gratuite"],
+      },
+      {
+        title: "Profitez du Transfert",
+        desc: "Votre chauffeur professionnel vous accueille avec pancarte nominative. Nous suivons votre vol et ajustons l'heure.",
+        features: ["Service d'accueil", "Suivi de vol", "Chauffeurs professionnels"],
+      },
+    ],
+  },
+  ru: {
+    badge: "Простой Процесс Бронирования",
+    title: "Как Это Работает",
+    subtitle: "Забронируйте премиум-трансфер из аэропорта за 3 простых шага. Быстро, безопасно и без хлопот.",
+    cta: "Забронировать Трансфер",
+    steps: [
+      {
+        title: "Введите Детали Поездки",
+        desc: "Выберите места посадки и высадки, дату и время поездки. Посмотрите все автомобили с прозрачными фиксированными ценами.",
+        features: ["Мгновенный расчёт", "Все варианты авто", "Доступно 24/7"],
+      },
+      {
+        title: "Подтвердите Бронирование",
+        desc: "Добавьте данные пассажиров и особые пожелания. Оплатите безопасно и получите мгновенное подтверждение.",
+        features: ["256-бит шифрование", "Мгновенное подтверждение", "Бесплатная отмена"],
+      },
+      {
+        title: "Наслаждайтесь Поездкой",
+        desc: "Профессиональный водитель встретит вас с табличкой. Мы отслеживаем рейс и корректируем время при задержках.",
+        features: ["Встреча с табличкой", "Отслеживание рейса", "Профессиональные водители"],
+      },
+    ],
+  },
+  it: {
+    badge: "Processo di Prenotazione Semplice",
+    title: "Come Funziona",
+    subtitle: "Prenota il tuo transfer aeroportuale premium in 3 semplici passaggi. Veloce, sicuro e senza problemi.",
+    cta: "Prenota Ora il Transfer",
+    steps: [
+      {
+        title: "Inserisci i Dettagli del Viaggio",
+        desc: "Seleziona i luoghi di ritiro e consegna, scegli data e ora. Visualizza tutti i veicoli con prezzi fissi trasparenti.",
+        features: ["Preventivo istantaneo", "Tutte le opzioni veicolo", "Disponibile 24/7"],
+      },
+      {
+        title: "Conferma la Prenotazione",
+        desc: "Aggiungi dettagli passeggeri e richieste speciali. Paga in sicurezza e ricevi conferma istantanea.",
+        features: ["Crittografia 256-bit", "Conferma istantanea", "Cancellazione gratuita"],
+      },
+      {
+        title: "Goditi il Transfer",
+        desc: "L'autista professionista ti accoglierà con cartello nominativo. Monitoriamo il volo e adattiamo l'orario.",
+        features: ["Servizio di accoglienza", "Monitoraggio volo", "Autisti professionisti"],
+      },
+    ],
+  },
+  es: {
+    badge: "Proceso de Reserva Simple",
+    title: "Cómo Funciona",
+    subtitle: "Reserve su traslado premium al aeropuerto en 3 simples pasos. Rápido, seguro y sin complicaciones.",
+    cta: "Reservar Transfer Ahora",
+    steps: [
+      {
+        title: "Ingrese Sus Detalles de Viaje",
+        desc: "Seleccione los puntos de recogida y destino, elija fecha y hora. Vea todos los vehículos con precios fijos transparentes.",
+        features: ["Cotización instantánea", "Todas las opciones", "Disponible 24/7"],
+      },
+      {
+        title: "Confirme Su Reserva",
+        desc: "Agregue datos de pasajeros y solicitudes especiales. Pague de forma segura y reciba confirmación instantánea.",
+        features: ["Encriptación 256-bit", "Confirmación instantánea", "Cancelación gratuita"],
+      },
+      {
+        title: "Disfrute del Traslado",
+        desc: "Su chofer profesional lo recibirá con cartel con su nombre. Monitoreamos su vuelo y ajustamos el horario.",
+        features: ["Servicio de bienvenida", "Seguimiento de vuelo", "Conductores profesionales"],
+      },
+    ],
+  },
+  ar: {
+    badge: "عملية حجز بسيطة",
+    title: "كيف يعمل",
+    subtitle: "احجز خدمة النقل المميزة من المطار في 3 خطوات بسيطة. سريع وآمن وبدون متاعب.",
+    cta: "احجز النقل الآن",
+    steps: [
+      {
+        title: "أدخل تفاصيل رحلتك",
+        desc: "حدد مواقع الاستلام والتوصيل، اختر التاريخ والوقت. عرض جميع المركبات بأسعار ثابتة وشفافة.",
+        features: ["عرض سعر فوري", "جميع خيارات المركبات", "متاح 24/7"],
+      },
+      {
+        title: "أكد حجزك",
+        desc: "أضف تفاصيل الركاب والطلبات الخاصة. ادفع بأمان واحصل على تأكيد فوري مع قسيمتك الرقمية.",
+        features: ["تشفير 256 بت", "تأكيد فوري", "إلغاء مجاني"],
+      },
+      {
+        title: "استمتع بالنقل",
+        desc: "سيستقبلك سائقك المحترف بلافتة تحمل اسمك. نتتبع رحلتك ونعدل وقت الاستلام لأي تأخيرات.",
+        features: ["خدمة الاستقبال", "تتبع الرحلة", "سائقون محترفون"],
+      },
+    ],
+  },
+  uk: {
+    badge: "Простий Процес Бронювання",
+    title: "Як Це Працює",
+    subtitle: "Забронюйте преміум-трансфер з аеропорту за 3 прості кроки. Швидко, безпечно і без клопоту.",
+    cta: "Забронювати Трансфер",
+    steps: [
+      {
+        title: "Введіть Деталі Поїздки",
+        desc: "Виберіть місця посадки та висадки, дату і час. Перегляньте всі авто з прозорими фіксованими цінами.",
+        features: ["Миттєвий розрахунок", "Усі варіанти авто", "Доступно 24/7"],
+      },
+      {
+        title: "Підтвердіть Бронювання",
+        desc: "Додайте дані пасажирів та особливі побажання. Оплатіть безпечно та отримайте миттєве підтвердження.",
+        features: ["256-біт шифрування", "Миттєве підтвердження", "Безкоштовне скасування"],
+      },
+      {
+        title: "Насолоджуйтесь Поїздкою",
+        desc: "Професійний водій зустріне вас з табличкою. Ми відстежуємо рейс і коригуємо час при затримках.",
+        features: ["Зустріч з табличкою", "Відстеження рейсу", "Професійні водії"],
+      },
+    ],
+  },
+  ja: {
+    badge: "シンプルな予約プロセス",
+    title: "ご利用方法",
+    subtitle: "プレミアム空港送迎を3つの簡単なステップで予約。迅速、安全、手間いらず。",
+    cta: "今すぐ送迎を予約",
+    steps: [
+      {
+        title: "旅行の詳細を入力",
+        desc: "乗車場所と降車場所を選択し、日時を指定。透明な固定料金ですべての車両オプションを確認できます。",
+        features: ["即時見積もり", "全車両オプション", "24時間利用可能"],
+      },
+      {
+        title: "予約を確定",
+        desc: "乗客情報と特別なリクエストを追加。安全に支払いを完了し、デジタルバウチャーで即座に確認を受け取ります。",
+        features: ["256ビット暗号化", "即時確認", "無料キャンセル"],
+      },
+      {
+        title: "送迎をお楽しみください",
+        desc: "プロのドライバーがネームボードでお出迎え。フライトを追跡し、遅延に合わせてピックアップ時間を調整します。",
+        features: ["お出迎えサービス", "フライト追跡", "プロのドライバー"],
+      },
+    ],
+  },
+};
+
+const stepIcons = [MapPin, Shield, Car];
+const stepColors = [
+  "from-blue-500 to-indigo-600",
+  "from-emerald-500 to-teal-600", 
+  "from-amber-500 to-orange-600"
+];
+
 const HowItWorks = () => {
-  const { t, getLocalizedPath, language } = useLanguage();
+  const { getLocalizedPath, language } = useLanguage();
   const lang = language.toLowerCase();
-
-  // Localized feature tags for all supported languages
-  const getFeatures = (step: number) => {
-    const features: Record<string, string[][]> = {
-      en: [
-        ["Instant pricing", "All vehicles", "24/7 booking"],
-        ["Secure payment", "Instant confirm", "Email voucher"],
-        ["Name sign", "Driver info", "Flight tracking"],
-      ],
-      tr: [
-        ["Anında fiyat", "Tüm araçlar", "7/24 rezervasyon"],
-        ["Güvenli ödeme", "Anında onay", "E-posta voucher"],
-        ["İsim tabelası", "Şoför bilgisi", "Uçuş takibi"],
-      ],
-      de: [
-        ["Sofortpreis", "Alle Fahrzeuge", "24/7 Buchung"],
-        ["Sichere Zahlung", "Sofortige Bestätigung", "E-Mail Gutschein"],
-        ["Namensschild", "Fahrerinfo", "Flugverfolgung"],
-      ],
-      fr: [
-        ["Prix instantané", "Tous véhicules", "Réservation 24/7"],
-        ["Paiement sécurisé", "Confirmation instantanée", "Voucher par e-mail"],
-        ["Panneau nominatif", "Info chauffeur", "Suivi de vol"],
-      ],
-      ru: [
-        ["Мгновенная цена", "Все авто", "Бронь 24/7"],
-        ["Безопасная оплата", "Мгновенное подтверждение", "Ваучер на e-mail"],
-        ["Табличка с именем", "Данные водителя", "Отслеживание рейса"],
-      ],
-      it: [
-        ["Prezzo istantaneo", "Tutti i veicoli", "Prenotazione 24/7"],
-        ["Pagamento sicuro", "Conferma istantanea", "Voucher via e-mail"],
-        ["Cartello con nome", "Info autista", "Tracciamento volo"],
-      ],
-      es: [
-        ["Precio instantáneo", "Todos los vehículos", "Reserva 24/7"],
-        ["Pago seguro", "Confirmación instantánea", "Voucher por e-mail"],
-        ["Cartel con nombre", "Info del conductor", "Seguimiento de vuelo"],
-      ],
-      ar: [
-        ["سعر فوري", "جميع المركبات", "حجز 24/7"],
-        ["دفع آمن", "تأكيد فوري", "قسيمة بالبريد"],
-        ["لافتة باسمك", "بيانات السائق", "تتبع الرحلة"],
-      ],
-      uk: [
-        ["Миттєва ціна", "Всі авто", "Бронювання 24/7"],
-        ["Безпечна оплата", "Миттєве підтвердження", "Ваучер на e-mail"],
-        ["Табличка з іменем", "Дані водія", "Відстеження рейсу"],
-      ],
-      ja: [
-        ["即時価格", "全車両", "24時間予約"],
-        ["安全決済", "即時確認", "メールバウチャー"],
-        ["ネームサイン", "ドライバー情報", "フライト追跡"],
-      ],
-    };
-    return features[lang]?.[step] || features.en[step];
-  };
-
-  // Localized badge text
-  const getBadgeText = () => {
-    const badges: Record<string, string> = {
-      en: "3 Easy Steps",
-      tr: "3 Kolay Adım",
-      de: "3 Einfache Schritte",
-      fr: "3 Étapes Simples",
-      ru: "3 Простых Шага",
-      it: "3 Semplici Passaggi",
-      es: "3 Pasos Fáciles",
-      ar: "3 خطوات سهلة",
-      uk: "3 Прості Кроки",
-      ja: "3つの簡単なステップ",
-    };
-    return badges[lang] || badges.en;
-  };
-
-  // Localized CTA button text
-  const getCtaText = () => {
-    const ctas: Record<string, string> = {
-      en: "Book Your Transfer Now",
-      tr: "Hemen Rezervasyon Yap",
-      de: "Jetzt Transfer Buchen",
-      fr: "Réservez Maintenant",
-      ru: "Забронировать Сейчас",
-      it: "Prenota Ora",
-      es: "Reserva Ahora",
-      ar: "احجز الآن",
-      uk: "Забронювати Зараз",
-      ja: "今すぐ予約",
-    };
-    return ctas[lang] || ctas.en;
-  };
-
-  const steps = [
-    {
-      number: "01",
-      icon: Search,
-      titleKey: "howStep1Title",
-      titleFallback: "Select Your Route",
-      descKey: "howStep1Desc",
-      descFallback: "Enter pickup and dropoff locations, select your preferred date and time. Compare all vehicle options with transparent pricing.",
-      color: "from-blue-500 to-indigo-600",
-      features: getFeatures(0),
-    },
-    {
-      number: "02",
-      icon: CreditCard,
-      titleKey: "howStep2Title",
-      titleFallback: "Confirm & Pay Securely",
-      descKey: "howStep2Desc",
-      descFallback: "Add passenger details and any extras. Complete your booking with our secure payment system and receive instant confirmation.",
-      color: "from-emerald-500 to-teal-600",
-      features: getFeatures(1),
-    },
-    {
-      number: "03",
-      icon: Car,
-      titleKey: "howStep3Title",
-      titleFallback: "Meet Your Chauffeur",
-      descKey: "howStep3Desc",
-      descFallback: "Receive your driver's details 6 hours before pickup. They'll greet you with a name sign and track your flight for any delays.",
-      color: "from-amber-500 to-orange-600",
-      features: getFeatures(2),
-    },
-  ];
+  
+  // Get translations for current language, fallback to English
+  const t = translations[lang] || translations.en;
 
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden">
@@ -156,14 +286,14 @@ const HowItWorks = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
           >
             <Sparkles className="h-4 w-4" />
-            {getBadgeText()}
+            {t.badge}
           </motion.div>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-            {t("howItWorks") || "How It Works"}
+            {t.title}
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {t("howItWorksDesc") || "Book your premium airport transfer in just a few clicks"}
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            {t.subtitle}
           </p>
         </motion.div>
 
@@ -173,59 +303,64 @@ const HowItWorks = () => {
           <div className="hidden md:block absolute top-24 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-primary/20 via-primary to-primary/20" />
           
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-            {steps.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
-                className="relative"
-              >
-                {/* Step Number Circle */}
-                <motion.div 
-                  className="relative mx-auto w-16 h-16 mb-6 z-10"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+            {t.steps.map((step, index) => {
+              const StepIcon = stepIcons[index];
+              const stepColor = stepColors[index];
+              
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.15 }}
+                  className="relative"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${step.color} rounded-2xl rotate-6 opacity-80`} />
-                  <div className={`relative w-full h-full bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center shadow-xl`}>
-                    <step.icon className="h-7 w-7 text-white" />
-                  </div>
-                  {/* Step Number Badge */}
-                  <div className="absolute -top-2 -right-2 w-7 h-7 bg-background border-2 border-primary rounded-full flex items-center justify-center">
-                    <span className="text-xs font-bold text-primary">{step.number}</span>
-                  </div>
-                </motion.div>
+                  {/* Step Number Circle */}
+                  <motion.div 
+                    className="relative mx-auto w-16 h-16 mb-6 z-10"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-br ${stepColor} rounded-2xl rotate-6 opacity-80`} />
+                    <div className={`relative w-full h-full bg-gradient-to-br ${stepColor} rounded-2xl flex items-center justify-center shadow-xl`}>
+                      <StepIcon className="h-7 w-7 text-white" />
+                    </div>
+                    {/* Step Number Badge */}
+                    <div className="absolute -top-2 -right-2 w-7 h-7 bg-background border-2 border-primary rounded-full flex items-center justify-center">
+                      <span className="text-xs font-bold text-primary">{String(index + 1).padStart(2, '0')}</span>
+                    </div>
+                  </motion.div>
 
-                {/* Card */}
-                <motion.div 
-                  className="bg-card border rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-primary/30 group"
-                  whileHover={{ y: -4 }}
-                >
-                  {/* Content */}
-                  <h3 className="text-xl font-bold mb-3 text-center group-hover:text-primary transition-colors">
-                    {t(step.titleKey) || step.titleFallback}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed text-center mb-4">
-                    {t(step.descKey) || step.descFallback}
-                  </p>
-                  
-                  {/* Features */}
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {step.features.map((feature, idx) => (
-                      <span 
-                        key={idx}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-muted rounded-full text-xs font-medium"
-                      >
-                        <CheckCircle2 className="h-3 w-3 text-primary" />
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
+                  {/* Card */}
+                  <motion.div 
+                    className="bg-card border rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-primary/30 group h-full"
+                    whileHover={{ y: -4 }}
+                  >
+                    {/* Content */}
+                    <h3 className="text-xl font-bold mb-3 text-center group-hover:text-primary transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed text-center mb-4 text-sm md:text-base">
+                      {step.desc}
+                    </p>
+                    
+                    {/* Features */}
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {step.features.map((feature, idx) => (
+                        <span 
+                          key={idx}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-muted rounded-full text-xs font-medium"
+                        >
+                          <CheckCircle2 className="h-3 w-3 text-primary" />
+                          {feature}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -240,7 +375,7 @@ const HowItWorks = () => {
             to={getLocalizedPath("/book")}
             className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl hover:scale-105"
           >
-            {getCtaText()}
+            {t.cta}
             <ArrowRight className="h-5 w-5" />
           </Link>
         </motion.div>

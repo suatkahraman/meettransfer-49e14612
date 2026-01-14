@@ -1,6 +1,7 @@
-import { memo, useState, useEffect, useMemo } from "react";
+import { memo, useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase, ChevronLeft, ChevronRight, Play, Image } from "lucide-react";
+import { useSwipeable } from "react-swipeable";
 import { CityVideo } from "./types";
 import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
 
@@ -129,14 +130,24 @@ export const HeroVisualSection = memo(({
   const prevMedia = () => setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
 
   const currentMobileImage = GALLERY_IMAGES[mobileImageIndex];
-  const nextMobileImage = () => setMobileImageIndex((prev) => (prev + 1) % GALLERY_IMAGES.length);
-  const prevMobileImage = () => setMobileImageIndex((prev) => (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length);
+  const nextMobileImage = useCallback(() => setMobileImageIndex((prev) => (prev + 1) % GALLERY_IMAGES.length), []);
+  const prevMobileImage = useCallback(() => setMobileImageIndex((prev) => (prev - 1 + GALLERY_IMAGES.length) % GALLERY_IMAGES.length), []);
+
+  // Swipe handlers for mobile
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: nextMobileImage,
+    onSwipedRight: prevMobileImage,
+    trackMouse: false,
+    trackTouch: true,
+    delta: 30,
+    preventScrollOnSwipe: true,
+  });
 
   return (
     <>
-      {/* Mobile Visual Section - Image Slider */}
+      {/* Mobile Visual Section - Image Slider with Swipe */}
       <div className="order-2 md:hidden">
-        <div className="relative rounded-xl overflow-hidden shadow-lg">
+        <div {...swipeHandlers} className="relative rounded-xl overflow-hidden shadow-lg touch-pan-y">
           <div className="relative h-40">
             {/* Base fallback image */}
             <img
