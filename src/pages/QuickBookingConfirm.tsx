@@ -336,12 +336,14 @@ export default function QuickBookingConfirm() {
       // Check if this is from AI assistant with complete pricing (new=true parameter)
       const isNewAIBooking = searchParams.get("new") === "true";
       const hasPrice = data.price && data.price > 0;
+      const isCreatedViaAI = data.created_via_ai === true;
       
       if (data.status === "pending" || data.status === "price_rejected") {
         // If this is a new AI booking with price, treat it as price_sent for immediate confirmation
-        if (isNewAIBooking && hasPrice && data.customer_email && data.customer_phone) {
-          console.log("AI quick booking with complete info - allowing immediate confirmation");
-          // Update status to price_sent since we have all the info
+        // Allow if: (new=true AND hasPrice) OR (created_via_ai AND hasPrice)
+        if ((isNewAIBooking || isCreatedViaAI) && hasPrice) {
+          console.log("AI quick booking with price - allowing immediate confirmation. Price:", data.price, "Created via AI:", isCreatedViaAI);
+          // Update status to price_sent since we have the price
           const { error: updateError } = await supabase
             .from("quick_booking_requests")
             .update({ status: "price_sent" })
@@ -350,6 +352,7 @@ export default function QuickBookingConfirm() {
           if (!updateError) {
             data.status = "price_sent";
           }
+          // Continue to show the form instead of returning
         } else {
           setBooking(data as BookingRequest);
           setWaitingForPrice(true);
