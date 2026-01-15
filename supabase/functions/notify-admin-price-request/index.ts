@@ -174,7 +174,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Meet Transfer <noreply@meettransfer.com>',
+        from: 'Meet Transfer <noreply@mail.meettransfer.app>',
         to: adminEmails,
         subject,
         html: htmlContent,
