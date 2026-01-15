@@ -7,6 +7,16 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // Blog posts data - centralized for reuse
 export const allBlogPosts = [
   {
+    id: "ai-booking-assistant-guide",
+    titleKey: "blogAIAssistantTitle",
+    descriptionKey: "blogAIAssistantDesc",
+    category: "Technology",
+    categoryKey: "technology",
+    readTime: 10,
+    date: "2025-01-15",
+    image: "/images/ai-chat-assistant.png",
+  },
+  {
     id: "cappadocia-airport-transfer-guide",
     titleKey: "blogCappadociaTitle",
     descriptionKey: "blogCappadociaDesc",

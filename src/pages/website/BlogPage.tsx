@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { getWhatsAppUrl } from "@/lib/contact";
 import BlogHourlyRentalPromo from "@/components/website/BlogHourlyRentalPromo";
+import aiChatImage from "@/assets/ai-chat-assistant.png";
 
 // Import blog hero images
 import cappadociaHero from "@/assets/blog/cappadocia-transfer-hero.jpg";
@@ -37,6 +38,16 @@ const BlogPage = () => {
 
   // Blog posts with translation keys - Updated for 2025 SEO
   const blogPosts = useMemo(() => [
+    {
+      id: "ai-booking-assistant-guide",
+      titleKey: "blogAIAssistantTitle",
+      descriptionKey: "blogAIAssistantDesc",
+      category: "Technology",
+      categoryKey: "technology",
+      readTime: 10,
+      date: "2025-01-15",
+      image: aiChatImage,
+    },
     {
       id: "cappadocia-airport-transfer-guide",
       titleKey: "blogCappadociaTitle",
