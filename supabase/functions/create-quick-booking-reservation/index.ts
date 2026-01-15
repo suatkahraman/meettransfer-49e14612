@@ -22,6 +22,11 @@ interface CreateReservationRequest {
   returnTime?: string;
   returnPrice?: number;
   promoCode?: string;
+  babySeatCount?: number;
+  luggageCount?: number;
+  customerNotes?: string;
+  flightNumber?: string;
+  passengerNames?: string[];
   // Customer info from Step 2
   customerName?: string;
   customerPhone?: string;
@@ -63,11 +68,14 @@ serve(async (req) => {
       console.error("Error fetching quick booking:", fetchError);
     }
 
-    const customerNotes = quickBooking?.customer_notes || null;
+    // Use request data if provided, otherwise fall back to quick booking data
+    const customerNotes = requestData.customerNotes || quickBooking?.customer_notes || null;
     const agencyId = quickBooking?.agency_id || null;
     const agencyUserId = quickBooking?.agency_user_id || null;
-    const luggageCount = quickBooking?.luggage_count || 1;
-    const babySeatCount = quickBooking?.baby_seat_count || 0;
+    const luggageCount = requestData.luggageCount ?? quickBooking?.luggage_count ?? 1;
+    const babySeatCount = requestData.babySeatCount ?? quickBooking?.baby_seat_count ?? 0;
+    const flightNumber = requestData.flightNumber || null;
+    const passengerNames = requestData.passengerNames || null;
 
     // Use customer info from request (Step 2 form) - priority over quick booking data
     const finalCustomerName = requestData.customerName || "Guest";
@@ -199,6 +207,8 @@ serve(async (req) => {
         agency_user_id: agencyUserId,
         luggage_count: luggageCount,
         baby_seat_count: babySeatCount,
+        flight_number: flightNumber,
+        passenger_names: passengerNames,
       })
       .select()
       .single();
@@ -242,6 +252,7 @@ serve(async (req) => {
           agency_user_id: agencyUserId,
           luggage_count: luggageCount,
           baby_seat_count: babySeatCount,
+          passenger_names: passengerNames,
         })
         .select()
         .single();
