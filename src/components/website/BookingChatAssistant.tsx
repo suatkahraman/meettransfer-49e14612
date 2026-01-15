@@ -2841,13 +2841,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               data-mobile-panel
               className="fixed inset-x-0 z-[80] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
               style={{
-                // Position panel above keyboard - increased size for mobile
-                top: keyboardHeight > 0 ? '0.5rem' : '8%',
+                // Position panel above keyboard - compact size for mobile
+                top: keyboardHeight > 0 ? '0.5rem' : '25%',
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
                 maxHeight: keyboardHeight > 0 
                   ? `calc(100% - ${keyboardHeight}px - 0.5rem)` 
-                  : '92%',
-                minHeight: '320px',
+                  : '75%',
+                minHeight: '280px',
                 touchAction: 'auto',
                 pointerEvents: 'auto',
                 paddingBottom: '0',
