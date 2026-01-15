@@ -2879,8 +2879,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
               data-mobile-backdrop
-              className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm"
-              style={{ touchAction: 'manipulation' }}
+              className="fixed inset-0 z-[70] bg-background/95 backdrop-blur-md"
+              style={{ 
+                touchAction: 'manipulation',
+                WebkitBackdropFilter: 'blur(12px)',
+                backdropFilter: 'blur(12px)'
+              }}
             />
           )}
         </AnimatePresence>
