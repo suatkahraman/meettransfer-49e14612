@@ -20,7 +20,7 @@ import confetti from "canvas-confetti";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired } from "@/lib/vehicleTypes";
@@ -36,6 +36,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
+import { z } from "zod";
 
 interface VehiclePrice {
   vehicleType: string;
@@ -52,6 +53,14 @@ interface HourlyPrice {
   hourly_rate: number | null;
   price_currency: string;
 }
+
+// Password validation schema
+const passwordSchema = z.string()
+  .min(6, 'Password must be at least 6 characters')
+  .max(100)
+  .regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least 1 lowercase letter')
+  .regex(/\d.*\d.*\d.*\d/, 'Password must contain at least 4 digits');
 
 const getSessionId = () => {
   let sessionId = localStorage.getItem('quick_booking_session_id');
@@ -140,6 +149,17 @@ const BookingPage = () => {
   const [paymentType, setPaymentType] = useState<"cash" | "credit_card" | "online">("cash");
   const [userProfile, setUserProfile] = useState<{ full_name: string | null; phone: string | null } | null>(null);
 
+  // Guest user form state (new - for account creation)
+  const [guestPassword, setGuestPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isGoogleUser, setIsGoogleUser] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  
+  // Booking success state
+  const [bookingCompleted, setBookingCompleted] = useState(false);
+  const [completedReservationId, setCompletedReservationId] = useState<string | null>(null);
+
   // Computed values
   const availableVehicles = getAvailableVehicles(passengers, luggageCount);
   const minibusRequired = isMinibusRequired(passengers, luggageCount);
@@ -187,6 +207,25 @@ const BookingPage = () => {
       fetchProfile();
     }
   }, [user]);
+
+  // Check for Google OAuth return
+  useEffect(() => {
+    const checkGoogleAuth = async () => {
+      const googleAuth = searchParams.get("googleAuth");
+      
+      if (googleAuth === "true") {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          setIsGoogleUser(true);
+          setCustomerEmail(session.user.email || "");
+          setCustomerName(session.user.user_metadata?.full_name || session.user.user_metadata?.name || "");
+        }
+      }
+    };
+    
+    checkGoogleAuth();
+  }, [searchParams]);
 
   // Fetch vehicle prices for transfer bookings with minimum 8 second loading animation
   useEffect(() => {
@@ -336,202 +375,136 @@ const BookingPage = () => {
     }
   };
 
-  // Handle form submission for guests (quick booking flow)
-  const handleGuestSubmit = async () => {
-    // Validation - phone is optional but if provided, validate format
-    if (customerPhone && customerPhone.length > 0 && customerPhone.length < 8) {
-      toast.error(t("invalidPhone") || "Please enter a valid phone number");
-      return;
+  // Validate guest form
+  const validateGuestForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    if (!customerName.trim() || customerName.trim().length < 2) {
+      errors.name = t("nameRequired") || "Name must be at least 2 characters";
     }
+    
+    if (!customerPhone.trim() || customerPhone.length < 7) {
+      errors.phone = t("phoneRequired") || "Valid phone number is required";
+    }
+    
+    if (!customerEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+      errors.email = t("emailRequired") || "Valid email address is required";
+    }
+    
+    // Only validate password for non-Google users
+    if (!isGoogleUser && !user) {
+      const passwordResult = passwordSchema.safeParse(guestPassword);
+      if (!passwordResult.success) {
+        errors.password = passwordResult.error.errors[0]?.message || t("invalidPassword") || "Invalid password";
+      }
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
-    if (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-      toast.error(t("invalidEmail") || "Please enter a valid email address");
+  // Handle Google Sign In
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      // Build current URL with all params for redirect
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('googleAuth', 'true');
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: currentUrl.toString(),
+        },
+      });
+      
+      if (error) throw error;
+    } catch (err: any) {
+      console.error("Google sign-in error:", err);
+      toast.error(t("googleSignInError") || "Failed to sign in with Google");
+      setGoogleLoading(false);
+    }
+  };
+
+  // Handle form submission for guests (create account + reservation)
+  const handleGuestSubmit = async () => {
+    // Validate form
+    if (!validateGuestForm()) {
+      toast.error(t("pleaseFixErrors") || "Please fix the form errors");
       return;
     }
 
     setSubmitting(true);
     
     try {
-      const sessionId = getSessionId();
       const currentPrice = isHourlyBooking 
         ? getHourlyPrice(vehicleType, selectedDuration) 
         : selectedPrice;
       
-      // Calculate return price with discount if applicable (use dynamic discount percentage)
+      // Calculate return price with discount if applicable
       const discountMultiplier = promoDiscountPercent ? (100 - promoDiscountPercent) / 100 : 1;
       const returnPrice = hasReturnTrip && currentPrice
         ? (isPromoCodeValid && promoDiscountPercent ? Math.round(currentPrice * discountMultiplier) : currentPrice)
         : null;
-      
-      const bookingData = isHourlyBooking 
-        ? {
-            pickup: urlCity,
-            dropoff: `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}`,
-            pickup_date: urlDate,
-            pickup_time: urlTime,
-            vehicle_type: vehicleType,
+
+      // Call edge function to create account and reservation
+      const { data: result, error: fnError } = await supabase.functions.invoke(
+        "create-quick-booking-reservation",
+        {
+          body: {
+            // Booking details
+            pickup: isHourlyBooking ? urlCity : urlPickup,
+            dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}` : urlDropoff,
+            pickupDate: urlDate,
+            pickupTime: urlTime,
+            vehicleType,
             passengers,
-            luggage_count: luggageCount,
-            baby_seat_count: babySeatCount,
-            customer_session_id: sessionId,
             price: currentPrice,
-            price_currency: preferredCurrency,
-            customer_notes: `[${selectedDuration} Hourly Rental] ${customerNotes.trim()}`.trim(),
-            customer_phone: customerPhone.trim() || null,
-            customer_email: customerEmail.trim() || null,
-            language: language.toLowerCase(),
-          }
-        : {
-            pickup: urlPickup,
-            dropoff: urlDropoff,
-            pickup_date: urlDate,
-            pickup_time: urlTime,
-            vehicle_type: vehicleType,
-            passengers,
-            luggage_count: luggageCount,
-            baby_seat_count: babySeatCount,
-            customer_session_id: sessionId,
-            price: currentPrice,
-            price_currency: preferredCurrency,
-            customer_notes: customerNotes.trim() || null,
-            customer_phone: customerPhone.trim() || null,
-            customer_email: customerEmail.trim() || null,
-            language: language.toLowerCase(),
-            has_return_trip: hasReturnTrip && returnDate && returnTime ? true : false,
-            return_date: hasReturnTrip && returnDate ? returnDate : null,
-            return_time: hasReturnTrip && returnTime ? returnTime : null,
-            return_price: returnPrice,
-            promo_code: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
-          };
-
-      // Create quick booking request first
-      const { data, error } = await supabase
-        .from("quick_booking_requests")
-        .insert(bookingData)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // If we have a price, update status to price_sent and navigate to confirm page
-      if (currentPrice) {
-        // Update status to price_sent since we have the price
-        await supabase
-          .from("quick_booking_requests")
-          .update({ status: "price_sent" })
-          .eq("id", data.id);
-
-        // Send vehicle prices email if customer provided email
-        if (customerEmail && customerEmail.trim()) {
-          try {
-            await supabase.functions.invoke("send-vehicle-prices-email", {
-              body: {
-                customerEmail: customerEmail.trim(),
-                pickup: isHourlyBooking ? urlCity : urlPickup,
-                dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}` : urlDropoff,
-                pickupDate: urlDate,
-                pickupTime: urlTime,
-                passengers,
-                vehiclePrices: isHourlyBooking 
-                  ? hourlyPrices.map(hp => ({
-                      vehicleType: hp.vehicle_type === "vito" ? "mercedes-vito" : 
-                                   hp.vehicle_type === "vito_vip" ? "vip-mercedes" :
-                                   hp.vehicle_type === "sprinter" ? "minibus" : hp.vehicle_type,
-                      price: hp.price,
-                      currency: preferredCurrency
-                    }))
-                  : vehiclePrices,
-                selectedVehicle: vehicleType,
-                selectedPrice: currentPrice,
-                language: language.toLowerCase(),
-              },
-            });
-            console.log("Vehicle prices email sent to:", customerEmail);
-          } catch (emailError) {
-            console.error("Failed to send vehicle prices email:", emailError);
-            // Don't fail the booking if email fails
-          }
+            priceCurrency: preferredCurrency,
+            paymentMethod: paymentType,
+            hasReturnTrip: hasReturnTrip && returnDate && returnTime ? true : false,
+            returnDate: hasReturnTrip && returnDate ? returnDate : null,
+            returnTime: hasReturnTrip && returnTime ? returnTime : null,
+            returnPrice: returnPrice,
+            promoCode: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
+            babySeatCount,
+            luggageCount,
+            customerNotes: customerNotes.trim() || null,
+            // Customer info
+            customerName: customerName.trim(),
+            customerPhone: customerPhone.trim(),
+            customerEmail: customerEmail.trim(),
+            customerPassword: isGoogleUser ? null : guestPassword,
+            isGoogleUser,
+          },
         }
+      );
 
-        // Trigger confetti for successful booking
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
+      if (fnError) throw fnError;
+      if (!result?.success) throw new Error(result?.error || "Failed to create reservation");
+
+      // Sign in the user (for non-Google users)
+      if (!isGoogleUser && guestPassword) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: customerEmail.trim(),
+          password: guestPassword,
         });
 
-        // Navigate to confirm page where customer will complete details and create reservation
-        navigate(`/quick-booking-confirm?token=${data.confirmation_token}`);
-        toast.success(t("completeYourBooking") || "Complete your booking details on the next page.");
-      } else {
-        // No price available - use old flow (waiting for admin to set price)
-        // For hourly, we already have the price
-        if (isHourlyBooking) {
-          try {
-            await supabase.functions.invoke("notify-admin-quick-booking-new", {
-              body: {
-                bookingId: data.id,
-                pickup: urlCity,
-                dropoff: `${selectedDuration} Hourly Rental`,
-                pickupDate: urlDate,
-                pickupTime: urlTime,
-                vehicleType,
-                passengers,
-                priceCurrency: preferredCurrency,
-                customerEmail: customerEmail.trim() || null,
-                customerPhone: customerPhone.trim() || null,
-                customerNotes: customerNotes.trim() || null,
-              },
-            });
-          } catch (notifyError) {
-            console.error("Failed to notify admin:", notifyError);
-          }
-        } else {
-          // Try auto-pricing for transfers
-          let autoPriceResult: { matched?: boolean } | null = null;
-          try {
-            const { data: autoPriceData } = await supabase.functions.invoke("auto-price-quick-booking", {
-              body: { quick_booking_id: data.id },
-            });
-            autoPriceResult = autoPriceData;
-          } catch (autoPriceError) {
-            console.error("Auto-pricing failed:", autoPriceError);
-          }
-
-          // Notify admin if auto-pricing didn't work
-          if (!autoPriceResult?.matched) {
-            try {
-              await supabase.functions.invoke("notify-admin-quick-booking-new", {
-                body: {
-                  bookingId: data.id,
-                  pickup: urlPickup,
-                  dropoff: urlDropoff,
-                  pickupDate: urlDate,
-                  pickupTime: urlTime,
-                  vehicleType,
-                  passengers,
-                  priceCurrency: preferredCurrency,
-                  customerEmail: customerEmail.trim() || null,
-                  customerPhone: customerPhone.trim() || null,
-                  customerNotes: customerNotes.trim() || null,
-                },
-              });
-            } catch (notifyError) {
-              console.error("Failed to notify admin:", notifyError);
-            }
-          }
+        if (signInError) {
+          console.error("Auto sign-in error:", signInError);
         }
-
-        let url = `/quick-booking-confirm?token=${data.confirmation_token}&new=true`;
-        if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
-          url += `&hasReturn=true&returnDate=${returnDate}&returnTime=${returnTime}`;
-          if (isPromoCodeValid && promoCode) {
-            url += `&promoCode=${encodeURIComponent(promoCode)}`;
-          }
-        }
-        navigate(url);
-        toast.success(t("priceRequestSent") || "Your request has been sent!");
       }
+
+      // Trigger confetti celebration
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      setBookingCompleted(true);
+      setCompletedReservationId(result.reservationId);
+      toast.success(t("bookingConfirmed") || "Booking confirmed!");
     } catch (error: unknown) {
       console.error("Error submitting:", error);
       toast.error((error as Error).message || "Failed to submit request");
@@ -648,8 +621,15 @@ const BookingPage = () => {
         console.error("Failed to notify admin:", notifyError);
       }
 
-      // Navigate to customer portal with success message
-      navigate(`/customer/reservations/${reservation.id}?success=true`);
+      // Trigger confetti celebration
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      setBookingCompleted(true);
+      setCompletedReservationId(reservation.id);
       toast.success(t("reservationCreated") || "Reservation created successfully!");
     } catch (error: unknown) {
       console.error("Error creating reservation:", error);
@@ -737,7 +717,6 @@ const BookingPage = () => {
   // Confetti celebration when loading completes
   useEffect(() => {
     if (wasLoading && !isPricesLoading && vehiclePrices.length > 0) {
-      // Fire confetti celebration
       const duration = 2000;
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
@@ -780,16 +759,13 @@ const BookingPage = () => {
       return;
     }
 
-    // Track that loading has started
     setWasLoading(true);
 
-    // Start progress animation
     setProgressWidth(100);
     const progressInterval = setInterval(() => {
-      setProgressWidth(prev => Math.max(0, prev - 1.25)); // Decrease by 1.25% every 100ms (8 seconds total)
+      setProgressWidth(prev => Math.max(0, prev - 1.25));
     }, 100);
 
-    // Countdown timer
     const countdownInterval = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) return 1;
@@ -797,7 +773,6 @@ const BookingPage = () => {
       });
     }, 1000);
 
-    // Tip rotation
     const tips = language === 'TR' ? loadingTips.TR : loadingTips.EN;
     setTipIndex(Math.floor(Math.random() * tips.length));
     const tipInterval = setInterval(() => {
@@ -811,21 +786,45 @@ const BookingPage = () => {
     };
   }, [isPricesLoading, language]);
 
-  // Professional Loading Animation Component - Mobile Optimized
+  // Booking Success Screen
+  if (bookingCompleted) {
+    return (
+      <WebsiteLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
+          <Card className="max-w-lg w-full">
+            <CardContent className="pt-6 text-center">
+              <div className="h-20 w-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
+              </div>
+              <h1 className="text-2xl font-bold mb-2">{t("bookingConfirmed") || "Booking Confirmed!"}</h1>
+              <p className="text-muted-foreground mb-4">
+                {t("thankYouBooking") || "Thank you! Your transfer has been confirmed."}
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                {t("whatsappConfirmation") || "You will receive a WhatsApp message with your reservation details."}
+              </p>
+              <Button onClick={() => navigate("/customer/bookings")} className="w-full" size="lg">
+                {t("viewMyReservations") || "View My Reservations"}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </WebsiteLayout>
+    );
+  }
+
+  // Professional Loading Animation Component
   if (isPricesLoading) {
     return (
       <WebsiteLayout>
         <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 safe-area-inset">
           <div className="text-center w-full max-w-sm sm:max-w-md">
-            {/* Animated Car Icon - Responsive sizing */}
             <div className="relative mb-6 sm:mb-8">
               <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto relative">
-                {/* Outer ring animation - optimized for mobile */}
                 <div className="absolute inset-0 rounded-full border-2 sm:border-4 border-primary/20 animate-[ping_2s_ease-in-out_infinite]" />
                 <div className="absolute inset-1.5 sm:inset-2 rounded-full border-2 sm:border-4 border-primary/30 animate-[ping_2s_ease-in-out_infinite_0.5s]" />
                 <div className="absolute inset-3 sm:inset-4 rounded-full border-2 sm:border-4 border-primary/40 animate-[ping_2s_ease-in-out_infinite_1s]" />
                 
-                {/* Center icon - responsive */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-xl animate-pulse">
                     <Car className="h-7 w-7 sm:h-10 sm:w-10 text-primary-foreground animate-bounce" />
@@ -833,7 +832,6 @@ const BookingPage = () => {
                 </div>
               </div>
               
-              {/* Sparkle decorations - optimized positions */}
               <div className="absolute top-0 left-[20%] sm:left-1/4 animate-[pulse_1.5s_ease-in-out_infinite]">
                 <Sparkles className="h-4 w-4 sm:h-6 sm:w-6 text-accent" />
               </div>
@@ -845,7 +843,6 @@ const BookingPage = () => {
               </div>
             </div>
             
-            {/* Text content - responsive typography */}
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2 sm:mb-4 animate-fade-in px-2">
               {language === 'TR' 
                 ? "En İyi Fiyatlarımız Hazırlanıyor"
@@ -859,7 +856,6 @@ const BookingPage = () => {
               }
             </p>
             
-            {/* Progress Bar with Countdown - touch optimized */}
             <div className="mb-4 sm:mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs sm:text-sm text-muted-foreground">
@@ -875,13 +871,11 @@ const BookingPage = () => {
                   className="h-full bg-gradient-to-r from-primary via-primary/80 to-accent rounded-full transition-all duration-100 ease-linear relative will-change-[width]"
                   style={{ width: `${progressWidth}%` }}
                 >
-                  {/* Shimmer effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_1.5s_ease-in-out_infinite]" />
                 </div>
               </div>
             </div>
             
-            {/* Random Tips - mobile optimized */}
             <div className="mb-4 sm:mb-6">
               <div 
                 className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-primary/20 shadow-sm min-h-[60px] sm:min-h-[72px] flex items-center justify-center"
@@ -894,57 +888,22 @@ const BookingPage = () => {
               </div>
             </div>
             
-            {/* Progress dots - smaller on mobile */}
             <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-4 sm:mb-6">
               <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite]" />
               <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.2s]" />
               <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-primary animate-[bounce_1s_ease-in-out_infinite_0.4s]" />
             </div>
-            
-            {/* Trip summary card - compact for mobile */}
-            <div className="bg-card rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-lg border border-border/50 animate-fade-in">
-              <div className="text-xs sm:text-sm text-muted-foreground space-y-1.5 sm:space-y-2">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary shrink-0" />
-                  <span className="truncate text-left">{urlPickup}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Navigation className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-accent shrink-0" />
-                  <span className="truncate text-left">{urlDropoff}</span>
-                </div>
-                <div className="flex items-center justify-center gap-3 sm:gap-4 pt-2 border-t border-border/50">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="text-xs sm:text-sm">{displayDate}</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="text-xs sm:text-sm">{urlTime}</span>
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
         
-        {/* Shimmer animation keyframe */}
         <style>{`
+          @keyframes tipFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
           @keyframes shimmer {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
-          }
-          @keyframes tipFadeIn {
-            0% { 
-              opacity: 0; 
-              transform: translateY(10px) scale(0.98);
-            }
-            100% { 
-              opacity: 1; 
-              transform: translateY(0) scale(1);
-            }
-          }
-          .safe-area-inset {
-            padding-bottom: env(safe-area-inset-bottom, 0);
           }
         `}</style>
       </WebsiteLayout>
@@ -953,48 +912,25 @@ const BookingPage = () => {
 
   return (
     <WebsiteLayout>
-      <div className="min-h-[100dvh] bg-gradient-to-b from-muted/30 to-background py-4 sm:py-8 md:py-12">
-        <div className="container max-w-4xl px-3 sm:px-4">
-          {/* Header with Trip Info - Mobile optimized */}
-          <div className="bg-primary text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-8 shadow-xl">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              {isHourlyBooking ? (
-                <Timer className="h-5 w-5 sm:h-6 sm:w-6 text-accent shrink-0" />
-              ) : (
-                <Car className="h-5 w-5 sm:h-6 sm:w-6 text-accent shrink-0" />
-              )}
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold leading-tight">
-                {isHourlyBooking 
-                  ? (t("hourlyRentalBooking") || "Hourly Rental Booking")
-                  : (t("completeBooking") || "Complete Your Booking")
-                }
-              </h1>
-            </div>
-            
-            {/* Route Map for Transfer bookings */}
-            {!isHourlyBooking && urlPickup && urlDropoff && (
-              <CompactRouteMap 
-                pickup={urlPickup} 
-                dropoff={urlDropoff}
-                className="mb-4"
-              />
-            )}
-            
-            <div className="grid grid-cols-2 gap-2 sm:gap-4">
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-28 lg:pb-8">
+          {/* Compact Hero with Route Info */}
+          <div className="bg-gradient-to-r from-primary via-primary/90 to-primary/80 rounded-xl sm:rounded-2xl p-3 sm:p-6 text-white mb-4 sm:mb-8 shadow-2xl">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
               {isHourlyBooking ? (
                 <>
-                  <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3 col-span-2">
                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-white/70 text-xs sm:text-sm">{t("city") || "City"}</p>
-                      <p className="font-medium text-sm sm:text-base truncate">{urlCity}</p>
+                      <p className="font-medium text-sm sm:text-base line-clamp-2">{urlCity}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2 sm:gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3 col-span-2">
                     <Timer className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="text-white/70 text-xs sm:text-sm">{t("duration") || "Duration"}</p>
-                      <p className="font-medium text-sm sm:text-base">{selectedDuration}</p>
+                      <p className="font-medium text-sm sm:text-base">{t("hourlyRental") || "Hourly Rental"}</p>
                     </div>
                   </div>
                 </>
@@ -1079,7 +1015,6 @@ const BookingPage = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0">
-                  {/* Warning for 7+ passengers */}
                   {passengers >= 7 && !isHourlyBooking && (
                     <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
                       <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400 font-medium flex items-center gap-2">
@@ -1098,8 +1033,6 @@ const BookingPage = () => {
                         ? getHourlyPrice(vehicleOption.value, selectedDuration)
                         : getPriceForVehicle(vehicleOption.value);
                       const isSelected = vehicleType === vehicleOption.value;
-                      
-                      // Disable vehicles that can't accommodate the passenger count
                       const vehicleCapacity = v.passengers;
                       const isCapacityInsufficient = passengers > vehicleCapacity;
                       const isDisabled = isCapacityInsufficient;
@@ -1111,7 +1044,6 @@ const BookingPage = () => {
                             if (!isDisabled && vehicleType !== vehicleOption.value) {
                               setVehicleType(vehicleOption.value);
                               setJustSelectedVehicle(vehicleOption.value);
-                              // Mini celebration confetti
                               confetti({
                                 particleCount: 30,
                                 spread: 60,
@@ -1154,7 +1086,6 @@ const BookingPage = () => {
                             </div>
                           )}
                           
-                          {/* Selected Banner */}
                           {isSelected && (
                             <div className="absolute top-0 left-0 bg-primary text-primary-foreground text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-br-lg z-10">
                               {language === 'TR' ? 'SEÇİLDİ' : 'SELECTED'}
@@ -1167,7 +1098,6 @@ const BookingPage = () => {
                             </div>
                           )}
                           
-                          {/* Vehicle Image Carousel with Autoplay */}
                           <div className="relative">
                             <Carousel 
                               className="w-full" 
@@ -1202,7 +1132,6 @@ const BookingPage = () => {
                                 </>
                               )}
                             </Carousel>
-                            {/* Image counter */}
                             {v.images.length > 1 && (
                               <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2 bg-black/60 text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 rounded">
                                 {Math.min(v.images.length, 6)}
@@ -1210,7 +1139,6 @@ const BookingPage = () => {
                             )}
                           </div>
                           
-                          {/* Content area */}
                           <div className="w-full p-3 sm:p-4 text-left">
                             <h3 className="font-semibold text-foreground mb-1.5 sm:mb-2 text-sm sm:text-base">{v.label}</h3>
                             
@@ -1228,9 +1156,7 @@ const BookingPage = () => {
                               </span>
                             </div>
                             
-                            {isPricesLoading ? (
-                              <div className="h-5 sm:h-6 w-16 sm:w-20 bg-muted animate-pulse rounded" />
-                            ) : price ? (
+                            {price ? (
                               <p className="text-base sm:text-lg font-bold text-primary">
                                 {price} {preferredCurrency}
                                 {isHourlyBooking && <span className="text-xs sm:text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
@@ -1248,259 +1174,15 @@ const BookingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Selected Vehicle & Price Card */}
-              {selectedPrice && (
-                <Card className="border-2 border-primary/50 bg-gradient-to-br from-primary/5 to-accent/5 shadow-lg">
-                  <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
-                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                      {language === 'TR' ? 'Seçtiğiniz Araç ve Fiyatı' : 'Selected Vehicle & Price'}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 sm:p-6 pt-0">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      {/* Vehicle Image */}
-                      {VEHICLE_TYPE_MAP[vehicleType]?.images?.[0] && (
-                        <div className="w-16 h-12 sm:w-24 sm:h-16 rounded-lg overflow-hidden shrink-0">
-                          <img
-                            src={VEHICLE_TYPE_MAP[vehicleType].images[0].src}
-                            alt={VEHICLE_TYPE_MAP[vehicleType].label}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground text-sm sm:text-base">
-                          {VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}
-                        </h4>
-                        <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">
-                          <span className="flex items-center gap-1">
-                            <Users className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                            {VEHICLE_TYPE_MAP[vehicleType]?.passengers}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Briefcase className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                            {VEHICLE_TYPE_MAP[vehicleType]?.luggage}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right shrink-0">
-                        {discountApplied && originalPrice && (
-                          <p className="text-xs sm:text-sm line-through text-muted-foreground">
-                            {originalPrice} {preferredCurrency}
-                          </p>
-                        )}
-                        <p className="text-lg sm:text-2xl font-bold text-primary">
-                          {selectedPrice} {preferredCurrency}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {/* Reject for Better Price Button */}
-                    {!discountApplied && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full mt-4 border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-400"
-                        disabled={rejectingPrice}
-                        onClick={async () => {
-                          if (!selectedPrice) return;
-                          
-                          setRejectingPrice(true);
-                          
-                          try {
-                            let discountInCurrency = 3;
-                            
-                            if (preferredCurrency !== 'EUR') {
-                              try {
-                                const response = await fetch(
-                                  `https://api.frankfurter.app/latest?from=EUR&to=${preferredCurrency}`,
-                                  { signal: AbortSignal.timeout(3000) }
-                                );
-                                if (response.ok) {
-                                  const data = await response.json();
-                                  const rate = data.rates[preferredCurrency];
-                                  if (rate) {
-                                    discountInCurrency = Math.round(3 * rate);
-                                  }
-                                }
-                              } catch (e) {
-                                const fallbackRates: Record<string, number> = {
-                                  'USD': 1.08, 'TRY': 37.5, 'GBP': 0.85, 'AED': 3.97, 'AUD': 1.65
-                                };
-                                discountInCurrency = Math.round(3 * (fallbackRates[preferredCurrency] || 1));
-                              }
-                            }
-                            
-                            setOriginalPrice(selectedPrice);
-                            setDiscountAmount(discountInCurrency);
-                            
-                            setVehiclePrices(prev => 
-                              prev.map(v => ({
-                                ...v,
-                                price: v.price ? Math.max(v.price - discountInCurrency, 1) : v.price
-                              }))
-                            );
-                            
-                            if (isHourlyBooking) {
-                              setHourlyPrices(prev => 
-                                prev.map(h => ({
-                                  ...h,
-                                  price: Math.max(h.price - discountInCurrency, 1)
-                                }))
-                              );
-                            }
-                            
-                            setDiscountApplied(true);
-                            
-                            confetti({
-                              particleCount: 80,
-                              spread: 100,
-                              origin: { y: 0.5, x: 0.5 },
-                              colors: ['#22c55e', '#16a34a', '#15803d', '#fbbf24', '#f59e0b']
-                            });
-                            
-                            const currencySymbol = preferredCurrency === 'EUR' ? '€' : preferredCurrency === 'USD' ? '$' : preferredCurrency === 'GBP' ? '£' : preferredCurrency === 'TRY' ? '₺' : preferredCurrency;
-                            
-                            toast.success(
-                              `🎉 ${t("discountApplied") || "Discount applied!"} -${currencySymbol}${discountInCurrency}`,
-                              { duration: 5000 }
-                            );
-                          } catch (err) {
-                            console.error("Failed to apply discount:", err);
-                            toast.error(t("discountError") || "Failed to apply discount");
-                          } finally {
-                            setRejectingPrice(false);
-                          }
-                        }}
-                      >
-                        {rejectingPrice ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Percent className="mr-2 h-4 w-4" />
-                            {t("rejectForBetterPrice") || "Get Better Price"}
-                          </>
-                        )}
-                      </Button>
-                    )}
-                    
-                    {/* Discount Applied Badge */}
-                    {discountApplied && (
-                      <div className="flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg py-2 mt-4">
-                        <Tag className="h-4 w-4" />
-                        <span className="font-medium">
-                          {language === 'TR' ? 'İndirim Uygulandı!' : 'Discount Applied!'}
-                        </span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Passengers & Options */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-primary" />
-                    {t("tripDetails") || "Trip Details"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    <div>
-                      <Label className="text-sm text-muted-foreground mb-2 block">{t("passengers")}</Label>
-                      <Select value={passengers.toString()} onValueChange={(v) => setPassengers(parseInt(v))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from({ length: 19 }, (_, i) => i + 1).map((num) => (
-                            <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-sm text-muted-foreground mb-2 block">{t("luggageCount") || "Luggage"}</Label>
-                      <Select value={luggageCount.toString()} onValueChange={(v) => setLuggageCount(parseInt(v))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from({ length: 20 }, (_, i) => i).map((num) => (
-                            <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-sm text-muted-foreground mb-2 block">{t("babySeat") || "Baby Seat"}</Label>
-                      <Select value={babySeatCount.toString()} onValueChange={(v) => setBabySeatCount(parseInt(v))}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[0, 1, 2].map((num) => (
-                            <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Currency Selection */}
-                  <div>
-                    <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
-                      <Coins className="h-4 w-4" />
-                      {t("preferredCurrency") || "Currency"}
-                    </Label>
-                    <div className="flex flex-wrap gap-2">
-                      {CURRENCY_OPTIONS.map((currency) => (
-                        <button
-                          key={currency.value}
-                          type="button"
-                          onClick={() => setPreferredCurrency(currency.value)}
-                          className={cn(
-                            "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm border",
-                            preferredCurrency === currency.value
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-muted hover:bg-muted/80 border-transparent"
-                          )}
-                        >
-                          <span>{currency.flag}</span>
-                          <span>{currency.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Return Trip - Only for transfers */}
-              {!isHourlyBooking && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ArrowLeftRight className="h-5 w-5 text-primary" />
-                      {t("returnTrip") || "Return Trip"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Return trip checkbox with enhanced promo highlight */}
+              {/* Return Trip Option */}
+              {!isHourlyBooking && activePromo.code && (
+                <Card className="border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
+                  <CardContent className="p-4 sm:p-6 space-y-4">
                     <div 
-                      className={cn(
-                        "flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer",
-                        hasReturnTrip 
-                          ? "bg-green-50 dark:bg-green-950/30 border-green-500" 
-                          : "bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-300 hover:border-green-400"
-                      )}
+                      className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 border border-green-200 dark:border-green-700 cursor-pointer hover:shadow-lg transition-all"
                       onClick={() => {
                         const newValue = !hasReturnTrip;
                         setHasReturnTrip(newValue);
-                        // Auto-apply promo code when return trip is selected
                         if (newValue && activePromo.code && !promoCode) {
                           handlePromoCodeChange(activePromo.code);
                         }
@@ -1512,7 +1194,6 @@ const BookingPage = () => {
                         onCheckedChange={(checked) => {
                           const newValue = checked === true;
                           setHasReturnTrip(newValue);
-                          // Auto-apply promo code when return trip is selected
                           if (newValue && activePromo.code && !promoCode) {
                             handlePromoCodeChange(activePromo.code);
                           }
@@ -1535,7 +1216,6 @@ const BookingPage = () => {
                       </div>
                     </div>
 
-                    {/* Show discount applied confirmation when return trip is selected */}
                     {hasReturnTrip && isPromoCodeValid && promoDiscountPercent && (
                       <div className="flex items-center gap-2 text-sm bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg border border-green-300 dark:border-green-700">
                         <CheckCircle className="h-5 w-5 shrink-0" />
@@ -1571,48 +1251,18 @@ const BookingPage = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        
-                        {/* Hidden promo code - auto-applied, show only if different code entered */}
-                        {promoCode !== activePromo.code && (
-                          <div className="sm:col-span-2">
-                            <Label className="text-sm text-muted-foreground mb-2 block">{t("promoCode") || "Promo Code"}</Label>
-                            <div className="relative">
-                              <Input
-                                placeholder={activePromo.code}
-                                value={promoCode}
-                                onChange={(e) => handlePromoCodeChange(e.target.value)}
-                                className={cn(
-                                  isPromoCodeValid === true && "border-green-500 ring-1 ring-green-500",
-                                  isPromoCodeValid === false && "border-red-500 ring-1 ring-red-500"
-                                )}
-                              />
-                              {isValidatingPromo && (
-                                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground animate-spin" />
-                              )}
-                              {!isValidatingPromo && isPromoCodeValid === true && (
-                                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
-                              )}
-                            </div>
-                            {isPromoCodeValid === true && promoDiscountPercent && (
-                              <p className="text-green-600 text-sm mt-1">✓ {promoDiscountPercent}% {t("discountWillBeApplied") || "discount will be applied!"}</p>
-                            )}
-                            {isPromoCodeValid === false && promoCodeError && (
-                              <p className="text-red-500 text-sm mt-1">✗ {promoCodeError}</p>
-                            )}
-                          </div>
-                        )}
                       </div>
                     )}
                   </CardContent>
                 </Card>
               )}
 
-              {/* Contact Information */}
+              {/* Customer Information - For both guests and logged-in users */}
               <Card>
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                    {user ? <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" /> : <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />}
-                    {user ? (t("passengerInfo") || "Passenger Information") : (t("contactInfo") || "Contact Information")}
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    {t("customerInformation") || "Your Information"}
                   </CardTitle>
                   {user && (
                     <CardDescription className="flex items-center gap-2 text-green-600 text-xs sm:text-sm">
@@ -1622,49 +1272,110 @@ const BookingPage = () => {
                   )}
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 pt-0 space-y-3 sm:space-y-4">
-                  {/* Name field for logged-in users */}
-                  {user && (
-                    <div>
-                      <Label className="text-sm text-muted-foreground mb-2 block">
-                        {t("fullName") || "Full Name"} <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        placeholder={t("enterFullName") || "Enter your full name"}
-                      />
-                    </div>
-                  )}
-
+                  {/* Name field */}
                   <div>
                     <Label className="text-sm text-muted-foreground mb-2 block">
-                      {t("phoneNumber") || "Phone"} <span className="text-muted-foreground text-xs">({t("optional")})</span>
+                      {t("fullName") || "Full Name"} <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder={t("enterFullName") || "Enter your full name"}
+                      className={formErrors.name ? "border-destructive" : ""}
+                    />
+                    {formErrors.name && <p className="text-xs text-destructive mt-1">{formErrors.name}</p>}
+                  </div>
+
+                  {/* Phone field */}
+                  <div>
+                    <Label className="text-sm text-muted-foreground mb-2 block">
+                      {t("phoneNumber") || "Phone"} <span className="text-red-500">*</span>
                     </Label>
                     <PhoneInput
                       value={customerPhone}
                       onChange={setCustomerPhone}
                       placeholder="555 123 4567"
+                      className={formErrors.phone ? "border-destructive" : ""}
                     />
+                    {formErrors.phone && <p className="text-xs text-destructive mt-1">{formErrors.phone}</p>}
                   </div>
 
-                  {!user && (
+                  {/* Email field */}
+                  <div>
+                    <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      {t("email") || "Email"} <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      type="email"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      placeholder="email@example.com"
+                      disabled={!!user || isGoogleUser}
+                      className={formErrors.email ? "border-destructive" : ""}
+                    />
+                    {formErrors.email && <p className="text-xs text-destructive mt-1">{formErrors.email}</p>}
+                  </div>
+
+                  {/* Password field - Only for guests (non-logged-in, non-Google users) */}
+                  {!user && !isGoogleUser && (
                     <div>
                       <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        {t("email") || "Email"} <span className="text-muted-foreground text-xs">({t("optional")})</span>
+                        <Lock className="h-4 w-4" />
+                        {t("password") || "Create Password"} <span className="text-red-500">*</span>
                       </Label>
-                      <Input
-                        type="email"
-                        value={customerEmail}
-                        onChange={(e) => setCustomerEmail(e.target.value)}
-                        placeholder="email@example.com"
-                      />
-                      <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                        {t("emailInfoDescription") || "Your reservation details will be sent to your email address. You can complete your reservation later using the link provided."}
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          value={guestPassword}
+                          onChange={(e) => setGuestPassword(e.target.value)}
+                          placeholder={t("createPassword") || "Create a password"}
+                          className={`pr-10 ${formErrors.password ? "border-destructive" : ""}`}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      {formErrors.password && <p className="text-xs text-destructive mt-1">{formErrors.password}</p>}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {t("passwordHint") || "Min 6 chars, 1 uppercase, 1 lowercase, 4 digits"}
                       </p>
                     </div>
                   )}
 
+                  {/* Google Sign In - Only for guests */}
+                  {!user && !isGoogleUser && (
+                    <div className="pt-4 border-t border-border">
+                      <p className="text-center text-sm text-muted-foreground mb-3">{t("orContinueWith") || "Or continue with"}</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleGoogleSignIn}
+                        disabled={googleLoading}
+                      >
+                        {googleLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                          </svg>
+                        )}
+                        {t("continueWithGoogle") || "Continue with Google"}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Notes field */}
                   <div>
                     <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
                       <MessageSquare className="h-4 w-4" />
@@ -1684,56 +1395,53 @@ const BookingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Payment Options - Only for logged-in users */}
-              {user && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="h-5 w-5 text-primary" />
-                      {t("paymentMethod") || "Payment Method"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <RadioGroup
-                      value={paymentType}
-                      onValueChange={(value) => setPaymentType(value as "cash" | "credit_card" | "online")}
-                      className="space-y-3"
-                    >
-                      <div className={cn(
-                        "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
-                        paymentType === "cash" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                      )}>
-                        <RadioGroupItem value="cash" id="cash" />
-                        <Label htmlFor="cash" className="flex items-center gap-3 cursor-pointer flex-1">
-                          <Banknote className="h-5 w-5 text-green-600" />
-                          <div>
-                            <p className="font-medium">{t("payWithCash") || "Pay with Cash"}</p>
-                            <p className="text-sm text-muted-foreground">{t("payDriverDirectly") || "Pay the driver directly"}</p>
-                          </div>
-                        </Label>
-                      </div>
+              {/* Payment Options */}
+              <Card>
+                <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    {t("paymentMethod") || "Payment Method"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <RadioGroup
+                    value={paymentType}
+                    onValueChange={(value) => setPaymentType(value as "cash" | "credit_card" | "online")}
+                    className="space-y-3"
+                  >
+                    <div className={cn(
+                      "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
+                      paymentType === "cash" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    )}>
+                      <RadioGroupItem value="cash" id="cash" />
+                      <Label htmlFor="cash" className="flex items-center gap-3 cursor-pointer flex-1">
+                        <Banknote className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium">{t("payWithCash") || "Pay with Cash"}</p>
+                          <p className="text-sm text-muted-foreground">{t("payDriverDirectly") || "Pay the driver directly"}</p>
+                        </div>
+                      </Label>
+                    </div>
 
-
-                      <div className={cn(
-                        "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
-                        paymentType === "online" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                      )}>
-                        <RadioGroupItem value="online" id="online" />
-                        <Label htmlFor="online" className="flex items-center gap-3 cursor-pointer flex-1">
-                          <Shield className="h-5 w-5 text-purple-600" />
-                          <div>
-                            <p className="font-medium">{t("payOnline") || "Pay Online"}</p>
-                            <p className="text-sm text-muted-foreground">{t("secureOnlinePayment") || "Secure online payment (link will be sent)"}</p>
-                          </div>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </CardContent>
-                </Card>
-              )}
+                    <div className={cn(
+                      "flex items-center gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer",
+                      paymentType === "online" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    )}>
+                      <RadioGroupItem value="online" id="online" />
+                      <Label htmlFor="online" className="flex items-center gap-3 cursor-pointer flex-1">
+                        <Shield className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <p className="font-medium">{t("payOnline") || "Pay Online"}</p>
+                          <p className="text-sm text-muted-foreground">{t("secureOnlinePayment") || "Secure online payment (link will be sent)"}</p>
+                        </div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Sidebar - Price Summary - Hidden on mobile, visible on desktop */}
+            {/* Sidebar - Price Summary - Hidden on mobile */}
             <div className="lg:col-span-1 hidden lg:block">
               <div className="sticky top-24">
                 <Card className="shadow-xl border-primary/20">
@@ -1741,7 +1449,6 @@ const BookingPage = () => {
                     <CardTitle className="text-base sm:text-lg">{t("priceSummary") || "Price Summary"}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    {/* Vehicle Image Carousel */}
                     {VEHICLE_TYPE_MAP[vehicleType]?.images && VEHICLE_TYPE_MAP[vehicleType].images.length > 0 && (
                       <div className="relative">
                         <Carousel className="w-full" opts={{ loop: true }}>
@@ -1761,7 +1468,6 @@ const BookingPage = () => {
                           <CarouselPrevious className="left-2 h-7 w-7 sm:h-8 sm:w-8 bg-white/80 hover:bg-white" />
                           <CarouselNext className="right-2 h-7 w-7 sm:h-8 sm:w-8 bg-white/80 hover:bg-white" />
                         </Carousel>
-                        {/* Image counter */}
                         <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
                           {VEHICLE_TYPE_MAP[vehicleType].images.length} {t("photos") || "photos"}
                         </div>
@@ -1774,7 +1480,6 @@ const BookingPage = () => {
                         <span className="font-semibold text-right text-sm sm:text-base">{VEHICLE_TYPE_MAP[vehicleType]?.label || vehicleType}</span>
                       </div>
                       
-                      {/* Vehicle features */}
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Users className="h-4 w-4" />
@@ -1799,11 +1504,7 @@ const BookingPage = () => {
                       </div>
                       
                       <div className="border-t pt-4">
-                        {isPricesLoading ? (
-                          <div className="flex items-center justify-center py-4">
-                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                          </div>
-                        ) : selectedPrice ? (
+                        {selectedPrice ? (
                           <div className="text-center">
                             <p className="text-sm text-muted-foreground mb-1">
                               {isHourlyBooking ? (t("totalForDuration") || "Total for") + ` ${selectedDuration}` : (t("totalPrice") || "Total")}
@@ -1836,22 +1537,15 @@ const BookingPage = () => {
                         {submitting ? (
                           <>
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            {t("sending") || "Sending..."}
+                            {t("sending") || "Processing..."}
                           </>
                         ) : (
                           <>
-                            {user ? (t("createReservation") || "Create Reservation") : (t("confirmBooking") || "Confirm Booking")}
+                            {t("confirmBooking") || "Confirm Booking"}
                             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                           </>
                         )}
                       </Button>
-
-                      {user && (
-                        <div className="flex items-center justify-center gap-2 text-xs text-green-600 bg-green-50 rounded-lg py-2 mt-3">
-                          <CheckCircle className="h-3 w-3" />
-                          {t("directReservation") || "Direct reservation - no confirmation needed"}
-                        </div>
-                      )}
 
                       <p className="text-xs text-center text-muted-foreground mt-3">
                         {t("freeCancel") || "Free cancellation up to 24h before"}
@@ -1865,16 +1559,11 @@ const BookingPage = () => {
         </div>
       </div>
       
-      {/* Mobile Sticky Footer - Always visible on mobile */}
+      {/* Mobile Sticky Footer */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t-2 border-primary/20 p-3 sm:p-4 shadow-2xl z-[100]" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="flex-1 min-w-0">
-            {isPricesLoading ? (
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">{t("loadingPrices") || "Loading..."}</p>
-              </div>
-            ) : selectedPrice ? (
+            {selectedPrice ? (
               <>
                 <p className="text-xs text-muted-foreground">{t("totalPrice") || "Total"}</p>
                 <p className="text-xl sm:text-2xl font-bold text-primary">
@@ -1899,7 +1588,7 @@ const BookingPage = () => {
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <>
-                {user ? (t("confirmNow") || "Confirm") : (t("continue") || "Continue")}
+                {t("confirmNow") || "Confirm"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </>
             )}
