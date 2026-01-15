@@ -59,30 +59,53 @@ export function PWAUpdatePrompt() {
       return;
     }
 
-    const showUpdatePrompt = async () => {
-      const waitingUrl = registrationRef.current?.waiting?.scriptURL ?? null;
-      console.log("[PWA Update] 🚀 Showing update prompt!", { waitingUrl });
+    const applyUpdateAutomatically = async () => {
+      const registration = registrationRef.current;
+      const waitingUrl = registration?.waiting?.scriptURL ?? null;
+      console.log("[PWA Update] 🚀 Auto-applying update!", { waitingUrl });
 
-      // If the same waiting SW was already prompted, don't spam.
+      // If the same waiting SW was already processed, skip
       if (waitingUrl && lastPromptedSwUrlRef.current === waitingUrl) {
-        console.log("[PWA Update] Prompt already shown for this version, skipping");
+        console.log("[PWA Update] Update already applied for this version, skipping");
         return;
       }
 
-      // Fetch version info with cache busting
-      try {
-        const response = await fetch(`/version.json?t=${Date.now()}`);
-        if (response.ok) {
-          const data = await response.json();
-          setVersionInfo(data);
-          console.log("[PWA Update] Version info loaded:", data);
-        }
-      } catch (e) {
-        console.log("[PWA Update] Could not fetch version info:", e);
-      }
-
       lastPromptedSwUrlRef.current = waitingUrl;
-      setShowPrompt(true);
+
+      // Auto-apply the update without showing prompt
+      try {
+        // Force update check to get the absolute latest SW
+        await registration?.update();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        await registration?.update();
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        const latestWaiting = registration?.waiting;
+        console.log("[PWA Update] ✅ Auto-applying LATEST update:", {
+          scriptURL: latestWaiting?.scriptURL,
+          state: latestWaiting?.state
+        });
+
+        // Use vite-plugin-pwa helper if available
+        if (updateSWRef.current) {
+          console.log("[PWA Update] Using updateSW helper for auto-update");
+          void updateSWRef.current(true);
+          return;
+        }
+
+        // Fallback - tell the waiting SW to take over
+        if (latestWaiting) {
+          console.log("[PWA Update] Using SKIP_WAITING message for auto-update");
+          latestWaiting.postMessage({ type: "SKIP_WAITING" });
+          return;
+        }
+      } catch (error) {
+        console.error("[PWA Update] Auto-update error:", error);
+        // Even on error, try to apply
+        if (updateSWRef.current) {
+          void updateSWRef.current(true);
+        }
+      }
     };
 
     // Register SW once.
@@ -100,10 +123,10 @@ export function PWAUpdatePrompt() {
           installing: !!registration?.installing,
         });
 
-        // If there's already a waiting worker (e.g. user kept an old tab open), show immediately.
+        // If there's already a waiting worker (e.g. user kept an old tab open), auto-apply immediately.
         if (registration?.waiting) {
-          console.log("[PWA Update] Found waiting worker, showing prompt");
-          showUpdatePrompt();
+          console.log("[PWA Update] Found waiting worker, auto-applying update");
+          applyUpdateAutomatically();
         }
 
         const requestUpdateCheck = async () => {
@@ -111,8 +134,8 @@ export function PWAUpdatePrompt() {
           try {
             await registration?.update();
             if (registration?.waiting) {
-              console.log("[PWA Update] New version waiting after check");
-              showUpdatePrompt();
+              console.log("[PWA Update] New version waiting after check, auto-applying");
+              applyUpdateAutomatically();
             } else {
               console.log("[PWA Update] No new version found");
             }
@@ -164,8 +187,8 @@ export function PWAUpdatePrompt() {
         };
       },
       onNeedRefresh: () => {
-        console.log("[PWA Update] 🔔 onNeedRefresh triggered!");
-        showUpdatePrompt();
+        console.log("[PWA Update] 🔔 onNeedRefresh triggered! Auto-applying...");
+        applyUpdateAutomatically();
       },
       onRegisterError: (error) => {
         console.error("[PWA Update] ❌ SW register error:", error);
@@ -179,7 +202,10 @@ export function PWAUpdatePrompt() {
         waiting: !!reg?.waiting,
         active: reg?.active?.state,
       });
-      if (reg?.waiting) showUpdatePrompt();
+      if (reg?.waiting) {
+        registrationRef.current = reg;
+        applyUpdateAutomatically();
+      }
     });
 
     // Fallback reload when the new SW takes control.
