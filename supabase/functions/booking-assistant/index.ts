@@ -344,10 +344,27 @@ When discount is applied, include:
 {"applied": true, "percentage": ${hesitationDiscountPercentage}, "originalPrice": [original], "discountedPrice": [new]}
 \`\`\`
 
-### PHASE 8: SHOW FINAL BOOKING FORM (WHEN CUSTOMER ACCEPTS)
-When customer accepts a price/vehicle:
+### PHASE 8: COLLECT CUSTOMER CONTACT INFO (REQUIRED BEFORE COMPLETING)
+**IMPORTANT: After vehicle selection and before finalizing, ALWAYS collect email and phone!**
 ${language === 'TR' ? `
-"Harika seçim ${customerName ? customerName + ' Bey/Hanım' : ''}! 🎉 Rezervasyonunuz hazır:
+"${customerName ? customerName + ' Bey/Hanım, ' : ''}mükemmel! Rezervasyonunuzu tamamlamak için iletişim bilgilerinize ihtiyacım var. 📱
+
+Lütfen e-posta adresinizi ve telefon numaranızı paylaşır mısınız?"
+` : `
+"${customerName ? customerName + ', ' : ''}excellent! I need your contact details to complete your booking. 📱
+
+Could you please share your email address and phone number?"
+`}
+
+When customer provides email and/or phone, include in booking data:
+- Extract email with format: user@domain.com
+- Extract phone with format: +90 or international format
+- Phone patterns: +90, 0532, 05xx, +1, +44, etc.
+
+### PHASE 9: SHOW FINAL BOOKING FORM (WHEN CUSTOMER PROVIDES CONTACT INFO)
+When customer provides email and phone:
+${language === 'TR' ? `
+"Harika ${customerName ? customerName + ' Bey/Hanım' : ''}! 🎉 Rezervasyonunuz hazır:
 
 📋 **REZERVASYON ÖZETİ**
 ━━━━━━━━━━━━━━━━━━━━━
@@ -359,19 +376,15 @@ ${language === 'TR' ? `
 🚗 Araç: [vehicle]
 💰 Fiyat: €[price]
 💳 Ödeme: [payment_method]
+📧 E-posta: [email]
+📱 Telefon: [phone]
 ━━━━━━━━━━━━━━━━━━━━━
 
-✅ Buraya kadar size yardımcı oldum! Bundan sonra sizi rezervasyon sayfasına yönlendireceğim.
-
-📝 **Rezervasyon sayfasında:**
-• E-posta ile giriş yapabilirsiniz
-• Veya hızlı Google girişi kullanabilirsiniz
-• Giriş yaptıktan sonra şoför bilginiz atanacak
-• İsterseniz rezervasyonunuzu istediğiniz zaman iptal edebilirsiniz
+✅ Tüm bilgileriniz alındı! Rezervasyonunuzu onaylamak için sizi kayıt sayfasına yönlendireceğim. Bilgileriniz otomatik olarak doldurulacak.
 
 Şimdi yönlendirmemi ister misiniz? 👆"
 ` : `
-"Excellent choice ${customerName ? customerName : ''}! 🎉 Your booking is ready:
+"Excellent ${customerName ? customerName : ''}! 🎉 Your booking is ready:
 
 📋 **BOOKING SUMMARY**
 ━━━━━━━━━━━━━━━━━━━━━
@@ -383,20 +396,16 @@ ${language === 'TR' ? `
 🚗 Vehicle: [vehicle]
 💰 Price: €[price]
 💳 Payment: [payment_method]
+📧 Email: [email]
+📱 Phone: [phone]
 ━━━━━━━━━━━━━━━━━━━━━
 
-✅ I've helped you up to this point! Now I'll redirect you to the booking page.
-
-📝 **On the booking page:**
-• You can sign in with email
-• Or use quick Google sign-in
-• After signing in, your driver will be assigned
-• You can cancel anytime if your plans change
+✅ All your information received! I'll redirect you to the registration page to confirm your booking. Your details will be auto-filled.
 
 Would you like me to redirect you now? 👆"
 `}
 
-When ready to redirect, include:
+When ready to redirect (customer has provided name, email, phone AND accepted), include:
 \`\`\`readyToBook
 {"ready": true}
 \`\`\`
@@ -516,15 +525,21 @@ ${pricingContext}
   "returnDiscountPercentage": ${returnDiscountPercentage},
   "babySeatCount": number or 0,
   "luggageCount": number or null,
+  "customerEmail": "email@example.com or null",
+  "customerPhone": "+90xxxxxxxxxx or null",
   "vehicleFeatures": {
     "wifi": boolean,
     "tv": boolean,
     "minibar": boolean,
     "waterService": boolean
   },
-  "isComplete": true only when ALL required fields are present
+  "isComplete": true only when ALL required fields INCLUDING customerEmail AND customerPhone are present
 }
 \`\`\`
+
+## CONTACT INFO EXTRACTION:
+- Email patterns: xxx@xxx.com, xxx@xxx.org, etc.
+- Phone patterns: +90, 0532, 05xx, +1, +44, +49, etc. Include spaces/dashes in the original format
 
 ## SMART EXTRACTION:
 - If passenger count not mentioned, ASK - don't assume
@@ -744,6 +759,8 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         service_type: serviceType,
         payment_method: bookingData.paymentMethod || null,
         customer_name: extractedCustomerName || customerName || null,
+        customer_email: bookingData.customerEmail || null,
+        customer_phone: bookingData.customerPhone || null,
         baby_seat_count: bookingData.babySeatCount || 0,
         luggage_count: bookingData.luggageCount || null,
         // Return trip fields
