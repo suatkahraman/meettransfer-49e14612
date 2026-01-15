@@ -1,5 +1,5 @@
 import { memo, useCallback } from "react";
-import { Users, Briefcase, Check } from "lucide-react";
+import { Users, Briefcase, Check, Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Luggage, Stars, Wine, Sparkles, Crown, Tv, icons } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
 
@@ -16,6 +16,22 @@ interface ChatVehicleCardsProps {
   hasReturnTrip?: boolean;
   returnDiscountPercentage?: number;
 }
+
+// Icon mapping for vehicle features
+const featureIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'snowflake': Snowflake,
+  'armchair': Armchair,
+  'wifi': Wifi,
+  'battery-charging': BatteryCharging,
+  'droplets': Droplets,
+  'luggage': Luggage,
+  'stars': Stars,
+  'wine': Wine,
+  'sparkles': Sparkles,
+  'crown': Crown,
+  'tv': Tv,
+  'champagne': Wine, // Map champagne to Wine icon
+};
 
 // Haptic feedback helper
 const triggerHaptic = (type: 'light' | 'medium' | 'heavy' = 'medium') => {
@@ -73,18 +89,19 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
     onSelect?.();
   }, [onSelect]);
 
+  // Get top 4 features for display
+  const displayFeatures = vehicle.features.slice(0, 4);
+
   return (
     <div
       className={cn(
-        "relative bg-background rounded-lg border overflow-hidden cursor-pointer transition-all duration-150 group aspect-square flex flex-col",
+        "relative bg-background rounded-lg border overflow-hidden cursor-pointer transition-all duration-150 group flex flex-col",
         isSelected
           ? "border-foreground/20 bg-muted shadow-sm"
           : "border-border hover:border-foreground/10 hover:shadow-sm active:scale-[0.98]"
       )}
       onClick={handleClick}
     >
-      {/* Selected Check - Top Left */}
-
       {/* Selected Check */}
       {isSelected && (
         <div className="absolute top-1 right-1 z-10 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-lg">
@@ -92,8 +109,8 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
         </div>
       )}
 
-      {/* Image - Square aspect */}
-      <div className="relative h-16 overflow-hidden flex-shrink-0">
+      {/* Square Image */}
+      <div className="relative aspect-square overflow-hidden flex-shrink-0">
         <img
           src={vehicle.images[0]?.src}
           alt={vehicle.images[0]?.alt || vehicle.label}
@@ -102,23 +119,34 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
       </div>
 
       {/* Content */}
-      <div className="p-1.5 flex-1 flex flex-col">
-        {/* Vehicle Name */}
-        <h4 className="font-bold text-[10px] leading-tight line-clamp-1">{vehicle.label}</h4>
-        
-        {/* Capacity */}
-        <div className="flex items-center gap-1.5 mt-0.5 text-muted-foreground text-[8px]">
-          <span className="flex items-center gap-0.5">
+      <div className="p-1.5 flex-1 flex flex-col gap-1">
+        {/* Vehicle Name & Capacity */}
+        <div className="flex items-center justify-between">
+          <h4 className="font-bold text-[10px] leading-tight line-clamp-1">{vehicle.label}</h4>
+          <div className="flex items-center gap-1 text-muted-foreground text-[8px]">
             <Users className="h-2.5 w-2.5" />
-            {vehicle.passengers}
-          </span>
-          <span className="flex items-center gap-0.5">
-            <Briefcase className="h-2.5 w-2.5" />
-            {vehicle.luggage}
-          </span>
+            <span>{vehicle.passengers}</span>
+          </div>
+        </div>
+        
+        {/* Feature Icons Row */}
+        <div className="flex items-center gap-1 flex-wrap">
+          {displayFeatures.map((feature, index) => {
+            const IconComponent = featureIconMap[feature.icon];
+            if (!IconComponent) return null;
+            return (
+              <div 
+                key={index} 
+                className="w-4 h-4 rounded bg-muted flex items-center justify-center"
+                title={isTurkish ? feature.labelTr : feature.label}
+              >
+                <IconComponent className="h-2.5 w-2.5 text-muted-foreground" />
+              </div>
+            );
+          })}
         </div>
 
-        {/* Price Section - Compact */}
+        {/* Price Section */}
         {price !== undefined && (
           <div className="mt-auto pt-1 border-t border-border">
             {hasReturnTrip ? (
