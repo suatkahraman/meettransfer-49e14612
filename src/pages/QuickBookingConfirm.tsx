@@ -333,20 +333,38 @@ export default function QuickBookingConfirm() {
         return;
       }
 
+      // Check if this is from AI assistant with complete pricing (new=true parameter)
+      const isNewAIBooking = searchParams.get("new") === "true";
+      const hasPrice = data.price && data.price > 0;
+      
       if (data.status === "pending" || data.status === "price_rejected") {
-        setBooking(data as BookingRequest);
-        setWaitingForPrice(true);
-        
-        // Pre-fill form with existing customer data even for pending status
-        if (data.customer_name || data.customer_email || data.customer_phone) {
-          setFormData(prev => ({
-            ...prev,
-            name: data.customer_name || "",
-            email: data.customer_email || "",
-            phone: data.customer_phone || "",
-          }));
+        // If this is a new AI booking with price, treat it as price_sent for immediate confirmation
+        if (isNewAIBooking && hasPrice && data.customer_email && data.customer_phone) {
+          console.log("AI quick booking with complete info - allowing immediate confirmation");
+          // Update status to price_sent since we have all the info
+          const { error: updateError } = await supabase
+            .from("quick_booking_requests")
+            .update({ status: "price_sent" })
+            .eq("id", data.id);
+          
+          if (!updateError) {
+            data.status = "price_sent";
+          }
+        } else {
+          setBooking(data as BookingRequest);
+          setWaitingForPrice(true);
+          
+          // Pre-fill form with existing customer data even for pending status
+          if (data.customer_name || data.customer_email || data.customer_phone) {
+            setFormData(prev => ({
+              ...prev,
+              name: data.customer_name || "",
+              email: data.customer_email || "",
+              phone: data.customer_phone || "",
+            }));
+          }
+          return;
         }
-        return;
       }
 
       if (data.status !== "price_sent") {
