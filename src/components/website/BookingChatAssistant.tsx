@@ -1494,9 +1494,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   }, [input, isRecording, isProcessing]);
 
   // Continuous conversation mode - auto-start recording after AI speaks
-  // Default to true for hands-free experience
-  const [continuousMode, setContinuousMode] = useState(true);
-  const continuousModeRef = useRef(true);
+  // Default to false: user (guest) must opt-in
+  const [continuousMode, setContinuousMode] = useState(false);
+  const continuousModeRef = useRef(false);
   const hasAutoStartedRef = useRef(false);
   const startRecordingRef = useRef<(() => void) | null>(null);
   
@@ -2002,16 +2002,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       }, 600);
     } else if (welcomeMessageRef.current && !isVoiceEnabled) {
       console.log('🎙️ [Welcome] ⚠️ Voice disabled, not speaking welcome');
-      // If voice is disabled, start recording directly
-      if (continuousModeRef.current && !hasAutoStartedRef.current && isOpen) {
-        hasAutoStartedRef.current = true;
-        setTimeout(() => {
-          if (startRecordingRef.current && !isRecording && !isProcessing) {
-            console.log('🎤 Auto-starting recording (voice disabled, after welcome)');
-            startRecordingRef.current();
-          }
-        }, 800);
-      }
+      // IMPORTANT: Do NOT auto-start microphone recording.
+      // Guest/user must explicitly start recording (tap mic).
     }
   }, [isVoiceEnabled, speakWelcome, isOpen, isRecording, isProcessing]);
 
@@ -2053,18 +2045,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   }, [isOpen]);
   
   // Auto-start recording after welcome message when voice is disabled or not available
+  // Disabled: never auto-start microphone recording. User must opt-in.
   useEffect(() => {
-    if (isOpen && messages.length === 1 && !hasAutoStartedRef.current && continuousModeRef.current && !isVoiceEnabled) {
-      // If voice is disabled, auto-start recording after a delay
-      hasAutoStartedRef.current = true;
-      setTimeout(() => {
-        if (startRecordingRef.current && !isRecording && !isProcessing) {
-          console.log('🎤 Auto-starting recording (voice disabled, from effect)');
-          startRecordingRef.current();
-        }
-      }, 1200);
-    }
-  }, [isOpen, messages.length, isVoiceEnabled, isRecording, isProcessing]);
+    // no-op
+  }, []);
 
   // Auto-send pending message after chat opens and welcome message is added
   useEffect(() => {
@@ -3158,8 +3142,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                 }
                                 // Update message's bookingData to reflect selection and trigger booking creation
                                 setMessages(prev => prev.map((m, i) => 
-                                  i === msgIndex && m.bookingData 
-                                    ? { ...m, bookingData: { ...m.bookingData, vehicleType, isComplete: true } }
+                                  i === msgIndex 
+                                    ? { 
+                                        ...m,
+                                        showVehicleCards: false,
+                                        bookingData: { ...(m.bookingData || ({} as BookingData)), vehicleType, isComplete: true }
+                                      }
                                     : m
                                 ));
                                 
@@ -3867,8 +3855,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       }
                       // Update message's bookingData to reflect selection and trigger booking creation
                       setMessages(prev => prev.map((m, idx) => 
-                        idx === msgIndex && m.bookingData 
-                          ? { ...m, bookingData: { ...m.bookingData, vehicleType, isComplete: true } }
+                        idx === msgIndex 
+                          ? { 
+                              ...m,
+                              showVehicleCards: false,
+                              bookingData: { ...(m.bookingData || ({} as BookingData)), vehicleType, isComplete: true }
+                            }
                           : m
                       ));
                       

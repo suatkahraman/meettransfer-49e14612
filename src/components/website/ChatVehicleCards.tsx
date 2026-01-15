@@ -1,6 +1,5 @@
 import { memo, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Users, Briefcase, Star, TrendingDown, Award, Check } from "lucide-react";
+import { Users, Briefcase, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
 
@@ -38,9 +37,6 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
   onSelect,
   language,
   discountPercentage,
-  isRecommended,
-  isPopular,
-  isBestValue,
   hasReturnTrip = false,
   returnDiscountPercentage = 25,
 }: {
@@ -51,9 +47,6 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
   onSelect?: () => void;
   language: string;
   discountPercentage?: number;
-  isRecommended?: boolean;
-  isPopular?: boolean;
-  isBestValue?: boolean;
   hasReturnTrip?: boolean;
   returnDiscountPercentage?: number;
 }) {
@@ -83,11 +76,10 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
   return (
     <div
       className={cn(
-        "relative bg-background rounded-lg border overflow-hidden cursor-pointer transition-all duration-200 group aspect-square flex flex-col",
-        isSelected 
-          ? "border-primary ring-2 ring-primary/30 shadow-lg bg-primary/5" 
-          : "border-border hover:border-primary/50 hover:shadow-md active:scale-[0.98]",
-        isPopular && !isSelected && "border-primary/50"
+        "relative bg-background rounded-lg border overflow-hidden cursor-pointer transition-all duration-150 group aspect-square flex flex-col",
+        isSelected
+          ? "border-foreground/20 bg-muted shadow-sm"
+          : "border-border hover:border-foreground/10 hover:shadow-sm active:scale-[0.98]"
       )}
       onClick={handleClick}
     >
@@ -156,7 +148,7 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
           <div className="mt-auto pt-1 border-t border-border">
             {hasReturnTrip ? (
               <div className="text-center">
-                <span className="font-bold text-primary text-xs">{currencySymbol}{totalPrice}</span>
+                <span className="font-bold text-foreground text-xs">{currencySymbol}{totalPrice}</span>
               </div>
             ) : (
               <div className="flex items-center justify-center gap-0.5">
@@ -165,7 +157,7 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
                     {currencySymbol}{originalPrice}
                   </span>
                 )}
-                <span className="font-bold text-primary text-xs">
+                <span className="font-bold text-foreground text-xs">
                   {currencySymbol}{displayPrice}
                 </span>
               </div>
@@ -194,32 +186,16 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
 
   // Always show exactly 4 vehicles for 1-6 passengers: sedan, vito, vip, maybach
   // For 7+ passengers, show only minibus
-  const displayVehicles = passengers >= 7 
+  const displayVehicles = passengers >= 7
     ? VEHICLE_TYPES.filter(v => v.value === 'minibus')
     : VEHICLE_TYPES.filter(v => ['sedan', 'mercedes-vito', 'vip-mercedes', 'maybach-minibus'].includes(v.value));
 
-  // Get recommended vehicle - Vito for standard, Sprinter for 7+
-  const recommendedVehicle = passengers >= 7 ? "minibus" : "mercedes-vito";
-  
-  // Most popular vehicle - VIP Mercedes for 1-6, Sprinter for 7+
-  const popularVehicle = passengers >= 7 ? "minibus" : "vip-mercedes";
-  
-  // Best value is the lowest priced vehicle
-  const bestValueVehicle = prices 
-    ? Object.entries(prices).reduce((a, b) => b[1] < a[1] ? b : a)?.[0]
-    : "sedan";
-
   return (
-    <motion.div 
-      className="mt-3 space-y-2"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-    >
+    <div className="mt-3 space-y-2">
       <div className="flex items-center justify-between px-1">
         <div className="text-xs text-muted-foreground font-medium">
-          {isTurkish 
-            ? `${passengers >= 7 ? "7+ yolcu:" : "Araç seçin:"}` 
+          {isTurkish
+            ? `${passengers >= 7 ? "7+ yolcu:" : "Araç seçin:"}`
             : `${passengers >= 7 ? "7+ passengers:" : "Select vehicle:"}`
           }
         </div>
@@ -227,13 +203,8 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
       
       {/* 2x2 Grid - Always show all 4 vehicles */}
       <div className="grid grid-cols-2 gap-2">
-        {displayVehicles.map((vehicle, index) => (
-          <motion.div 
-            key={vehicle.value}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.15, delay: index * 0.05 }}
-          >
+        {displayVehicles.map((vehicle) => (
+          <div key={vehicle.value}>
             <ChatVehicleCard
               vehicle={vehicle}
               price={prices?.[vehicle.value]}
@@ -242,16 +213,13 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
               onSelect={() => onSelectVehicle?.(vehicle.value)}
               language={language}
               discountPercentage={discountPercentage}
-              isRecommended={vehicle.value === recommendedVehicle}
-              isPopular={vehicle.value === popularVehicle}
-              isBestValue={showPriceComparison && vehicle.value === bestValueVehicle}
               hasReturnTrip={hasReturnTrip}
               returnDiscountPercentage={returnDiscountPercentage}
             />
-          </motion.div>
+          </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 });
 
