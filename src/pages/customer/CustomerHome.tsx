@@ -26,6 +26,7 @@ import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomp
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes, getAvailableVehicles, isMinibusRequired, VEHICLE_TYPE_MAP } from '@/lib/vehicleTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -135,6 +136,18 @@ const CustomerHome = () => {
   }>>([]);
   const [isAddingFavorite, setIsAddingFavorite] = useState(false);
   const [newFavoriteRoute, setNewFavoriteRoute] = useState({ name: '', pickup: '', dropoff: '', notes: '' });
+  
+  // Pending booking modal state
+  const [showPendingBookingModal, setShowPendingBookingModal] = useState(false);
+  const [pendingBookingInfo, setPendingBookingInfo] = useState<{
+    token: string;
+    bookingData: any;
+    customerName: string;
+    customerPhone: string;
+    customerEmail: string;
+  } | null>(null);
+  const [isCreatingReservation, setIsCreatingReservation] = useState(false);
+  
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
@@ -303,22 +316,41 @@ const CustomerHome = () => {
       if (!user?.id) return;
       
       const pendingToken = localStorage.getItem('pending_booking_token');
-      if (!pendingToken) return;
+      const pendingData = localStorage.getItem('pending_booking_data');
       
-      console.log('Found pending booking token, processing...', pendingToken);
-      localStorage.removeItem('pending_booking_token');
+      if (!pendingToken && !pendingData) return;
+      
+      console.log('Found pending booking, processing...', { pendingToken, pendingData });
       
       try {
-        // Fetch the quick booking request
-        const { data: quickBooking, error } = await supabase
-          .from('quick_booking_requests')
-          .select('*')
-          .eq('confirmation_token', pendingToken)
-          .single();
+        let quickBooking: any = null;
+        let bookingDataFromStorage: any = null;
         
-        if (error || !quickBooking) {
-          console.error('Failed to load pending booking:', error);
-          return;
+        // Handle token-based pending booking
+        if (pendingToken) {
+          localStorage.removeItem('pending_booking_token');
+          
+          const { data, error } = await supabase
+            .from('quick_booking_requests')
+            .select('*')
+            .eq('confirmation_token', pendingToken)
+            .single();
+          
+          if (error || !data) {
+            console.error('Failed to load pending booking:', error);
+            return;
+          }
+          quickBooking = data;
+        }
+        
+        // Handle data-based pending booking
+        if (pendingData) {
+          localStorage.removeItem('pending_booking_data');
+          try {
+            bookingDataFromStorage = JSON.parse(pendingData);
+          } catch (e) {
+            console.error('Failed to parse pending booking data:', e);
+          }
         }
         
         // Get user profile for phone
@@ -329,48 +361,137 @@ const CustomerHome = () => {
           .single();
         
         // Get user email from auth
-        const userEmail = user.email || quickBooking.customer_email;
-        const userName = profile?.full_name || user.user_metadata?.full_name || quickBooking.customer_name || '';
-        const userPhone = profile?.phone || quickBooking.customer_phone || '';
+        const userEmail = user.email || quickBooking?.customer_email || '';
+        const userName = profile?.full_name || user.user_metadata?.full_name || quickBooking?.customer_name || '';
+        const userPhone = profile?.phone || quickBooking?.customer_phone || '';
         
-        // Create reservation from quick booking
-        const { data: result, error: createError } = await supabase.functions.invoke('create-quick-booking-reservation', {
-          body: {
-            bookingId: quickBooking.id,
+        // Check if we have missing required info
+        const hasMissingInfo = !userName.trim() || !userPhone.trim();
+        
+        if (hasMissingInfo && quickBooking) {
+          // Show modal to collect missing info
+          console.log('Missing info detected, showing modal...');
+          setPendingBookingInfo({
+            token: pendingToken || '',
+            bookingData: quickBooking,
             customerName: userName,
-            customerEmail: userEmail,
             customerPhone: userPhone,
-            paymentMethod: quickBooking.payment_method || 'card',
-            hasReturnTrip: quickBooking.has_return_trip,
-            returnPrice: quickBooking.return_price,
-          }
-        });
-        
-        if (createError) {
-          console.error('Failed to create reservation:', createError);
-          toast.error(language === 'TR' ? 'Rezervasyon oluşturulamadı' : 'Failed to create reservation');
+            customerEmail: userEmail,
+          });
+          setShowPendingBookingModal(true);
           return;
         }
         
-        console.log('Reservation created from pending booking:', result);
-        toast.success(
-          language === 'TR' 
-            ? '🎉 Rezervasyonunuz başarıyla oluşturuldu!' 
-            : '🎉 Your reservation was successfully created!'
-        );
-        
-        // Refresh data to show the new reservation
-        fetchData();
+        // If we have all info, proceed with reservation creation
+        if (quickBooking) {
+          setIsCreatingReservation(true);
+          const { data: result, error: createError } = await supabase.functions.invoke('create-quick-booking-reservation', {
+            body: {
+              bookingId: quickBooking.id,
+              customerName: userName,
+              customerEmail: userEmail,
+              customerPhone: userPhone,
+              paymentMethod: quickBooking.payment_method || 'card',
+              hasReturnTrip: quickBooking.has_return_trip,
+              returnPrice: quickBooking.return_price,
+            }
+          });
+          setIsCreatingReservation(false);
+          
+          if (createError) {
+            console.error('Failed to create reservation:', createError);
+            toast.error(language === 'TR' ? 'Rezervasyon oluşturulamadı' : 'Failed to create reservation');
+            return;
+          }
+          
+          console.log('Reservation created from pending booking:', result);
+          toast.success(
+            language === 'TR' 
+              ? '🎉 Rezervasyonunuz başarıyla oluşturuldu!' 
+              : '🎉 Your reservation was successfully created!'
+          );
+          
+          // Refresh data to show the new reservation
+          fetchData();
+        }
         
       } catch (err) {
         console.error('Error processing pending booking:', err);
+        setIsCreatingReservation(false);
       }
     };
     
     if (!authLoading && user?.id) {
       checkPendingBooking();
     }
-  }, [authLoading, user?.id, user?.email, user?.user_metadata, language]);
+  }, [authLoading, user?.id, user?.email, user?.user_metadata, language, fetchData]);
+  
+  // Handle completing pending booking from modal
+  const handleCompletePendingBooking = async () => {
+    if (!pendingBookingInfo || !user?.id) return;
+    
+    const { bookingData, customerName, customerPhone, customerEmail } = pendingBookingInfo;
+    
+    // Validate
+    if (!customerName.trim()) {
+      toast.error(language === 'TR' ? 'Lütfen adınızı girin' : 'Please enter your name');
+      return;
+    }
+    if (!customerPhone.trim()) {
+      toast.error(language === 'TR' ? 'Lütfen telefon numaranızı girin' : 'Please enter your phone number');
+      return;
+    }
+    
+    setIsCreatingReservation(true);
+    
+    try {
+      // First update the profile
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        full_name: customerName.trim(),
+        phone: customerPhone.trim(),
+        updated_at: new Date().toISOString()
+      });
+      
+      // Create reservation
+      const { data: result, error: createError } = await supabase.functions.invoke('create-quick-booking-reservation', {
+        body: {
+          bookingId: bookingData.id,
+          customerName: customerName.trim(),
+          customerEmail: customerEmail,
+          customerPhone: customerPhone.trim(),
+          paymentMethod: bookingData.payment_method || 'card',
+          hasReturnTrip: bookingData.has_return_trip,
+          returnPrice: bookingData.return_price,
+        }
+      });
+      
+      if (createError) {
+        console.error('Failed to create reservation:', createError);
+        toast.error(language === 'TR' ? 'Rezervasyon oluşturulamadı' : 'Failed to create reservation');
+        return;
+      }
+      
+      console.log('Reservation created from modal:', result);
+      toast.success(
+        language === 'TR' 
+          ? '🎉 Rezervasyonunuz başarıyla oluşturuldu!' 
+          : '🎉 Your reservation was successfully created!'
+      );
+      
+      // Close modal and refresh
+      setShowPendingBookingModal(false);
+      setPendingBookingInfo(null);
+      setProfileData({ full_name: customerName.trim(), phone: customerPhone.trim() });
+      fetchData();
+      
+    } catch (err) {
+      console.error('Error completing pending booking:', err);
+      toast.error(language === 'TR' ? 'Bir hata oluştu' : 'An error occurred');
+    } finally {
+      setIsCreatingReservation(false);
+    }
+  };
 
   // Wait for auth to complete before fetching data
   useEffect(() => {
@@ -2445,6 +2566,108 @@ const CustomerHome = () => {
           </motion.div>
         </div>
       </main>
+      
+      {/* Pending Booking Modal - Complete Missing Info */}
+      <Dialog open={showPendingBookingModal} onOpenChange={setShowPendingBookingModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <CheckCircle className="h-6 w-6 text-green-500" />
+              {language === 'TR' ? 'Rezervasyonunuz Hazır!' : 'Your Booking is Ready!'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'TR' 
+                ? 'Rezervasyonunuzu tamamlamak için bilgilerinizi girin.'
+                : 'Enter your details to complete your reservation.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          {pendingBookingInfo && (
+            <div className="space-y-4 py-4">
+              {/* Booking Summary */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-green-600" />
+                  <span className="font-medium">{pendingBookingInfo.bookingData?.pickup}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-red-500" />
+                  <span className="font-medium">{pendingBookingInfo.bookingData?.dropoff}</span>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {pendingBookingInfo.bookingData?.pickup_date}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {pendingBookingInfo.bookingData?.pickup_time}
+                  </span>
+                </div>
+                {pendingBookingInfo.bookingData?.price && (
+                  <div className="pt-2 border-t">
+                    <span className="text-lg font-bold text-primary">
+                      {pendingBookingInfo.bookingData.price} {pendingBookingInfo.bookingData.price_currency || 'EUR'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Form Fields */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="modal-name" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    {language === 'TR' ? 'Ad Soyad' : 'Full Name'}
+                  </Label>
+                  <Input
+                    id="modal-name"
+                    value={pendingBookingInfo.customerName}
+                    onChange={(e) => setPendingBookingInfo(prev => 
+                      prev ? { ...prev, customerName: e.target.value } : null
+                    )}
+                    placeholder={language === 'TR' ? 'Adınız Soyadınız' : 'Your Full Name'}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="modal-phone" className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    {language === 'TR' ? 'Telefon' : 'Phone'}
+                  </Label>
+                  <PhoneInput
+                    value={pendingBookingInfo.customerPhone}
+                    onChange={(value) => setPendingBookingInfo(prev => 
+                      prev ? { ...prev, customerPhone: value } : null
+                    )}
+                    placeholder={language === 'TR' ? 'Telefon Numaranız' : 'Your Phone Number'}
+                  />
+                </div>
+              </div>
+              
+              {/* Submit Button */}
+              <Button 
+                onClick={handleCompletePendingBooking}
+                disabled={isCreatingReservation}
+                className="w-full h-12 text-base font-semibold"
+              >
+                {isCreatingReservation ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    {language === 'TR' ? 'Oluşturuluyor...' : 'Creating...'}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    {language === 'TR' ? 'Rezervasyonu Tamamla' : 'Complete Reservation'}
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
