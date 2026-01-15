@@ -119,28 +119,9 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
         </p>
       </div>
 
-      {/* Action Buttons */}
-      <div className="space-y-2">
-        {/* Google Login Button - Primary/Prominent */}
-        <Button
-          onClick={handleGoogleLogin}
-          disabled={googleLoading || isLoading}
-          variant="outline"
-          className="w-full h-11 bg-white hover:bg-gray-50 text-gray-700 border-gray-300 font-medium rounded-xl shadow-sm flex items-center justify-center gap-3"
-        >
-          {googleLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <GoogleIcon />
-              <span>
-                {isTurkish ? "Google ile Hızlı Giriş" : "Quick Sign in with Google"}
-              </span>
-            </>
-          )}
-        </Button>
-
-        {/* Continue as Guest / Go to Booking Page */}
+      {/* Action Buttons - Reordered: Continue first, then Google */}
+      <div className="space-y-3">
+        {/* Continue as Guest / Go to Booking Page - Primary Action */}
         <Button
           onClick={onRedirect}
           disabled={isLoading || googleLoading}
@@ -158,13 +139,41 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
             <ArrowRight className="h-4 w-4" />
           </motion.div>
         </Button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-[10px] text-muted-foreground font-medium">
+            {isTurkish ? "veya" : "or"}
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {/* Google Login Button - More Prominent at Bottom */}
+        <Button
+          onClick={handleGoogleLogin}
+          disabled={googleLoading || isLoading}
+          variant="outline"
+          className="w-full h-12 bg-white hover:bg-gray-50 text-gray-700 border-2 border-primary/30 hover:border-primary font-medium rounded-xl shadow-md flex items-center justify-center gap-3 transition-all"
+        >
+          {googleLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <>
+              <GoogleIcon />
+              <span className="font-semibold">
+                {isTurkish ? "Google ile Hızlı Giriş" : "Quick Sign in with Google"}
+              </span>
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Helper text */}
       <p className="text-center text-[10px] text-muted-foreground mt-3">
         {isTurkish 
-          ? "Google ile giriş yaparsanız müşteri panelinize erişebilirsiniz" 
-          : "Sign in with Google to access your customer panel"
+          ? "Google ile giriş yaparak müşteri panelinize erişebilir, rezervasyonlarınızı takip edebilirsiniz" 
+          : "Sign in with Google to access your customer panel and track your bookings"
         }
       </p>
     </motion.div>
