@@ -31,7 +31,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.send-confirmation-email]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-notification-email]
 verify_jwt = false
