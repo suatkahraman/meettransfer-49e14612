@@ -109,91 +109,126 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn("mt-3 p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20", className)}
+      className={cn("mt-4 p-5 bg-gradient-to-br from-green-50 via-background to-primary/10 rounded-2xl border-2 border-green-500/30 shadow-xl", className)}
     >
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <CheckCircle className="h-5 w-5 text-green-500" />
-        <h4 className="font-semibold text-sm">
-          {isTurkish ? "Rezervasyonunuz Hazır!" : "Your Booking is Ready!"}
-        </h4>
+      {/* Success Header - More Prominent */}
+      <motion.div 
+        className="flex items-center gap-3 mb-4 pb-3 border-b border-green-500/20"
+        initial={{ x: -20 }}
+        animate={{ x: 0 }}
+      >
+        <motion.div
+          className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/40"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <CheckCircle className="h-6 w-6 text-white" />
+        </motion.div>
+        <div>
+          <h4 className="font-bold text-base text-foreground">
+            {isTurkish ? "Rezervasyonunuz Hazır!" : "Your Booking is Ready!"}
+          </h4>
+          <p className="text-xs text-muted-foreground">
+            {isTurkish ? "Son adım: Onaylayın ve tamamlayın" : "Final step: Confirm and complete"}
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Info Section - Enhanced */}
+      <div className="text-xs text-muted-foreground space-y-2 mb-5 bg-white/50 rounded-xl p-3 border border-border/50">
+        <p className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-lg bg-green-500/10 flex items-center justify-center">
+            <Shield className="h-3.5 w-3.5 text-green-600" />
+          </div>
+          <span className="font-medium">
+            {isTurkish 
+              ? "Tüm bilgileriniz güvenli şekilde kaydedildi" 
+              : "All your information is securely saved"
+            }
+          </span>
+        </p>
+        <p className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center">
+            <Clock className="h-3.5 w-3.5 text-blue-600" />
+          </div>
+          <span className="font-medium">
+            {isTurkish 
+              ? "Sadece birkaç saniye içinde tamamlayın" 
+              : "Complete in just a few seconds"
+            }
+          </span>
+        </p>
       </div>
 
-      {/* Info Section */}
-      <div className="text-[11px] text-muted-foreground space-y-1.5 mb-4">
-        <p className="flex items-start gap-2">
-          <Shield className="h-3.5 w-3.5 text-green-500 shrink-0 mt-0.5" />
-          {isTurkish 
-            ? "Tüm bilgileriniz güvenli şekilde kaydedildi" 
-            : "All your information is securely saved"
-          }
-        </p>
-        <p className="flex items-start gap-2">
-          <Clock className="h-3.5 w-3.5 text-blue-500 shrink-0 mt-0.5" />
-          {isTurkish 
-            ? "Sadece birkaç saniye içinde tamamlayın" 
-            : "Complete in just a few seconds"
-          }
-        </p>
-      </div>
-
-      {/* Action Buttons - Reordered: Continue first, then Google */}
+      {/* Action Buttons - Enhanced */}
       <div className="space-y-3">
         {/* Continue as Guest / Go to Booking Page - Primary Action */}
-        <Button
-          onClick={onRedirect}
-          disabled={isLoading || googleLoading}
-          className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/25"
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <motion.div
-            className="flex items-center gap-2"
-            animate={{ x: [0, 3, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          <Button
+            onClick={onRedirect}
+            disabled={isLoading || googleLoading}
+            className="w-full h-14 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-bold text-base rounded-xl shadow-xl shadow-primary/30 transition-all"
           >
-            <UserPlus className="h-4 w-4" />
-            <span>
-              {isTurkish ? "Devam Et & Rezervasyonu Tamamla" : "Continue & Complete Booking"}
-            </span>
-            <ArrowRight className="h-4 w-4" />
-          </motion.div>
-        </Button>
+            <motion.div
+              className="flex items-center gap-3"
+              animate={{ x: [0, 4, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <UserPlus className="h-5 w-5" />
+              <span>
+                {isTurkish ? "Devam Et & Rezervasyonu Tamamla" : "Continue & Complete Booking"}
+              </span>
+              <ArrowRight className="h-5 w-5" />
+            </motion.div>
+          </Button>
+        </motion.div>
 
         {/* Divider */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-[10px] text-muted-foreground font-medium">
+        <div className="flex items-center gap-4 py-1">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">
             {isTurkish ? "veya" : "or"}
           </span>
-          <div className="flex-1 h-px bg-border" />
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         </div>
 
-        {/* Google Login Button - More Prominent at Bottom */}
-        <Button
-          onClick={handleGoogleLogin}
-          disabled={googleLoading || isLoading}
-          variant="outline"
-          className="w-full h-12 bg-white hover:bg-gray-50 text-gray-700 border-2 border-primary/30 hover:border-primary font-medium rounded-xl shadow-md flex items-center justify-center gap-3 transition-all"
+        {/* Google Login Button - Enhanced */}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          {googleLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
-            <>
-              <GoogleIcon />
-              <span className="font-semibold">
-                {isTurkish ? "Google ile Hızlı Giriş" : "Quick Sign in with Google"}
-              </span>
-            </>
-          )}
-        </Button>
+          <Button
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || isLoading}
+            variant="outline"
+            className="w-full h-14 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-primary/50 font-semibold text-base rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all"
+          >
+            {googleLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <GoogleIcon />
+                <span>
+                  {isTurkish ? "Google ile Hızlı Giriş" : "Quick Sign in with Google"}
+                </span>
+              </>
+            )}
+          </Button>
+        </motion.div>
       </div>
 
-      {/* Helper text */}
-      <p className="text-center text-[10px] text-muted-foreground mt-3">
-        {isTurkish 
-          ? "Google ile giriş yaparak müşteri panelinize erişebilir, rezervasyonlarınızı takip edebilirsiniz" 
-          : "Sign in with Google to access your customer panel and track your bookings"
-        }
-      </p>
+      {/* Helper text - Enhanced */}
+      <div className="mt-4 p-3 bg-primary/5 rounded-xl border border-primary/10">
+        <p className="text-center text-xs text-muted-foreground leading-relaxed">
+          {isTurkish 
+            ? "💡 Google ile giriş yaparak müşteri panelinize erişebilir ve tüm rezervasyonlarınızı kolayca takip edebilirsiniz" 
+            : "💡 Sign in with Google to access your customer panel and easily track all your bookings"
+          }
+        </p>
+      </div>
     </motion.div>
   );
 });
