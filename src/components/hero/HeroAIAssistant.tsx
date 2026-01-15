@@ -203,12 +203,14 @@ export const HeroAIAssistant = memo(({ language, onApplyBooking }: HeroAIAssista
         </div>
       </div>
 
-      {/* Mobile: Floating Widget - deferred loading */}
+      {/* Mobile: Floating Widget - deferred loading with proper z-index */}
       {shouldLoadMobile && (
-        <div className="md:hidden">
-          <Suspense fallback={null}>
-            <BookingChatAssistant onApplyBooking={onApplyBooking} mobileFloating />
-          </Suspense>
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[60]" style={{ pointerEvents: 'none' }}>
+          <div style={{ pointerEvents: 'auto' }}>
+            <Suspense fallback={null}>
+              <BookingChatAssistant onApplyBooking={onApplyBooking} mobileFloating />
+            </Suspense>
+          </div>
         </div>
       )}
     </>
