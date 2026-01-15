@@ -115,6 +115,7 @@ interface Message {
   showPaymentMethod?: boolean;
   showPassengerCount?: boolean;
   showExtras?: boolean;
+  showAirportSelection?: boolean;
   showDateTimePicker?: boolean;
   vehiclePrices?: Record<string, number>;
   passengerCount?: number;
@@ -2289,6 +2290,22 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       ];
       const showExtras = extrasQuestionPatterns.some(pattern => pattern.test(cleanedContent));
 
+      // Detect airport selection patterns (when user just says "istanbul" without specifying airport)
+      const airportSelectionPatterns = [
+        /hangi.*havalimanı/i,
+        /hangi.*havaalanı/i,
+        /which.*airport/i,
+        /ist.*veya.*saw/i,
+        /ist.*mi.*saw.*mı/i,
+        /ist.*or.*saw/i,
+        /istanbul.*havalimanı.*mı.*sabiha/i,
+        /istanbul.*airport.*or.*sabiha/i,
+        /welcher.*flughafen/i,
+        /quel.*aéroport/i,
+        /какой.*аэропорт/i,
+      ];
+      const showAirportSelection = airportSelectionPatterns.some(pattern => pattern.test(cleanedContent));
+
       // Detect date/time question patterns
       const dateTimeQuestionPatterns = [
         /ne.*zaman/i,
@@ -2335,6 +2352,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         showPaymentMethod,
         showPassengerCount,
         showExtras,
+        showAirportSelection,
         showDateTimePicker,
       };
 
@@ -3280,10 +3298,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           )}
 
                           {/* Quick Reply Buttons - Mobile */}
-                          {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras) && (
+                          {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras || msg.showAirportSelection) && (
                             <ChatQuickReplyButtons
                               language={language}
                               type={
+                                msg.showAirportSelection ? "airport_selection" :
                                 msg.showReturnQuestion ? "return_transfer" :
                                 msg.showPaymentMethod ? "payment_method" :
                                 msg.showPassengerCount ? "passenger_count" :
@@ -3302,6 +3321,20 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                     onApplyBooking(partialBookingData as BookingData);
                                   }
                                 }
+                                
+                                // Hide quick reply buttons after selection by updating this message's flags
+                                setMessages(prev => prev.map((m, i) => 
+                                  i === msgIndex 
+                                    ? { 
+                                        ...m,
+                                        showReturnQuestion: false,
+                                        showPaymentMethod: false,
+                                        showPassengerCount: false,
+                                        showExtras: false,
+                                        showAirportSelection: false,
+                                      }
+                                    : m
+                                ));
                                 
                                 setInput(answer);
                                 setTimeout(() => {
@@ -3324,6 +3357,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                   console.log("[DateTimePicker] Syncing to form:", dateStr, time, returnDate ? returnDate.toISOString().split('T')[0] : 'no return');
                                   onApplyBooking({ date: dateStr, time } as BookingData);
                                 }
+                                
+                                // Hide date time picker after selection
+                                setMessages(prev => prev.map((m, i) => 
+                                  i === msgIndex 
+                                    ? { ...m, showDateTimePicker: false }
+                                    : m
+                                ));
                                 
                                 // Build message
                                 let message = `${formattedDate} ${time}`;
@@ -3994,10 +4034,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 )}
 
                 {/* Quick Reply Buttons - Desktop */}
-                {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras) && (
+                {/* Quick Reply Buttons - Desktop */}
+                {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras || msg.showAirportSelection) && (
                   <ChatQuickReplyButtons
                     language={language}
                     type={
+                      msg.showAirportSelection ? "airport_selection" :
                       msg.showReturnQuestion ? "return_transfer" :
                       msg.showPaymentMethod ? "payment_method" :
                       msg.showPassengerCount ? "passenger_count" :
@@ -4016,6 +4058,20 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           onApplyBooking(partialBookingData as BookingData);
                         }
                       }
+                      
+                      // Hide quick reply buttons after selection by updating this message's flags
+                      setMessages(prev => prev.map((m, idx) => 
+                        idx === msgIndex 
+                          ? { 
+                              ...m,
+                              showReturnQuestion: false,
+                              showPaymentMethod: false,
+                              showPassengerCount: false,
+                              showExtras: false,
+                              showAirportSelection: false,
+                            }
+                          : m
+                      ));
                       
                       setInput(answer);
                       setTimeout(() => {
@@ -4038,6 +4094,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         console.log("[DateTimePicker] Syncing to form:", dateStr, time, returnDate ? returnDate.toISOString().split('T')[0] : 'no return');
                         onApplyBooking({ date: dateStr, time } as BookingData);
                       }
+                      
+                      // Hide date time picker after selection
+                      setMessages(prev => prev.map((m, idx) => 
+                        idx === msgIndex 
+                          ? { ...m, showDateTimePicker: false }
+                          : m
+                      ));
                       
                       // Build message
                       let message = `${formattedDate} ${time}`;
