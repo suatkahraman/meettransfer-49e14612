@@ -66,76 +66,109 @@ export const HeroBackground = memo(({
   const currentBg = HERO_BACKGROUNDS[currentBgIndex];
 
   return (
-    <div className="absolute inset-0 z-0 hidden md:block">
-      {/* Static Backgrounds - Fast Loading with Local Assets */}
-      <div className="absolute inset-0">
-        {/* First image loads immediately as base layer */}
-        <img
-          src={HERO_BACKGROUNDS[0].src}
-          alt="VIP Transfer Background"
-          className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 saturate-110"
-          loading="eager"
-          decoding="async"
-          fetchPriority="high"
+    <>
+      {/* Mobile Grid Background */}
+      <div className="absolute inset-0 z-0 md:hidden">
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/30" />
+        
+        {/* Grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)
+            `,
+            backgroundSize: '24px 24px'
+          }}
         />
         
-        {/* Animated crossfade between backgrounds */}
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={currentBgIndex}
-            src={currentBg.src}
-            alt={language === 'TR' ? currentBg.labelTR : currentBg.label}
+        {/* Radial gradient overlay for depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
+        
+        {/* Subtle accent dots */}
+        <div 
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)`,
+            backgroundSize: '48px 48px'
+          }}
+        />
+      </div>
+
+      {/* Desktop Image Slideshow Background */}
+      <div className="absolute inset-0 z-0 hidden md:block">
+        {/* Static Backgrounds - Fast Loading with Local Assets */}
+        <div className="absolute inset-0">
+          {/* First image loads immediately as base layer */}
+          <img
+            src={HERO_BACKGROUNDS[0].src}
+            alt="VIP Transfer Background"
             className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 saturate-110"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: "easeInOut" }}
             loading="eager"
             decoding="async"
+            fetchPriority="high"
           />
-        </AnimatePresence>
-        
-        {/* Background Label Badge - Desktop */}
-        <motion.div
-          key={`label-${currentBgIndex}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3 }}
-          className="absolute bottom-8 right-8 z-20 hidden md:block"
-        >
-          <div className="flex items-center gap-2 bg-background/90 backdrop-blur-md rounded-full px-4 py-2 border border-primary/30 shadow-xl">
-            <Globe className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-foreground">
-              {language === 'TR' ? currentBg.labelTR : currentBg.label}
-            </span>
-          </div>
-        </motion.div>
-        
-        {/* Navigation Dots - Desktop */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 hidden md:flex gap-2">
-          {HERO_BACKGROUNDS.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentBgIndex(index)}
-              className={cn(
-                "w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-md",
-                currentBgIndex === index 
-                  ? "bg-primary w-7" 
-                  : "bg-white/60 hover:bg-white/80"
-              )}
-              aria-label={`Go to background ${index + 1}`}
+          
+          {/* Animated crossfade between backgrounds */}
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={currentBgIndex}
+              src={currentBg.src}
+              alt={language === 'TR' ? currentBg.labelTR : currentBg.label}
+              className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 saturate-110"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+              loading="eager"
+              decoding="async"
             />
-          ))}
+          </AnimatePresence>
+          
+          {/* Background Label Badge - Desktop */}
+          <motion.div
+            key={`label-${currentBgIndex}`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="absolute bottom-8 right-8 z-20"
+          >
+            <div className="flex items-center gap-2 bg-background/90 backdrop-blur-md rounded-full px-4 py-2 border border-primary/30 shadow-xl">
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold text-foreground">
+                {language === 'TR' ? currentBg.labelTR : currentBg.label}
+              </span>
+            </div>
+          </motion.div>
+          
+          {/* Navigation Dots - Desktop */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {HERO_BACKGROUNDS.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentBgIndex(index)}
+                className={cn(
+                  "w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-md",
+                  currentBgIndex === index 
+                    ? "bg-primary w-7" 
+                    : "bg-white/60 hover:bg-white/80"
+                )}
+                aria-label={`Go to background ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
+        
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-background/20 to-transparent" />
+        
+        {/* Pattern Overlay */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
       </div>
-      
-      {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/30 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-background/20 to-transparent" />
-      
-      {/* Pattern Overlay */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PHBhdGggZD0iTTM2IDM0djItaDJ2LTJoLTJ6bTAgNHYyaC0ydjJoMnYtMmgydi0yaC0yem0tMiAydi0yaC0ydjJoMnptMi0yaDJ2LTJoLTJ2MnptLTItNHYyaDJ2LTJoLTJ6bS0yLTJ2Mmgydi0yaC0yem0yLTJoMnYtMmgtMnYyem0tMiAydjJoLTJ2Mmgydi0yaC0ydi0yaDJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20" />
-    </div>
+    </>
   );
 });
 
