@@ -2958,7 +2958,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           )}
                           
                           {/* Vehicle Cards for Mobile */}
-                          {msg.showVehicleCards && msg.vehiclePrices && (
+                          {/* Vehicle Cards for Mobile - Only show if no vehicle selected */}
+                          {msg.showVehicleCards && msg.vehiclePrices && !msg.bookingData?.vehicleType && (
                             <ChatVehicleCards
                               passengers={msg.passengerCount || 2}
                               prices={msg.vehiclePrices}
@@ -2966,6 +2967,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               selectedVehicle={msg.bookingData?.vehicleType || undefined}
                               language={language}
                               discountPercentage={msg.bookingData?.discountPercentage || undefined}
+                              hasReturnTrip={msg.bookingData?.hasReturnTrip || false}
+                              returnDiscountPercentage={25}
                               onSelectVehicle={(vehicleType) => {
                                 // Sync all booking data to form when vehicle is selected
                                 if (onApplyBooking) {
@@ -2988,12 +2991,27 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                   console.log("[ChatVehicleCards Mobile] Syncing all data to form:", syncData);
                                   onApplyBooking(syncData as BookingData);
                                 }
-                                // Update message's bookingData to reflect selection
+                                // Update message's bookingData to reflect selection and trigger booking creation
                                 setMessages(prev => prev.map((m, i) => 
                                   i === msgIndex && m.bookingData 
-                                    ? { ...m, bookingData: { ...m.bookingData, vehicleType } }
+                                    ? { ...m, bookingData: { ...m.bookingData, vehicleType, isComplete: true } }
                                     : m
                                 ));
+                                
+                                // Send a message to confirm vehicle selection and trigger booking creation
+                                const vehicleLabels: Record<string, string> = {
+                                  'sedan': 'Sedan',
+                                  'mercedes-vito': 'Mercedes Vito',
+                                  'vip-mercedes': 'Mercedes Vito VIP',
+                                  'maybach-minibus': 'Maybach',
+                                  'minibus': 'Mercedes Sprinter'
+                                };
+                                const label = vehicleLabels[vehicleType] || vehicleType;
+                                setInput(label);
+                                setTimeout(() => {
+                                  const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
+                                  if (submitButton) submitButton.click();
+                                }, 100);
                               }}
                             />
                           )}
@@ -3589,7 +3607,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 )}
                 
                 {/* Vehicle Cards for Desktop */}
-                {msg.showVehicleCards && msg.vehiclePrices && (
+                {/* Vehicle Cards for Desktop - Only show if no vehicle selected */}
+                {msg.showVehicleCards && msg.vehiclePrices && !msg.bookingData?.vehicleType && (
                   <ChatVehicleCards
                     passengers={msg.passengerCount || 2}
                     prices={msg.vehiclePrices}
@@ -3597,6 +3616,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     selectedVehicle={msg.bookingData?.vehicleType || undefined}
                     language={language}
                     discountPercentage={msg.bookingData?.discountPercentage || undefined}
+                    hasReturnTrip={msg.bookingData?.hasReturnTrip || false}
+                    returnDiscountPercentage={25}
                     onSelectVehicle={(vehicleType) => {
                       // Sync all booking data to form when vehicle is selected
                       if (onApplyBooking) {
@@ -3619,12 +3640,27 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         console.log("[ChatVehicleCards Desktop] Syncing all data to form:", syncData);
                         onApplyBooking(syncData as BookingData);
                       }
-                      // Update message's bookingData to reflect selection
+                      // Update message's bookingData to reflect selection and trigger booking creation
                       setMessages(prev => prev.map((m, idx) => 
                         idx === msgIndex && m.bookingData 
-                          ? { ...m, bookingData: { ...m.bookingData, vehicleType } }
+                          ? { ...m, bookingData: { ...m.bookingData, vehicleType, isComplete: true } }
                           : m
                       ));
+                      
+                      // Send a message to confirm vehicle selection and trigger booking creation
+                      const vehicleLabels: Record<string, string> = {
+                        'sedan': 'Sedan',
+                        'mercedes-vito': 'Mercedes Vito',
+                        'vip-mercedes': 'Mercedes Vito VIP',
+                        'maybach-minibus': 'Maybach',
+                        'minibus': 'Mercedes Sprinter'
+                      };
+                      const label = vehicleLabels[vehicleType] || vehicleType;
+                      setInput(label);
+                      setTimeout(() => {
+                        const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
+                        if (submitButton) submitButton.click();
+                      }, 100);
                     }}
                   />
                 )}

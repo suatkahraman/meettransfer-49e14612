@@ -771,22 +771,23 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
     const serviceType = bookingData?.serviceType || 'transfer';
     const isHourlyRental = serviceType === 'hourly';
 
-    // Check completion based on service type
+    // Check completion based on service type - payment is OPTIONAL
+    // Booking is complete when we have core info + vehicleType
     const isTransferComplete = !isHourlyRental && 
-      bookingData?.isComplete && 
-      bookingData.pickup && 
+      bookingData?.pickup && 
       bookingData.dropoff && 
       bookingData.date && 
       bookingData.time && 
-      bookingData.passengers;
+      bookingData.passengers &&
+      bookingData.vehicleType; // Vehicle selection completes the booking
 
     const isHourlyComplete = isHourlyRental && 
-      bookingData?.isComplete && 
-      bookingData.city && 
+      bookingData?.city && 
       bookingData.durationHours && 
       bookingData.date && 
       bookingData.time && 
-      bookingData.passengers;
+      bookingData.passengers &&
+      bookingData.vehicleType; // Vehicle selection completes the booking
 
     if (isTransferComplete || isHourlyComplete) {
       console.log(`Creating ${serviceType} booking request...`);
