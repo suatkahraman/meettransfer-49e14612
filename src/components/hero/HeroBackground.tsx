@@ -66,7 +66,7 @@ export const HeroBackground = memo(({
   const currentBg = HERO_BACKGROUNDS[currentBgIndex];
 
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 z-0 hidden md:block">
       {/* Static Backgrounds - Fast Loading with Local Assets */}
       <div className="absolute inset-0">
         {/* First image loads immediately as base layer */}
