@@ -1333,6 +1333,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [waitingForPrice, setWaitingForPrice] = useState(false);
   const [detectedCountryCode, setDetectedCountryCode] = useState<string | null>(null);
   const [showLanguageBanner, setShowLanguageBanner] = useState(true);
+  const [panelHeight, setPanelHeight] = useState(75); // Default 75% height
+  const [isDraggingResize, setIsDraggingResize] = useState(false);
+  const resizeStartYRef = useRef<number>(0);
+  const resizeStartHeightRef = useRef<number>(75);
   const baselineViewportHeightRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -2841,25 +2845,57 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               data-mobile-panel
               className="fixed inset-x-0 z-[80] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
               style={{
-                // Position panel above keyboard - compact size for mobile
-                top: keyboardHeight > 0 ? '0.5rem' : '25%',
+                // Position panel above keyboard - user adjustable size
+                top: keyboardHeight > 0 ? '0.5rem' : `${100 - panelHeight}%`,
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
                 maxHeight: keyboardHeight > 0 
                   ? `calc(100% - ${keyboardHeight}px - 0.5rem)` 
-                  : '75%',
-                minHeight: '280px',
+                  : `${panelHeight}%`,
+                minHeight: '200px',
                 touchAction: 'auto',
                 pointerEvents: 'auto',
                 paddingBottom: '0',
               }}
             >
-                {/* Drag Handle - Swipe indicator */}
+                {/* Resize Handle - Drag to resize */}
                  <div 
-                   className="flex justify-center pt-2 pb-1.5 cursor-grab active:cursor-grabbing shrink-0"
+                   className={cn(
+                     "flex justify-center pt-2 pb-1.5 cursor-ns-resize shrink-0 transition-colors",
+                     isDraggingResize && "bg-primary/10"
+                   )}
                    style={{ touchAction: 'none' }}
-                   onPointerDown={(e) => dragControls.start(e.nativeEvent)}
+                   onPointerDown={(e) => {
+                     // Resize mode
+                     setIsDraggingResize(true);
+                     resizeStartYRef.current = e.clientY;
+                     resizeStartHeightRef.current = panelHeight;
+                     e.currentTarget.setPointerCapture(e.pointerId);
+                   }}
+                   onPointerMove={(e) => {
+                     if (!isDraggingResize) return;
+                     const deltaY = resizeStartYRef.current - e.clientY;
+                     const viewportHeight = window.innerHeight;
+                     const deltaPercent = (deltaY / viewportHeight) * 100;
+                     const newHeight = Math.min(95, Math.max(30, resizeStartHeightRef.current + deltaPercent));
+                     setPanelHeight(newHeight);
+                   }}
+                   onPointerUp={(e) => {
+                     if (isDraggingResize) {
+                       setIsDraggingResize(false);
+                       e.currentTarget.releasePointerCapture(e.pointerId);
+                     }
+                   }}
+                   onPointerCancel={(e) => {
+                     if (isDraggingResize) {
+                       setIsDraggingResize(false);
+                       e.currentTarget.releasePointerCapture(e.pointerId);
+                     }
+                   }}
                  >
-                   <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+                   <div className={cn(
+                     "w-10 h-1.5 rounded-full transition-all",
+                     isDraggingResize ? "bg-primary w-16" : "bg-muted-foreground/30"
+                   )} />
                  </div>
                 
                 {/* Mobile Header - More Compact */}
