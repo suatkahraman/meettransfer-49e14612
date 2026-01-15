@@ -2888,19 +2888,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0.1, bottom: 0.3 }}
               onDragEnd={(_, info) => {
-                // More strict thresholds to prevent accidental exits
-                const offsetThreshold = isFullscreen ? 150 : 120;
-                const velocityThreshold = isFullscreen ? 800 : 600;
+                // Swipe down to close - always close on swipe down (regardless of fullscreen)
+                const offsetThreshold = 100; // Lower threshold for easier close
+                const velocityThreshold = 500; // Lower velocity for easier close
                 
                 if (info.offset.y > offsetThreshold || info.velocity.y > velocityThreshold) {
+                  // Always close the panel on swipe down
                   if (isFullscreen) {
-                    // Exit fullscreen first on swipe down
                     setPanelHeight(previousHeightRef.current);
                     setIsFullscreen(false);
-                  } else {
-                    // Close the panel if not in fullscreen
-                    setIsOpen(false);
                   }
+                  setIsOpen(false);
                 }
               }}
               data-mobile-panel
