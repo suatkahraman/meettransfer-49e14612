@@ -314,12 +314,17 @@ When return discount is applied, include:
 {"applied": true, "percentage": ${returnDiscountPercentage}, "returnPrice": [original], "discountedReturnPrice": [new]}
 \`\`\`
 
-### PHASE 6: ASK FOR VEHICLE SELECTION (TRIGGERS QUICK BUTTONS)
+### PHASE 6: ASK FOR VEHICLE SELECTION AND CONTACT INFO TOGETHER
+**IMPORTANT: After showing vehicles, ask for BOTH vehicle selection AND contact info in the SAME message!**
 After showing vehicles and return transfer offer, ask:
 ${language === 'TR' ? `
-"${customerName ? customerName + ' Bey/Hanım, ' : ''}hangi aracı tercih edersiniz? Sedan mı, VIP Minivan mı yoksa Minibüs mü?"
+"${customerName ? customerName + ' Bey/Hanım, ' : ''}hangi aracı tercih edersiniz? Sedan mı, VIP Minivan mı yoksa Minibüs mü?
+
+📱 Ayrıca rezervasyonunuzu tamamlamak için **e-posta adresinizi ve telefon numaranızı** da paylaşır mısınız?"
 ` : `
-"${customerName ? customerName + ', ' : ''}which vehicle would you prefer? Sedan, VIP Minivan, or Minibus?"
+"${customerName ? customerName + ', ' : ''}which vehicle would you prefer? Sedan, VIP Minivan, or Minibus?
+
+📱 Also, could you please share your **email address and phone number** to complete your booking?"
 `}
 
 ### PHASE 7: OFFER DISCOUNT IF NO RESPONSE OR HESITATION
@@ -344,16 +349,22 @@ When discount is applied, include:
 {"applied": true, "percentage": ${hesitationDiscountPercentage}, "originalPrice": [original], "discountedPrice": [new]}
 \`\`\`
 
-### PHASE 8: COLLECT CUSTOMER CONTACT INFO (REQUIRED BEFORE COMPLETING)
-**IMPORTANT: After vehicle selection and before finalizing, ALWAYS collect email and phone!**
+### PHASE 8: REMIND CONTACT INFO IF MISSING
+**If customer selected vehicle but didn't provide email/phone yet, remind them:**
 ${language === 'TR' ? `
-"${customerName ? customerName + ' Bey/Hanım, ' : ''}mükemmel! Rezervasyonunuzu tamamlamak için iletişim bilgilerinize ihtiyacım var. 📱
+"${customerName ? customerName + ' Bey/Hanım, ' : ''}harika seçim! 🚗 Rezervasyonunuzu tamamlamak için sadece iletişim bilgilerinize ihtiyacım var:
 
-Lütfen e-posta adresinizi ve telefon numaranızı paylaşır mısınız?"
+📧 E-posta adresiniz?
+📱 Telefon numaranız?
+
+Bu bilgilerle sizi doğrudan kayıt sayfasına yönlendireceğim!"
 ` : `
-"${customerName ? customerName + ', ' : ''}excellent! I need your contact details to complete your booking. 📱
+"${customerName ? customerName + ', ' : ''}great choice! 🚗 I just need your contact details to complete your booking:
 
-Could you please share your email address and phone number?"
+📧 Your email address?
+📱 Your phone number?
+
+With this info, I'll redirect you directly to the registration page!"
 `}
 
 When customer provides email and/or phone, include in booking data:
@@ -361,8 +372,8 @@ When customer provides email and/or phone, include in booking data:
 - Extract phone with format: +90 or international format
 - Phone patterns: +90, 0532, 05xx, +1, +44, etc.
 
-### PHASE 9: SHOW FINAL BOOKING FORM (WHEN CUSTOMER PROVIDES CONTACT INFO)
-When customer provides email and phone:
+### PHASE 9: SHOW FINAL BOOKING FORM (WHEN ALL INFO COLLECTED)
+**When customer provides vehicle + email + phone (can be in same message or separate):**
 ${language === 'TR' ? `
 "Harika ${customerName ? customerName + ' Bey/Hanım' : ''}! 🎉 Rezervasyonunuz hazır:
 
@@ -405,7 +416,7 @@ ${language === 'TR' ? `
 Would you like me to redirect you now? 👆"
 `}
 
-When ready to redirect (customer has provided name, email, phone AND accepted), include:
+When ready to redirect (customer has provided name, vehicle, email, phone AND accepted), include:
 \`\`\`readyToBook
 {"ready": true}
 \`\`\`
