@@ -26,6 +26,9 @@ interface SWInfo {
   lastUpdateCheck?: Date;
   updateAvailable: boolean;
   error?: string;
+  cacheKeys?: string[];
+  versionFingerprint?: string;
+  versionData?: { version?: string; buildNumber?: number; releaseDate?: string };
 }
 
 /**
@@ -45,7 +48,7 @@ export function PWADebugPanel() {
   // Check if debug panel should be visible
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const debugParam = urlParams.get("pwa-debug");
+    const debugParam = urlParams.get("pwa-debug") || urlParams.get("pwa_debug");
     const isDev = import.meta.env.DEV;
     
     // Show if in dev mode or debug param is set
@@ -80,10 +83,36 @@ export function PWADebugPanel() {
     try {
       const registration = await navigator.serviceWorker.getRegistration();
 
+      // Fetch cache keys
+      let cacheKeys: string[] = [];
+      if ("caches" in window) {
+        try {
+          cacheKeys = await caches.keys();
+        } catch {
+          // ignore
+        }
+      }
+
+      // Fetch version.json
+      let versionFingerprint: string | undefined;
+      let versionData: SWInfo["versionData"];
+      try {
+        const res = await fetch("/version.json", { cache: "no-store" });
+        if (res.ok) {
+          versionData = await res.json();
+          versionFingerprint = `${versionData?.version ?? ""}-${versionData?.buildNumber ?? ""}-${versionData?.releaseDate ?? ""}`;
+        }
+      } catch {
+        // ignore
+      }
+
       if (!registration) {
         setSwInfo({
           status: "none",
           updateAvailable: false,
+          cacheKeys,
+          versionFingerprint,
+          versionData,
         });
         return;
       }
@@ -105,6 +134,9 @@ export function PWADebugPanel() {
         scope: registration.scope,
         lastUpdateCheck: new Date(),
         updateAvailable: !!waitingWorker,
+        cacheKeys,
+        versionFingerprint,
+        versionData,
       });
     } catch (error) {
       setSwInfo({
@@ -298,6 +330,50 @@ export function PWADebugPanel() {
                 </div>
               </div>
 
+              {/* Version.json Fingerprint */}
+              {swInfo.versionFingerprint && (
+                <div className="space-y-2">
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Version Fingerprint
+                  </div>
+                  <code className="block text-xs p-2 bg-primary/10 border border-primary/20 rounded break-all text-primary font-mono">
+                    {swInfo.versionFingerprint}
+                  </code>
+                  {swInfo.versionData && (
+                    <div className="grid grid-cols-3 gap-1 text-[10px]">
+                      <div className="p-1.5 bg-muted/30 rounded text-center">
+                        <div className="text-muted-foreground">Ver</div>
+                        <div className="font-medium">{swInfo.versionData.version || "-"}</div>
+                      </div>
+                      <div className="p-1.5 bg-muted/30 rounded text-center">
+                        <div className="text-muted-foreground">Build</div>
+                        <div className="font-medium">{swInfo.versionData.buildNumber || "-"}</div>
+                      </div>
+                      <div className="p-1.5 bg-muted/30 rounded text-center">
+                        <div className="text-muted-foreground">Date</div>
+                        <div className="font-medium">{swInfo.versionData.releaseDate || "-"}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Cache Keys */}
+              {swInfo.cacheKeys && swInfo.cacheKeys.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Cache Keys ({swInfo.cacheKeys.length})
+                  </div>
+                  <div className="max-h-24 overflow-auto space-y-1">
+                    {swInfo.cacheKeys.map((key, i) => (
+                      <code key={i} className="block text-[10px] p-1.5 bg-muted/30 rounded break-all font-mono">
+                        {key}
+                      </code>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Scope */}
               {swInfo.scope && (
                 <div className="space-y-2">
@@ -371,7 +447,7 @@ export function PWADebugPanel() {
 
               {/* Tip */}
               <p className="text-[10px] text-muted-foreground text-center">
-                Add ?pwa-debug=1 to URL to show this panel
+                Add ?pwa_debug=1 to URL to show this panel
               </p>
             </div>
           </motion.div>
