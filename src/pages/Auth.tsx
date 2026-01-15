@@ -253,6 +253,16 @@ const Auth = () => {
     }
     
     if (user && !roleLoading && role && recoveryChecked) {
+      // Check for pending booking from quick booking flow
+      const pendingBookingToken = localStorage.getItem('pending_booking_token');
+      const pendingBookingData = localStorage.getItem('pending_booking_data');
+      
+      if (pendingBookingToken || pendingBookingData) {
+        console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
+        navigate('/customer', { replace: true });
+        return;
+      }
+      
       switch (role) {
         case 'admin':
           navigate('/admin', { replace: true });
