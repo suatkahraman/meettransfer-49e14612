@@ -20,7 +20,7 @@ import confetti from "canvas-confetti";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired } from "@/lib/vehicleTypes";
@@ -155,6 +155,10 @@ const BookingPage = () => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  
+  // Flight and passenger details
+  const [flightNumber, setFlightNumber] = useState("");
+  const [passengerNames, setPassengerNames] = useState("");
   
   // Booking success state
   const [bookingCompleted, setBookingCompleted] = useState(false);
@@ -470,6 +474,8 @@ const BookingPage = () => {
             babySeatCount,
             luggageCount,
             customerNotes: customerNotes.trim() || null,
+            flightNumber: flightNumber.trim() || null,
+            passengerNames: passengerNames.trim() ? passengerNames.trim().split('\n').filter(n => n.trim()) : null,
             // Customer info
             customerName: customerName.trim(),
             customerPhone: customerPhone.trim(),
@@ -545,6 +551,7 @@ const BookingPage = () => {
             price_currency: preferredCurrency,
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
+            passenger_names: passengerNames.trim() ? passengerNames.trim().split('\n').filter(n => n.trim()) : null,
             status: getHourlyPrice(vehicleType, selectedDuration) ? "confirmed" : "awaiting-price",
           }
         : {
@@ -562,6 +569,8 @@ const BookingPage = () => {
             price_currency: preferredCurrency,
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
+            flight_number: flightNumber.trim() || null,
+            passenger_names: passengerNames.trim() ? passengerNames.trim().split('\n').filter(n => n.trim()) : null,
             status: selectedPrice ? "confirmed" : "awaiting-price",
           };
 
@@ -596,6 +605,7 @@ const BookingPage = () => {
             price_currency: preferredCurrency,
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
+            passenger_names: passengerNames.trim() ? passengerNames.trim().split('\n').filter(n => n.trim()) : null,
             status: "pending",
             is_return_transfer: true,
             original_reservation_id: reservation.id,
@@ -1375,6 +1385,47 @@ const BookingPage = () => {
                     </div>
                   )}
 
+                  {/* Flight Number - Only for airport transfers */}
+                  {!isHourlyBooking && (urlPickup.toLowerCase().includes('airport') || urlPickup.toLowerCase().includes('havalimanı') || urlPickup.toLowerCase().includes('havaalanı')) && (
+                    <div>
+                      <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                        <Plane className="h-4 w-4" />
+                        {t("flightNumber") || "Flight Number"}
+                      </Label>
+                      <Input
+                        value={flightNumber}
+                        onChange={(e) => setFlightNumber(e.target.value.toUpperCase())}
+                        placeholder="TK 1234"
+                        maxLength={20}
+                        className="uppercase"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {language === 'TR' 
+                          ? "Uçuş numaranızı girerek gecikmeler durumunda sizi bekleyebiliriz"
+                          : "Enter your flight number so we can track delays"}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Passenger Names */}
+                  <div>
+                    <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                      <UserPlus className="h-4 w-4" />
+                      {t("passengerNames") || "Passenger Names"} 
+                      <span className="text-xs text-muted-foreground">({t("optional") || "optional"})</span>
+                    </Label>
+                    <Textarea
+                      value={passengerNames}
+                      onChange={(e) => setPassengerNames(e.target.value)}
+                      placeholder={language === 'TR' 
+                        ? "Her satıra bir yolcu ismi yazın\nÖrn: John Smith\nJane Doe"
+                        : "Enter one passenger name per line\nE.g: John Smith\nJane Doe"
+                      }
+                      className="resize-none min-h-[80px]"
+                      maxLength={500}
+                    />
+                  </div>
+
                   {/* Notes field */}
                   <div>
                     <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
@@ -1386,7 +1437,7 @@ const BookingPage = () => {
                       onChange={(e) => setCustomerNotes(e.target.value)}
                       placeholder={isHourlyBooking 
                         ? (t("hourlyNotesPlaceholder") || "Pickup location address, places to visit...")
-                        : (t("specialRequestsPlaceholder") || "Flight number, special requirements...")
+                        : (t("specialRequestsPlaceholder") || "Special requirements, child seats, etc...")
                       }
                       className="resize-none min-h-[80px]"
                       maxLength={500}
