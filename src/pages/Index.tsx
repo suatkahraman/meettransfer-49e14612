@@ -7,6 +7,8 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
 import TrustBar from "@/components/website/TrustBar";
+import { AITestChecklist } from "@/components/website/AITestChecklist";
+import { AITestControls } from "@/components/website/AITestControls";
 
 // Hero is lazy loaded for faster initial paint - it's heavy
 const Hero = lazy(() => import("@/components/Hero").then(m => ({ default: m.Hero })));
@@ -35,7 +37,7 @@ const SectionPlaceholder = () => (
 const Index = () => {
   // Auto-redirect first-time visitors based on browser language
   useBrowserLanguageRedirect();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <WebsiteLayout>
@@ -114,6 +116,10 @@ const Index = () => {
       </Suspense>
       
       <Footer />
+      
+      {/* AI Test Mode UI */}
+      <AITestChecklist language={language} />
+      <AITestControls language={language} />
     </WebsiteLayout>
   );
 };
