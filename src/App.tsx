@@ -18,8 +18,8 @@ import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import { UpdateManager } from "./components/UpdateManager";
 import { PWAInstallPrompt } from "./components/website/PWAInstallPrompt";
 import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
-// Debug panel disabled - uncomment to re-enable
-// import { PWADebugPanel } from "./components/website/PWADebugPanel";
+// PWA Debug panel - visible with ?pwa_debug=1
+import { PWADebugPanel } from "./components/website/PWADebugPanel";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -207,7 +207,7 @@ const App = () => (
               <AIChatProvider>
               <UpdateManager />
               <PWAInstallPrompt />
-              {/* <PWADebugPanel /> */}
+              <PWADebugPanel />
               <AuthProvider>
                 <Routes>
               {/* Localized Website Pages - Support all languages */}
