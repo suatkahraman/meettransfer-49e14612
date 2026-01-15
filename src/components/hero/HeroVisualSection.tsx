@@ -3,13 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase, ChevronLeft, ChevronRight, Play, Image } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
 import { CityVideo } from "./types";
-import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
-
-// Optimized WebP hero images for gallery
+// Optimized WebP hero images for gallery - all converted to WebP for faster loading
+import heroMercedes from "@/assets/hero/hero-mercedes-vito.webp";
 import heroAirportFleet from "@/assets/hero/hero-airport-fleet.webp";
 import heroSkyline from "@/assets/hero/hero-city-skyline.webp";
-import heroFuturistic1 from "@/assets/hero-futuristic-1.jpg";
-import heroFuturistic2 from "@/assets/hero-futuristic-2.jpg";
+import heroFuturistic1 from "@/assets/hero/hero-futuristic-1.webp";
+import heroFuturistic2 from "@/assets/hero/hero-futuristic-2.webp";
 
 // Gallery images configuration with optimized local assets - multilingual labels
 type GalleryLabels = Record<string, string>;
