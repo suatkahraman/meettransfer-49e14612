@@ -201,7 +201,7 @@ export const VehicleImageCarousel = memo(({
 
       {/* Loading skeleton - only show if first image hasn't loaded */}
       {!isCurrentLoaded && (
-        <div className="absolute inset-0 bg-muted animate-pulse z-0" />
+        <div className="absolute inset-0 bg-muted z-0" />
       )}
     </div>
   );

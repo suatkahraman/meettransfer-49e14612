@@ -3080,10 +3080,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           )}
                           
                           {/* Vehicle Cards for Mobile */}
-                          {/* Vehicle Cards for Mobile - Only show if no vehicle selected */}
-                          {msg.showVehicleCards && msg.vehiclePrices && !msg.bookingData?.vehicleType && (
+                          {/* Vehicle Cards for Mobile - show 2x2 quick select when vehicle selection is needed */}
+                          {(((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection) && !msg.bookingData?.isComplete) && (
                             <ChatVehicleCards
-                              passengers={msg.passengerCount || 2}
+                              passengers={msg.passengerCount || msg.bookingData?.passengers || 2}
                               prices={msg.vehiclePrices}
                               currency={msg.bookingData?.currency || "EUR"}
                               selectedVehicle={msg.bookingData?.vehicleType || undefined}
@@ -3119,6 +3119,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                     ? { 
                                         ...m,
                                         showVehicleCards: false,
+                                        showVehicleSelection: false,
                                         bookingData: { ...(m.bookingData || ({} as BookingData)), vehicleType, isComplete: true }
                                       }
                                     : m
@@ -3240,12 +3241,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           )}
 
                           {/* Quick Reply Buttons - Mobile */}
-                          {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showVehicleSelection || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras) && (
+                          {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras) && (
                             <ChatQuickReplyButtons
                               language={language}
                               type={
                                 msg.showReturnQuestion ? "return_transfer" :
-                                msg.showVehicleSelection ? "vehicle_selection" :
                                 msg.showPaymentMethod ? "payment_method" :
                                 msg.showPassengerCount ? "passenger_count" :
                                 "extras"
@@ -3793,10 +3793,10 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 )}
                 
                 {/* Vehicle Cards for Desktop */}
-                {/* Vehicle Cards for Desktop - Only show if no vehicle selected */}
-                {msg.showVehicleCards && msg.vehiclePrices && !msg.bookingData?.vehicleType && (
+                {/* Vehicle Cards for Desktop - show 2x2 quick select when vehicle selection is needed */}
+                {(((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection) && !msg.bookingData?.isComplete) && (
                   <ChatVehicleCards
-                    passengers={msg.passengerCount || 2}
+                    passengers={msg.passengerCount || msg.bookingData?.passengers || 2}
                     prices={msg.vehiclePrices}
                     currency={msg.bookingData?.currency || "EUR"}
                     selectedVehicle={msg.bookingData?.vehicleType || undefined}
@@ -3832,6 +3832,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           ? { 
                               ...m,
                               showVehicleCards: false,
+                              showVehicleSelection: false,
                               bookingData: { ...(m.bookingData || ({} as BookingData)), vehicleType, isComplete: true }
                             }
                           : m
@@ -3953,12 +3954,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 )}
 
                 {/* Quick Reply Buttons - Desktop */}
-                {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showVehicleSelection || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras) && (
+                {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras) && (
                   <ChatQuickReplyButtons
                     language={language}
                     type={
                       msg.showReturnQuestion ? "return_transfer" :
-                      msg.showVehicleSelection ? "vehicle_selection" :
                       msg.showPaymentMethod ? "payment_method" :
                       msg.showPassengerCount ? "passenger_count" :
                       "extras"

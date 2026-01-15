@@ -284,7 +284,7 @@ export function ChatQuickReplyButtons({
         transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
         className="w-full flex items-center gap-1.5 mb-1"
       >
-        <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
         <span className="text-xs text-muted-foreground font-medium">
           {getLocalizedText(language, {
             TR: "Hızlı seçim yapın",
@@ -324,15 +324,10 @@ export function ChatQuickReplyButtons({
                 "h-11 px-5 rounded-2xl font-semibold transition-all duration-300 touch-manipulation",
                 "shadow-md hover:shadow-xl",
                 "border-0",
-                button.pulse && "animate-pulse",
                 button.className
               )}
             >
-              <motion.span
-                initial={{ rotate: 0 }}
-                animate={button.pulse ? { rotate: [0, -10, 10, 0] } : {}}
-                transition={{ duration: 0.5, repeat: button.pulse ? Infinity : 0, repeatDelay: 2 }}
-              >
+              <motion.span initial={false}>
                 <Icon className="h-4 w-4 mr-2" />
               </motion.span>
               {button.text}
