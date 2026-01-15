@@ -3,9 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, Settings2, ChevronDown, Trash2, CheckCircle2, Clock } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, ChevronDown, Trash2, CheckCircle2, Clock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MobileTooltip } from "@/components/ui/mobile-tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -4024,36 +4023,73 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         )}
       </AnimatePresence>
 
-      {/* Centered Microphone Button - Hero Style - Only for mobile floating mode */}
+      {/* Push-to-Talk Hero Button - Professional Design - Only for mobile floating mode */}
       {mobileFloating && isSpeechSupported && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center justify-center py-8"
+          className="flex flex-col items-center justify-center py-6"
         >
-          <motion.button
-            onClick={isRecording ? stopRecording : startRecording}
-            className={cn(
-              "relative w-24 h-24 rounded-full flex items-center justify-center transition-colors",
-              isRecording 
-                ? "bg-gradient-to-br from-destructive to-destructive/80 text-destructive-foreground shadow-lg shadow-destructive/30"
-                : "bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30"
-            )}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          {/* Push-to-Talk Instructions */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-4 text-center"
           >
-            {/* Outer pulse rings - always animate */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full">
+              <motion.div
+                className="w-2 h-2 rounded-full bg-primary"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <span className="text-sm font-medium text-primary">
+                {language === "TR" ? "Basılı Tut ve Konuş" : "Push to Talk"}
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Main Push-to-Talk Button */}
+          <motion.button
+            onMouseDown={() => {
+              if (!isRecording) startRecording();
+            }}
+            onMouseUp={() => {
+              if (isRecording) stopRecording();
+            }}
+            onMouseLeave={() => {
+              if (isRecording) stopRecording();
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              if (!isRecording) startRecording();
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              if (isRecording) stopRecording();
+            }}
+            className={cn(
+              "relative w-28 h-28 rounded-full flex items-center justify-center transition-all select-none touch-none",
+              isRecording 
+                ? "bg-gradient-to-br from-destructive via-destructive to-destructive/80 text-destructive-foreground shadow-2xl shadow-destructive/40 scale-110"
+                : "bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40"
+            )}
+            whileHover={!isRecording ? { scale: 1.05 } : {}}
+            animate={isRecording ? { scale: 1.1 } : { scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            {/* Outer pulse rings - animate faster when recording */}
             <motion.div
               className={cn(
                 "absolute inset-0 rounded-full border-2",
-                isRecording ? "border-destructive/40" : "border-primary/30"
+                isRecording ? "border-destructive/50" : "border-primary/30"
               )}
               animate={{
-                scale: [1, 1.6, 1.6],
+                scale: isRecording ? [1, 1.4, 1.4] : [1, 1.3, 1.3],
                 opacity: [0.6, 0, 0],
               }}
               transition={{
-                duration: 2,
+                duration: isRecording ? 0.8 : 2,
                 repeat: Infinity,
                 ease: "easeOut",
               }}
@@ -4061,64 +4097,52 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
             <motion.div
               className={cn(
                 "absolute inset-0 rounded-full border-2",
-                isRecording ? "border-destructive/40" : "border-primary/30"
+                isRecording ? "border-destructive/50" : "border-primary/30"
               )}
               animate={{
-                scale: [1, 1.4, 1.4],
-                opacity: [0.6, 0, 0],
+                scale: isRecording ? [1, 1.3, 1.3] : [1, 1.2, 1.2],
+                opacity: [0.5, 0, 0],
               }}
               transition={{
-                duration: 2,
+                duration: isRecording ? 0.8 : 2,
                 repeat: Infinity,
                 ease: "easeOut",
-                delay: 0.5,
-              }}
-            />
-            <motion.div
-              className={cn(
-                "absolute inset-0 rounded-full border-2",
-                isRecording ? "border-destructive/40" : "border-primary/30"
-              )}
-              animate={{
-                scale: [1, 1.2, 1.2],
-                opacity: [0.6, 0, 0],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeOut",
-                delay: 1,
+                delay: isRecording ? 0.2 : 0.5,
               }}
             />
             
-            {/* Sound wave bars when recording */}
+            {/* Inner glow effect when recording */}
             {isRecording && (
+              <motion.div
+                className="absolute inset-2 rounded-full bg-destructive-foreground/10"
+                animate={{ scale: [0.9, 1, 0.9], opacity: [0.3, 0.5, 0.3] }}
+                transition={{ duration: 0.5, repeat: Infinity }}
+              />
+            )}
+            
+            {/* Sound wave bars when recording */}
+            {isRecording ? (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="flex items-center gap-1">
-                  {[0, 1, 2, 3, 4].map((i) => (
+                  {audioLevels.slice(4, 12).map((level, i) => (
                     <motion.div
                       key={i}
-                      className="w-1 bg-destructive-foreground/80 rounded-full"
+                      className="w-1.5 bg-destructive-foreground/90 rounded-full"
                       animate={{
-                        height: [8, 20 + Math.random() * 16, 8],
+                        height: Math.max(8, 8 + level * 28),
                       }}
                       transition={{
-                        duration: 0.5 + Math.random() * 0.3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: i * 0.1,
+                        duration: 0.05,
+                        ease: "linear",
                       }}
                     />
                   ))}
                 </div>
               </div>
-            )}
-            
-            {/* Mic icon - show when not recording */}
-            {!isRecording && (
+            ) : (
               <motion.div
                 animate={{
-                  scale: [1, 1.1, 1],
+                  scale: [1, 1.05, 1],
                 }}
                 transition={{
                   duration: 2,
@@ -4126,57 +4150,41 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   ease: "easeInOut",
                 }}
               >
-                <Mic className="h-10 w-10" />
+                <Mic className="h-12 w-12" />
               </motion.div>
             )}
           </motion.button>
           
-          {/* Status text with wave animation */}
-          <div className="mt-5 flex flex-col items-center gap-2">
+          {/* Status text and visual feedback */}
+          <div className="mt-5 flex flex-col items-center gap-3">
             {isRecording ? (
               <>
-                {/* Listening text with animated dots */}
+                {/* Recording indicator */}
                 <motion.div
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5"
+                  className="flex items-center gap-2"
                 >
                   <motion.div
-                    className="w-2 h-2 rounded-full bg-destructive"
-                    animate={{ scale: [1, 1.3, 1] }}
-                    transition={{ duration: 1, repeat: Infinity }}
+                    className="w-3 h-3 rounded-full bg-destructive"
+                    animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+                    transition={{ duration: 0.5, repeat: Infinity }}
                   />
-                  <span className="text-base font-medium text-destructive">
-                    {language === "TR" ? "Dinliyorum" : "Listening"}
+                  <span className="text-base font-semibold text-destructive">
+                    {language === "TR" ? "Dinliyorum..." : "Listening..."}
                   </span>
-                  <motion.span className="flex gap-0.5">
-                    {[0, 1, 2].map((i) => (
-                      <motion.span
-                        key={i}
-                        className="text-destructive font-medium"
-                        animate={{ opacity: [0.3, 1, 0.3] }}
-                        transition={{
-                          duration: 1.2,
-                          repeat: Infinity,
-                          delay: i * 0.2,
-                        }}
-                      >
-                        .
-                      </motion.span>
-                    ))}
-                  </motion.span>
                 </motion.div>
                 
-                {/* Sound wave visualization */}
+                {/* Waveform visualization */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex items-center justify-center gap-[3px] h-6"
+                  className="flex items-center justify-center gap-[2px] h-8 px-4 py-2 bg-destructive/10 rounded-full"
                 >
                   {audioLevels.map((level, i) => (
                     <motion.div
                       key={i}
-                      className="w-1 bg-destructive/70 rounded-full"
+                      className="w-1 bg-destructive/80 rounded-full"
                       animate={{
                         height: Math.max(4, 4 + level * 20),
                       }}
@@ -4190,60 +4198,125 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 
                 {/* Interim transcript */}
                 {interimTranscript && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.8 }}
-                    className="text-sm text-muted-foreground italic max-w-[250px] text-center"
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-[280px] px-4 py-2 bg-background/80 border border-border/50 rounded-xl"
                   >
-                    "{interimTranscript}"
-                  </motion.p>
+                    <p className="text-sm text-foreground/80 italic text-center">
+                      "{interimTranscript}"
+                    </p>
+                  </motion.div>
                 )}
                 
-                {/* Tap to stop hint */}
+                {/* Release hint */}
                 <motion.p
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.5 }}
-                  className="text-xs text-muted-foreground"
+                  animate={{ opacity: 0.7 }}
+                  className="text-xs text-destructive/80 font-medium"
                 >
-                  {language === "TR" ? "Durdurmak için butona tıklayın" : "Tap to stop"}
+                  {language === "TR" ? "Bırakınca gönderilecek" : "Release to send"}
                 </motion.p>
               </>
             ) : (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-sm text-muted-foreground text-center"
-              >
-                {language === "TR" ? "Konuşmak için tıklayın" : "Tap to speak"}
-              </motion.p>
+              <>
+                {/* Instruction when not recording */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      className="flex items-center gap-1"
+                      animate={{ y: [0, -2, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <span className="text-2xl">👆</span>
+                    </motion.div>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {language === "TR" ? "Parmağınızı basılı tutun" : "Hold to record"}
+                    </span>
+                  </div>
+                  
+                  {/* Visual guide */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                      </div>
+                      <span>{language === "TR" ? "Basılı tut" : "Press"}</span>
+                    </div>
+                    <ArrowRight className="h-3 w-3" />
+                    <div className="flex items-center gap-1">
+                      <Mic className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{language === "TR" ? "Konuş" : "Speak"}</span>
+                    </div>
+                    <ArrowRight className="h-3 w-3" />
+                    <div className="flex items-center gap-1">
+                      <Send className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{language === "TR" ? "Bırak" : "Release"}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
             )}
           </div>
         </motion.div>
       )}
 
-      {/* Input Area */}
+      {/* Input Area - Simplified with Push-to-Talk */}
       <div className={cn(
         "flex gap-2",
         // Hide input area when showing hero mic button (but not during processing) - only for mobile
         mobileFloating && isSpeechSupported && !isProcessing && !isLoading && !isSpeaking && messages.length <= 1 && "hidden"
       )}>
-        {/* Voice recording button - only show on mobile floating mode */}
+        {/* Push-to-Talk microphone button - only show on mobile floating mode */}
         {mobileFloating && isSpeechSupported && (
           <Button
-            onClick={isRecording ? stopRecording : startRecording}
+            onMouseDown={() => {
+              if (!isRecording && !isLoading && !isProcessing) startRecording();
+            }}
+            onMouseUp={() => {
+              if (isRecording) stopRecording();
+            }}
+            onMouseLeave={() => {
+              if (isRecording) stopRecording();
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              if (!isRecording && !isLoading && !isProcessing) startRecording();
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              if (isRecording) stopRecording();
+            }}
             disabled={isLoading || isProcessing}
             size="icon"
             variant="outline"
             className={cn(
-              "h-11 w-11 rounded-xl shrink-0",
-              isRecording && "bg-destructive/10 border-destructive text-destructive"
+              "h-11 w-11 rounded-xl shrink-0 select-none touch-none transition-all",
+              isRecording && "bg-destructive/20 border-destructive text-destructive scale-110 shadow-lg shadow-destructive/20"
             )}
           >
             {isProcessing ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : isRecording ? (
-              <Square className="h-5 w-5 fill-current" />
+              <motion.div
+                className="flex items-center gap-0.5"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 0.3, repeat: Infinity }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1 bg-destructive rounded-full"
+                    animate={{ height: [8, 16, 8] }}
+                    transition={{ duration: 0.4, repeat: Infinity, delay: i * 0.1 }}
+                  />
+                ))}
+              </motion.div>
             ) : (
               <Mic className="h-5 w-5" />
             )}
@@ -4274,161 +4347,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           )}
         </Button>
         
-        {/* Voice output toggle with settings popover - only show on mobile */}
-        {mobileFloating && <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-11 w-11 rounded-xl shrink-0"
-            >
-              {isVoiceEnabled ? (
-                <Volume2 className="h-5 w-5 text-primary" />
-              ) : (
-                <VolumeX className="h-5 w-5 text-muted-foreground" />
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-72 p-3">
-            <div className="space-y-4">
-              {/* Voice toggle */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">
-                  {language === "TR" ? "Sesli Yanıt" : "Voice Response"}
-                </span>
-                <Button
-                  variant={isVoiceEnabled ? "default" : "outline"}
-                  size="sm"
-                  onClick={toggleVoice}
-                  className="h-7 px-3"
-                >
-                  {isVoiceEnabled 
-                    ? (language === "TR" ? "Açık" : "On")
-                    : (language === "TR" ? "Kapalı" : "Off")
-                  }
-                </Button>
-              </div>
-              
-              {/* Continuous conversation mode toggle */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">
-                  {language === "TR" ? "Sürekli Konuşma" : "Continuous Mode"}
-                </span>
-                <Button
-                  variant={continuousMode ? "default" : "outline"}
-                  size="sm"
-                  onClick={toggleContinuousMode}
-                  className="h-7 px-3"
-                >
-                  {continuousMode 
-                    ? (language === "TR" ? "Açık" : "On")
-                    : (language === "TR" ? "Kapalı" : "Off")
-                  }
-                </Button>
-              </div>
-
-              {/* Voice selection with gender filter */}
-              {availableVoices.length > 0 && (
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">
-                    {language === "TR" ? "Ses Seçimi" : "Voice Selection"}
-                  </label>
-                  
-                  {/* Gender filter buttons */}
-                  <div className="flex gap-1 mb-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs flex-1 gap-1"
-                      onClick={() => {
-                        const femaleVoice = availableVoices.find(v => v.gender === 'female');
-                        if (femaleVoice) selectVoice(femaleVoice.id);
-                      }}
-                    >
-                      <span>♀</span>
-                      <span>{language === "TR" ? "Kadın" : "Female"}</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs flex-1 gap-1"
-                      onClick={() => {
-                        const maleVoice = availableVoices.find(v => v.gender === 'male');
-                        if (maleVoice) selectVoice(maleVoice.id);
-                      }}
-                    >
-                      <span>♂</span>
-                      <span>{language === "TR" ? "Erkek" : "Male"}</span>
-                    </Button>
-                  </div>
-                  
-                  {/* Voice list */}
-                  <div className="grid grid-cols-2 gap-1.5 max-h-24 overflow-y-auto">
-                    {availableVoices.slice(0, 8).map((voice) => (
-                      <Button
-                        key={voice.id}
-                        variant={selectedVoiceId === voice.id ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => selectVoice(voice.id)}
-                        className="h-7 text-xs justify-start px-2"
-                      >
-                        <span className="truncate">{voice.name}</span>
-                        {voice.gender !== 'neutral' && (
-                          <span className="ml-1 opacity-60 text-[10px]">
-                            {voice.gender === 'female' ? '♀' : '♂'}
-                          </span>
-                        )}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Speech rate */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-muted-foreground">
-                    {language === "TR" ? "Konuşma Hızı" : "Speech Rate"}
-                  </label>
-                  <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
-                    {speechRate.toFixed(1)}x
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => changeRate(Math.max(0.5, speechRate - 0.25))}
-                    disabled={speechRate <= 0.5}
-                  >
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary rounded-full transition-all"
-                      style={{ width: `${((speechRate - 0.5) / 1.5) * 100}%` }}
-                    />
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => changeRate(Math.min(2, speechRate + 0.25))}
-                    disabled={speechRate >= 2}
-                  >
-                    <ChevronDown className="h-3 w-3 rotate-180" />
-                  </Button>
-                </div>
-                <div className="flex justify-between text-[10px] text-muted-foreground px-1">
-                  <span>{language === "TR" ? "Yavaş" : "Slow"}</span>
-                  <span>{language === "TR" ? "Normal" : "Normal"}</span>
-                  <span>{language === "TR" ? "Hızlı" : "Fast"}</span>
-                </div>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>}
+        {/* Simple Voice toggle button - only show on mobile */}
+        {mobileFloating && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleVoice}
+            className={cn(
+              "h-11 w-11 rounded-xl shrink-0 transition-colors",
+              isVoiceEnabled && "bg-primary/10 border-primary"
+            )}
+          >
+            {isVoiceEnabled ? (
+              <Volume2 className="h-5 w-5 text-primary" />
+            ) : (
+              <VolumeX className="h-5 w-5 text-muted-foreground" />
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );
