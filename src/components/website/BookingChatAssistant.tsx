@@ -2808,7 +2808,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     {language === "TR" ? "AI Rezervasyon Asistanı" : "AI Booking Assistant"}
                   </span>
                 }
-                side="left"
+                side="right"
                 contentClassName="bg-primary text-primary-foreground border border-primary"
                 longPressThreshold={400}
                 autoHideDelay={2500}
@@ -2820,7 +2820,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   whileTap={{ scale: 0.95 }}
                   onClick={handleAIButtonClick}
                   data-chat-trigger
-                  className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-3 z-[60] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
+                  className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-3 z-[60] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
                   style={{
                     WebkitTapHighlightColor: "transparent",
                     boxShadow:
