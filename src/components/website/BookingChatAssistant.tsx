@@ -4062,14 +4062,26 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
             }}
             onTouchStart={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               if (!isRecording) startRecording();
             }}
             onTouchEnd={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               if (isRecording) stopRecording();
             }}
+            onTouchCancel={(e) => {
+              // Critical for iOS - triggered when touch is interrupted
+              e.preventDefault();
+              if (isRecording) stopRecording();
+            }}
+            onContextMenu={(e) => e.preventDefault()}
             className={cn(
-              "relative w-28 h-28 rounded-full flex items-center justify-center transition-all select-none touch-none",
+              "relative w-28 h-28 rounded-full flex items-center justify-center transition-all select-none",
+              // iOS-specific: use touch-manipulation instead of touch-none for better response
+              "touch-manipulation",
+              // Prevent text selection and callout on iOS
+              "[-webkit-touch-callout:none] [-webkit-user-select:none]",
               isRecording 
                 ? "bg-gradient-to-br from-destructive via-destructive to-destructive/80 text-destructive-foreground shadow-2xl shadow-destructive/40 scale-110"
                 : "bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-2xl hover:shadow-primary/40"
@@ -4286,17 +4298,26 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
             }}
             onTouchStart={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               if (!isRecording && !isLoading && !isProcessing) startRecording();
             }}
             onTouchEnd={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               if (isRecording) stopRecording();
             }}
+            onTouchCancel={(e) => {
+              // Critical for iOS - triggered when touch is interrupted
+              e.preventDefault();
+              if (isRecording) stopRecording();
+            }}
+            onContextMenu={(e) => e.preventDefault()}
             disabled={isLoading || isProcessing}
             size="icon"
             variant="outline"
             className={cn(
-              "h-11 w-11 rounded-xl shrink-0 select-none touch-none transition-all",
+              "h-11 w-11 rounded-xl shrink-0 select-none touch-manipulation transition-all",
+              "[-webkit-touch-callout:none] [-webkit-user-select:none]",
               isRecording && "bg-destructive/20 border-destructive text-destructive scale-110 shadow-lg shadow-destructive/20"
             )}
           >
