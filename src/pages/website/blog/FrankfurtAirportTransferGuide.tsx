@@ -159,13 +159,13 @@ const FrankfurtAirportTransferGuide = () => {
         />
 
         {/* Main Content */}
-        <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 py-8 md:py-12">
           {/* Share Buttons */}
           <ShareButtons url={window.location.href} title={t("blogFrankfurtH1")} />
 
           {/* Overview Section */}
-          <section id="overview" className="mb-12 scroll-mt-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">{t("blogFrankfurtOverview")}</h2>
+          <section id="overview" className="mb-8 md:mb-12 scroll-mt-20">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6">{t("blogFrankfurtOverview")}</h2>
             <p className="text-muted-foreground mb-4 leading-relaxed">
               {t("blogFrankfurtOverviewText1")}
             </p>
@@ -175,8 +175,8 @@ const FrankfurtAirportTransferGuide = () => {
           </section>
 
           {/* Airport Info Section */}
-          <section id="airport-info" className="mb-12 scroll-mt-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">{t("blogFrankfurtAirportInfo")}</h2>
+          <section id="airport-info" className="mb-8 md:mb-12 scroll-mt-20">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6">{t("blogFrankfurtAirportInfo")}</h2>
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -208,9 +208,9 @@ const FrankfurtAirportTransferGuide = () => {
           </section>
 
           {/* Transfer Options Section */}
-          <section id="transfer-options" className="mb-12 scroll-mt-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">{t("blogFrankfurtTransferOptions")}</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+          <section id="transfer-options" className="mb-8 md:mb-12 scroll-mt-20">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6">{t("blogFrankfurtTransferOptions")}</h2>
+            <div className="grid md:grid-cols-2 gap-4 md:gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">{t("blogFrankfurtPrivateTransfer")}</CardTitle>
@@ -257,8 +257,8 @@ const FrankfurtAirportTransferGuide = () => {
           </section>
 
           {/* Prices Section */}
-          <section id="prices" className="mb-12 scroll-mt-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">{t("blogFrankfurtPrices")}</h2>
+          <section id="prices" className="mb-8 md:mb-12 scroll-mt-20">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6">{t("blogFrankfurtPrices")}</h2>
             <Card>
               <CardContent className="p-0">
                 <Table>
@@ -287,9 +287,9 @@ const FrankfurtAirportTransferGuide = () => {
           </section>
 
           {/* Attractions Section */}
-          <section id="attractions" className="mb-12 scroll-mt-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">{t("blogFrankfurtAttractions")}</h2>
-            <div className="grid md:grid-cols-2 gap-4">
+          <section id="attractions" className="mb-8 md:mb-12 scroll-mt-20">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6">{t("blogFrankfurtAttractions")}</h2>
+            <div className="grid md:grid-cols-2 gap-3 md:gap-4">
               {popularAttractions.map((attraction, index) => (
                 <Card key={index}>
                   <CardHeader className="pb-2">
@@ -307,9 +307,9 @@ const FrankfurtAirportTransferGuide = () => {
           <BlogCTA destination="Frankfurt" />
 
           {/* FAQ Section */}
-          <section id="faq" className="mb-12 scroll-mt-20">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6">{t("blogFrankfurtFAQ")}</h2>
-            <div className="space-y-4">
+          <section id="faq" className="mb-8 md:mb-12 scroll-mt-20">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 md:mb-6">{t("blogFrankfurtFAQ")}</h2>
+            <div className="space-y-3 md:space-y-4">
               {faqItems.map((item, index) => (
                 <Card key={index}>
                   <CardHeader className="pb-2">
