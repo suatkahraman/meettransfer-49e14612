@@ -86,6 +86,9 @@ const BookingPage = () => {
   const { promoCode: activePromo } = usePromo();
   const { user } = useAuth();
 
+  // Token for existing quick booking (from AI assistant)
+  const urlToken = searchParams.get("token") || "";
+  
   // Determine booking type
   const bookingType = searchParams.get("type") || "transfer";
   const isHourlyBooking = bookingType === "hourly";
@@ -109,6 +112,34 @@ const BookingPage = () => {
   const urlBabySeatCount = searchParams.get("babySeatCount");
   const urlLuggageCount = searchParams.get("luggageCount");
   const urlPromoCode = searchParams.get("promoCode") || "";
+  
+  // Token booking data state
+  const [tokenBookingData, setTokenBookingData] = useState<{
+    id: string;
+    pickup: string;
+    dropoff: string;
+    pickup_date: string;
+    pickup_time: string;
+    passengers: number;
+    vehicle_type: string;
+    price: number | null;
+    price_currency: string | null;
+    customer_name: string | null;
+    customer_email: string | null;
+    customer_phone: string | null;
+    customer_notes: string | null;
+    has_return_trip: boolean | null;
+    return_date: string | null;
+    return_time: string | null;
+    return_price: number | null;
+    baby_seat_count: number | null;
+    luggage_count: number | null;
+    service_type: string;
+    city: string | null;
+    duration_hours: number | null;
+    promo_code: string | null;
+  } | null>(null);
+  const [tokenLoading, setTokenLoading] = useState(!!urlToken);
 
   // Form state - initialize from URL params if available
   const [vehicleType, setVehicleType] = useState(urlVehicleType || "mercedes-vito");
@@ -164,6 +195,14 @@ const BookingPage = () => {
   const [bookingCompleted, setBookingCompleted] = useState(false);
   const [completedReservationId, setCompletedReservationId] = useState<string | null>(null);
 
+  // Effective values - use token data if available, otherwise URL params
+  const effectivePickup = tokenBookingData?.pickup || urlPickup;
+  const effectiveDropoff = tokenBookingData?.dropoff || urlDropoff;
+  const effectiveDate = tokenBookingData?.pickup_date || urlDate;
+  const effectiveTime = tokenBookingData?.pickup_time || urlTime;
+  const effectiveCity = tokenBookingData?.city || urlCity;
+  const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
+
   // Computed values
   const availableVehicles = getAvailableVehicles(passengers, luggageCount);
   const minibusRequired = isMinibusRequired(passengers, luggageCount);
@@ -175,8 +214,65 @@ const BookingPage = () => {
     }
   }, [minibusRequired, vehicleType]);
 
-  // Redirect if no URL params
+  // Load booking data from token (AI assistant flow)
   useEffect(() => {
+    if (!urlToken) {
+      setTokenLoading(false);
+      return;
+    }
+    
+    const loadTokenBooking = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("quick_booking_requests")
+          .select("*")
+          .eq("confirmation_token", urlToken)
+          .single();
+        
+        if (error || !data) {
+          console.error("Failed to load booking:", error);
+          toast.error(t("bookingNotFound") || "Booking not found");
+          navigate(getLocalizedPath("/"));
+          return;
+        }
+        
+        setTokenBookingData(data);
+        
+        // Pre-fill form with booking data
+        setVehicleType(data.vehicle_type || "mercedes-vito");
+        setPassengers(data.passengers || 1);
+        setLuggageCount(data.luggage_count || 1);
+        setBabySeatCount(data.baby_seat_count || 0);
+        setPreferredCurrency(data.price_currency || "EUR");
+        setCustomerPhone(data.customer_phone || "");
+        setCustomerEmail(data.customer_email || "");
+        setCustomerName(data.customer_name || "");
+        setCustomerNotes(data.customer_notes || "");
+        setHasReturnTrip(!!data.has_return_trip);
+        setReturnDate(data.return_date || "");
+        setReturnTime(data.return_time || "");
+        if (data.promo_code) setPromoCode(data.promo_code);
+        if (data.duration_hours) setSelectedDuration(`${data.duration_hours}h`);
+        
+      } catch (err) {
+        console.error("Error loading token booking:", err);
+        navigate(getLocalizedPath("/"));
+      } finally {
+        setTokenLoading(false);
+      }
+    };
+    
+    loadTokenBooking();
+  }, [urlToken, navigate, getLocalizedPath, t]);
+
+  // Redirect if no URL params AND no token
+  useEffect(() => {
+    // Skip redirect if we have a token (will be loaded separately)
+    if (urlToken || tokenLoading) return;
+    
+    // Skip redirect if token booking data is loaded
+    if (tokenBookingData) return;
+    
     if (isHourlyBooking) {
       if (!urlCity || !urlDate || !urlTime) {
         navigate(getLocalizedPath("/"));
@@ -186,7 +282,7 @@ const BookingPage = () => {
         navigate(getLocalizedPath("/"));
       }
     }
-  }, [urlPickup, urlDropoff, urlDate, urlTime, urlCity, isHourlyBooking, navigate, getLocalizedPath]);
+  }, [urlPickup, urlDropoff, urlDate, urlTime, urlCity, isHourlyBooking, navigate, getLocalizedPath, urlToken, tokenLoading, tokenBookingData]);
 
   // Pre-fill user data if logged in
   useEffect(() => {
@@ -659,7 +755,7 @@ const BookingPage = () => {
   };
 
   // Parse date for display
-  const displayDate = urlDate ? format(parse(urlDate, "yyyy-MM-dd", new Date()), "dd MMM yyyy") : "";
+  const displayDate = effectiveDate ? format(parse(effectiveDate, "yyyy-MM-dd", new Date()), "dd MMM yyyy") : "";
   const selectedPrice = isHourlyBooking 
     ? getHourlyPrice(vehicleType, selectedDuration) 
     : getPriceForVehicle(vehicleType);
@@ -795,6 +891,22 @@ const BookingPage = () => {
       clearInterval(tipInterval);
     };
   }, [isPricesLoading, language]);
+
+  // Token Loading Screen
+  if (tokenLoading) {
+    return (
+      <WebsiteLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              {language === "TR" ? "Rezervasyon bilgileri yükleniyor..." : "Loading booking details..."}
+            </p>
+          </div>
+        </div>
+      </WebsiteLayout>
+    );
+  }
 
   // Booking Success Screen
   if (bookingCompleted) {
@@ -950,14 +1062,14 @@ const BookingPage = () => {
                     <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-white/70 text-xs sm:text-sm">{t("pickupPoint")}</p>
-                      <p className="font-medium text-sm sm:text-base line-clamp-2">{urlPickup}</p>
+                      <p className="font-medium text-sm sm:text-base line-clamp-2">{effectivePickup}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2 sm:gap-3 col-span-2 sm:col-span-1">
                     <Navigation className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-white/70 text-xs sm:text-sm">{t("dropoffLocation")}</p>
-                      <p className="font-medium text-sm sm:text-base line-clamp-2">{urlDropoff}</p>
+                      <p className="font-medium text-sm sm:text-base line-clamp-2">{effectiveDropoff}</p>
                     </div>
                   </div>
                 </>
@@ -973,7 +1085,7 @@ const BookingPage = () => {
                 <Clock className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
                 <div className="min-w-0">
                   <p className="text-white/70 text-xs sm:text-sm">{t("pickupTime")}</p>
-                  <p className="font-medium text-sm sm:text-base">{urlTime}</p>
+                  <p className="font-medium text-sm sm:text-base">{effectiveTime}</p>
                 </div>
               </div>
             </div>
