@@ -106,21 +106,21 @@ const MuglaAirportTransferGuide = () => {
         ]}
       />
 
-      <article className="max-w-4xl mx-auto px-4 py-12">
+      <article className="max-w-4xl mx-auto px-3 sm:px-4 py-8 md:py-12">
         <Link 
           to={getLocalizedPath("/blog")} 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 md:mb-8 transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           {t("backToBlog")}
         </Link>
 
-        <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">{t("cityMugla")}</Badge>
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+        <header className="mb-8 md:mb-12">
+          <Badge variant="secondary" className="mb-3 md:mb-4">{t("cityMugla")}</Badge>
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight">
             {t("blogMuglaH1")}
           </h1>
-          <p className="text-xl text-muted-foreground mb-6">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 md:mb-6">
             {t("blogMuglaIntro")}
           </p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -137,7 +137,7 @@ const MuglaAirportTransferGuide = () => {
 
         <ShareButtons title={t("blogMuglaH1")} className="mb-8" />
 
-        <div className="aspect-video overflow-hidden rounded-xl mb-8">
+        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
           <img 
             src={muglaTransferHero} 
             alt={t("blogMuglaHeroAlt")}
@@ -148,7 +148,7 @@ const MuglaAirportTransferGuide = () => {
 
         <TableOfContents items={tocItems} />
 
-        <div className="prose prose-lg dark:prose-invert max-w-none">
+        <div className="prose prose-sm sm:prose-base md:prose-lg dark:prose-invert max-w-none">
           <h2 id="airport-overview">{t("blogMuglaSection1Title")}</h2>
           <p>{t("blogMuglaSection1P1")}</p>
           <p>{t("blogMuglaSection1P2")}</p>
@@ -284,10 +284,10 @@ const MuglaAirportTransferGuide = () => {
           </p>
         </div>
 
-        <div className="my-12 p-6 bg-muted/50 rounded-2xl">
-          <div className="flex items-center gap-2 mb-4">
-            <MapPin className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold text-lg">{t("blogMuglaMapTitle")}</h3>
+        <div className="my-8 md:my-12 p-4 md:p-6 bg-muted/50 rounded-xl md:rounded-2xl">
+          <div className="flex items-center gap-2 mb-3 md:mb-4">
+            <MapPin className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+            <h3 className="font-semibold text-base md:text-lg">{t("blogMuglaMapTitle")}</h3>
           </div>
           <p className="text-muted-foreground text-sm mb-4">
             {t("blogMuglaMapDesc")}
@@ -296,9 +296,9 @@ const MuglaAirportTransferGuide = () => {
 
         <BlogCTA destination="Muğla" />
 
-        <section className="my-12">
-          <h2 className="font-serif text-2xl font-bold mb-8">{t("frequentlyAskedQuestions")}</h2>
-          <div className="space-y-6">
+        <section className="my-8 md:my-12">
+          <h2 className="font-serif text-xl sm:text-2xl font-bold mb-6 md:mb-8">{t("frequentlyAskedQuestions")}</h2>
+          <div className="space-y-4 md:space-y-6">
             {faqItems.map((item, index) => (
               <div key={index} className="border-b border-border pb-6 last:border-0">
                 <h3 className="font-semibold text-lg mb-2">{item.question}</h3>
