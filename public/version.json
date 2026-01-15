@@ -1,16 +1,17 @@
 {
-  "version": "2.5.0",
-  "releaseDate": "2025-01-14",
+  "version": "2.5.1",
+  "releaseDate": "2025-01-15",
+  "buildNumber": 1,
   "notes": {
-    "TR": "Acenta şehir seçimi güncellendi, PWA güncelleme sistemi iyileştirildi",
-    "EN": "Agency city selection updated, PWA update system improved",
-    "DE": "Agenturstadt-Auswahl aktualisiert, PWA-Update-System verbessert",
-    "FR": "Sélection de ville d'agence mise à jour, système de mise à jour PWA amélioré",
-    "RU": "Обновлен выбор города агентства, улучшена система обновления PWA",
-    "IT": "Aggiornata la selezione della città dell'agenzia, migliorato il sistema di aggiornamento PWA",
-    "ES": "Actualizada la selección de ciudad de agencia, mejorado el sistema de actualización PWA",
-    "AR": "تم تحديث اختيار مدينة الوكالة، تم تحسين نظام تحديث PWA",
-    "UK": "Оновлено вибір міста агентства, покращено систему оновлення PWA",
-    "JA": "代理店の都市選択が更新され、PWA更新システムが改善されました"
+    "TR": "Sesli yanıt için görsel dalga animasyonu, haptic feedback, PWA güncelleme sistemi optimize edildi",
+    "EN": "Visual wave animation for voice response, haptic feedback, PWA update system optimized",
+    "DE": "Visuelle Wellenanimation für Sprachantwort, haptisches Feedback, PWA-Update-System optimiert",
+    "FR": "Animation visuelle pour réponse vocale, retour haptique, système de mise à jour PWA optimisé",
+    "RU": "Визуальная волновая анимация для голосового ответа, тактильная обратная связь, оптимизирована система обновления PWA",
+    "IT": "Animazione visiva per risposta vocale, feedback aptico, sistema di aggiornamento PWA ottimizzato",
+    "ES": "Animación visual para respuesta de voz, retroalimentación háptica, sistema de actualización PWA optimizado",
+    "AR": "رسوم متحركة مرئية للاستجابة الصوتية، ردود فعل لمسية، تم تحسين نظام تحديث PWA",
+    "UK": "Візуальна хвильова анімація для голосової відповіді, тактильний зворотний зв'язок, оптимізовано систему оновлення PWA",
+    "JA": "音声応答用のビジュアルウェーブアニメーション、触覚フィードバック、PWA更新システムの最適化"
   }
 }
