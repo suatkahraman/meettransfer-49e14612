@@ -829,8 +829,8 @@ interface VoiceSettings {
 // Text-to-Speech hook using ElevenLabs API for high-quality voice
 function useTextToSpeech(language: string, onSpeakEnd?: () => void, mobileFloating?: boolean) {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  // Mobile: start with voice disabled (text mode), Desktop: voice enabled
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(!mobileFloating);
+  // Voice disabled by default - user can enable manually
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const [speechRate, setSpeechRate] = useState(1.15); // Faster, more natural speech
