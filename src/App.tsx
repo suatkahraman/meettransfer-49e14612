@@ -151,6 +151,7 @@ const AydinAirportTransferGuide = lazy(() => import("./pages/website/blog/AydinA
 const MuglaAirportTransferGuide = lazy(() => import("./pages/website/blog/MuglaAirportTransferGuide"));
 const FrankfurtAirportTransferGuide = lazy(() => import("./pages/website/blog/FrankfurtAirportTransferGuide"));
 const AthensAirportTransferGuide = lazy(() => import("./pages/website/blog/AthensAirportTransferGuide"));
+const AIBookingAssistantGuide = lazy(() => import("./pages/website/blog/AIBookingAssistantGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -263,6 +264,7 @@ const App = () => (
               {localizedRoutes("/blog/aydin-airport-transfer-guide", <AydinAirportTransferGuide />)}
               {localizedRoutes("/blog/mugla-airport-transfer-guide", <MuglaAirportTransferGuide />)}
               {localizedRoutes("/blog/frankfurt-airport-transfer-guide", <FrankfurtAirportTransferGuide />)}
+              {localizedRoutes("/blog/ai-booking-assistant-guide", <AIBookingAssistantGuide />)}
               {localizedRoutes("/blog/athens-airport-transfer-guide", <AthensAirportTransferGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
