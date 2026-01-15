@@ -882,6 +882,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "New reservation created!",
     pleaseEnterName: "Please enter your name",
     pleaseEnterPhone: "Please enter your phone number",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "Reservation",
+    autoDiscountApplied: "Price reduced! A special discount has been applied.",
+    specialDiscountApplied: "Special discounted price applied!",
+    rejectExplanation: "If you don't accept this price, press Reject.",
+    finalOfferMessage: "This is our special discounted final offer for you.",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - International VIP Airport Transfer & Chauffeur Service | Turkey, Dubai, Cyprus",
@@ -2393,6 +2399,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "Neue Reservierung erstellt!",
     pleaseEnterName: "Bitte geben Sie Ihren Namen ein",
     pleaseEnterPhone: "Bitte geben Sie Ihre Telefonnummer ein",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "Reservierung",
+    autoDiscountApplied: "Preis reduziert! Ein Sonderrabatt wurde angewendet.",
+    specialDiscountApplied: "Sonderrabatt angewendet!",
+    rejectExplanation: "Wenn Sie diesen Preis nicht akzeptieren, klicken Sie auf Ablehnen.",
+    finalOfferMessage: "Dies ist unser spezielles vergünstigtes Endangebot für Sie.",
     
     // Edit Reservation Page
     updateYourReservation: "Aktualisieren Sie Ihre Reservierung",
@@ -4196,6 +4208,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "Nouvelle réservation créée!",
     pleaseEnterName: "Veuillez entrer votre nom",
     pleaseEnterPhone: "Veuillez entrer votre numéro de téléphone",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "Réservation",
+    autoDiscountApplied: "Prix réduit! Une réduction spéciale a été appliquée.",
+    specialDiscountApplied: "Prix réduit spécial appliqué!",
+    rejectExplanation: "Si vous n'acceptez pas ce prix, appuyez sur Refuser.",
+    finalOfferMessage: "Ceci est notre offre finale spéciale à prix réduit pour vous.",
     
     // Edit Reservation Page
     updateYourReservation: "Mettre à jour votre réservation",
@@ -5710,6 +5728,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "Новое бронирование создано!",
     pleaseEnterName: "Пожалуйста, введите ваше имя",
     pleaseEnterPhone: "Пожалуйста, введите ваш номер телефона",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "Бронирование",
+    autoDiscountApplied: "Цена снижена! Применена специальная скидка.",
+    specialDiscountApplied: "Применена специальная скидка!",
+    rejectExplanation: "Если вас не устраивает эта цена, нажмите Отклонить.",
+    finalOfferMessage: "Это наше специальное предложение со скидкой для вас.",
     
     // Edit Reservation Page
     updateYourReservation: "Обновите вашу бронь",
@@ -7088,6 +7112,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "Nuova prenotazione creata!",
     pleaseEnterName: "Per favore inserisci il tuo nome",
     pleaseEnterPhone: "Per favore inserisci il tuo numero di telefono",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "Prenotazione",
+    autoDiscountApplied: "Prezzo ridotto! È stato applicato uno sconto speciale.",
+    specialDiscountApplied: "Prezzo scontato speciale applicato!",
+    rejectExplanation: "Se non accetti questo prezzo, premi Rifiuta.",
+    finalOfferMessage: "Questa è la nostra offerta finale scontata speciale per te.",
     
     // Edit Reservation Page
     updateYourReservation: "Aggiorna la tua prenotazione",
@@ -8513,6 +8543,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "¡Nueva reserva creada!",
     pleaseEnterName: "Por favor ingresa tu nombre",
     pleaseEnterPhone: "Por favor ingresa tu número de teléfono",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "Reserva",
+    autoDiscountApplied: "¡Precio reducido! Se ha aplicado un descuento especial.",
+    specialDiscountApplied: "¡Se aplicó el precio con descuento especial!",
+    rejectExplanation: "Si no aceptas este precio, presiona Rechazar.",
+    finalOfferMessage: "Esta es nuestra oferta final especial con descuento para ti.",
     
     // Edit Reservation Page
     updateYourReservation: "Actualiza Tu Reserva",
@@ -9938,6 +9974,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "تم إنشاء حجز جديد!",
     pleaseEnterName: "الرجاء إدخال اسمك",
     pleaseEnterPhone: "الرجاء إدخال رقم هاتفك",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "الحجز",
+    autoDiscountApplied: "تم تخفيض السعر! تم تطبيق خصم خاص.",
+    specialDiscountApplied: "تم تطبيق السعر المخفض الخاص!",
+    rejectExplanation: "إذا لم تقبل هذا السعر، اضغط على رفض.",
+    finalOfferMessage: "هذا هو عرضنا النهائي الخاص المخفض لك.",
     
     // Edit Reservation Page
     updateYourReservation: "تحديث حجزك",
@@ -11571,6 +11613,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "Yeni rezervasyon oluşturuldu!",
     pleaseEnterName: "Lütfen adınızı girin",
     pleaseEnterPhone: "Lütfen telefon numaranızı girin",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "Rezervasyon",
+    autoDiscountApplied: "Fiyat indirildi! Özel bir indirim uygulandı.",
+    specialDiscountApplied: "İndirimli fiyat uygulandı!",
+    rejectExplanation: "Bu fiyatı beğenmediyseniz Reddet tuşuna basın.",
+    finalOfferMessage: "Bu sizin için özel indirimli son teklifimizdir.",
 
     // Customer Portal Page
     yourBookings: "Rezervasyonlarınız",
@@ -12887,6 +12935,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "Нове бронювання створено!",
     pleaseEnterName: "Будь ласка, введіть ваше ім'я",
     pleaseEnterPhone: "Будь ласка, введіть ваш номер телефону",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "Бронювання",
+    autoDiscountApplied: "Ціна знижена! Застосовано спеціальну знижку.",
+    specialDiscountApplied: "Застосовано спеціальну знижку!",
+    rejectExplanation: "Якщо ви не приймаєте цю ціну, натисніть Відхилити.",
+    finalOfferMessage: "Це наша спеціальна пропозиція зі знижкою для вас.",
     
     // Edit Reservation Page
     updateYourReservation: "Оновіть ваше бронювання",
@@ -14297,6 +14351,12 @@ const translations: Record<Language, Record<string, string>> = {
     newReservationCreated: "新しい予約が作成されました！",
     pleaseEnterName: "お名前を入力してください",
     pleaseEnterPhone: "電話番号を入力してください",
+    // Customer Reservation Detail - Missing Keys
+    reservation: "予約",
+    autoDiscountApplied: "料金が割引されました！特別割引が適用されました。",
+    specialDiscountApplied: "特別割引価格が適用されました！",
+    rejectExplanation: "この価格を受け入れない場合は、拒否を押してください。",
+    finalOfferMessage: "これはお客様への特別割引最終オファーです。",
     
     // Edit Reservation Page
     updateYourReservation: "予約を更新する",
