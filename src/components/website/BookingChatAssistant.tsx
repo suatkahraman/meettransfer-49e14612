@@ -3137,8 +3137,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           
                           {/* Vehicle Cards for Mobile */}
                           {/* Vehicle Cards for Mobile - show 2x2 quick select when vehicle selection is needed */}
-                          {/* Hide cards if vehicle is already selected OR booking is complete */}
-                          {(((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection) && !msg.bookingData?.vehicleType && !msg.bookingData?.isComplete) && (
+                          {/* Only show on LAST message, hide if isComplete is explicitly true (user made selection) */}
+                          {msgIndex === messages.length - 1 && !isLoading && (((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection)) && !msg.bookingData?.isComplete && (
                             <ChatVehicleCards
                               passengers={msg.passengerCount || msg.bookingData?.passengers || 2}
                               prices={msg.vehiclePrices}
@@ -3955,8 +3955,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 
                 {/* Vehicle Cards for Desktop */}
                 {/* Vehicle Cards for Desktop - show 2x2 quick select when vehicle selection is needed */}
-                {/* Hide cards if vehicle is already selected OR booking is complete */}
-                {(((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection) && !msg.bookingData?.vehicleType && !msg.bookingData?.isComplete) && (
+                {/* Only show on LAST message, hide if isComplete is explicitly true (user made selection) */}
+                {msgIndex === messages.length - 1 && !isLoading && (((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection)) && !msg.bookingData?.isComplete && (
                   <ChatVehicleCards
                     passengers={msg.passengerCount || msg.bookingData?.passengers || 2}
                     prices={msg.vehiclePrices}
