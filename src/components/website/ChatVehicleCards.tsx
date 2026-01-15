@@ -95,16 +95,16 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
   return (
     <div
       className={cn(
-        "relative bg-background rounded-lg border overflow-hidden cursor-pointer transition-all duration-150 group flex flex-col",
+        "relative bg-background rounded-lg border overflow-hidden cursor-pointer flex flex-col",
         isSelected
-          ? "border-foreground/20 bg-muted shadow-sm"
-          : "border-border hover:border-foreground/10 hover:shadow-sm active:scale-[0.98]"
+          ? "border-primary bg-muted"
+          : "border-border"
       )}
       onClick={handleClick}
     >
       {/* Selected Check */}
       {isSelected && (
-        <div className="absolute top-1 right-1 z-10 w-5 h-5 bg-primary rounded-full flex items-center justify-center shadow-lg">
+        <div className="absolute top-1 right-1 z-10 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
           <Check className="h-3 w-3 text-primary-foreground" />
         </div>
       )}
@@ -114,7 +114,7 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
         <img
           src={vehicle.images[0]?.src}
           alt={vehicle.images[0]?.alt || vehicle.label}
-          className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+          className="w-full h-full object-cover"
         />
       </div>
 
