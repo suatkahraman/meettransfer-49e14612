@@ -79,7 +79,7 @@ interface SchemaOrgProps {
   schemas: SchemaType[];
 }
 
-const baseUrl = 'https://meettransfer.app';
+const baseUrl = 'https://meettransfer.lovable.app';
 
 const companyInfo = {
   name: 'Meet Transfer',
