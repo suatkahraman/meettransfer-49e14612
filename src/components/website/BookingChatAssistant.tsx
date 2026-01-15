@@ -2458,10 +2458,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   } as const;
 
   const handleApplyBooking = (data: BookingData) => {
+    // Apply booking data to the form first
     if (onApplyBooking) {
       onApplyBooking(data);
-      setIsOpen(false);
     }
+    setIsOpen(false);
+    
+    // Navigate to /book page with booking data
+    const params = new URLSearchParams();
+    if (data.pickup) params.set("pickup", data.pickup);
+    if (data.dropoff) params.set("dropoff", data.dropoff);
+    if (data.date) params.set("date", data.date);
+    if (data.time) params.set("time", data.time);
+    if (data.passengers) params.set("passengers", data.passengers.toString());
+    if (data.vehicleType) params.set("vehicleType", data.vehicleType);
+    if (data.estimatedPrice) params.set("estimatedPrice", data.estimatedPrice.toString());
+    if (data.currency) params.set("currency", data.currency);
+    
+    navigate(`/book?${params.toString()}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -3049,15 +3063,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                   {msg.bookingData.estimatedPrice}
                                 </span>
                               </div>
-                              {onApplyBooking && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleApplyBooking(msg.bookingData!)}
-                                  className="w-full mt-1.5 h-7 text-xs"
-                                >
-                                  {language === "TR" ? "Forma Uygula" : "Apply"}
-                                  <ArrowRight className="h-3 w-3 ml-1" />
-                                </Button>
+                              {/* Go to Booking Button - Always visible when price is shown */}
+                              <Button
+                                size="sm"
+                                onClick={() => handleApplyBooking(msg.bookingData!)}
+                                className="w-full mt-1.5 h-7 text-xs bg-primary hover:bg-primary/90"
+                              >
+                                {language === "TR" ? "Rezervasyona Git" : "Go to Booking"}
+                                <ArrowRight className="h-3 w-3 ml-1" />
+                              </Button>
+                              
+                              {/* Google Login Option - Show when booking data exists */}
+                              {msg.bookingData && (
+                                <ChatRedirectButton
+                                  language={language}
+                                  bookingToken={bookingCreated?.token}
+                                  onRedirect={() => handleApplyBooking(msg.bookingData!)}
+                                  className="mt-2"
+                                />
                               )}
                             </div>
                           )}
@@ -3699,15 +3722,24 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         {msg.bookingData.estimatedPrice}
                       </span>
                     </div>
-                    {onApplyBooking && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleApplyBooking(msg.bookingData!)}
-                        className="w-full mt-2 h-7 text-xs"
-                      >
-                        {language === "TR" ? "Forma Uygula" : "Apply to Form"}
-                        <ArrowRight className="h-3 w-3 ml-1" />
-                      </Button>
+                    {/* Go to Booking Button - Always visible when price is shown */}
+                    <Button
+                      size="sm"
+                      onClick={() => handleApplyBooking(msg.bookingData!)}
+                      className="w-full mt-2 h-7 text-xs bg-primary hover:bg-primary/90"
+                    >
+                      {language === "TR" ? "Rezervasyona Git" : "Go to Booking"}
+                      <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
+                    
+                    {/* Google Login Option - Show when booking data exists */}
+                    {msg.bookingData && (
+                      <ChatRedirectButton
+                        language={language}
+                        bookingToken={bookingCreated?.token}
+                        onRedirect={() => handleApplyBooking(msg.bookingData!)}
+                        className="mt-2"
+                      />
                     )}
                   </div>
                 )}
