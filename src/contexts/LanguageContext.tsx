@@ -2386,6 +2386,13 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Bitte beheben Sie die Validierungsfehler",
     bookingFailed: "Buchung fehlgeschlagen",
     submitTransferDetails: "Geben Sie Ihre Transferdetails ein und wir senden Ihnen den Preis zur Genehmigung",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 Ihre Reservierung wurde erfolgreich erstellt!",
+    reservationCreateFailed: "Reservierung konnte nicht erstellt werden",
+    reservationDeleted: "Reservierung gelöscht",
+    newReservationCreated: "Neue Reservierung erstellt!",
+    pleaseEnterName: "Bitte geben Sie Ihren Namen ein",
+    pleaseEnterPhone: "Bitte geben Sie Ihre Telefonnummer ein",
     
     // Edit Reservation Page
     updateYourReservation: "Aktualisieren Sie Ihre Reservierung",
@@ -4182,6 +4189,13 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Veuillez corriger les erreurs de validation",
     bookingFailed: "Échec de la réservation",
     submitTransferDetails: "Soumettez vos détails de transfert et nous vous enverrons le prix pour approbation",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 Votre réservation a été créée avec succès!",
+    reservationCreateFailed: "Échec de la création de la réservation",
+    reservationDeleted: "Réservation supprimée",
+    newReservationCreated: "Nouvelle réservation créée!",
+    pleaseEnterName: "Veuillez entrer votre nom",
+    pleaseEnterPhone: "Veuillez entrer votre numéro de téléphone",
     
     // Edit Reservation Page
     updateYourReservation: "Mettre à jour votre réservation",
@@ -5689,6 +5703,13 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Пожалуйста, исправьте ошибки валидации",
     bookingFailed: "Не удалось создать бронирование",
     submitTransferDetails: "Отправьте данные трансфера, и мы пришлем вам цену для подтверждения",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 Ваше бронирование успешно создано!",
+    reservationCreateFailed: "Не удалось создать бронирование",
+    reservationDeleted: "Бронирование удалено",
+    newReservationCreated: "Новое бронирование создано!",
+    pleaseEnterName: "Пожалуйста, введите ваше имя",
+    pleaseEnterPhone: "Пожалуйста, введите ваш номер телефона",
     
     // Edit Reservation Page
     updateYourReservation: "Обновите вашу бронь",
@@ -7060,6 +7081,13 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Per favore correggi gli errori di validazione",
     bookingFailed: "Prenotazione fallita",
     submitTransferDetails: "Invia i dettagli del trasferimento e ti invieremo il prezzo per l'approvazione",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 La tua prenotazione è stata creata con successo!",
+    reservationCreateFailed: "Impossibile creare la prenotazione",
+    reservationDeleted: "Prenotazione eliminata",
+    newReservationCreated: "Nuova prenotazione creata!",
+    pleaseEnterName: "Per favore inserisci il tuo nome",
+    pleaseEnterPhone: "Per favore inserisci il tuo numero di telefono",
     
     // Edit Reservation Page
     updateYourReservation: "Aggiorna la tua prenotazione",
@@ -8478,6 +8506,13 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Por favor corrige los errores de validación",
     bookingFailed: "Error al crear la reserva",
     submitTransferDetails: "Envía los detalles de tu traslado y te enviaremos el precio para aprobación",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 ¡Tu reserva se ha creado con éxito!",
+    reservationCreateFailed: "No se pudo crear la reserva",
+    reservationDeleted: "Reserva eliminada",
+    newReservationCreated: "¡Nueva reserva creada!",
+    pleaseEnterName: "Por favor ingresa tu nombre",
+    pleaseEnterPhone: "Por favor ingresa tu número de teléfono",
     
     // Edit Reservation Page
     updateYourReservation: "Actualiza Tu Reserva",
@@ -9896,6 +9931,13 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "يرجى إصلاح أخطاء التحقق",
     bookingFailed: "فشل في إنشاء الحجز",
     submitTransferDetails: "أرسل تفاصيل نقلك وسنرسل لك السعر للموافقة",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 تم إنشاء حجزك بنجاح!",
+    reservationCreateFailed: "فشل في إنشاء الحجز",
+    reservationDeleted: "تم حذف الحجز",
+    newReservationCreated: "تم إنشاء حجز جديد!",
+    pleaseEnterName: "الرجاء إدخال اسمك",
+    pleaseEnterPhone: "الرجاء إدخال رقم هاتفك",
     
     // Edit Reservation Page
     updateYourReservation: "تحديث حجزك",
@@ -12838,6 +12880,13 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "Будь ласка, виправте помилки валідації",
     bookingFailed: "Не вдалося створити бронювання",
     submitTransferDetails: "Надішліть деталі трансферу, і ми надішлемо вам ціну для підтвердження",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 Ваше бронювання успішно створено!",
+    reservationCreateFailed: "Не вдалося створити бронювання",
+    reservationDeleted: "Бронювання видалено",
+    newReservationCreated: "Нове бронювання створено!",
+    pleaseEnterName: "Будь ласка, введіть ваше ім'я",
+    pleaseEnterPhone: "Будь ласка, введіть ваш номер телефону",
     
     // Edit Reservation Page
     updateYourReservation: "Оновіть ваше бронювання",
@@ -14241,6 +14290,13 @@ const translations: Record<Language, Record<string, string>> = {
     fixValidationErrors: "検証エラーを修正してください",
     bookingFailed: "予約の作成に失敗しました",
     submitTransferDetails: "送迎の詳細を送信すると、確認のための料金をお送りします",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 予約が正常に作成されました！",
+    reservationCreateFailed: "予約の作成に失敗しました",
+    reservationDeleted: "予約が削除されました",
+    newReservationCreated: "新しい予約が作成されました！",
+    pleaseEnterName: "お名前を入力してください",
+    pleaseEnterPhone: "電話番号を入力してください",
     
     // Edit Reservation Page
     updateYourReservation: "予約を更新する",
