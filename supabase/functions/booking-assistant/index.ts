@@ -727,20 +727,29 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
 
     console.log("AI Response received, booking data:", bookingData, "customerName:", extractedCustomerName, "priceRequest:", priceRequestData);
 
-    // If price request is needed, notify admin
+    // If price request is needed, notify admin AND create quick booking record
     let priceRequestSent = false;
     if (priceRequestData?.needed) {
       try {
-        // Call the notify-admin-price-request function
-        const { error: notifyError } = await supabase.functions.invoke('notify-admin-price-request', {
+        // Call the notify-admin-price-request function with all available booking data
+        // This will now also create a quick_booking_requests record
+        const { data: notifyResult, error: notifyError } = await supabase.functions.invoke('notify-admin-price-request', {
           body: {
             pickup: priceRequestData.pickup || bookingData?.pickup,
             dropoff: priceRequestData.dropoff || bookingData?.dropoff,
-            passengers: bookingData?.passengers,
-            vehicleType: priceRequestData.vehicleType || bookingData?.vehicleType,
+            passengers: bookingData?.passengers || 1,
+            vehicleType: priceRequestData.vehicleType || bookingData?.vehicleType || 'mercedes-vito',
             customerName: extractedCustomerName || customerName,
             customerSessionId: visitorId,
-            language
+            language,
+            // Additional fields for complete quick booking record
+            pickupDate: bookingData?.date,
+            pickupTime: bookingData?.time,
+            customerPhone: bookingData?.customerPhone,
+            customerEmail: bookingData?.customerEmail,
+            babySeatCount: bookingData?.babySeatCount || 0,
+            luggageCount: bookingData?.luggageCount,
+            serviceType: bookingData?.serviceType || 'airport_transfer'
           }
         });
         
@@ -748,7 +757,7 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
           console.error("Failed to notify admin:", notifyError);
         } else {
           priceRequestSent = true;
-          console.log("Admin notified for price request");
+          console.log("Admin notified for price request, quick booking created:", notifyResult?.quickBookingId);
         }
       } catch (e) {
         console.error("Error notifying admin:", e);

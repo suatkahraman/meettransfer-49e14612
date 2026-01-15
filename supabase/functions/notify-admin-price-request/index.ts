@@ -19,10 +19,19 @@ serve(async (req) => {
       vehicleType, 
       customerName,
       customerSessionId,
-      language = 'EN'
+      language = 'EN',
+      // Additional optional fields for more complete booking
+      pickupDate,
+      pickupTime,
+      customerPhone,
+      customerEmail,
+      babySeatCount,
+      luggageCount,
+      serviceType = 'airport_transfer'
     } = await req.json();
 
     console.log("Price request notification for route:", pickup, "->", dropoff);
+    console.log("Additional data:", { pickupDate, pickupTime, customerPhone, customerEmail, passengers, vehicleType });
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
     if (!RESEND_API_KEY) {
@@ -34,6 +43,64 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // ============================================
+    // CREATE QUICK BOOKING REQUEST RECORD
+    // This ensures the request appears in admin panel
+    // ============================================
+    let quickBookingId: string | null = null;
+    
+    if (pickup && dropoff && customerSessionId) {
+      // Check if there's already a pending request for this session with same route
+      const { data: existingRequest } = await supabase
+        .from('quick_booking_requests')
+        .select('id')
+        .eq('customer_session_id', customerSessionId)
+        .eq('pickup', pickup)
+        .eq('dropoff', dropoff)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (existingRequest) {
+        console.log("Quick booking request already exists:", existingRequest.id);
+        quickBookingId = existingRequest.id;
+      } else {
+        // Create new quick booking request with status 'pending' (awaiting price)
+        const insertData: Record<string, any> = {
+          pickup,
+          dropoff,
+          pickup_date: pickupDate || new Date().toISOString().split('T')[0], // Default to today if not provided
+          pickup_time: pickupTime || '12:00', // Default time if not provided
+          passengers: passengers || 1,
+          vehicle_type: vehicleType || 'mercedes-vito',
+          customer_session_id: customerSessionId,
+          status: 'pending', // Awaiting admin price input
+          language: language,
+          service_type: serviceType,
+          customer_name: customerName || null,
+          customer_phone: customerPhone || null,
+          customer_email: customerEmail || null,
+          baby_seat_count: babySeatCount || 0,
+          luggage_count: luggageCount || null,
+          created_via_ai: true, // Mark as created via AI assistant price request
+          price: null, // No price yet - admin needs to set it
+          price_currency: 'EUR',
+        };
+
+        const { data: newRequest, error: insertError } = await supabase
+          .from('quick_booking_requests')
+          .insert(insertData)
+          .select('id')
+          .single();
+
+        if (insertError) {
+          console.error("Failed to create quick booking request:", insertError);
+        } else {
+          quickBookingId = newRequest.id;
+          console.log("Created quick booking request:", quickBookingId);
+        }
+      }
+    }
 
     // Get admin emails
     const { data: adminRoles } = await supabase
@@ -79,6 +146,9 @@ serve(async (req) => {
       ? `🚨 Acil Fiyat Talebi - ${pickup} → ${dropoff}`
       : `🚨 Urgent Price Request - ${pickup} → ${dropoff}`;
 
+    // Link directly to Quick Bookings page (not reservations)
+    const adminPanelUrl = 'https://meettransfer.lovable.app/admin/quick-bookings';
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -95,8 +165,10 @@ serve(async (req) => {
           .route-item { display: flex; align-items: center; margin: 10px 0; }
           .label { color: #64748b; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; }
           .value { font-size: 16px; font-weight: 600; color: #1e293b; }
+          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
           .cta-button { display: inline-block; background: #2563eb; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 20px; }
           .footer { background: #f8fafc; padding: 20px; text-align: center; color: #64748b; font-size: 12px; }
+          .booking-id { background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-family: monospace; }
         </style>
       </head>
       <body>
@@ -110,6 +182,7 @@ serve(async (req) => {
               ${isTurkish 
                 ? 'Müşteri için bu güzergahta fiyat bulunamadı. Lütfen hemen fiyat girin.' 
                 : 'No price found for this route. Please enter a price immediately.'}
+              ${quickBookingId ? `<br><br><span class="booking-id">Request ID: ${quickBookingId.substring(0, 8)}...</span>` : ''}
             </div>
             
             <div class="route-box">
@@ -128,7 +201,7 @@ serve(async (req) => {
               </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+            <div class="info-grid">
               <div>
                 <p class="label">👥 ${isTurkish ? 'Yolcu Sayısı' : 'Passengers'}</p>
                 <p class="value">${passengers || 'Belirtilmedi'}</p>
@@ -137,10 +210,28 @@ serve(async (req) => {
                 <p class="label">🚗 ${isTurkish ? 'Araç Tipi' : 'Vehicle Type'}</p>
                 <p class="value">${vehicleNames[vehicleType] || vehicleType || 'Belirtilmedi'}</p>
               </div>
+              ${pickupDate ? `
+              <div>
+                <p class="label">📅 ${isTurkish ? 'Tarih' : 'Date'}</p>
+                <p class="value">${pickupDate}</p>
+              </div>
+              ` : ''}
+              ${pickupTime ? `
+              <div>
+                <p class="label">🕐 ${isTurkish ? 'Saat' : 'Time'}</p>
+                <p class="value">${pickupTime}</p>
+              </div>
+              ` : ''}
               ${customerName ? `
-              <div style="grid-column: span 2;">
+              <div>
                 <p class="label">👤 ${isTurkish ? 'Müşteri' : 'Customer'}</p>
                 <p class="value">${customerName}</p>
+              </div>
+              ` : ''}
+              ${customerPhone ? `
+              <div>
+                <p class="label">📱 ${isTurkish ? 'Telefon' : 'Phone'}</p>
+                <p class="value">${customerPhone}</p>
               </div>
               ` : ''}
             </div>
@@ -152,8 +243,8 @@ serve(async (req) => {
             </p>
             
             <div style="text-align: center;">
-              <a href="https://meettransfer.lovable.app/admin/reservations" class="cta-button">
-                ${isTurkish ? 'Admin Paneline Git' : 'Go to Admin Panel'}
+              <a href="${adminPanelUrl}" class="cta-button">
+                ${isTurkish ? 'Quick Bookings\'e Git' : 'Go to Quick Bookings'}
               </a>
             </div>
           </div>
@@ -196,10 +287,32 @@ serve(async (req) => {
       });
     }
 
+    // Send push notification to admins
+    try {
+      const { error: pushError } = await supabase.functions.invoke('send-push-notification', {
+        body: {
+          userIds: adminRoles.map(a => a.user_id),
+          title: isTurkish ? '🚨 Acil Fiyat Talebi' : '🚨 Urgent Price Request',
+          body: `${pickup} → ${dropoff}`,
+          url: adminPanelUrl,
+          tag: 'price-request',
+        }
+      });
+      
+      if (pushError) {
+        console.error("Push notification error:", pushError);
+      } else {
+        console.log("Push notifications sent to admins");
+      }
+    } catch (pushErr) {
+      console.error("Failed to send push notifications:", pushErr);
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
       emailsSent: adminEmails.length,
-      notificationsCreated: adminRoles.length
+      notificationsCreated: adminRoles.length,
+      quickBookingId: quickBookingId
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
