@@ -88,9 +88,7 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
   const priceDiff = price && lowestPrice ? price - lowestPrice : 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       className={cn(
         "relative bg-background rounded-xl border overflow-hidden cursor-pointer transition-all group",
         isSelected 
@@ -99,7 +97,6 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
         isPopular && !isSelected && "border-amber-500/50 ring-1 ring-amber-500/20"
       )}
       onClick={onSelect}
-      whileTap={{ scale: 0.98 }}
     >
       {/* Badge Stack - Top Left */}
       <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
@@ -283,7 +280,7 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -342,13 +339,8 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
         "grid gap-3",
         availableVehicles.length === 1 ? "grid-cols-1" : "grid-cols-2"
       )}>
-        {availableVehicles.map((vehicle, index) => (
-          <motion.div
-            key={vehicle.value}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
+        {availableVehicles.map((vehicle) => (
+          <div key={vehicle.value}>
             <ChatVehicleCard
               vehicle={vehicle}
               price={prices?.[vehicle.value]}
@@ -364,7 +356,7 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
               hasReturnTrip={hasReturnTrip}
               returnDiscountPercentage={returnDiscountPercentage}
             />
-          </motion.div>
+          </div>
         ))}
       </div>
     </motion.div>
