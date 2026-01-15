@@ -14,6 +14,8 @@ interface ChatVehicleCardsProps {
   compact?: boolean;
   discountPercentage?: number;
   showPriceComparison?: boolean;
+  hasReturnTrip?: boolean;
+  returnDiscountPercentage?: number;
 }
 
 // Icon mapping for features
@@ -38,6 +40,8 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
   isPopular,
   isBestValue,
   lowestPrice,
+  hasReturnTrip = false,
+  returnDiscountPercentage = 25,
 }: {
   vehicle: VehicleTypeInfo;
   price?: number;
@@ -50,6 +54,8 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
   isPopular?: boolean;
   isBestValue?: boolean;
   lowestPrice?: number;
+  hasReturnTrip?: boolean;
+  returnDiscountPercentage?: number;
 }) {
   const [imageIndex, setImageIndex] = useState(0);
   const currencySymbol = currency === "TRY" ? "₺" : currency === "USD" ? "$" : "€";
@@ -67,6 +73,16 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
     ? Math.round(price * (1 - discountPercentage / 100)) 
     : price;
   const originalPrice = discountPercentage && price ? price : null;
+  
+  // Calculate return trip price with discount
+  const returnPrice = hasReturnTrip && price 
+    ? Math.round(price * (1 - returnDiscountPercentage / 100)) 
+    : 0;
+  
+  // Calculate total price (outbound + discounted return)
+  const totalPrice = hasReturnTrip && price 
+    ? (displayPrice || price) + returnPrice 
+    : displayPrice || price || 0;
   
   // Calculate price difference from lowest
   const priceDiff = price && lowestPrice ? price - lowestPrice : 0;
@@ -213,34 +229,57 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
         {/* Price Section with Comparison */}
         {price !== undefined && (
           <div className="mt-3 pt-3 border-t border-border">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col">
-                {originalPrice && (
-                  <span className="text-xs text-muted-foreground line-through">
-                    {currencySymbol}{originalPrice}
+            {hasReturnTrip ? (
+              // Show total with return trip breakdown
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{isTurkish ? "Gidiş" : "Outbound"}</span>
+                  <span>{currencySymbol}{displayPrice || price}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-green-600 flex items-center gap-1">
+                    <TrendingDown className="h-3 w-3" />
+                    {isTurkish ? "Dönüş" : "Return"} 
+                    <span className="text-[10px] bg-green-500/10 text-green-600 px-1 rounded">-{returnDiscountPercentage}%</span>
                   </span>
-                )}
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-bold text-primary text-lg">
-                    {currencySymbol}{displayPrice}
-                  </span>
-                  {discountPercentage && (
-                    <span className="px-1.5 py-0.5 bg-green-500/10 text-green-600 text-[10px] font-bold rounded">
-                      -{discountPercentage}%
-                    </span>
-                  )}
+                  <span className="text-green-600">{currencySymbol}{returnPrice}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-dashed border-border">
+                  <span className="font-semibold text-sm">{isTurkish ? "Toplam" : "Total"}</span>
+                  <span className="font-bold text-primary text-lg">{currencySymbol}{totalPrice}</span>
                 </div>
               </div>
-              
-              {/* Price comparison indicator */}
-              {priceDiff > 0 && lowestPrice && (
-                <div className="text-right">
-                  <span className="text-[10px] text-muted-foreground">
-                    +{currencySymbol}{priceDiff}
-                  </span>
+            ) : (
+              // Original single-trip view
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  {originalPrice && (
+                    <span className="text-xs text-muted-foreground line-through">
+                      {currencySymbol}{originalPrice}
+                    </span>
+                  )}
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-bold text-primary text-lg">
+                      {currencySymbol}{displayPrice}
+                    </span>
+                    {discountPercentage && (
+                      <span className="px-1.5 py-0.5 bg-green-500/10 text-green-600 text-[10px] font-bold rounded">
+                        -{discountPercentage}%
+                      </span>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
+                
+                {/* Price comparison indicator */}
+                {priceDiff > 0 && lowestPrice && (
+                  <div className="text-right">
+                    <span className="text-[10px] text-muted-foreground">
+                      +{currencySymbol}{priceDiff}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -258,7 +297,10 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
   compact = true,
   discountPercentage,
   showPriceComparison = true,
+  hasReturnTrip = false,
+  returnDiscountPercentage = 25,
 }: ChatVehicleCardsProps) {
+  const currencySymbol = currency === "TRY" ? "₺" : currency === "USD" ? "$" : "€";
   const availableVehicles = getAvailableVehicles(passengers, passengers);
   const isTurkish = language === "TR";
 
@@ -319,6 +361,8 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
               isPopular={vehicle.value === popularVehicle}
               isBestValue={showPriceComparison && vehicle.value === bestValueVehicle}
               lowestPrice={showPriceComparison ? lowestPrice : undefined}
+              hasReturnTrip={hasReturnTrip}
+              returnDiscountPercentage={returnDiscountPercentage}
             />
           </motion.div>
         ))}
