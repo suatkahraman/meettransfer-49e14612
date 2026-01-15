@@ -106,7 +106,7 @@ const AntalyaAirportTransferGuide = () => {
         ]}
       />
 
-      <article className="max-w-4xl mx-auto px-4 py-12">
+      <article className="max-w-4xl mx-auto px-3 sm:px-4 py-8 md:py-12">
         {/* Back to Blog */}
         <Link 
           to={getLocalizedPath("/blog")} 
@@ -117,31 +117,31 @@ const AntalyaAirportTransferGuide = () => {
         </Link>
 
         {/* Article Header */}
-        <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">{t("cityAntalya")}</Badge>
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+        <header className="mb-8 md:mb-12">
+          <Badge variant="secondary" className="mb-3 md:mb-4">{t("cityAntalya")}</Badge>
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight">
             {t("blogAntalyaH1")}
           </h1>
-          <p className="text-xl text-muted-foreground mb-6">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 md:mb-6">
             {t("blogAntalyaIntro")}
           </p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {t("lastUpdated")}: {formatBlogDate("2025-01-10")}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               15 {t("minRead")}
             </span>
           </div>
         </header>
 
         {/* Share Buttons */}
-        <ShareButtons title={t("blogAntalyaH1")} className="mb-8" />
+        <ShareButtons title={t("blogAntalyaH1")} className="mb-6 md:mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-8">
+        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
           <img 
             src={antalyaTransferHero} 
             alt={t("blogAntalyaHeroAlt")}
@@ -154,7 +154,7 @@ const AntalyaAirportTransferGuide = () => {
         <TableOfContents items={tocItems} />
 
         {/* Article Content */}
-        <div className="prose prose-lg dark:prose-invert max-w-none">
+        <div className="prose prose-sm sm:prose-base md:prose-lg dark:prose-invert max-w-none">
           <h2 id="airport-overview">{t("blogAntalyaSection1Title")}</h2>
           <p>{t("blogAntalyaSection1P1")}</p>
           <p>{t("blogAntalyaSection1P2")}</p>
@@ -182,7 +182,8 @@ const AntalyaAirportTransferGuide = () => {
           <h2 id="transfer-prices">{t("blogAntalyaSection3Title")}</h2>
           <p>{t("blogAntalyaSection3Intro")}</p>
 
-          <div className="overflow-x-auto not-prose my-8">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto not-prose my-6 md:my-8">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -203,6 +204,28 @@ const AntalyaAirportTransferGuide = () => {
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden not-prose my-6 space-y-3">
+            {destinations.map((dest, index) => (
+              <Card key={index} className="p-3">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-semibold text-sm">{dest.area}</h4>
+                  <span className="text-primary font-bold text-base">{dest.price}</span>
+                </div>
+                <div className="flex gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {dest.distance}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {dest.time}
+                  </span>
+                </div>
+              </Card>
+            ))}
           </div>
 
           <p className="text-sm text-muted-foreground">
@@ -233,15 +256,15 @@ const AntalyaAirportTransferGuide = () => {
 
           <h2 id="whats-included">{t("blogAntalyaSection5Title")}</h2>
 
-          <div className="not-prose my-8">
+          <div className="not-prose my-6 md:my-8">
             <Card className="bg-primary/5 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                   {t("blogAntalyaIncludesTitle")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid md:grid-cols-2 gap-4">
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 pt-0">
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
                   <span>{t("blogPriceInclude1")}</span>
