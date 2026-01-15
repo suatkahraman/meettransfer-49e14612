@@ -302,11 +302,7 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
     : "mercedes-vito";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mt-4 space-y-3"
-    >
+    <div className="mt-4 space-y-3">
       <div className="flex items-center justify-between px-1">
         <div className="text-sm text-muted-foreground font-medium">
           {isTurkish 
@@ -345,7 +341,7 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
           </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 });
 

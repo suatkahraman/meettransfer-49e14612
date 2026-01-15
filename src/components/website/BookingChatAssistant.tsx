@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, ChevronDown, Trash2, CheckCircle2, Clock } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, ChevronDown, Trash2, CheckCircle2, Clock, Check } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MobileTooltip } from "@/components/ui/mobile-tooltip";
 import { supabase } from "@/integrations/supabase/client";
@@ -3053,38 +3053,59 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             />
                           )}
                           
-                          {/* Booking Card for Mobile - Compact */}
-                          {msg.bookingData && msg.bookingData.estimatedPrice && !msg.showVehicleCards && (
-                            <div className="mt-2 p-2 bg-background rounded-lg border border-border">
-                              <div className="flex items-center justify-between">
-                                <span className="text-[11px] text-muted-foreground">
-                                  {language === "TR" ? "Fiyat" : "Price"}
-                                </span>
-                                <span className="font-bold text-primary text-sm">
-                                  {msg.bookingData.currency === "TRY" ? "₺" : "€"}
-                                  {msg.bookingData.estimatedPrice}
-                                </span>
+                          {/* Booking Summary Card for Mobile - Show after vehicle selection */}
+                          {msg.bookingData && msg.bookingData.vehicleType && msg.vehiclePrices && (
+                            <div className="mt-3 p-3 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+                              {/* Total Price Header */}
+                              <div className="flex items-center justify-between mb-3 pb-2 border-b border-border/50">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <Check className="h-4 w-4 text-green-500" />
+                                  </div>
+                                  <div>
+                                    <p className="font-semibold text-sm">
+                                      {language === "TR" ? "Araç Seçildi" : "Vehicle Selected"}
+                                    </p>
+                                    <p className="text-[11px] text-muted-foreground">
+                                      {msg.bookingData.vehicleType === 'sedan' ? 'Sedan' :
+                                       msg.bookingData.vehicleType === 'mercedes-vito' ? 'Mercedes Vito' :
+                                       msg.bookingData.vehicleType === 'vip-mercedes' ? 'Mercedes Vito VIP' :
+                                       msg.bookingData.vehicleType === 'maybach-minibus' ? 'Maybach' :
+                                       msg.bookingData.vehicleType === 'minibus' ? 'Mercedes Sprinter' :
+                                       msg.bookingData.vehicleType}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-[10px] text-muted-foreground uppercase">
+                                    {language === "TR" ? "Toplam" : "Total"}
+                                  </p>
+                                  <p className="font-bold text-primary text-xl">
+                                    {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                                    {msg.vehiclePrices[msg.bookingData.vehicleType] || msg.bookingData.estimatedPrice}
+                                  </p>
+                                </div>
                               </div>
-                              {/* Go to Booking Button - Always visible when price is shown */}
-                              <Button
-                                size="sm"
-                                onClick={() => handleApplyBooking(msg.bookingData!)}
-                                className="w-full mt-1.5 h-7 text-xs bg-primary hover:bg-primary/90"
-                              >
-                                {language === "TR" ? "Rezervasyona Git" : "Go to Booking"}
-                                <ArrowRight className="h-3 w-3 ml-1" />
-                              </Button>
-                              
-                              {/* Google Login Option - Show when booking data exists */}
-                              {msg.bookingData && (
+
+                              {/* Action Buttons */}
+                              <div className="space-y-2">
+                                {/* Continue to Booking */}
+                                <Button
+                                  onClick={() => handleApplyBooking(msg.bookingData!)}
+                                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/25"
+                                >
+                                  <ArrowRight className="h-4 w-4 mr-2" />
+                                  {language === "TR" ? "Rezervasyonu Tamamla" : "Complete Booking"}
+                                </Button>
+
+                                {/* Google Login Option */}
                                 <ChatRedirectButton
                                   language={language}
                                   bookingToken={bookingCreated?.token}
                                   bookingData={msg.bookingData}
                                   onRedirect={() => handleApplyBooking(msg.bookingData!)}
-                                  className="mt-2"
                                 />
-                              )}
+                              </div>
                             </div>
                           )}
 
@@ -3721,38 +3742,59 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   />
                 )}
                 
-                {/* Booking Card */}
-                {msg.bookingData && msg.bookingData.estimatedPrice && !msg.showVehicleCards && (
-                  <div className="mt-2 p-2 bg-background rounded-lg border border-border">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        {language === "TR" ? "Fiyat" : "Price"}
-                      </span>
-                      <span className="font-bold text-primary">
-                        {msg.bookingData.currency === "TRY" ? "₺" : "€"}
-                        {msg.bookingData.estimatedPrice}
-                      </span>
+                {/* Booking Summary Card for Desktop - Show after vehicle selection */}
+                {msg.bookingData && msg.bookingData.vehicleType && msg.vehiclePrices && (
+                  <div className="mt-3 p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20">
+                    {/* Total Price Header */}
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-border/50">
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                          <Check className="h-5 w-5 text-green-500" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">
+                            {language === "TR" ? "Araç Seçildi" : "Vehicle Selected"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {msg.bookingData.vehicleType === 'sedan' ? 'Sedan' :
+                             msg.bookingData.vehicleType === 'mercedes-vito' ? 'Mercedes Vito' :
+                             msg.bookingData.vehicleType === 'vip-mercedes' ? 'Mercedes Vito VIP' :
+                             msg.bookingData.vehicleType === 'maybach-minibus' ? 'Maybach' :
+                             msg.bookingData.vehicleType === 'minibus' ? 'Mercedes Sprinter' :
+                             msg.bookingData.vehicleType}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground uppercase">
+                          {language === "TR" ? "Toplam" : "Total"}
+                        </p>
+                        <p className="font-bold text-primary text-2xl">
+                          {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                          {msg.vehiclePrices[msg.bookingData.vehicleType] || msg.bookingData.estimatedPrice}
+                        </p>
+                      </div>
                     </div>
-                    {/* Go to Booking Button - Always visible when price is shown */}
-                    <Button
-                      size="sm"
-                      onClick={() => handleApplyBooking(msg.bookingData!)}
-                      className="w-full mt-2 h-7 text-xs bg-primary hover:bg-primary/90"
-                    >
-                      {language === "TR" ? "Rezervasyona Git" : "Go to Booking"}
-                      <ArrowRight className="h-3 w-3 ml-1" />
-                    </Button>
-                    
-                    {/* Google Login Option - Show when booking data exists */}
-                    {msg.bookingData && (
+
+                    {/* Action Buttons */}
+                    <div className="space-y-2">
+                      {/* Continue to Booking */}
+                      <Button
+                        onClick={() => handleApplyBooking(msg.bookingData!)}
+                        className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/25"
+                      >
+                        <ArrowRight className="h-4 w-4 mr-2" />
+                        {language === "TR" ? "Rezervasyonu Tamamla" : "Complete Booking"}
+                      </Button>
+
+                      {/* Google Login Option */}
                       <ChatRedirectButton
                         language={language}
                         bookingToken={bookingCreated?.token}
                         bookingData={msg.bookingData}
                         onRedirect={() => handleApplyBooking(msg.bookingData!)}
-                        className="mt-2"
                       />
-                    )}
+                    </div>
                   </div>
                 )}
 
