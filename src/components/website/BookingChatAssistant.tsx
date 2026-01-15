@@ -26,6 +26,7 @@ import { ChatQuickReplyButtons, QuickReplyType } from "./ChatQuickReplyButtons";
 import { ChatLanguageDetectedBanner } from "./ChatLanguageDetectedBanner";
 import { ChatDateTimePicker } from "./ChatDateTimePicker";
 import { SoundWaveInline } from "@/components/ui/SoundWaveAnimation";
+import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -1385,6 +1386,9 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     language,
     handleInterimTranscript
   );
+  
+  // Haptic feedback for push-to-talk
+  const { trigger: triggerHaptic } = useHapticFeedback();
   
   // Auto-send voice message when transcription is complete and not recording/processing
   const autoSendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -4052,28 +4056,46 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           {/* Main Push-to-Talk Button */}
           <motion.button
             onMouseDown={() => {
-              if (!isRecording) startRecording();
+              if (!isRecording) {
+                triggerHaptic('medium');
+                startRecording();
+              }
             }}
             onMouseUp={() => {
-              if (isRecording) stopRecording();
+              if (isRecording) {
+                triggerHaptic('light');
+                stopRecording();
+              }
             }}
             onMouseLeave={() => {
-              if (isRecording) stopRecording();
+              if (isRecording) {
+                triggerHaptic('light');
+                stopRecording();
+              }
             }}
             onTouchStart={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (!isRecording) startRecording();
+              if (!isRecording) {
+                triggerHaptic('medium');
+                startRecording();
+              }
             }}
             onTouchEnd={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (isRecording) stopRecording();
+              if (isRecording) {
+                triggerHaptic('success');
+                stopRecording();
+              }
             }}
             onTouchCancel={(e) => {
               // Critical for iOS - triggered when touch is interrupted
               e.preventDefault();
-              if (isRecording) stopRecording();
+              if (isRecording) {
+                triggerHaptic('light');
+                stopRecording();
+              }
             }}
             onContextMenu={(e) => e.preventDefault()}
             className={cn(
@@ -4288,28 +4310,46 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         {mobileFloating && isSpeechSupported && (
           <Button
             onMouseDown={() => {
-              if (!isRecording && !isLoading && !isProcessing) startRecording();
+              if (!isRecording && !isLoading && !isProcessing) {
+                triggerHaptic('medium');
+                startRecording();
+              }
             }}
             onMouseUp={() => {
-              if (isRecording) stopRecording();
+              if (isRecording) {
+                triggerHaptic('light');
+                stopRecording();
+              }
             }}
             onMouseLeave={() => {
-              if (isRecording) stopRecording();
+              if (isRecording) {
+                triggerHaptic('light');
+                stopRecording();
+              }
             }}
             onTouchStart={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (!isRecording && !isLoading && !isProcessing) startRecording();
+              if (!isRecording && !isLoading && !isProcessing) {
+                triggerHaptic('medium');
+                startRecording();
+              }
             }}
             onTouchEnd={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (isRecording) stopRecording();
+              if (isRecording) {
+                triggerHaptic('success');
+                stopRecording();
+              }
             }}
             onTouchCancel={(e) => {
               // Critical for iOS - triggered when touch is interrupted
               e.preventDefault();
-              if (isRecording) stopRecording();
+              if (isRecording) {
+                triggerHaptic('light');
+                stopRecording();
+              }
             }}
             onContextMenu={(e) => e.preventDefault()}
             disabled={isLoading || isProcessing}
