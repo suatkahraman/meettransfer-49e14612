@@ -336,6 +336,16 @@ export default function QuickBookingConfirm() {
       if (data.status === "pending" || data.status === "price_rejected") {
         setBooking(data as BookingRequest);
         setWaitingForPrice(true);
+        
+        // Pre-fill form with existing customer data even for pending status
+        if (data.customer_name || data.customer_email || data.customer_phone) {
+          setFormData(prev => ({
+            ...prev,
+            name: data.customer_name || "",
+            email: data.customer_email || "",
+            phone: data.customer_phone || "",
+          }));
+        }
         return;
       }
 
