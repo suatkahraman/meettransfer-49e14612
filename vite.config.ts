@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     mode === "production" && viteVersionPlugin(),
     VitePWA({
-      // Manual update only: do not auto-check/apply SW updates.
-      registerType: "prompt",
+      // Auto-update: keep users on the latest published version (no manual prompt).
+      registerType: "autoUpdate",
       injectRegister: null,
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "robots.txt", "sitemap.xml"],
       manifest: {
@@ -112,8 +112,8 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         // Merge our push-notification handlers into the SAME SW scope
         importScripts: ["sw-push.js"],
-        // Skip waiting for immediate activation
-        skipWaiting: false,
+        // Activate new SW immediately (prevents users getting stuck on an old cached app shell)
+        skipWaiting: true,
         clientsClaim: true,
         // Navigation preload for faster page loads
         navigationPreload: true,
