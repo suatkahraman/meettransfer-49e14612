@@ -67,35 +67,8 @@ export const HeroBackground = memo(({
 
   return (
     <>
-      {/* Mobile Grid Background */}
-      <div className="absolute inset-0 z-0 md:hidden">
-        {/* Base gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/30" />
-        
-        {/* Grid pattern */}
-        <div 
-          className="absolute inset-0 opacity-[0.15]"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, hsl(var(--muted-foreground) / 0.3) 1px, transparent 1px),
-              linear-gradient(to bottom, hsl(var(--muted-foreground) / 0.3) 1px, transparent 1px)
-            `,
-            backgroundSize: '24px 24px'
-          }}
-        />
-        
-        {/* Radial gradient overlay for depth */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
-        
-        {/* Subtle accent dots */}
-        <div 
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)`,
-            backgroundSize: '48px 48px'
-          }}
-        />
-      </div>
+      {/* Mobile Background */}
+      <div className="absolute inset-0 z-0 md:hidden bg-muted/40" />
 
       {/* Desktop Image Slideshow Background */}
       <div className="absolute inset-0 z-0 hidden md:block">
