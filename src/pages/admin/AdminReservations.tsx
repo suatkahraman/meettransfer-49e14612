@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2, Banknote, CheckCircle2, Clock3, RefreshCw, Briefcase, Baby, Car, Users } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2, Banknote, CheckCircle2, Clock3, RefreshCw, Briefcase, Baby, Car, Users, Plane } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -49,6 +49,7 @@ interface Reservation {
   agency_id: string | null;
   luggage_count: number | null;
   baby_seat_count: number | null;
+  passenger_names: string[] | null;
   drivers?: {
     id: string;
     name: string;
@@ -1063,11 +1064,22 @@ const AdminReservations = () => {
                                 </span>
                               </div>
                               
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <User className="h-3.5 w-3.5 text-muted-foreground" />
                                 <span className="font-medium text-sm">{reservation.customer_name}</span>
+                                {reservation.passenger_names && reservation.passenger_names.length > 1 && (
+                                  <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                    +{reservation.passenger_names.length - 1} yolcu
+                                  </span>
+                                )}
                                 <span className="text-muted-foreground text-xs">·</span>
                                 <span className="text-xs text-muted-foreground">{reservation.customer_phone}</span>
+                                {reservation.flight_number && (
+                                  <span className="flex items-center gap-1 text-xs text-sky-600 bg-sky-50 dark:bg-sky-900/30 px-1.5 py-0.5 rounded">
+                                    <Plane className="h-2.5 w-2.5" />
+                                    {reservation.flight_number}
+                                  </span>
+                                )}
                               </div>
 
                               <div className="space-y-0.5">
