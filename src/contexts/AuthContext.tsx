@@ -66,32 +66,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               const pendingBookingData = localStorage.getItem('pending_booking_data');
               
               if (pendingBookingToken || pendingBookingData) {
-                console.log('[Auth] Found pending booking, redirecting to /book');
+                console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
                 
-                // Build redirect URL
-                let redirectUrl = '/book';
-                if (pendingBookingToken) {
-                  redirectUrl = `/book?token=${pendingBookingToken}&new=true`;
-                } else if (pendingBookingData) {
-                  try {
-                    const bookingData = JSON.parse(pendingBookingData);
-                    const params = new URLSearchParams();
-                    if (bookingData.pickup) params.set("pickup", bookingData.pickup);
-                    if (bookingData.dropoff) params.set("dropoff", bookingData.dropoff);
-                    if (bookingData.date) params.set("date", bookingData.date);
-                    if (bookingData.time) params.set("time", bookingData.time);
-                    if (bookingData.passengers) params.set("passengers", bookingData.passengers.toString());
-                    if (bookingData.vehicleType) params.set("vehicleType", bookingData.vehicleType);
-                    if (bookingData.estimatedPrice) params.set("estimatedPrice", bookingData.estimatedPrice.toString());
-                    if (bookingData.currency) params.set("currency", bookingData.currency);
-                    redirectUrl = `/book?${params.toString()}`;
-                    localStorage.removeItem('pending_booking_data');
-                  } catch (e) {
-                    console.error('[Auth] Failed to parse pending booking data:', e);
-                  }
-                }
-                
-                navigate(redirectUrl, { replace: true });
+                // Keep the token/data in localStorage - CustomerHome will process it
+                // Redirect to customer panel where they can complete missing info
+                navigate('/customer', { replace: true });
                 return;
               }
 
