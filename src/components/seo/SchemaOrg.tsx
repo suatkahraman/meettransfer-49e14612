@@ -69,7 +69,11 @@ interface ServiceSchema {
   };
 }
 
-type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema | MerchantProductSchema | ArticleSchema | WebPageSchema | ServiceSchema;
+interface AIBookingAssistantSchema {
+  type: 'AIBookingAssistant';
+}
+
+type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema | MerchantProductSchema | ArticleSchema | WebPageSchema | ServiceSchema | AIBookingAssistantSchema;
 
 interface SchemaOrgProps {
   schemas: SchemaType[];
@@ -406,6 +410,79 @@ const generateServiceSchema = (service: ServiceSchema) => ({
   }),
 });
 
+// AI Booking Assistant Schema - For AI search visibility
+const generateAIBookingAssistantSchema = () => ({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  '@id': `${baseUrl}/#ai-assistant`,
+  name: 'Meet Transfer AI Booking Assistant',
+  alternateName: ['AI Transfer Booking', 'AI Havalimanı Transfer Asistanı', 'KI Flughafentransfer Assistent'],
+  description: 'AI-powered instant booking assistant for airport transfers. Get real-time prices, make reservations, and receive 24/7 multilingual support through our intelligent chatbot.',
+  applicationCategory: 'TravelApplication',
+  applicationSubCategory: 'AI Booking Assistant',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'EUR',
+    description: 'Free AI-powered booking assistance',
+  },
+  featureList: [
+    'Instant price quotes for airport transfers',
+    'Real-time booking without forms',
+    'Multilingual support (10+ languages)',
+    '24/7 availability',
+    'Smart route suggestions',
+    'One-click Google login booking',
+    'Automatic price calculation',
+    'Natural language booking queries'
+  ],
+  provider: {
+    '@type': 'Organization',
+    name: 'Meet Transfer',
+    '@id': `${baseUrl}/#organization`,
+    url: baseUrl,
+  },
+  potentialAction: {
+    '@type': 'UseAction',
+    name: 'Book Transfer with AI',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: baseUrl,
+      actionPlatform: [
+        'https://schema.org/DesktopWebPlatform',
+        'https://schema.org/MobileWebPlatform'
+      ],
+    },
+    description: 'Start a conversation with our AI assistant to book your airport transfer instantly',
+  },
+  audience: {
+    '@type': 'Audience',
+    audienceType: 'Travelers, Tourists, Business Travelers',
+    geographicArea: [
+      { '@type': 'Country', name: 'Turkey' },
+      { '@type': 'Country', name: 'United Arab Emirates' },
+      { '@type': 'Country', name: 'Cyprus' },
+      { '@type': 'Country', name: 'Germany' },
+      { '@type': 'Country', name: 'Greece' },
+    ],
+  },
+  keywords: 'AI booking, artificial intelligence transfer, yapay zeka transfer, AI airport transfer, chatbot booking, instant booking AI, KI Transfer Buchung, réservation IA transfert',
+  inLanguage: ['en', 'tr', 'de', 'fr', 'ru', 'ar', 'es', 'it', 'uk', 'ja'],
+  availableLanguage: [
+    { '@type': 'Language', name: 'English', alternateName: 'en' },
+    { '@type': 'Language', name: 'Turkish', alternateName: 'tr' },
+    { '@type': 'Language', name: 'German', alternateName: 'de' },
+    { '@type': 'Language', name: 'French', alternateName: 'fr' },
+    { '@type': 'Language', name: 'Russian', alternateName: 'ru' },
+    { '@type': 'Language', name: 'Arabic', alternateName: 'ar' },
+    { '@type': 'Language', name: 'Spanish', alternateName: 'es' },
+    { '@type': 'Language', name: 'Italian', alternateName: 'it' },
+  ],
+  isAccessibleForFree: true,
+  screenshot: `${baseUrl}/images/ai-chat-assistant.png`,
+});
+
 const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
   useEffect(() => {
     let cancelled = false;
@@ -488,8 +565,11 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
           case 'WebPage':
             schemaData = generateWebPageSchema(schema as WebPageSchema);
             break;
-          case 'Service':
+        case 'Service':
             schemaData = generateServiceSchema(schema as ServiceSchema);
+            break;
+          case 'AIBookingAssistant':
+            schemaData = generateAIBookingAssistantSchema();
             break;
           default:
             return;
