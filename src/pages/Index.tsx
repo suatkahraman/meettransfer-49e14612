@@ -51,6 +51,7 @@ const Index = () => {
           { type: 'LocalBusiness', includeRating: true },
           { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus'] },
           { type: 'MerchantProduct' },
+          { type: 'AIBookingAssistant' },
         ]}
       />
       {/* Critical above-the-fold content - wrapped with error boundary */}

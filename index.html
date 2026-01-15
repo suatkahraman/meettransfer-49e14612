@@ -460,14 +460,79 @@
         "@id": "https://meettransfer.app/#organization"
       },
       "inLanguage": ["en", "tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja"],
+      "potentialAction": [
+        {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://meettransfer.app/destinations?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        },
+        {
+          "@type": "InteractAction",
+          "name": "AI Booking Assistant",
+          "description": "Book airport transfer instantly using AI-powered chatbot",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://meettransfer.app",
+            "actionPlatform": ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"]
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Structured Data - AI Booking Assistant (SoftwareApplication) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "@id": "https://meettransfer.app/#ai-assistant",
+      "name": "Meet Transfer AI Booking Assistant",
+      "alternateName": ["AI Transfer Booking", "AI Havalimanı Transfer Asistanı", "KI Flughafentransfer Assistent", "ИИ помощник трансфера"],
+      "description": "AI-powered instant booking assistant for airport transfers. Get real-time prices, make reservations, and receive 24/7 multilingual support through our intelligent chatbot. Book your VIP airport transfer with artificial intelligence - no forms required.",
+      "applicationCategory": "TravelApplication",
+      "applicationSubCategory": "AI Booking Assistant",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR",
+        "description": "Free AI-powered booking assistance"
+      },
+      "featureList": [
+        "Instant price quotes for airport transfers",
+        "Real-time booking without forms",
+        "Multilingual support in 10+ languages",
+        "24/7 availability",
+        "Smart route suggestions",
+        "One-click Google login booking",
+        "Automatic price calculation",
+        "Natural language booking queries",
+        "AI-powered customer support"
+      ],
+      "provider": {
+        "@type": "Organization",
+        "@id": "https://meettransfer.app/#organization",
+        "name": "Meet Transfer"
+      },
       "potentialAction": {
-        "@type": "SearchAction",
+        "@type": "UseAction",
+        "name": "Book Transfer with AI",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": "https://meettransfer.app/destinations?q={search_term_string}"
-        },
-        "query-input": "required name=search_term_string"
-      }
+          "urlTemplate": "https://meettransfer.app",
+          "actionPlatform": ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"]
+        }
+      },
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "Travelers, Tourists, Business Travelers"
+      },
+      "keywords": "AI booking, artificial intelligence transfer, yapay zeka transfer reservasyon, AI airport transfer, chatbot booking, instant booking AI, KI Transfer Buchung, réservation IA transfert, AI ile hızlı rezervasyon, yapay zeka ile transfer",
+      "inLanguage": ["en", "tr", "de", "fr", "ru", "ar", "es", "it", "uk", "ja"],
+      "isAccessibleForFree": true
     }
     </script>
   </head>
