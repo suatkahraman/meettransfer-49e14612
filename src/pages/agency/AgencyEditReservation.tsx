@@ -210,9 +210,6 @@ const AgencyEditReservation = () => {
   const CriticalFieldLabel = ({ children, isChanged }: { children: React.ReactNode; isChanged?: boolean }) => (
     <div className="flex items-center gap-2 flex-wrap">
       {children}
-      <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
-        {t('priceAffecting')}
-      </Badge>
       {isChanged && (
         <Badge variant="destructive" className="text-xs animate-pulse">
           {t('changed')}

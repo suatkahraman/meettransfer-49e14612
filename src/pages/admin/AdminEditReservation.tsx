@@ -240,16 +240,10 @@ const AdminEditReservation = () => {
   // Critical field label component
   const CriticalFieldLabel = ({ label, fieldName, isPassengerCount = false }: { label: string; fieldName: string; isPassengerCount?: boolean }) => {
     const isChanged = isPassengerCount ? getChangedFields.has('passenger_count') : getChangedFields.has(fieldName);
-    const isCritical = criticalFields.includes(fieldName) || isPassengerCount;
     
     return (
       <div className="flex items-center gap-2 flex-wrap">
         <Label>{label}</Label>
-        {isCritical && (
-          <Badge variant="outline" className="text-[10px] px-1 py-0 h-4 bg-amber-500/10 text-amber-700 border-amber-300">
-            Fiyat Etkiler
-          </Badge>
-        )}
         {isChanged && (
           <Badge className="text-[10px] px-1 py-0 h-4 bg-blue-500 text-white animate-pulse">
             Değişti
