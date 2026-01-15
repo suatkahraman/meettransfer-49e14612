@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, ChevronDown, Trash2, CheckCircle2, Clock, Check } from "lucide-react";
+import { MessageCircle, Send, Sparkles, X, Bot, User, Loader2, ArrowRight, Mic, Square, Volume2, VolumeX, AlertCircle, ChevronDown, Trash2, CheckCircle2, Clock, Check, Maximize2, Minimize2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MobileTooltip } from "@/components/ui/mobile-tooltip";
 import { supabase } from "@/integrations/supabase/client";
@@ -1347,6 +1347,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     return 75; // Default 75% height
   });
   const [isDraggingResize, setIsDraggingResize] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const previousHeightRef = useRef<number>(75);
   const resizeStartYRef = useRef<number>(0);
   const resizeStartHeightRef = useRef<number>(panelHeight);
   const baselineViewportHeightRef = useRef<number>(0);
@@ -2855,14 +2857,17 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 }
               }}
               data-mobile-panel
-              className="fixed inset-x-0 z-[80] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
+              className={cn(
+                "fixed inset-x-0 z-[80] bg-card shadow-2xl border-t border-border flex flex-col transition-all duration-300",
+                isFullscreen ? "rounded-none" : "rounded-t-2xl"
+              )}
               style={{
-                // Position panel above keyboard - user adjustable size
-                top: keyboardHeight > 0 ? '0.5rem' : `${100 - panelHeight}%`,
+                // Position panel above keyboard - user adjustable size or fullscreen
+                top: keyboardHeight > 0 ? '0.5rem' : isFullscreen ? 0 : `${100 - panelHeight}%`,
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
                 maxHeight: keyboardHeight > 0 
                   ? `calc(100% - ${keyboardHeight}px - 0.5rem)` 
-                  : `${panelHeight}%`,
+                  : isFullscreen ? '100%' : `${panelHeight}%`,
                 minHeight: '200px',
                 touchAction: 'auto',
                 pointerEvents: 'auto',
@@ -2928,6 +2933,30 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     </span>
                   </div>
                   <div className="flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        if (isFullscreen) {
+                          // Exit fullscreen - restore previous height
+                          setPanelHeight(previousHeightRef.current);
+                          setIsFullscreen(false);
+                        } else {
+                          // Enter fullscreen - save current height
+                          previousHeightRef.current = panelHeight;
+                          setPanelHeight(100);
+                          setIsFullscreen(true);
+                        }
+                      }}
+                      className="h-6 w-6 rounded-full"
+                      title={isFullscreen ? (language === "TR" ? "Küçült" : "Exit Fullscreen") : (language === "TR" ? "Tam Ekran" : "Fullscreen")}
+                    >
+                      {isFullscreen ? (
+                        <Minimize2 className="h-3 w-3 text-muted-foreground" />
+                      ) : (
+                        <Maximize2 className="h-3 w-3 text-muted-foreground" />
+                      )}
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
