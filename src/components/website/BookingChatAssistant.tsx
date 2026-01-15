@@ -2234,7 +2234,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         /iki.*yön/i,
         /gidiş.*dönüş/i,
       ];
-      const showReturnQuestion = returnQuestionPatterns.some(pattern => pattern.test(cleanedContent));
+      const hasReturnQuestionPattern = returnQuestionPatterns.some(pattern => pattern.test(cleanedContent));
+      
+      // Don't show return question if return date/trip already provided
+      const alreadyHasReturn = bookingData?.hasReturnTrip === true || 
+                               bookingData?.returnDate !== null && bookingData?.returnDate !== undefined;
+      const showReturnQuestion = hasReturnQuestionPattern && !alreadyHasReturn;
 
       // Detect vehicle selection question patterns
       const vehicleQuestionPatterns = [
