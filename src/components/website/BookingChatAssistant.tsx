@@ -26,6 +26,7 @@ import { ChatSpeakingWaveform } from "./ChatSpeakingWaveform";
 import { ChatQuickReplyButtons, QuickReplyType } from "./ChatQuickReplyButtons";
 import { ChatLanguageDetectedBanner } from "./ChatLanguageDetectedBanner";
 import { ChatDateTimePicker } from "./ChatDateTimePicker";
+import { ChatCombinedQuickPanel } from "./ChatCombinedQuickPanel";
 import { SoundWaveInline } from "@/components/ui/SoundWaveAnimation";
 import { RecordingWaveform, CircularWaveform, InlineRecordingWave } from "@/components/ui/RecordingWaveform";
 import { SpeakingBubbleOverlay, SpeakingWaveBar } from "@/components/ui/SpeakingBubbleOverlay";
@@ -117,6 +118,7 @@ interface Message {
   showExtras?: boolean;
   showAirportSelection?: boolean;
   showDateTimePicker?: boolean;
+  showCombinedPanel?: boolean; // New combined quick selection panel
   vehiclePrices?: Record<string, number>;
   passengerCount?: number;
   vehicleFeatures?: VehicleFeatures;
@@ -2341,6 +2343,47 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       ];
       const showDateTimePicker = dateTimeQuestionPatterns.some(pattern => pattern.test(cleanedContent));
 
+      // Detect combined panel trigger - show when we have pickup+dropoff and asking for details
+      // OR when customer name is confirmed and we need vehicle/payment/date/time
+      const combinedPanelPatterns = [
+        /hızlı.*seçim/i,
+        /quick.*selection/i,
+        /devam.*edebilir/i,
+        /continue.*with/i,
+        /detaylar.*devam/i,
+        /proceed.*with.*details/i,
+        /araç.*ve.*ödeme/i,
+        /vehicle.*and.*payment/i,
+        /rezervasyon.*detay/i,
+        /booking.*detail/i,
+        /seçim.*kartları/i,
+        /selection.*card/i,
+      ];
+      const hasCombinedPanelTrigger = combinedPanelPatterns.some(pattern => pattern.test(cleanedContent));
+      
+      // Show combined panel when we have enough info (pickup + dropoff) OR name confirmed
+      // AND we need vehicle OR payment OR date OR time
+      const hasBasicInfo = bookingData?.pickup && bookingData?.dropoff;
+      const needsVehicle = !bookingData?.vehicleType;
+      const needsPayment = !bookingData?.paymentMethod;
+      const needsDate = !bookingData?.date;
+      const needsTime = !bookingData?.time;
+      const needsMultipleThings = [needsVehicle, needsPayment, needsDate, needsTime].filter(Boolean).length >= 2;
+      
+      // Show combined panel if:
+      // 1. We have basic info AND need multiple things, OR
+      // 2. AI explicitly triggers it with combined panel patterns
+      // 3. AND we're not already showing redirect button (booking complete)
+      const showCombinedPanel = !hasFormRedirect && (
+        (hasBasicInfo && needsMultipleThings && hasCombinedPanelTrigger) ||
+        hasCombinedPanelTrigger
+      );
+      
+      // If showing combined panel, disable individual quick selectors to avoid conflict
+      const finalShowVehicleSelection = showCombinedPanel ? false : showVehicleSelection;
+      const finalShowPaymentMethod = showCombinedPanel ? false : showPaymentMethod;
+      const finalShowDateTimePicker = showCombinedPanel ? false : showDateTimePicker;
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -2348,12 +2391,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         bookingData,
         showRedirectButton: hasFormRedirect,
         showReturnQuestion,
-        showVehicleSelection,
-        showPaymentMethod,
+        showVehicleSelection: finalShowVehicleSelection,
+        showPaymentMethod: finalShowPaymentMethod,
         showPassengerCount,
         showExtras,
         showAirportSelection,
-        showDateTimePicker,
+        showDateTimePicker: finalShowDateTimePicker,
+        showCombinedPanel,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -3448,6 +3492,63 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               disabled={isLoading}
                             />
                           )}
+
+                          {/* Combined Quick Panel - Mobile */}
+                          {/* Show when we need multiple selections at once */}
+                          {msgIndex === messages.length - 1 && !isLoading && msg.showCombinedPanel && !msg.bookingData?.isComplete && (
+                            <ChatCombinedQuickPanel
+                              language={language}
+                              showDatePicker={!msg.bookingData?.date}
+                              showTimePicker={!msg.bookingData?.time}
+                              currentVehicle={msg.bookingData?.vehicleType || undefined}
+                              currentPayment={msg.bookingData?.paymentMethod || undefined}
+                              onSubmit={(selections) => {
+                                // Sync all selections to form
+                                if (onApplyBooking) {
+                                  const syncData: Partial<BookingData> = {
+                                    vehicleType: selections.vehicleType,
+                                    paymentMethod: selections.paymentMethod,
+                                  };
+                                  if (selections.date) {
+                                    syncData.date = selections.date.toISOString().split('T')[0];
+                                  }
+                                  if (selections.time) {
+                                    syncData.time = selections.time;
+                                  }
+                                  console.log("[CombinedPanel Mobile] Syncing to form:", syncData);
+                                  onApplyBooking(syncData as BookingData);
+                                }
+                                
+                                // Hide combined panel
+                                setMessages(prev => prev.map((m, idx) => 
+                                  idx === msgIndex 
+                                    ? { ...m, showCombinedPanel: false }
+                                    : m
+                                ));
+                                
+                                // Build confirmation message
+                                const vehicleLabels: Record<string, string> = {
+                                  'sedan': 'Sedan',
+                                  'vip-mercedes': 'VIP Minivan',
+                                  'minibus': 'Minibus'
+                                };
+                                const paymentLabels: Record<string, string> = {
+                                  'card': language === 'TR' ? 'Kredi Kartı' : 'Credit Card',
+                                  'cash': language === 'TR' ? 'Nakit' : 'Cash'
+                                };
+                                let message = `${vehicleLabels[selections.vehicleType] || selections.vehicleType}, ${paymentLabels[selections.paymentMethod]}`;
+                                if (selections.formattedDate) message += `, ${selections.formattedDate}`;
+                                if (selections.time) message += ` ${selections.time}`;
+                                
+                                setInput(message);
+                                setTimeout(() => {
+                                  const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
+                                  if (submitButton) submitButton.click();
+                                }, 100);
+                              }}
+                              disabled={isLoading}
+                            />
+                          )}
                         </div>
                         {msg.role === "user" && (
                           <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
@@ -4265,6 +4366,42 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       if (returnDate && formattedReturnDate && returnTime) {
                         message += ` → ${formattedReturnDate} ${returnTime}`;
                       }
+                      setInput(message);
+                      setTimeout(() => {
+                        const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
+                        if (submitButton) submitButton.click();
+                      }, 100);
+                    }}
+                    disabled={isLoading}
+                  />
+                )}
+
+                {/* Combined Quick Panel - Desktop */}
+                {msgIndex === messages.length - 1 && !isLoading && msg.showCombinedPanel && !msg.bookingData?.isComplete && (
+                  <ChatCombinedQuickPanel
+                    language={language}
+                    showDatePicker={!msg.bookingData?.date}
+                    showTimePicker={!msg.bookingData?.time}
+                    currentVehicle={msg.bookingData?.vehicleType || undefined}
+                    currentPayment={msg.bookingData?.paymentMethod || undefined}
+                    onSubmit={(selections) => {
+                      if (onApplyBooking) {
+                        const syncData: Partial<BookingData> = {
+                          vehicleType: selections.vehicleType,
+                          paymentMethod: selections.paymentMethod,
+                        };
+                        if (selections.date) syncData.date = selections.date.toISOString().split('T')[0];
+                        if (selections.time) syncData.time = selections.time;
+                        onApplyBooking(syncData as BookingData);
+                      }
+                      setMessages(prev => prev.map((m, idx) => idx === msgIndex ? { ...m, showCombinedPanel: false } : m));
+                      
+                      const vehicleLabels: Record<string, string> = { 'sedan': 'Sedan', 'vip-mercedes': 'VIP Minivan', 'minibus': 'Minibus' };
+                      const paymentLabels: Record<string, string> = { 'card': language === 'TR' ? 'Kredi Kartı' : 'Credit Card', 'cash': language === 'TR' ? 'Nakit' : 'Cash' };
+                      let message = `${vehicleLabels[selections.vehicleType] || selections.vehicleType}, ${paymentLabels[selections.paymentMethod]}`;
+                      if (selections.formattedDate) message += `, ${selections.formattedDate}`;
+                      if (selections.time) message += ` ${selections.time}`;
+                      
                       setInput(message);
                       setTimeout(() => {
                         const submitButton = document.querySelector('[data-chat-submit]') as HTMLButtonElement;
