@@ -613,10 +613,11 @@ ${pricingContext}
 1. NEVER rush - take your time with each step
 2. ALWAYS explain WHY you need information
 3. Use customer's name when addressing them
-4. ONE question at a time
+4. ONE question at a time (EXCEPT for quick booking mode!)
 5. Show empathy and warmth
 6. Don't auto-redirect - always ASK first
 7. When customer says "yes" to redirect, mark booking as complete
+8. **QUICK BOOKING MODE**: If customer provides ALL info (pickup, dropoff, date, time, passengers, vehicle, email, phone) in ONE message, set isComplete=true immediately AND include the readyToBook block!
 
 REMEMBER: You are a premium VIP service assistant. Make every customer feel special and valued!`;
 
@@ -808,6 +809,13 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         console.log(`Return trip detected. Base price: ${basePrice}, Return price (${returnDiscountPercentage}% off): ${calculatedReturnPrice}`);
       }
 
+      // If price is available and customer provided email/phone, set status to price_sent for immediate booking
+      const hasCompletePricing = bookingData.estimatedPrice && bookingData.estimatedPrice > 0;
+      const hasContactInfo = bookingData.customerEmail && bookingData.customerPhone;
+      const bookingStatus = (hasCompletePricing && hasContactInfo) ? 'price_sent' : 'pending';
+      
+      console.log(`Booking status: ${bookingStatus}, hasPrice: ${hasCompletePricing}, hasContact: ${hasContactInfo}`);
+      
       const insertData: Record<string, any> = {
         pickup_date: bookingData.date,
         pickup_time: bookingData.time,
@@ -816,7 +824,7 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         price: bookingData.estimatedPrice || null,
         price_currency: bookingData.currency || 'EUR',
         customer_session_id: sessionId,
-        status: 'pending',
+        status: bookingStatus,
         language: language,
         service_type: serviceType,
         payment_method: bookingData.paymentMethod || null,
@@ -848,6 +856,18 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         insertData.dropoff = bookingData.dropoff;
       }
 
+      // Calculate and store all vehicle prices if we have a base price
+      if (bookingData.estimatedPrice && bookingData.estimatedPrice > 0) {
+        const basePrice = bookingData.estimatedPrice;
+        insertData.all_vehicle_prices = {
+          'sedan': basePrice,
+          'mercedes-vito': basePrice,
+          'vip-mercedes': Math.round(basePrice * 1.3),
+          'maybach-minibus': Math.round(basePrice * 1.6),
+          'minibus': Math.round(basePrice * 1.5)
+        };
+      }
+
       const { data: quickBooking, error: qbError } = await supabase
         .from('quick_booking_requests')
         .insert(insertData)
@@ -859,7 +879,7 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       } else {
         quickBookingId = quickBooking.id;
         confirmationToken = quickBooking.confirmation_token;
-        console.log("Quick booking created:", quickBookingId, "type:", serviceType);
+        console.log("Quick booking created:", quickBookingId, "type:", serviceType, "status:", bookingStatus);
       }
     }
 
