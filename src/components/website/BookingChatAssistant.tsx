@@ -2919,8 +2919,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                    )} />
                  </div>
                 
-                {/* Mobile Header - More Compact */}
-                <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/50 shrink-0">
+                {/* Mobile Header - More Compact with safe area in fullscreen */}
+                <div 
+                  className="flex items-center justify-between px-3 py-1.5 border-b border-border/50 shrink-0"
+                  style={{
+                    paddingTop: isFullscreen ? 'max(0.375rem, env(safe-area-inset-top))' : '0.375rem'
+                  }}
+                >
                   <div className="flex items-center gap-1.5">
                     <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
                       <Bot className="h-3 w-3 text-primary" />
