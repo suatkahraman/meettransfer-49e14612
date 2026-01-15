@@ -3000,7 +3000,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                               language={language}
                               onRedirect={() => {
                                 setIsOpen(false);
-                                navigate(`/quick-booking-confirm?token=${bookingCreated.token}&new=true`);
+                                navigate(`/book?token=${bookingCreated.token}&new=true`);
                               }}
                             />
                           )}
@@ -3623,7 +3623,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                     language={language}
                     onRedirect={() => {
                       setIsOpen(false);
-                      navigate(`/quick-booking-confirm?token=${bookingCreated.token}&new=true`);
+                      navigate(`/book?token=${bookingCreated.token}&new=true`);
                     }}
                   />
                 )}
