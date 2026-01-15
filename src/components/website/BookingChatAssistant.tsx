@@ -3078,6 +3078,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                 <ChatRedirectButton
                                   language={language}
                                   bookingToken={bookingCreated?.token}
+                                  bookingData={msg.bookingData}
                                   onRedirect={() => handleApplyBooking(msg.bookingData!)}
                                   className="mt-2"
                                 />
@@ -3737,6 +3738,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       <ChatRedirectButton
                         language={language}
                         bookingToken={bookingCreated?.token}
+                        bookingData={msg.bookingData}
                         onRedirect={() => handleApplyBooking(msg.bookingData!)}
                         className="mt-2"
                       />

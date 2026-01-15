@@ -27,6 +27,17 @@ const GoogleIcon = () => (
   </svg>
 );
 
+interface BookingDataForStorage {
+  pickup?: string;
+  dropoff?: string;
+  date?: string;
+  time?: string;
+  passengers?: number;
+  vehicleType?: string;
+  estimatedPrice?: number;
+  currency?: string;
+}
+
 interface ChatRedirectButtonProps {
   language: string;
   onRedirect: () => void;
@@ -34,6 +45,7 @@ interface ChatRedirectButtonProps {
   isLoading?: boolean;
   className?: string;
   bookingToken?: string;
+  bookingData?: BookingDataForStorage;
 }
 
 export const ChatRedirectButton = memo(function ChatRedirectButton({
@@ -43,6 +55,7 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
   isLoading = false,
   className,
   bookingToken,
+  bookingData,
 }: ChatRedirectButtonProps) {
   const isTurkish = language === "TR";
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -64,6 +77,11 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
       // Store booking token for after login
       if (bookingToken) {
         localStorage.setItem('pending_booking_token', bookingToken);
+      }
+      
+      // Also store booking data for redirect after login (when no token exists)
+      if (bookingData) {
+        localStorage.setItem('pending_booking_data', JSON.stringify(bookingData));
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
