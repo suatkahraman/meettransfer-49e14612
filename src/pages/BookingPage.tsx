@@ -413,8 +413,14 @@ const BookingPage = () => {
 
       if (error) throw error;
 
-      // If we have a price, directly create the reservation and go to customer info page
+      // If we have a price, update status to price_sent and navigate to confirm page
       if (currentPrice) {
+        // Update status to price_sent since we have the price
+        await supabase
+          .from("quick_booking_requests")
+          .update({ status: "price_sent" })
+          .eq("id", data.id);
+
         // Send vehicle prices email if customer provided email
         if (customerEmail && customerEmail.trim()) {
           try {
@@ -454,35 +460,9 @@ const BookingPage = () => {
           origin: { y: 0.6 }
         });
 
-        // Create reservation directly
-        const { data: reservationData, error: reservationError } = await supabase.functions.invoke("create-quick-booking-reservation", {
-          body: {
-            bookingId: data.id,
-            pickup: isHourlyBooking ? urlCity : urlPickup,
-            dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}` : urlDropoff,
-            pickupDate: urlDate,
-            pickupTime: urlTime,
-            vehicleType,
-            passengers,
-            price: currentPrice,
-            priceCurrency: preferredCurrency,
-            paymentMethod: "cash",
-            hasReturnTrip: hasReturnTrip && returnDate && returnTime ? true : false,
-            returnDate: hasReturnTrip && returnDate ? returnDate : null,
-            returnTime: hasReturnTrip && returnTime ? returnTime : null,
-            returnPrice: returnPrice,
-            promoCode: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
-          },
-        });
-
-        if (reservationError) {
-          console.error("Reservation creation error:", reservationError);
-          throw new Error("Failed to create reservation");
-        }
-
-        // Navigate directly to confirm page with token
+        // Navigate to confirm page where customer will complete details and create reservation
         navigate(`/quick-booking-confirm?token=${data.confirmation_token}`);
-        toast.success(t("bookingConfirmed") || "Booking confirmed! Please complete your details.");
+        toast.success(t("completeYourBooking") || "Complete your booking details on the next page.");
       } else {
         // No price available - use old flow (waiting for admin to set price)
         // For hourly, we already have the price
