@@ -1368,6 +1368,37 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
       }
     };
   }, [isOpen, mobileFloating, setAIChatOpen]);
+
+  // Handle back button for fullscreen mode
+  useEffect(() => {
+    if (!mobileFloating) return;
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (isFullscreen) {
+        // Exit fullscreen instead of navigating back
+        e.preventDefault();
+        setPanelHeight(previousHeightRef.current);
+        setIsFullscreen(false);
+        // Push state back to prevent actual navigation
+        window.history.pushState({ aiFullscreen: false }, '');
+      } else if (isOpen) {
+        // Close the chat panel
+        e.preventDefault();
+        setIsOpen(false);
+        window.history.pushState({ aiOpen: false }, '');
+      }
+    };
+
+    // Push initial state when opening or entering fullscreen
+    if (isOpen) {
+      window.history.pushState({ aiOpen: true, aiFullscreen: isFullscreen }, '');
+    }
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [isOpen, isFullscreen, mobileFloating]);
   // Ref to track if we should auto-send voice transcription
   const pendingVoiceMessageRef = useRef<string | null>(null);
   const shouldAutoSendRef = useRef<boolean>(false);
