@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, X, RotateCcw, ArrowRight, Car, CreditCard, Banknote, Users, Baby, Briefcase, Sparkles } from "lucide-react";
+import { Check, X, RotateCcw, ArrowRight, Car, CreditCard, Banknote, Users, Baby, Briefcase, Sparkles, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,8 @@ export type QuickReplyType =
   | "vehicle_selection" 
   | "payment_method"
   | "passenger_count"
-  | "extras";
+  | "extras"
+  | "airport_selection";
 
 // Vehicle type mapping for form sync
 export const VEHICLE_TYPE_MAP: Record<string, string> = {
@@ -34,7 +35,7 @@ export const PAYMENT_TYPE_MAP: Record<string, "card" | "cash"> = {
 interface ChatQuickReplyButtonsProps {
   language: string;
   type: QuickReplyType;
-  onReply: (answer: string, metadata?: { vehicleType?: string; paymentMethod?: "card" | "cash"; passengers?: number }) => void;
+  onReply: (answer: string, metadata?: { vehicleType?: string; paymentMethod?: "card" | "cash"; passengers?: number; airport?: string }) => void;
   disabled?: boolean;
   className?: string;
 }
@@ -45,7 +46,7 @@ interface QuickReplyButton {
   icon: typeof Check;
   variant: "default" | "outline";
   className: string;
-  metadata?: { vehicleType?: string; paymentMethod?: "card" | "cash"; passengers?: number };
+  metadata?: { vehicleType?: string; paymentMethod?: "card" | "cash"; passengers?: number; airport?: string };
   pulse?: boolean;
 }
 
@@ -225,6 +226,26 @@ export function ChatQuickReplyButtons({
             icon: X,
             variant: "outline",
             className: "border-2 border-muted-foreground/30 hover:border-muted-foreground/50 hover:bg-muted/50",
+          },
+        ];
+
+      case "airport_selection":
+        return [
+          {
+            text: getLocalizedText(language, { TR: "İstanbul Havalimanı (IST)", EN: "Istanbul Airport (IST)", DE: "Istanbul Flughafen (IST)", FR: "Aéroport d'Istanbul (IST)", RU: "Аэропорт Стамбула (IST)", AR: "مطار إسطنبول (IST)", ES: "Aeropuerto de Estambul (IST)", IT: "Aeroporto di Istanbul (IST)" }),
+            value: getLocalizedText(language, { TR: "İstanbul Havalimanı (IST)", EN: "Istanbul Airport (IST)", DE: "Istanbul Flughafen (IST)", FR: "Aéroport d'Istanbul (IST)", RU: "Аэропорт Стамбула (IST)", AR: "مطار إسطنبول (IST)", ES: "Aeropuerto de Estambul (IST)", IT: "Aeroporto di Istanbul (IST)" }),
+            icon: Plane,
+            variant: "default",
+            className: "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-500/30",
+            metadata: { airport: "IST" },
+          },
+          {
+            text: getLocalizedText(language, { TR: "Sabiha Gökçen (SAW)", EN: "Sabiha Gökçen (SAW)", DE: "Sabiha Gökçen (SAW)", FR: "Sabiha Gökçen (SAW)", RU: "Сабиха Гёкчен (SAW)", AR: "صبيحة غوكتشن (SAW)", ES: "Sabiha Gökçen (SAW)", IT: "Sabiha Gökçen (SAW)" }),
+            value: getLocalizedText(language, { TR: "Sabiha Gökçen Havalimanı (SAW)", EN: "Sabiha Gökçen Airport (SAW)", DE: "Sabiha Gökçen Flughafen (SAW)", FR: "Aéroport Sabiha Gökçen (SAW)", RU: "Аэропорт Сабиха Гёкчен (SAW)", AR: "مطار صبيحة غوكتشن (SAW)", ES: "Aeropuerto Sabiha Gökçen (SAW)", IT: "Aeroporto Sabiha Gökçen (SAW)" }),
+            icon: Plane,
+            variant: "outline",
+            className: "border-2 border-sky-500/30 hover:border-sky-500/50 hover:bg-sky-500/10 text-sky-600",
+            metadata: { airport: "SAW" },
           },
         ];
 
