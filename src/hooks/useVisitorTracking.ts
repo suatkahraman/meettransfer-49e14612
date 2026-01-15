@@ -82,6 +82,7 @@ const EXCLUDED_ROUTES = [
 // Domains that should be excluded from tracking
 const EXCLUDED_DOMAINS = [
   'lovableproject.com',
+  'lovable.app',
   'localhost',
   '127.0.0.1',
 ];
