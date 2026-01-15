@@ -102,40 +102,26 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
       <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
         {/* Most Popular Badge */}
         {isPopular && (
-          <motion.div
-            initial={{ scale: 0, rotate: -10 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10, delay: 0.1 }}
-            className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-bold rounded-full flex items-center gap-1 shadow-lg shadow-amber-500/30"
-          >
+          <div className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-bold rounded-full flex items-center gap-1">
             <Award className="h-2.5 w-2.5" />
             {isTurkish ? "En Popüler" : "Most Popular"}
-          </motion.div>
+          </div>
         )}
         
         {/* Recommended Badge */}
         {isRecommended && !isPopular && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="px-2 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center gap-1"
-          >
+          <div className="px-2 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center gap-1">
             <Star className="h-2.5 w-2.5 fill-current" />
             {isTurkish ? "Önerilen" : "Recommended"}
-          </motion.div>
+          </div>
         )}
 
         {/* Best Value Badge */}
         {isBestValue && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.15 }}
-            className="px-2 py-0.5 bg-green-500 text-white text-[9px] font-bold rounded-full flex items-center gap-1"
-          >
+          <div className="px-2 py-0.5 bg-green-500 text-white text-[9px] font-bold rounded-full flex items-center gap-1">
             <TrendingDown className="h-2.5 w-2.5" />
             {isTurkish ? "En Uygun" : "Best Value"}
-          </motion.div>
+          </div>
         )}
       </div>
 

@@ -149,45 +149,45 @@ const AIBookingAssistantGuide = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-background">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative">
-                <div className="absolute -inset-8 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-full blur-3xl opacity-50 animate-pulse" />
+                <div className="absolute -inset-8 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-full blur-3xl opacity-50" />
                 <Bot className="w-32 h-32 md:w-48 md:h-48 text-primary relative z-10" />
               </div>
             </div>
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
           
-          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-12">
             <div className="container mx-auto">
               <Link 
                 to={getLocalizedPath("/blog")} 
-                className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-4"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-3 md:mb-4 text-sm md:text-base"
               >
                 <ArrowLeft className="w-4 h-4" />
                 {t("backToBlog")}
               </Link>
               
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <Badge variant="secondary" className="bg-primary/10 text-primary">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-3 md:mb-4">
+                <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
                   <Bot className="w-3 h-3 mr-1" />
                   {t("blogAIAssistantCategory")}
                 </Badge>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
+                    <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                     {formatBlogDate("2025-01-15")}
                   </span>
                   <span className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
+                    <Clock className="w-3 h-3 md:w-4 md:h-4" />
                     10 {t("minRead")}
                   </span>
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 md:mb-4 leading-tight">
                 {t("blogAIAssistantH1")}
               </h1>
               
-              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl">
+              <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl">
                 {t("blogAIAssistantSubtitle")}
               </p>
             </div>
