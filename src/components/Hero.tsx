@@ -23,7 +23,7 @@ const RideFormContent = lazy(() => import("@/components/hero/RideFormContent").t
 const HourlyFormContent = lazy(() => import("@/components/hero/HourlyFormContent").then(m => ({ default: m.HourlyFormContent })));
 const HeroBackground = lazy(() => import("@/components/hero/HeroBackground").then(m => ({ default: m.HeroBackground })));
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
-const HeroAIAssistant = lazy(() => import("@/components/hero/HeroAIAssistant").then(m => ({ default: m.HeroAIAssistant })));
+// HeroAIAssistant temporarily disabled
 const ReturnTripPromoBanner = lazy(() => import("@/components/hero/ReturnTripPromoBanner").then(m => ({ default: m.ReturnTripPromoBanner })));
 const SwipeableBookingCard = lazy(() => import("@/components/hero/SwipeableBookingCard").then(m => ({ default: m.SwipeableBookingCard })));
 
@@ -99,9 +99,7 @@ export const Hero = () => {
           {/* Left Side - Form */}
           <div className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
-            <Suspense fallback={null}>
-              <HeroAIAssistant language={language} onApplyBooking={rideForm.handleApplyBooking} />
-            </Suspense>
+            {/* AI Assistant temporarily disabled */}
             <Suspense fallback={null}>
               <ReturnTripPromoBanner language={language} onApplyPromoCode={rideForm.handleApplyPromoCode} />
             </Suspense>
