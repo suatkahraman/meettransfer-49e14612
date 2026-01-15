@@ -1369,36 +1369,52 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
     };
   }, [isOpen, mobileFloating, setAIChatOpen]);
 
-  // Handle back button for fullscreen mode
+  // Handle back button for fullscreen mode and Android hardware back button
+  const historyPushedRef = useRef(false);
+  
   useEffect(() => {
     if (!mobileFloating) return;
 
     const handlePopState = (e: PopStateEvent) => {
+      // Check if this is our managed state
+      const state = e.state as { aiOpen?: boolean; aiFullscreen?: boolean } | null;
+      
       if (isFullscreen) {
         // Exit fullscreen instead of navigating back
-        e.preventDefault();
         setPanelHeight(previousHeightRef.current);
         setIsFullscreen(false);
-        // Push state back to prevent actual navigation
-        window.history.pushState({ aiFullscreen: false }, '');
+        historyPushedRef.current = false;
       } else if (isOpen) {
         // Close the chat panel
-        e.preventDefault();
         setIsOpen(false);
-        window.history.pushState({ aiOpen: false }, '');
+        historyPushedRef.current = false;
       }
     };
 
-    // Push initial state when opening or entering fullscreen
-    if (isOpen) {
+    // Push state when opening chat or entering fullscreen (only once)
+    if (isOpen && !historyPushedRef.current) {
       window.history.pushState({ aiOpen: true, aiFullscreen: isFullscreen }, '');
+      historyPushedRef.current = true;
+    }
+    
+    // Push additional state when entering fullscreen while already open
+    if (isOpen && isFullscreen && historyPushedRef.current) {
+      window.history.pushState({ aiOpen: true, aiFullscreen: true }, '');
     }
 
     window.addEventListener('popstate', handlePopState);
+    
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
   }, [isOpen, isFullscreen, mobileFloating]);
+
+  // Reset history ref when chat closes
+  useEffect(() => {
+    if (!isOpen) {
+      historyPushedRef.current = false;
+    }
+  }, [isOpen]);
   // Ref to track if we should auto-send voice transcription
   const pendingVoiceMessageRef = useRef<string | null>(null);
   const shouldAutoSendRef = useRef<boolean>(false);
