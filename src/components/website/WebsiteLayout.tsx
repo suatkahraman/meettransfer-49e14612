@@ -68,12 +68,6 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
       </motion.main>
       {showBottomNav && <BottomNavigation />}
       
-      {/* Proactive help popup - appears after 90 seconds, hidden when AI chat is open */}
-      {showProactiveHelp && (
-        <Suspense fallback={null}>
-          <ProactiveHelpPopup delaySeconds={90} visitorId={visitorId} />
-        </Suspense>
-      )}
     </div>
   );
 };
