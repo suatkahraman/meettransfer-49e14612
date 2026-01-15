@@ -7,9 +7,9 @@ import { CityVideo } from "./types";
 // Optimized WebP hero backgrounds - local assets for fast loading
 import heroAirportFleet from "@/assets/hero/hero-airport-fleet.webp";
 import heroSkylane from "@/assets/hero/hero-city-skyline.webp";
-import heroFuturistic1 from "@/assets/hero-futuristic-1.jpg";
-import heroFuturistic2 from "@/assets/hero-futuristic-2.jpg";
-import heroMercedes from "@/assets/hero-mercedes-vito.jpg";
+import heroFuturistic1 from "@/assets/hero/hero-futuristic-1.webp";
+import heroFuturistic2 from "@/assets/hero/hero-futuristic-2.webp";
+import heroMercedes from "@/assets/hero/hero-mercedes-vito.webp";
 
 // Background images configuration - optimized WebP format for fast loading
 const HERO_BACKGROUNDS = [
