@@ -85,7 +85,6 @@ const AdminPromoCodes = lazy(() => import("./pages/admin/AdminPromoCodes"));
 // Customer Portal Pages
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const ConfirmBooking = lazy(() => import("./pages/ConfirmBooking"));
-const QuickBookingConfirm = lazy(() => import("./pages/QuickBookingConfirm"));
 const QuickBookingCustomerInfo = lazy(() => import("./pages/QuickBookingCustomerInfo"));
 
 // Admin Quick Bookings
@@ -338,7 +337,6 @@ const App = () => (
               {/* Customer Portal & Booking Confirmation - Public */}
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
               <Route path="/confirm-booking" element={<LazyRoute><ConfirmBooking /></LazyRoute>} />
-              <Route path="/quick-booking-confirm" element={<LazyRoute><QuickBookingConfirm /></LazyRoute>} />
               <Route path="/quick-booking-info" element={<LazyRoute><QuickBookingCustomerInfo /></LazyRoute>} />
               
               {/* Security Settings - Protected (all authenticated users) */}
