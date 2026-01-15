@@ -3209,17 +3209,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             />
                           )}
 
-                          {/* Redirect Button for Mobile */}
-                          {msg.showRedirectButton && bookingCreated && (
-                            <ChatRedirectButton
-                              language={language}
-                              bookingToken={bookingCreated.token}
-                              onRedirect={() => {
-                                setIsOpen(false);
-                                navigate(`/book?token=${bookingCreated.token}&new=true`);
-                              }}
-                            />
-                          )}
+                          {/* Redirect Button removed - only show inside booking summary card */}
                           
                           {/* Booking Summary Card for Mobile - Show after vehicle selection */}
                           {msg.bookingData && msg.bookingData.vehicleType && msg.vehiclePrices && (
@@ -3379,7 +3369,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           )}
 
                           {/* Quick Reply Buttons - Mobile */}
-                          {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras || msg.showAirportSelection) && (
+                          {/* Only show on LAST message and hide if already answered (via bookingData flags) */}
+                          {msgIndex === messages.length - 1 && !isLoading && !msg.bookingData?.isComplete && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras || msg.showAirportSelection) && (
                             <ChatQuickReplyButtons
                               language={language}
                               type={
@@ -3403,19 +3394,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                   }
                                 }
                                 
-                                // Hide quick reply buttons after selection by updating this message's flags
-                                setMessages(prev => prev.map((m, i) => 
-                                  i === msgIndex 
-                                    ? { 
-                                        ...m,
-                                        showReturnQuestion: false,
-                                        showPaymentMethod: false,
-                                        showPassengerCount: false,
-                                        showExtras: false,
-                                        showAirportSelection: false,
-                                      }
-                                    : m
-                                ));
+                                // Hide quick reply buttons after selection - update ALL messages' flags
+                                setMessages(prev => prev.map((m) => ({ 
+                                  ...m,
+                                  showReturnQuestion: false,
+                                  showPaymentMethod: false,
+                                  showPassengerCount: false,
+                                  showExtras: false,
+                                  showAirportSelection: false,
+                                })));
                                 
                                 setInput(answer);
                                 setTimeout(() => {
@@ -4048,17 +4035,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   />
                 )}
 
-                {/* Redirect Button for Desktop */}
-                {msg.showRedirectButton && bookingCreated && (
-                  <ChatRedirectButton
-                    language={language}
-                    bookingToken={bookingCreated.token}
-                    onRedirect={() => {
-                      setIsOpen(false);
-                      navigate(`/book?token=${bookingCreated.token}&new=true`);
-                    }}
-                  />
-                )}
+                {/* Redirect Button removed - only show inside booking summary card */}
                 
                 {/* Booking Summary Card for Desktop - Show after vehicle selection */}
                 {msg.bookingData && msg.bookingData.vehicleType && msg.vehiclePrices && (
@@ -4218,8 +4195,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 )}
 
                 {/* Quick Reply Buttons - Desktop */}
-                {/* Quick Reply Buttons - Desktop */}
-                {msgIndex === messages.length - 1 && !isLoading && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras || msg.showAirportSelection) && (
+                {/* Only show on LAST message and hide if already answered (via bookingData flags) */}
+                {msgIndex === messages.length - 1 && !isLoading && !msg.bookingData?.isComplete && (msg.showReturnQuestion || msg.showPaymentMethod || msg.showPassengerCount || msg.showExtras || msg.showAirportSelection) && (
                   <ChatQuickReplyButtons
                     language={language}
                     type={
@@ -4243,19 +4220,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         }
                       }
                       
-                      // Hide quick reply buttons after selection by updating this message's flags
-                      setMessages(prev => prev.map((m, idx) => 
-                        idx === msgIndex 
-                          ? { 
-                              ...m,
-                              showReturnQuestion: false,
-                              showPaymentMethod: false,
-                              showPassengerCount: false,
-                              showExtras: false,
-                              showAirportSelection: false,
-                            }
-                          : m
-                      ));
+                      // Hide quick reply buttons after selection - update ALL messages' flags
+                      setMessages(prev => prev.map((m) => ({ 
+                        ...m,
+                        showReturnQuestion: false,
+                        showPaymentMethod: false,
+                        showPassengerCount: false,
+                        showExtras: false,
+                        showAirportSelection: false,
+                      })));
                       
                       setInput(answer);
                       setTimeout(() => {
