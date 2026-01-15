@@ -400,16 +400,12 @@ const CustomerHome = () => {
           
           if (createError) {
             console.error('Failed to create reservation:', createError);
-            toast.error(language === 'TR' ? 'Rezervasyon oluşturulamadı' : 'Failed to create reservation');
+            toast.error(t('reservationCreateFailed'));
             return;
           }
           
           console.log('Reservation created from pending booking:', result);
-          toast.success(
-            language === 'TR' 
-              ? '🎉 Rezervasyonunuz başarıyla oluşturuldu!' 
-              : '🎉 Your reservation was successfully created!'
-          );
+          toast.success(t('reservationCreatedSuccess'));
           
           // Refresh data to show the new reservation
           fetchData();
@@ -434,11 +430,11 @@ const CustomerHome = () => {
     
     // Validate
     if (!customerName.trim()) {
-      toast.error(language === 'TR' ? 'Lütfen adınızı girin' : 'Please enter your name');
+      toast.error(t('pleaseEnterName'));
       return;
     }
     if (!customerPhone.trim()) {
-      toast.error(language === 'TR' ? 'Lütfen telefon numaranızı girin' : 'Please enter your phone number');
+      toast.error(t('pleaseEnterPhone'));
       return;
     }
     
@@ -468,16 +464,12 @@ const CustomerHome = () => {
       
       if (createError) {
         console.error('Failed to create reservation:', createError);
-        toast.error(language === 'TR' ? 'Rezervasyon oluşturulamadı' : 'Failed to create reservation');
+        toast.error(t('reservationCreateFailed'));
         return;
       }
       
       console.log('Reservation created from modal:', result);
-      toast.success(
-        language === 'TR' 
-          ? '🎉 Rezervasyonunuz başarıyla oluşturuldu!' 
-          : '🎉 Your reservation was successfully created!'
-      );
+      toast.success(t('reservationCreatedSuccess'));
       
       // Close modal and refresh
       setShowPendingBookingModal(false);
@@ -487,7 +479,7 @@ const CustomerHome = () => {
       
     } catch (err) {
       console.error('Error completing pending booking:', err);
-      toast.error(language === 'TR' ? 'Bir hata oluştu' : 'An error occurred');
+      toast.error(t('errorOccurred'));
     } finally {
       setIsCreatingReservation(false);
     }
@@ -522,13 +514,13 @@ const CustomerHome = () => {
           console.log('CustomerHome - Reservation realtime update:', payload);
           
           if (payload.eventType === 'INSERT') {
-            toast.success(language === 'TR' ? 'Yeni rezervasyon oluşturuldu!' : 'New reservation created!');
+            toast.success(t('newReservationCreated'));
             fetchData();
           } else if (payload.eventType === 'UPDATE') {
-            toast.info(language === 'TR' ? 'Rezervasyon güncellendi' : 'Reservation updated');
+            toast.info(t('reservationUpdated'));
             fetchData();
           } else if (payload.eventType === 'DELETE') {
-            toast.info(language === 'TR' ? 'Rezervasyon silindi' : 'Reservation deleted');
+            toast.info(t('reservationDeleted'));
             fetchData();
           }
         }

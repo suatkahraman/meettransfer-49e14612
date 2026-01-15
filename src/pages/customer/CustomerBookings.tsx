@@ -272,14 +272,14 @@ const CustomerBookings = () => {
           
           if (payload.eventType === 'INSERT') {
             playSound();
-            toast.success(language === 'TR' ? 'Yeni rezervasyon oluşturuldu!' : 'New reservation created!');
+            toast.success(t('newReservationCreated'));
             fetchReservations();
           } else if (payload.eventType === 'UPDATE') {
             playSound();
             toast.info(t('reservationUpdated'));
             fetchReservations();
           } else if (payload.eventType === 'DELETE') {
-            toast.info(language === 'TR' ? 'Rezervasyon silindi' : 'Reservation deleted');
+            toast.info(t('reservationDeleted'));
             fetchReservations();
           }
         }
