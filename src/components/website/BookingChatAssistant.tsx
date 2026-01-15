@@ -27,6 +27,7 @@ import { ChatLanguageDetectedBanner } from "./ChatLanguageDetectedBanner";
 import { ChatDateTimePicker } from "./ChatDateTimePicker";
 import { SoundWaveInline } from "@/components/ui/SoundWaveAnimation";
 import { RecordingWaveform, CircularWaveform, InlineRecordingWave } from "@/components/ui/RecordingWaveform";
+import { SpeakingBubbleOverlay, SpeakingWaveBar } from "@/components/ui/SpeakingBubbleOverlay";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 
 // Web Speech API type declarations
@@ -2896,12 +2897,20 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         )}
                         <div
                           className={cn(
-                            "max-w-[82%] rounded-xl px-2.5 py-1.5 text-[12px] leading-relaxed",
+                            "max-w-[82%] rounded-xl px-2.5 py-1.5 text-[12px] leading-relaxed relative",
                             msg.role === "user"
                               ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
+                              : "bg-muted",
+                            speakingMessageId === msg.id && isSpeaking && msg.role === "assistant" && "ring-2 ring-primary/30"
                           )}
                         >
+                          {/* Speaking overlay for active message */}
+                          {msg.role === "assistant" && (
+                            <SpeakingBubbleOverlay 
+                              isActive={speakingMessageId === msg.id && isSpeaking} 
+                              variant="mobile" 
+                            />
+                          )}
                           {/* Language Detection Banner - Show on welcome message */}
                           {msg.id === "welcome" && showLanguageBanner && (
                             <ChatLanguageDetectedBanner
@@ -3527,12 +3536,20 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               )}
               <div
                 className={cn(
-                  "max-w-[85%] rounded-xl px-3 py-2 text-sm",
+                  "max-w-[85%] rounded-xl px-3 py-2 text-sm relative",
                   msg.role === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                    : "bg-muted",
+                  speakingMessageId === msg.id && isSpeaking && msg.role === "assistant" && "ring-2 ring-primary/30"
                 )}
               >
+                {/* Speaking overlay for active message */}
+                {msg.role === "assistant" && (
+                  <SpeakingBubbleOverlay 
+                    isActive={speakingMessageId === msg.id && isSpeaking} 
+                    variant="desktop" 
+                  />
+                )}
                 {msg.role === "assistant" ? (
                   <div className="relative group">
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
