@@ -1,6 +1,6 @@
-import { memo, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Users, Briefcase, Star, Check, TrendingDown, Award } from "lucide-react";
+import { memo, useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import { Users, Briefcase, Star, Check, TrendingDown, Award, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
 
@@ -87,7 +87,7 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
       whileTap={{ scale: 0.95 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        "relative bg-background rounded-lg border overflow-hidden cursor-pointer transition-colors group aspect-square flex flex-col",
+        "relative bg-background rounded-lg border overflow-hidden cursor-pointer transition-colors group aspect-square flex flex-col min-w-0",
         isSelected 
           ? "border-primary ring-2 ring-primary/30 shadow-lg" 
           : "border-border hover:border-primary/50 hover:shadow-md",
@@ -231,7 +231,8 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
   returnDiscountPercentage = 25,
 }: ChatVehicleCardsProps) {
   const isTurkish = language === "TR";
-
+  const [currentPage, setCurrentPage] = useState(0);
+  
   // Always show exactly 4 vehicles for 1-6 passengers: sedan, vito, vip, maybach
   // For 7+ passengers, show only minibus
   const displayVehicles = passengers >= 7 
@@ -252,6 +253,57 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
     ? Object.entries(prices).reduce((a, b) => b[1] < a[1] ? b : a)?.[0]
     : "sedan";
 
+  // Carousel logic - 2 vehicles per page
+  const vehiclesPerPage = 2;
+  const totalPages = Math.ceil(displayVehicles.length / vehiclesPerPage);
+  const showCarousel = displayVehicles.length > vehiclesPerPage;
+  
+  // Get current page vehicles
+  const currentVehicles = showCarousel 
+    ? displayVehicles.slice(currentPage * vehiclesPerPage, (currentPage + 1) * vehiclesPerPage)
+    : displayVehicles;
+
+  // Swipe handling
+  const x = useMotionValue(0);
+  const dragThreshold = 50;
+
+  const handleDragEnd = useCallback((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const offset = info.offset.x;
+    const velocity = info.velocity.x;
+
+    if (offset < -dragThreshold || velocity < -500) {
+      // Swipe left - next page
+      if (currentPage < totalPages - 1) {
+        triggerHaptic('light');
+        setCurrentPage(prev => prev + 1);
+      }
+    } else if (offset > dragThreshold || velocity > 500) {
+      // Swipe right - previous page
+      if (currentPage > 0) {
+        triggerHaptic('light');
+        setCurrentPage(prev => prev - 1);
+      }
+    }
+  }, [currentPage, totalPages]);
+
+  const goToPage = useCallback((page: number) => {
+    triggerHaptic('light');
+    setCurrentPage(page);
+  }, []);
+
+  // Auto-scroll to selected vehicle's page
+  useEffect(() => {
+    if (selectedVehicle && showCarousel) {
+      const vehicleIndex = displayVehicles.findIndex(v => v.value === selectedVehicle);
+      if (vehicleIndex >= 0) {
+        const targetPage = Math.floor(vehicleIndex / vehiclesPerPage);
+        if (targetPage !== currentPage) {
+          setCurrentPage(targetPage);
+        }
+      }
+    }
+  }, [selectedVehicle, displayVehicles, showCarousel, vehiclesPerPage, currentPage]);
+
   return (
     <div className="mt-3 space-y-2">
       <div className="flex items-center justify-between px-1">
@@ -261,47 +313,110 @@ export const ChatVehicleCards = memo(function ChatVehicleCards({
             : `${passengers >= 7 ? "7+ passengers:" : "Select vehicle:"}`
           }
         </div>
+        {/* Page indicator */}
+        {showCarousel && (
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }).map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => goToPage(idx)}
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full transition-all duration-200",
+                  idx === currentPage 
+                    ? "bg-primary w-3" 
+                    : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                )}
+              />
+            ))}
+          </div>
+        )}
       </div>
       
-      <motion.div 
-        className="grid grid-cols-2 gap-2"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: {
-              staggerChildren: 0.05
-            }
-          }
-        }}
-      >
-        {displayVehicles.map((vehicle) => (
-          <motion.div 
-            key={vehicle.value}
-            variants={{
-              hidden: { opacity: 0, y: 10 },
-              visible: { opacity: 1, y: 0 }
-            }}
+      {/* Carousel Container */}
+      <div className="relative overflow-hidden">
+        {/* Navigation Arrows - Desktop only */}
+        {showCarousel && (
+          <>
+            <button
+              onClick={() => currentPage > 0 && goToPage(currentPage - 1)}
+              className={cn(
+                "absolute left-0 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center transition-opacity hidden md:flex",
+                currentPage === 0 ? "opacity-30 cursor-not-allowed" : "opacity-100 hover:bg-muted"
+              )}
+              disabled={currentPage === 0}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => currentPage < totalPages - 1 && goToPage(currentPage + 1)}
+              className={cn(
+                "absolute right-0 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center transition-opacity hidden md:flex",
+                currentPage === totalPages - 1 ? "opacity-30 cursor-not-allowed" : "opacity-100 hover:bg-muted"
+              )}
+              disabled={currentPage === totalPages - 1}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </>
+        )}
+
+        {/* Swipeable Cards Container */}
+        <motion.div
+          drag={showCarousel ? "x" : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={handleDragEnd}
+          style={{ x }}
+          className="touch-pan-y"
+        >
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={currentPage}
+              className="grid grid-cols-2 gap-2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {currentVehicles.map((vehicle) => (
+                <ChatVehicleCard
+                  key={vehicle.value}
+                  vehicle={vehicle}
+                  price={prices?.[vehicle.value]}
+                  currency={currency}
+                  isSelected={selectedVehicle === vehicle.value}
+                  onSelect={() => onSelectVehicle?.(vehicle.value)}
+                  language={language}
+                  discountPercentage={discountPercentage}
+                  isRecommended={vehicle.value === recommendedVehicle}
+                  isPopular={vehicle.value === popularVehicle}
+                  isBestValue={showPriceComparison && vehicle.value === bestValueVehicle}
+                  hasReturnTrip={hasReturnTrip}
+                  returnDiscountPercentage={returnDiscountPercentage}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Swipe hint - Mobile only */}
+        {showCarousel && currentPage === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 0.5 }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-muted-foreground md:hidden"
           >
-            <ChatVehicleCard
-              vehicle={vehicle}
-              price={prices?.[vehicle.value]}
-              currency={currency}
-              isSelected={selectedVehicle === vehicle.value}
-              onSelect={() => onSelectVehicle?.(vehicle.value)}
-              language={language}
-              discountPercentage={discountPercentage}
-              isRecommended={vehicle.value === recommendedVehicle}
-              isPopular={vehicle.value === popularVehicle}
-              isBestValue={showPriceComparison && vehicle.value === bestValueVehicle}
-              hasReturnTrip={hasReturnTrip}
-              returnDiscountPercentage={returnDiscountPercentage}
-            />
+            <motion.div
+              animate={{ x: [0, 5, 0] }}
+              transition={{ repeat: 3, duration: 0.6 }}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </motion.div>
           </motion.div>
-        ))}
-      </motion.div>
+        )}
+      </div>
     </div>
   );
 });
