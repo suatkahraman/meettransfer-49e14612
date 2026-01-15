@@ -90,177 +90,92 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
   return (
     <div
       className={cn(
-        "relative bg-background rounded-xl border overflow-hidden cursor-pointer transition-all group",
+        "relative bg-background rounded-lg border overflow-hidden cursor-pointer transition-all group aspect-square flex flex-col",
         isSelected 
           ? "border-primary ring-2 ring-primary/20 shadow-lg" 
           : "border-border hover:border-primary/50 hover:shadow-md",
-        isPopular && !isSelected && "border-amber-500/50 ring-1 ring-amber-500/20"
+        isPopular && !isSelected && "border-primary/50 ring-1 ring-primary/20"
       )}
       onClick={onSelect}
     >
       {/* Badge Stack - Top Left */}
-      <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+      <div className="absolute top-1.5 left-1.5 z-10 flex flex-col gap-0.5">
         {/* Most Popular Badge */}
         {isPopular && (
-          <div className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-bold rounded-full flex items-center gap-1">
-            <Award className="h-2.5 w-2.5" />
-            {isTurkish ? "En Popüler" : "Most Popular"}
+          <div className="px-1.5 py-0.5 bg-primary text-primary-foreground text-[8px] font-bold rounded-full flex items-center gap-0.5">
+            <Award className="h-2 w-2" />
+            {isTurkish ? "Popüler" : "Popular"}
           </div>
         )}
         
         {/* Recommended Badge */}
         {isRecommended && !isPopular && (
-          <div className="px-2 py-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center gap-1">
-            <Star className="h-2.5 w-2.5 fill-current" />
-            {isTurkish ? "Önerilen" : "Recommended"}
+          <div className="px-1.5 py-0.5 bg-primary text-primary-foreground text-[8px] font-bold rounded-full flex items-center gap-0.5">
+            <Star className="h-2 w-2 fill-current" />
+            {isTurkish ? "Önerilen" : "Best"}
           </div>
         )}
 
         {/* Best Value Badge */}
         {isBestValue && (
-          <div className="px-2 py-0.5 bg-green-500 text-white text-[9px] font-bold rounded-full flex items-center gap-1">
-            <TrendingDown className="h-2.5 w-2.5" />
-            {isTurkish ? "En Uygun" : "Best Value"}
+          <div className="px-1.5 py-0.5 bg-green-500 text-white text-[8px] font-bold rounded-full flex items-center gap-0.5">
+            <TrendingDown className="h-2 w-2" />
+            {isTurkish ? "Uygun" : "Value"}
           </div>
         )}
       </div>
 
       {/* Selected Check */}
       {isSelected && (
-        <div className="absolute top-2 right-2 z-10 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-          <Check className="h-3 w-3 text-primary-foreground" />
+        <div className="absolute top-1.5 right-1.5 z-10 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+          <Check className="h-2.5 w-2.5 text-primary-foreground" />
         </div>
       )}
 
-      {/* Image Carousel - Compact */}
-      <div className="relative h-28 overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={imageIndex}
-            src={vehicle.images[imageIndex]?.src}
-            alt={vehicle.images[imageIndex]?.alt || vehicle.label}
-            className="w-full h-full object-cover"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          />
-        </AnimatePresence>
-        
-        {/* Navigation Arrows */}
-        {vehicle.images.length > 1 && (
-          <>
-            <button
-              onClick={(e) => { e.stopPropagation(); prevImage(); }}
-              className="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/70 transition-opacity"
-            >
-              <ChevronLeft className="h-3.5 w-3.5 text-white" />
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); nextImage(); }}
-              className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-black/70 transition-opacity"
-            >
-              <ChevronRight className="h-3.5 w-3.5 text-white" />
-            </button>
-          </>
-        )}
-
-        {/* Image Dots */}
-        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
-          {vehicle.images.slice(0, 3).map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "w-1.5 h-1.5 rounded-full transition-all",
-                i === imageIndex ? "bg-white w-3" : "bg-white/50"
-              )}
-            />
-          ))}
-        </div>
+      {/* Image - Square aspect */}
+      <div className="relative h-20 overflow-hidden flex-shrink-0">
+        <img
+          src={vehicle.images[0]?.src}
+          alt={vehicle.images[0]?.alt || vehicle.label}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {/* Content */}
-      <div className="p-3">
+      <div className="p-2 flex-1 flex flex-col">
         {/* Vehicle Name */}
-        <h4 className="font-bold text-sm leading-tight">{vehicle.label}</h4>
+        <h4 className="font-bold text-xs leading-tight line-clamp-1">{vehicle.label}</h4>
         
         {/* Capacity */}
-        <div className="flex items-center gap-4 mt-2 text-muted-foreground text-xs">
-          <span className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-2 mt-1 text-muted-foreground text-[10px]">
+          <span className="flex items-center gap-0.5">
+            <Users className="h-3 w-3" />
             {vehicle.passengers}
           </span>
-          <span className="flex items-center gap-1">
-            <Briefcase className="h-3.5 w-3.5" />
+          <span className="flex items-center gap-0.5">
+            <Briefcase className="h-3 w-3" />
             {vehicle.luggage}
           </span>
         </div>
 
-        {/* Key Features - Just icons */}
-        <div className="flex items-center gap-1.5 mt-2">
-          {vehicle.features.slice(0, 4).map((feature, i) => (
-            <div 
-              key={i}
-              className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground"
-              title={language === "TR" ? feature.labelTr : feature.label}
-            >
-              {featureIcons[feature.icon] || <Sparkles className="h-3 w-3" />}
-            </div>
-          ))}
-        </div>
-
-        {/* Price Section with Comparison */}
+        {/* Price Section - Compact */}
         {price !== undefined && (
-          <div className="mt-3 pt-3 border-t border-border">
+          <div className="mt-auto pt-1.5 border-t border-border">
             {hasReturnTrip ? (
-              // Show total with return trip breakdown
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{isTurkish ? "Gidiş" : "Outbound"}</span>
-                  <span>{currencySymbol}{displayPrice || price}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-green-600 flex items-center gap-1">
-                    <TrendingDown className="h-3 w-3" />
-                    {isTurkish ? "Dönüş" : "Return"} 
-                    <span className="text-[10px] bg-green-500/10 text-green-600 px-1 rounded">-{returnDiscountPercentage}%</span>
-                  </span>
-                  <span className="text-green-600">{currencySymbol}{returnPrice}</span>
-                </div>
-                <div className="flex items-center justify-between pt-1 border-t border-dashed border-border">
-                  <span className="font-semibold text-sm">{isTurkish ? "Toplam" : "Total"}</span>
-                  <span className="font-bold text-primary text-lg">{currencySymbol}{totalPrice}</span>
-                </div>
+              <div className="text-center">
+                <span className="font-bold text-primary text-sm">{currencySymbol}{totalPrice}</span>
+                <span className="text-[9px] text-muted-foreground ml-1">{isTurkish ? "toplam" : "total"}</span>
               </div>
             ) : (
-              // Original single-trip view
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  {originalPrice && (
-                    <span className="text-xs text-muted-foreground line-through">
-                      {currencySymbol}{originalPrice}
-                    </span>
-                  )}
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-bold text-primary text-lg">
-                      {currencySymbol}{displayPrice}
-                    </span>
-                    {discountPercentage && (
-                      <span className="px-1.5 py-0.5 bg-green-500/10 text-green-600 text-[10px] font-bold rounded">
-                        -{discountPercentage}%
-                      </span>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Price comparison indicator */}
-                {priceDiff > 0 && lowestPrice && (
-                  <div className="text-right">
-                    <span className="text-[10px] text-muted-foreground">
-                      +{currencySymbol}{priceDiff}
-                    </span>
-                  </div>
+              <div className="flex items-center justify-center gap-1">
+                {originalPrice && (
+                  <span className="text-[10px] text-muted-foreground line-through">
+                    {currencySymbol}{originalPrice}
+                  </span>
                 )}
+                <span className="font-bold text-primary text-sm">
+                  {currencySymbol}{displayPrice}
+                </span>
               </div>
             )}
           </div>

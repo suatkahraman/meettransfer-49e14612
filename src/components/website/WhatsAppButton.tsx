@@ -41,7 +41,7 @@ const WhatsAppButton = ({
       >
         <button
           onClick={handleClick}
-          className={`fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-3 sm:right-6 z-50 bg-[#25D366] hover:bg-[#22c55e] text-white h-14 w-14 sm:h-14 sm:w-14 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 border-2 border-white/30 ${className}`}
+          className={`fixed bottom-[calc(7.5rem+env(safe-area-inset-bottom))] right-3 sm:right-6 z-50 bg-[#25D366] hover:bg-[#22c55e] text-white h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center hover:scale-110 border-2 border-white/30 ${className}`}
           aria-label="WhatsApp"
           style={{
             boxShadow:
