@@ -125,7 +125,7 @@ const CappadociaAirportTransferGuide = () => {
         ]}
       />
 
-      <article className="max-w-4xl mx-auto px-4 py-12">
+      <article className="max-w-4xl mx-auto px-3 sm:px-4 py-8 md:py-12">
         {/* Back to Blog */}
         <Link 
           to={getLocalizedPath("/blog")} 
@@ -136,21 +136,21 @@ const CappadociaAirportTransferGuide = () => {
         </Link>
 
         {/* Article Header */}
-        <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">Cappadocia</Badge>
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+        <header className="mb-8 md:mb-12">
+          <Badge variant="secondary" className="mb-3 md:mb-4">Cappadocia</Badge>
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight">
             {t("blogCappadociaH1")}
           </h1>
-          <p className="text-xl text-muted-foreground mb-6">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 md:mb-6">
             {t("blogCappadociaIntro")}
           </p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {t("lastUpdated")}: {formatBlogDate("2025-01-10")}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               18 {t("minRead")}
             </span>
           </div>
@@ -159,11 +159,11 @@ const CappadociaAirportTransferGuide = () => {
         {/* Share Buttons */}
         <ShareButtons 
           title={t("blogCappadociaH1")} 
-          className="mb-8" 
+          className="mb-6 md:mb-8" 
         />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-12">
+        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
           <img 
             src={cappadociaTransferHero} 
             alt={t("blogCappadociaHeroAlt")}
