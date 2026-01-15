@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
+import { DUBAI_VEHICLE_TYPES, isDubaiLocation } from "@/lib/dubaiVehicleTypes";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { useHeroFormStorage, parseSavedDate, SavedFormData } from "./useHeroFormStorage";
 import type { BookingData } from "@/components/hero/types";
@@ -201,14 +202,29 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     return () => clearTimeout(timer);
   }, [pickup, dropoff]);
 
-  // Auto-adjust vehicle type based on passenger count
+  // Auto-adjust vehicle type based on passenger count AND location
   useEffect(() => {
-    const currentVehicle = VEHICLE_TYPES.find(v => v.value === vehicleType);
+    const isDubai = isDubaiLocation(pickup) || isDubaiLocation(dropoff);
+    const vehicleList = isDubai ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
+    
+    // Check if current vehicle is valid for this location
+    const isValidVehicle = vehicleList.some(v => v.value === vehicleType);
+    
+    // If vehicle is not valid for this location, switch to first available
+    if (!isValidVehicle) {
+      const suitable = vehicleList.find(v => v.passengers >= parseInt(passengers));
+      if (suitable) setVehicleType(suitable.value);
+      else setVehicleType(vehicleList[0].value);
+      return;
+    }
+    
+    // Check passenger capacity
+    const currentVehicle = vehicleList.find(v => v.value === vehicleType);
     if (currentVehicle && currentVehicle.passengers < parseInt(passengers)) {
-      const suitable = VEHICLE_TYPES.find(v => v.passengers >= parseInt(passengers));
+      const suitable = vehicleList.find(v => v.passengers >= parseInt(passengers));
       if (suitable) setVehicleType(suitable.value);
     }
-  }, [passengers, vehicleType]);
+  }, [passengers, vehicleType, pickup, dropoff]);
 
   // Handlers
   const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {

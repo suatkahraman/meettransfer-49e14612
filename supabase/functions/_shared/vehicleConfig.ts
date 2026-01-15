@@ -1,5 +1,5 @@
 // Shared vehicle configuration for edge functions
-// Keep in sync with src/lib/vehicleTypes.ts
+// Keep in sync with src/lib/vehicleTypes.ts and src/lib/dubaiVehicleTypes.ts
 
 export interface VehicleTypeConfig {
   value: string;
@@ -17,14 +17,58 @@ export const VEHICLE_TYPES: VehicleTypeConfig[] = [
   { value: 'minibus', label: 'Mercedes Sprinter', passengers: 16, luggage: 16 },
 ];
 
+// Dubai-specific vehicle types
+export const DUBAI_VEHICLE_TYPES: VehicleTypeConfig[] = [
+  { value: 'dubai-private-sedan', label: 'Private Standard Sedan', passengers: 3, luggage: 2 },
+  { value: 'dubai-suburban', label: 'Mercedes Suburban', passengers: 6, luggage: 6 },
+  { value: 'dubai-vip-mercedes-van', label: 'VIP Mercedes Van', passengers: 7, luggage: 7 },
+  { value: 'dubai-v-class', label: 'Mercedes V-Class', passengers: 6, luggage: 6 },
+];
+
 // Vehicle labels lookup
 export const VEHICLE_LABELS: Record<string, string> = Object.fromEntries(
-  VEHICLE_TYPES.map(v => [v.value, v.label])
+  [...VEHICLE_TYPES, ...DUBAI_VEHICLE_TYPES].map(v => [v.value, v.label])
 );
 
 // Get vehicle label for display
 export function getVehicleLabel(vehicleType: string): string {
   return VEHICLE_LABELS[vehicleType] || vehicleType;
+}
+
+// Check if location is in Dubai
+export function isDubaiLocation(location: string): boolean {
+  if (!location) return false;
+  const normalizedLocation = location.toLowerCase();
+  
+  const dubaiKeywords = [
+    'dubai',
+    'دبي',
+    'burj khalifa',
+    'palm jumeirah',
+    'dubai mall',
+    'dubai marina',
+    'dxb',
+    'dubai international',
+    'al maktoum',
+    'dwc',
+    'jebel ali',
+    'jumeirah',
+    'downtown dubai',
+    'business bay',
+    'deira',
+    'bur dubai',
+    'sheikh zayed',
+    'emirates hills',
+    'arabian ranches',
+  ];
+  
+  return dubaiKeywords.some(keyword => normalizedLocation.includes(keyword));
+}
+
+// Get vehicle types based on location
+export function getVehicleTypesForLocation(pickup: string, dropoff: string): VehicleTypeConfig[] {
+  const isDubai = isDubaiLocation(pickup) || isDubaiLocation(dropoff);
+  return isDubai ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
 }
 
 // Vehicle fallback order for price matching
@@ -44,6 +88,12 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   'mercedes-vclass': ['mercedes-vito-vip', 'vip-mercedes'],
   'maybach': ['mercedes-maybach', 'maybach-minibus'],
   
+  // Dubai vehicle mappings
+  'dubai-private-sedan': ['dubai-private-sedan', 'sedan'],
+  'dubai-suburban': ['dubai-suburban', 'mercedes-vito'],
+  'dubai-vip-mercedes-van': ['dubai-vip-mercedes-van', 'vip-mercedes'],
+  'dubai-v-class': ['dubai-v-class', 'mercedes-vito'],
+  
   // Common aliases
   'Mercedes Vito': ['mercedes-vito'],
   'Mercedes Vito VIP': ['mercedes-vito-vip', 'vip-mercedes'],
@@ -58,6 +108,10 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   'Minivan': ['mercedes-vito'],
   'Minibus': ['mercedes-sprinter', 'minibus'],
   'Sedan': ['sedan', 'mercedes-vito'],
+  // Dubai aliases
+  'Private Sedan': ['dubai-private-sedan', 'sedan'],
+  'Suburban': ['dubai-suburban', 'mercedes-vito'],
+  'VIP Van': ['dubai-vip-mercedes-van', 'vip-mercedes'],
 };
 
 // Get vehicle fallback list for price matching
