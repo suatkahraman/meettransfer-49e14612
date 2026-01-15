@@ -2755,7 +2755,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   whileTap={{ scale: 0.95 }}
                   onClick={handleAIButtonClick}
                   data-chat-trigger
-                  className="fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] right-3 z-[9999] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
+                  className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-3 z-[60] flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-full shadow-xl touch-manipulation border-2 border-primary-foreground/20"
                   style={{
                     WebkitTapHighlightColor: "transparent",
                     boxShadow:
@@ -2814,7 +2814,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
               data-mobile-backdrop
-              className="fixed inset-0 z-[9997] bg-background/80 backdrop-blur-sm"
+              className="fixed inset-0 z-[70] bg-background/80 backdrop-blur-sm"
               style={{ touchAction: 'manipulation' }}
             />
           )}
@@ -2839,15 +2839,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 }
               }}
               data-mobile-panel
-              className="fixed inset-x-0 z-[9998] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
+              className="fixed inset-x-0 z-[80] bg-card rounded-t-2xl shadow-2xl border-t border-border flex flex-col"
               style={{
                 // Position panel above keyboard - increased size for mobile
-                top: keyboardHeight > 0 ? '0.5rem' : '10%',
+                top: keyboardHeight > 0 ? '0.5rem' : '8%',
                 bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 0,
                 maxHeight: keyboardHeight > 0 
                   ? `calc(100% - ${keyboardHeight}px - 0.5rem)` 
-                  : '90%',
-                minHeight: '300px',
+                  : '92%',
+                minHeight: '320px',
                 touchAction: 'auto',
                 pointerEvents: 'auto',
                 paddingBottom: '0',
@@ -3271,10 +3271,12 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                   </div>
                 </ScrollArea>
 
-                {/* Mobile Input - Sticky at bottom */}
+                {/* Mobile Input - Sticky at bottom with improved keyboard handling */}
                 <div 
-                  className="shrink-0 p-2 border-t border-border bg-card mt-auto"
-                  style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}
+                  className="shrink-0 p-3 border-t border-border bg-card/95 backdrop-blur-sm mt-auto"
+                  style={{ 
+                    paddingBottom: keyboardHeight > 0 ? '8px' : 'max(12px, env(safe-area-inset-bottom))'
+                  }}
                 >
                   {/* Large Recording Overlay with animated indicator */}
                   <AnimatePresence>
@@ -3458,23 +3460,23 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  <div className="flex gap-2.5">
+                  <div className="flex gap-2 items-center">
                     <Button
                       onClick={isRecording ? stopRecording : startRecording}
                       disabled={isLoading || isProcessing}
                       size="icon"
                       variant="outline"
                       className={cn(
-                        "h-14 w-14 rounded-xl shrink-0 touch-manipulation",
+                        "h-12 w-12 rounded-xl shrink-0 touch-manipulation transition-all active:scale-95",
                         isRecording && "bg-destructive/10 border-destructive text-destructive"
                       )}
                     >
                       {isProcessing ? (
-                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                       ) : isRecording ? (
-                        <Square className="h-6 w-6 fill-current" />
+                        <Square className="h-5 w-5 fill-current" />
                       ) : (
-                        <Mic className="h-6 w-6" />
+                        <Mic className="h-5 w-5" />
                       )}
                     </Button>
                     <Input
@@ -3497,13 +3499,19 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           // Scroll input into visible area above keyboard
                           inputRef.current?.scrollIntoView({ 
                             behavior: 'smooth', 
-                            block: 'center'
+                            block: 'nearest'
                           });
                         }, delay);
                       }}
+                      onBlur={() => {
+                        // Prevent keyboard from closing unexpectedly on iOS
+                        setTimeout(() => {
+                          window.scrollTo(0, 0);
+                        }, 100);
+                      }}
                       placeholder={language === "TR" ? "Mesaj yazın..." : "Type message..."}
                       disabled={isLoading || isRecording}
-                      className="h-14 rounded-xl text-base flex-1 touch-manipulation"
+                      className="h-12 rounded-xl text-base flex-1 touch-manipulation border-2 focus:border-primary transition-colors"
                       style={{ fontSize: '16px' }}
                       autoComplete="off"
                       autoCorrect="on"
@@ -3517,14 +3525,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       size="icon"
                       data-chat-submit
                       className={cn(
-                        "h-14 w-14 rounded-xl shrink-0 touch-manipulation",
-                        input.trim() ? "bg-primary" : "bg-muted"
+                        "h-12 w-12 rounded-xl shrink-0 touch-manipulation transition-all active:scale-95",
+                        input.trim() ? "bg-primary shadow-lg shadow-primary/30" : "bg-muted"
                       )}
                     >
                       {isLoading ? (
-                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                       ) : (
-                        <Send className="h-6 w-6" />
+                        <Send className="h-5 w-5" />
                       )}
                     </Button>
                     
