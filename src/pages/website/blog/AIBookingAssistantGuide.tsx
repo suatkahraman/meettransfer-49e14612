@@ -194,104 +194,104 @@ const AIBookingAssistantGuide = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid lg:grid-cols-[1fr_300px] gap-12">
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <div className="grid lg:grid-cols-[1fr_300px] gap-8 lg:gap-12">
             {/* Main Content */}
-            <div className="prose prose-lg dark:prose-invert max-w-none">
+            <div className="prose prose-sm md:prose-lg dark:prose-invert max-w-none">
               
               {/* What is AI Assistant */}
-              <section id="what-is-ai-assistant" className="scroll-mt-24">
-                <h2 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-foreground mb-6">
-                  <Bot className="w-8 h-8 text-primary" />
+              <section id="what-is-ai-assistant" className="scroll-mt-20 md:scroll-mt-24">
+                <h2 className="flex items-center gap-2 md:gap-3 text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-4 md:mb-6">
+                  <Bot className="w-6 h-6 md:w-8 md:h-8 text-primary shrink-0" />
                   {t("blogAIAssistantSection1Title")}
                 </h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
                   {t("blogAIAssistantSection1P1")}
                 </p>
-                <p className="text-muted-foreground leading-relaxed mb-6">
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
                   {t("blogAIAssistantSection1P2")}
                 </p>
                 
-                <div className="relative my-8 rounded-2xl overflow-hidden shadow-xl">
+                <div className="relative my-6 md:my-8 rounded-xl md:rounded-2xl overflow-hidden shadow-lg md:shadow-xl">
                   <img 
                     src={aiChatImage} 
                     alt={t("blogAIAssistantImageAlt")}
-                    className="w-full max-w-md mx-auto"
+                    className="w-full max-w-sm md:max-w-md mx-auto"
                     loading="lazy"
                   />
                 </div>
               </section>
 
               {/* How It Works */}
-              <section id="how-it-works" className="scroll-mt-24 mt-12">
-                <h2 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-foreground mb-6">
-                  <Sparkles className="w-8 h-8 text-primary" />
+              <section id="how-it-works" className="scroll-mt-20 md:scroll-mt-24 mt-8 md:mt-12">
+                <h2 className="flex items-center gap-2 md:gap-3 text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-4 md:mb-6">
+                  <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-primary shrink-0" />
                   {t("blogAIAssistantSection2Title")}
                 </h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
                   {t("blogAIAssistantSection2P1")}
                 </p>
                 
-                <div className="grid md:grid-cols-3 gap-6 my-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 my-6 md:my-8">
                   <Card className="border-primary/20 bg-primary/5">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">1</span>
+                    <CardHeader className="p-4 md:p-6">
+                      <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                        <span className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs md:text-sm font-bold shrink-0">1</span>
                         {t("blogAIAssistantStep1Title")}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">{t("blogAIAssistantStep1Desc")}</p>
+                    <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+                      <p className="text-xs md:text-sm text-muted-foreground">{t("blogAIAssistantStep1Desc")}</p>
                     </CardContent>
                   </Card>
                   
                   <Card className="border-primary/20 bg-primary/5">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">2</span>
+                    <CardHeader className="p-4 md:p-6">
+                      <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                        <span className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs md:text-sm font-bold shrink-0">2</span>
                         {t("blogAIAssistantStep2Title")}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">{t("blogAIAssistantStep2Desc")}</p>
+                    <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+                      <p className="text-xs md:text-sm text-muted-foreground">{t("blogAIAssistantStep2Desc")}</p>
                     </CardContent>
                   </Card>
                   
-                  <Card className="border-primary/20 bg-primary/5">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">3</span>
+                  <Card className="border-primary/20 bg-primary/5 sm:col-span-2 md:col-span-1">
+                    <CardHeader className="p-4 md:p-6">
+                      <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                        <span className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs md:text-sm font-bold shrink-0">3</span>
                         {t("blogAIAssistantStep3Title")}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">{t("blogAIAssistantStep3Desc")}</p>
+                    <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+                      <p className="text-xs md:text-sm text-muted-foreground">{t("blogAIAssistantStep3Desc")}</p>
                     </CardContent>
                   </Card>
                 </div>
               </section>
 
               {/* Key Features */}
-              <section id="key-features" className="scroll-mt-24 mt-12">
-                <h2 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-foreground mb-6">
-                  <CheckCircle2 className="w-8 h-8 text-primary" />
+              <section id="key-features" className="scroll-mt-20 md:scroll-mt-24 mt-8 md:mt-12">
+                <h2 className="flex items-center gap-2 md:gap-3 text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-4 md:mb-6">
+                  <CheckCircle2 className="w-6 h-6 md:w-8 md:h-8 text-primary shrink-0" />
                   {t("blogAIAssistantSection3Title")}
                 </h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
                   {t("blogAIAssistantSection3P1")}
                 </p>
                 
-                <div className="grid md:grid-cols-2 gap-6 my-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 my-6 md:my-8">
                   {aiFeatures.map((feature, index) => (
                     <Card key={index} className="border-l-4 border-l-primary">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-3">
-                          <feature.icon className="w-6 h-6 text-primary" />
+                      <CardHeader className="p-4 md:p-6">
+                        <CardTitle className="flex items-center gap-2 md:gap-3 text-base md:text-lg">
+                          <feature.icon className="w-5 h-5 md:w-6 md:h-6 text-primary shrink-0" />
                           {t(feature.titleKey)}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground">{t(feature.descKey)}</p>
+                      <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+                        <p className="text-xs md:text-sm text-muted-foreground">{t(feature.descKey)}</p>
                       </CardContent>
                     </Card>
                   ))}
@@ -299,16 +299,36 @@ const AIBookingAssistantGuide = () => {
               </section>
 
               {/* Comparison */}
-              <section id="comparison" className="scroll-mt-24 mt-12">
-                <h2 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-foreground mb-6">
-                  <Zap className="w-8 h-8 text-primary" />
+              <section id="comparison" className="scroll-mt-20 md:scroll-mt-24 mt-8 md:mt-12">
+                <h2 className="flex items-center gap-2 md:gap-3 text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-4 md:mb-6">
+                  <Zap className="w-6 h-6 md:w-8 md:h-8 text-primary shrink-0" />
                   {t("blogAIAssistantSection4Title")}
                 </h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
                   {t("blogAIAssistantSection4P1")}
                 </p>
                 
-                <div className="overflow-x-auto my-8">
+                {/* Mobile: Card-based comparison */}
+                <div className="block md:hidden space-y-3 my-6">
+                  {comparisonData.map((row, index) => (
+                    <Card key={index} className="p-4">
+                      <div className="font-medium text-sm mb-2">{row.feature}</div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2 bg-muted/50 rounded">
+                          <span className="text-muted-foreground block mb-1">{t("blogAIAssistantTableTraditional")}</span>
+                          <span>{row.traditional}</span>
+                        </div>
+                        <div className="p-2 bg-primary/10 rounded">
+                          <span className="text-primary block mb-1">{t("blogAIAssistantTableAI")}</span>
+                          <span className="text-primary font-medium">{row.aiAssistant}</span>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+                
+                {/* Desktop: Table comparison */}
+                <div className="hidden md:block overflow-x-auto my-8">
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-muted/50">
@@ -331,62 +351,62 @@ const AIBookingAssistantGuide = () => {
               </section>
 
               {/* Benefits */}
-              <section id="benefits" className="scroll-mt-24 mt-12">
-                <h2 className="flex items-center gap-3 text-2xl md:text-3xl font-bold text-foreground mb-6">
-                  <Globe className="w-8 h-8 text-primary" />
+              <section id="benefits" className="scroll-mt-20 md:scroll-mt-24 mt-8 md:mt-12">
+                <h2 className="flex items-center gap-2 md:gap-3 text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-4 md:mb-6">
+                  <Globe className="w-6 h-6 md:w-8 md:h-8 text-primary shrink-0" />
                   {t("blogAIAssistantSection5Title")}
                 </h2>
-                <p className="text-muted-foreground leading-relaxed mb-6">
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
                   {t("blogAIAssistantSection5P1")}
                 </p>
                 
-                <ul className="space-y-4 my-8">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-1 shrink-0" />
-                    <span className="text-muted-foreground">{t("blogAIAssistantBenefit1")}</span>
+                <ul className="space-y-3 md:space-y-4 my-6 md:my-8">
+                  <li className="flex items-start gap-2 md:gap-3">
+                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-500 mt-0.5 md:mt-1 shrink-0" />
+                    <span className="text-sm md:text-base text-muted-foreground">{t("blogAIAssistantBenefit1")}</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-1 shrink-0" />
-                    <span className="text-muted-foreground">{t("blogAIAssistantBenefit2")}</span>
+                  <li className="flex items-start gap-2 md:gap-3">
+                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-500 mt-0.5 md:mt-1 shrink-0" />
+                    <span className="text-sm md:text-base text-muted-foreground">{t("blogAIAssistantBenefit2")}</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-1 shrink-0" />
-                    <span className="text-muted-foreground">{t("blogAIAssistantBenefit3")}</span>
+                  <li className="flex items-start gap-2 md:gap-3">
+                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-500 mt-0.5 md:mt-1 shrink-0" />
+                    <span className="text-sm md:text-base text-muted-foreground">{t("blogAIAssistantBenefit3")}</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-1 shrink-0" />
-                    <span className="text-muted-foreground">{t("blogAIAssistantBenefit4")}</span>
+                  <li className="flex items-start gap-2 md:gap-3">
+                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-500 mt-0.5 md:mt-1 shrink-0" />
+                    <span className="text-sm md:text-base text-muted-foreground">{t("blogAIAssistantBenefit4")}</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-1 shrink-0" />
-                    <span className="text-muted-foreground">{t("blogAIAssistantBenefit5")}</span>
+                  <li className="flex items-start gap-2 md:gap-3">
+                    <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-500 mt-0.5 md:mt-1 shrink-0" />
+                    <span className="text-sm md:text-base text-muted-foreground">{t("blogAIAssistantBenefit5")}</span>
                   </li>
                 </ul>
               </section>
 
               {/* CTA */}
-              <div className="my-12 p-8 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 text-center">
-                <h3 className="text-2xl font-bold text-foreground mb-4">{t("blogAIAssistantCTATitle")}</h3>
-                <p className="text-muted-foreground mb-6">{t("blogAIAssistantCTADesc")}</p>
+              <div className="my-8 md:my-12 p-6 md:p-8 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 text-center">
+                <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3 md:mb-4">{t("blogAIAssistantCTATitle")}</h3>
+                <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6">{t("blogAIAssistantCTADesc")}</p>
                 <Button onClick={scrollToAssistant} size="lg" className="gap-2">
-                  <MessageCircle className="w-5 h-5" />
+                  <MessageCircle className="w-4 h-4 md:w-5 md:h-5" />
                   {t("blogAIAssistantCTAButton")}
                 </Button>
               </div>
 
               {/* FAQ */}
-              <section id="faq" className="scroll-mt-24 mt-12">
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
+              <section id="faq" className="scroll-mt-20 md:scroll-mt-24 mt-8 md:mt-12">
+                <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-4 md:mb-6">
                   {t("frequentlyAskedQuestions")}
                 </h2>
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   {faqItems.map((item, index) => (
                     <Card key={index}>
-                      <CardHeader>
-                        <CardTitle className="text-lg">{item.question}</CardTitle>
+                      <CardHeader className="p-4 md:p-6">
+                        <CardTitle className="text-base md:text-lg">{item.question}</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground">{item.answer}</p>
+                      <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+                        <p className="text-xs md:text-sm text-muted-foreground">{item.answer}</p>
                       </CardContent>
                     </Card>
                   ))}
@@ -396,10 +416,12 @@ const AIBookingAssistantGuide = () => {
               <ShareButtons title={t("blogAIAssistantH1")} className="mt-12" />
             </div>
 
-            {/* Sidebar */}
-            <aside className="space-y-6">
-              <TableOfContents items={tocItems} />
-              <BlogCTA />
+            {/* Sidebar - Hidden on mobile, sticky on desktop */}
+            <aside className="hidden lg:block space-y-6">
+              <div className="sticky top-24">
+                <TableOfContents items={tocItems} />
+                <BlogCTA />
+              </div>
             </aside>
           </div>
 
