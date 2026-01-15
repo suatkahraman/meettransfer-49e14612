@@ -103,7 +103,7 @@ const AIBookingAssistantGuide = () => {
         description={t('blogAIAssistantDesc')}
         keywords="AI booking assistant, yapay zeka ile rezervasyon, AI transfer booking, instant price quote, automated booking, artificial intelligence travel, AI havalimanı transfer, chatbot booking, 24/7 booking assistant, multilingual booking, quick booking AI, smart travel assistant"
         canonicalPath="/blog/ai-booking-assistant-guide"
-        ogImage="https://meettransfer.app/og/ai-assistant-og.jpg"
+        ogImage="https://meettransfer.lovable.app/og/ai-booking-assistant.jpg"
         ogType="article"
         articlePublishedTime="2025-01-15"
         articleModifiedTime="2025-01-15"
@@ -117,7 +117,7 @@ const AIBookingAssistantGuide = () => {
             type: 'Article',
             headline: t('blogAIAssistantH1'),
             description: t('blogAIAssistantDesc'),
-            image: 'https://meettransfer.app/og/ai-assistant-og.jpg',
+            image: 'https://meettransfer.lovable.app/og/ai-booking-assistant.jpg',
             datePublished: '2025-01-15',
             dateModified: '2025-01-15',
             author: 'Meet Transfer',
