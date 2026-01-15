@@ -3883,9 +3883,30 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         />
       )}
 
-      {/* Messages Area */}
-      <ScrollArea className="h-[380px] rounded-xl bg-background/50 border border-border mb-3">
-        <div className="p-3 space-y-2">
+      {/* Messages Area with Header */}
+      <div className="rounded-xl bg-background/50 border border-border mb-3 overflow-hidden">
+        {/* Desktop Chat Header */}
+        <div className="flex items-center justify-between px-3 py-2 border-b border-border/50 bg-muted/30">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <Bot className="h-3 w-3 text-primary" />
+            </div>
+            <span className="font-medium text-sm">
+              {language === "TR" ? "AI Asistan" : "AI Assistant"}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearConversation}
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive gap-1.5"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            {language === "TR" ? "Temizle" : "Clear"}
+          </Button>
+        </div>
+        <ScrollArea className="h-[340px]">
+          <div className="p-3 space-y-2">
           {messages.map((msg, msgIndex) => (
             <div
               key={msg.id}
@@ -4396,6 +4417,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
+      </div>
 
       {/* Desktop Recording indicator with large animated visual */}
       <AnimatePresence>
