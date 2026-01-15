@@ -3029,6 +3029,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           {msg.showRedirectButton && bookingCreated && (
                             <ChatRedirectButton
                               language={language}
+                              bookingToken={bookingCreated.token}
                               onRedirect={() => {
                                 setIsOpen(false);
                                 navigate(`/book?token=${bookingCreated.token}&new=true`);
@@ -3678,6 +3679,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 {msg.showRedirectButton && bookingCreated && (
                   <ChatRedirectButton
                     language={language}
+                    bookingToken={bookingCreated.token}
                     onRedirect={() => {
                       setIsOpen(false);
                       navigate(`/book?token=${bookingCreated.token}&new=true`);

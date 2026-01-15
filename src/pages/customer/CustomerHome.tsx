@@ -297,6 +297,81 @@ const CustomerHome = () => {
     threshold: 80,
   });
 
+  // Check for pending booking token from AI assistant (after Google login)
+  useEffect(() => {
+    const checkPendingBooking = async () => {
+      if (!user?.id) return;
+      
+      const pendingToken = localStorage.getItem('pending_booking_token');
+      if (!pendingToken) return;
+      
+      console.log('Found pending booking token, processing...', pendingToken);
+      localStorage.removeItem('pending_booking_token');
+      
+      try {
+        // Fetch the quick booking request
+        const { data: quickBooking, error } = await supabase
+          .from('quick_booking_requests')
+          .select('*')
+          .eq('confirmation_token', pendingToken)
+          .single();
+        
+        if (error || !quickBooking) {
+          console.error('Failed to load pending booking:', error);
+          return;
+        }
+        
+        // Get user profile for phone
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, phone')
+          .eq('id', user.id)
+          .single();
+        
+        // Get user email from auth
+        const userEmail = user.email || quickBooking.customer_email;
+        const userName = profile?.full_name || user.user_metadata?.full_name || quickBooking.customer_name || '';
+        const userPhone = profile?.phone || quickBooking.customer_phone || '';
+        
+        // Create reservation from quick booking
+        const { data: result, error: createError } = await supabase.functions.invoke('create-quick-booking-reservation', {
+          body: {
+            bookingId: quickBooking.id,
+            customerName: userName,
+            customerEmail: userEmail,
+            customerPhone: userPhone,
+            paymentMethod: quickBooking.payment_method || 'card',
+            hasReturnTrip: quickBooking.has_return_trip,
+            returnPrice: quickBooking.return_price,
+          }
+        });
+        
+        if (createError) {
+          console.error('Failed to create reservation:', createError);
+          toast.error(language === 'TR' ? 'Rezervasyon oluşturulamadı' : 'Failed to create reservation');
+          return;
+        }
+        
+        console.log('Reservation created from pending booking:', result);
+        toast.success(
+          language === 'TR' 
+            ? '🎉 Rezervasyonunuz başarıyla oluşturuldu!' 
+            : '🎉 Your reservation was successfully created!'
+        );
+        
+        // Refresh data to show the new reservation
+        fetchData();
+        
+      } catch (err) {
+        console.error('Error processing pending booking:', err);
+      }
+    };
+    
+    if (!authLoading && user?.id) {
+      checkPendingBooking();
+    }
+  }, [authLoading, user?.id, user?.email, user?.user_metadata, language]);
+
   // Wait for auth to complete before fetching data
   useEffect(() => {
     if (!authLoading && user?.id) {
