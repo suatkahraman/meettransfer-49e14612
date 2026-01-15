@@ -3258,19 +3258,26 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             />
                           )}
 
-                          {/* Redirect Button removed - only show inside booking summary card */}
-                          
                           {/* Booking Summary Card for Mobile - Show after vehicle selection */}
                           {msg.bookingData && msg.bookingData.vehicleType && msg.vehiclePrices && (
-                            <div className="mt-3 p-3 bg-gradient-to-br from-background to-muted/30 rounded-xl border border-border shadow-lg">
-                              {/* Header with Vehicle & Price */}
-                              <div className="flex items-center justify-between mb-3 pb-2 border-b border-border/50">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                    <Check className="h-4 w-4 text-primary" />
-                                  </div>
+                            <motion.div 
+                              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              transition={{ duration: 0.4, ease: "easeOut" }}
+                              className="mt-4 p-4 bg-gradient-to-br from-background via-background to-primary/5 rounded-2xl border-2 border-primary/20 shadow-xl shadow-primary/10"
+                            >
+                              {/* Prominent Header */}
+                              <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-primary/20">
+                                <div className="flex items-center gap-3">
+                                  <motion.div 
+                                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/30"
+                                    animate={{ scale: [1, 1.05, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  >
+                                    <Check className="h-5 w-5 text-white" />
+                                  </motion.div>
                                   <div>
-                                    <p className="font-semibold text-sm text-foreground">
+                                    <p className="font-bold text-base text-foreground">
                                       {msg.bookingData.vehicleType === 'sedan' ? 'Sedan' :
                                        msg.bookingData.vehicleType === 'mercedes-vito' ? 'Mercedes Vito' :
                                        msg.bookingData.vehicleType === 'vip-mercedes' ? 'Mercedes Vito VIP' :
@@ -3278,16 +3285,21 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                        msg.bookingData.vehicleType === 'minibus' ? 'Mercedes Sprinter' :
                                        msg.bookingData.vehicleType}
                                     </p>
-                                    <p className="text-[10px] text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground">
                                       {msg.bookingData.passengers || 2} {language === "TR" ? "Yolcu" : "Passengers"}
                                     </p>
                                   </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-[9px] text-muted-foreground uppercase tracking-wide">
+                                <motion.div 
+                                  className="text-right"
+                                  initial={{ scale: 0.8 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ delay: 0.2, type: "spring" }}
+                                >
+                                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
                                     {language === "TR" ? "Toplam Tutar" : "Total"}
                                   </p>
-                                  <p className="font-bold text-primary text-xl">
+                                  <p className="font-bold text-primary text-2xl">
                                     {msg.bookingData.currency === "TRY" ? "₺" : "€"}
                                     {(() => {
                                       const basePrice = msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice || 0;
@@ -3299,26 +3311,26 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                     })()}
                                   </p>
                                   {msg.bookingData.hasReturnTrip && (
-                                    <p className="text-[9px] text-green-600 font-medium">
+                                    <p className="text-[10px] text-green-600 font-semibold">
                                       {language === "TR" ? "Gidiş + Dönüş" : "Round Trip"} (-25%)
                                     </p>
                                   )}
-                                </div>
+                                </motion.div>
                               </div>
 
-                              {/* Trip Details - Professional Layout */}
-                              <div className="space-y-2 mb-3">
+                              {/* Trip Details - Enhanced Layout */}
+                              <div className="space-y-2.5 mb-4">
                                 {/* Pickup */}
                                 {msg.bookingData.pickup && (
-                                  <div className="flex items-start gap-2 p-2 bg-green-500/5 rounded-lg border border-green-500/10">
-                                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center shrink-0 mt-0.5">
-                                      <MapPin className="h-2.5 w-2.5 text-white" />
+                                  <div className="flex items-start gap-3 p-3 bg-green-500/10 rounded-xl border border-green-500/20">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shrink-0 shadow-md">
+                                      <MapPin className="h-3 w-3 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-[9px] text-green-600 font-medium uppercase tracking-wide">
+                                      <p className="text-[10px] text-green-600 font-semibold uppercase tracking-wide">
                                         {language === "TR" ? "Alış Noktası" : "Pickup"}
                                       </p>
-                                      <p className="text-xs font-medium text-foreground truncate">
+                                      <p className="text-sm font-medium text-foreground truncate">
                                         {msg.bookingData.pickup}
                                       </p>
                                     </div>
@@ -3327,15 +3339,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
 
                                 {/* Dropoff */}
                                 {msg.bookingData.dropoff && (
-                                  <div className="flex items-start gap-2 p-2 bg-red-500/5 rounded-lg border border-red-500/10">
-                                    <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shrink-0 mt-0.5">
-                                      <MapPin className="h-2.5 w-2.5 text-white" />
+                                  <div className="flex items-start gap-3 p-3 bg-red-500/10 rounded-xl border border-red-500/20">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shrink-0 shadow-md">
+                                      <MapPin className="h-3 w-3 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-[9px] text-red-600 font-medium uppercase tracking-wide">
+                                      <p className="text-[10px] text-red-600 font-semibold uppercase tracking-wide">
                                         {language === "TR" ? "Bırakış Noktası" : "Dropoff"}
                                       </p>
-                                      <p className="text-xs font-medium text-foreground truncate">
+                                      <p className="text-sm font-medium text-foreground truncate">
                                         {msg.bookingData.dropoff}
                                       </p>
                                     </div>
@@ -3346,14 +3358,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                 {(msg.bookingData.date || msg.bookingData.time) && (
                                   <div className="flex gap-2">
                                     {msg.bookingData.date && (
-                                      <div className="flex-1 p-2 bg-primary/5 rounded-lg border border-primary/10">
+                                      <div className="flex-1 p-3 bg-primary/10 rounded-xl border border-primary/20">
                                         <div className="flex items-center gap-1.5">
-                                          <Calendar className="h-3 w-3 text-primary" />
-                                          <p className="text-[9px] text-primary font-medium uppercase tracking-wide">
+                                          <Calendar className="h-3.5 w-3.5 text-primary" />
+                                          <p className="text-[10px] text-primary font-semibold uppercase tracking-wide">
                                             {language === "TR" ? "Tarih" : "Date"}
                                           </p>
                                         </div>
-                                        <p className="text-xs font-semibold text-foreground mt-0.5">
+                                        <p className="text-sm font-bold text-foreground mt-1">
                                           {new Date(msg.bookingData.date).toLocaleDateString(language === "TR" ? "tr-TR" : "en-US", {
                                             day: 'numeric',
                                             month: 'short',
@@ -3363,14 +3375,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                       </div>
                                     )}
                                     {msg.bookingData.time && (
-                                      <div className="flex-1 p-2 bg-primary/5 rounded-lg border border-primary/10">
+                                      <div className="flex-1 p-3 bg-primary/10 rounded-xl border border-primary/20">
                                         <div className="flex items-center gap-1.5">
-                                          <Clock className="h-3 w-3 text-primary" />
-                                          <p className="text-[9px] text-primary font-medium uppercase tracking-wide">
+                                          <Clock className="h-3.5 w-3.5 text-primary" />
+                                          <p className="text-[10px] text-primary font-semibold uppercase tracking-wide">
                                             {language === "TR" ? "Saat" : "Time"}
                                           </p>
                                         </div>
-                                        <p className="text-xs font-semibold text-foreground mt-0.5">
+                                        <p className="text-sm font-bold text-foreground mt-1">
                                           {msg.bookingData.time}
                                         </p>
                                       </div>
@@ -3380,14 +3392,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
 
                                 {/* Return Trip Info */}
                                 {msg.bookingData.hasReturnTrip && msg.bookingData.returnDate && (
-                                  <div className="p-2 bg-amber-500/5 rounded-lg border border-amber-500/20">
-                                    <div className="flex items-center gap-1.5 mb-1">
-                                      <ArrowRight className="h-3 w-3 text-amber-600" />
-                                      <p className="text-[9px] text-amber-600 font-medium uppercase tracking-wide">
+                                  <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <ArrowRight className="h-3.5 w-3.5 text-amber-600" />
+                                      <p className="text-[10px] text-amber-600 font-semibold uppercase tracking-wide">
                                         {language === "TR" ? "Dönüş" : "Return"}
                                       </p>
                                     </div>
-                                    <p className="text-xs font-semibold text-foreground">
+                                    <p className="text-sm font-bold text-foreground">
                                       {new Date(msg.bookingData.returnDate).toLocaleDateString(language === "TR" ? "tr-TR" : "en-US", {
                                         day: 'numeric',
                                         month: 'short'
@@ -3398,23 +3410,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                 )}
                               </div>
 
-                              {/* Action Buttons */}
-                              <div className="space-y-2">
-                                <Button
-                                  onClick={() => handleApplyBooking(msg.bookingData!)}
-                                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/25"
-                                >
-                                  <ArrowRight className="h-4 w-4 mr-2" />
-                                  {language === "TR" ? "Rezervasyonu Tamamla" : "Complete Booking"}
-                                </Button>
-                                <ChatRedirectButton
-                                  language={language}
-                                  bookingToken={bookingCreated?.token}
-                                  bookingData={msg.bookingData}
-                                  onRedirect={() => handleApplyBooking(msg.bookingData!)}
-                                />
-                              </div>
-                            </div>
+                              {/* Enhanced ChatRedirectButton - Full Width, More Prominent */}
+                              <ChatRedirectButton
+                                language={language}
+                                bookingToken={bookingCreated?.token}
+                                bookingData={msg.bookingData}
+                                onRedirect={() => handleApplyBooking(msg.bookingData!)}
+                                className="!mt-0 !p-0 !bg-transparent !border-0"
+                              />
+                            </motion.div>
                           )}
 
                           {/* Quick Reply Buttons - Mobile */}
