@@ -2921,48 +2921,21 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 paddingBottom: '0',
               }}
             >
-                {/* Resize Handle - Drag to resize */}
+                {/* Swipe Handle - Drag down to close OR hold to resize */}
                  <div 
                    className={cn(
-                     "flex justify-center pt-2 pb-1.5 cursor-ns-resize shrink-0 transition-colors",
+                     "flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing shrink-0 transition-colors select-none",
                      isDraggingResize && "bg-primary/10"
                    )}
                    style={{ touchAction: 'none' }}
                    onPointerDown={(e) => {
-                     // Resize mode
-                     setIsDraggingResize(true);
-                     resizeStartYRef.current = e.clientY;
-                     resizeStartHeightRef.current = panelHeight;
-                     e.currentTarget.setPointerCapture(e.pointerId);
-                   }}
-                   onPointerMove={(e) => {
-                     if (!isDraggingResize) return;
-                     const deltaY = resizeStartYRef.current - e.clientY;
-                     const viewportHeight = window.innerHeight;
-                     const deltaPercent = (deltaY / viewportHeight) * 100;
-                     const newHeight = Math.min(95, Math.max(30, resizeStartHeightRef.current + deltaPercent));
-                     setPanelHeight(newHeight);
-                   }}
-                   onPointerUp={(e) => {
-                     if (isDraggingResize) {
-                       setIsDraggingResize(false);
-                       e.currentTarget.releasePointerCapture(e.pointerId);
-                       // Save height to localStorage
-                       localStorage.setItem('ai-assistant-panel-height', panelHeight.toString());
-                     }
-                   }}
-                   onPointerCancel={(e) => {
-                     if (isDraggingResize) {
-                       setIsDraggingResize(false);
-                       e.currentTarget.releasePointerCapture(e.pointerId);
-                       // Save height to localStorage
-                       localStorage.setItem('ai-assistant-panel-height', panelHeight.toString());
-                     }
+                     // Start the framer-motion drag (swipe to close)
+                     dragControls.start(e);
                    }}
                  >
                    <div className={cn(
-                     "w-10 h-1.5 rounded-full transition-all",
-                     isDraggingResize ? "bg-primary w-16" : "bg-muted-foreground/30"
+                     "w-12 h-1.5 rounded-full transition-all",
+                     "bg-muted-foreground/40 hover:bg-muted-foreground/60"
                    )} />
                  </div>
                 
