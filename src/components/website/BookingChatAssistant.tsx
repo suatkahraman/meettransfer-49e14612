@@ -3119,7 +3119,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           
                           {/* Vehicle Cards for Mobile */}
                           {/* Vehicle Cards for Mobile - show 2x2 quick select when vehicle selection is needed */}
-                          {(((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection) && !msg.bookingData?.isComplete) && (
+                          {/* Hide cards if vehicle is already selected OR booking is complete */}
+                          {(((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection) && !msg.bookingData?.vehicleType && !msg.bookingData?.isComplete) && (
                             <ChatVehicleCards
                               passengers={msg.passengerCount || msg.bookingData?.passengers || 2}
                               prices={msg.vehiclePrices}
@@ -3832,7 +3833,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 
                 {/* Vehicle Cards for Desktop */}
                 {/* Vehicle Cards for Desktop - show 2x2 quick select when vehicle selection is needed */}
-                {(((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection) && !msg.bookingData?.isComplete) && (
+                {/* Hide cards if vehicle is already selected OR booking is complete */}
+                {(((msg.showVehicleCards && msg.vehiclePrices) || msg.showVehicleSelection) && !msg.bookingData?.vehicleType && !msg.bookingData?.isComplete) && (
                   <ChatVehicleCards
                     passengers={msg.passengerCount || msg.bookingData?.passengers || 2}
                     prices={msg.vehiclePrices}

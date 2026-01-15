@@ -209,7 +209,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGoogle = async () => {
     try {
-      const redirectUrl = `${window.location.origin}/login`;
+      const redirectUrl = `${window.location.origin}/auth`;
       
       // Check if running as installed PWA (standalone mode)
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
