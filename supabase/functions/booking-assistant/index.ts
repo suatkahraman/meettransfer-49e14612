@@ -38,13 +38,13 @@ serve(async (req) => {
       .from('region_prices')
       .select('city, district, airport, price, price_currency, vehicle_type')
       .eq('is_active', true)
-      .limit(50);
+      .limit(500);
 
     const { data: hourlyPrices } = await supabase
       .from('hourly_rental_prices')
       .select('city, duration_type, price, price_currency, vehicle_type')
       .eq('is_active', true)
-      .limit(30);
+      .limit(100);
 
     // Fetch active promo codes from database
     const { data: promoCodes } = await supabase
@@ -957,7 +957,7 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
 function buildPricingContext(regionPrices: any[], hourlyPrices: any[]): string {
   const lines: string[] = [];
   
-  // Group region prices by city
+  // Group region prices by city and district
   const byCity: Record<string, any[]> = {};
   regionPrices.forEach(p => {
     if (!byCity[p.city]) byCity[p.city] = [];
@@ -965,15 +965,24 @@ function buildPricingContext(regionPrices: any[], hourlyPrices: any[]): string {
   });
 
   lines.push("### Transfer Prices (Airport ⇄ District):");
+  lines.push("IMPORTANT: Match district names flexibly (Side = Side, Belek = Belek, etc.)");
   Object.entries(byCity).forEach(([city, prices]) => {
-    const sample = prices.slice(0, 5);
-    sample.forEach(p => {
-      lines.push(`- ${p.airport || city} → ${p.district}: ${p.price} ${p.price_currency} (${p.vehicle_type})`);
+    // Group by district within each city to show all vehicle types
+    const byDistrict: Record<string, any[]> = {};
+    prices.forEach(p => {
+      if (!byDistrict[p.district]) byDistrict[p.district] = [];
+      byDistrict[p.district].push(p);
+    });
+    
+    Object.entries(byDistrict).forEach(([district, districtPrices]) => {
+      districtPrices.forEach(p => {
+        lines.push(`- ${p.airport || city + " Airport"} → ${district}: ${p.price} ${p.price_currency} (${p.vehicle_type})`);
+      });
     });
   });
 
   lines.push("\n### Hourly Rental Prices:");
-  hourlyPrices.slice(0, 10).forEach(p => {
+  hourlyPrices.forEach(p => {
     lines.push(`- ${p.city} ${p.duration_type}: ${p.price} ${p.price_currency} (${p.vehicle_type})`);
   });
 
