@@ -169,19 +169,27 @@ export const VehicleImageCarousel = memo(({
         );
       })}
 
-      {/* Dots indicator */}
+      {/* Dots indicator - using span instead of button to avoid nesting buttons */}
       {images.length > 1 && (
         <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 z-20">
           {images.map((_, index) => (
-            <button
+            <span
               key={index}
-              type="button"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 goToIndex(index);
                 pauseAutoplay();
               }}
-              className={`w-1.5 h-1.5 rounded-full transition-all ${
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                  goToIndex(index);
+                  pauseAutoplay();
+                }
+              }}
+              className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${
                 index === currentIndex 
                   ? "bg-primary w-3" 
                   : "bg-white/50 hover:bg-white/70"
