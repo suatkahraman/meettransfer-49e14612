@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import WebsiteHeader from "./WebsiteHeader";
 import BottomNavigation from "./BottomNavigation";
-import { PWAInstallBanner } from "./PWAInstallBanner";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { useAdvancedTracking } from "@/hooks/useAdvancedTracking";
+import { useAIChat } from "@/contexts/AIChatContext";
 
 // Lazy load the proactive help popup
 const ProactiveHelpPopup = lazy(() => import("./ProactiveHelpPopup"));
@@ -36,6 +36,7 @@ const pageTransition = {
 
 const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) => {
   const location = useLocation();
+  const { isAIChatOpen } = useAIChat();
   
   // Track visitor for analytics
   useVisitorTracking();
@@ -43,8 +44,9 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
   // Advanced tracking for scroll, clicks, form interactions
   const { visitorId } = useAdvancedTracking();
 
-  // Only show proactive help on main pages (not admin, auth, etc.)
-  const showProactiveHelp = !location.pathname.includes('/admin') && 
+  // Only show proactive help on main pages (not admin, auth, etc.) and when AI chat is closed
+  const showProactiveHelp = !isAIChatOpen &&
+                            !location.pathname.includes('/admin') && 
                             !location.pathname.includes('/driver') && 
                             !location.pathname.includes('/agency') &&
                             !location.pathname.includes('/auth') &&
@@ -65,9 +67,8 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
         {children}
       </motion.main>
       {showBottomNav && <BottomNavigation />}
-      <PWAInstallBanner />
       
-      {/* Proactive help popup - appears after 90 seconds */}
+      {/* Proactive help popup - appears after 90 seconds, hidden when AI chat is open */}
       {showProactiveHelp && (
         <Suspense fallback={null}>
           <ProactiveHelpPopup delaySeconds={90} visitorId={visitorId} />
