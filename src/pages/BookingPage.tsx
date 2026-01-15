@@ -1668,16 +1668,85 @@ const BookingPage = () => {
                       
                       <div className="border-t pt-4">
                         {selectedPrice ? (
-                          <div className="text-center">
-                            <p className="text-sm text-muted-foreground mb-1">
-                              {isHourlyBooking ? (t("totalForDuration") || "Total for") + ` ${selectedDuration}` : (t("totalPrice") || "Total")}
-                            </p>
-                            <p className="text-3xl font-bold text-primary">
-                              {selectedPrice} {preferredCurrency}
-                            </p>
-                            <p className="text-xs text-green-600 mt-2 flex items-center justify-center gap-1">
-                              ✓ {t("freeCancellation24h") || "Free cancellation 24 hours before"}
-                            </p>
+                          <div className="space-y-3">
+                            {/* Outbound Trip Price */}
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-muted-foreground">
+                                {isHourlyBooking ? (t("rentalPrice") || "Rental") : (t("outboundTrip") || "Outbound Trip")}
+                              </span>
+                              <span className="font-medium">{selectedPrice} {preferredCurrency}</span>
+                            </div>
+                            
+                            {/* Return Trip Price with Discount */}
+                            {hasReturnTrip && !isHourlyBooking && (
+                              <>
+                                <div className="flex justify-between items-center text-sm">
+                                  <span className="text-muted-foreground flex items-center gap-1">
+                                    {t("returnTrip") || "Return Trip"}
+                                    {isPromoCodeValid && promoDiscountPercent && (
+                                      <span className="text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded">
+                                        -{promoDiscountPercent}%
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span className="font-medium flex items-center gap-2">
+                                    {isPromoCodeValid && promoDiscountPercent ? (
+                                      <>
+                                        <span className="line-through text-muted-foreground text-xs">{selectedPrice}</span>
+                                        <span className="text-green-600 dark:text-green-400">
+                                          {Math.round(selectedPrice * (100 - promoDiscountPercent) / 100)} {preferredCurrency}
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <span>{selectedPrice} {preferredCurrency}</span>
+                                    )}
+                                  </span>
+                                </div>
+                                
+                                {/* Savings */}
+                                {isPromoCodeValid && promoDiscountPercent && (
+                                  <div className="flex justify-between items-center text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-1.5 rounded-lg">
+                                    <span className="flex items-center gap-1">
+                                      <Sparkles className="h-3.5 w-3.5" />
+                                      {t("savings") || "Savings"}
+                                    </span>
+                                    <span className="font-semibold">
+                                      -{Math.round(selectedPrice * promoDiscountPercent / 100)} {preferredCurrency}
+                                    </span>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                            
+                            {/* Total */}
+                            <div className="border-t pt-3 mt-2">
+                              <div className="text-center">
+                                <p className="text-sm text-muted-foreground mb-1">
+                                  {t("grandTotal") || "Grand Total"}
+                                </p>
+                                {hasReturnTrip && !isHourlyBooking ? (
+                                  <div className="space-y-1">
+                                    {isPromoCodeValid && promoDiscountPercent && (
+                                      <p className="text-lg text-muted-foreground line-through">
+                                        {selectedPrice * 2} {preferredCurrency}
+                                      </p>
+                                    )}
+                                    <p className="text-3xl font-bold text-primary">
+                                      {isPromoCodeValid && promoDiscountPercent
+                                        ? selectedPrice + Math.round(selectedPrice * (100 - promoDiscountPercent) / 100)
+                                        : selectedPrice * 2} {preferredCurrency}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <p className="text-3xl font-bold text-primary">
+                                    {selectedPrice} {preferredCurrency}
+                                  </p>
+                                )}
+                                <p className="text-xs text-green-600 mt-2 flex items-center justify-center gap-1">
+                                  ✓ {t("freeCancellation24h") || "Free cancellation 24 hours before"}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         ) : (
                           <div className="text-center">
@@ -1728,10 +1797,30 @@ const BookingPage = () => {
           <div className="flex-1 min-w-0">
             {selectedPrice ? (
               <>
-                <p className="text-xs text-muted-foreground">{t("totalPrice") || "Total"}</p>
-                <p className="text-xl sm:text-2xl font-bold text-primary">
-                  {selectedPrice} {preferredCurrency}
-                </p>
+                <p className="text-xs text-muted-foreground">{t("grandTotal") || "Total"}</p>
+                {hasReturnTrip && !isHourlyBooking ? (
+                  <div className="flex items-center gap-2">
+                    {isPromoCodeValid && promoDiscountPercent && (
+                      <span className="text-sm text-muted-foreground line-through">
+                        {selectedPrice * 2}
+                      </span>
+                    )}
+                    <p className="text-xl sm:text-2xl font-bold text-primary">
+                      {isPromoCodeValid && promoDiscountPercent
+                        ? selectedPrice + Math.round(selectedPrice * (100 - promoDiscountPercent) / 100)
+                        : selectedPrice * 2} {preferredCurrency}
+                    </p>
+                    {isPromoCodeValid && promoDiscountPercent && (
+                      <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded font-medium">
+                        -{promoDiscountPercent}%
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xl sm:text-2xl font-bold text-primary">
+                    {selectedPrice} {preferredCurrency}
+                  </p>
+                )}
               </>
             ) : (
               <div>
