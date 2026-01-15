@@ -9,6 +9,7 @@ import { MobileTooltip } from "@/components/ui/mobile-tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAIChat } from "@/contexts/AIChatContext";
+import { useAITestOptional } from "@/contexts/AITestContext";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import ReactMarkdown from "react-markdown";
@@ -1313,6 +1314,7 @@ function markOnboardingSeen(): void {
 export default function BookingChatAssistant({ onApplyBooking, defaultOpen = false, mobileFloating = false }: BookingChatAssistantProps) {
   const { t, language } = useLanguage();
   const { setAIChatOpen } = useAIChat();
+  const testContext = useAITestOptional();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -2354,6 +2356,42 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
         
         if (hasUsefulData) {
           console.log("[AI Assistant] Auto-syncing booking data to form:", bookingData);
+          
+          // Test mode logging for each step
+          if (testContext?.smokeTestConfig.enabled) {
+            if (bookingData.pickup) {
+              testContext.updateStep('pickup', bookingData.pickup);
+              testContext.setCurrentStep('dropoff');
+            }
+            if (bookingData.dropoff) {
+              testContext.updateStep('dropoff', bookingData.dropoff);
+              testContext.setCurrentStep('date');
+            }
+            if (bookingData.date) {
+              testContext.updateStep('date', bookingData.date);
+              testContext.setCurrentStep('time');
+            }
+            if (bookingData.time) {
+              testContext.updateStep('time', bookingData.time);
+              testContext.setCurrentStep('passengers');
+            }
+            if (bookingData.passengers) {
+              testContext.updateStep('passengers', bookingData.passengers);
+              testContext.setCurrentStep('vehicle');
+            }
+            if (bookingData.vehicleType) {
+              testContext.updateStep('vehicle', bookingData.vehicleType);
+              testContext.setCurrentStep('confirmation');
+            }
+            if (bookingData.paymentMethod) {
+              testContext.updateStep('payment', bookingData.paymentMethod);
+            }
+            if (bookingData.hasReturnTrip !== null && bookingData.hasReturnTrip !== undefined) {
+              testContext.updateStep('returnTrip', bookingData.hasReturnTrip ? 'Yes' : 'No');
+            }
+            testContext.log('Booking data updated', bookingData);
+          }
+          
           // Small delay so user can see the message first
           setTimeout(() => {
             onApplyBooking(bookingData);

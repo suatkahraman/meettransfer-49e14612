@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { PromoProvider } from "./contexts/PromoContext";
 import { AIChatProvider } from "./contexts/AIChatContext";
+import { AITestProvider } from "./contexts/AITestContext";
 import { AgencyLanguageProvider } from "./contexts/AgencyLanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
@@ -205,6 +206,7 @@ const App = () => (
               <GeoLanguageInitializer />
               <PromoProvider>
               <AIChatProvider>
+              <AITestProvider>
               <UpdateManager />
               <PWAInstallPrompt />
               <PWADebugPanel />
@@ -351,6 +353,7 @@ const App = () => (
               </Routes>
               <FloatingWhatsApp />
             </AuthProvider>
+            </AITestProvider>
             </AIChatProvider>
             </PromoProvider>
           </LanguageProvider>
