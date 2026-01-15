@@ -41,6 +41,7 @@ export function PWAUpdatePrompt() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null);
   const lastPromptedSwUrlRef = useRef<string | null>(null);
+  const lastSeenVersionRef = useRef<string | null>(null);
 
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null);
@@ -144,13 +145,48 @@ export function PWAUpdatePrompt() {
           }
         };
 
+        // Extra-fast detection for installed PWAs:
+        // version.json is fetched with no-store to bypass caches; if it changes, we force a SW update + reload.
+        const pollVersionJson = async () => {
+          try {
+            const res = await fetch("/version.json", { cache: "no-store" });
+            if (!res.ok) return;
+            const v = (await res.json()) as any;
+            const fingerprint = `${v?.version ?? ""}-${v?.buildNumber ?? ""}-${v?.releaseDate ?? ""}`;
+            if (!fingerprint || fingerprint === "--") return;
+
+            if (!lastSeenVersionRef.current) {
+              lastSeenVersionRef.current = fingerprint;
+              return;
+            }
+
+            if (lastSeenVersionRef.current !== fingerprint) {
+              console.log("[PWA Update] 🔥 version.json changed → forcing immediate update", {
+                from: lastSeenVersionRef.current,
+                to: fingerprint,
+              });
+              lastSeenVersionRef.current = fingerprint;
+
+              await requestUpdateCheck();
+
+              // If we still don't have a waiting SW (some browsers delay it), hard reload once.
+              if (!registration?.waiting) {
+                setTimeout(() => window.location.reload(), 600);
+              }
+            }
+          } catch {
+            // ignore
+          }
+        };
+
         // ULTRA-AGGRESSIVE update checks - every 10 seconds for fastest detection
         const interval = window.setInterval(requestUpdateCheck, 10 * 1000);
+        const versionInterval = window.setInterval(pollVersionJson, 10 * 1000);
 
-        // Check IMMEDIATELY on page load (after 1 second to allow SW to settle)
+        // Check IMMEDIATELY on page load
         setTimeout(requestUpdateCheck, 1000);
-        // Second check after 3 seconds for reliability
         setTimeout(requestUpdateCheck, 3000);
+        setTimeout(pollVersionJson, 1200);
 
         // Check immediately on visibility change (no debounce for faster detection)
         const onVisible = () => {
@@ -178,6 +214,7 @@ export function PWAUpdatePrompt() {
 
         return () => {
           window.clearInterval(interval);
+          window.clearInterval(versionInterval);
           window.removeEventListener("focus", requestUpdateCheck);
           window.removeEventListener("online", requestUpdateCheck);
           document.removeEventListener("visibilitychange", onVisible);
