@@ -57,7 +57,7 @@ export function PWAUpdatePrompt() {
       setTimeout(() => {
         toast.success(toastText, {
           duration: 2500,
-          icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
+          icon: <CheckCircle2 className="h-4 w-4 text-primary" />,
         });
       }, 800);
     }
@@ -166,6 +166,37 @@ export function PWAUpdatePrompt() {
           }
         };
 
+        // Nuclear option: if a new publish is detected but the browser refuses to install a new SW,
+        // we unregister + clear caches once and reload. This maximizes "always latest" behavior.
+        const forceHardUpdate = async (reason: string) => {
+          console.log("[PWA Update] ☢️ Forcing hard update:", reason);
+
+          try {
+            sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
+          } catch {
+            // ignore
+          }
+
+          try {
+            if (registration) {
+              await registration.unregister();
+            }
+          } catch {
+            // ignore
+          }
+
+          try {
+            if ("caches" in window) {
+              const keys = await caches.keys();
+              await Promise.all(keys.map((k) => caches.delete(k)));
+            }
+          } catch {
+            // ignore
+          }
+
+          window.location.reload();
+        };
+
         // Extra-fast detection for installed PWAs:
         // version.json is fetched with no-store to bypass caches; if it changes, we force a SW update + reload.
         const pollVersionJson = async () => {
@@ -190,10 +221,9 @@ export function PWAUpdatePrompt() {
 
               await requestUpdateCheck();
 
-              // If we still don't have a waiting SW (some browsers delay it), hard reload once.
+              // If we still don't have a waiting SW, go nuclear once (per fingerprint).
               if (!registration?.waiting) {
-                sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
-                setTimeout(() => window.location.reload(), 600);
+                await forceHardUpdate("version_json_changed_no_waiting_sw");
               }
             }
           } catch {
@@ -201,35 +231,38 @@ export function PWAUpdatePrompt() {
           }
         };
 
-        // ULTRA-AGGRESSIVE update checks - every 10 seconds for fastest detection
-        const interval = window.setInterval(requestUpdateCheck, 10 * 1000);
-        const versionInterval = window.setInterval(pollVersionJson, 10 * 1000);
+        // ULTRA-AGGRESSIVE update checks (foreground) - every 3 seconds
+        const interval = window.setInterval(requestUpdateCheck, 3 * 1000);
+        const versionInterval = window.setInterval(pollVersionJson, 3 * 1000);
 
         // Check IMMEDIATELY on page load
-        setTimeout(requestUpdateCheck, 1000);
-        setTimeout(requestUpdateCheck, 3000);
-        setTimeout(pollVersionJson, 1200);
+        setTimeout(requestUpdateCheck, 600);
+        setTimeout(requestUpdateCheck, 1600);
+        setTimeout(pollVersionJson, 800);
 
-        // Check immediately on visibility change (no debounce for faster detection)
+        const onFastTrigger = () => {
+          requestUpdateCheck();
+          void pollVersionJson();
+        };
+
+        // Check immediately on visibility change
         const onVisible = () => {
           if (document.visibilityState === "visible") {
-            requestUpdateCheck();
+            onFastTrigger();
           }
         };
 
         // Listen to all triggers for immediate update detection
-        window.addEventListener("focus", requestUpdateCheck);
-        window.addEventListener("online", requestUpdateCheck);
+        window.addEventListener("focus", onFastTrigger);
+        window.addEventListener("online", onFastTrigger);
         document.addEventListener("visibilitychange", onVisible);
 
         // Also check when page becomes interactive again
-        window.addEventListener("pageshow", requestUpdateCheck);
-        
+        window.addEventListener("pageshow", onFastTrigger);
+
         // Check on any user interaction (first touch/click)
         const onFirstInteraction = () => {
-          requestUpdateCheck();
-          window.removeEventListener("touchstart", onFirstInteraction);
-          window.removeEventListener("click", onFirstInteraction);
+          onFastTrigger();
         };
         window.addEventListener("touchstart", onFirstInteraction, { once: true, passive: true });
         window.addEventListener("click", onFirstInteraction, { once: true });
@@ -237,10 +270,10 @@ export function PWAUpdatePrompt() {
         return () => {
           window.clearInterval(interval);
           window.clearInterval(versionInterval);
-          window.removeEventListener("focus", requestUpdateCheck);
-          window.removeEventListener("online", requestUpdateCheck);
+          window.removeEventListener("focus", onFastTrigger);
+          window.removeEventListener("online", onFastTrigger);
           document.removeEventListener("visibilitychange", onVisible);
-          window.removeEventListener("pageshow", requestUpdateCheck);
+          window.removeEventListener("pageshow", onFastTrigger);
           window.removeEventListener("touchstart", onFirstInteraction);
           window.removeEventListener("click", onFirstInteraction);
         };
