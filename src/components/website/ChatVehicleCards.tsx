@@ -83,32 +83,7 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
       )}
       onClick={handleClick}
     >
-      {/* Badge Stack - Top Left */}
-      <div className="absolute top-1 left-1 z-10 flex flex-col gap-0.5">
-        {/* Most Popular Badge */}
-        {isPopular && (
-          <div className="px-1 py-0.5 bg-primary text-primary-foreground text-[7px] font-bold rounded-full flex items-center gap-0.5">
-            <Award className="h-2 w-2" />
-            {isTurkish ? "Pop" : "Top"}
-          </div>
-        )}
-        
-        {/* Recommended Badge */}
-        {isRecommended && !isPopular && (
-          <div className="px-1 py-0.5 bg-primary text-primary-foreground text-[7px] font-bold rounded-full flex items-center gap-0.5">
-            <Star className="h-2 w-2 fill-current" />
-            {isTurkish ? "Öner" : "Best"}
-          </div>
-        )}
-
-        {/* Best Value Badge */}
-        {isBestValue && (
-          <div className="px-1 py-0.5 bg-green-500 text-white text-[7px] font-bold rounded-full flex items-center gap-0.5">
-            <TrendingDown className="h-2 w-2" />
-            {isTurkish ? "₺" : "€"}
-          </div>
-        )}
-      </div>
+      {/* Selected Check - Top Left */}
 
       {/* Selected Check */}
       {isSelected && (
