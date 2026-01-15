@@ -875,6 +875,13 @@ const translations: Record<Language, Record<string, string>> = {
     reservationDetailsCopied: "Reservation details copied",
     copyFailed: "Copy failed",
     copyBtn: "Copy",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 Your reservation was successfully created!",
+    reservationCreateFailed: "Failed to create reservation",
+    reservationDeleted: "Reservation deleted",
+    newReservationCreated: "New reservation created!",
+    pleaseEnterName: "Please enter your name",
+    pleaseEnterPhone: "Please enter your phone number",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - International VIP Airport Transfer & Chauffeur Service | Turkey, Dubai, Cyprus",
@@ -11515,6 +11522,13 @@ const translations: Record<Language, Record<string, string>> = {
     reservationDetailsCopied: "Rezervasyon detayları kopyalandı",
     copyFailed: "Kopyalama başarısız",
     copyBtn: "Kopyala",
+    // Customer Toast Messages
+    reservationCreatedSuccess: "🎉 Rezervasyonunuz başarıyla oluşturuldu!",
+    reservationCreateFailed: "Rezervasyon oluşturulamadı",
+    reservationDeleted: "Rezervasyon silindi",
+    newReservationCreated: "Yeni rezervasyon oluşturuldu!",
+    pleaseEnterName: "Lütfen adınızı girin",
+    pleaseEnterPhone: "Lütfen telefon numaranızı girin",
 
     // Customer Portal Page
     yourBookings: "Rezervasyonlarınız",
