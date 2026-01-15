@@ -1333,10 +1333,22 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   const [waitingForPrice, setWaitingForPrice] = useState(false);
   const [detectedCountryCode, setDetectedCountryCode] = useState<string | null>(null);
   const [showLanguageBanner, setShowLanguageBanner] = useState(true);
-  const [panelHeight, setPanelHeight] = useState(75); // Default 75% height
+  const [panelHeight, setPanelHeight] = useState(() => {
+    // Load saved height from localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ai-assistant-panel-height');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed >= 30 && parsed <= 95) {
+          return parsed;
+        }
+      }
+    }
+    return 75; // Default 75% height
+  });
   const [isDraggingResize, setIsDraggingResize] = useState(false);
   const resizeStartYRef = useRef<number>(0);
-  const resizeStartHeightRef = useRef<number>(75);
+  const resizeStartHeightRef = useRef<number>(panelHeight);
   const baselineViewportHeightRef = useRef<number>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -2883,12 +2895,16 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                      if (isDraggingResize) {
                        setIsDraggingResize(false);
                        e.currentTarget.releasePointerCapture(e.pointerId);
+                       // Save height to localStorage
+                       localStorage.setItem('ai-assistant-panel-height', panelHeight.toString());
                      }
                    }}
                    onPointerCancel={(e) => {
                      if (isDraggingResize) {
                        setIsDraggingResize(false);
                        e.currentTarget.releasePointerCapture(e.pointerId);
+                       // Save height to localStorage
+                       localStorage.setItem('ai-assistant-panel-height', panelHeight.toString());
                      }
                    }}
                  >
