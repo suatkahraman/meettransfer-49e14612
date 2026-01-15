@@ -2902,9 +2902,13 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               dragControls={dragControls}
               dragListener={false}
               dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0, bottom: 0.5 }}
+              dragElastic={{ top: 0.1, bottom: 0.3 }}
               onDragEnd={(_, info) => {
-                if (info.offset.y > 100 || info.velocity.y > 500) {
+                // More strict thresholds to prevent accidental exits
+                const offsetThreshold = isFullscreen ? 150 : 120;
+                const velocityThreshold = isFullscreen ? 800 : 600;
+                
+                if (info.offset.y > offsetThreshold || info.velocity.y > velocityThreshold) {
                   if (isFullscreen) {
                     // Exit fullscreen first on swipe down
                     setPanelHeight(previousHeightRef.current);
