@@ -2904,7 +2904,14 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               dragElastic={{ top: 0, bottom: 0.5 }}
               onDragEnd={(_, info) => {
                 if (info.offset.y > 100 || info.velocity.y > 500) {
-                  setIsOpen(false);
+                  if (isFullscreen) {
+                    // Exit fullscreen first on swipe down
+                    setPanelHeight(previousHeightRef.current);
+                    setIsFullscreen(false);
+                  } else {
+                    // Close the panel if not in fullscreen
+                    setIsOpen(false);
+                  }
                 }
               }}
               data-mobile-panel
