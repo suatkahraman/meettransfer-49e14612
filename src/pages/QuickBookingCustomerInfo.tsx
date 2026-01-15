@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-// This page now redirects to QuickBookingConfirm which handles everything
+// This page now redirects to BookingPage which handles everything
 export default function QuickBookingCustomerInfo() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -10,11 +10,10 @@ export default function QuickBookingCustomerInfo() {
     const token = searchParams.get("token");
     const bookingId = searchParams.get("bookingId");
     
-    // Redirect to the combined confirm page
+    // Redirect to the combined booking page
     if (token) {
-      navigate(`/quick-booking-confirm?token=${token}`, { replace: true });
+      navigate(`/book?token=${token}`, { replace: true });
     } else if (bookingId) {
-      // Try to get token from booking
       navigate(`/`, { replace: true });
     } else {
       navigate("/", { replace: true });
