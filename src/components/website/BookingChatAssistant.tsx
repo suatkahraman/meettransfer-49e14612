@@ -26,6 +26,7 @@ import { ChatQuickReplyButtons, QuickReplyType } from "./ChatQuickReplyButtons";
 import { ChatLanguageDetectedBanner } from "./ChatLanguageDetectedBanner";
 import { ChatDateTimePicker } from "./ChatDateTimePicker";
 import { SoundWaveInline } from "@/components/ui/SoundWaveAnimation";
+import { RecordingWaveform, CircularWaveform, InlineRecordingWave } from "@/components/ui/RecordingWaveform";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
 
 // Web Speech API type declarations
@@ -4154,24 +4155,22 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               />
             )}
             
-            {/* Sound wave bars when recording */}
+            {/* Circular waveform around the button when recording */}
+            <CircularWaveform 
+              isRecording={isRecording} 
+              audioLevels={audioLevels}
+              color="white"
+            />
+            
+            {/* Center content - waveform or mic icon */}
             {isRecording ? (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex items-center gap-1">
-                  {audioLevels.slice(4, 12).map((level, i) => (
-                    <motion.div
-                      key={i}
-                      className="w-1.5 bg-destructive-foreground/90 rounded-full"
-                      animate={{
-                        height: Math.max(8, 8 + level * 28),
-                      }}
-                      transition={{
-                        duration: 0.05,
-                        ease: "linear",
-                      }}
-                    />
-                  ))}
-                </div>
+                <RecordingWaveform
+                  isRecording={isRecording}
+                  audioLevels={audioLevels.slice(2, 14)}
+                  variant="large"
+                  color="white"
+                />
               </div>
             ) : (
               <motion.div
@@ -4364,20 +4363,11 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
             {isProcessing ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : isRecording ? (
-              <motion.div
-                className="flex items-center gap-0.5"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 0.3, repeat: Infinity }}
-              >
-                {[0, 1, 2].map((i) => (
-                  <motion.div
-                    key={i}
-                    className="w-1 bg-destructive rounded-full"
-                    animate={{ height: [8, 16, 8] }}
-                    transition={{ duration: 0.4, repeat: Infinity, delay: i * 0.1 }}
-                  />
-                ))}
-              </motion.div>
+              <InlineRecordingWave 
+                isRecording={isRecording}
+                barCount={5}
+                className="text-destructive"
+              />
             ) : (
               <Mic className="h-5 w-5" />
             )}
