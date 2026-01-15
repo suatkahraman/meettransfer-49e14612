@@ -257,7 +257,9 @@ export const RideFormContent = memo(({
           loadingPrices={loadingTransferPrice} 
           hasRoute={hasRoute} 
           language={language} 
-          currency={transferPriceCurrency} 
+          currency={transferPriceCurrency}
+          pickup={pickup}
+          dropoff={dropoff}
         />
       </div>
 

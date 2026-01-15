@@ -1,11 +1,12 @@
-import { memo, lazy, Suspense, useState, useCallback, useRef } from "react";
-import { Users, Check, Briefcase, Snowflake, Wifi, Star, Tv, Crown, Armchair } from "lucide-react";
+import { memo, lazy, Suspense, useState, useCallback, useRef, useMemo } from "react";
+import { Users, Check, Briefcase, Snowflake, Wifi, Star, Tv, Crown, Armchair, Sparkles, Wine, Droplets, Luggage, BatteryCharging } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
+import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
+import { DUBAI_VEHICLE_TYPES, isDubaiLocation } from "@/lib/dubaiVehicleTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VehiclePrice } from "./types";
 
-// Feature icon mapping
+// Feature icon mapping - extended for Dubai vehicles
 const featureIcons: Record<string, React.ElementType> = {
   'snowflake': Snowflake,
   'armchair': Armchair,
@@ -13,6 +14,11 @@ const featureIcons: Record<string, React.ElementType> = {
   'stars': Star,
   'tv': Tv,
   'crown': Crown,
+  'sparkles': Sparkles,
+  'wine': Wine,
+  'droplets': Droplets,
+  'luggage': Luggage,
+  'battery-charging': BatteryCharging,
 };
 
 // Vehicle images
@@ -21,6 +27,12 @@ import vitoVipImg from "@/assets/vito-vip-1.jpg";
 import maybachImg from "@/assets/maybach-1.jpg";
 import sprinterImg from "@/assets/sprinter-1.jpg";
 import sedanImg from "@/assets/sedan-airport-1.jpg";
+
+// Dubai vehicle images
+import dubaiSedanImg from "@/assets/dubai/dubai-sedan-private.jpg";
+import dubaiSuburbanImg from "@/assets/dubai/dubai-suburban.jpg";
+import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
+import dubaiVClassImg from "@/assets/dubai/dubai-v-class.jpg";
 
 // Lazy load heavy components
 const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
@@ -32,6 +44,11 @@ const vehicleImages: Record<string, string> = {
   'maybach-minibus': maybachImg,
   'sprinter-minibus': sprinterImg,
   'minibus': sprinterImg,
+  // Dubai vehicles
+  'dubai-private-sedan': dubaiSedanImg,
+  'dubai-suburban': dubaiSuburbanImg,
+  'dubai-vip-mercedes-van': dubaiVipVanImg,
+  'dubai-v-class': dubaiVClassImg,
 };
 
 interface VehicleSelectorProps {
@@ -43,6 +60,8 @@ interface VehicleSelectorProps {
   hasRoute: boolean;
   language: string;
   currency?: string;
+  pickup?: string;
+  dropoff?: string;
 }
 
 export const VehicleSelector = memo(({
@@ -53,13 +72,24 @@ export const VehicleSelector = memo(({
   loadingPrices,
   hasRoute,
   language,
-  currency = "EUR"
+  currency = "EUR",
+  pickup = "",
+  dropoff = ""
 }: VehicleSelectorProps) => {
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Determine if location is in Dubai and get appropriate vehicle list
+  const isDubai = useMemo(() => {
+    return isDubaiLocation(pickup) || isDubaiLocation(dropoff);
+  }, [pickup, dropoff]);
+
+  const vehicleList: VehicleTypeInfo[] = useMemo(() => {
+    return isDubai ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
+  }, [isDubai]);
+
   // Simple click handler
-  const handleVehicleClick = useCallback((vehicle: typeof VEHICLE_TYPES[0], isDisabled: boolean) => {
+  const handleVehicleClick = useCallback((vehicle: VehicleTypeInfo, isDisabled: boolean) => {
     if (isDisabled) return;
     onSelectVehicle(vehicle.value);
   }, [onSelectVehicle]);
@@ -75,7 +105,7 @@ export const VehicleSelector = memo(({
 
   return (
     <div ref={containerRef} className="grid grid-cols-2 gap-2.5 sm:gap-3">
-      {VEHICLE_TYPES.map((vehicle, index) => {
+      {vehicleList.map((vehicle, index) => {
         const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
         const isSelected = selectedVehicle === vehicle.value;
         const isDisabled = vehicle.passengers < parseInt(passengers);
