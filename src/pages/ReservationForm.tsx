@@ -965,11 +965,21 @@ const ReservationForm = () => {
         console.error('Failed to notify admin:', notifyError);
       }
 
-      // Send email notification
+      // Send email notification to admin
       try {
         await emailAdminNewReservation(newReservation.id);
       } catch (emailError) {
         console.error('Failed to send admin email:', emailError);
+      }
+
+      // Send confirmation email to customer
+      try {
+        await supabase.functions.invoke('send-confirmation-email', {
+          body: { reservation_id: newReservation.id, lang: language?.substring(0, 2) || 'en' }
+        });
+        console.log('Customer confirmation email sent');
+      } catch (emailError) {
+        console.error('Failed to send customer confirmation email:', emailError);
       }
 
       // Create return trip if enabled
