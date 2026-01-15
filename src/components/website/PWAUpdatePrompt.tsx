@@ -121,8 +121,13 @@ export function PWAUpdatePrompt() {
           }
         };
 
-        // AGGRESSIVE update checks - every 30 seconds for immediate detection after publish
-        const interval = window.setInterval(requestUpdateCheck, 30 * 1000);
+        // ULTRA-AGGRESSIVE update checks - every 10 seconds for fastest detection
+        const interval = window.setInterval(requestUpdateCheck, 10 * 1000);
+
+        // Check IMMEDIATELY on page load (after 1 second to allow SW to settle)
+        setTimeout(requestUpdateCheck, 1000);
+        // Second check after 3 seconds for reliability
+        setTimeout(requestUpdateCheck, 3000);
 
         // Check immediately on visibility change (no debounce for faster detection)
         const onVisible = () => {
@@ -138,6 +143,15 @@ export function PWAUpdatePrompt() {
 
         // Also check when page becomes interactive again
         window.addEventListener("pageshow", requestUpdateCheck);
+        
+        // Check on any user interaction (first touch/click)
+        const onFirstInteraction = () => {
+          requestUpdateCheck();
+          window.removeEventListener("touchstart", onFirstInteraction);
+          window.removeEventListener("click", onFirstInteraction);
+        };
+        window.addEventListener("touchstart", onFirstInteraction, { once: true, passive: true });
+        window.addEventListener("click", onFirstInteraction, { once: true });
 
         return () => {
           window.clearInterval(interval);
@@ -145,6 +159,8 @@ export function PWAUpdatePrompt() {
           window.removeEventListener("online", requestUpdateCheck);
           document.removeEventListener("visibilitychange", onVisible);
           window.removeEventListener("pageshow", requestUpdateCheck);
+          window.removeEventListener("touchstart", onFirstInteraction);
+          window.removeEventListener("click", onFirstInteraction);
         };
       },
       onNeedRefresh: () => {
