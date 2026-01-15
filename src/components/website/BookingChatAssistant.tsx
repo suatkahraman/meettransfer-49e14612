@@ -2421,13 +2421,15 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
   };
 
   const cleanResponseForDisplay = (response: string): string => {
-    // Remove all JSON blocks from display (booking, customerName, discount, readyToBook)
+    // Remove all JSON blocks from display (booking, customerName, discount, readyToBook, priceRequest)
     return response
       .replace(/```booking[\s\S]*?```/g, '')
       .replace(/```json[\s\S]*?```/g, '')
       .replace(/```customerName[\s\S]*?```/g, '')
       .replace(/```discount[\s\S]*?```/g, '')
       .replace(/```readyToBook[\s\S]*?```/g, '')
+      .replace(/```priceRequest[\s\S]*?```/g, '')
+      .replace(/\{"needed":\s*true[^}]*\}/g, '') // Fallback for unformatted priceRequest JSON
       .trim();
   };
 
@@ -3824,7 +3826,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
               </div>
               <div className="max-w-[85%] rounded-xl px-3 py-2 text-sm bg-muted">
                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                  {streamingContent}
+                  {cleanResponseForDisplay(streamingContent)}
                 </ReactMarkdown>
               </div>
             </div>
