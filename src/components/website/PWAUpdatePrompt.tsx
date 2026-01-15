@@ -121,28 +121,30 @@ export function PWAUpdatePrompt() {
           }
         };
 
-        // Less aggressive update checks - every 5 minutes instead of 30 seconds
-        const interval = window.setInterval(requestUpdateCheck, 5 * 60 * 1000);
+        // AGGRESSIVE update checks - every 30 seconds for immediate detection after publish
+        const interval = window.setInterval(requestUpdateCheck, 30 * 1000);
 
-        // Debounced visibility check
-        let visibilityTimeout: ReturnType<typeof setTimeout>;
+        // Check immediately on visibility change (no debounce for faster detection)
         const onVisible = () => {
           if (document.visibilityState === "visible") {
-            clearTimeout(visibilityTimeout);
-            visibilityTimeout = setTimeout(requestUpdateCheck, 2000);
+            requestUpdateCheck();
           }
         };
 
+        // Listen to all triggers for immediate update detection
         window.addEventListener("focus", requestUpdateCheck);
         window.addEventListener("online", requestUpdateCheck);
         document.addEventListener("visibilitychange", onVisible);
 
+        // Also check when page becomes interactive again
+        window.addEventListener("pageshow", requestUpdateCheck);
+
         return () => {
           window.clearInterval(interval);
-          clearTimeout(visibilityTimeout);
           window.removeEventListener("focus", requestUpdateCheck);
           window.removeEventListener("online", requestUpdateCheck);
           document.removeEventListener("visibilitychange", onVisible);
+          window.removeEventListener("pageshow", requestUpdateCheck);
         };
       },
       onNeedRefresh: () => {
@@ -182,19 +184,30 @@ export function PWAUpdatePrompt() {
     const updateSW = updateSWRef.current;
 
     try {
-      // First, check for any newer updates before applying
-      console.log("[PWA Update] Checking for latest updates before applying...");
+      // CRITICAL: Check for ALL pending updates before applying
+      // This ensures we skip to the LATEST version, not an intermediate one
+      console.log("[PWA Update] 🔄 Fetching all pending updates...");
+      
+      // Force update check to get the absolute latest SW
       await registration?.update();
       
-      // Small delay to allow any new SW to be detected
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait a moment for any new SW to be detected
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Now get the latest waiting worker (could be newer than when prompt was shown)
+      // Check again in case there's an even newer version
+      await registration?.update();
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Now get the latest waiting worker (this should be the most recent version)
       const latestWaiting = registration?.waiting;
-      console.log("[PWA Update] Applying latest update:", latestWaiting?.scriptURL);
+      console.log("[PWA Update] ✅ Applying LATEST update:", {
+        scriptURL: latestWaiting?.scriptURL,
+        state: latestWaiting?.state
+      });
 
       // Preferred flow (vite-plugin-pwa helper) - this will skip to the latest SW
       if (updateSW) {
+        console.log("[PWA Update] Using updateSW helper");
         void updateSW(true);
         setShowPrompt(false);
         return;
@@ -202,12 +215,14 @@ export function PWAUpdatePrompt() {
 
       // Hard fallback - tell the waiting SW to take over
       if (latestWaiting) {
+        console.log("[PWA Update] Using SKIP_WAITING message");
         latestWaiting.postMessage({ type: "SKIP_WAITING" });
         setShowPrompt(false);
         return;
       }
 
       // Final fallback - just reload
+      console.log("[PWA Update] Using hard reload fallback");
       window.location.reload();
     } catch (error) {
       console.error("[PWA Update] Error during update:", error);
