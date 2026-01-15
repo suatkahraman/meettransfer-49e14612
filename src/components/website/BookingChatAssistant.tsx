@@ -3079,11 +3079,31 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                 <div className="text-right">
                                   <p className="text-[10px] text-muted-foreground uppercase">
                                     {language === "TR" ? "Toplam" : "Total"}
+                                    {msg.bookingData.hasReturnTrip && (
+                                      <span className="ml-1 text-primary">
+                                        ({language === "TR" ? "Gidiş + Dönüş" : "Round Trip"})
+                                      </span>
+                                    )}
                                   </p>
                                   <p className="font-bold text-primary text-xl">
                                     {msg.bookingData.currency === "TRY" ? "₺" : "€"}
-                                    {msg.vehiclePrices[msg.bookingData.vehicleType] || msg.bookingData.estimatedPrice}
+                                    {(() => {
+                                      const basePrice = msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice || 0;
+                                      if (msg.bookingData.hasReturnTrip) {
+                                        const returnPrice = Math.round(basePrice * 0.75); // 25% discount on return
+                                        return basePrice + returnPrice;
+                                      }
+                                      return basePrice;
+                                    })()}
                                   </p>
+                                  {msg.bookingData.hasReturnTrip && (
+                                    <p className="text-[9px] text-muted-foreground">
+                                      {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                                      {msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice} + {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                                      {Math.round((msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice || 0) * 0.75)}
+                                      <span className="ml-1 text-green-600">(-25%)</span>
+                                    </p>
+                                  )}
                                 </div>
                               </div>
 
@@ -3768,11 +3788,31 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground uppercase">
                           {language === "TR" ? "Toplam" : "Total"}
+                          {msg.bookingData.hasReturnTrip && (
+                            <span className="ml-1 text-primary">
+                              ({language === "TR" ? "Gidiş + Dönüş" : "Round Trip"})
+                            </span>
+                          )}
                         </p>
                         <p className="font-bold text-primary text-2xl">
                           {msg.bookingData.currency === "TRY" ? "₺" : "€"}
-                          {msg.vehiclePrices[msg.bookingData.vehicleType] || msg.bookingData.estimatedPrice}
+                          {(() => {
+                            const basePrice = msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice || 0;
+                            if (msg.bookingData.hasReturnTrip) {
+                              const returnPrice = Math.round(basePrice * 0.75); // 25% discount on return
+                              return basePrice + returnPrice;
+                            }
+                            return basePrice;
+                          })()}
                         </p>
+                        {msg.bookingData.hasReturnTrip && (
+                          <p className="text-[10px] text-muted-foreground">
+                            {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                            {msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice} + {msg.bookingData.currency === "TRY" ? "₺" : "€"}
+                            {Math.round((msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice || 0) * 0.75)}
+                            <span className="ml-1 text-green-600">(-25%)</span>
+                          </p>
+                        )}
                       </div>
                     </div>
 
