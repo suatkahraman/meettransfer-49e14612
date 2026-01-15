@@ -74,7 +74,7 @@ const PrivateVsTaxiTurkey = () => {
         ]}
       />
 
-      <article className="max-w-4xl mx-auto px-4 py-12">
+      <article className="max-w-4xl mx-auto px-3 sm:px-4 py-8 md:py-12">
         {/* Back to Blog */}
         <Link 
           to={getLocalizedPath("/blog")} 
@@ -85,31 +85,31 @@ const PrivateVsTaxiTurkey = () => {
         </Link>
 
         {/* Article Header */}
-        <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">{t('travelTips')}</Badge>
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+        <header className="mb-8 md:mb-12">
+          <Badge variant="secondary" className="mb-3 md:mb-4">{t('travelTips')}</Badge>
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight">
             {t('blogPrivateTaxiH1')}
           </h1>
-          <p className="text-xl text-muted-foreground mb-6">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 md:mb-6">
             {t('blogPrivateTaxiIntro')}
           </p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {t("lastUpdated")}: {formatBlogDate("2025-01-10")}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               11 {t('minRead')}
             </span>
           </div>
         </header>
 
         {/* Share Buttons */}
-        <ShareButtons title={t('blogPrivateTaxiH1')} className="mb-8" />
+        <ShareButtons title={t('blogPrivateTaxiH1')} className="mb-6 md:mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-12">
+        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-8 md:mb-12">
           <img 
             src={vitoVipStarlightPurple} 
             alt={t("blogTaxiHeroAlt")}
@@ -129,17 +129,17 @@ const PrivateVsTaxiTurkey = () => {
           { id: "best-choice", title: t("blogTaxiTocBestChoice") },
         ]} />
 
-        <div className="prose prose-lg dark:prose-invert max-w-none">
+        <div className="prose prose-sm sm:prose-base md:prose-lg dark:prose-invert max-w-none">
           <h2 id="introduction">{t("blogTaxiSectionIntro")}</h2>
           <p>{t("blogTaxiIntroP1")}</p>
           <p>{t("blogTaxiIntroP2")}</p>
 
           <h2 id="quick-summary">{t("blogTaxiSectionQuickSummary")}</h2>
           
-          <div className="not-prose grid md:grid-cols-2 gap-6 my-8">
+          <div className="not-prose grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 my-6 md:my-8">
             <Card className="border-primary/30">
-              <CardHeader>
-                <CardTitle className="text-lg">{t("blogTaxiPrivateTransfer")}</CardTitle>
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="text-base md:text-lg">{t("blogTaxiPrivateTransfer")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-center gap-2 text-green-600">
@@ -166,8 +166,8 @@ const PrivateVsTaxiTurkey = () => {
             </Card>
 
             <Card className="border-amber-500/30">
-              <CardHeader>
-                <CardTitle className="text-lg">{t("blogTaxiRegularTransport")}</CardTitle>
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="text-base md:text-lg">{t("blogTaxiRegularTransport")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-center gap-2 text-green-600">

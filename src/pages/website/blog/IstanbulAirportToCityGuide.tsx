@@ -118,7 +118,7 @@ const IstanbulAirportToCityGuide = () => {
         ]}
       />
 
-      <article className="max-w-4xl mx-auto px-4 py-12">
+      <article className="max-w-4xl mx-auto px-3 sm:px-4 py-8 md:py-12">
         {/* Back to Blog */}
         <Link 
           to={getLocalizedPath("/blog")} 
@@ -129,31 +129,31 @@ const IstanbulAirportToCityGuide = () => {
         </Link>
 
         {/* Article Header */}
-        <header className="mb-12">
-          <Badge variant="secondary" className="mb-4">{t("cityIstanbul")}</Badge>
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+        <header className="mb-8 md:mb-12">
+          <Badge variant="secondary" className="mb-3 md:mb-4">{t("cityIstanbul")}</Badge>
+          <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight">
             {t('blogIstanbul1H1')}
           </h1>
-          <p className="text-xl text-muted-foreground mb-6">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-4 md:mb-6">
             {t('blogIstanbul1Intro')}
           </p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-3 md:gap-4 text-xs sm:text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {t('lastUpdated')}: {formatBlogDate("2025-01-10")}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               14 {t('minRead')}
             </span>
           </div>
         </header>
 
         {/* Share Buttons */}
-        <ShareButtons title={t('blogIstanbul1H1')} className="mb-8" />
+        <ShareButtons title={t('blogIstanbul1H1')} className="mb-6 md:mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-12">
+        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-8 md:mb-12">
           <img 
             src={istanbulAirportCityHero} 
             alt={t("blogIstanbulHeroAlt")}
@@ -175,7 +175,7 @@ const IstanbulAirportToCityGuide = () => {
         ]} />
 
         {/* Article Content */}
-        <div className="prose prose-lg dark:prose-invert max-w-none">
+        <div className="prose prose-sm sm:prose-base md:prose-lg dark:prose-invert max-w-none">
           <h2 id="introduction">{t("blogIstanbulTocIntro")}</h2>
           <p>{t("blogIstanbulIntroP1")}</p>
           <p>{t("blogIstanbulIntroP2")}</p>
@@ -183,7 +183,8 @@ const IstanbulAirportToCityGuide = () => {
           <h2 id="quick-comparison">{t("blogIstanbulTocComparison")}</h2>
           <p>{t("blogIstanbulQuickOverview")}</p>
 
-          <div className="overflow-x-auto not-prose my-8">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto not-prose my-6 md:my-8">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -220,6 +221,62 @@ const IstanbulAirportToCityGuide = () => {
                 </TableRow>
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden not-prose my-6 space-y-3">
+            <Card className="p-3 border-primary/30">
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-semibold text-sm">{t("blogIstanbulTablePrivate")}</h4>
+                <span className="text-primary font-bold">€50-65</span>
+              </div>
+              <div className="flex gap-4 text-xs text-muted-foreground mb-2">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  35-45 min
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">{t("blogIstanbulBestForFamilies")}</p>
+            </Card>
+            <Card className="p-3">
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-semibold text-sm">{t("blogIstanbulTableRegular")}</h4>
+                <span className="text-muted-foreground font-medium">Variable</span>
+              </div>
+              <div className="flex gap-4 text-xs text-muted-foreground mb-2">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  40-60 min
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">{t("blogIstanbulBestForSolo")}</p>
+            </Card>
+            <Card className="p-3">
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-semibold text-sm">{t("blogIstanbulTableMetro")}</h4>
+                <span className="text-green-600 font-bold">€1-2</span>
+              </div>
+              <div className="flex gap-4 text-xs text-muted-foreground mb-2">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  50-70 min
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">{t("blogIstanbulBestForBudget")}</p>
+            </Card>
+            <Card className="p-3">
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-semibold text-sm">{t("blogIstanbulTableHavaist")}</h4>
+                <span className="text-muted-foreground font-medium">€5-8</span>
+              </div>
+              <div className="flex gap-4 text-xs text-muted-foreground mb-2">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  60-90 min
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">{t("blogIstanbulBestForMajor")}</p>
+            </Card>
           </div>
 
           <h2 id="private-transfer">{t("blogIstanbulTocPrivate")}</h2>
