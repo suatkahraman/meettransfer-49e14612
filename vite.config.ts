@@ -234,32 +234,32 @@ export default defineConfig(({ mode }) => ({
           },
           
           // ============================================
-          // API CALLS - StaleWhileRevalidate (instant + fresh)
+          // STATIC READ-ONLY DATA - Short cache (price lists, destinations)
           // ============================================
           
-          // Supabase Edge Functions (cacheable) - StaleWhileRevalidate
+          // Supabase Edge Functions (cacheable static data only)
           {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/(get-google-reviews|get-all-vehicle-prices|get-exchange-rate|get-destinations)/i,
+            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/(get-google-reviews|get-destinations)/i,
             handler: "StaleWhileRevalidate",
             options: {
-              cacheName: "supabase-functions-cache",
+              cacheName: "supabase-static-cache",
               expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 // 1 hour
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 30 // 30 minutes for static content
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
           },
-          // Supabase REST API (read-only tables) - StaleWhileRevalidate
+          // Supabase REST API (truly static tables) - Short cache
           {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(hourly_rental_prices|region_prices|intercity_prices|google_reviews_cache)/i,
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(google_reviews_cache)/i,
             handler: "StaleWhileRevalidate",
             options: {
-              cacheName: "supabase-readonly-cache",
+              cacheName: "supabase-reviews-cache",
               expiration: {
-                maxEntries: 100,
+                maxEntries: 10,
                 maxAgeSeconds: 60 * 15 // 15 minutes
               },
               cacheableResponse: {
@@ -269,35 +269,70 @@ export default defineConfig(({ mode }) => ({
           },
           
           // ============================================
-          // DYNAMIC API - NetworkFirst (fresh data priority)
+          // DYNAMIC/CRITICAL API - NetworkOnly (always fresh)
           // ============================================
           
-          // Supabase REST API (dynamic tables) - NetworkFirst with timeout
+          // Price-related endpoints - NEVER cache (prices change frequently)
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/(get-all-vehicle-prices|get-exchange-rate|calculate-price|get-price)/i,
+            handler: "NetworkOnly"
+          },
+          // Price tables - NEVER cache
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(hourly_rental_prices|region_prices|intercity_prices|price_thresholds)/i,
+            handler: "NetworkOnly"
+          },
+          // Reservations and bookings - NEVER cache
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(reservations|quick_booking_requests|bookings)/i,
+            handler: "NetworkOnly"
+          },
+          // User/customer data - NEVER cache  
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(profiles|user_roles|agencies|drivers)/i,
+            handler: "NetworkOnly"
+          },
+          // Promo codes - NEVER cache (validity changes)
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(promo_codes)/i,
+            handler: "NetworkOnly"
+          },
+          // AI/Chat endpoints - NEVER cache
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/(ai-chat|whatsapp|send-|create-|confirm-|track-)/i,
+            handler: "NetworkOnly"
+          },
+          
+          // ============================================
+          // FALLBACK - Other Supabase calls with very short cache
+          // ============================================
+          
+          // Supabase REST API (other tables) - NetworkFirst with 1 min cache
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
-              cacheName: "supabase-rest-cache",
-              networkTimeoutSeconds: 3, // Fast fallback to cache
+              cacheName: "supabase-rest-fallback",
+              networkTimeoutSeconds: 2, // Fast timeout
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 5 // 5 minutes
+                maxEntries: 50,
+                maxAgeSeconds: 60 // 1 minute only
               },
               cacheableResponse: {
                 statuses: [0, 200]
               }
             }
           },
-          // Other Edge Functions - NetworkFirst
+          // Other Edge Functions - NetworkFirst with 2 min cache
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
-              cacheName: "supabase-edge-cache",
-              networkTimeoutSeconds: 5,
+              cacheName: "supabase-edge-fallback",
+              networkTimeoutSeconds: 3,
               expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 10 // 10 minutes
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 2 // 2 minutes
               },
               cacheableResponse: {
                 statuses: [0, 200]
