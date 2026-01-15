@@ -3347,7 +3347,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           )}
 
                           {/* Date Time Picker - Mobile */}
-                          {msgIndex === messages.length - 1 && !isLoading && msg.showDateTimePicker && (
+                          {/* Hide picker if date AND time are already selected */}
+                          {msgIndex === messages.length - 1 && !isLoading && msg.showDateTimePicker && !(msg.bookingData?.date && msg.bookingData?.time) && (
                             <ChatDateTimePicker
                               language={language}
                               onSelectDateTime={(date, formattedDate, time, formattedTime, returnDate, formattedReturnDate, returnTime, formattedReturnTime) => {
@@ -4084,7 +4085,8 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                 )}
 
                 {/* Date Time Picker - Desktop */}
-                {msgIndex === messages.length - 1 && !isLoading && msg.showDateTimePicker && (
+                {/* Hide picker if date AND time are already selected */}
+                {msgIndex === messages.length - 1 && !isLoading && msg.showDateTimePicker && !(msg.bookingData?.date && msg.bookingData?.time) && (
                   <ChatDateTimePicker
                     language={language}
                     onSelectDateTime={(date, formattedDate, time, formattedTime, returnDate, formattedReturnDate, returnTime, formattedReturnTime) => {
