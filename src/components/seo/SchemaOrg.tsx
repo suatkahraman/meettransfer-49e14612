@@ -91,11 +91,11 @@ const companyInfo = {
   email: 'info@meettransfer.app',
   address: {
     '@type': 'PostalAddress',
-    addressCountry: 'US',
-    addressLocality: 'Sheridan',
-    addressRegion: 'Wyoming',
-    postalCode: '82801',
-    streetAddress: '30 N Gould St',
+    addressCountry: 'TR',
+    addressLocality: 'Istanbul',
+    addressRegion: 'Istanbul',
+    postalCode: '34000',
+    streetAddress: 'Atatürk Mahallesi',
   },
   geo: {
     '@type': 'GeoCoordinates',
