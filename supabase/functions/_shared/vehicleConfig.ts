@@ -20,9 +20,9 @@ export const VEHICLE_TYPES: VehicleTypeConfig[] = [
 // Dubai-specific vehicle types
 export const DUBAI_VEHICLE_TYPES: VehicleTypeConfig[] = [
   { value: 'dubai-private-sedan', label: 'Private Standard Sedan', passengers: 3, luggage: 2 },
-  { value: 'dubai-suburban', label: 'Mercedes Suburban', passengers: 6, luggage: 6 },
-  { value: 'dubai-vip-mercedes-van', label: 'VIP Mercedes Van', passengers: 7, luggage: 7 },
-  { value: 'dubai-v-class', label: 'Mercedes V-Class', passengers: 6, luggage: 6 },
+  { value: 'dubai-premium-van', label: 'Mercedes Premium Van', passengers: 6, luggage: 6 },
+  { value: 'dubai-suburban-suv', label: 'Mercedes Suburban SUV', passengers: 6, luggage: 6 },
+  { value: 'dubai-vip-sprinter', label: 'VIP Mercedes Sprinter', passengers: 12, luggage: 12 },
 ];
 
 // Vehicle labels lookup
@@ -60,6 +60,8 @@ export function isDubaiLocation(location: string): boolean {
     'sheikh zayed',
     'emirates hills',
     'arabian ranches',
+    'jbr',
+    'jumeirah beach',
   ];
   
   return dubaiKeywords.some(keyword => normalizedLocation.includes(keyword));
@@ -90,9 +92,9 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   
   // Dubai vehicle mappings
   'dubai-private-sedan': ['dubai-private-sedan', 'sedan'],
-  'dubai-suburban': ['dubai-suburban', 'mercedes-vito'],
-  'dubai-vip-mercedes-van': ['dubai-vip-mercedes-van', 'vip-mercedes'],
-  'dubai-v-class': ['dubai-v-class', 'mercedes-vito'],
+  'dubai-premium-van': ['dubai-premium-van', 'mercedes-vito'],
+  'dubai-suburban-suv': ['dubai-suburban-suv', 'mercedes-vito'],
+  'dubai-vip-sprinter': ['dubai-vip-sprinter', 'minibus'],
   
   // Common aliases
   'Mercedes Vito': ['mercedes-vito'],
@@ -110,8 +112,9 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   'Sedan': ['sedan', 'mercedes-vito'],
   // Dubai aliases
   'Private Sedan': ['dubai-private-sedan', 'sedan'],
-  'Suburban': ['dubai-suburban', 'mercedes-vito'],
-  'VIP Van': ['dubai-vip-mercedes-van', 'vip-mercedes'],
+  'Premium Van': ['dubai-premium-van', 'mercedes-vito'],
+  'Suburban SUV': ['dubai-suburban-suv', 'mercedes-vito'],
+  'VIP Sprinter': ['dubai-vip-sprinter', 'minibus'],
 };
 
 // Get vehicle fallback list for price matching
