@@ -27,6 +27,7 @@ import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const MarmarisAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -138,14 +139,13 @@ const MarmarisAirportTransferGuide = () => {
 
         <ShareButtons title={t("blogMarmarisH1")} className="mb-6 md:mb-8" />
 
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
-          <img 
-            src={marmarisTransferHero} 
-            alt={t("blogMarmarisHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={marmarisTransferHero}
+          alt={t("blogMarmarisHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-6 md:mb-8"
+        />
 
         <TableOfContents items={tocItems} />
 

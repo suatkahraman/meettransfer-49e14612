@@ -20,6 +20,7 @@ import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogCTA from "@/components/website/BlogCTA";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const BursaDayTourGuide = () => {
   const { getLocalizedPath, t } = useLanguage();

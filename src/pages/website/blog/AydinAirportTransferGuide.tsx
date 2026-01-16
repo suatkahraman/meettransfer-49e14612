@@ -26,6 +26,7 @@ import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const AydinAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
