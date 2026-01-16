@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, MapPin, Star, Shield, Car, Users, Plane, Building, Camera, CheckCircle2, Church } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Star, Shield, Car, Users, Plane, Building, Camera, CheckCircle2, Church, MapPinned, Sparkles, Clock3, Route, Gem } from "lucide-react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -19,6 +19,10 @@ import { useBlogDate } from "@/hooks/useBlogDate";
 // Import images
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
+import midyatStoneHouses from "@/assets/blog/midyat-stone-houses.jpg";
+import morGabrielMonastery from "@/assets/blog/mor-gabriel-monastery.jpg";
+import midyatTelkariSilver from "@/assets/blog/midyat-telkari-silver.jpg";
+import daraAncientCity from "@/assets/blog/dara-ancient-city.jpg";
 
 const MidyatAirportTransferGuide = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -70,7 +74,7 @@ const MidyatAirportTransferGuide = () => {
     {
       name: "Telkari Silver Workshops",
       description: "Famous for silver filigree craftsmanship (telkari). Watch artisans create intricate jewelry and decorative items.",
-      icon: Star
+      icon: Gem
     },
     {
       name: "Mor Yakup Monastery",
@@ -79,11 +83,54 @@ const MidyatAirportTransferGuide = () => {
     }
   ];
 
+  const nearbyCities = [
+    { name: "Mardin", distance: "65 km", time: "1 hour", description: "Ancient city with stunning old town and Mesopotamian views" },
+    { name: "Hasankeyf", distance: "55 km", time: "50 min", description: "12,000-year-old ancient city on Tigris River" },
+    { name: "Dara Ancient City", distance: "45 km", time: "50 min", description: "Roman and Byzantine ruins with underground cisterns" },
+    { name: "Nusaybin", distance: "50 km", time: "45 min", description: "Historic border town with Assyrian heritage" },
+    { name: "Batman", distance: "55 km", time: "1 hour", description: "Modern city, gateway to regional attractions" },
+  ];
+
+  const ourServices = [
+    {
+      title: "Airport Transfers",
+      description: "Direct transfers from Mardin Airport to Midyat with meet & greet service",
+      icon: Plane
+    },
+    {
+      title: "Monastery Tours",
+      description: "Full-day tours to Mor Gabriel, Mor Yakup, and other Syriac monasteries",
+      icon: Church
+    },
+    {
+      title: "Stone House Tours",
+      description: "Explore Midyat's famous stone architecture with local guides",
+      icon: Building
+    },
+    {
+      title: "Telkari Workshops",
+      description: "Visit silver filigree workshops and meet local artisans",
+      icon: Gem
+    },
+    {
+      title: "Intercity Transfers",
+      description: "Comfortable transfers to Mardin, Hasankeyf, Dara, and beyond",
+      icon: Route
+    },
+    {
+      title: "Multi-Day Tours",
+      description: "Custom itineraries covering Tur Abdin's spiritual treasures",
+      icon: Clock3
+    }
+  ];
+
   const tocItems = [
     { id: "overview", title: "Overview" },
     { id: "getting-there", title: "Getting to Midyat" },
     { id: "transfer-options", title: "Transfer Options" },
     { id: "prices", title: "Transfer Prices" },
+    { id: "cities", title: "Nearby Cities" },
+    { id: "services", title: "Our Services" },
     { id: "monasteries", title: "Syriac Monasteries" },
     { id: "attractions", title: "Top Attractions" },
     { id: "faq", title: "FAQ" },
@@ -109,8 +156,8 @@ const MidyatAirportTransferGuide = () => {
             datePublished: "2025-01-16",
             dateModified: "2025-01-16",
             author: "Meet Transfer",
-            readingTime: "11",
-            wordCount: 2400,
+            readingTime: "13",
+            wordCount: 3200,
             keywords: ["Midyat airport transfer", "Mor Gabriel Monastery", "Syriac monasteries", "Mardin to Midyat"]
           },
           {
@@ -168,7 +215,7 @@ const MidyatAirportTransferGuide = () => {
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              <span>11 min read</span>
+              <span>13 min read</span>
             </div>
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -179,10 +226,10 @@ const MidyatAirportTransferGuide = () => {
           <ShareButtons title="Midyat Airport Transfer - Private Shuttle to Mor Gabriel, Syriac Monasteries 2025" />
         </header>
 
-        {/* Hero Image */}
+        {/* Hero Image - Midyat Stone Houses */}
         <OptimizedBlogImage
-          src={vitoVipStarlightPurple}
-          alt="VIP Mercedes Vito transfer to Midyat and Syriac monasteries"
+          src={midyatStoneHouses}
+          alt="Midyat old town cobblestone streets with traditional honey-colored stone houses and intricate carvings"
           className="w-full aspect-video rounded-xl mb-12"
           priority={true}
         />
@@ -254,6 +301,19 @@ const MidyatAirportTransferGuide = () => {
               </div>
             </section>
 
+            {/* Image: Mor Gabriel Monastery */}
+            <div className="not-prose my-8">
+              <OptimizedBlogImage
+                src={morGabrielMonastery}
+                alt="Mor Gabriel Monastery exterior with ancient stone walls in Tur Abdin plateau"
+                className="w-full rounded-xl"
+                aspectRatio="video"
+              />
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Mor Gabriel Monastery - Founded in 397 AD, one of the world's oldest active monasteries
+              </p>
+            </div>
+
             {/* Getting There */}
             <section id="getting-there">
               <h2>How to Get to Midyat</h2>
@@ -297,6 +357,19 @@ const MidyatAirportTransferGuide = () => {
                 monasteries with waiting time at each location.
               </p>
             </section>
+
+            {/* VIP Vehicle Image */}
+            <div className="not-prose my-8">
+              <OptimizedBlogImage
+                src={vitoVipStarlightPurple}
+                alt="VIP Mercedes Vito with starlight ceiling for luxury Midyat transfers"
+                className="w-full rounded-xl"
+                aspectRatio="video"
+              />
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                VIP Mercedes Vito - Luxury interior for comfortable monastery tours
+              </p>
+            </div>
 
             {/* Prices */}
             <section id="prices">
@@ -352,6 +425,79 @@ const MidyatAirportTransferGuide = () => {
               </div>
             </section>
 
+            {/* Nearby Cities Section */}
+            <section id="cities">
+              <h2>Nearby Cities & Destinations</h2>
+              <p>
+                Midyat is a perfect base for exploring the Tur Abdin region and southeastern Turkey's 
+                most fascinating historical sites. Our transfer service connects you to all major destinations.
+              </p>
+              
+              <div className="not-prose my-8 grid gap-4">
+                {nearbyCities.map((city) => (
+                  <Card key={city.name} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <MapPin className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{city.name}</h4>
+                            <p className="text-sm text-muted-foreground">{city.description}</p>
+                          </div>
+                        </div>
+                        <div className="text-right text-sm">
+                          <div className="font-medium">{city.distance}</div>
+                          <div className="text-muted-foreground">{city.time}</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+
+            {/* Image: Telkari Silver */}
+            <div className="not-prose my-8">
+              <OptimizedBlogImage
+                src={midyatTelkariSilver}
+                alt="Midyat telkari silver filigree craftsmanship with artisan creating intricate jewelry"
+                className="w-full rounded-xl"
+                aspectRatio="square"
+              />
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Telkari - Traditional Midyat silver filigree craftsmanship passed down through generations
+              </p>
+            </div>
+
+            {/* Our Services Section */}
+            <section id="services">
+              <h2>Our Services in Midyat Region</h2>
+              <p>
+                Meet Transfer offers comprehensive transportation solutions for visitors exploring 
+                Midyat and the Tur Abdin plateau. From airport pickups to multi-day monastery tours.
+              </p>
+              
+              <div className="not-prose my-8 grid sm:grid-cols-2 gap-4">
+                {ourServices.map((service) => (
+                  <Card key={service.title} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <service.icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">{service.title}</h4>
+                          <p className="text-sm text-muted-foreground">{service.description}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+
             {/* Monasteries */}
             <section id="monasteries">
               <h2>Syriac Monasteries Near Midyat</h2>
@@ -377,14 +523,31 @@ const MidyatAirportTransferGuide = () => {
 
               <h3>Mor Augin Monastery</h3>
               <p>
-                Perched on a mountainside, this monastery offers breathtaking views and 
-                a glimpse into the ascetic traditions of Syriac Christianity.
+                Perched dramatically on a cliff, Mor Augin offers spectacular views and a 
+                sense of spiritual isolation. The monastery has been a center of Syriac 
+                Christianity for centuries.
               </p>
             </section>
 
+            {/* Image: Dara Ancient City */}
+            <div className="not-prose my-8">
+              <OptimizedBlogImage
+                src={daraAncientCity}
+                alt="Dara Ancient City ruins with Roman and Byzantine architecture near Midyat"
+                className="w-full rounded-xl"
+                aspectRatio="video"
+              />
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Dara Ancient City - Roman and Byzantine ruins with impressive underground cisterns
+              </p>
+            </div>
+
             {/* Attractions */}
             <section id="attractions">
-              <h2>Top Attractions in Midyat</h2>
+              <h2>Top Attractions in Midyat Region</h2>
+              <p>
+                Beyond the monasteries, Midyat offers a wealth of cultural and historical experiences:
+              </p>
               
               <div className="grid sm:grid-cols-2 gap-4 not-prose my-8">
                 {attractions.map((attraction) => (
@@ -414,74 +577,54 @@ const MidyatAirportTransferGuide = () => {
                   "Flight tracking",
                   "60 minutes free waiting",
                   "Door-to-door service",
-                  "Professional local driver",
-                  "Air-conditioned Mercedes",
+                  "Professional driver",
+                  "Air-conditioned vehicle",
                   "Free WiFi",
                   "Bottled water",
-                  "Photo stop requests",
-                  "24/7 customer support"
+                  "Child seats on request",
+                  "24/7 support"
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-2 py-1">
-                    <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
-                    <span className="text-sm">{item}</span>
+                    <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                    <span>{item}</span>
                   </div>
+                ))}
+              </div>
+            </section>
+
+            {/* FAQ */}
+            <section id="faq">
+              <h2>Frequently Asked Questions</h2>
+              <div className="not-prose space-y-4">
+                {faqItems.map((item, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-2">{item.question}</h3>
+                      <p className="text-muted-foreground">{item.answer}</p>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </section>
 
             {/* CTA */}
             <BlogCTA />
-
-            {/* FAQ */}
-            <section id="faq" className="not-prose">
-              <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
-              <div className="space-y-4">
-                {faqItems.map((item, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold mb-2">{item.question}</h3>
-                      <p className="text-muted-foreground text-sm">{item.answer}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
           </div>
 
           {/* Sidebar */}
           <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-6">
+            <div className="sticky top-24">
               <TableOfContents items={tocItems} />
               
-              <Card className="bg-primary/5 border-primary/20">
+              <Card className="mt-6">
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Book Midyat Transfer</h3>
+                  <h3 className="font-semibold mb-4">Book Your Transfer</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Private transfer to Midyat and Syriac monasteries
+                    Get instant quote for Midyat transfer
                   </p>
                   <Button asChild className="w-full">
-                    <Link to={getLocalizedPath("/")}>Book Now</Link>
+                    <Link to={getLocalizedPath("/")}>Get Quote</Link>
                   </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Popular Routes</h3>
-                  <ul className="text-sm space-y-2">
-                    <li className="flex justify-between">
-                      <span>Airport → Midyat</span>
-                      <span className="font-medium">€65</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Airport → Mor Gabriel</span>
-                      <span className="font-medium">€75</span>
-                    </li>
-                    <li className="flex justify-between">
-                      <span>Midyat → Hasankeyf</span>
-                      <span className="font-medium">€95</span>
-                    </li>
-                  </ul>
                 </CardContent>
               </Card>
             </div>
@@ -489,7 +632,8 @@ const MidyatAirportTransferGuide = () => {
         </div>
 
         {/* Related Articles */}
-        <RelatedArticles currentArticleId="midyat-airport-transfer-guide" maxArticles={3} />
+        <RelatedArticles
+        />
       </article>
 
       <Footer />
