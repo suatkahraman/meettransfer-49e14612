@@ -98,10 +98,22 @@ const VIPAirportTransferTurkey = () => {
             description: "Complete guide to VIP airport transfers in Turkey. Book Mercedes Maybach, S-Class, VIP Vito with Meet Transfer for premium luxury experience.",
             datePublished: "2025-01-16",
             dateModified: "2025-01-16",
+            author: "Meet Transfer",
+            readingTime: "10",
+            wordCount: 2200,
+            keywords: ["VIP airport transfer Turkey", "Mercedes Maybach transfer", "luxury chauffeur Turkey", "VIP Vito transfer"],
+          },
+          {
+            type: "BreadcrumbList" as const,
+            items: [
+              { name: "Home", url: "/" },
+              { name: "Blog", url: "/blog" },
+              { name: "VIP Airport Transfer Turkey", url: "/blog/vip-airport-transfer-turkey" },
+            ],
           },
           {
             type: "FAQPage" as const,
-            questions: faqItems,
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer })),
           },
         ]}
       />

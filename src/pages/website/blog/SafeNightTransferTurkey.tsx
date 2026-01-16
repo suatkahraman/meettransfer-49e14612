@@ -101,6 +101,10 @@ const SafeNightTransferTurkey = () => {
             datePublished: "2025-01-10",
             dateModified: "2025-01-10",
             image: heroImage,
+            author: "Meet Transfer",
+            readingTime: "8",
+            wordCount: 1900,
+            keywords: ["safe night transfer Turkey", "late night airport transfer", "24/7 airport transfer", "midnight airport pickup"],
           },
           {
             type: "BreadcrumbList" as const,
@@ -112,7 +116,7 @@ const SafeNightTransferTurkey = () => {
           },
           {
             type: "FAQPage" as const,
-            questions: faqItems,
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer })),
           },
         ]}
       />

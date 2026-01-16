@@ -99,7 +99,7 @@ const MardinAirportTransferGuide = () => {
       />
       <SchemaOrg
         schemas={[
-          { type: 'LocalBusiness' },
+          { type: 'LocalBusiness', includeRating: true },
           {
             type: 'Article',
             headline: "Mardin Airport Transfer - Complete Guide 2025",
@@ -108,7 +108,9 @@ const MardinAirportTransferGuide = () => {
             datePublished: "2025-01-16",
             dateModified: "2025-01-16",
             author: "Meet Transfer",
-            readingTime: "10"
+            readingTime: "10",
+            wordCount: 2100,
+            keywords: ["Mardin airport transfer", "Midyat transfer", "Mesopotamia tours", "Deyrulzafaran monastery"]
           },
           {
             type: 'BreadcrumbList',
@@ -120,7 +122,7 @@ const MardinAirportTransferGuide = () => {
           },
           {
             type: 'FAQPage',
-            questions: faqItems
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer }))
           }
         ]}
       />
