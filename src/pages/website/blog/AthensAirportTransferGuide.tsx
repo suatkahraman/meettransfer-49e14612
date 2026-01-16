@@ -23,6 +23,7 @@ import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const AthensAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -105,10 +106,11 @@ const AthensAirportTransferGuide = () => {
       <article className="min-h-screen">
         {/* Hero Section */}
         <header className="relative h-[50vh] md:h-[60vh] overflow-hidden">
-          <img
+          <OptimizedBlogImage
             src={athensTransferHero}
             alt={t("blogAthensHeroAlt")}
-            className="absolute inset-0 w-full h-full object-cover"
+            priority
+            className="absolute inset-0 w-full h-full !aspect-auto"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
           

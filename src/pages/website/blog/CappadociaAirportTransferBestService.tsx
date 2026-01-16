@@ -10,6 +10,7 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,

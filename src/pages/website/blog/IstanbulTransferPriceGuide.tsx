@@ -26,6 +26,7 @@ import vitoVip2 from "@/assets/vito-vip-2.jpg";
 import sprinterInteriorBlue from "@/assets/sprinter-interior-blue.jpg";
 import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const IstanbulTransferPriceGuide = () => {
   const { getLocalizedPath, t } = useLanguage();

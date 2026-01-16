@@ -14,6 +14,7 @@ import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const AIBookingAssistantGuide = () => {
   const { t, getLocalizedPath } = useLanguage();

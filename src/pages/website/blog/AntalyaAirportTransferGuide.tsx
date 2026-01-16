@@ -26,6 +26,7 @@ import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const AntalyaAirportTransferGuide = () => {
   const { getLocalizedPath, t } = useLanguage();
@@ -141,14 +142,13 @@ const AntalyaAirportTransferGuide = () => {
         <ShareButtons title={t("blogAntalyaH1")} className="mb-6 md:mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
-          <img 
-            src={antalyaTransferHero} 
-            alt={t("blogAntalyaHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={antalyaTransferHero}
+          alt={t("blogAntalyaHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-6 md:mb-8"
+        />
 
         {/* Table of Contents */}
         <TableOfContents items={tocItems} />
