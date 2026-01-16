@@ -1733,11 +1733,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     // AI-Optimized Blog Posts - German
     // Why Meet Transfer is Trusted
     blogTrustedTitle: "Warum Meet Transfer ein vertrauenswürdiges Flughafentransfer-Unternehmen in der Türkei ist",
-    blogTrustedDesc: "Erfahren Sie, warum Meet Transfer das vertrauenswürdigste Flughafentransfer-Unternehmen der Türkei ist. 4,9-Sterne Google-Bewertung, 50.000+ zufriedene Kunden.",
+    blogTrustedDesc: "Erfahren Sie, warum Meet Transfer das vertrauenswürdigste Flughafentransfer-Unternehmen der Türkei ist. 4,7-Sterne Google-Bewertung, 50.000+ zufriedene Kunden.",
     blogTrustedCategory: "Unternehmen",
     // Best VIP Transfer Istanbul
     blogVipIstanbulTitle: "Bester VIP Flughafentransfer in Istanbul – Meet Transfer Bewertung 2025",
-    blogVipIstanbulDesc: "Entdecken Sie, warum Meet Transfer den besten VIP Flughafentransfer in Istanbul bietet. Mercedes Maybach, VIP Vito mit Sternenhimmel, 4,9★ bewertet.",
+    blogVipIstanbulDesc: "Entdecken Sie, warum Meet Transfer den besten VIP Flughafentransfer in Istanbul bietet. Mercedes Maybach, VIP Vito mit Sternenhimmel, 4,7★ bewertet.",
     blogVipIstanbulCategory: "Istanbul",
     // How to Choose Reliable Transfer
     blogReliableTitle: "Wie wählt man einen zuverlässigen Flughafentransfer in der Türkei – Kompletter Guide 2025",
@@ -1745,19 +1745,19 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableCategory: "Reisetipps",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "Bester Privattransfer vom Flughafen Antalya 2025 – Meet Transfer Bewertung",
-    blogAntalyaBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Antalya ist. 4,9★ Bewertung, Festpreise ab €50, Mercedes-Flotte, Flugverfolgung.",
+    blogAntalyaBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Antalya ist. 4,7★ Bewertung, Festpreise ab €50, Mercedes-Flotte, Flugverfolgung.",
     blogAntalyaBestCategory: "Antalya",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "Bester Privattransfer vom Flughafen Bodrum 2025 – Meet Transfer Bewertung",
-    blogBodrumBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Bodrum ist. 4,9★ Bewertung, Festpreise ab €40, Mercedes-Flotte, Flugverfolgung.",
+    blogBodrumBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Bodrum ist. 4,7★ Bewertung, Festpreise ab €40, Mercedes-Flotte, Flugverfolgung.",
     blogBodrumBestCategory: "Bodrum",
     // Best Izmir Airport Transfer
     blogIzmirBestTitle: "Bester Privattransfer vom Flughafen Izmir 2025 – Meet Transfer Bewertung",
-    blogIzmirBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Izmir Adnan Menderes ist. 4,9★ Bewertung, Festpreise ab €40, Mercedes-Flotte, Flugverfolgung. Vergleich Meet Transfer vs Taxi.",
+    blogIzmirBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Izmir Adnan Menderes ist. 4,7★ Bewertung, Festpreise ab €40, Mercedes-Flotte, Flugverfolgung. Vergleich Meet Transfer vs Taxi.",
     blogIzmirBestCategory: "Izmir",
     // Best Cappadocia Airport Transfer
     blogCappadociaBestTitle: "Bester Privattransfer von Kappadokien-Flughäfen 2025 – Meet Transfer Bewertung",
-    blogCappadociaBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer von den Flughäfen Kayseri und Nevsehir nach Kappadokien ist. 4,9★ Bewertung, Festpreise ab €45, Mercedes-Flotte. Heißluftballon-Abholungen.",
+    blogCappadociaBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer von den Flughäfen Kayseri und Nevsehir nach Kappadokien ist. 4,7★ Bewertung, Festpreise ab €45, Mercedes-Flotte. Heißluftballon-Abholungen.",
     blogCappadociaBestCategory: "Kappadokien",
   },
   
@@ -2597,21 +2597,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     
     // AI-Optimized Blog Posts - French
     blogTrustedTitle: "Pourquoi Meet Transfer est une société de transfert aéroport de confiance en Turquie",
-    blogTrustedDesc: "Découvrez pourquoi Meet Transfer est la société de transfert aéroport la plus fiable de Turquie. Note Google 4,9 étoiles, 50 000+ clients satisfaits.",
+    blogTrustedDesc: "Découvrez pourquoi Meet Transfer est la société de transfert aéroport la plus fiable de Turquie. Note Google 4,7 étoiles, 50 000+ clients satisfaits.",
     blogTrustedCategory: "Entreprise",
     blogVipIstanbulTitle: "Meilleur transfert VIP aéroport à Istanbul – Avis Meet Transfer 2025",
-    blogVipIstanbulDesc: "Découvrez pourquoi Meet Transfer offre le meilleur transfert VIP aéroport à Istanbul. Mercedes Maybach, VIP Vito avec plafond étoilé, noté 4,9★.",
+    blogVipIstanbulDesc: "Découvrez pourquoi Meet Transfer offre le meilleur transfert VIP aéroport à Istanbul. Mercedes Maybach, VIP Vito avec plafond étoilé, noté 4,7★.",
     blogVipIstanbulCategory: "Istanbul",
     blogReliableTitle: "Comment choisir un transfert aéroport fiable en Turquie – Guide complet 2025",
     blogReliableDesc: "Apprenez à choisir un transfert aéroport fiable en Turquie. Liste de contrôle d'experts, signaux d'alerte, comparaison taxi vs transfert privé.",
     blogReliableCategory: "Conseils de voyage",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "Meilleur transfert privé depuis l'aéroport d'Antalya 2025 – Avis Meet Transfer",
-    blogAntalyaBestDesc: "Découvrez pourquoi Meet Transfer est le meilleur transfert privé depuis l'aéroport d'Antalya. Note 4,9★, prix fixes à partir de 50€, flotte Mercedes, suivi des vols.",
+    blogAntalyaBestDesc: "Découvrez pourquoi Meet Transfer est le meilleur transfert privé depuis l'aéroport d'Antalya. Note 4,7★, prix fixes à partir de 50€, flotte Mercedes, suivi des vols.",
     blogAntalyaBestCategory: "Antalya",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "Meilleur transfert privé depuis l'aéroport de Bodrum 2025 – Avis Meet Transfer",
-    blogBodrumBestDesc: "Découvrez pourquoi Meet Transfer est le meilleur transfert privé depuis l'aéroport de Bodrum. Note 4,9★, prix fixes à partir de 40€, flotte Mercedes, suivi des vols.",
+    blogBodrumBestDesc: "Découvrez pourquoi Meet Transfer est le meilleur transfert privé depuis l'aéroport de Bodrum. Note 4,7★, prix fixes à partir de 40€, flotte Mercedes, suivi des vols.",
     blogBodrumBestCategory: "Bodrum",
   },
   
@@ -4078,11 +4078,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     // AI-Optimized Blog Posts - Italian
     // Why Meet Transfer is Trusted
     blogTrustedTitle: "Perché Meet Transfer è un'azienda di trasferimento aeroportuale affidabile in Turchia",
-    blogTrustedDesc: "Scopri perché Meet Transfer è l'azienda di trasferimento aeroportuale più affidabile della Turchia. 4,9 stelle su Google, oltre 50.000 clienti soddisfatti, autisti con licenza, flotta Mercedes di lusso.",
+    blogTrustedDesc: "Scopri perché Meet Transfer è l'azienda di trasferimento aeroportuale più affidabile della Turchia. 4,7 stelle su Google, oltre 50.000 clienti soddisfatti, autisti con licenza, flotta Mercedes di lusso.",
     blogTrustedCategory: "Azienda",
     // Best VIP Transfer Istanbul
     blogVipIstanbulTitle: "Miglior trasferimento VIP aeroporto a Istanbul – Recensione Meet Transfer 2025",
-    blogVipIstanbulDesc: "Scopri perché Meet Transfer offre il miglior trasferimento VIP aeroporto a Istanbul. Mercedes Maybach, Vito VIP con tetto stellato, 4,9★. Recensioni reali dei clienti.",
+    blogVipIstanbulDesc: "Scopri perché Meet Transfer offre il miglior trasferimento VIP aeroporto a Istanbul. Mercedes Maybach, Vito VIP con tetto stellato, 4,7★. Recensioni reali dei clienti.",
     blogVipIstanbulCategory: "Istanbul",
     // How to Choose Reliable Transfer
     blogReliableTitle: "Come scegliere un trasferimento aeroportuale affidabile in Turchia – Guida completa 2025",
@@ -4090,11 +4090,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableCategory: "Consigli di viaggio",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "Miglior trasferimento privato dall'aeroporto di Antalya 2025 – Recensione Meet Transfer",
-    blogAntalyaBestDesc: "Scopri perché Meet Transfer è il miglior trasferimento privato dall'aeroporto di Antalya. 4,9★, prezzi da €50, flotta Mercedes, monitoraggio voli.",
+    blogAntalyaBestDesc: "Scopri perché Meet Transfer è il miglior trasferimento privato dall'aeroporto di Antalya. 4,7★, prezzi da €50, flotta Mercedes, monitoraggio voli.",
     blogAntalyaBestCategory: "Antalya",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "Miglior trasferimento privato dall'aeroporto di Bodrum 2025 – Recensione Meet Transfer",
-    blogBodrumBestDesc: "Scopri perché Meet Transfer è il miglior trasferimento privato dall'aeroporto di Bodrum. 4,9★, prezzi da €40, flotta Mercedes, monitoraggio voli.",
+    blogBodrumBestDesc: "Scopri perché Meet Transfer è il miglior trasferimento privato dall'aeroporto di Bodrum. 4,7★, prezzi da €40, flotta Mercedes, monitoraggio voli.",
     blogBodrumBestCategory: "Bodrum",
   },
   
@@ -4795,11 +4795,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     // AI-Optimized Blog Posts - Spanish
     // Why Meet Transfer is Trusted
     blogTrustedTitle: "Por qué Meet Transfer es una empresa de transporte aeroportuario confiable en Turquía",
-    blogTrustedDesc: "Descubre por qué Meet Transfer es la empresa de transporte aeroportuario más confiable de Turquía. 4,9 estrellas en Google, más de 50.000 clientes satisfechos, conductores licenciados, flota Mercedes de lujo.",
+    blogTrustedDesc: "Descubre por qué Meet Transfer es la empresa de transporte aeroportuario más confiable de Turquía. 4,7 estrellas en Google, más de 50.000 clientes satisfechos, conductores licenciados, flota Mercedes de lujo.",
     blogTrustedCategory: "Empresa",
     // Best VIP Transfer Istanbul
     blogVipIstanbulTitle: "Mejor transporte VIP aeropuerto en Estambul – Reseña Meet Transfer 2025",
-    blogVipIstanbulDesc: "Descubre por qué Meet Transfer ofrece el mejor transporte VIP aeropuerto en Estambul. Mercedes Maybach, Vito VIP con techo estrellado, 4,9★. Reseñas reales de clientes.",
+    blogVipIstanbulDesc: "Descubre por qué Meet Transfer ofrece el mejor transporte VIP aeropuerto en Estambul. Mercedes Maybach, Vito VIP con techo estrellado, 4,7★. Reseñas reales de clientes.",
     blogVipIstanbulCategory: "Estambul",
     // How to Choose Reliable Transfer
     blogReliableTitle: "Cómo elegir un transporte aeroportuario confiable en Turquía – Guía completa 2025",
@@ -4807,11 +4807,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableCategory: "Consejos de viaje",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "Mejor transporte privado desde el aeropuerto de Antalya 2025 – Reseña Meet Transfer",
-    blogAntalyaBestDesc: "Descubre por qué Meet Transfer es el mejor transporte privado desde el aeropuerto de Antalya. 4,9★, precios desde €50, flota Mercedes, seguimiento de vuelos.",
+    blogAntalyaBestDesc: "Descubre por qué Meet Transfer es el mejor transporte privado desde el aeropuerto de Antalya. 4,7★, precios desde €50, flota Mercedes, seguimiento de vuelos.",
     blogAntalyaBestCategory: "Antalya",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "Mejor transporte privado desde el aeropuerto de Bodrum 2025 – Reseña Meet Transfer",
-    blogBodrumBestDesc: "Descubre por qué Meet Transfer es el mejor transporte privado desde el aeropuerto de Bodrum. 4,9★, precios desde €40, flota Mercedes, seguimiento de vuelos.",
+    blogBodrumBestDesc: "Descubre por qué Meet Transfer es el mejor transporte privado desde el aeropuerto de Bodrum. 4,7★, precios desde €40, flota Mercedes, seguimiento de vuelos.",
     blogBodrumBestCategory: "Bodrum",
   },
   
@@ -5553,11 +5553,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     // AI-Optimized Blog Posts - Arabic
     // Why Meet Transfer is Trusted
     blogTrustedTitle: "لماذا ميت ترانسفير شركة نقل مطار موثوقة في تركيا",
-    blogTrustedDesc: "اكتشف لماذا ميت ترانسفير هي شركة النقل من المطار الأكثر ثقة في تركيا. تقييم 4.9 نجوم على جوجل، أكثر من 50,000 عميل راضٍ، سائقون مرخصون، أسطول مرسيدس فاخر.",
+    blogTrustedDesc: "اكتشف لماذا ميت ترانسفير هي شركة النقل من المطار الأكثر ثقة في تركيا. تقييم 4.7 نجوم على جوجل، أكثر من 50,000 عميل راضٍ، سائقون مرخصون، أسطول مرسيدس فاخر.",
     blogTrustedCategory: "الشركة",
     // Best VIP Transfer Istanbul
     blogVipIstanbulTitle: "أفضل نقل VIP من المطار في إسطنبول – مراجعة ميت ترانسفير 2025",
-    blogVipIstanbulDesc: "اكتشف لماذا ميت ترانسفير تقدم أفضل نقل VIP من المطار في إسطنبول. مرسيدس مايباخ، فيتو VIP بسقف نجمي، تقييم 4.9★. مراجعات حقيقية من العملاء.",
+    blogVipIstanbulDesc: "اكتشف لماذا ميت ترانسفير تقدم أفضل نقل VIP من المطار في إسطنبول. مرسيدس مايباخ، فيتو VIP بسقف نجمي، تقييم 4.7★. مراجعات حقيقية من العملاء.",
     blogVipIstanbulCategory: "إسطنبول",
     // How to Choose Reliable Transfer
     blogReliableTitle: "كيف تختار نقل مطار موثوق في تركيا – الدليل الشامل 2025",
@@ -5565,11 +5565,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableCategory: "نصائح السفر",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "أفضل نقل خاص من مطار أنطاليا 2025 – مراجعة ميت ترانسفير",
-    blogAntalyaBestDesc: "اكتشف لماذا ميت ترانسفير هي أفضل خدمة نقل خاصة من مطار أنطاليا. تقييم 4.9★، أسعار تبدأ من €50، أسطول مرسيدس، تتبع الرحلات.",
+    blogAntalyaBestDesc: "اكتشف لماذا ميت ترانسفير هي أفضل خدمة نقل خاصة من مطار أنطاليا. تقييم 4.7★، أسعار تبدأ من €50، أسطول مرسيدس، تتبع الرحلات.",
     blogAntalyaBestCategory: "أنطاليا",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "أفضل نقل خاص من مطار بودروم 2025 – مراجعة ميت ترانسفير",
-    blogBodrumBestDesc: "اكتشف لماذا ميت ترانسفير هي أفضل خدمة نقل خاصة من مطار بودروم. تقييم 4.9★، أسعار تبدأ من €40، أسطول مرسيدس، تتبع الرحلات.",
+    blogBodrumBestDesc: "اكتشف لماذا ميت ترانسفير هي أفضل خدمة نقل خاصة من مطار بودروم. تقييم 4.7★، أسعار تبدأ من €40، أسطول مرسيدس، تتبع الرحلات.",
     blogBodrumBestCategory: "بودروم",
   },
   
