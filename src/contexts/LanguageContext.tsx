@@ -411,7 +411,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "Mercedes Vito",
     vitoDesc: "The Mercedes Vito Comfortable family holiday transfer vehicles with best budget.",
     maybachName: "Mercedes Maybach Minivan",
-    maybachDesc: "The pinnacle of automotive luxury. Our Maybach Minivan offers executive rear seating and the smoothest ride for VIP guests and business executives.",
+    maybachDesc: "The pinnacle of automotive luxury. Our Mercedes Maybach Minivan offers executive rear seating and the smoothest ride for VIP guests and business executives.",
     sprinterName: "Mercedes Sprinter VIP Minibus",
     sprinterDesc: "Perfect for larger groups, our VIP Sprinter offers airline-style seating for up to 16 passengers with individual screens and premium amenities.",
     
@@ -2195,7 +2195,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "Mercedes Vito",
     vitoDesc: "Der Mercedes Vito - komfortable Familienurlaubs-Transferfahrzeuge mit bestem Budget.",
     maybachName: "Mercedes Maybach Minivan",
-    maybachDesc: "Der Gipfel des automobilen Luxus. Unser Maybach Minivan bietet Executive-Rücksitze und die sanfteste Fahrt für VIP-Gäste und Geschäftsführer.",
+    maybachDesc: "Der Gipfel des automobilen Luxus. Unser Mercedes Maybach Minivan bietet Executive-Rücksitze und die sanfteste Fahrt für VIP-Gäste und Geschäftsführer.",
     sprinterName: "Mercedes Sprinter VIP Minibus",
     sprinterDesc: "Perfekt für größere Gruppen, unser VIP Sprinter bietet Airline-Sitze für bis zu 16 Passagiere mit individuellen Bildschirmen und Premium-Ausstattung.",
     
@@ -4018,7 +4018,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "Mercedes Vito",
     vitoDesc: "Le Mercedes Vito - véhicules de transfert familiaux confortables avec le meilleur budget.",
     maybachName: "Mercedes Maybach Minivan",
-    maybachDesc: "Le summum du luxe automobile. Notre Maybach Minivan offre des sièges arrière executive et le trajet le plus fluide pour les invités VIP.",
+    maybachDesc: "Le summum du luxe automobile. Notre Mercedes Maybach Minivan offre des sièges arrière executive et le trajet le plus fluide pour les invités VIP.",
     sprinterName: "Mercedes Sprinter VIP Minibus",
     sprinterDesc: "Parfait pour les grands groupes, notre Sprinter VIP offre des sièges style avion pour jusqu'à 16 passagers avec équipements premium.",
     
@@ -5552,7 +5552,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "Mercedes Vito",
     vitoDesc: "Mercedes Vito — комфортные семейные автомобили для трансфера с лучшим бюджетом.",
     maybachName: "Mercedes Maybach Minivan",
-    maybachDesc: "Вершина автомобильной роскоши. Наш Maybach Minivan предлагает представительские задние сиденья и самую плавную поездку для VIP-гостей и руководителей.",
+    maybachDesc: "Вершина автомобильной роскоши. Наш Mercedes Maybach Minivan предлагает представительские задние сиденья и самую плавную поездку для VIP-гостей и руководителей.",
     sprinterName: "Mercedes Sprinter VIP Минибус",
     sprinterDesc: "Идеально для больших групп, наш VIP Sprinter предлагает сиденья авиационного класса для до 16 пассажиров с индивидуальными экранами и премиум-удобствами.",
     
@@ -6950,7 +6950,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "Mercedes Vito",
     vitoDesc: "Il Mercedes Vito - veicoli di trasferimento familiari confortevoli con il miglior budget.",
     maybachName: "Mercedes Maybach Minivan",
-    maybachDesc: "L'apice del lusso automobilistico. Il nostro Maybach Minivan offre sedili posteriori executive e il viaggio più fluido per ospiti VIP e dirigenti.",
+    maybachDesc: "L'apice del lusso automobilistico. Il nostro Mercedes Maybach Minivan offre sedili posteriori executive e il viaggio più fluido per ospiti VIP e dirigenti.",
     sprinterName: "Mercedes Sprinter VIP Minibus",
     sprinterDesc: "Perfetto per gruppi più grandi, il nostro Sprinter VIP offre sedili stile aereo per fino a 16 passeggeri con schermi individuali e comfort premium.",
     
@@ -8395,7 +8395,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "Mercedes Vito",
     vitoDesc: "El Mercedes Vito - vehículos de traslado familiar cómodos con el mejor presupuesto.",
     maybachName: "Mercedes Maybach Minivan",
-    maybachDesc: "La cima del lujo automotriz. Nuestro Maybach Minivan ofrece asientos traseros ejecutivos y el viaje más suave para huéspedes VIP y ejecutivos.",
+    maybachDesc: "La cima del lujo automotriz. Nuestro Mercedes Maybach Minivan ofrece asientos traseros ejecutivos y el viaje más suave para huéspedes VIP y ejecutivos.",
     sprinterName: "Mercedes Sprinter VIP Minibús",
     sprinterDesc: "Perfecto para grupos más grandes, nuestro Sprinter VIP ofrece asientos estilo avión para hasta 16 pasajeros con pantallas individuales y comodidades premium.",
     
@@ -9840,7 +9840,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "مرسيدس فيتو",
     vitoDesc: "مرسيدس فيتو - مركبات نقل عائلية مريحة بأفضل ميزانية.",
     maybachName: "مرسيدس مايباخ ميني فان",
-    maybachDesc: "قمة الفخامة في السيارات. يقدم مايباخ ميني فان مقاعد تنفيذية خلفية وأسلس قيادة لضيوف VIP ورجال الأعمال.",
+    maybachDesc: "قمة الفخامة في السيارات. يقدم مرسيدس مايباخ ميني فان مقاعد تنفيذية خلفية وأسلس قيادة لضيوف VIP ورجال الأعمال.",
     sprinterName: "ميني باص مرسيدس سبرينتر VIP",
     sprinterDesc: "مثالي للمجموعات الكبيرة، يقدم سبرينتر VIP مقاعد بطراز الطائرة لما يصل إلى 16 راكباً مع شاشات فردية ووسائل راحة فاخرة.",
     
@@ -11258,7 +11258,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "Mercedes Vito",
     vitoDesc: "Mercedes Vito - En uygun bütçeyle konforlu aile tatil transfer aracı.",
     maybachName: "Mercedes Maybach Minivan",
-    maybachDesc: "Otomotiv lüksünün zirvesi. Maybach Minivan'ımız VIP misafirler ve iş dünyası yöneticileri için executive arka koltuklar ve en yumuşak sürüş sunar.",
+    maybachDesc: "Otomotiv lüksünün zirvesi. Mercedes Maybach Minivan'ımız VIP misafirler ve iş dünyası yöneticileri için executive arka koltuklar ve en yumuşak sürüş sunar.",
     sprinterName: "Mercedes Sprinter VIP Minibüs",
     sprinterDesc: "Büyük gruplar için mükemmel, VIP Sprinter'ımız bireysel ekranlar ve premium olanaklarla 16 yolcuya kadar uçak tarzı oturma sunar.",
     
@@ -12767,7 +12767,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "Mercedes Vito",
     vitoDesc: "Mercedes Vito — комфортні сімейні автомобілі для трансферу з найкращим бюджетом.",
     maybachName: "Mercedes Maybach Minivan",
-    maybachDesc: "Вершина автомобільної розкоші. Наш Maybach Minivan пропонує представницькі задні сидіння та найплавнішу поїздку для VIP-гостей.",
+    maybachDesc: "Вершина автомобільної розкоші. Наш Mercedes Maybach Minivan пропонує представницькі задні сидіння та найплавнішу поїздку для VIP-гостей.",
     sprinterName: "Mercedes Sprinter VIP Мікроавтобус",
     sprinterDesc: "Ідеально для великих груп, наш VIP Sprinter пропонує сидіння авіаційного класу для до 16 пасажирів з індивідуальними екранами.",
     
@@ -14188,7 +14188,7 @@ const translations: Record<Language, Record<string, string>> = {
     vitoName: "メルセデス・ヴィト",
     vitoDesc: "お手頃な価格で快適なファミリー向け送迎車両。",
     maybachName: "メルセデス・マイバッハ ミニバン",
-    maybachDesc: "自動車の高級さの頂点。マイバッハ ミニバンはVIPゲストやビジネスエグゼクティブ向けのエグゼクティブリアシートと最も滑らかな乗り心地を提供します。",
+    maybachDesc: "自動車の高級さの頂点。メルセデス・マイバッハ ミニバンはVIPゲストやビジネスエグゼクティブ向けのエグゼクティブリアシートと最も滑らかな乗り心地を提供します。",
     sprinterName: "メルセデス・スプリンター VIPミニバス",
     sprinterDesc: "大人数グループに最適。VIPスプリンターは最大16名様まで個別スクリーンとプレミアムアメニティを備えた航空機スタイルのシートを提供します。",
     
