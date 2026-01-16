@@ -34,8 +34,28 @@ export const DUBAI_VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
   },
   {
-    value: 'dubai-suburban',
-    label: 'Mercedes Suburban',
+    value: 'dubai-premium-van',
+    label: 'Mercedes Premium Van',
+    passengers: 6,
+    luggage: 6,
+    description: 'Premium Mercedes van for families and groups. Spacious interior with luxury amenities for comfortable Dubai airport transfers.',
+    descriptionTr: 'Aileler ve gruplar için premium Mercedes van. Dubai havalimanı transferleri için lüks donanımlarla geniş iç mekan.',
+    features: [
+      { icon: 'snowflake', label: 'Dual-Zone Climate', labelTr: 'Çift Bölgeli Klima' },
+      { icon: 'armchair', label: 'Leather Captain Seats', labelTr: 'Deri Kaptan Koltuk' },
+      { icon: 'wifi', label: 'High-Speed WiFi', labelTr: 'Yüksek Hızlı WiFi' },
+      { icon: 'battery-charging', label: 'USB Charging', labelTr: 'USB Şarj' },
+      { icon: 'luggage', label: 'Extra Luggage Space', labelTr: 'Ekstra Bagaj Alanı' },
+      { icon: 'droplets', label: 'Refreshments', labelTr: 'İkramlar' },
+    ],
+    images: [
+      { src: dubaiVClass, alt: "Mercedes Premium Van luxury Dubai airport transfer with Burj Al Arab" },
+      { src: dubaiVClassInterior, alt: "Mercedes Premium Van leather interior with ambient lighting" },
+    ],
+  },
+  {
+    value: 'dubai-suburban-suv',
+    label: 'Mercedes Suburban SUV',
     passengers: 6,
     luggage: 6,
     description: 'Spacious luxury SUV for families and groups. Perfect for Dubai airport transfers with ample luggage space and premium comfort.',
@@ -54,12 +74,12 @@ export const DUBAI_VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
   },
   {
-    value: 'dubai-vip-mercedes-van',
-    label: 'VIP Mercedes Van',
-    passengers: 7,
-    luggage: 7,
-    description: 'Premium VIP van with starlight ceiling and luxurious interior. Ultimate comfort for VIP transfers in Dubai with professional chauffeur service.',
-    descriptionTr: 'Yıldızlı tavan ve lüks iç mekanla premium VIP van. Profesyonel şoför hizmeti ile Dubai\'de VIP transferler için üstün konfor.',
+    value: 'dubai-vip-sprinter',
+    label: 'VIP Mercedes Sprinter',
+    passengers: 12,
+    luggage: 12,
+    description: 'Ultimate VIP Sprinter with starlight ceiling and luxurious interior. The pinnacle of luxury for VIP group transfers in Dubai with professional chauffeur service.',
+    descriptionTr: 'Yıldızlı tavan ve lüks iç mekanla ultimate VIP Sprinter. Profesyonel şoför hizmeti ile Dubai\'de VIP grup transferleri için lüksün zirvesi.',
     features: [
       { icon: 'snowflake', label: 'Climate Control', labelTr: 'Klima Kontrolü' },
       { icon: 'armchair', label: 'VIP Leather Seats', labelTr: 'VIP Deri Koltuk' },
@@ -67,31 +87,11 @@ export const DUBAI_VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'wifi', label: 'Premium WiFi', labelTr: 'Premium WiFi' },
       { icon: 'battery-charging', label: 'Wireless Charging', labelTr: 'Kablosuz Şarj' },
       { icon: 'sparkles', label: 'Ambient Lighting', labelTr: 'Ambiyans Aydınlatma' },
-      { icon: 'wine', label: 'Refreshments', labelTr: 'İkramlar' },
+      { icon: 'wine', label: 'VIP Refreshments', labelTr: 'VIP İkramlar' },
     ],
     images: [
-      { src: dubaiVipMercedesVan, alt: "VIP Mercedes Van starlight ceiling Dubai Marina skyline" },
-      { src: dubaiVipVanExterior, alt: "Mercedes VIP Van exterior Dubai airport professional chauffeur" },
-    ],
-  },
-  {
-    value: 'dubai-v-class',
-    label: 'Mercedes V-Class',
-    passengers: 6,
-    luggage: 6,
-    description: 'Luxurious Mercedes V-Class with panoramic roof and white leather interior. Perfect for family transfers and business groups in Dubai.',
-    descriptionTr: 'Panoramik tavan ve beyaz deri iç mekan ile lüks Mercedes V-Class. Dubai\'de aile transferleri ve iş grupları için ideal.',
-    features: [
-      { icon: 'snowflake', label: 'Climate Control', labelTr: 'Klima Kontrolü' },
-      { icon: 'armchair', label: 'Premium White Leather', labelTr: 'Premium Beyaz Deri' },
-      { icon: 'wifi', label: 'High-Speed WiFi', labelTr: 'Yüksek Hızlı WiFi' },
-      { icon: 'battery-charging', label: 'USB & Wireless Charging', labelTr: 'USB & Kablosuz Şarj' },
-      { icon: 'luggage', label: 'Large Luggage Space', labelTr: 'Geniş Bagaj Alanı' },
-      { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
-    ],
-    images: [
-      { src: dubaiVClass, alt: "Mercedes V-Class white exterior Palm Jumeirah Dubai transfer" },
-      { src: dubaiVClassInterior, alt: "Mercedes V-Class panoramic roof white leather interior Dubai Marina" },
+      { src: dubaiVipMercedesVan, alt: "VIP Mercedes Sprinter starlight ceiling Dubai Marina skyline" },
+      { src: dubaiVipVanExterior, alt: "Mercedes VIP Sprinter exterior Dubai airport professional chauffeur" },
     ],
   },
 ];
@@ -142,6 +142,8 @@ export function isDubaiLocation(location: string): boolean {
     'sheikh zayed',
     'emirates hills',
     'arabian ranches',
+    'jbr',
+    'jumeirah beach',
   ];
   
   return dubaiKeywords.some(keyword => normalizedLocation.includes(keyword));
