@@ -168,6 +168,8 @@ const AirportTransferBookingTips = lazy(() => import("./pages/website/blog/Airpo
 const VIPAirportTransferTurkey = lazy(() => import("./pages/website/blog/VIPAirportTransferTurkey"));
 const IntercityTransferTurkey = lazy(() => import("./pages/website/blog/IntercityTransferTurkey"));
 const LuxuryMaybachTransferTurkey = lazy(() => import("./pages/website/blog/LuxuryMaybachTransferTurkey"));
+const MardinAirportTransferGuide = lazy(() => import("./pages/website/blog/MardinAirportTransferGuide"));
+const MidyatAirportTransferGuide = lazy(() => import("./pages/website/blog/MidyatAirportTransferGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -298,6 +300,8 @@ const App = () => (
               {localizedRoutes("/blog/vip-airport-transfer-turkey", <VIPAirportTransferTurkey />)}
               {localizedRoutes("/blog/intercity-transfer-turkey", <IntercityTransferTurkey />)}
               {localizedRoutes("/blog/luxury-maybach-transfer-turkey", <LuxuryMaybachTransferTurkey />)}
+              {localizedRoutes("/blog/mardin-airport-transfer-guide", <MardinAirportTransferGuide />)}
+              {localizedRoutes("/blog/midyat-airport-transfer-guide", <MidyatAirportTransferGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
