@@ -414,6 +414,12 @@ const AdminAnalytics = () => {
     [dailyStats]
   );
 
+  // Filter out blocked visitors from active visitors list
+  const filteredActiveVisitors = useMemo(() => 
+    activeVisitors.filter(v => !blockedVisitors.has(v.visitor_id)),
+    [activeVisitors, blockedVisitors]
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-4 md:p-6">
@@ -542,76 +548,51 @@ const AdminAnalytics = () => {
               <Activity className="h-5 w-5 text-green-500" />
               Şu An Aktif Ziyaretçiler
               <Badge variant="secondary" className="ml-2">
-                {activeVisitors.length}
+                {filteredActiveVisitors.length}
               </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {activeVisitors.length === 0 ? (
+            {filteredActiveVisitors.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
                 Şu an aktif ziyaretçi yok
               </p>
             ) : (
               <div className="space-y-3 max-h-80 overflow-y-auto">
-                {activeVisitors.map((visitor, index) => {
-                  const isBlocked = blockedVisitors.has(visitor.visitor_id);
-                  return (
-                    <div 
-                      key={`${visitor.visitor_id}-${index}`}
-                      className={`flex items-center justify-between p-3 rounded-lg ${
-                        isBlocked ? 'bg-red-500/10 border border-red-500/30' : 'bg-muted/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">
-                          {getFlagEmoji(visitor.country_code)}
-                        </span>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm truncate max-w-[200px]">{visitor.page_path}</p>
-                            {isBlocked && (
-                              <Badge variant="destructive" className="text-[10px] px-1 py-0">
-                                <ShieldX className="h-3 w-3 mr-0.5" />
-                                Engelli
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            {visitor.country_name || 'Bilinmeyen Konum'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          {getDeviceIcon(visitor.device)}
-                          <span className="text-xs hidden sm:inline">{visitor.browser}</span>
-                        </div>
-                        {isBlocked ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 px-2 text-xs border-green-500/50 text-green-600 hover:bg-green-500/10"
-                            onClick={() => handleUnblockVisitor(visitor.visitor_id)}
-                          >
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Kaldır
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 px-2 text-xs border-red-500/50 text-red-600 hover:bg-red-500/10"
-                            onClick={() => handleOpenBlockDialog(visitor)}
-                          >
-                            <Ban className="h-3 w-3 mr-1" />
-                            Engelle
-                          </Button>
-                        )}
-                        <div className={`w-2 h-2 rounded-full animate-pulse ${isBlocked ? 'bg-red-500' : 'bg-green-500'}`} />
+                {filteredActiveVisitors.map((visitor, index) => (
+                  <div 
+                    key={`${visitor.visitor_id}-${index}`}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">
+                        {getFlagEmoji(visitor.country_code)}
+                      </span>
+                      <div>
+                        <p className="font-medium text-sm truncate max-w-[200px]">{visitor.page_path}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {visitor.country_name || 'Bilinmeyen Konum'}
+                        </p>
                       </div>
                     </div>
-                  );
-                })}
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        {getDeviceIcon(visitor.device)}
+                        <span className="text-xs hidden sm:inline">{visitor.browser}</span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs border-red-500/50 text-red-600 hover:bg-red-500/10"
+                        onClick={() => handleOpenBlockDialog(visitor)}
+                      >
+                        <Ban className="h-3 w-3 mr-1" />
+                        Engelle
+                      </Button>
+                      <div className="w-2 h-2 rounded-full animate-pulse bg-green-500" />
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
