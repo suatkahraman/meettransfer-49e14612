@@ -850,6 +850,14 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableTitle: "How to Choose a Reliable Airport Transfer in Turkey – Complete Guide 2025",
     blogReliableDesc: "Learn how to choose a reliable airport transfer in Turkey. Expert checklist, red flags to avoid, comparison of taxis vs private transfers.",
     blogReliableCategory: "Travel Tips",
+    // Best Antalya Airport Transfer
+    blogAntalyaBestTitle: "Best Private Transfer from Antalya Airport 2025 – Meet Transfer Review",
+    blogAntalyaBestDesc: "Discover why Meet Transfer is the best private transfer from Antalya Airport. 4.9★ rating, fixed prices from €50, Mercedes fleet, flight tracking.",
+    blogAntalyaBestCategory: "Antalya",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "Best Private Transfer from Bodrum Airport 2025 – Meet Transfer Review",
+    blogBodrumBestDesc: "Discover why Meet Transfer is the best private transfer from Bodrum Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking.",
+    blogBodrumBestCategory: "Bodrum",
   },
   
   DE: {
@@ -1727,6 +1735,14 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableTitle: "Wie wählt man einen zuverlässigen Flughafentransfer in der Türkei – Kompletter Guide 2025",
     blogReliableDesc: "Lernen Sie, wie Sie einen zuverlässigen Flughafentransfer in der Türkei wählen. Experten-Checkliste, Warnsignale, Vergleich Taxi vs. Privattransfer.",
     blogReliableCategory: "Reisetipps",
+    // Best Antalya Airport Transfer
+    blogAntalyaBestTitle: "Bester Privattransfer vom Flughafen Antalya 2025 – Meet Transfer Bewertung",
+    blogAntalyaBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Antalya ist. 4,9★ Bewertung, Festpreise ab €50, Mercedes-Flotte, Flugverfolgung.",
+    blogAntalyaBestCategory: "Antalya",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "Bester Privattransfer vom Flughafen Bodrum 2025 – Meet Transfer Bewertung",
+    blogBodrumBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Bodrum ist. 4,9★ Bewertung, Festpreise ab €40, Mercedes-Flotte, Flugverfolgung.",
+    blogBodrumBestCategory: "Bodrum",
   },
   
   FR: {
@@ -2573,6 +2589,14 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableTitle: "Comment choisir un transfert aéroport fiable en Turquie – Guide complet 2025",
     blogReliableDesc: "Apprenez à choisir un transfert aéroport fiable en Turquie. Liste de contrôle d'experts, signaux d'alerte, comparaison taxi vs transfert privé.",
     blogReliableCategory: "Conseils de voyage",
+    // Best Antalya Airport Transfer
+    blogAntalyaBestTitle: "Meilleur transfert privé depuis l'aéroport d'Antalya 2025 – Avis Meet Transfer",
+    blogAntalyaBestDesc: "Découvrez pourquoi Meet Transfer est le meilleur transfert privé depuis l'aéroport d'Antalya. Note 4,9★, prix fixes à partir de 50€, flotte Mercedes, suivi des vols.",
+    blogAntalyaBestCategory: "Antalya",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "Meilleur transfert privé depuis l'aéroport de Bodrum 2025 – Avis Meet Transfer",
+    blogBodrumBestDesc: "Découvrez pourquoi Meet Transfer est le meilleur transfert privé depuis l'aéroport de Bodrum. Note 4,9★, prix fixes à partir de 40€, flotte Mercedes, suivi des vols.",
+    blogBodrumBestCategory: "Bodrum",
   },
   
   RU: {
@@ -3323,6 +3347,14 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableTitle: "Как выбрать надежный трансфер из аэропорта в Турции – Полное руководство 2025",
     blogReliableDesc: "Узнайте, как выбрать надежный трансфер из аэропорта в Турции. Чек-лист эксперта, предупреждающие знаки, сравнение такси и частного трансфера.",
     blogReliableCategory: "Советы путешественникам",
+    // Best Antalya Airport Transfer
+    blogAntalyaBestTitle: "Лучший частный трансфер из аэропорта Анталии 2025 – Обзор Meet Transfer",
+    blogAntalyaBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Анталии. Рейтинг 4,9★, фиксированные цены от €50, автопарк Mercedes, отслеживание рейсов.",
+    blogAntalyaBestCategory: "Анталия",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "Лучший частный трансфер из аэропорта Бодрума 2025 – Обзор Meet Transfer",
+    blogBodrumBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Бодрума. Рейтинг 4,9★, фиксированные цены от €40, автопарк Mercedes, отслеживание рейсов.",
+    blogBodrumBestCategory: "Бодрум",
   },
   
   IT: {
@@ -4036,6 +4068,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogAntalyaBestTitle: "Miglior trasferimento privato dall'aeroporto di Antalya 2025 – Recensione Meet Transfer",
     blogAntalyaBestDesc: "Scopri perché Meet Transfer è il miglior trasferimento privato dall'aeroporto di Antalya. 4,9★, prezzi da €50, flotta Mercedes, monitoraggio voli.",
     blogAntalyaBestCategory: "Antalya",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "Miglior trasferimento privato dall'aeroporto di Bodrum 2025 – Recensione Meet Transfer",
+    blogBodrumBestDesc: "Scopri perché Meet Transfer è il miglior trasferimento privato dall'aeroporto di Bodrum. 4,9★, prezzi da €40, flotta Mercedes, monitoraggio voli.",
+    blogBodrumBestCategory: "Bodrum",
   },
   
   ES: {
@@ -4749,6 +4785,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogAntalyaBestTitle: "Mejor transporte privado desde el aeropuerto de Antalya 2025 – Reseña Meet Transfer",
     blogAntalyaBestDesc: "Descubre por qué Meet Transfer es el mejor transporte privado desde el aeropuerto de Antalya. 4,9★, precios desde €50, flota Mercedes, seguimiento de vuelos.",
     blogAntalyaBestCategory: "Antalya",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "Mejor transporte privado desde el aeropuerto de Bodrum 2025 – Reseña Meet Transfer",
+    blogBodrumBestDesc: "Descubre por qué Meet Transfer es el mejor transporte privado desde el aeropuerto de Bodrum. 4,9★, precios desde €40, flota Mercedes, seguimiento de vuelos.",
+    blogBodrumBestCategory: "Bodrum",
   },
   
   AR: {
@@ -5503,6 +5543,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogAntalyaBestTitle: "أفضل نقل خاص من مطار أنطاليا 2025 – مراجعة ميت ترانسفير",
     blogAntalyaBestDesc: "اكتشف لماذا ميت ترانسفير هي أفضل خدمة نقل خاصة من مطار أنطاليا. تقييم 4.9★، أسعار تبدأ من €50، أسطول مرسيدس، تتبع الرحلات.",
     blogAntalyaBestCategory: "أنطاليا",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "أفضل نقل خاص من مطار بودروم 2025 – مراجعة ميت ترانسفير",
+    blogBodrumBestDesc: "اكتشف لماذا ميت ترانسفير هي أفضل خدمة نقل خاصة من مطار بودروم. تقييم 4.9★، أسعار تبدأ من €40، أسطول مرسيدس، تتبع الرحلات.",
+    blogBodrumBestCategory: "بودروم",
   },
   
   TR: {
@@ -6375,6 +6419,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogAntalyaBestTitle: "Antalya Havalimanı'ndan En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
     blogAntalyaBestDesc: "Meet Transfer'in neden Antalya Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €50'den başlayan fiyatlar, Mercedes filosu, uçuş takibi.",
     blogAntalyaBestCategory: "Antalya",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "Bodrum Havalimanı'ndan En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
+    blogBodrumBestDesc: "Meet Transfer'in neden Bodrum Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €40'dan başlayan fiyatlar, Mercedes filosu, uçuş takibi.",
+    blogBodrumBestCategory: "Bodrum",
   },
   
   UK: {
@@ -7259,6 +7307,10 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogAntalyaBestTitle: "Найкращий приватний трансфер з аеропорту Анталії 2025 – Огляд Meet Transfer",
     blogAntalyaBestDesc: "Дізнайтеся, чому Meet Transfer — найкращий приватний трансфер з аеропорту Анталії. Рейтинг 4.9★, ціни від €50, парк Mercedes, відстеження рейсів.",
     blogAntalyaBestCategory: "Анталія",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "Найкращий приватний трансфер з аеропорту Бодрума 2025 – Огляд Meet Transfer",
+    blogBodrumBestDesc: "Дізнайтеся, чому Meet Transfer — найкращий приватний трансфер з аеропорту Бодрума. Рейтинг 4.9★, ціни від €40, парк Mercedes, відстеження рейсів.",
+    blogBodrumBestCategory: "Бодрум",
   },
   
   JA: {
