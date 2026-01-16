@@ -21,15 +21,14 @@ import maybachMinivan2 from "@/assets/maybach-minivan-2.jpg";
 import maybachMinivan3 from "@/assets/maybach-minivan-3.jpg";
 
 // Dubai exclusive fleet images
-import dubaiRollsRoyce from "@/assets/dubai-rolls-royce.jpg";
-import dubaiBentley from "@/assets/dubai-bentley.jpg";
-import dubaiRangeRover from "@/assets/dubai-range-rover.jpg";
-import dubaiMercedesSClass from "@/assets/dubai-mercedes-s-class.jpg";
-
-// Legacy images for additional variety
-import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
-import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
-import meetTransferPromoBanner from "@/assets/meet-transfer-promo-banner.png";
+import dubaiStandardSedan from "@/assets/dubai/dubai-standard-sedan.jpg";
+import dubaiStandardSedanInterior from "@/assets/dubai/dubai-standard-sedan-interior.jpg";
+import dubaiPremiumVan from "@/assets/dubai/dubai-v-class.jpg";
+import dubaiPremiumVanInterior from "@/assets/dubai/dubai-v-class-interior.jpg";
+import dubaiSuburban from "@/assets/dubai/dubai-suburban.jpg";
+import dubaiSuburbanInterior from "@/assets/dubai/dubai-suburban-interior.jpg";
+import dubaiVipSprinter from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
+import dubaiVipSprinterExterior from "@/assets/dubai/dubai-vip-van-exterior.jpg";
 
 const FleetPage = () => {
   const { t, language } = useLanguage();
@@ -46,9 +45,6 @@ const FleetPage = () => {
       images: [
         { src: vitoVipPremium, alt: "Mercedes VIP Vito starlight ceiling luxury airport transfer" },
         { src: vitoVipInterior, alt: "Mercedes VIP Vito purple starlight interior with champagne" },
-        { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
-        { src: meetTransferDubai, alt: "Meet Transfer VIP service in Dubai UAE" },
-        { src: meetTransferCyprus, alt: "Meet Transfer VIP chauffeur service Cyprus" },
       ],
     },
     {
@@ -61,9 +57,6 @@ const FleetPage = () => {
       images: [
         { src: vitoAirport, alt: "Mercedes Vito airport transfer with professional chauffeur" },
         { src: vitoFamily, alt: "Mercedes Vito family interior with happy passengers" },
-        { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
-        { src: meetTransferCyprus, alt: "Meet Transfer VIP service in Cyprus" },
-        { src: meetTransferDubai, alt: "Meet Transfer luxury service in Dubai" },
       ],
     },
     {
@@ -77,8 +70,6 @@ const FleetPage = () => {
         { src: maybachMinivan1, alt: "Mercedes Maybach Minivan ultra luxury exterior VIP transfer" },
         { src: maybachMinivan2, alt: "Mercedes Maybach Minivan premium cream leather interior with champagne" },
         { src: maybachMinivan3, alt: "Mercedes Maybach Minivan elegant black side profile executive shuttle" },
-        { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
-        { src: meetTransferDubai, alt: "Meet Transfer Maybach Minivan luxury service Dubai" },
       ],
     },
     {
@@ -91,60 +82,57 @@ const FleetPage = () => {
       images: [
         { src: sprinterExterior, alt: "Mercedes Sprinter VIP minibus at airport terminal" },
         { src: sprinterInterior, alt: "Mercedes Sprinter VIP blue starlight interior with TV" },
-        { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
-        { src: meetTransferDubai, alt: "Meet Transfer Sprinter minibus Dubai" },
-        { src: meetTransferCyprus, alt: "Meet Transfer Sprinter minibus Cyprus" },
       ],
     },
   ];
 
   const dubaiVehicles = [
     {
-      name: t("rollsRoyceName"),
-      description: t("rollsRoyceDesc"),
+      name: t("dubaiSedanName"),
+      description: t("dubaiSedanDesc"),
       passengers: 3,
-      luggage: 3,
-      startingPrice: "$350",
-      features: ["Starlight headliner", "Massage seats", "Champagne cooler", "Bespoke audio", "Privacy partition", "Umbrellas"],
+      luggage: 2,
+      startingPrice: "$80",
+      features: ["Climate Control", "Premium Leather", "Free WiFi", "USB Charging", "Bottled Water"],
       images: [
-        { src: dubaiRollsRoyce, alt: "Rolls Royce Phantom luxury VIP transfer Dubai" },
-        { src: meetTransferDubai, alt: "Meet Transfer Rolls Royce service Dubai" },
+        { src: dubaiStandardSedan, alt: "Standard sedan Toyota Camry Dubai airport transfer" },
+        { src: dubaiStandardSedanInterior, alt: "Standard sedan clean interior Dubai transfer service" },
       ],
     },
     {
-      name: t("bentleyName"),
-      description: t("bentleyDesc"),
-      passengers: 3,
-      luggage: 3,
-      startingPrice: "$280",
-      features: ["Diamond quilted leather", "Rotating display", "Naim audio", "Mood lighting", "Rear entertainment", "WiFi"],
+      name: t("dubaiPremiumVanName"),
+      description: t("dubaiPremiumVanDesc"),
+      passengers: 6,
+      luggage: 6,
+      startingPrice: "$150",
+      features: ["Dual-Zone Climate", "Leather Captain Seats", "High-Speed WiFi", "USB Charging", "Extra Luggage Space", "Refreshments"],
       images: [
-        { src: dubaiBentley, alt: "Bentley Flying Spur luxury airport transfer Dubai" },
-        { src: meetTransferDubai, alt: "Meet Transfer Bentley service Dubai Marina" },
+        { src: dubaiPremiumVan, alt: "Mercedes Premium Van luxury Dubai airport transfer with Burj Al Arab" },
+        { src: dubaiPremiumVanInterior, alt: "Mercedes Premium Van leather interior with ambient lighting" },
       ],
     },
     {
-      name: t("rangeRoverName"),
-      description: t("rangeRoverDesc"),
-      passengers: 4,
-      luggage: 4,
-      startingPrice: "$220",
-      features: ["Executive class seats", "Panoramic roof", "Meridian audio", "Climate seats", "Terrain response", "Air suspension"],
-      images: [
-        { src: dubaiRangeRover, alt: "Range Rover Autobiography VIP transfer Dubai" },
-        { src: meetTransferDubai, alt: "Meet Transfer Range Rover desert safari Dubai" },
-      ],
-    },
-    {
-      name: t("mercedesSClassName"),
-      description: t("mercedesSClassDesc"),
-      passengers: 3,
-      luggage: 3,
+      name: t("dubaiSuburbanName"),
+      description: t("dubaiSuburbanDesc"),
+      passengers: 6,
+      luggage: 6,
       startingPrice: "$180",
-      features: ["MBUX system", "Energizing comfort", "Burmester audio", "Executive rear seats", "Ambient lighting", "Night vision"],
+      features: ["Dual-Zone Climate", "Leather Captain Seats", "High-Speed WiFi", "USB Charging", "Extra Luggage Space", "Refreshments"],
       images: [
-        { src: dubaiMercedesSClass, alt: "Mercedes S-Class S580 airport transfer Dubai" },
-        { src: meetTransferDubai, alt: "Meet Transfer Mercedes S-Class Dubai" },
+        { src: dubaiSuburban, alt: "Mercedes Suburban SUV luxury Dubai airport transfer with Burj Al Arab" },
+        { src: dubaiSuburbanInterior, alt: "Mercedes Suburban premium black leather interior with ambient lighting" },
+      ],
+    },
+    {
+      name: t("dubaiVipSprinterName"),
+      description: t("dubaiVipSprinterDesc"),
+      passengers: 12,
+      luggage: 12,
+      startingPrice: "$350",
+      features: ["Climate Control", "VIP Leather Seats", "Starlight Ceiling", "Premium WiFi", "Wireless Charging", "Ambient Lighting", "VIP Refreshments"],
+      images: [
+        { src: dubaiVipSprinter, alt: "VIP Mercedes Sprinter starlight ceiling Dubai Marina skyline" },
+        { src: dubaiVipSprinterExterior, alt: "Mercedes VIP Sprinter exterior Dubai airport professional chauffeur" },
       ],
     },
   ];
