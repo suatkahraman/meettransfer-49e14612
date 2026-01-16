@@ -695,8 +695,9 @@ const BookingPage = () => {
 
       // If return trip (only for transfers), create return reservation
       if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
-        const returnPrice = isPromoCodeValid && selectedPrice 
-          ? Math.round(selectedPrice * 0.75) // 25% discount
+        // Dubai locations don't get return trip discount
+        const returnPrice = !isDubai && isPromoCodeValid && selectedPrice 
+          ? Math.round(selectedPrice * 0.75) // 25% discount (not for Dubai)
           : selectedPrice;
 
         await supabase
@@ -1311,16 +1312,24 @@ const BookingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Return Trip Option */}
-              {!isHourlyBooking && activePromo.code && (
-                <Card className="border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
+              {/* Return Trip Option - Show discount promo only for non-Dubai locations */}
+              {!isHourlyBooking && (
+                <Card className={isDubai 
+                  ? "border-muted" 
+                  : "border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20"
+                }>
                   <CardContent className="p-4 sm:p-6 space-y-4">
                     <div 
-                      className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 border border-green-200 dark:border-green-700 cursor-pointer hover:shadow-lg transition-all"
+                      className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer hover:shadow-lg transition-all ${
+                        isDubai 
+                          ? "bg-muted/50 border border-muted-foreground/20" 
+                          : "bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 border border-green-200 dark:border-green-700"
+                      }`}
                       onClick={() => {
                         const newValue = !hasReturnTrip;
                         setHasReturnTrip(newValue);
-                        if (newValue && activePromo.code && !promoCode) {
+                        // Only auto-apply promo for non-Dubai locations
+                        if (!isDubai && newValue && activePromo.code && !promoCode) {
                           handlePromoCodeChange(activePromo.code);
                         }
                       }}
@@ -1331,7 +1340,8 @@ const BookingPage = () => {
                         onCheckedChange={(checked) => {
                           const newValue = checked === true;
                           setHasReturnTrip(newValue);
-                          if (newValue && activePromo.code && !promoCode) {
+                          // Only auto-apply promo for non-Dubai locations
+                          if (!isDubai && newValue && activePromo.code && !promoCode) {
                             handlePromoCodeChange(activePromo.code);
                           }
                         }}
@@ -1340,20 +1350,29 @@ const BookingPage = () => {
                       <div className="flex-1">
                         <Label htmlFor="returnTrip" className="cursor-pointer font-semibold text-base flex items-center gap-2">
                           {t("addReturnTrip") || "Add return trip"}
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500 text-white text-xs font-bold animate-pulse">
-                            <Sparkles className="h-3 w-3" />
-                            {activePromo.discountPercentage}% {t("discount") || "OFF"}
-                          </span>
+                          {/* Only show discount badge for non-Dubai locations */}
+                          {!isDubai && activePromo.code && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500 text-white text-xs font-bold animate-pulse">
+                              <Sparkles className="h-3 w-3" />
+                              {activePromo.discountPercentage}% {t("discount") || "OFF"}
+                            </span>
+                          )}
                         </Label>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {language === 'TR' 
-                            ? `Dönüş yolculuğunuzda %${activePromo.discountPercentage} indirim otomatik uygulanır!`
-                            : `${activePromo.discountPercentage}% discount automatically applied on your return!`}
+                          {isDubai 
+                            ? (language === 'TR' 
+                                ? 'Dönüş yolculuğu ekleyin'
+                                : 'Add a return trip to your booking')
+                            : (language === 'TR' 
+                                ? `Dönüş yolculuğunuzda %${activePromo.discountPercentage} indirim otomatik uygulanır!`
+                                : `${activePromo.discountPercentage}% discount automatically applied on your return!`)
+                          }
                         </p>
                       </div>
                     </div>
 
-                    {hasReturnTrip && isPromoCodeValid && promoDiscountPercent && (
+                    {/* Only show discount applied message for non-Dubai locations */}
+                    {!isDubai && hasReturnTrip && isPromoCodeValid && promoDiscountPercent && (
                       <div className="flex items-center gap-2 text-sm bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg border border-green-300 dark:border-green-700">
                         <CheckCircle className="h-5 w-5 shrink-0" />
                         <span className="font-medium">
