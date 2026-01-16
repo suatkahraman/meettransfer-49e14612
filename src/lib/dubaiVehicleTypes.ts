@@ -1,8 +1,8 @@
 // Dubai-specific vehicle types configuration
 // These vehicles are shown ONLY when Dubai is detected as the transfer location
 
-import dubaiSedanPrivate from "@/assets/dubai/dubai-sedan-private.jpg";
-import dubaiSedanInterior from "@/assets/dubai/dubai-sedan-interior.jpg";
+import dubaiStandardSedan from "@/assets/dubai/dubai-standard-sedan.jpg";
+import dubaiStandardSedanInterior from "@/assets/dubai/dubai-standard-sedan-interior.jpg";
 import dubaiSuburban from "@/assets/dubai/dubai-suburban.jpg";
 import dubaiSuburbanInterior from "@/assets/dubai/dubai-suburban-interior.jpg";
 import dubaiVipMercedesVan from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
@@ -29,8 +29,8 @@ export const DUBAI_VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
     ],
     images: [
-      { src: dubaiSedanPrivate, alt: "Private luxury sedan Dubai airport transfer with Burj Khalifa background" },
-      { src: dubaiSedanInterior, alt: "Premium sedan tan leather interior Dubai executive transfer" },
+      { src: dubaiStandardSedan, alt: "Standard sedan Toyota Camry Dubai airport transfer" },
+      { src: dubaiStandardSedanInterior, alt: "Standard sedan clean interior Dubai transfer service" },
     ],
   },
   {
