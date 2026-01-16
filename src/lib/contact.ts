@@ -32,13 +32,13 @@ export interface OfficeLocation {
 
 export const GLOBAL_OFFICES: OfficeLocation[] = [
   {
-    flag: "🇺🇸",
-    country: "USA",
-    city: "Sheridan",
-    address: "30 N Gould St, Sheridan, WY 82801",
+    flag: "🇹🇷",
+    country: "Turkey",
+    city: "Istanbul",
+    address: "Atatürk Mahallesi",
     phone: WHATSAPP_DISPLAY,
     whatsappOnly: true,
-    email: null,
+    email: SUPPORT_EMAIL,
   },
   {
     flag: "🇩🇪",
@@ -59,10 +59,19 @@ export const GLOBAL_OFFICES: OfficeLocation[] = [
     email: null,
   },
   {
-    flag: "🇦🇺",
-    country: "Australia",
-    city: "Sydney",
-    address: "10 Ettolong St, Auburn NSW 2144",
+    flag: "🇬🇷",
+    country: "Greece",
+    city: "Athens",
+    address: "Syntagma Square, Athens",
+    phone: WHATSAPP_DISPLAY,
+    whatsappOnly: true,
+    email: null,
+  },
+  {
+    flag: "🇨🇾",
+    country: "Cyprus",
+    city: "Larnaca",
+    address: "Airport Road, Larnaca",
     phone: WHATSAPP_DISPLAY,
     whatsappOnly: true,
     email: null,
