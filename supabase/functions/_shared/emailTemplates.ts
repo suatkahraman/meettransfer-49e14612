@@ -375,7 +375,7 @@ export function generateCustomerPriceQuoteEmail(
   const vehicleNames: Record<string, string> = {
     'mercedes-vito': 'Mercedes Vito VIP',
     'mercedes-sprinter': 'Mercedes Sprinter VIP',
-    'mercedes-maybach': 'Mercedes Maybach',
+    'mercedes-maybach': 'Mercedes Maybach Minivan',
   };
 
   let priceHtml = `<p style="font-size: 28px; color: white; font-weight: bold; margin: 10px 0;">${currencySymbol}${priceInfo.price}</p>`;
@@ -918,7 +918,7 @@ export function generatePaymentRequestEmail(
   const vehicleNames: Record<string, string> = {
     'mercedes-vito': 'Mercedes Vito VIP',
     'mercedes-sprinter': 'Mercedes Sprinter VIP',
-    'mercedes-maybach': 'Mercedes Maybach',
+    'mercedes-maybach': 'Mercedes Maybach Minivan',
   };
 
   return `
@@ -1006,7 +1006,7 @@ export function generatePaymentConfirmedEmail(
   const vehicleNames: Record<string, string> = {
     'mercedes-vito': 'Mercedes Vito VIP',
     'mercedes-sprinter': 'Mercedes Sprinter VIP',
-    'mercedes-maybach': 'Mercedes Maybach',
+    'mercedes-maybach': 'Mercedes Maybach Minivan',
   };
 
   return `
@@ -1098,7 +1098,7 @@ export function generatePriceSetEmail(
   const vehicleNames: Record<string, string> = {
     'mercedes-vito': 'Mercedes Vito VIP',
     'mercedes-sprinter': 'Mercedes Sprinter VIP',
-    'mercedes-maybach': 'Mercedes Maybach',
+    'mercedes-maybach': 'Mercedes Maybach Minivan',
   };
 
   let cashSection = '';

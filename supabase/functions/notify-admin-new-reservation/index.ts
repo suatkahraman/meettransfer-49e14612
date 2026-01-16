@@ -352,7 +352,7 @@ Deno.serve(async (req) => {
         const vehicleLabels: Record<string, string> = {
           'mercedes-vito': 'Mercedes Vito',
           'mercedes-vclass': 'Mercedes Vip Vito',
-          'maybach': 'Maybach',
+          'maybach': 'Mercedes Maybach Minivan',
           'minibus': 'Minibus',
         }
         

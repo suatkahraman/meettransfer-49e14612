@@ -3236,7 +3236,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                   'sedan': 'Sedan',
                                   'mercedes-vito': 'Mercedes Vito',
                                   'vip-mercedes': 'Mercedes Vito VIP',
-                                  'maybach-minibus': 'Maybach',
+                                  'maybach-minibus': 'Mercedes Maybach Minivan',
                                   'minibus': 'Mercedes Sprinter'
                                 };
                                 const label = vehicleLabels[vehicleType] || vehicleType;
@@ -3281,7 +3281,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                       {msg.bookingData.vehicleType === 'sedan' ? 'Sedan' :
                                        msg.bookingData.vehicleType === 'mercedes-vito' ? 'Mercedes Vito' :
                                        msg.bookingData.vehicleType === 'vip-mercedes' ? 'Mercedes Vito VIP' :
-                                       msg.bookingData.vehicleType === 'maybach-minibus' ? 'Maybach' :
+                                       msg.bookingData.vehicleType === 'maybach-minibus' ? 'Mercedes Maybach Minivan' :
                                        msg.bookingData.vehicleType === 'minibus' ? 'Mercedes Sprinter' :
                                        msg.bookingData.vehicleType}
                                     </p>
@@ -4123,7 +4123,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                         'sedan': 'Sedan',
                         'mercedes-vito': 'Mercedes Vito',
                         'vip-mercedes': 'Mercedes Vito VIP',
-                        'maybach-minibus': 'Maybach',
+                        'maybach-minibus': 'Mercedes Maybach Minivan',
                         'minibus': 'Mercedes Sprinter'
                       };
                       const label = vehicleLabels[vehicleType] || vehicleType;
@@ -4161,7 +4161,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                             {msg.bookingData.vehicleType === 'sedan' ? 'Sedan' :
                              msg.bookingData.vehicleType === 'mercedes-vito' ? 'Mercedes Vito' :
                              msg.bookingData.vehicleType === 'vip-mercedes' ? 'Mercedes Vito VIP' :
-                             msg.bookingData.vehicleType === 'maybach-minibus' ? 'Maybach' :
+                             msg.bookingData.vehicleType === 'maybach-minibus' ? 'Mercedes Maybach Minivan' :
                              msg.bookingData.vehicleType === 'minibus' ? 'Mercedes Sprinter' :
                              msg.bookingData.vehicleType}
                           </p>

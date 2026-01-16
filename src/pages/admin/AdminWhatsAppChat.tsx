@@ -980,7 +980,7 @@ export default function AdminWhatsAppChat() {
                                 <SelectContent>
                                   <SelectItem value="mercedes-vito">Vito</SelectItem>
                                   <SelectItem value="mercedes-vclass">VIP Vito</SelectItem>
-                                  <SelectItem value="maybach">Maybach</SelectItem>
+                                  <SelectItem value="maybach">Mercedes Maybach Minivan</SelectItem>
                                   <SelectItem value="minibus">Minibus</SelectItem>
                                 </SelectContent>
                               </Select>

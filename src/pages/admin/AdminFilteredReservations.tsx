@@ -52,10 +52,10 @@ interface Reservation {
 const vehicleLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
   'vip-mercedes': 'VIP Mercedes',
-  'maybach-minibus': 'Maybach Minibus',
+  'maybach-minibus': 'Mercedes Maybach Minivan',
   'minibus': 'Mercedes Sprinter',
   'mercedes-vclass': 'VIP Vito',
-  'maybach': 'Maybach',
+  'maybach': 'Mercedes Maybach Minivan',
 };
 
 const statusColors: Record<string, string> = {

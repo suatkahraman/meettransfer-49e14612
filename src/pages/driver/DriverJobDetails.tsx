@@ -30,11 +30,11 @@ import { getWhatsAppUrl } from '@/lib/contact';
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes-vito',
   'vip-mercedes': 'Vip Mercedes',
-  'maybach-minibus': 'Maybach Minibus',
+  'maybach-minibus': 'Mercedes Maybach Minivan',
   'minibus': 'Minibus',
   // Legacy support
   'mercedes-vclass': 'Mercedes Vip Vito',
-  'maybach': 'Maybach',
+  'maybach': 'Mercedes Maybach Minivan',
 };
 
 interface Reservation {
