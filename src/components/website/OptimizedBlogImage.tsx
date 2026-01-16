@@ -28,33 +28,15 @@ const OptimizedBlogImage = ({
   onLoad,
 }: OptimizedBlogImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(priority);
+  const [isInView, setIsInView] = useState(true); // Always render image, use native lazy loading
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for lazy loading
+  // Reset states when src changes
   useEffect(() => {
-    if (priority) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.disconnect();
-        }
-      },
-      {
-        rootMargin: "200px", // Start loading 200px before entering viewport
-        threshold: 0,
-      }
-    );
-
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [priority]);
+    setIsLoaded(false);
+    setHasError(false);
+  }, [src]);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -62,20 +44,13 @@ const OptimizedBlogImage = ({
   };
 
   const handleError = () => {
+    // Only set error after a delay to allow for retries
+    console.warn('OptimizedBlogImage: Image failed to load:', src);
     setHasError(true);
   };
 
-  // Generate WebP source if the src is a jpg/png
-  const getWebPSrc = (originalSrc: string) => {
-    // For imported assets, we can't convert them dynamically
-    // But we can check if it's a URL and try webp version
-    if (typeof originalSrc === "string" && originalSrc.startsWith("/")) {
-      return originalSrc.replace(/\.(jpg|jpeg|png)$/i, ".webp");
-    }
-    return null;
-  };
-
-  const webpSrc = getWebPSrc(src);
+  // Check if src is valid
+  const isValidSrc = src && typeof src === 'string' && src.length > 0;
 
   return (
     <div
@@ -86,42 +61,37 @@ const OptimizedBlogImage = ({
         className
       )}
     >
-      {/* Placeholder/Skeleton */}
+      {/* Placeholder/Skeleton - show while loading */}
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 bg-gradient-to-r from-muted via-muted/80 to-muted animate-pulse" />
       )}
 
-      {/* Error fallback */}
-      {hasError && (
+      {/* Error fallback - only show if src is invalid or truly failed */}
+      {(hasError || !isValidSrc) && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted text-muted-foreground">
           <span className="text-sm">Image unavailable</span>
         </div>
       )}
 
-      {/* Actual image */}
-      {isInView && !hasError && (
-        <picture>
-          {/* WebP source for browsers that support it */}
-          {webpSrc && <source srcSet={webpSrc} type="image/webp" />}
-          
-          <img
-            src={src}
-            alt={alt}
-            loading={priority ? "eager" : "lazy"}
-            decoding={priority ? "sync" : "async"}
-            fetchPriority={priority ? "high" : "auto"}
-            sizes={sizes}
-            onLoad={handleLoad}
-            onError={handleError}
-            className={cn(
-              "w-full h-full object-cover transition-opacity duration-300",
-              isLoaded ? "opacity-100" : "opacity-0"
-            )}
-            // Width and height for aspect ratio hint (prevents CLS)
-            width={1200}
-            height={aspectRatio === "hero" ? 750 : aspectRatio === "video" ? 675 : 1200}
-          />
-        </picture>
+      {/* Actual image - always render if src is valid */}
+      {isValidSrc && !hasError && (
+        <img
+          src={src}
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          decoding={priority ? "sync" : "async"}
+          fetchPriority={priority ? "high" : "auto"}
+          sizes={sizes}
+          onLoad={handleLoad}
+          onError={handleError}
+          className={cn(
+            "w-full h-full object-cover transition-opacity duration-300",
+            isLoaded ? "opacity-100" : "opacity-0"
+          )}
+          // Width and height for aspect ratio hint (prevents CLS)
+          width={1200}
+          height={aspectRatio === "hero" ? 750 : aspectRatio === "video" ? 675 : 1200}
+        />
       )}
     </div>
   );
