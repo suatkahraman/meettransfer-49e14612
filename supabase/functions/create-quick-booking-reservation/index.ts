@@ -438,8 +438,7 @@ ${customerLoginText}
 Need help? Contact us via WhatsApp: +1 (555) 805-1101 or email: info@meettransfer.app
 
 Best regards,
-Meet Transfer USA, LLC
-30 N Gould St, Sheridan, WY 82801, USA
+Meet Transfer
           `.trim();
 
           const emailHtml = `
@@ -504,8 +503,7 @@ Meet Transfer USA, LLC
     </tr>
     <tr>
       <td style="background-color:#1a365d;padding:20px;text-align:center;">
-        <p style="color:#fff;margin:0 0 10px;font-size:14px;font-weight:bold;">Meet Transfer USA, LLC</p>
-        <p style="color:#ccc;margin:0 0 5px;font-size:12px;">📍 30 N Gould St, Sheridan, WY 82801, USA</p>
+        <p style="color:#fff;margin:0 0 10px;font-size:14px;font-weight:bold;">Meet Transfer</p>
         <p style="color:#ccc;margin:0 0 10px;font-size:12px;">📧 info@meettransfer.app</p>
         <a href="https://wa.me/15558051101" style="display:inline-block;background-color:#25D366;color:#fff;padding:8px 16px;text-decoration:none;border-radius:4px;font-size:12px;">💬 WhatsApp: +1 (555) 805-1101</a>
       </td>
