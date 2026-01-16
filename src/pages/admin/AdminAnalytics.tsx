@@ -16,10 +16,26 @@ import {
   Tablet,
   RefreshCw,
   Eye,
-  FileText
+  FileText,
+  Ban,
+  ShieldX,
+  CheckCircle
 } from "lucide-react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { tr } from "date-fns/locale";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface DailyStats {
   date: string;
@@ -70,6 +86,29 @@ const AdminAnalytics = () => {
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
   const [pageStats, setPageStats] = useState<PageStats[]>([]);
+  const [blockedVisitors, setBlockedVisitors] = useState<Set<string>>(new Set());
+  
+  // Block dialog state
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [visitorToBlock, setVisitorToBlock] = useState<ActiveVisitor | null>(null);
+  const [blockReason, setBlockReason] = useState("");
+  const [isBlocking, setIsBlocking] = useState(false);
+
+  // Fetch blocked visitors
+  const fetchBlockedVisitors = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blocked_visitors')
+        .select('visitor_id')
+        .eq('is_active', true);
+      
+      if (!error && data) {
+        setBlockedVisitors(new Set(data.map(b => b.visitor_id)));
+      }
+    } catch (err) {
+      console.error('Error fetching blocked visitors:', err);
+    }
+  }, []);
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -244,11 +283,83 @@ const AdminAnalytics = () => {
 
   useEffect(() => {
     fetchAnalytics();
+    fetchBlockedVisitors();
     
     // Refresh every 60 seconds (reduced from 30s)
-    const interval = setInterval(fetchAnalytics, 60000);
+    const interval = setInterval(() => {
+      fetchAnalytics();
+      fetchBlockedVisitors();
+    }, 60000);
     return () => clearInterval(interval);
-  }, [fetchAnalytics]);
+  }, [fetchAnalytics, fetchBlockedVisitors]);
+
+  // Block visitor handler
+  const handleOpenBlockDialog = useCallback((visitor: ActiveVisitor) => {
+    setVisitorToBlock(visitor);
+    setBlockReason("");
+    setBlockDialogOpen(true);
+  }, []);
+
+  const handleBlockVisitor = useCallback(async () => {
+    if (!visitorToBlock) return;
+    
+    setIsBlocking(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('blocked_visitors')
+        .insert({
+          visitor_id: visitorToBlock.visitor_id,
+          reason: blockReason || 'Manuel engelleme',
+          blocked_by: user?.id,
+          country_code: visitorToBlock.country_code,
+          country_name: visitorToBlock.country_name,
+          is_active: true,
+        });
+      
+      if (error) {
+        if (error.code === '23505') {
+          toast.error('Bu ziyaretçi zaten engellenmiş');
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success(`Ziyaretçi başarıyla engellendi`, {
+          description: `${visitorToBlock.country_name || 'Bilinmeyen konum'} - ${visitorToBlock.visitor_id.substring(0, 10)}...`
+        });
+        setBlockedVisitors(prev => new Set([...prev, visitorToBlock.visitor_id]));
+      }
+    } catch (err) {
+      console.error('Error blocking visitor:', err);
+      toast.error('Ziyaretçi engellenirken hata oluştu');
+    } finally {
+      setIsBlocking(false);
+      setBlockDialogOpen(false);
+      setVisitorToBlock(null);
+    }
+  }, [visitorToBlock, blockReason]);
+
+  const handleUnblockVisitor = useCallback(async (visitorId: string) => {
+    try {
+      const { error } = await supabase
+        .from('blocked_visitors')
+        .update({ is_active: false })
+        .eq('visitor_id', visitorId);
+      
+      if (error) throw error;
+      
+      toast.success('Ziyaretçi engeli kaldırıldı');
+      setBlockedVisitors(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(visitorId);
+        return newSet;
+      });
+    } catch (err) {
+      console.error('Error unblocking visitor:', err);
+      toast.error('Engel kaldırılırken hata oluştu');
+    }
+  }, []);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -398,31 +509,65 @@ const AdminAnalytics = () => {
               </p>
             ) : (
               <div className="space-y-3 max-h-80 overflow-y-auto">
-                {activeVisitors.map((visitor, index) => (
-                  <div 
-                    key={`${visitor.visitor_id}-${index}`}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">
-                        {getFlagEmoji(visitor.country_code)}
-                      </span>
-                      <div>
-                        <p className="font-medium text-sm truncate max-w-[200px]">{visitor.page_path}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {visitor.country_name || 'Bilinmeyen Konum'}
-                        </p>
+                {activeVisitors.map((visitor, index) => {
+                  const isBlocked = blockedVisitors.has(visitor.visitor_id);
+                  return (
+                    <div 
+                      key={`${visitor.visitor_id}-${index}`}
+                      className={`flex items-center justify-between p-3 rounded-lg ${
+                        isBlocked ? 'bg-red-500/10 border border-red-500/30' : 'bg-muted/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">
+                          {getFlagEmoji(visitor.country_code)}
+                        </span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm truncate max-w-[200px]">{visitor.page_path}</p>
+                            {isBlocked && (
+                              <Badge variant="destructive" className="text-[10px] px-1 py-0">
+                                <ShieldX className="h-3 w-3 mr-0.5" />
+                                Engelli
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {visitor.country_name || 'Bilinmeyen Konum'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          {getDeviceIcon(visitor.device)}
+                          <span className="text-xs hidden sm:inline">{visitor.browser}</span>
+                        </div>
+                        {isBlocked ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2 text-xs border-green-500/50 text-green-600 hover:bg-green-500/10"
+                            onClick={() => handleUnblockVisitor(visitor.visitor_id)}
+                          >
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Kaldır
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2 text-xs border-red-500/50 text-red-600 hover:bg-red-500/10"
+                            onClick={() => handleOpenBlockDialog(visitor)}
+                          >
+                            <Ban className="h-3 w-3 mr-1" />
+                            Engelle
+                          </Button>
+                        )}
+                        <div className={`w-2 h-2 rounded-full animate-pulse ${isBlocked ? 'bg-red-500' : 'bg-green-500'}`} />
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        {getDeviceIcon(visitor.device)}
-                        <span className="text-xs hidden sm:inline">{visitor.browser}</span>
-                      </div>
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -553,6 +698,71 @@ const AdminAnalytics = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Block Visitor Dialog */}
+      <AlertDialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldX className="h-5 w-5 text-red-500" />
+              Ziyaretçiyi Engelle
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Bu ziyaretçi sitenize erişemeyecek. Engellenmiş ziyaretçiler tracking ve presence sisteminden çıkarılır.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          {visitorToBlock && (
+            <div className="py-4 space-y-4">
+              <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                <span className="text-2xl">
+                  {getFlagEmoji(visitorToBlock.country_code)}
+                </span>
+                <div>
+                  <p className="font-medium">{visitorToBlock.country_name || 'Bilinmeyen Konum'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    ID: {visitorToBlock.visitor_id.substring(0, 15)}...
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {visitorToBlock.device} • {visitorToBlock.browser}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="block-reason">Engelleme Nedeni (Opsiyonel)</Label>
+                <Input
+                  id="block-reason"
+                  placeholder="Örn: Şüpheli aktivite, bot, spam..."
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isBlocking}>İptal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBlockVisitor}
+              disabled={isBlocking}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isBlocking ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Engelleniyor...
+                </>
+              ) : (
+                <>
+                  <Ban className="h-4 w-4 mr-2" />
+                  Engelle
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
