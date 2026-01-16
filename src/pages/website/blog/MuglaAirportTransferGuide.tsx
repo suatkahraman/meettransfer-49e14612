@@ -138,14 +138,13 @@ const MuglaAirportTransferGuide = () => {
 
         <ShareButtons title={t("blogMuglaH1")} className="mb-8" />
 
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
-          <img 
-            src={muglaTransferHero} 
-            alt={t("blogMuglaHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={muglaTransferHero}
+          alt={t("blogMuglaHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-6 md:mb-8"
+        />
 
         <TableOfContents items={tocItems} />
 

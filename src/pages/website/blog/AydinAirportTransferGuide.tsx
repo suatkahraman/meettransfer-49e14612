@@ -138,14 +138,13 @@ const AydinAirportTransferGuide = () => {
 
         <ShareButtons title={t("blogAydinH1")} className="mb-8" />
 
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
-          <img 
-            src={aydinTransferHero} 
-            alt={t("blogAydinHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={aydinTransferHero}
+          alt={t("blogAydinHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-6 md:mb-8"
+        />
 
         <TableOfContents items={tocItems} />
 

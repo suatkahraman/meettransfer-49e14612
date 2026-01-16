@@ -146,14 +146,13 @@ const CyprusAirportTransferGuide = () => {
         <ShareButtons title={t("blogCyprusH1")} className="mb-6 md:mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
-          <img 
-            src={cyprusTransferHero} 
-            alt={t("blogCyprusHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={cyprusTransferHero}
+          alt={t("blogCyprusHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-6 md:mb-8"
+        />
 
         {/* Table of Contents */}
         <TableOfContents items={[

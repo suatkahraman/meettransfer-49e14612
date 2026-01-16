@@ -10,6 +10,7 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -270,11 +271,12 @@ const HowToChooseReliableTransfer = () => {
       {/* Hero Image */}
       <div className="container mx-auto px-4 -mt-8 mb-12">
         <div className="max-w-5xl mx-auto">
-          <img
+          <OptimizedBlogImage
             src={vitoExterior}
             alt="Professional airport transfer vehicle - How to choose reliable transfer in Turkey"
-            className="w-full h-auto rounded-2xl shadow-2xl"
-            loading="eager"
+            aspectRatio="video"
+            priority
+            className="rounded-2xl shadow-2xl"
           />
         </div>
       </div>

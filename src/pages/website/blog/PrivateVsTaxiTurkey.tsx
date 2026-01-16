@@ -110,14 +110,13 @@ const PrivateVsTaxiTurkey = () => {
         <ShareButtons title={t('blogPrivateTaxiH1')} className="mb-6 md:mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-8 md:mb-12">
-          <img 
-            src={vitoVipStarlightPurple} 
-            alt={t("blogTaxiHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={vitoVipStarlightPurple}
+          alt={t("blogTaxiHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-8 md:mb-12"
+        />
 
         {/* Table of Contents */}
         <TableOfContents items={[

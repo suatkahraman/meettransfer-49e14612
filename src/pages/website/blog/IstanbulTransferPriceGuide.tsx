@@ -152,14 +152,13 @@ const IstanbulTransferPriceGuide = () => {
         <ShareButtons title={t("blogPriceH1")} className="mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-8">
-          <img 
-            src={istanbulTransferHero} 
-            alt={t("blogIstanbulPriceHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={istanbulTransferHero}
+          alt={t("blogIstanbulPriceHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-xl mb-8"
+        />
 
         {/* Table of Contents */}
         <TableOfContents items={tocItems} />

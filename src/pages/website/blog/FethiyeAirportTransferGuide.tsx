@@ -139,14 +139,13 @@ const FethiyeAirportTransferGuide = () => {
 
         <ShareButtons title={t("blogFethiyeH1")} className="mb-8" />
 
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
-          <img 
-            src={fethiyeTransferHero} 
-            alt={t("blogFethiyeHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={fethiyeTransferHero}
+          alt={t("blogFethiyeHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-6 md:mb-8"
+        />
 
         <TableOfContents items={tocItems} />
 

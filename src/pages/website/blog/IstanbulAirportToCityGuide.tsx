@@ -154,14 +154,13 @@ const IstanbulAirportToCityGuide = () => {
         <ShareButtons title={t('blogIstanbul1H1')} className="mb-6 md:mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-8 md:mb-12">
-          <img 
-            src={istanbulAirportCityHero} 
-            alt={t("blogIstanbulHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={istanbulAirportCityHero}
+          alt={t("blogIstanbulHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-8 md:mb-12"
+        />
 
         <TableOfContents items={[
           { id: "introduction", title: t("blogIstanbulTocIntro") },

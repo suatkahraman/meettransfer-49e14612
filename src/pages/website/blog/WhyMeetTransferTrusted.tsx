@@ -207,11 +207,12 @@ const WhyMeetTransferTrusted = () => {
       {/* Hero Image */}
       <div className="container mx-auto px-4 -mt-8 mb-12">
         <div className="max-w-5xl mx-auto">
-          <img
+          <OptimizedBlogImage
             src={vitoVipStarlightPurple}
             alt="Meet Transfer VIP Mercedes Vito - Turkey's trusted airport transfer company"
-            className="w-full h-auto rounded-2xl shadow-2xl"
-            loading="eager"
+            aspectRatio="video"
+            priority
+            className="rounded-2xl shadow-2xl"
           />
         </div>
       </div>

@@ -236,12 +236,13 @@ const BursaDayTourGuide = () => {
 
           {/* Cumalıkızık Image */}
           <div className="relative rounded-2xl overflow-hidden mb-8">
-          <img 
+            <OptimizedBlogImage 
               src={cumalikizikImage} 
               alt={t("blogBursaCumalikizikAlt")}
-              className="w-full h-[300px] md:h-[400px] object-cover"
+              aspectRatio="hero"
+              className="h-[300px] md:h-[400px]"
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 z-10">
               <h3 className="text-white font-bold text-xl mb-1">{t("blogBursaCumalikizikTitle")}</h3>
               <p className="text-white/80 text-sm">{t("blogBursaCumalikizikSubtitle")}</p>
             </div>
@@ -323,12 +324,13 @@ const BursaDayTourGuide = () => {
 
           {/* Uludağ Image */}
           <div className="relative rounded-2xl overflow-hidden">
-          <img 
+            <OptimizedBlogImage 
               src={uludagImage} 
               alt={t("blogBursaUludagAlt")}
-              className="w-full h-[300px] md:h-[400px] object-cover"
+              aspectRatio="hero"
+              className="h-[300px] md:h-[400px]"
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 z-10">
               <h3 className="text-white font-bold text-xl mb-1">{t("blogBursaCableCarTitle")}</h3>
               <p className="text-white/80 text-sm">{t("blogBursaCableCarSubtitle")}</p>
             </div>

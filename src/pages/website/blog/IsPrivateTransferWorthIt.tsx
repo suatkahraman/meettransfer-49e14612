@@ -128,14 +128,13 @@ const IsPrivateTransferWorthIt = () => {
         <ShareButtons title={t('blogWorthItH1')} className="mb-8" />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-xl mb-12">
-          <img 
-            src={privateTransferWorthHero} 
-            alt="Luxury private transfer interior in Turkey - VIP Mercedes with premium leather seats and amenities"
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={privateTransferWorthHero}
+          alt="Luxury private transfer interior in Turkey - VIP Mercedes with premium leather seats and amenities"
+          aspectRatio="video"
+          priority
+          className="rounded-xl mb-12"
+        />
 
         {/* Table of Contents */}
         <TableOfContents items={[

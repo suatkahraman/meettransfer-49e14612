@@ -214,11 +214,11 @@ const AIBookingAssistantGuide = () => {
                 </p>
                 
                 <div className="relative my-6 md:my-8 rounded-xl md:rounded-2xl overflow-hidden shadow-lg md:shadow-xl">
-                  <img 
+                  <OptimizedBlogImage 
                     src={aiChatImage} 
                     alt={t("blogAIAssistantImageAlt")}
-                    className="w-full max-w-sm md:max-w-md mx-auto"
-                    loading="lazy"
+                    aspectRatio="square"
+                    className="max-w-sm md:max-w-md mx-auto"
                   />
                 </div>
               </section>
