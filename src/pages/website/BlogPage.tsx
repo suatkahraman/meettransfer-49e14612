@@ -298,8 +298,9 @@ const BlogPage = () => {
   // Filter posts based on search and category
   const filteredPosts = useMemo(() => {
     return blogPosts.filter(post => {
-      const title = t(post.titleKey).toLowerCase();
-      const description = t(post.descriptionKey).toLowerCase();
+      // Handle both static posts (with title/description) and translated posts (with titleKey/descriptionKey)
+      const title = post.isStatic ? (post.title || '').toLowerCase() : t(post.titleKey).toLowerCase();
+      const description = post.isStatic ? (post.description || '').toLowerCase() : t(post.descriptionKey).toLowerCase();
       const matchesSearch = searchQuery === "" || 
         title.includes(searchQuery.toLowerCase()) ||
         description.includes(searchQuery.toLowerCase());
