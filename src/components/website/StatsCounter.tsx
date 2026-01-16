@@ -214,7 +214,7 @@ const StatsCounter = () => {
         >
           <div className="flex items-center gap-2 text-white/60">
             <Award className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium">{isTR ? "4.9 Yıldız Puan" : "4.9 Star Rating"}</span>
+            <span className="text-sm font-medium">{isTR ? "4.7 Yıldız Puan" : "4.7 Star Rating"}</span>
           </div>
           <div className="flex items-center gap-2 text-white/60">
             <Shield className="h-5 w-5 text-primary" />

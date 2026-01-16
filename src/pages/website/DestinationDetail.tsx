@@ -45,7 +45,7 @@ const destinationData: Record<string, {
     name: "Istanbul",
     nameTR: "İstanbul",
     airports: ["IST", "SAW"],
-    rating: 4.9,
+    rating: 4.7,
     fromPrice: 45,
     popular: true,
     description: {
@@ -84,7 +84,7 @@ const destinationData: Record<string, {
     name: "Antalya",
     nameTR: "Antalya",
     airports: ["AYT"],
-    rating: 4.9,
+    rating: 4.7,
     fromPrice: 35,
     popular: true,
     description: {
@@ -218,7 +218,7 @@ const destinationData: Record<string, {
     name: "Cappadocia",
     nameTR: "Kapadokya",
     airports: ["NAV", "ASR"],
-    rating: 4.9,
+    rating: 4.7,
     fromPrice: 55,
     popular: true,
     description: {
@@ -255,7 +255,7 @@ const destinationData: Record<string, {
     name: "Dubai",
     nameTR: "Dubai",
     airports: ["DXB"],
-    rating: 4.9,
+    rating: 4.7,
     fromPrice: 65,
     popular: true,
     description: {
@@ -382,7 +382,7 @@ const destinationData: Record<string, {
     name: "Frankfurt",
     nameTR: "Frankfurt",
     airports: ["FRA"],
-    rating: 4.9,
+    rating: 4.7,
     fromPrice: 55,
     popular: true,
     description: {
@@ -412,7 +412,7 @@ const destinationData: Record<string, {
     name: "Athens",
     nameTR: "Atina",
     airports: ["ATH"],
-    rating: 4.9,
+    rating: 4.7,
     fromPrice: 45,
     popular: true,
     description: {

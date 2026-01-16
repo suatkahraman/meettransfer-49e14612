@@ -159,7 +159,7 @@ const SafeNightTransferTurkey = () => {
               <span>•</span>
               <span className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                4.9 Rating
+                4.7 Rating
               </span>
             </div>
           </div>

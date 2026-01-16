@@ -43,7 +43,7 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
               </span>
               <span className="inline-flex items-center gap-0.5 bg-yellow-500/10 text-yellow-600 rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
                 <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-current" />
-                4.9
+                4.7
               </span>
             </div>
           </div>

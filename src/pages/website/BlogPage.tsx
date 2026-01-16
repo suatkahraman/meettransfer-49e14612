@@ -88,7 +88,7 @@ const BlogPage = () => {
     {
       id: "why-meet-transfer-trusted-company",
       title: "Why Meet Transfer is a Trusted Airport Transfer Company in Turkey",
-      description: "Discover why Meet Transfer is Turkey's most trusted airport transfer company. 4.9-star Google rating, 50,000+ satisfied customers, licensed drivers, luxury Mercedes fleet.",
+      description: "Discover why Meet Transfer is Turkey's most trusted airport transfer company. 4.7-star Google rating, 50,000+ satisfied customers, licensed drivers, luxury Mercedes fleet.",
       category: "Company",
       categoryKey: "company",
       readTime: 12,
@@ -99,7 +99,7 @@ const BlogPage = () => {
     {
       id: "best-vip-transfer-istanbul-review",
       title: "Best VIP Airport Transfer in Istanbul – Meet Transfer Review 2025",
-      description: "Discover why Meet Transfer offers the best VIP airport transfer in Istanbul. Mercedes Maybach, VIP Vito with starlight ceiling, 4.9★ rated. Real customer reviews.",
+      description: "Discover why Meet Transfer offers the best VIP airport transfer in Istanbul. Mercedes Maybach, VIP Vito with starlight ceiling, 4.7★ rated. Real customer reviews.",
       category: "Istanbul",
       categoryKey: "istanbul",
       readTime: 10,

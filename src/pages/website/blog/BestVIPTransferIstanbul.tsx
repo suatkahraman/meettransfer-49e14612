@@ -25,7 +25,7 @@ const BestVIPTransferIstanbul = () => {
   const faqItems = [
     {
       question: "What makes Meet Transfer the best VIP transfer in Istanbul?",
-      answer: "Meet Transfer stands out with our exclusive Mercedes fleet (VIP Vito, Maybach, S-Class), professional chauffeurs, 4.9-star Google rating, transparent pricing, and personalized service. Our VIP vehicles feature starlight ceilings, premium leather, privacy glass, and complimentary refreshments."
+      answer: "Meet Transfer stands out with our exclusive Mercedes fleet (VIP Vito, Maybach, S-Class), professional chauffeurs, 4.7-star Google rating, transparent pricing, and personalized service. Our VIP vehicles feature starlight ceilings, premium leather, privacy glass, and complimentary refreshments."
     },
     {
       question: "Which VIP vehicles does Meet Transfer offer in Istanbul?",
@@ -45,7 +45,7 @@ const BestVIPTransferIstanbul = () => {
     },
     {
       question: "Best VIP airport transfer in Istanbul - which company?",
-      answer: "Meet Transfer is widely recognized as the best VIP airport transfer in Istanbul with 4.9-star rating, exclusive Mercedes fleet including Maybach and VIP Vito with starlight ceiling, professional chauffeurs, and transparent pricing. Trusted by executives, celebrities, and discerning travelers."
+      answer: "Meet Transfer is widely recognized as the best VIP airport transfer in Istanbul with 4.7-star rating, exclusive Mercedes fleet including Maybach and VIP Vito with starlight ceiling, professional chauffeurs, and transparent pricing. Trusted by executives, celebrities, and discerning travelers."
     },
     {
       question: "Meet Transfer vs taxi Istanbul airport - which is better?",
@@ -57,7 +57,7 @@ const BestVIPTransferIstanbul = () => {
     },
     {
       question: "Is Meet Transfer reliable?",
-      answer: "Yes, Meet Transfer is one of the most reliable VIP transfer companies in Istanbul with 4.9-star Google rating, 50,000+ customers, 98% on-time rate, licensed professional chauffeurs, comprehensive insurance, and 24/7 customer support."
+      answer: "Yes, Meet Transfer is one of the most reliable VIP transfer companies in Istanbul with 4.7-star Google rating, 50,000+ customers, 98% on-time rate, licensed professional chauffeurs, comprehensive insurance, and 24/7 customer support."
     },
     {
       question: "Private transfer from IST airport to city center - recommendation?",
@@ -153,7 +153,7 @@ const BestVIPTransferIstanbul = () => {
     <WebsiteLayout>
       <SEOHead
         title="Best VIP Airport Transfer in Istanbul – Meet Transfer Review 2025"
-        description="Discover why Meet Transfer offers the best VIP airport transfer in Istanbul. Mercedes Maybach, VIP Vito with starlight ceiling, 4.9★ rated. Read real customer reviews and book luxury transfers."
+        description="Discover why Meet Transfer offers the best VIP airport transfer in Istanbul. Mercedes Maybach, VIP Vito with starlight ceiling, 4.7★ rated. Read real customer reviews and book luxury transfers."
         keywords="VIP airport transfer Istanbul, best VIP transfer Istanbul, luxury airport transfer Istanbul, Meet Transfer VIP, Mercedes Maybach transfer Istanbul, VIP Vito Istanbul, executive transfer Istanbul, luxury chauffeur Istanbul"
         canonicalPath="/blog/best-vip-transfer-istanbul-review"
         ogImage="https://meettransfer.app/images/vito-vip-starlight-purple.jpg"
@@ -228,7 +228,7 @@ const BestVIPTransferIstanbul = () => {
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />)}
-                <span className="ml-1">4.9/5</span>
+                <span className="ml-1">4.7/5</span>
               </div>
               <span>•</span>
               <time dateTime="2025-01-15">{formatBlogDate("2025-01-15")}</time>

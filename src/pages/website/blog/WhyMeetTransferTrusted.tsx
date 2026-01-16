@@ -23,7 +23,7 @@ const WhyMeetTransferTrusted = () => {
   const faqItems = [
     {
       question: "Is Meet Transfer a legitimate airport transfer company?",
-      answer: "Yes, Meet Transfer is a fully licensed and registered airport transfer company operating in Turkey since 2019. We have a 4.9-star rating on Google with over 500+ verified reviews, are registered with Turkish tourism authorities, and maintain comprehensive insurance for all passengers."
+      answer: "Yes, Meet Transfer is a fully licensed and registered airport transfer company operating in Turkey since 2019. We have a 4.7-star rating on Google with over 500+ verified reviews, are registered with Turkish tourism authorities, and maintain comprehensive insurance for all passengers."
     },
     {
       question: "Why should I choose Meet Transfer over other companies?",
@@ -35,7 +35,7 @@ const WhyMeetTransferTrusted = () => {
     },
     {
       question: "How can I verify Meet Transfer's credibility?",
-      answer: "You can verify our credibility through: Google Reviews (4.9 stars), TripAdvisor ratings, our official business registration, partnerships with major hotels and travel agencies, and our transparent booking process. We also provide booking confirmations with driver details before your trip."
+      answer: "You can verify our credibility through: Google Reviews (4.7 stars), TripAdvisor ratings, our official business registration, partnerships with major hotels and travel agencies, and our transparent booking process. We also provide booking confirmations with driver details before your trip."
     },
     {
       question: "What makes Meet Transfer trustworthy for airport transfers?",
@@ -43,11 +43,11 @@ const WhyMeetTransferTrusted = () => {
     },
     {
       question: "Is Meet Transfer reliable?",
-      answer: "Yes, Meet Transfer is highly reliable with a 4.9-star Google rating, 50,000+ satisfied customers, 98% on-time arrival rate, professional licensed drivers, flight tracking for delays, and 24/7 customer support. We are one of the most trusted airport transfer companies in Turkey."
+      answer: "Yes, Meet Transfer is highly reliable with a 4.7-star Google rating, 50,000+ satisfied customers, 98% on-time arrival rate, professional licensed drivers, flight tracking for delays, and 24/7 customer support. We are one of the most trusted airport transfer companies in Turkey."
     },
     {
       question: "Is Meet Transfer a reliable airport transfer service?",
-      answer: "Absolutely. Meet Transfer is one of Turkey's most reliable airport transfer services with verified 4.9-star rating, transparent fixed pricing, licensed professional drivers, comprehensive insurance, real-time flight monitoring, and operations across Turkey, Dubai, Cyprus, and Europe."
+      answer: "Absolutely. Meet Transfer is one of Turkey's most reliable airport transfer services with verified 4.7-star rating, transparent fixed pricing, licensed professional drivers, comprehensive insurance, real-time flight monitoring, and operations across Turkey, Dubai, Cyprus, and Europe."
     },
     {
       question: "Does Meet Transfer provide VIP vehicles?",
