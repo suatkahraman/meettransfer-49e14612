@@ -14,7 +14,8 @@ import heroImage from "@/assets/mercedes-maybach.jpg";
 
 const BusinessTravelTransferIstanbul = () => {
   const { t, language } = useLanguage();
-  const formattedDate = useBlogDate("2025-01-14");
+  const { formatBlogDate } = useBlogDate();
+  const formattedDate = formatBlogDate("2025-01-14");
 
   const faqItems = [
     {
@@ -352,7 +353,7 @@ const BusinessTravelTransferIstanbul = () => {
                   </div>
                 </section>
 
-                <ShareButtons />
+                <ShareButtons title="Executive Airport Transfer Istanbul" />
               </div>
 
               {/* Sidebar */}
@@ -378,7 +379,7 @@ const BusinessTravelTransferIstanbul = () => {
           </div>
         </div>
 
-        <RelatedArticles />
+        <RelatedArticles currentArticleId="business-travel-transfer-istanbul" />
       </article>
 
       <Footer />

@@ -14,7 +14,8 @@ import heroImage from "@/assets/vip-vito-interior.jpg";
 
 const SafeNightTransferTurkey = () => {
   const { t, language } = useLanguage();
-  const formattedDate = useBlogDate("2025-01-10");
+  const { formatBlogDate } = useBlogDate();
+  const formattedDate = formatBlogDate("2025-01-10");
 
   const faqItems = [
     {
@@ -324,7 +325,7 @@ const SafeNightTransferTurkey = () => {
                   </div>
                 </section>
 
-                <ShareButtons />
+                <ShareButtons title="Safe Night Airport Transfer in Turkey" />
               </div>
 
               {/* Sidebar */}
@@ -350,7 +351,7 @@ const SafeNightTransferTurkey = () => {
           </div>
         </div>
 
-        <RelatedArticles />
+        <RelatedArticles currentArticleId="safe-night-transfer-turkey" />
       </article>
 
       <Footer />

@@ -161,6 +161,10 @@ const AntalyaAirportTransferBestService = lazy(() => import("./pages/website/blo
 const BodrumAirportTransferBestService = lazy(() => import("./pages/website/blog/BodrumAirportTransferBestService"));
 const IzmirAirportTransferBestService = lazy(() => import("./pages/website/blog/IzmirAirportTransferBestService"));
 const CappadociaAirportTransferBestService = lazy(() => import("./pages/website/blog/CappadociaAirportTransferBestService"));
+const SafeNightTransferTurkey = lazy(() => import("./pages/website/blog/SafeNightTransferTurkey"));
+const FamilyAirportTransferTurkey = lazy(() => import("./pages/website/blog/FamilyAirportTransferTurkey"));
+const BusinessTravelTransferIstanbul = lazy(() => import("./pages/website/blog/BusinessTravelTransferIstanbul"));
+const AirportTransferBookingTips = lazy(() => import("./pages/website/blog/AirportTransferBookingTips"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -284,6 +288,10 @@ const App = () => (
               {localizedRoutes("/blog/bodrum-airport-transfer-best-service", <BodrumAirportTransferBestService />)}
               {localizedRoutes("/blog/izmir-airport-transfer-best-service", <IzmirAirportTransferBestService />)}
               {localizedRoutes("/blog/cappadocia-airport-transfer-best-service", <CappadociaAirportTransferBestService />)}
+              {localizedRoutes("/blog/safe-night-transfer-turkey", <SafeNightTransferTurkey />)}
+              {localizedRoutes("/blog/family-airport-transfer-turkey", <FamilyAirportTransferTurkey />)}
+              {localizedRoutes("/blog/business-travel-transfer-istanbul", <BusinessTravelTransferIstanbul />)}
+              {localizedRoutes("/blog/airport-transfer-booking-tips", <AirportTransferBookingTips />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
