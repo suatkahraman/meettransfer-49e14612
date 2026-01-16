@@ -16,6 +16,18 @@ const promoTranslations: Record<string, Record<string, string>> = {
   code: { TR: "Kod", EN: "Code", DE: "Code", FR: "Code", RU: "Код", IT: "Codice", ES: "Código", AR: "الرمز", UK: "Код", JA: "コード" },
   validUntil: { TR: "Son Geçerlilik:", EN: "Valid until:", DE: "Gültig bis:", FR: "Valable jusqu'au:", RU: "Действует до:", IT: "Valido fino al:", ES: "Válido hasta:", AR: "صالح حتى:", UK: "Дійсний до:", JA: "有効期限:" },
   click: { TR: "Tıkla →", EN: "Click →", DE: "Klicken →", FR: "Cliquer →", RU: "Нажмите →", IT: "Clicca →", ES: "Haz clic →", AR: "انقر ←", UK: "Натисніть →", JA: "クリック →" },
+  turkeyOnly: { 
+    TR: "Sadece Türkiye Havalimanları İçin", 
+    EN: "Only for Turkey Airports", 
+    DE: "Nur für Flughäfen in der Türkei", 
+    FR: "Uniquement pour les aéroports de Turquie", 
+    RU: "Только для аэропортов Турции", 
+    IT: "Solo per gli aeroporti della Turchia", 
+    ES: "Solo para aeropuertos de Turquía", 
+    AR: "فقط لمطارات تركيا", 
+    UK: "Тільки для аеропортів Туреччини", 
+    JA: "トルコの空港のみ対象" 
+  },
   promoApplied: { 
     TR: 'Promo kodu "{code}" uygulandı! Dönüş yolculuğunuzda %{discount} indirim kazandınız.',
     EN: 'Promo code "{code}" applied! You\'ll get {discount}% off on your return trip.',
@@ -173,8 +185,15 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
             </div>
           </div>
           
-          {/* Bottom Row - Expiry Date */}
-          <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3">
+          {/* Bottom Row - Turkey Only Note & Expiry Date */}
+          <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3 flex-wrap">
+            {/* Turkey Only Note */}
+            <div className="flex items-center gap-1 bg-amber-500/20 rounded-lg px-2 py-0.5">
+              <span className="text-[9px] md:text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+                🇹🇷 {promoTranslations.turkeyOnly[language] || promoTranslations.turkeyOnly.EN}
+              </span>
+            </div>
+            
             {/* Expiry Date Display */}
             {expiryDate && (
               <div className="flex items-center gap-1">
