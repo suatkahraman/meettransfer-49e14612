@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck } from "../_shared/priceMatching.ts";
 import { corsHeaders, dynamicCacheHeaders } from "../_shared/cacheHeaders.ts";
+import { isDubaiLocation, DUBAI_VEHICLE_TYPES, VEHICLE_TYPES } from "../_shared/vehicleConfig.ts";
 
 interface GetPricesRequest {
   pickup: string;
@@ -49,22 +50,19 @@ async function convertCurrency(
     'EUR': { 'USD': 1.08, 'TRY': 37.5, 'GBP': 0.85, 'AED': 3.97, 'AUD': 1.65 },
     'USD': { 'EUR': 0.93, 'TRY': 34.5, 'GBP': 0.79, 'AED': 3.67, 'AUD': 1.53 },
     'TRY': { 'EUR': 0.027, 'USD': 0.029, 'GBP': 0.023, 'AED': 0.11, 'AUD': 0.045 },
+    'AED': { 'EUR': 0.25, 'USD': 0.27, 'TRY': 9.4, 'GBP': 0.21, 'AUD': 0.42 },
   };
 
   const rate = fallbackRates[fromCurrency]?.[toCurrency] || 1;
   return { amount: Math.round(amount * rate), rate };
 }
 
-// Vehicle type configuration - synced with src/lib/vehicleTypes.ts
-const VEHICLE_CONFIG: Record<string, { label: string; passengers: number; luggage: number }> = {
-  'sedan': { label: 'Sedan', passengers: 3, luggage: 2 },
-  'mercedes-vito': { label: 'Mercedes Vito', passengers: 6, luggage: 6 },
-  'vip-mercedes': { label: 'VIP Mercedes', passengers: 5, luggage: 5 },
-  'maybach-minibus': { label: 'Maybach Minibus', passengers: 4, luggage: 4 },
-  'minibus': { label: 'Mercedes Sprinter', passengers: 16, luggage: 16 },
-};
-
-const VEHICLE_TYPES = ['sedan', 'mercedes-vito', 'vip-mercedes', 'maybach-minibus', 'minibus'];
+// Build vehicle config from dynamic types
+function buildVehicleConfig(vehicleTypes: typeof VEHICLE_TYPES): Record<string, { label: string; passengers: number; luggage: number }> {
+  return Object.fromEntries(
+    vehicleTypes.map(v => [v.value, { label: v.label, passengers: v.passengers, luggage: v.luggage }])
+  );
+}
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -80,6 +78,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("🚗 Getting all vehicle prices for route:", pickup, "→", dropoff);
 
+    // Check if this is a Dubai route
+    const isDubai = isDubaiLocation(pickup) || isDubaiLocation(dropoff);
+    const activeVehicleTypes = isDubai ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
+    const vehicleConfig = buildVehicleConfig(activeVehicleTypes);
+    
+    console.log("🏙️ Location type:", isDubai ? "Dubai" : "Standard", "- Using", activeVehicleTypes.length, "vehicle types");
+
     // Analyze transfer using shared module
     const transferInfo = analyzeTransfer(pickup, dropoff);
     const { airport, city, district, direction, confidence } = transferInfo;
@@ -90,17 +95,18 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("❌ No location match - returning empty prices");
       return new Response(
         JSON.stringify({ 
-          prices: VEHICLE_TYPES.map(vt => ({
-            vehicleType: vt,
-            vehicleLabel: VEHICLE_CONFIG[vt].label,
+          prices: activeVehicleTypes.map(vt => ({
+            vehicleType: vt.value,
+            vehicleLabel: vt.label,
             price: null,
             currency: customerCurrency,
-            passengers: VEHICLE_CONFIG[vt].passengers,
-            luggage: VEHICLE_CONFIG[vt].luggage,
+            passengers: vt.passengers,
+            luggage: vt.luggage,
             available: false,
           })),
           matched: false,
-          reason: "no_location_match"
+          reason: "no_location_match",
+          isDubai,
         }),
         { headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
@@ -160,7 +166,8 @@ const handler = async (req: Request): Promise<Response> => {
     let baseCurrency = 'EUR';
     let exchangeRate = 1;
 
-    for (const vehicleType of VEHICLE_TYPES) {
+    for (const vehicleTypeConfig of activeVehicleTypes) {
+      const vehicleType = vehicleTypeConfig.value;
       let foundPrice: { price: number; currency: string } | null = null;
 
       // For intercity routes, first check intercity_prices table
@@ -286,7 +293,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
-      const config = VEHICLE_CONFIG[vehicleType];
+      const config = vehicleConfig[vehicleType];
       
       if (foundPrice) {
         baseCurrency = foundPrice.currency;
@@ -301,49 +308,52 @@ const handler = async (req: Request): Promise<Response> => {
           exchangeRate = conversion.rate;
         }
 
-        // Perform sanity check on the price
-        const sanityCheck = checkPriceSanity(
-          pickupCity,
-          dropoffCity,
-          foundPrice.price, // Use original price for sanity check
-          foundPrice.currency,
-          vehicleType,
-          airport
-        );
-
-        logPriceSanityCheck('quick_booking', `get-prices-${vehicleType}`, sanityCheck);
-
-        if (!sanityCheck.isValid) {
-          console.log(`⚠️ Price sanity check FAILED for ${vehicleType}: ${sanityCheck.reason}`);
-          // Mark as unavailable when sanity check fails - admin needs to set price
-          vehiclePrices.push({
+        // Perform sanity check on the price (skip for Dubai as AED prices are different)
+        if (!isDubai) {
+          const sanityCheck = checkPriceSanity(
+            pickupCity,
+            dropoffCity,
+            foundPrice.price, // Use original price for sanity check
+            foundPrice.currency,
             vehicleType,
-            vehicleLabel: config.label,
-            price: null,
-            currency: finalCurrency,
-            passengers: config.passengers,
-            luggage: config.luggage,
-            available: false,
-            sanityFailed: true,
-            sanityReason: sanityCheck.reason,
-          });
-        } else {
-          vehiclePrices.push({
-            vehicleType,
-            vehicleLabel: config.label,
-            price: finalPrice,
-            currency: finalCurrency,
-            passengers: config.passengers,
-            luggage: config.luggage,
-            available: true,
-          });
+            airport
+          );
+
+          logPriceSanityCheck('quick_booking', `get-prices-${vehicleType}`, sanityCheck);
+
+          if (!sanityCheck.isValid) {
+            console.log(`⚠️ Price sanity check FAILED for ${vehicleType}: ${sanityCheck.reason}`);
+            // Mark as unavailable when sanity check fails - admin needs to set price
+            vehiclePrices.push({
+              vehicleType,
+              vehicleLabel: config.label,
+              price: null,
+              currency: finalCurrency,
+              passengers: config.passengers,
+              luggage: config.luggage,
+              available: false,
+              sanityFailed: true,
+              sanityReason: sanityCheck.reason,
+            });
+            continue;
+          }
         }
+
+        vehiclePrices.push({
+          vehicleType,
+          vehicleLabel: config.label,
+          price: finalPrice,
+          currency: finalCurrency,
+          passengers: config.passengers,
+          luggage: config.luggage,
+          available: true,
+        });
       } else {
         vehiclePrices.push({
           vehicleType,
           vehicleLabel: config.label,
           price: null,
-          currency: customerCurrency || 'EUR',
+          currency: customerCurrency || (isDubai ? 'AED' : 'EUR'),
           passengers: config.passengers,
           luggage: config.luggage,
           available: false,
@@ -354,7 +364,7 @@ const handler = async (req: Request): Promise<Response> => {
     const availableCount = vehiclePrices.filter(v => v.available).length;
     const sanityFailedCount = vehiclePrices.filter(v => v.sanityFailed).length;
     
-    console.log("✅ Vehicle prices found:", availableCount, "out of", VEHICLE_TYPES.length);
+    console.log("✅ Vehicle prices found:", availableCount, "out of", activeVehicleTypes.length);
     if (sanityFailedCount > 0) {
       console.log("⚠️ Prices with sanity check failed:", sanityFailedCount);
     }
@@ -372,6 +382,7 @@ const handler = async (req: Request): Promise<Response> => {
         exchangeRate: exchangeRate !== 1 ? exchangeRate : null,
         sanityCheckFailed: sanityFailedCount > 0,
         requiresManualPricing: sanityFailedCount > 0,
+        isDubai,
       }),
       { headers: { "Content-Type": "application/json", ...dynamicCacheHeaders } }
     );

@@ -23,7 +23,8 @@ import {
   Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired } from "@/lib/vehicleTypes";
+import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired, VehicleTypeInfo } from "@/lib/vehicleTypes";
+import { DUBAI_VEHICLE_TYPES, DUBAI_VEHICLE_TYPE_MAP, isDubaiLocation } from "@/lib/dubaiVehicleTypes";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import {
@@ -203,16 +204,30 @@ const BookingPage = () => {
   const effectiveCity = tokenBookingData?.city || urlCity;
   const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
 
-  // Computed values
-  const availableVehicles = getAvailableVehicles(passengers, luggageCount);
-  const minibusRequired = isMinibusRequired(passengers, luggageCount);
+  // Check if location is in Dubai
+  const isDubai = isDubaiLocation(effectivePickup) || isDubaiLocation(effectiveDropoff);
 
-  // Auto-select minibus if required
+  // Computed values - use Dubai vehicles if location is in Dubai
+  const availableVehicles = isDubai 
+    ? DUBAI_VEHICLE_TYPES.map(v => ({ value: v.value, label: v.label }))
+    : getAvailableVehicles(passengers, luggageCount);
+  const minibusRequired = isDubai ? false : isMinibusRequired(passengers, luggageCount);
+  
+  // Get the correct vehicle map based on location
+  const vehicleTypeMap = isDubai ? DUBAI_VEHICLE_TYPE_MAP : VEHICLE_TYPE_MAP;
+
+  // Auto-select appropriate vehicle based on location
   useEffect(() => {
-    if (minibusRequired && vehicleType !== 'minibus') {
+    if (isDubai) {
+      // For Dubai, auto-select first Dubai vehicle if current vehicle is not a Dubai type
+      const isDubaiVehicle = vehicleType.startsWith('dubai-');
+      if (!isDubaiVehicle && DUBAI_VEHICLE_TYPES.length > 0) {
+        setVehicleType(DUBAI_VEHICLE_TYPES[0].value);
+      }
+    } else if (minibusRequired && vehicleType !== 'minibus') {
       setVehicleType('minibus');
     }
-  }, [minibusRequired, vehicleType]);
+  }, [minibusRequired, vehicleType, isDubai]);
 
   // Load booking data from token (AI assistant flow)
   useEffect(() => {
@@ -1148,7 +1163,7 @@ const BookingPage = () => {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {(isHourlyBooking ? getHourlyVehicleOptions() : availableVehicles.map(v => ({ value: v.value, dbType: v.value }))).map((vehicleOption) => {
-                      const v = VEHICLE_TYPE_MAP[vehicleOption.value];
+                      const v = vehicleTypeMap[vehicleOption.value];
                       if (!v) return null;
                       
                       const price = isHourlyBooking 
