@@ -116,6 +116,10 @@ const FamilyAirportTransferTurkey = () => {
             datePublished: "2025-01-12",
             dateModified: "2025-01-12",
             image: heroImage,
+            author: "Meet Transfer",
+            readingTime: "7",
+            wordCount: 1800,
+            keywords: ["family airport transfer Turkey", "child car seat transfer", "baby seat airport transfer", "kids transfer Turkey"],
           },
           {
             type: "BreadcrumbList" as const,
@@ -127,7 +131,7 @@ const FamilyAirportTransferTurkey = () => {
           },
           {
             type: "FAQPage" as const,
-            questions: faqItems,
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer })),
           },
         ]}
       />

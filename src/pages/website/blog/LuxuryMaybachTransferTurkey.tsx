@@ -98,10 +98,22 @@ const LuxuryMaybachTransferTurkey = () => {
             description: "Complete guide to Mercedes Maybach transfers in Turkey. Features, pricing, booking guide. The ultimate luxury chauffeur service.",
             datePublished: "2025-01-16",
             dateModified: "2025-01-16",
+            author: "Meet Transfer",
+            readingTime: "8",
+            wordCount: 1800,
+            keywords: ["Mercedes Maybach transfer", "luxury transfer Turkey", "Maybach chauffeur", "VIP Maybach service"],
+          },
+          {
+            type: "BreadcrumbList" as const,
+            items: [
+              { name: "Home", url: "/" },
+              { name: "Blog", url: "/blog" },
+              { name: "Maybach Transfer Turkey", url: "/blog/luxury-maybach-transfer-turkey" },
+            ],
           },
           {
             type: "FAQPage" as const,
-            questions: faqItems,
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer })),
           },
         ]}
       />

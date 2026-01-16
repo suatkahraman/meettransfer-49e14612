@@ -116,6 +116,10 @@ const BusinessTravelTransferIstanbul = () => {
             datePublished: "2025-01-14",
             dateModified: "2025-01-14",
             image: heroImage,
+            author: "Meet Transfer",
+            readingTime: "6",
+            wordCount: 1600,
+            keywords: ["executive airport transfer Istanbul", "business travel Istanbul", "corporate transfer Turkey", "VIP chauffeur Istanbul"],
           },
           {
             type: "BreadcrumbList" as const,
@@ -127,7 +131,7 @@ const BusinessTravelTransferIstanbul = () => {
           },
           {
             type: "FAQPage" as const,
-            questions: faqItems,
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer })),
           },
         ]}
       />

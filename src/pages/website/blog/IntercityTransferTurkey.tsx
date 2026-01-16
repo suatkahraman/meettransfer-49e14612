@@ -100,10 +100,22 @@ const IntercityTransferTurkey = () => {
             description: "Complete guide to intercity transfers in Turkey. Popular routes, prices, booking tips. Istanbul to Cappadocia, Antalya to Pamukkale, and more.",
             datePublished: "2025-01-16",
             dateModified: "2025-01-16",
+            author: "Meet Transfer",
+            readingTime: "9",
+            wordCount: 2000,
+            keywords: ["intercity transfer Turkey", "Istanbul to Cappadocia", "Antalya to Pamukkale", "private city transfer"],
+          },
+          {
+            type: "BreadcrumbList" as const,
+            items: [
+              { name: "Home", url: "/" },
+              { name: "Blog", url: "/blog" },
+              { name: "Intercity Transfer Turkey", url: "/blog/intercity-transfer-turkey" },
+            ],
           },
           {
             type: "FAQPage" as const,
-            questions: faqItems,
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer })),
           },
         ]}
       />

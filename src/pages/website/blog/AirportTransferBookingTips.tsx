@@ -116,6 +116,10 @@ const AirportTransferBookingTips = () => {
             datePublished: "2025-01-15",
             dateModified: "2025-01-15",
             image: heroImage,
+            author: "Meet Transfer",
+            readingTime: "8",
+            wordCount: 2000,
+            keywords: ["airport transfer booking tips", "Turkey transfer booking", "how to book airport transfer", "travel tips Turkey"],
           },
           {
             type: "BreadcrumbList" as const,
@@ -127,7 +131,7 @@ const AirportTransferBookingTips = () => {
           },
           {
             type: "FAQPage" as const,
-            questions: faqItems,
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer })),
           },
         ]}
       />

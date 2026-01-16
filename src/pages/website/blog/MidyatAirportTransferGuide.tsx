@@ -100,7 +100,7 @@ const MidyatAirportTransferGuide = () => {
       />
       <SchemaOrg
         schemas={[
-          { type: 'LocalBusiness' },
+          { type: 'LocalBusiness', includeRating: true },
           {
             type: 'Article',
             headline: "Midyat Airport Transfer - Complete Guide 2025",
@@ -109,7 +109,9 @@ const MidyatAirportTransferGuide = () => {
             datePublished: "2025-01-16",
             dateModified: "2025-01-16",
             author: "Meet Transfer",
-            readingTime: "11"
+            readingTime: "11",
+            wordCount: 2400,
+            keywords: ["Midyat airport transfer", "Mor Gabriel Monastery", "Syriac monasteries", "Mardin to Midyat"]
           },
           {
             type: 'BreadcrumbList',
@@ -121,7 +123,7 @@ const MidyatAirportTransferGuide = () => {
           },
           {
             type: 'FAQPage',
-            questions: faqItems
+            questions: faqItems.map(item => ({ question: item.question, answer: item.answer }))
           }
         ]}
       />
