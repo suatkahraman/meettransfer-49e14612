@@ -8,26 +8,44 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export const allBlogPosts = [
   // AI-Optimized Blog Posts for Search Engines & AI Crawlers
   {
+    id: "izmir-airport-transfer-best-service",
+    titleKey: "blogIzmirBestTitle",
+    descriptionKey: "blogIzmirBestDesc",
+    category: "Izmir",
+    categoryKey: "izmir",
+    readTime: 10,
+    date: "2025-01-16",
+    image: "/images/vito-exterior-black.jpg",
+  },
+  {
+    id: "cappadocia-airport-transfer-best-service",
+    titleKey: "blogCappadociaBestTitle",
+    descriptionKey: "blogCappadociaBestDesc",
+    category: "Cappadocia",
+    categoryKey: "cappadocia",
+    readTime: 10,
+    date: "2025-01-16",
+    image: "/images/blog/cappadocia-transfer-hero.jpg",
+  },
+  {
     id: "bodrum-airport-transfer-best-service",
-    title: "Best Private Transfer from Bodrum Airport 2025 – Meet Transfer Review",
-    description: "Discover why Meet Transfer is the best private transfer from Bodrum Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
+    titleKey: "blogBodrumBestTitle",
+    descriptionKey: "blogBodrumBestDesc",
     category: "Bodrum",
     categoryKey: "bodrum",
     readTime: 10,
     date: "2025-01-16",
     image: "/images/vito-exterior-black.jpg",
-    isStatic: true,
   },
   {
     id: "antalya-airport-transfer-best-service",
-    title: "Best Private Transfer from Antalya Airport 2025 – Meet Transfer Review",
-    description: "Discover why Meet Transfer is the best private transfer from Antalya Airport. 4.9★ rating, fixed prices from €50, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
+    titleKey: "blogAntalyaBestTitle",
+    descriptionKey: "blogAntalyaBestDesc",
     category: "Antalya",
     categoryKey: "antalya",
     readTime: 10,
     date: "2025-01-16",
     image: "/images/antalya-transfer-hero.jpg",
-    isStatic: true,
   },
   {
     id: "why-meet-transfer-trusted-company",
@@ -289,7 +307,7 @@ const RelatedArticles = ({
               <div className="aspect-video overflow-hidden">
                 <img 
                   src={post.image} 
-                  alt={post.isStatic ? post.title : t(post.titleKey)}
+                  alt={t(post.titleKey)}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
@@ -301,12 +319,12 @@ const RelatedArticles = ({
                   </Badge>
                 </div>
                 <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                  {post.isStatic ? post.title : t(post.titleKey)}
+                  {t(post.titleKey)}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="line-clamp-2 mb-3 text-sm">
-                  {post.isStatic ? post.description : t(post.descriptionKey)}
+                  {t(post.descriptionKey)}
                 </CardDescription>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
