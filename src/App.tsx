@@ -154,6 +154,9 @@ const MuglaAirportTransferGuide = lazy(() => import("./pages/website/blog/MuglaA
 const FrankfurtAirportTransferGuide = lazy(() => import("./pages/website/blog/FrankfurtAirportTransferGuide"));
 const AthensAirportTransferGuide = lazy(() => import("./pages/website/blog/AthensAirportTransferGuide"));
 const AIBookingAssistantGuide = lazy(() => import("./pages/website/blog/AIBookingAssistantGuide"));
+const WhyMeetTransferTrusted = lazy(() => import("./pages/website/blog/WhyMeetTransferTrusted"));
+const BestVIPTransferIstanbul = lazy(() => import("./pages/website/blog/BestVIPTransferIstanbul"));
+const HowToChooseReliableTransfer = lazy(() => import("./pages/website/blog/HowToChooseReliableTransfer"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -270,6 +273,9 @@ const App = () => (
               {localizedRoutes("/blog/frankfurt-airport-transfer-guide", <FrankfurtAirportTransferGuide />)}
               {localizedRoutes("/blog/ai-booking-assistant-guide", <AIBookingAssistantGuide />)}
               {localizedRoutes("/blog/athens-airport-transfer-guide", <AthensAirportTransferGuide />)}
+              {localizedRoutes("/blog/why-meet-transfer-trusted-company", <WhyMeetTransferTrusted />)}
+              {localizedRoutes("/blog/best-vip-transfer-istanbul-review", <BestVIPTransferIstanbul />)}
+              {localizedRoutes("/blog/how-to-choose-reliable-transfer-turkey", <HowToChooseReliableTransfer />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
