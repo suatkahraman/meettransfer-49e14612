@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, MapPin, Star, Shield, Car, Users, Plane, Building, Camera, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Star, Shield, Car, Users, Plane, Building, Camera, CheckCircle2, MapPinned, Sparkles, Clock3, Route } from "lucide-react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -19,6 +19,9 @@ import { useBlogDate } from "@/hooks/useBlogDate";
 // Import images
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
+import mardinOldTownPanorama from "@/assets/blog/mardin-old-town-panorama.jpg";
+import deyrulzafaranMonastery from "@/assets/blog/deyrulzafaran-monastery.jpg";
+import daraAncientCity from "@/assets/blog/dara-ancient-city.jpg";
 
 const MardinAirportTransferGuide = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -79,11 +82,54 @@ const MardinAirportTransferGuide = () => {
     }
   ];
 
+  const nearbyCities = [
+    { name: "Midyat", distance: "65 km", time: "1 hour", description: "Famous for stone houses, telkari silver, and Syriac heritage" },
+    { name: "Diyarbakır", distance: "95 km", time: "1.5 hours", description: "Ancient city with UNESCO-listed fortress walls" },
+    { name: "Şanlıurfa", distance: "180 km", time: "2.5 hours", description: "Home to Göbeklitepe, world's oldest temple" },
+    { name: "Nusaybin", distance: "55 km", time: "1 hour", description: "Border town with rich Assyrian history" },
+    { name: "Batman", distance: "100 km", time: "1.5 hours", description: "Gateway to Hasankeyf ancient city" },
+  ];
+
+  const ourServices = [
+    {
+      title: "Airport Transfers",
+      description: "Meet & greet at Mardin Airport with flight tracking and free waiting time",
+      icon: Plane
+    },
+    {
+      title: "Monastery Tours",
+      description: "Full-day tours to Deyrulzafaran, Mor Gabriel, and other ancient monasteries",
+      icon: Building
+    },
+    {
+      title: "City Tours",
+      description: "Explore Mardin old town, bazaars, and rooftop restaurants with local guides",
+      icon: MapPinned
+    },
+    {
+      title: "Intercity Transfers",
+      description: "Comfortable transfers to Midyat, Diyarbakır, Şanlıurfa, and beyond",
+      icon: Route
+    },
+    {
+      title: "VIP Services",
+      description: "Mercedes Maybach and luxury vehicles for special occasions",
+      icon: Sparkles
+    },
+    {
+      title: "Multi-Day Tours",
+      description: "Custom itineraries covering Mesopotamia's historical treasures",
+      icon: Clock3
+    }
+  ];
+
   const tocItems = [
     { id: "overview", title: "Overview" },
     { id: "airport-info", title: "Mardin Airport Info" },
     { id: "transfer-options", title: "Transfer Options" },
     { id: "prices", title: "Transfer Prices" },
+    { id: "cities", title: "Nearby Cities" },
+    { id: "services", title: "Our Services" },
     { id: "attractions", title: "Top Attractions" },
     { id: "faq", title: "FAQ" },
   ];
@@ -108,8 +154,8 @@ const MardinAirportTransferGuide = () => {
             datePublished: "2025-01-16",
             dateModified: "2025-01-16",
             author: "Meet Transfer",
-            readingTime: "10",
-            wordCount: 2100,
+            readingTime: "12",
+            wordCount: 2800,
             keywords: ["Mardin airport transfer", "Midyat transfer", "Mesopotamia tours", "Deyrulzafaran monastery"]
           },
           {
@@ -166,7 +212,7 @@ const MardinAirportTransferGuide = () => {
             </div>
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
-              <span>10 min read</span>
+              <span>12 min read</span>
             </div>
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -177,10 +223,10 @@ const MardinAirportTransferGuide = () => {
           <ShareButtons title="Mardin Airport Transfer - Private VIP Shuttle to Midyat, Nusaybin 2025" />
         </header>
 
-        {/* Hero Image */}
+        {/* Hero Image - Mardin Old Town Panorama */}
         <OptimizedBlogImage
-          src={vitoExteriorBlack}
-          alt="Private airport transfer Mercedes Vito in Mardin, Mesopotamia region"
+          src={mardinOldTownPanorama}
+          alt="Mardin old town panoramic view with honey-colored stone buildings and minarets at sunset"
           className="w-full aspect-video rounded-xl mb-12"
           priority={true}
         />
@@ -246,6 +292,19 @@ const MardinAirportTransferGuide = () => {
               </div>
             </section>
 
+            {/* Image: Deyrulzafaran Monastery */}
+            <div className="not-prose my-8">
+              <OptimizedBlogImage
+                src={deyrulzafaranMonastery}
+                alt="Deyrulzafaran Monastery courtyard with ancient stone architecture in Mardin"
+                className="w-full rounded-xl"
+                aspectRatio="video"
+              />
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Deyrulzafaran Monastery - One of the oldest Syriac Orthodox monasteries in the world
+              </p>
+            </div>
+
             {/* Airport Info */}
             <section id="airport-info">
               <h2>Mardin Airport (MQM) Information</h2>
@@ -283,6 +342,19 @@ const MardinAirportTransferGuide = () => {
                 in unparalleled comfort and style.
               </p>
             </section>
+
+            {/* VIP Vehicle Image */}
+            <div className="not-prose my-8">
+              <OptimizedBlogImage
+                src={vitoVipStarlightPurple}
+                alt="VIP Mercedes Vito with starlight ceiling for luxury Mardin transfers"
+                className="w-full rounded-xl"
+                aspectRatio="video"
+              />
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                VIP Mercedes Vito - Luxury interior with starlight ceiling
+              </p>
+            </div>
 
             {/* Prices */}
             <section id="prices">
@@ -338,6 +410,79 @@ const MardinAirportTransferGuide = () => {
               </div>
             </section>
 
+            {/* Nearby Cities Section */}
+            <section id="cities">
+              <h2>Nearby Cities & Destinations</h2>
+              <p>
+                Mardin is perfectly positioned to explore southeastern Turkey's most fascinating destinations. 
+                Our transfer service connects you to all major cities in the region.
+              </p>
+              
+              <div className="not-prose my-8 grid gap-4">
+                {nearbyCities.map((city) => (
+                  <Card key={city.name} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <MapPin className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{city.name}</h4>
+                            <p className="text-sm text-muted-foreground">{city.description}</p>
+                          </div>
+                        </div>
+                        <div className="text-right text-sm">
+                          <div className="font-medium">{city.distance}</div>
+                          <div className="text-muted-foreground">{city.time}</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+
+            {/* Image: Dara Ancient City */}
+            <div className="not-prose my-8">
+              <OptimizedBlogImage
+                src={daraAncientCity}
+                alt="Dara Ancient City ruins with Roman and Byzantine architecture near Mardin"
+                className="w-full rounded-xl"
+                aspectRatio="video"
+              />
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Dara Ancient City - Roman and Byzantine ruins in Mesopotamia
+              </p>
+            </div>
+
+            {/* Our Services Section */}
+            <section id="services">
+              <h2>Our Services in Mardin Region</h2>
+              <p>
+                Meet Transfer offers comprehensive transportation solutions for visitors exploring 
+                Mardin and the Mesopotamian region. From simple airport pickups to multi-day tours.
+              </p>
+              
+              <div className="not-prose my-8 grid sm:grid-cols-2 gap-4">
+                {ourServices.map((service) => (
+                  <Card key={service.title} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <service.icon className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">{service.title}</h4>
+                          <p className="text-sm text-muted-foreground">{service.description}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+
             {/* Attractions */}
             <section id="attractions">
               <h2>Top Attractions in Mardin Region</h2>
@@ -382,45 +527,45 @@ const MardinAirportTransferGuide = () => {
                   "24/7 support"
                 ].map((item) => (
                   <div key={item} className="flex items-center gap-2 py-1">
-                    <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
-                    <span className="text-sm">{item}</span>
+                    <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0" />
+                    <span>{item}</span>
                   </div>
+                ))}
+              </div>
+            </section>
+
+            {/* FAQ */}
+            <section id="faq">
+              <h2>Frequently Asked Questions</h2>
+              <div className="not-prose space-y-4">
+                {faqItems.map((item, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-2">{item.question}</h3>
+                      <p className="text-muted-foreground">{item.answer}</p>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </section>
 
             {/* CTA */}
             <BlogCTA />
-
-            {/* FAQ */}
-            <section id="faq" className="not-prose">
-              <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
-              <div className="space-y-4">
-                {faqItems.map((item, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold mb-2">{item.question}</h3>
-                      <p className="text-muted-foreground text-sm">{item.answer}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
           </div>
 
           {/* Sidebar */}
           <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-6">
+            <div className="sticky top-24">
               <TableOfContents items={tocItems} />
               
-              <Card className="bg-primary/5 border-primary/20">
+              <Card className="mt-6">
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Book Your Transfer</h3>
+                  <h3 className="font-semibold mb-4">Book Your Transfer</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Get instant pricing for Mardin Airport transfers
+                    Get instant quote for Mardin Airport transfer
                   </p>
                   <Button asChild className="w-full">
-                    <Link to={getLocalizedPath("/")}>Book Now</Link>
+                    <Link to={getLocalizedPath("/")}>Get Quote</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -429,7 +574,8 @@ const MardinAirportTransferGuide = () => {
         </div>
 
         {/* Related Articles */}
-        <RelatedArticles currentArticleId="mardin-airport-transfer-guide" maxArticles={3} />
+        <RelatedArticles
+        />
       </article>
 
       <Footer />
