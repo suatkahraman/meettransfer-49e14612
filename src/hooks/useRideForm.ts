@@ -9,6 +9,7 @@ import { DUBAI_VEHICLE_TYPES, isDubaiLocation } from "@/lib/dubaiVehicleTypes";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { useHeroFormStorage, parseSavedDate, SavedFormData } from "./useHeroFormStorage";
 import type { BookingData } from "@/components/hero/types";
+import { usePromo } from "@/contexts/PromoContext";
 
 // Helper to parse various date formats from AI
 function parseFlexibleDate(dateStr: string): Date | null {
@@ -148,6 +149,7 @@ export interface UseRideFormReturn {
 export function useRideForm(t: (key: string) => string | undefined): UseRideFormReturn {
   const navigate = useNavigate();
   const { loadSavedFormData } = useHeroFormStorage();
+  const { promoCode: activePromo } = usePromo();
   
   // Initialize state from localStorage
   const [pickup, setPickup] = useState(() => loadSavedFormData()?.pickup || "");
@@ -173,6 +175,17 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   const [babySeatCount, setBabySeatCount] = useState(0);
   const [luggageCount, setLuggageCount] = useState(0);
 
+  // Auto-apply promo code when return trip is enabled
+  useEffect(() => {
+    if (hasReturnTrip && activePromo?.code && !appliedPromoCode) {
+      setAppliedPromoCode(activePromo.code);
+      console.log("[useRideForm] Auto-applied promo code for return trip:", activePromo.code);
+    } else if (!hasReturnTrip && appliedPromoCode) {
+      // Clear promo code when return trip is disabled
+      setAppliedPromoCode("");
+      console.log("[useRideForm] Cleared promo code - return trip disabled");
+    }
+  }, [hasReturnTrip, activePromo?.code]);
   // Fetch transfer prices when locations change
   useEffect(() => {
     if (!pickup || !dropoff) {
