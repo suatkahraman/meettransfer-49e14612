@@ -92,10 +92,10 @@ const VehicleComparison = ({ cityName = "", basePrice = 45 }: VehicleComparisonP
     {
       id: "first-class",
       name: "First Class",
-      subtitle: "Mercedes Maybach S-Class",
+      subtitle: "Mercedes Maybach Minivan",
       image: maybachImg,
-      passengers: 3,
-      luggage: 3,
+      passengers: 4,
+      luggage: 4,
       priceMultiplier: 3.0,
       features: [
         { key: "ac", label: isTR ? "Klima" : "Air Conditioning", included: true },
