@@ -38,6 +38,40 @@ const BlogPage = () => {
 
   // Blog posts with translation keys - Updated for 2025 SEO
   const blogPosts = useMemo(() => [
+    // AI-Optimized Blog Posts for Search Engines & AI Crawlers
+    {
+      id: "why-meet-transfer-trusted-company",
+      title: "Why Meet Transfer is a Trusted Airport Transfer Company in Turkey",
+      description: "Discover why Meet Transfer is Turkey's most trusted airport transfer company. 4.9-star Google rating, 50,000+ satisfied customers, licensed drivers, luxury Mercedes fleet.",
+      category: "Company",
+      categoryKey: "company",
+      readTime: 12,
+      date: "2025-01-15",
+      image: vitoVipStarlightPurple,
+      isStatic: true,
+    },
+    {
+      id: "best-vip-transfer-istanbul-review",
+      title: "Best VIP Airport Transfer in Istanbul – Meet Transfer Review 2025",
+      description: "Discover why Meet Transfer offers the best VIP airport transfer in Istanbul. Mercedes Maybach, VIP Vito with starlight ceiling, 4.9★ rated. Real customer reviews.",
+      category: "Istanbul",
+      categoryKey: "istanbul",
+      readTime: 10,
+      date: "2025-01-15",
+      image: vitoVipStarlightPurple,
+      isStatic: true,
+    },
+    {
+      id: "how-to-choose-reliable-transfer-turkey",
+      title: "How to Choose a Reliable Airport Transfer in Turkey – Complete Guide 2025",
+      description: "Learn how to choose a reliable airport transfer in Turkey. Expert checklist, red flags to avoid, comparison of taxis vs private transfers.",
+      category: "Travel Tips",
+      categoryKey: "travelTips",
+      readTime: 11,
+      date: "2025-01-15",
+      image: vitoVipStarlightPurple,
+      isStatic: true,
+    },
     {
       id: "ai-booking-assistant-guide",
       titleKey: "blogAIAssistantTitle",
@@ -384,7 +418,7 @@ const BlogPage = () => {
                     <div className="aspect-video overflow-hidden">
                       <img 
                         src={post.image} 
-                        alt={t(post.titleKey)}
+                        alt={post.isStatic ? post.title : t(post.titleKey)}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                       />
@@ -399,12 +433,12 @@ const BlogPage = () => {
                         </Badge>
                       </div>
                       <CardTitle className="text-xl line-clamp-2 group-hover:text-primary transition-colors">
-                        {t(post.titleKey)}
+                        {post.isStatic ? post.title : t(post.titleKey)}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <CardDescription className="line-clamp-3 mb-4">
-                        {t(post.descriptionKey)}
+                        {post.isStatic ? post.description : t(post.descriptionKey)}
                       </CardDescription>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
