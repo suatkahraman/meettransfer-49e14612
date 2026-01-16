@@ -261,7 +261,7 @@ export const HeroVisualSection = memo(({
                 <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
               </div>
               <div>
-                <div className="text-xs font-bold text-foreground">4.9</div>
+                <div className="text-xs font-bold text-foreground">4.7</div>
                 <div className="text-[8px] text-muted-foreground">{t("googleReviews") || "Google"}</div>
               </div>
             </div>
@@ -457,7 +457,7 @@ export const HeroVisualSection = memo(({
                 <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
               </div>
               <div>
-                <div className="text-xl font-bold text-foreground">4.9</div>
+                <div className="text-xl font-bold text-foreground">4.7</div>
                 <div className="text-xs text-muted-foreground">{t("googleReviews") || "Google"}</div>
               </div>
             </div>

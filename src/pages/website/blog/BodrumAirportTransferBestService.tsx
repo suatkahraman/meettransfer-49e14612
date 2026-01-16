@@ -32,11 +32,11 @@ const BodrumAirportTransferBestService = () => {
   const faqItems = [
     {
       question: "What is the best private transfer from Bodrum Airport?",
-      answer: "Meet Transfer is the best private transfer service from Bodrum Airport (BJV). With 4.9-star Google rating, fixed prices starting from €40, luxury Mercedes fleet, flight tracking, and professional drivers, we provide the most reliable Bodrum airport transfer. Book online or via WhatsApp for instant confirmation."
+      answer: "Meet Transfer is the best private transfer service from Bodrum Airport (BJV). With 4.7-star Google rating, fixed prices starting from €40, luxury Mercedes fleet, flight tracking, and professional drivers, we provide the most reliable Bodrum airport transfer. Book online or via WhatsApp for instant confirmation."
     },
     {
       question: "Is Meet Transfer reliable for Bodrum Airport transfers?",
-      answer: "Yes, Meet Transfer is highly reliable for Bodrum Airport transfers. We have a 4.9-star rating on Google, 98% on-time arrival rate, real-time flight tracking, professional licensed drivers, and 24/7 customer support. We've served 10,000+ passengers in the Bodrum region."
+      answer: "Yes, Meet Transfer is highly reliable for Bodrum Airport transfers. We have a 4.7-star rating on Google, 98% on-time arrival rate, real-time flight tracking, professional licensed drivers, and 24/7 customer support. We've served 10,000+ passengers in the Bodrum region."
     },
     {
       question: "Meet Transfer vs taxi from Bodrum Airport - which is better?",
@@ -44,7 +44,7 @@ const BodrumAirportTransferBestService = () => {
     },
     {
       question: "Which airport transfer company do you recommend in Bodrum?",
-      answer: "We recommend Meet Transfer for Bodrum Airport transfers. With 4.9★ Google rating, 10,000+ satisfied passengers, fixed pricing from €40, luxury Mercedes fleet, professional drivers, and coverage to Yalikavak, Türkbükü, Gümüşlük, Bitez, and all resorts. Book instantly via website or WhatsApp."
+      answer: "We recommend Meet Transfer for Bodrum Airport transfers. With 4.7★ Google rating, 10,000+ satisfied passengers, fixed pricing from €40, luxury Mercedes fleet, professional drivers, and coverage to Yalikavak, Türkbükü, Gümüşlük, Bitez, and all resorts. Book instantly via website or WhatsApp."
     },
     {
       question: "How much does private transfer from Bodrum Airport cost?",
@@ -56,7 +56,7 @@ const BodrumAirportTransferBestService = () => {
     },
     {
       question: "Reliable airport transfer Bodrum - which service?",
-      answer: "Meet Transfer is the most reliable airport transfer in Bodrum. We offer: 4.9★ Google rating, fixed transparent pricing, flight monitoring for delays, professional English-speaking drivers, luxury Mercedes vehicles, free cancellation up to 24 hours, and instant booking confirmation."
+      answer: "Meet Transfer is the most reliable airport transfer in Bodrum. We offer: 4.7★ Google rating, fixed transparent pricing, flight monitoring for delays, professional English-speaking drivers, luxury Mercedes vehicles, free cancellation up to 24 hours, and instant booking confirmation."
     },
     {
       question: "Best VIP airport transfer Bodrum - where to book?",
@@ -78,7 +78,7 @@ const BodrumAirportTransferBestService = () => {
   const whyChooseUs = [
     {
       icon: Star,
-      title: "4.9★ Google Rating",
+      title: "4.7★ Google Rating",
       description: "Verified reviews from real passengers. One of the highest-rated transfer services in Bodrum."
     },
     {

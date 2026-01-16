@@ -219,7 +219,7 @@ const MidyatAirportTransferGuide = () => {
             </div>
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span>4.9/5 Rating</span>
+              <span>4.7/5 Rating</span>
             </div>
           </div>
 

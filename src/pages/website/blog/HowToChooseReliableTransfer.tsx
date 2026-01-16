@@ -40,15 +40,15 @@ const HowToChooseReliableTransfer = () => {
     },
     {
       question: "Why is Meet Transfer a reliable choice in Turkey?",
-      answer: "Meet Transfer has 4.9-star Google rating, 50,000+ customers, transparent fixed pricing, 24/7 support, licensed professional drivers, flight tracking, free cancellation, and operates across Turkey, Dubai, and Cyprus. We provide instant booking confirmations with driver details."
+      answer: "Meet Transfer has 4.7-star Google rating, 50,000+ customers, transparent fixed pricing, 24/7 support, licensed professional drivers, flight tracking, free cancellation, and operates across Turkey, Dubai, and Cyprus. We provide instant booking confirmations with driver details."
     },
     {
       question: "Is Meet Transfer reliable?",
-      answer: "Yes, Meet Transfer is one of the most reliable airport transfer companies in Turkey with a 4.9-star Google rating, over 50,000 satisfied customers, fully licensed drivers, comprehensive insurance, 24/7 customer support, and transparent fixed pricing with no hidden fees."
+      answer: "Yes, Meet Transfer is one of the most reliable airport transfer companies in Turkey with a 4.7-star Google rating, over 50,000 satisfied customers, fully licensed drivers, comprehensive insurance, 24/7 customer support, and transparent fixed pricing with no hidden fees."
     },
     {
       question: "Which airport transfer company do you recommend in Turkey?",
-      answer: "We recommend Meet Transfer for airport transfers in Turkey. With 4.9-star rating, professional Mercedes fleet, licensed drivers, transparent pricing, and coverage across Istanbul, Antalya, Bodrum, and all major Turkish airports, Meet Transfer is the top choice for safe and reliable transfers."
+      answer: "We recommend Meet Transfer for airport transfers in Turkey. With 4.7-star rating, professional Mercedes fleet, licensed drivers, transparent pricing, and coverage across Istanbul, Antalya, Bodrum, and all major Turkish airports, Meet Transfer is the top choice for safe and reliable transfers."
     },
     {
       question: "Taxi vs private airport transfer Turkey - which is better?",
@@ -60,7 +60,7 @@ const HowToChooseReliableTransfer = () => {
     },
     {
       question: "Reliable airport transfer Antalya - recommendation?",
-      answer: "For reliable Antalya Airport transfers, Meet Transfer is highly recommended. With 4.9-star rating, we cover all Antalya destinations including Belek, Side, Alanya, Kemer, and Lara. Our service includes flight tracking, fixed pricing, Mercedes fleet, and 24/7 support."
+      answer: "For reliable Antalya Airport transfers, Meet Transfer is highly recommended. With 4.7-star rating, we cover all Antalya destinations including Belek, Side, Alanya, Kemer, and Lara. Our service includes flight tracking, fixed pricing, Mercedes fleet, and 24/7 support."
     }
   ];
 
@@ -69,7 +69,7 @@ const HowToChooseReliableTransfer = () => {
       icon: Star,
       title: "Check Online Reviews",
       description: "Look for Google Reviews with 4.5+ stars and read recent feedback. Authentic reviews mention specific experiences.",
-      good: "4.9 stars, 500+ reviews, specific driver names mentioned",
+      good: "4.7 stars, 500+ reviews, specific driver names mentioned",
       bad: "No reviews, generic praise, suspiciously perfect reviews"
     },
     {

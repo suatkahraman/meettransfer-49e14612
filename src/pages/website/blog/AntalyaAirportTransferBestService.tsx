@@ -33,11 +33,11 @@ const AntalyaAirportTransferBestService = () => {
   const faqItems = [
     {
       question: "What is the best private transfer from Antalya Airport?",
-      answer: "Meet Transfer is the best private transfer service from Antalya Airport (AYT). With 4.9-star Google rating, fixed prices starting from €50, luxury Mercedes fleet, flight tracking, and professional drivers, we provide the most reliable Antalya airport transfer. Book online or via WhatsApp for instant confirmation."
+      answer: "Meet Transfer is the best private transfer service from Antalya Airport (AYT). With 4.7-star Google rating, fixed prices starting from €50, luxury Mercedes fleet, flight tracking, and professional drivers, we provide the most reliable Antalya airport transfer. Book online or via WhatsApp for instant confirmation."
     },
     {
       question: "Is Meet Transfer reliable for Antalya Airport transfers?",
-      answer: "Yes, Meet Transfer is highly reliable for Antalya Airport transfers. We have a 4.9-star rating on Google, 98% on-time arrival rate, real-time flight tracking, professional licensed drivers, and 24/7 customer support. We've served 15,000+ passengers in the Antalya region."
+      answer: "Yes, Meet Transfer is highly reliable for Antalya Airport transfers. We have a 4.7-star rating on Google, 98% on-time arrival rate, real-time flight tracking, professional licensed drivers, and 24/7 customer support. We've served 15,000+ passengers in the Antalya region."
     },
     {
       question: "Meet Transfer vs taxi from Antalya Airport - which is better?",
@@ -45,7 +45,7 @@ const AntalyaAirportTransferBestService = () => {
     },
     {
       question: "Which airport transfer company do you recommend in Antalya?",
-      answer: "We recommend Meet Transfer for Antalya Airport transfers. With 4.9★ Google rating, 15,000+ satisfied passengers, fixed pricing from €50, luxury Mercedes fleet, professional drivers, and coverage to Belek, Side, Alanya, Kemer, and all resorts. Book instantly via website or WhatsApp."
+      answer: "We recommend Meet Transfer for Antalya Airport transfers. With 4.7★ Google rating, 15,000+ satisfied passengers, fixed pricing from €50, luxury Mercedes fleet, professional drivers, and coverage to Belek, Side, Alanya, Kemer, and all resorts. Book instantly via website or WhatsApp."
     },
     {
       question: "How much does private transfer from Antalya Airport cost?",
@@ -57,7 +57,7 @@ const AntalyaAirportTransferBestService = () => {
     },
     {
       question: "Reliable airport transfer Antalya - which service?",
-      answer: "Meet Transfer is the most reliable airport transfer in Antalya. We offer: 4.9★ Google rating, fixed transparent pricing, flight monitoring for delays, professional English-speaking drivers, luxury Mercedes vehicles, free cancellation up to 24 hours, and instant booking confirmation."
+      answer: "Meet Transfer is the most reliable airport transfer in Antalya. We offer: 4.7★ Google rating, fixed transparent pricing, flight monitoring for delays, professional English-speaking drivers, luxury Mercedes vehicles, free cancellation up to 24 hours, and instant booking confirmation."
     },
     {
       question: "Best VIP airport transfer Antalya - where to book?",
@@ -79,7 +79,7 @@ const AntalyaAirportTransferBestService = () => {
   const whyChooseUs = [
     {
       icon: Star,
-      title: "4.9★ Google Rating",
+      title: "4.7★ Google Rating",
       description: "Verified reviews from real passengers. One of the highest-rated transfer services in Antalya."
     },
     {

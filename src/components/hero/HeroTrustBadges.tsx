@@ -23,7 +23,7 @@ export const HeroTrustBadges = memo(() => {
         className="flex items-center gap-1.5 bg-yellow-500/10 rounded-full px-3 py-1.5 hover:scale-105 transition-transform"
       >
         <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
-        <span className="text-xs font-medium text-yellow-600">4.9/5 (2,500+ {t("reviews") || "reviews"})</span>
+        <span className="text-xs font-medium text-yellow-600">4.7/5 (2,500+ {t("reviews") || "reviews"})</span>
       </div>
       <div 
         className="flex items-center gap-1.5 bg-primary/10 rounded-full px-3 py-1.5 hover:scale-105 transition-transform"

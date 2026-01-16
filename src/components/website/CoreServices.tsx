@@ -432,7 +432,7 @@ const CoreServices = () => {
   const stats = [
     { value: "50K+", label: ct("happyCustomers") },
     { value: "99%", label: ct("onTimeArrivals") },
-    { value: "4.9", label: ct("averageRating"), icon: Star },
+    { value: "4.7", label: ct("averageRating"), icon: Star },
   ];
 
   return (
