@@ -100,10 +100,8 @@ const FleetPage = () => {
 
   const dubaiVehicles = [
     {
-      name: "Rolls Royce Phantom",
-      description: isTurkish 
-        ? "Otomotiv lüksünün zirvesi. Rolls Royce Phantom, eşsiz konforu ve prestiji ile Dubai'nin en seçkin misafirleri için ideal tercih."
-        : "The pinnacle of automotive luxury. Rolls Royce Phantom offers unmatched comfort and prestige for Dubai's most distinguished guests.",
+      name: t("rollsRoyceName"),
+      description: t("rollsRoyceDesc"),
       passengers: 3,
       luggage: 3,
       startingPrice: "$350",
@@ -114,10 +112,8 @@ const FleetPage = () => {
       ],
     },
     {
-      name: "Bentley Flying Spur",
-      description: isTurkish 
-        ? "İngiliz zanaatkarlığının şaheseri. Bentley Flying Spur, güç ve zarafeti mükemmel bir uyum içinde sunar."
-        : "A masterpiece of British craftsmanship. Bentley Flying Spur delivers power and elegance in perfect harmony.",
+      name: t("bentleyName"),
+      description: t("bentleyDesc"),
       passengers: 3,
       luggage: 3,
       startingPrice: "$280",
@@ -128,10 +124,8 @@ const FleetPage = () => {
       ],
     },
     {
-      name: "Range Rover Autobiography",
-      description: isTurkish 
-        ? "Lüks SUV segmentinin tartışmasız lideri. Range Rover Autobiography, konfor ve performansı bir arada sunar."
-        : "The undisputed leader in luxury SUV segment. Range Rover Autobiography combines comfort and performance seamlessly.",
+      name: t("rangeRoverName"),
+      description: t("rangeRoverDesc"),
       passengers: 4,
       luggage: 4,
       startingPrice: "$220",
@@ -142,10 +136,8 @@ const FleetPage = () => {
       ],
     },
     {
-      name: "Mercedes S-Class S580",
-      description: isTurkish 
-        ? "Teknoloji ve lüksün mükemmel buluşması. Mercedes S-Class, iş dünyasının en çok tercih ettiği sedan."
-        : "The perfect fusion of technology and luxury. Mercedes S-Class is the most preferred sedan for business executives.",
+      name: t("mercedesSClassName"),
+      description: t("mercedesSClassDesc"),
       passengers: 3,
       luggage: 3,
       startingPrice: "$180",
@@ -224,18 +216,16 @@ const FleetPage = () => {
 
               <div className="text-center mb-8">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-amber-600 via-yellow-500 to-orange-500 bg-clip-text text-transparent">
-                  {isTurkish ? "Dubai Özel Lüks Filo" : "Dubai Exclusive Luxury Fleet"}
+                  {t("dubaiFleetTitle")}
                 </h2>
                 <div className="flex items-center justify-center gap-2 text-amber-600 dark:text-amber-400 mb-4">
                   <Plane className="w-5 h-5" />
                   <span className="font-semibold">
-                    {isTurkish ? "Sadece Dubai Havalimanı Transferleri" : "Dubai Airport Transfers Only"}
+                    {t("dubaiFleetSubtitle")}
                   </span>
                 </div>
                 <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-lg">
-                  {isTurkish 
-                    ? "Bu özel lüks araç koleksiyonu sadece Dubai Uluslararası Havalimanı (DXB) ve Al Maktoum Havalimanı (DWC) transferleri için geçerlidir. Rolls Royce, Bentley, Range Rover ve Mercedes S-Class ile Dubai'de unutulmaz bir VIP deneyimi yaşayın."
-                    : "This exclusive luxury vehicle collection is available only for Dubai International Airport (DXB) and Al Maktoum Airport (DWC) transfers. Experience an unforgettable VIP journey in Dubai with Rolls Royce, Bentley, Range Rover and Mercedes S-Class."}
+                  {t("dubaiFleetDesc")}
                 </p>
               </div>
 
@@ -249,9 +239,7 @@ const FleetPage = () => {
               <div className="mt-10 text-center">
                 <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl px-6 py-4">
                   <span className="text-amber-700 dark:text-amber-300 font-medium">
-                    {isTurkish 
-                      ? "Dubai transferi için özel fiyat teklifi alın" 
-                      : "Get a custom quote for Dubai transfers"}
+                    {t("dubaiFleetCta")}
                   </span>
                 </div>
                 <div className="mt-4">
