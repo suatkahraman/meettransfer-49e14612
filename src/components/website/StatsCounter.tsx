@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
 import { Globe, Plane, Car, MapPin, Award, Shield } from "lucide-react";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
 interface StatItem {
   value: number;
@@ -84,6 +85,7 @@ const useCountUp = (end: number, duration: number = 2000, startCounting: boolean
 
 const StatCard = ({ stat, index, isVisible }: { stat: StatItem; index: number; isVisible: boolean }) => {
   const { t } = useLanguage();
+  const { rating } = useGoogleReviewStats();
   const count = useCountUp(stat.value, 2000 + index * 200, isVisible);
   const Icon = stat.icon;
 
@@ -126,6 +128,7 @@ const StatCard = ({ stat, index, isVisible }: { stat: StatItem; index: number; i
 
 const StatsCounter = () => {
   const { t, language } = useLanguage();
+  const { rating } = useGoogleReviewStats();
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const isTR = language.toLowerCase() === "tr";
@@ -214,7 +217,7 @@ const StatsCounter = () => {
         >
           <div className="flex items-center gap-2 text-white/60">
             <Award className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium">{isTR ? "4.7 Yıldız Puan" : "4.7 Star Rating"}</span>
+            <span className="text-sm font-medium">{isTR ? `${rating.toFixed(1)} Yıldız Puan` : `${rating.toFixed(1)} Star Rating`}</span>
           </div>
           <div className="flex items-center gap-2 text-white/60">
             <Shield className="h-5 w-5 text-primary" />

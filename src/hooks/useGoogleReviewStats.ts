@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { DEFAULT_RATING, DEFAULT_TOTAL_REVIEWS } from "@/constants/ratings";
 
 export function useGoogleReviewStats() {
   const { language } = useLanguage();
-  const [rating, setRating] = useState<number>(4.8);
-  const [totalReviews, setTotalReviews] = useState<number>(2847);
+  const [rating, setRating] = useState<number>(DEFAULT_RATING);
+  const [totalReviews, setTotalReviews] = useState<number>(DEFAULT_TOTAL_REVIEWS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {

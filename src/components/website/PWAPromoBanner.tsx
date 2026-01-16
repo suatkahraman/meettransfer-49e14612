@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { IOSInstallModal } from "./IOSInstallModal";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
 export function PWAPromoBanner() {
   const { canInstall, isInstalled, isStandalone, isIOS, promptInstall } = usePWAInstall();
@@ -52,8 +53,8 @@ export function PWAPromoBanner() {
         { icon: Bell, text: "Push notifications" },
       ];
 
-  const rating = 4.8;
-  const reviewCount = 2847;
+  // Use centralized rating from Google Reviews hook
+  const { rating, totalReviews: reviewCount } = useGoogleReviewStats();
 
   return (
     <>

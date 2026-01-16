@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Globe, Users, Clock, Building2, ArrowRight, Sparkles, Shield, Star, Zap, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
 // Translations for CoreServices
 const coreTranslations: Record<string, Record<string, string>> = {
@@ -429,10 +430,13 @@ const CoreServices = () => {
     },
   ];
 
+  // Use centralized rating from Google Reviews hook
+  const { rating } = useGoogleReviewStats();
+  
   const stats = [
     { value: "50K+", label: ct("happyCustomers") },
     { value: "99%", label: ct("onTimeArrivals") },
-    { value: "4.7", label: ct("averageRating"), icon: Star },
+    { value: rating.toFixed(1), label: ct("averageRating"), icon: Star },
   ];
 
   return (

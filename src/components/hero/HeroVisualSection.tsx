@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Plane, Star, Check, Wifi, Baby, Briefcase, ChevronLeft, ChevronRight, Play, Image } from "lucide-react";
 import { useSwipeable } from "react-swipeable";
 import { CityVideo } from "./types";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 // Optimized WebP hero images for gallery - all converted to WebP for faster loading
 import heroMercedes from "@/assets/hero/hero-mercedes-vito.webp";
 import heroAirportFleet from "@/assets/hero/hero-airport-fleet.webp";
@@ -60,6 +61,9 @@ export const HeroVisualSection = memo(({
   language,
   t
 }: HeroVisualSectionProps) => {
+  // Get live rating from Google Reviews
+  const { rating } = useGoogleReviewStats();
+  
   // Mobile: Always show static image for performance
   const [isMobile, setIsMobile] = useState(true);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -261,7 +265,7 @@ export const HeroVisualSection = memo(({
                 <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
               </div>
               <div>
-                <div className="text-xs font-bold text-foreground">4.7</div>
+                <div className="text-xs font-bold text-foreground">{rating.toFixed(1)}</div>
                 <div className="text-[8px] text-muted-foreground">{t("googleReviews") || "Google"}</div>
               </div>
             </div>
@@ -457,7 +461,7 @@ export const HeroVisualSection = memo(({
                 <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
               </div>
               <div>
-                <div className="text-xl font-bold text-foreground">4.7</div>
+                <div className="text-xl font-bold text-foreground">{rating.toFixed(1)}</div>
                 <div className="text-xs text-muted-foreground">{t("googleReviews") || "Google"}</div>
               </div>
             </div>
