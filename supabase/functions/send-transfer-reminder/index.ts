@@ -27,7 +27,9 @@ const getVehicleLabel = (vehicleType: string): string => {
     'vito_vip': 'Mercedes Vito VIP',
     'sprinter': 'Mercedes Sprinter VIP',
     'sprinter_vip': 'Mercedes Sprinter VIP',
-    'maybach': 'Mercedes Maybach',
+    'maybach': 'Mercedes Maybach Minivan',
+    'maybach-minibus': 'Mercedes Maybach Minivan',
+    'mercedes-maybach': 'Mercedes Maybach Minivan',
   };
   return labels[vehicleType] || vehicleType;
 };

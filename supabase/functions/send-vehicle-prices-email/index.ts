@@ -40,7 +40,7 @@ const vehicleLabelsI18n: Record<string, Record<string, { name: string; descripti
       icon: "✨"
     },
     "maybach": { 
-      name: "Maybach Minivan", 
+      name: "Mercedes Maybach Minivan", 
       description: "Ultra-luxury experience with Maybach comfort",
       icon: "👑"
     },
@@ -62,7 +62,7 @@ const vehicleLabelsI18n: Record<string, Record<string, { name: string; descripti
       icon: "✨"
     },
     "maybach": { 
-      name: "Maybach Minivan", 
+      name: "Mercedes Maybach Minivan", 
       description: "Maybach konforu ile ultra lüks deneyim",
       icon: "👑"
     },
@@ -84,7 +84,7 @@ const vehicleLabelsI18n: Record<string, Record<string, { name: string; descripti
       icon: "✨"
     },
     "maybach": { 
-      name: "Maybach Minivan", 
+      name: "Mercedes Maybach Minivan", 
       description: "Ultra-Luxus-Erlebnis mit Maybach-Komfort",
       icon: "👑"
     },
@@ -106,7 +106,7 @@ const vehicleLabelsI18n: Record<string, Record<string, { name: string; descripti
       icon: "✨"
     },
     "maybach": { 
-      name: "Maybach Minivan", 
+      name: "Mercedes Maybach Minivan", 
       description: "Ультра-люкс с комфортом Maybach",
       icon: "👑"
     },
@@ -128,7 +128,7 @@ const vehicleLabelsI18n: Record<string, Record<string, { name: string; descripti
       icon: "✨"
     },
     "maybach": { 
-      name: "مايباخ ميني فان", 
+      name: "مرسيدس مايباخ ميني فان", 
       description: "تجربة فائقة الفخامة مع راحة مايباخ",
       icon: "👑"
     },
