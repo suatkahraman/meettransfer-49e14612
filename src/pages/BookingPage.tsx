@@ -578,6 +578,11 @@ const BookingPage = () => {
       const returnPrice = hasReturnTrip && currentPrice
         ? (isPromoCodeValid && promoDiscountPercent ? Math.round(currentPrice * discountMultiplier) : currentPrice)
         : null;
+      
+      // Calculate discount amount for return trip
+      const returnDiscountAmount = hasReturnTrip && currentPrice && isPromoCodeValid && promoDiscountPercent
+        ? Math.round(currentPrice * (promoDiscountPercent / 100) * 100) / 100
+        : null;
 
       // Call edge function to create account and reservation
       const { data: result, error: fnError } = await supabase.functions.invoke(
@@ -598,6 +603,8 @@ const BookingPage = () => {
             returnDate: hasReturnTrip && returnDate ? returnDate : null,
             returnTime: hasReturnTrip && returnTime ? returnTime : null,
             returnPrice: returnPrice,
+            returnDiscountPercentage: hasReturnTrip && isPromoCodeValid && promoDiscountPercent ? promoDiscountPercent : null,
+            returnDiscountAmount: returnDiscountAmount,
             promoCode: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
             babySeatCount,
             luggageCount,
@@ -712,10 +719,14 @@ const BookingPage = () => {
 
       // If return trip (only for transfers), create return reservation
       if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
-        // Return trip discount ONLY applies for Turkey locations
-        const returnPrice = isTurkey && isPromoCodeValid && selectedPrice 
-          ? Math.round(selectedPrice * 0.75) // 25% discount (ONLY for Turkey)
+        // Use actual promo discount percentage instead of hardcoded 25%
+        const discountPercent = isTurkey && isPromoCodeValid && promoDiscountPercent ? promoDiscountPercent : 0;
+        const returnPrice = selectedPrice && discountPercent > 0
+          ? Math.round(selectedPrice * (100 - discountPercent) / 100)
           : selectedPrice;
+        const discountAmount = selectedPrice && discountPercent > 0
+          ? Math.round(selectedPrice * (discountPercent / 100) * 100) / 100
+          : 0;
 
         await supabase
           .from("reservations")
@@ -739,6 +750,8 @@ const BookingPage = () => {
             is_return_transfer: true,
             original_reservation_id: reservation.id,
             promo_code: isPromoCodeValid && promoCode ? promoCode : null,
+            discount_percentage: discountPercent > 0 ? discountPercent : null,
+            discount_amount: discountAmount > 0 ? discountAmount : null,
           });
       }
 

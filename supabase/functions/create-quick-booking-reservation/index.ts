@@ -21,6 +21,8 @@ interface CreateReservationRequest {
   returnDate?: string;
   returnTime?: string;
   returnPrice?: number;
+  returnDiscountPercentage?: number;
+  returnDiscountAmount?: number;
   promoCode?: string;
   babySeatCount?: number;
   luggageCount?: number;
@@ -247,6 +249,8 @@ serve(async (req) => {
           is_return_transfer: true,
           original_reservation_id: reservation.id,
           promo_code: requestData.promoCode || null,
+          discount_percentage: requestData.returnDiscountPercentage || null,
+          discount_amount: requestData.returnDiscountAmount || null,
           customer_notes: customerNotes,
           agency_id: agencyId,
           agency_user_id: agencyUserId,
