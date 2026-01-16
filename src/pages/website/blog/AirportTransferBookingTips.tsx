@@ -14,7 +14,8 @@ import heroImage from "@/assets/vip-mercedes-vito.jpg";
 
 const AirportTransferBookingTips = () => {
   const { t, language } = useLanguage();
-  const formattedDate = useBlogDate("2025-01-15");
+  const { formatBlogDate } = useBlogDate();
+  const formattedDate = formatBlogDate("2025-01-15");
 
   const faqItems = [
     {
@@ -383,7 +384,7 @@ const AirportTransferBookingTips = () => {
                   </div>
                 </section>
 
-                <ShareButtons />
+                <ShareButtons title="Airport Transfer Booking Tips for Turkey" />
               </div>
 
               {/* Sidebar */}
@@ -409,7 +410,7 @@ const AirportTransferBookingTips = () => {
           </div>
         </div>
 
-        <RelatedArticles />
+        <RelatedArticles currentArticleId="airport-transfer-booking-tips" />
       </article>
 
       <Footer />
