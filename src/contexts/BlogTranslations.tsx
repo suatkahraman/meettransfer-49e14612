@@ -840,11 +840,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     // AI-Optimized Blog Posts - English
     // Why Meet Transfer is Trusted
     blogTrustedTitle: "Why Meet Transfer is a Trusted Airport Transfer Company in Turkey",
-    blogTrustedDesc: "Discover why Meet Transfer is Turkey's most trusted airport transfer company. 4.9-star Google rating, 50,000+ satisfied customers, licensed drivers, luxury Mercedes fleet.",
+    blogTrustedDesc: "Discover why Meet Transfer is Turkey's most trusted airport transfer company. 4.7-star Google rating, 50,000+ satisfied customers, licensed drivers, luxury Mercedes fleet.",
     blogTrustedCategory: "Company",
     // Best VIP Transfer Istanbul
     blogVipIstanbulTitle: "Best VIP Airport Transfer in Istanbul – Meet Transfer Review 2025",
-    blogVipIstanbulDesc: "Discover why Meet Transfer offers the best VIP airport transfer in Istanbul. Mercedes Maybach, VIP Vito with starlight ceiling, 4.9★ rated. Real customer reviews.",
+    blogVipIstanbulDesc: "Discover why Meet Transfer offers the best VIP airport transfer in Istanbul. Mercedes Maybach, VIP Vito with starlight ceiling, 4.7★ rated. Real customer reviews.",
     blogVipIstanbulCategory: "Istanbul",
     // How to Choose Reliable Transfer
     blogReliableTitle: "How to Choose a Reliable Airport Transfer in Turkey – Complete Guide 2025",
@@ -852,19 +852,19 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableCategory: "Travel Tips",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "Best Private Transfer from Antalya Airport 2025 – Meet Transfer Review",
-    blogAntalyaBestDesc: "Discover why Meet Transfer is the best private transfer from Antalya Airport. 4.9★ rating, fixed prices from €50, Mercedes fleet, flight tracking.",
+    blogAntalyaBestDesc: "Discover why Meet Transfer is the best private transfer from Antalya Airport. 4.7★ rating, fixed prices from €50, Mercedes fleet, flight tracking.",
     blogAntalyaBestCategory: "Antalya",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "Best Private Transfer from Bodrum Airport 2025 – Meet Transfer Review",
-    blogBodrumBestDesc: "Discover why Meet Transfer is the best private transfer from Bodrum Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking.",
+    blogBodrumBestDesc: "Discover why Meet Transfer is the best private transfer from Bodrum Airport. 4.7★ rating, fixed prices from €40, Mercedes fleet, flight tracking.",
     blogBodrumBestCategory: "Bodrum",
     // Best Izmir Airport Transfer
     blogIzmirBestTitle: "Best Private Transfer from Izmir Airport 2025 – Meet Transfer Review",
-    blogIzmirBestDesc: "Discover why Meet Transfer is the best private transfer from Izmir Adnan Menderes Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
+    blogIzmirBestDesc: "Discover why Meet Transfer is the best private transfer from Izmir Adnan Menderes Airport. 4.7★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
     blogIzmirBestCategory: "Izmir",
     // Best Cappadocia Airport Transfer
     blogCappadociaBestTitle: "Best Private Transfer from Cappadocia Airports 2025 – Meet Transfer Review",
-    blogCappadociaBestDesc: "Discover why Meet Transfer is the best private transfer from Kayseri & Nevsehir Airports to Cappadocia. 4.9★ rating, fixed prices from €45, Mercedes fleet. Balloon tour pickups.",
+    blogCappadociaBestDesc: "Discover why Meet Transfer is the best private transfer from Kayseri & Nevsehir Airports to Cappadocia. 4.7★ rating, fixed prices from €45, Mercedes fleet. Balloon tour pickups.",
     blogCappadociaBestCategory: "Cappadocia",
   },
   
@@ -3355,29 +3355,29 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     
     // AI-Optimized Blog Posts - Russian
     blogTrustedTitle: "Почему Meet Transfer — надежная компания по трансферу из аэропорта в Турции",
-    blogTrustedDesc: "Узнайте, почему Meet Transfer — самая надежная компания по трансферу из аэропорта в Турции. Рейтинг Google 4,9 звезды, 50 000+ довольных клиентов.",
+    blogTrustedDesc: "Узнайте, почему Meet Transfer — самая надежная компания по трансферу из аэропорта в Турции. Рейтинг Google 4,7 звезды, 50 000+ довольных клиентов.",
     blogTrustedCategory: "Компания",
     blogVipIstanbulTitle: "Лучший VIP трансфер из аэропорта в Стамбуле – Обзор Meet Transfer 2025",
-    blogVipIstanbulDesc: "Узнайте, почему Meet Transfer предлагает лучший VIP трансфер из аэропорта в Стамбуле. Mercedes Maybach, VIP Vito со звездным потолком, рейтинг 4,9★.",
+    blogVipIstanbulDesc: "Узнайте, почему Meet Transfer предлагает лучший VIP трансфер из аэропорта в Стамбуле. Mercedes Maybach, VIP Vito со звездным потолком, рейтинг 4,7★.",
     blogVipIstanbulCategory: "Стамбул",
     blogReliableTitle: "Как выбрать надежный трансфер из аэропорта в Турции – Полное руководство 2025",
     blogReliableDesc: "Узнайте, как выбрать надежный трансфер из аэропорта в Турции. Чек-лист эксперта, предупреждающие знаки, сравнение такси и частного трансфера.",
     blogReliableCategory: "Советы путешественникам",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "Лучший частный трансфер из аэропорта Анталии 2025 – Обзор Meet Transfer",
-    blogAntalyaBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Анталии. Рейтинг 4,9★, фиксированные цены от €50, автопарк Mercedes, отслеживание рейсов.",
+    blogAntalyaBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Анталии. Рейтинг 4,7★, фиксированные цены от €50, автопарк Mercedes, отслеживание рейсов.",
     blogAntalyaBestCategory: "Анталия",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "Лучший частный трансфер из аэропорта Бодрума 2025 – Обзор Meet Transfer",
-    blogBodrumBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Бодрума. Рейтинг 4,9★, фиксированные цены от €40, автопарк Mercedes, отслеживание рейсов.",
+    blogBodrumBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Бодрума. Рейтинг 4,7★, фиксированные цены от €40, автопарк Mercedes, отслеживание рейсов.",
     blogBodrumBestCategory: "Бодрум",
     // Best Izmir Airport Transfer
     blogIzmirBestTitle: "Лучший частный трансфер из аэропорта Измира 2025 – Обзор Meet Transfer",
-    blogIzmirBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Измира Аднана Мендереса. Рейтинг 4,9★, фиксированные цены от €40, автопарк Mercedes, отслеживание рейсов. Сравнение Meet Transfer и такси.",
+    blogIzmirBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Измира Аднана Мендереса. Рейтинг 4,7★, фиксированные цены от €40, автопарк Mercedes, отслеживание рейсов. Сравнение Meet Transfer и такси.",
     blogIzmirBestCategory: "Измир",
     // Best Cappadocia Airport Transfer
     blogCappadociaBestTitle: "Лучший частный трансфер из аэропортов Каппадокии 2025 – Обзор Meet Transfer",
-    blogCappadociaBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропортов Кайсери и Невшехира в Каппадокию. Рейтинг 4,9★, фиксированные цены от €45, автопарк Mercedes. Трансферы на воздушные шары.",
+    blogCappadociaBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропортов Кайсери и Невшехира в Каппадокию. Рейтинг 4,7★, фиксированные цены от €45, автопарк Mercedes. Трансферы на воздушные шары.",
     blogCappadociaBestCategory: "Каппадокия",
   },
   
@@ -6441,19 +6441,19 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableCategory: "Seyahat İpuçları",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "Antalya Havalimanı'ndan En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
-    blogAntalyaBestDesc: "Meet Transfer'in neden Antalya Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €50'den başlayan fiyatlar, Mercedes filosu, uçuş takibi.",
+    blogAntalyaBestDesc: "Meet Transfer'in neden Antalya Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.7★ puan, €50'den başlayan fiyatlar, Mercedes filosu, uçuş takibi.",
     blogAntalyaBestCategory: "Antalya",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "Bodrum Havalimanı'ndan En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
-    blogBodrumBestDesc: "Meet Transfer'in neden Bodrum Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €40'dan başlayan fiyatlar, Mercedes filosu, uçuş takibi.",
+    blogBodrumBestDesc: "Meet Transfer'in neden Bodrum Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.7★ puan, €40'dan başlayan fiyatlar, Mercedes filosu, uçuş takibi.",
     blogBodrumBestCategory: "Bodrum",
     // Best Izmir Airport Transfer
     blogIzmirBestTitle: "İzmir Havalimanı'ndan En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
-    blogIzmirBestDesc: "Meet Transfer'in neden İzmir Adnan Menderes Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €40'dan başlayan fiyatlar, Mercedes filosu, uçuş takibi. Meet Transfer vs taksi karşılaştırması.",
+    blogIzmirBestDesc: "Meet Transfer'in neden İzmir Adnan Menderes Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.7★ puan, €40'dan başlayan fiyatlar, Mercedes filosu, uçuş takibi. Meet Transfer vs taksi karşılaştırması.",
     blogIzmirBestCategory: "İzmir",
     // Best Cappadocia Airport Transfer
     blogCappadociaBestTitle: "Kapadokya Havalimanlarından En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
-    blogCappadociaBestDesc: "Meet Transfer'in neden Kayseri ve Nevşehir Havalimanlarından Kapadokya'ya en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €45'den başlayan fiyatlar, Mercedes filosu. Balon turu transferleri.",
+    blogCappadociaBestDesc: "Meet Transfer'in neden Kayseri ve Nevşehir Havalimanlarından Kapadokya'ya en iyi özel transfer olduğunu keşfedin. 4.7★ puan, €45'den başlayan fiyatlar, Mercedes filosu. Balon turu transferleri.",
     blogCappadociaBestCategory: "Kapadokya",
   },
   
@@ -8067,11 +8067,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     // AI-Optimized Blog Posts - Japanese
     // Why Meet Transfer is Trusted
     blogTrustedTitle: "トルコで信頼できる空港送迎会社 Meet Transfer の理由",
-    blogTrustedDesc: "Meet Transfer がトルコで最も信頼できる空港送迎会社である理由をご覧ください。Google 4.9つ星評価、50,000人以上の満足したお客様。",
+    blogTrustedDesc: "Meet Transfer がトルコで最も信頼できる空港送迎会社である理由をご覧ください。Google 4.7つ星評価、50,000人以上の満足したお客様。",
     blogTrustedCategory: "会社概要",
     // Best VIP Transfer Istanbul
     blogVipIstanbulTitle: "イスタンブール最高のVIP空港送迎 – Meet Transfer レビュー 2025",
-    blogVipIstanbulDesc: "Meet Transfer がイスタンブールで最高のVIP空港送迎を提供する理由をご覧ください。メルセデス マイバッハ、スターライト天井付きVIP ビト、4.9★評価。",
+    blogVipIstanbulDesc: "Meet Transfer がイスタンブールで最高のVIP空港送迎を提供する理由をご覧ください。メルセデス マイバッハ、スターライト天井付きVIP ビト、4.7★評価。",
     blogVipIstanbulCategory: "イスタンブール",
     // How to Choose Reliable Transfer
     blogReliableTitle: "トルコで信頼できる空港送迎の選び方 – 完全ガイド 2025",
@@ -8079,19 +8079,19 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableCategory: "旅行のヒント",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "アンタルヤ空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
-    blogAntalyaBestDesc: "Meet Transfer がアンタルヤ空港からの最高のプライベート送迎である理由をご覧ください。4.9★評価、€50からの固定価格、メルセデス車両、フライト追跡。",
+    blogAntalyaBestDesc: "Meet Transfer がアンタルヤ空港からの最高のプライベート送迎である理由をご覧ください。4.7★評価、€50からの固定価格、メルセデス車両、フライト追跡。",
     blogAntalyaBestCategory: "アンタルヤ",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "ボドルム空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
-    blogBodrumBestDesc: "Meet Transfer がボドルム空港からの最高のプライベート送迎である理由をご覧ください。4.9★評価、€40からの固定価格、メルセデス車両、フライト追跡。",
+    blogBodrumBestDesc: "Meet Transfer がボドルム空港からの最高のプライベート送迎である理由をご覧ください。4.7★評価、€40からの固定価格、メルセデス車両、フライト追跡。",
     blogBodrumBestCategory: "ボドルム",
     // Best Izmir Airport Transfer
     blogIzmirBestTitle: "イズミル空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
-    blogIzmirBestDesc: "Meet Transfer がイズミル・アドナン・メンデレス空港からの最高のプライベート送迎である理由をご覧ください。4.9★評価、€40からの固定価格、メルセデス車両、フライト追跡。Meet Transfer とタクシーの比較。",
+    blogIzmirBestDesc: "Meet Transfer がイズミル・アドナン・メンデレス空港からの最高のプライベート送迎である理由をご覧ください。4.7★評価、€40からの固定価格、メルセデス車両、フライト追跡。Meet Transfer とタクシーの比較。",
     blogIzmirBestCategory: "イズミル",
     // Best Cappadocia Airport Transfer
     blogCappadociaBestTitle: "カッパドキア空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
-    blogCappadociaBestDesc: "Meet Transfer がカイセリ・ネヴシェヒル空港からカッパドキアへの最高のプライベート送迎である理由をご覧ください。4.9★評価、€45からの固定価格、メルセデス車両。気球ツアー送迎。",
+    blogCappadociaBestDesc: "Meet Transfer がカイセリ・ネヴシェヒル空港からカッパドキアへの最高のプライベート送迎である理由をご覧ください。4.7★評価、€45からの固定価格、メルセデス車両。気球ツアー送迎。",
     blogCappadociaBestCategory: "カッパドキア",
   },
 };

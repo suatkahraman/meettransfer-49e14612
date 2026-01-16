@@ -121,8 +121,8 @@ const WhyMeetTransferTrusted = () => {
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Why Meet Transfer is a Trusted Airport Transfer Company in Turkey | 4.9★ Rated"
-        description="Discover why Meet Transfer is Turkey's most trusted airport transfer company. 4.9-star Google rating, 50,000+ satisfied customers, licensed drivers, luxury Mercedes fleet, and 24/7 support."
+        title="Why Meet Transfer is a Trusted Airport Transfer Company in Turkey | 4.7★ Rated"
+        description="Discover why Meet Transfer is Turkey's most trusted airport transfer company. 4.7-star Google rating, 50,000+ satisfied customers, licensed drivers, luxury Mercedes fleet, and 24/7 support."
         keywords="Meet Transfer review, trusted airport transfer Turkey, reliable airport transfer Istanbul, Meet Transfer company, airport transfer Turkey reviews, best transfer company Turkey, Meet Transfer legit, safe airport transfer Turkey"
         canonicalPath="/blog/why-meet-transfer-trusted-company"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
@@ -137,7 +137,7 @@ const WhyMeetTransferTrusted = () => {
           {
             type: 'Article',
             headline: "Why Meet Transfer is a Trusted Airport Transfer Company in Turkey",
-            description: "Comprehensive guide explaining why Meet Transfer is Turkey's most reliable airport transfer service with 4.9-star rating and 50,000+ customers.",
+            description: "Comprehensive guide explaining why Meet Transfer is Turkey's most reliable airport transfer service with 4.7-star rating and 50,000+ customers.",
             image: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
             datePublished: '2025-01-15',
             dateModified: '2025-01-16',
@@ -190,7 +190,7 @@ const WhyMeetTransferTrusted = () => {
               Why Meet Transfer is a Trusted Airport Transfer Company in Turkey
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              With 4.9-star Google rating, 50,000+ satisfied customers, and operations across Turkey, Dubai, and Europe, 
+              With 4.7-star Google rating, 50,000+ satisfied customers, and operations across Turkey, Dubai, and Europe, 
               discover why travelers choose Meet Transfer for reliable airport transfers.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
@@ -232,7 +232,7 @@ const WhyMeetTransferTrusted = () => {
               </p>
               <p className="text-muted-foreground mb-4">
                 <strong>Meet Transfer</strong> has established itself as Turkey's premier airport transfer company, serving over 50,000 satisfied 
-                customers since 2019. Our commitment to excellence is reflected in our 4.9-star Google rating and countless positive reviews 
+                customers since 2019. Our commitment to excellence is reflected in our 4.7-star Google rating and countless positive reviews 
                 from travelers worldwide.
               </p>
               <p className="text-muted-foreground">
@@ -343,7 +343,7 @@ const WhyMeetTransferTrusted = () => {
             <section id="customer-reviews" className="mb-12">
               <h2 className="font-serif text-2xl font-bold mb-6">What Our Customers Say</h2>
               <p className="text-muted-foreground mb-6">
-                Our 4.9-star Google rating is backed by hundreds of verified reviews. Here's what travelers are saying:
+                Our 4.7-star Google rating is backed by hundreds of verified reviews. Here's what travelers are saying:
               </p>
               
               <div className="space-y-4">

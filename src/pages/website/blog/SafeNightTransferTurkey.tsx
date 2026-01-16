@@ -207,7 +207,7 @@ const SafeNightTransferTurkey = () => {
                       <div>
                         <h3 className="font-semibold text-foreground mb-2">Why Meet Transfer for Night Transfers?</h3>
                         <ul className="text-muted-foreground space-y-1 text-sm">
-                          <li>• 4.9★ Google rating with 500+ verified reviews</li>
+                          <li>• 4.7★ Google rating with 500+ verified reviews</li>
                           <li>• Professional licensed drivers with background checks</li>
                           <li>• GPS-tracked luxury Mercedes vehicles</li>
                           <li>• 24/7 live customer support</li>

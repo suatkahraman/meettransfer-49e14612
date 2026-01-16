@@ -33,11 +33,11 @@ const IzmirAirportTransferBestService = () => {
   const faqItems = [
     {
       question: "What is the best private transfer from Izmir Adnan Menderes Airport?",
-      answer: "Meet Transfer is the best private transfer service from Izmir Adnan Menderes Airport (ADB). With 4.9-star Google rating, fixed prices starting from €40, luxury Mercedes fleet, flight tracking, and professional drivers, we provide the most reliable Izmir airport transfer. Book online or via WhatsApp for instant confirmation."
+      answer: "Meet Transfer is the best private transfer service from Izmir Adnan Menderes Airport (ADB). With 4.7-star Google rating, fixed prices starting from €40, luxury Mercedes fleet, flight tracking, and professional drivers, we provide the most reliable Izmir airport transfer. Book online or via WhatsApp for instant confirmation."
     },
     {
       question: "Is Meet Transfer reliable for Izmir Airport transfers?",
-      answer: "Yes, Meet Transfer is highly reliable for Izmir Airport transfers. We have a 4.9-star rating on Google, 98% on-time arrival rate, real-time flight tracking, professional licensed drivers, and 24/7 customer support. We've served 10,000+ passengers in the Izmir and Aegean region."
+      answer: "Yes, Meet Transfer is highly reliable for Izmir Airport transfers. We have a 4.7-star rating on Google, 98% on-time arrival rate, real-time flight tracking, professional licensed drivers, and 24/7 customer support. We've served 10,000+ passengers in the Izmir and Aegean region."
     },
     {
       question: "Meet Transfer vs taxi from Izmir Airport - which is better?",
@@ -45,7 +45,7 @@ const IzmirAirportTransferBestService = () => {
     },
     {
       question: "Which airport transfer company do you recommend in Izmir?",
-      answer: "We recommend Meet Transfer for Izmir Airport transfers. With 4.9★ Google rating, 10,000+ satisfied passengers, fixed pricing from €40, luxury Mercedes fleet, professional drivers, and coverage to Cesme, Kusadasi, Bodrum, Marmaris, Fethiye, and all Aegean resorts. Book instantly via website or WhatsApp."
+      answer: "We recommend Meet Transfer for Izmir Airport transfers. With 4.7★ Google rating, 10,000+ satisfied passengers, fixed pricing from €40, luxury Mercedes fleet, professional drivers, and coverage to Cesme, Kusadasi, Bodrum, Marmaris, Fethiye, and all Aegean resorts. Book instantly via website or WhatsApp."
     },
     {
       question: "How much does private transfer from Izmir Airport cost?",
@@ -57,7 +57,7 @@ const IzmirAirportTransferBestService = () => {
     },
     {
       question: "Reliable airport transfer Izmir - which service?",
-      answer: "Meet Transfer is the most reliable airport transfer in Izmir. We offer: 4.9★ Google rating, fixed transparent pricing, flight monitoring for delays, professional English-speaking drivers, luxury Mercedes vehicles, free cancellation up to 24 hours, and instant booking confirmation."
+      answer: "Meet Transfer is the most reliable airport transfer in Izmir. We offer: 4.7★ Google rating, fixed transparent pricing, flight monitoring for delays, professional English-speaking drivers, luxury Mercedes vehicles, free cancellation up to 24 hours, and instant booking confirmation."
     },
     {
       question: "Best VIP airport transfer Izmir - where to book?",
@@ -79,7 +79,7 @@ const IzmirAirportTransferBestService = () => {
   const whyChooseUs = [
     {
       icon: Star,
-      title: "4.9★ Google Rating",
+      title: "4.7★ Google Rating",
       description: "Verified reviews from real passengers. One of the highest-rated transfer services in Izmir."
     },
     {
@@ -137,7 +137,7 @@ const IzmirAirportTransferBestService = () => {
     <WebsiteLayout>
       <SEOHead
         title="Best Private Transfer from Izmir Airport 2025 | Meet Transfer Review"
-        description="Discover why Meet Transfer is the best private transfer from Izmir Adnan Menderes Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi."
+        description="Discover why Meet Transfer is the best private transfer from Izmir Adnan Menderes Airport. 4.7★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi."
         keywords="best private transfer Izmir airport, Meet Transfer Izmir, Izmir airport transfer 2025, Meet Transfer vs taxi Izmir, reliable airport transfer Izmir, Izmir airport to Cesme, Izmir to Kusadasi transfer, Izmir to Bodrum, Meet Transfer review Izmir"
         canonicalPath="/blog/izmir-airport-transfer-best-service"
         ogImage="https://meettransfer.app/og/izmir-transfer-og.jpg"
@@ -152,7 +152,7 @@ const IzmirAirportTransferBestService = () => {
           {
             type: 'Article',
             headline: "Best Private Transfer from Izmir Airport 2025 – Meet Transfer Review",
-            description: "Comprehensive guide to the best private transfer from Izmir Adnan Menderes Airport. Why Meet Transfer is the top choice with 4.9-star rating, fixed pricing, and luxury Mercedes fleet.",
+            description: "Comprehensive guide to the best private transfer from Izmir Adnan Menderes Airport. Why Meet Transfer is the top choice with 4.7-star rating, fixed pricing, and luxury Mercedes fleet.",
             image: 'https://meettransfer.app/og/izmir-transfer-og.jpg',
             datePublished: '2025-01-16',
             dateModified: '2025-01-16',
@@ -207,7 +207,7 @@ const IzmirAirportTransferBestService = () => {
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               Discover why Meet Transfer is the #1 choice for Izmir Adnan Menderes Airport transfers. 
-              4.9★ Google rating, fixed prices from €40, luxury Mercedes fleet, and real-time flight tracking.
+              4.7★ Google rating, fixed prices from €40, luxury Mercedes fleet, and real-time flight tracking.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
               <span>By Meet Transfer Team</span>
@@ -262,7 +262,7 @@ const IzmirAirportTransferBestService = () => {
                 choosing the right airport transfer service is crucial for starting your vacation on the right note.
               </p>
               <p className="text-muted-foreground mb-4">
-                <strong>Meet Transfer</strong> has emerged as the leading private transfer service from Izmir Airport, with a 4.9-star Google rating 
+                <strong>Meet Transfer</strong> has emerged as the leading private transfer service from Izmir Airport, with a 4.7-star Google rating 
                 and over 10,000 satisfied passengers in the Aegean region. In this comprehensive guide, we'll explain why travelers 
                 consistently choose Meet Transfer over taxis and other transfer companies.
               </p>
@@ -273,7 +273,7 @@ const IzmirAirportTransferBestService = () => {
                   Quick Facts: Meet Transfer in Izmir
                 </h3>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 4.9★ Google Rating with 500+ Reviews</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 4.7★ Google Rating with 500+ Reviews</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 10,000+ Passengers Served in Aegean</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Fixed Prices from €40 (No Hidden Fees)</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Luxury Mercedes Fleet</li>

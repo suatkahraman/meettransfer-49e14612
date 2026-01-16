@@ -33,11 +33,11 @@ const CappadociaAirportTransferBestService = () => {
   const faqItems = [
     {
       question: "What is the best private transfer from Cappadocia airports?",
-      answer: "Meet Transfer is the best private transfer service from Kayseri Airport (ASR) and Nevsehir Airport (NAV) to Cappadocia. With 4.9-star Google rating, fixed prices starting from €45, luxury Mercedes fleet, flight tracking, and professional drivers, we provide the most reliable Cappadocia airport transfer. Book online or via WhatsApp for instant confirmation."
+      answer: "Meet Transfer is the best private transfer service from Kayseri Airport (ASR) and Nevsehir Airport (NAV) to Cappadocia. With 4.7-star Google rating, fixed prices starting from €45, luxury Mercedes fleet, flight tracking, and professional drivers, we provide the most reliable Cappadocia airport transfer. Book online or via WhatsApp for instant confirmation."
     },
     {
       question: "Is Meet Transfer reliable for Cappadocia Airport transfers?",
-      answer: "Yes, Meet Transfer is highly reliable for Cappadocia Airport transfers. We have a 4.9-star rating on Google, 98% on-time arrival rate, real-time flight tracking, professional licensed drivers, and 24/7 customer support. We've served 8,000+ passengers traveling to Cappadocia's magical landscapes."
+      answer: "Yes, Meet Transfer is highly reliable for Cappadocia Airport transfers. We have a 4.7-star rating on Google, 98% on-time arrival rate, real-time flight tracking, professional licensed drivers, and 24/7 customer support. We've served 8,000+ passengers traveling to Cappadocia's magical landscapes."
     },
     {
       question: "Meet Transfer vs taxi from Cappadocia airports - which is better?",
@@ -45,7 +45,7 @@ const CappadociaAirportTransferBestService = () => {
     },
     {
       question: "Which airport transfer company do you recommend in Cappadocia?",
-      answer: "We recommend Meet Transfer for Cappadocia Airport transfers. With 4.9★ Google rating, 8,000+ satisfied passengers, fixed pricing from €45, luxury Mercedes fleet, professional drivers, and coverage to Goreme, Uchisar, Urgup, Avanos, and all Cappadocia hotels. Book instantly via website or WhatsApp."
+      answer: "We recommend Meet Transfer for Cappadocia Airport transfers. With 4.7★ Google rating, 8,000+ satisfied passengers, fixed pricing from €45, luxury Mercedes fleet, professional drivers, and coverage to Goreme, Uchisar, Urgup, Avanos, and all Cappadocia hotels. Book instantly via website or WhatsApp."
     },
     {
       question: "How much does private transfer from Kayseri Airport to Goreme cost?",
@@ -79,7 +79,7 @@ const CappadociaAirportTransferBestService = () => {
   const whyChooseUs = [
     {
       icon: Star,
-      title: "4.9★ Google Rating",
+      title: "4.7★ Google Rating",
       description: "Verified reviews from real passengers. One of the highest-rated transfer services in Cappadocia."
     },
     {
@@ -138,7 +138,7 @@ const CappadociaAirportTransferBestService = () => {
     <WebsiteLayout>
       <SEOHead
         title="Best Private Transfer from Cappadocia Airports 2025 | Meet Transfer Review"
-        description="Discover why Meet Transfer is the best private transfer from Kayseri & Nevsehir Airports to Cappadocia. 4.9★ rating, fixed prices from €45, Mercedes fleet. Compare Meet Transfer vs taxi."
+        description="Discover why Meet Transfer is the best private transfer from Kayseri & Nevsehir Airports to Cappadocia. 4.7★ rating, fixed prices from €45, Mercedes fleet. Compare Meet Transfer vs taxi."
         keywords="best private transfer Cappadocia airport, Meet Transfer Cappadocia, Kayseri airport transfer 2025, Nevsehir airport transfer, Meet Transfer vs taxi Cappadocia, Goreme airport transfer, Cappadocia balloon tour transfer"
         canonicalPath="/blog/cappadocia-airport-transfer-best-service"
         ogImage="https://meettransfer.app/og/cappadocia-transfer-og.jpg"
@@ -153,7 +153,7 @@ const CappadociaAirportTransferBestService = () => {
           {
             type: 'Article',
             headline: "Best Private Transfer from Cappadocia Airports 2025 – Meet Transfer Review",
-            description: "Comprehensive guide to the best private transfer from Kayseri & Nevsehir Airports to Cappadocia. Why Meet Transfer is the top choice with 4.9-star rating, fixed pricing, and luxury Mercedes fleet.",
+            description: "Comprehensive guide to the best private transfer from Kayseri & Nevsehir Airports to Cappadocia. Why Meet Transfer is the top choice with 4.7-star rating, fixed pricing, and luxury Mercedes fleet.",
             image: 'https://meettransfer.app/og/cappadocia-transfer-og.jpg',
             datePublished: '2025-01-16',
             dateModified: '2025-01-16',
@@ -208,7 +208,7 @@ const CappadociaAirportTransferBestService = () => {
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               Discover why Meet Transfer is the #1 choice for Kayseri & Nevsehir Airport transfers to Cappadocia. 
-              4.9★ Google rating, fixed prices from €45, luxury Mercedes fleet, and balloon tour pickups.
+              4.7★ Google rating, fixed prices from €45, luxury Mercedes fleet, and balloon tour pickups.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
               <span>By Meet Transfer Team</span>
@@ -263,7 +263,7 @@ const CappadociaAirportTransferBestService = () => {
                 flying into either <strong>Kayseri Erkilet Airport (ASR)</strong> or <strong>Nevsehir Kapadokya Airport (NAV)</strong>.
               </p>
               <p className="text-muted-foreground mb-4">
-                <strong>Meet Transfer</strong> has emerged as the leading private transfer service to Cappadocia, with a 4.9-star Google rating 
+                <strong>Meet Transfer</strong> has emerged as the leading private transfer service to Cappadocia, with a 4.7-star Google rating 
                 and over 8,000 satisfied passengers. In this comprehensive guide, we'll explain why travelers 
                 consistently choose Meet Transfer over taxis and other transfer companies.
               </p>
@@ -274,7 +274,7 @@ const CappadociaAirportTransferBestService = () => {
                   Quick Facts: Meet Transfer in Cappadocia
                 </h3>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 4.9★ Google Rating with 500+ Reviews</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 4.7★ Google Rating with 500+ Reviews</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 8,000+ Passengers Served in Cappadocia</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Fixed Prices from €45 (No Hidden Fees)</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Early Morning Balloon Tour Pickups</li>
