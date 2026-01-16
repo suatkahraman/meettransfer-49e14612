@@ -171,7 +171,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Your VIP Transfer Awaits",
-    heroSubtitle: "✈️ 25% OFF Round-Trip! Code: Meet25Return | Turkey • Dubai • Cyprus",
+    heroSubtitle: "✈️ 25% OFF Round-Trip! Code: Meet25Return | Turkey • Dubai • Cyprus • Germany • Greece",
     pointToPoint: "Transfer",
     perHour: "Per Hour",
     bookYourTransfer: "Book Your Transfer",
@@ -1969,7 +1969,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Ihr VIP-Transfer wartet",
-    heroSubtitle: "✈️ 25% RABATT Hin-Rück! Code: Meet25Return | Türkei • Dubai • Zypern",
+    heroSubtitle: "✈️ 25% RABATT Hin-Rück! Code: Meet25Return | Türkei • Dubai • Zypern • Deutschland • Griechenland",
     pointToPoint: "Transfer",
     perHour: "Pro Stunde",
     bookYourTransfer: "Transfer buchen",
@@ -3793,7 +3793,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Votre Transfert VIP Vous Attend",
-    heroSubtitle: "✈️ -25% Aller-Retour! Code: Meet25Return | Turquie • Dubaï • Chypre",
+    heroSubtitle: "✈️ -25% Aller-Retour! Code: Meet25Return | Turquie • Dubaï • Chypre • Allemagne • Grèce",
     pointToPoint: "Transfert",
     perHour: "À l'heure",
     bookYourTransfer: "Réserver votre transfert",
@@ -5327,7 +5327,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Ваш VIP-трансфер ждёт",
-    heroSubtitle: "✈️ СКИДКА 25% туда-обратно! Код: Meet25Return | Турция • Дубай • Кипр",
+    heroSubtitle: "✈️ СКИДКА 25% туда-обратно! Код: Meet25Return | Турция • Дубай • Кипр • Германия • Греция",
     pointToPoint: "Трансфер",
     perHour: "Почасовая",
     bookYourTransfer: "Забронировать трансфер",
@@ -6725,7 +6725,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Il Tuo Transfer VIP Ti Aspetta",
-    heroSubtitle: "✈️ -25% Andata e Ritorno! Codice: Meet25Return | Turchia • Dubai • Cipro",
+    heroSubtitle: "✈️ -25% Andata e Ritorno! Codice: Meet25Return | Turchia • Dubai • Cipro • Germania • Grecia",
     pointToPoint: "Trasferimento",
     perHour: "All'ora",
     bookYourTransfer: "Prenota il tuo trasferimento",
@@ -8170,7 +8170,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Tu Transfer VIP Te Espera",
-    heroSubtitle: "✈️ -25% Ida y Vuelta! Código: Meet25Return | Turquía • Dubái • Chipre",
+    heroSubtitle: "✈️ -25% Ida y Vuelta! Código: Meet25Return | Turquía • Dubái • Chipre • Alemania • Grecia",
     pointToPoint: "Traslado",
     perHour: "Por hora",
     bookYourTransfer: "Reserva tu traslado",
@@ -9615,7 +9615,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "توصيلتك VIP بانتظارك",
-    heroSubtitle: "✈️ خصم 25% ذهاب وعودة! الكود: Meet25Return | تركيا • دبي • قبرص",
+    heroSubtitle: "✈️ خصم 25% ذهاب وعودة! الكود: Meet25Return | تركيا • دبي • قبرص • ألمانيا • اليونان",
     pointToPoint: "نقل",
     perHour: "بالساعة",
     bookYourTransfer: "احجز نقلك",
@@ -10997,7 +10997,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "VIP Transferiniz Hazır",
-    heroSubtitle: "✈️ Gidiş-Dönüş %25 İNDİRİM! Kod: Meet25Return | Türkiye • Dubai • Kıbrıs",
+    heroSubtitle: "✈️ Gidiş-Dönüş %25 İNDİRİM! Kod: Meet25Return | Türkiye • Dubai • Kıbrıs • Almanya • Yunanistan",
     pointToPoint: "Transfer",
     perHour: "Saatlik",
     bookYourTransfer: "Transferinizi Ayırtın",
@@ -12602,7 +12602,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "Ваш VIP-трансфер чекає",
-    heroSubtitle: "✈️ ЗНИЖКА 25% туди-назад! Код: Meet25Return | Туреччина • Дубай • Кіпр",
+    heroSubtitle: "✈️ ЗНИЖКА 25% туди-назад! Код: Meet25Return | Туреччина • Дубай • Кіпр • Німеччина • Греція",
     pointToPoint: "Трансфер",
     perHour: "Погодинно",
     bookYourTransfer: "Забронювати трансфер",
@@ -13960,7 +13960,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Hero Section
     heroTitle: "VIP送迎をご予約",
-    heroSubtitle: "✈️ 往復25%オフ! コード: Meet25Return | トルコ • ドバイ • キプロス",
+    heroSubtitle: "✈️ 往復25%オフ! コード: Meet25Return | トルコ • ドバイ • キプロス • ドイツ • ギリシャ",
     pointToPoint: "送迎",
     perHour: "時間制",
     bookYourTransfer: "送迎を予約",
