@@ -4,7 +4,7 @@
  */
 
 // Company name
-export const COMPANY_NAME = "Meet Transfer USA, LLC";
+export const COMPANY_NAME = "Meet Transfer";
 
 // WhatsApp number for customer support and bookings
 // Format: country code + number without spaces or special characters

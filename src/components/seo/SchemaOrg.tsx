@@ -83,7 +83,7 @@ const baseUrl = 'https://meettransfer.lovable.app';
 
 const companyInfo = {
   name: 'Meet Transfer',
-  legalName: 'Meet Transfer USA, LLC',
+  legalName: 'Meet Transfer',
   url: baseUrl,
   logo: `${baseUrl}/favicon.png`,
   description: 'Premium VIP airport transfer and chauffeur service worldwide. Luxury Mercedes fleet with professional drivers.',
