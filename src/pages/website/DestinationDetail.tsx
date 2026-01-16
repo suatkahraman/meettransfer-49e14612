@@ -554,44 +554,6 @@ const DestinationDetail = () => {
       </div>
 
       <div className="container px-4 py-8 md:py-12">
-        {/* Promo Banner */}
-        {promoCode.isActive && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 rounded-2xl p-4 md:p-6 mb-8"
-          >
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-primary/20 rounded-xl">
-                  <Tag className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="text-lg font-bold text-primary">
-                      {promoCode.discountPercentage}% {isTR ? "İNDİRİM" : "OFF"}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {discountText.returnTripDiscount}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col items-center md:items-end gap-1">
-                <div className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg">
-                  <span className="font-mono font-bold text-lg tracking-wider">{promoCode.code}</span>
-                </div>
-                {promoCode.validUntil && (
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5" />
-                    <span>{discountText.validUntilText}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
 
         {/* Description Section */}
         <motion.section

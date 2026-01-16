@@ -2140,31 +2140,6 @@ const CustomerHome = () => {
                 style={{ overflow: "hidden" }}
               >
           <CardContent>
-            {/* Promo Banner */}
-            {activePromo && activePromo.discountPercentage > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-5 p-3 rounded-lg bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-950/40 dark:to-emerald-950/40 border border-green-200 dark:border-green-800"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-8 h-8 bg-green-500/20 rounded-full">
-                    <Tag className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                      {getLocalizedDiscountText(activePromo.discountPercentage, activePromo.code, language.toLowerCase()).returnTripDiscount}
-                    </p>
-                    <p className="text-xs text-green-600 dark:text-green-400">
-                      {t('promoCodeLabel')}: <span className="font-semibold">{activePromo.code}</span>
-                    </p>
-                  </div>
-                  <Badge className="bg-green-500 text-white hover:bg-green-600">
-                    %{activePromo.discountPercentage}
-                  </Badge>
-                </div>
-              </motion.div>
-            )}
             <form onSubmit={handleSubmit} className="space-y-5 relative">
               {/* Loading Overlay */}
               <AnimatePresence>
