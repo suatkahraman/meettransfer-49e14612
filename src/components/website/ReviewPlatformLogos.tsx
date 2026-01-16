@@ -2,6 +2,7 @@ import { Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
+import { PLATFORM_RATINGS } from "@/constants/ratings";
 
 type Platform = {
   name: string;
@@ -113,12 +114,12 @@ const ReviewPlatformLogos = () => {
         color: "hover:bg-blue-50 dark:hover:bg-blue-950",
       },
       ...staticPlatforms.map((p) => {
-        // Keep existing static platform metrics as-is.
-        if (p.name === "Tripadvisor") return { ...p, rating: "4.7", reviews: "492+" };
-        if (p.name === "App Store") return { ...p, rating: "4.8", reviews: "1,200+" };
-        if (p.name === "Google Play") return { ...p, rating: "4.7", reviews: "3,400+" };
-        if (p.name === "Trustpilot") return { ...p, rating: "4.8", reviews: "980+" };
-        return { ...p, rating: "4.8", reviews: "" };
+        // Platform-specific ratings (these are verified independently per platform)
+        if (p.name === "Tripadvisor") return { ...p, rating: PLATFORM_RATINGS.tripadvisor.rating.toFixed(1), reviews: `${PLATFORM_RATINGS.tripadvisor.reviews}+` };
+        if (p.name === "App Store") return { ...p, rating: PLATFORM_RATINGS.appStore.rating.toFixed(1), reviews: `${PLATFORM_RATINGS.appStore.reviews.toLocaleString()}+` };
+        if (p.name === "Google Play") return { ...p, rating: PLATFORM_RATINGS.googlePlay.rating.toFixed(1), reviews: `${PLATFORM_RATINGS.googlePlay.reviews.toLocaleString()}+` };
+        if (p.name === "Trustpilot") return { ...p, rating: PLATFORM_RATINGS.trustpilot.rating.toFixed(1), reviews: `${PLATFORM_RATINGS.trustpilot.reviews}+` };
+        return { ...p, rating: rating.toFixed(1), reviews: "" };
       }),
     ],
     [rating, totalReviews]

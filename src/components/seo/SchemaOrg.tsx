@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { DEFAULT_RATING, DEFAULT_TOTAL_REVIEWS } from '@/constants/ratings';
 
 interface LocalBusinessSchema {
   type: 'LocalBusiness';
@@ -498,7 +499,7 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
         (s) => s.type === 'LocalBusiness' && (s as LocalBusinessSchema).includeRating
       );
 
-      const fallback: AggregateRatingData = { ratingValue: '4.8', reviewCount: '2847' };
+      const fallback: AggregateRatingData = { ratingValue: DEFAULT_RATING.toFixed(1), reviewCount: String(DEFAULT_TOTAL_REVIEWS) };
 
       if (needsRating) {
         try {

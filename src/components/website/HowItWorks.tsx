@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo } from "@/contexts/PromoContext";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 import { 
   MapPin, 
   Shield, 
@@ -369,6 +370,7 @@ const stepAccents = [
 const HowItWorks = () => {
   const { getLocalizedPath, language } = useLanguage();
   const { promoCode: activePromo } = usePromo();
+  const { rating } = useGoogleReviewStats();
   const lang = language.toLowerCase();
   
   // Get translations for current language, fallback to English
@@ -551,7 +553,7 @@ const HowItWorks = () => {
           <div className="flex flex-wrap justify-center gap-6 mt-10 text-muted-foreground text-sm">
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span>4.7/5 Rating</span>
+              <span>{rating.toFixed(1)}/5 Rating</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />

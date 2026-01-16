@@ -362,7 +362,7 @@ const AirportTransferIstanbul = () => {
         <section className="prose max-w-none">
           <h2 className="text-2xl font-bold mb-4 text-foreground">Neden Meet Transfer?</h2>
           <p className="text-muted-foreground leading-relaxed mb-4">
-            2018'den bu yana İstanbul'da binlerce misafire güvenli ve konforlu transfer hizmeti sunuyoruz. <strong>Google'da 4.8/5</strong> ortalama puanımız ve <strong>2,847+ olumlu değerlendirmemiz</strong> hizmet kalitemizin kanıtıdır.
+            2018'den bu yana İstanbul'da binlerce misafire güvenli ve konforlu transfer hizmeti sunuyoruz. <strong>Google'da {rating.toFixed(1)}/5</strong> ortalama puanımız ve <strong>{totalReviews.toLocaleString()}+ olumlu değerlendirmemiz</strong> hizmet kalitemizin kanıtıdır.
           </p>
           <div className="grid md:grid-cols-3 gap-6 my-8">
             <div className="text-center">

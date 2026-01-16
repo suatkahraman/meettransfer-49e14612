@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Shield, Zap, Star, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
 // Logo
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
@@ -11,6 +12,7 @@ interface HeroHeaderProps {
 
 export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   const { t } = useLanguage();
+  const { rating } = useGoogleReviewStats();
   
   return (
     <div className="mb-3 md:mb-5">
@@ -43,7 +45,7 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
               </span>
               <span className="inline-flex items-center gap-0.5 bg-yellow-500/10 text-yellow-600 rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
                 <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-current" />
-                4.7
+                {rating.toFixed(1)}
               </span>
             </div>
           </div>
