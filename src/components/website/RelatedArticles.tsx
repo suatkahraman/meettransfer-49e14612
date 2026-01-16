@@ -3,6 +3,7 @@ import { ArrowRight, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import OptimizedBlogImage from "./OptimizedBlogImage";
 
 // Blog posts data - centralized for reuse
 export const allBlogPosts = [
@@ -381,14 +382,12 @@ const RelatedArticles = ({
             className="group"
           >
             <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50">
-              <div className="aspect-video overflow-hidden">
-                <img 
-                  src={post.image} 
-                  alt={t(post.titleKey)}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
+              <OptimizedBlogImage
+                src={post.image}
+                alt={post.title || t(post.titleKey || '')}
+                className="aspect-video"
+                priority={false}
+              />
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="text-xs">
