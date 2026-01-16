@@ -100,6 +100,7 @@ const LuxuryMaybachTransferTurkey = () => {
           },
           {
             type: "FAQPage" as const,
+            questions: faqItems,
           },
         ]}
       />

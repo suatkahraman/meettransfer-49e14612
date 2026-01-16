@@ -165,6 +165,9 @@ const SafeNightTransferTurkey = lazy(() => import("./pages/website/blog/SafeNigh
 const FamilyAirportTransferTurkey = lazy(() => import("./pages/website/blog/FamilyAirportTransferTurkey"));
 const BusinessTravelTransferIstanbul = lazy(() => import("./pages/website/blog/BusinessTravelTransferIstanbul"));
 const AirportTransferBookingTips = lazy(() => import("./pages/website/blog/AirportTransferBookingTips"));
+const VIPAirportTransferTurkey = lazy(() => import("./pages/website/blog/VIPAirportTransferTurkey"));
+const IntercityTransferTurkey = lazy(() => import("./pages/website/blog/IntercityTransferTurkey"));
+const LuxuryMaybachTransferTurkey = lazy(() => import("./pages/website/blog/LuxuryMaybachTransferTurkey"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -292,6 +295,9 @@ const App = () => (
               {localizedRoutes("/blog/family-airport-transfer-turkey", <FamilyAirportTransferTurkey />)}
               {localizedRoutes("/blog/business-travel-transfer-istanbul", <BusinessTravelTransferIstanbul />)}
               {localizedRoutes("/blog/airport-transfer-booking-tips", <AirportTransferBookingTips />)}
+              {localizedRoutes("/blog/vip-airport-transfer-turkey", <VIPAirportTransferTurkey />)}
+              {localizedRoutes("/blog/intercity-transfer-turkey", <IntercityTransferTurkey />)}
+              {localizedRoutes("/blog/luxury-maybach-transfer-turkey", <LuxuryMaybachTransferTurkey />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}

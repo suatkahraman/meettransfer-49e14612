@@ -100,6 +100,7 @@ const VIPAirportTransferTurkey = () => {
           },
           {
             type: "FAQPage" as const,
+            questions: faqItems,
           },
         ]}
       />

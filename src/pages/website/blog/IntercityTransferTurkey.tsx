@@ -102,6 +102,7 @@ const IntercityTransferTurkey = () => {
           },
           {
             type: "FAQPage" as const,
+            questions: faqItems,
           },
         ]}
       />
