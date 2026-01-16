@@ -1810,25 +1810,57 @@ const BookingPage = () => {
                     </div>
 
                     <div className="p-6 pt-0">
-                      <Button
-                        onClick={handleSubmit}
-                        size="lg"
-                        variant="accent"
-                        className="w-full h-14 text-lg font-semibold group"
-                        disabled={submitting}
-                      >
-                        {submitting ? (
-                          <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            {t("sending") || "Processing..."}
-                          </>
-                        ) : (
-                          <>
-                            {t("confirmBooking") || "Confirm Booking"}
-                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                          </>
-                        )}
-                      </Button>
+                      {!selectedPrice && !isPricesLoading && !isHourlyBooking ? (
+                        <div className="space-y-3">
+                          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-center">
+                            <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                              {t("priceNotAvailable") || "Bu güzergah için otomatik fiyat bulunamadı"}
+                            </p>
+                            <p className="text-amber-600 dark:text-amber-400 text-xs mt-1">
+                              {t("adminWillContact") || "Admin sizinle en kısa sürede iletişime geçecek"}
+                            </p>
+                          </div>
+                          <Button
+                            onClick={handleSubmit}
+                            size="lg"
+                            variant="outline"
+                            className="w-full h-14 text-lg font-semibold group border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                            disabled={submitting}
+                          >
+                            {submitting ? (
+                              <>
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                {t("sending") || "Processing..."}
+                              </>
+                            ) : (
+                              <>
+                                {t("requestPrice") || "Fiyat Talebi Gönder"}
+                                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          onClick={handleSubmit}
+                          size="lg"
+                          variant="accent"
+                          className="w-full h-14 text-lg font-semibold group"
+                          disabled={submitting}
+                        >
+                          {submitting ? (
+                            <>
+                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                              {t("sending") || "Processing..."}
+                            </>
+                          ) : (
+                            <>
+                              {t("confirmBooking") || "Confirm Booking"}
+                              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                            </>
+                          )}
+                        </Button>
+                      )}
 
                       <p className="text-xs text-center text-muted-foreground mt-3">
                         {t("freeCancel") || "Free cancellation up to 24h before"}
@@ -1875,23 +1907,28 @@ const BookingPage = () => {
               </>
             ) : (
               <div>
-                <p className="text-sm font-medium text-foreground">{t("priceOnRequest") || "Price on request"}</p>
-                <p className="text-xs text-muted-foreground">{t("weWillContactYou") || "We'll send you the price"}</p>
+                <p className="text-sm font-medium text-amber-600 dark:text-amber-400">{t("priceNotAvailableShort") || "Fiyat Bulunamadı"}</p>
+                <p className="text-xs text-muted-foreground">{t("requestFromAdmin") || "Admin'den talep edin"}</p>
               </div>
             )}
           </div>
           <Button
             onClick={handleSubmit}
             size="lg"
-            variant="accent"
-            className="h-14 px-6 sm:px-8 text-base sm:text-lg font-bold shrink-0 shadow-xl animate-pulse hover:animate-none min-w-[140px]"
+            variant={selectedPrice ? "accent" : "outline"}
+            className={`h-14 px-6 sm:px-8 text-base sm:text-lg font-bold shrink-0 shadow-xl min-w-[140px] ${selectedPrice ? 'animate-pulse hover:animate-none' : 'border-primary text-primary hover:bg-primary hover:text-primary-foreground'}`}
             disabled={submitting}
           >
             {submitting ? (
               <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
+            ) : selectedPrice ? (
               <>
                 {t("confirmNow") || "Confirm"}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </>
+            ) : (
+              <>
+                {t("requestPriceShort") || "Fiyat İste"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </>
             )}
