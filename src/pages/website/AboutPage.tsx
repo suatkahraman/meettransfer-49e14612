@@ -9,8 +9,17 @@ import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 import { COMPANY_NAME, GLOBAL_OFFICES } from "@/lib/contact";
 
 const cities = [
+  // Turkey
   "Istanbul", "Antalya", "Bodrum", "Dalaman", "Izmir",
-  "Cappadocia", "Fethiye", "Marmaris"
+  "Cappadocia", "Fethiye", "Marmaris", "Alanya", "Side",
+  // Germany
+  "Frankfurt", "Berlin", "Munich",
+  // UAE
+  "Dubai", "Abu Dhabi",
+  // Cyprus
+  "Larnaca", "Paphos", "Nicosia",
+  // Greece
+  "Athens", "Thessaloniki", "Rhodes", "Mykonos", "Santorini"
 ];
 
 const AboutPage = () => {
@@ -19,7 +28,7 @@ const AboutPage = () => {
   const stats = [
     { value: "10+", label: t("yearsExperience") },
     { value: "50,000+", label: t("transfersCompleted") },
-    { value: "8", label: t("citiesCovered") },
+    { value: "25+", label: t("citiesCovered") },
     { value: "24/7", label: t("availability") },
   ];
 
@@ -82,11 +91,6 @@ const AboutPage = () => {
           <div className="mb-4 inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-lg font-semibold">
             {COMPANY_NAME}
           </div>
-          {GLOBAL_OFFICES[0] && (
-            <p className="text-sm text-muted-foreground mb-4">
-              {GLOBAL_OFFICES[0].address}, {GLOBAL_OFFICES[0].country}
-            </p>
-          )}
           <p className="text-muted-foreground leading-relaxed text-lg">
             {t("aboutIntro1")}
           </p>
