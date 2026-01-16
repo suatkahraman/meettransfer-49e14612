@@ -19,8 +19,16 @@ import {
   FileText,
   Ban,
   ShieldX,
-  CheckCircle
+  CheckCircle,
+  X
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { tr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -76,6 +84,17 @@ interface PresenceState {
   last_activity: string;
 }
 
+interface BlockedVisitorDetails {
+  id: string;
+  visitor_id: string;
+  reason: string | null;
+  blocked_at: string;
+  country_name: string | null;
+  country_code: string | null;
+  city: string | null;
+  is_active: boolean;
+}
+
 const AdminAnalytics = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -87,23 +106,29 @@ const AdminAnalytics = () => {
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
   const [pageStats, setPageStats] = useState<PageStats[]>([]);
   const [blockedVisitors, setBlockedVisitors] = useState<Set<string>>(new Set());
+  const [blockedVisitorsList, setBlockedVisitorsList] = useState<BlockedVisitorDetails[]>([]);
   
   // Block dialog state
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [visitorToBlock, setVisitorToBlock] = useState<ActiveVisitor | null>(null);
   const [blockReason, setBlockReason] = useState("");
   const [isBlocking, setIsBlocking] = useState(false);
+  
+  // Blocked visitors sheet state
+  const [blockedSheetOpen, setBlockedSheetOpen] = useState(false);
 
   // Fetch blocked visitors
   const fetchBlockedVisitors = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('blocked_visitors')
-        .select('visitor_id')
-        .eq('is_active', true);
+        .select('id, visitor_id, reason, blocked_at, country_name, country_code, city, is_active')
+        .eq('is_active', true)
+        .order('blocked_at', { ascending: false });
       
       if (!error && data) {
         setBlockedVisitors(new Set(data.map(b => b.visitor_id)));
+        setBlockedVisitorsList(data);
       }
     } catch (err) {
       console.error('Error fetching blocked visitors:', err);
@@ -355,6 +380,7 @@ const AdminAnalytics = () => {
         newSet.delete(visitorId);
         return newSet;
       });
+      setBlockedVisitorsList(prev => prev.filter(b => b.visitor_id !== visitorId));
     } catch (err) {
       console.error('Error unblocking visitor:', err);
       toast.error('Engel kaldırılırken hata oluştu');
@@ -486,6 +512,24 @@ const AdminAnalytics = () => {
               <div className="text-3xl font-bold">{countryStats.length}</div>
               <p className="text-xs text-muted-foreground mt-1">
                 Farklı ülke
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:border-red-500/50 transition-colors col-span-2 md:col-span-1"
+            onClick={() => setBlockedSheetOpen(true)}
+          >
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Engelli Ziyaretçiler
+              </CardTitle>
+              <ShieldX className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-red-600">{blockedVisitorsList.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tıkla ve listele →
               </p>
             </CardContent>
           </Card>
@@ -763,6 +807,69 @@ const AdminAnalytics = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Blocked Visitors Sheet */}
+      <Sheet open={blockedSheetOpen} onOpenChange={setBlockedSheetOpen}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <ShieldX className="h-5 w-5 text-red-500" />
+              Engellenmiş Ziyaretçiler
+            </SheetTitle>
+            <SheetDescription>
+              Toplam {blockedVisitorsList.length} ziyaretçi engelli
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="mt-6 space-y-3">
+            {blockedVisitorsList.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <ShieldX className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>Henüz engellenmiş ziyaretçi yok</p>
+              </div>
+            ) : (
+              blockedVisitorsList.map((blocked) => (
+                <div 
+                  key={blocked.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-red-500/10 border border-red-500/30"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">
+                      {getFlagEmoji(blocked.country_code || '')}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm">
+                        {blocked.country_name || 'Bilinmeyen Konum'}
+                        {blocked.city && <span className="text-muted-foreground"> • {blocked.city}</span>}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        ID: {blocked.visitor_id.substring(0, 12)}...
+                      </p>
+                      {blocked.reason && (
+                        <p className="text-xs text-red-500 mt-0.5">
+                          Neden: {blocked.reason}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {format(new Date(blocked.blocked_at), 'dd MMM yyyy HH:mm', { locale: tr })}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 h-8 px-3 border-green-500/50 text-green-600 hover:bg-green-500/10"
+                    onClick={() => handleUnblockVisitor(blocked.visitor_id)}
+                  >
+                    <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                    Kaldır
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
