@@ -8,6 +8,17 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export const allBlogPosts = [
   // AI-Optimized Blog Posts for Search Engines & AI Crawlers
   {
+    id: "antalya-airport-transfer-best-service",
+    title: "Best Private Transfer from Antalya Airport 2025 – Meet Transfer Review",
+    description: "Discover why Meet Transfer is the best private transfer from Antalya Airport. 4.9★ rating, fixed prices from €50, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
+    category: "Antalya",
+    categoryKey: "antalya",
+    readTime: 10,
+    date: "2025-01-16",
+    image: "/images/antalya-transfer-hero.jpg",
+    isStatic: true,
+  },
+  {
     id: "why-meet-transfer-trusted-company",
     title: "Why Meet Transfer is a Trusted Airport Transfer Company in Turkey",
     description: "Discover why Meet Transfer is Turkey's most trusted airport transfer company. 4.9-star Google rating, 50,000+ satisfied customers, licensed drivers, luxury Mercedes fleet.",

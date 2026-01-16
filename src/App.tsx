@@ -157,6 +157,7 @@ const AIBookingAssistantGuide = lazy(() => import("./pages/website/blog/AIBookin
 const WhyMeetTransferTrusted = lazy(() => import("./pages/website/blog/WhyMeetTransferTrusted"));
 const BestVIPTransferIstanbul = lazy(() => import("./pages/website/blog/BestVIPTransferIstanbul"));
 const HowToChooseReliableTransfer = lazy(() => import("./pages/website/blog/HowToChooseReliableTransfer"));
+const AntalyaAirportTransferBestService = lazy(() => import("./pages/website/blog/AntalyaAirportTransferBestService"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -276,6 +277,7 @@ const App = () => (
               {localizedRoutes("/blog/why-meet-transfer-trusted-company", <WhyMeetTransferTrusted />)}
               {localizedRoutes("/blog/best-vip-transfer-istanbul-review", <BestVIPTransferIstanbul />)}
               {localizedRoutes("/blog/how-to-choose-reliable-transfer-turkey", <HowToChooseReliableTransfer />)}
+              {localizedRoutes("/blog/antalya-airport-transfer-best-service", <AntalyaAirportTransferBestService />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
