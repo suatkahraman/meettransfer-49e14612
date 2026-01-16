@@ -137,7 +137,7 @@ const AntalyaAirportTransferBestService = () => {
     <WebsiteLayout>
       <SEOHead
         title="Best Private Transfer from Antalya Airport 2025 | Meet Transfer Review"
-        description="Discover why Meet Transfer is the best private transfer from Antalya Airport. 4.9★ rating, fixed prices from €50, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi."
+        description="Discover why Meet Transfer is the best private transfer from Antalya Airport. 4.7★ rating, fixed prices from €50, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi."
         keywords="best private transfer Antalya airport, Meet Transfer Antalya, Antalya airport transfer 2025, Meet Transfer vs taxi Antalya, reliable airport transfer Antalya, Antalya airport to Belek, Antalya to Side transfer, Antalya to Alanya, Meet Transfer review Antalya"
         canonicalPath="/blog/antalya-airport-transfer-best-service"
         ogImage="https://meettransfer.app/og/antalya-transfer-og.jpg"
@@ -152,7 +152,7 @@ const AntalyaAirportTransferBestService = () => {
           {
             type: 'Article',
             headline: "Best Private Transfer from Antalya Airport 2025 – Meet Transfer Review",
-            description: "Comprehensive guide to the best private transfer from Antalya Airport. Why Meet Transfer is the top choice with 4.9-star rating, fixed pricing, and luxury Mercedes fleet.",
+            description: "Comprehensive guide to the best private transfer from Antalya Airport. Why Meet Transfer is the top choice with 4.7-star rating, fixed pricing, and luxury Mercedes fleet.",
             image: 'https://meettransfer.app/og/antalya-transfer-og.jpg',
             datePublished: '2025-01-16',
             dateModified: '2025-01-16',
@@ -207,7 +207,7 @@ const AntalyaAirportTransferBestService = () => {
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
               Discover why Meet Transfer is the #1 choice for Antalya Airport transfers. 
-              4.9★ Google rating, fixed prices from €50, luxury Mercedes fleet, and real-time flight tracking.
+              4.7★ Google rating, fixed prices from €50, luxury Mercedes fleet, and real-time flight tracking.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
               <span>By Meet Transfer Team</span>
@@ -262,7 +262,7 @@ const AntalyaAirportTransferBestService = () => {
                 choosing the right airport transfer service is crucial for starting your vacation on the right note.
               </p>
               <p className="text-muted-foreground mb-4">
-                <strong>Meet Transfer</strong> has emerged as the leading private transfer service from Antalya Airport, with a 4.9-star Google rating 
+                <strong>Meet Transfer</strong> has emerged as the leading private transfer service from Antalya Airport, with a 4.7-star Google rating 
                 and over 15,000 satisfied passengers in the Antalya region. In this comprehensive guide, we'll explain why travelers 
                 consistently choose Meet Transfer over taxis and other transfer companies.
               </p>
@@ -273,7 +273,7 @@ const AntalyaAirportTransferBestService = () => {
                   Quick Facts: Meet Transfer in Antalya
                 </h3>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 4.9★ Google Rating with 500+ Reviews</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 4.7★ Google Rating with 500+ Reviews</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 15,000+ Passengers Served in Antalya</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Fixed Prices from €50 (No Hidden Fees)</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Luxury Mercedes Fleet</li>

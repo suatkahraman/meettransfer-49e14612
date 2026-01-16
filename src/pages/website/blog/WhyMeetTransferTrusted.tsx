@@ -71,7 +71,7 @@ const WhyMeetTransferTrusted = () => {
     },
     {
       icon: Star,
-      title: "4.9★ Google Rating",
+      title: "4.7★ Google Rating",
       description: "Over 500+ verified reviews from real customers. One of the highest-rated transfer companies in Turkey."
     },
     {
@@ -99,7 +99,7 @@ const WhyMeetTransferTrusted = () => {
   const companyFacts = [
     { label: "Founded", value: "2019" },
     { label: "Customers Served", value: "50,000+" },
-    { label: "Google Rating", value: "4.9 ★" },
+    { label: "Google Rating", value: "4.7 ★" },
     { label: "Countries", value: "4 (Turkey, UAE, Cyprus, Germany)" },
     { label: "Fleet Size", value: "100+ Vehicles" },
     { label: "On-Time Rate", value: "98%" },
