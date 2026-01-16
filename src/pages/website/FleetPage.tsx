@@ -95,8 +95,8 @@ const FleetPage = () => {
       startingPrice: "$80",
       features: ["Climate Control", "Premium Leather", "Free WiFi", "USB Charging", "Bottled Water"],
       images: [
-        { src: dubaiStandardSedan, alt: "Standard sedan Toyota Camry Dubai airport transfer" },
-        { src: dubaiStandardSedanInterior, alt: "Standard sedan clean interior Dubai transfer service" },
+        { src: dubaiStandardSedan, alt: "Private Standard Sedan Dubai Airport Transfer - DXB to Downtown Dubai luxury chauffeur service with professional driver" },
+        { src: dubaiStandardSedanInterior, alt: "Private Sedan interior - premium leather seats Dubai airport pickup and drop-off service" },
       ],
     },
     {
@@ -107,8 +107,8 @@ const FleetPage = () => {
       startingPrice: "$150",
       features: ["Dual-Zone Climate", "Leather Captain Seats", "High-Speed WiFi", "USB Charging", "Extra Luggage Space", "Refreshments"],
       images: [
-        { src: dubaiPremiumVan, alt: "Mercedes Premium Van luxury Dubai airport transfer with Burj Al Arab" },
-        { src: dubaiPremiumVanInterior, alt: "Mercedes Premium Van leather interior with ambient lighting" },
+        { src: dubaiPremiumVan, alt: "Mercedes V-Class Premium Van Dubai Airport Transfer - luxury group transportation to Burj Khalifa Palm Jumeirah" },
+        { src: dubaiPremiumVanInterior, alt: "Mercedes V-Class interior - captain leather seats ambient lighting Dubai VIP airport shuttle" },
       ],
     },
     {
@@ -119,8 +119,8 @@ const FleetPage = () => {
       startingPrice: "$180",
       features: ["Dual-Zone Climate", "Leather Captain Seats", "High-Speed WiFi", "USB Charging", "Extra Luggage Space", "Refreshments"],
       images: [
-        { src: dubaiSuburban, alt: "Mercedes Suburban SUV luxury Dubai airport transfer with Burj Al Arab" },
-        { src: dubaiSuburbanInterior, alt: "Mercedes Suburban premium black leather interior with ambient lighting" },
+        { src: dubaiSuburban, alt: "Mercedes Suburban SUV Dubai Airport Transfer - premium black SUV chauffeur service to Dubai Marina JBR" },
+        { src: dubaiSuburbanInterior, alt: "Mercedes Suburban SUV interior - spacious black leather executive seating Dubai luxury airport transfer" },
       ],
     },
     {
@@ -131,8 +131,8 @@ const FleetPage = () => {
       startingPrice: "$350",
       features: ["Climate Control", "VIP Leather Seats", "Starlight Ceiling", "Premium WiFi", "Wireless Charging", "Ambient Lighting", "VIP Refreshments"],
       images: [
-        { src: dubaiVipSprinter, alt: "VIP Mercedes Sprinter starlight ceiling Dubai Marina skyline" },
-        { src: dubaiVipSprinterExterior, alt: "Mercedes VIP Sprinter exterior Dubai airport professional chauffeur" },
+        { src: dubaiVipSprinter, alt: "VIP Mercedes Sprinter Dubai Airport Transfer - starlight ceiling luxury minibus group transportation Palm Jumeirah" },
+        { src: dubaiVipSprinterExterior, alt: "Mercedes VIP Sprinter exterior - professional chauffeur driven airport transfer Dubai International DXB" },
       ],
     },
   ];
