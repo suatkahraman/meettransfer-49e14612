@@ -325,6 +325,21 @@ const BookingPage = () => {
     }
   }, [user]);
 
+  // Auto-validate promo code from URL when page loads with return trip
+  useEffect(() => {
+    // Skip if token loading (will be handled by token flow)
+    if (tokenLoading || urlToken) return;
+    
+    // Auto-validate promo code if coming from hero with return trip selected
+    if (urlHasReturnTrip && urlPromoCode && isTurkey) {
+      handlePromoCodeChange(urlPromoCode);
+    }
+    // If return trip is selected but no promo code, auto-apply active promo
+    else if (urlHasReturnTrip && !urlPromoCode && isTurkey && activePromo.code) {
+      handlePromoCodeChange(activePromo.code);
+    }
+  }, [urlHasReturnTrip, urlPromoCode, isTurkey, activePromo.code, tokenLoading, urlToken]);
+
   // Check for Google OAuth return
   useEffect(() => {
     const checkGoogleAuth = async () => {
