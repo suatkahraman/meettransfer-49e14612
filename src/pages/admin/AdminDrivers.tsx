@@ -17,8 +17,8 @@ import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye,
 // Shared constants - synchronized with DriverInfoEditor
 const vehicleTypes = [
   { value: 'Sedan', label: 'Sedan' },
-  { value: 'Mercedes Vito', label: 'Mercedes-vito' },
-  { value: 'Mercedes VIP Vito', label: 'Vip Mercedes' },
+  { value: 'Mercedes Vito', label: 'Mercedes Vito' },
+  { value: 'Mercedes VIP Vito', label: 'VIP Mercedes Vito' },
   { value: 'Mercedes Maybach Minivan', label: 'Mercedes Maybach Minivan' },
   { value: 'Minibus', label: 'Minibus' },
 ];

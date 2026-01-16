@@ -282,7 +282,7 @@ const generateMerchantProductSchema = () => ({
   '@context': 'https://schema.org',
   '@type': 'Service',
   name: 'Meet Transfer – VIP Airport Transfer Service',
-  description: 'Luxury private airport transfer service worldwide with fixed prices, professional chauffeurs and VIP Mercedes vehicles.',
+  description: 'Luxury private airport transfer service worldwide with fixed prices, professional chauffeurs and VIP Mercedes Vito vehicles.',
   provider: {
     '@type': 'Organization',
     name: 'Meet Transfer',

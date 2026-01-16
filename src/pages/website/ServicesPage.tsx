@@ -120,7 +120,7 @@ const ServicesPage = () => {
       features: [
         "Athens, Piraeus Port, Thessaloniki",
         "Greek Islands & Cruise Port Transfers",
-        "VIP Mercedes Fleet",
+        "VIP Mercedes Vito Fleet",
       ],
     },
   ];

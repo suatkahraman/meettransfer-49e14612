@@ -406,8 +406,8 @@ const translations: Record<Language, Record<string, string>> = {
     contactForHelp: "Contact us and we will help you choose the perfect vehicle for your transfer",
     
     // Vehicles
-    vitoVipName: "Mercedes Vito VIP",
-    vitoVipDesc: "Our most popular choice for airport transfers. The Mercedes Vito VIP offers spacious seating, ample luggage space, and premium comfort features perfect for families and small groups.",
+    vitoVipName: "VIP Mercedes Vito",
+    vitoVipDesc: "Our most popular choice for airport transfers. The VIP Mercedes Vito offers spacious seating, ample luggage space, and premium comfort features perfect for families and small groups.",
     vitoName: "Mercedes Vito",
     vitoDesc: "The Mercedes Vito Comfortable family holiday transfer vehicles with best budget.",
     maybachName: "Mercedes Maybach Minivan",
@@ -2190,8 +2190,8 @@ const translations: Record<Language, Record<string, string>> = {
     contactForHelp: "Kontaktieren Sie uns und wir helfen Ihnen, das perfekte Fahrzeug für Ihren Transfer zu wählen",
     
     // Vehicles
-    vitoVipName: "Mercedes Vito VIP",
-    vitoVipDesc: "Unsere beliebteste Wahl für Flughafentransfers. Der Mercedes Vito VIP bietet geräumige Sitze, viel Gepäckraum und Premium-Komfortfunktionen, perfekt für Familien und kleine Gruppen.",
+    vitoVipName: "VIP Mercedes Vito",
+    vitoVipDesc: "Unsere beliebteste Wahl für Flughafentransfers. Der VIP Mercedes Vito bietet geräumige Sitze, viel Gepäckraum und Premium-Komfortfunktionen, perfekt für Familien und kleine Gruppen.",
     vitoName: "Mercedes Vito",
     vitoDesc: "Der Mercedes Vito - komfortable Familienurlaubs-Transferfahrzeuge mit bestem Budget.",
     maybachName: "Mercedes Maybach Minivan",
@@ -4013,8 +4013,8 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaFeature3: "Chauffeur privé VIP pour tours",
     
     // Vehicles
-    vitoVipName: "Mercedes Vito VIP",
-    vitoVipDesc: "Notre choix le plus populaire pour les transferts aéroport. Le Mercedes Vito VIP offre des sièges spacieux, un espace bagages généreux et des caractéristiques de confort premium.",
+    vitoVipName: "VIP Mercedes Vito",
+    vitoVipDesc: "Notre choix le plus populaire pour les transferts aéroport. Le VIP Mercedes Vito offre des sièges spacieux, un espace bagages généreux et des caractéristiques de confort premium.",
     vitoName: "Mercedes Vito",
     vitoDesc: "Le Mercedes Vito - véhicules de transfert familiaux confortables avec le meilleur budget.",
     maybachName: "Mercedes Maybach Minivan",
@@ -5547,8 +5547,8 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaFeature3: "VIP частный водитель для туров",
     
     // Vehicles
-    vitoVipName: "Mercedes Vito VIP",
-    vitoVipDesc: "Наш самый популярный выбор для трансферов из аэропорта. Mercedes Vito VIP предлагает просторные сиденья, много места для багажа и премиальные функции комфорта, идеально подходит для семей и небольших групп.",
+    vitoVipName: "VIP Mercedes Vito",
+    vitoVipDesc: "Наш самый популярный выбор для трансферов из аэропорта. VIP Mercedes Vito предлагает просторные сиденья, много места для багажа и премиальные функции комфорта, идеально подходит для семей и небольших групп.",
     vitoName: "Mercedes Vito",
     vitoDesc: "Mercedes Vito — комфортные семейные автомобили для трансфера с лучшим бюджетом.",
     maybachName: "Mercedes Maybach Minivan",
@@ -6945,8 +6945,8 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaFeature3: "Autista privato VIP per tour",
     
     // Vehicles
-    vitoVipName: "Mercedes Vito VIP",
-    vitoVipDesc: "La nostra scelta più popolare per i trasferimenti aeroportuali. Il Mercedes Vito VIP offre sedili spaziosi, ampio spazio bagagli e caratteristiche di comfort premium, perfetto per famiglie e piccoli gruppi.",
+    vitoVipName: "VIP Mercedes Vito",
+    vitoVipDesc: "La nostra scelta più popolare per i trasferimenti aeroportuali. Il VIP Mercedes Vito offre sedili spaziosi, ampio spazio bagagli e caratteristiche di comfort premium, perfetto per famiglie e piccoli gruppi.",
     vitoName: "Mercedes Vito",
     vitoDesc: "Il Mercedes Vito - veicoli di trasferimento familiari confortevoli con il miglior budget.",
     maybachName: "Mercedes Maybach Minivan",
@@ -8390,8 +8390,8 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaFeature3: "Chófer privado VIP para tours",
     
     // Vehicles
-    vitoVipName: "Mercedes Vito VIP",
-    vitoVipDesc: "Nuestra opción más popular para traslados desde el aeropuerto. El Mercedes Vito VIP ofrece asientos espaciosos, amplio espacio para equipaje y características de confort premium, perfecto para familias y grupos pequeños.",
+    vitoVipName: "VIP Mercedes Vito",
+    vitoVipDesc: "Nuestra opción más popular para traslados desde el aeropuerto. El VIP Mercedes Vito ofrece asientos espaciosos, amplio espacio para equipaje y características de confort premium, perfecto para familias y grupos pequeños.",
     vitoName: "Mercedes Vito",
     vitoDesc: "El Mercedes Vito - vehículos de traslado familiar cómodos con el mejor presupuesto.",
     maybachName: "Mercedes Maybach Minivan",
@@ -9835,8 +9835,8 @@ const translations: Record<Language, Record<string, string>> = {
     contactForHelp: "تواصل معنا وسنساعدك في اختيار المركبة المثالية لنقلك",
     
     // Vehicles
-    vitoVipName: "مرسيدس فيتو VIP",
-    vitoVipDesc: "خيارنا الأكثر شعبية لنقل المطار. يقدم مرسيدس فيتو VIP مقاعد واسعة، مساحة أمتعة كافية، وميزات راحة فاخرة مثالية للعائلات والمجموعات الصغيرة.",
+    vitoVipName: "VIP مرسيدس فيتو",
+    vitoVipDesc: "خيارنا الأكثر شعبية لنقل المطار. يقدم VIP مرسيدس فيتو مقاعد واسعة، مساحة أمتعة كافية، وميزات راحة فاخرة مثالية للعائلات والمجموعات الصغيرة.",
     vitoName: "مرسيدس فيتو",
     vitoDesc: "مرسيدس فيتو - مركبات نقل عائلية مريحة بأفضل ميزانية.",
     maybachName: "مرسيدس مايباخ ميني فان",
@@ -11253,8 +11253,8 @@ const translations: Record<Language, Record<string, string>> = {
     contactForHelp: "Bizimle iletişime geçin, transferiniz için mükemmel aracı seçmenize yardımcı olalım",
     
     // Vehicles
-    vitoVipName: "Mercedes Vito VIP",
-    vitoVipDesc: "Havalimanı transferleri için en popüler tercihimiz. Mercedes Vito VIP, aileler ve küçük gruplar için mükemmel, geniş oturma alanı, bol bagaj hacmi ve premium konfor özellikleri sunar.",
+    vitoVipName: "VIP Mercedes Vito",
+    vitoVipDesc: "Havalimanı transferleri için en popüler tercihimiz. VIP Mercedes Vito, aileler ve küçük gruplar için mükemmel, geniş oturma alanı, bol bagaj hacmi ve premium konfor özellikleri sunar.",
     vitoName: "Mercedes Vito",
     vitoDesc: "Mercedes Vito - En uygun bütçeyle konforlu aile tatil transfer aracı.",
     maybachName: "Mercedes Maybach Minivan",
@@ -12762,8 +12762,8 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaFeature3: "VIP приватний водій для турів",
     
     // Vehicles
-    vitoVipName: "Mercedes Vito VIP",
-    vitoVipDesc: "Наш найпопулярніший вибір для трансферів з аеропорту. Mercedes Vito VIP пропонує просторі сидіння, багато місця для багажу та преміальні функції комфорту.",
+    vitoVipName: "VIP Mercedes Vito",
+    vitoVipDesc: "Наш найпопулярніший вибір для трансферів з аеропорту. VIP Mercedes Vito пропонує просторі сидіння, багато місця для багажу та преміальні функції комфорту.",
     vitoName: "Mercedes Vito",
     vitoDesc: "Mercedes Vito — комфортні сімейні автомобілі для трансферу з найкращим бюджетом.",
     maybachName: "Mercedes Maybach Minivan",
@@ -14183,8 +14183,8 @@ const translations: Record<Language, Record<string, string>> = {
     contactForHelp: "お問い合わせいただければ、送迎に最適な車両をお選びいたします",
     
     // Vehicles
-    vitoVipName: "メルセデス・ヴィト VIP",
-    vitoVipDesc: "空港送迎で最も人気のある選択肢。広々とした座席、十分な荷物スペース、家族や小グループに最適なプレミアム快適機能を備えています。",
+    vitoVipName: "VIP メルセデス・ヴィト",
+    vitoVipDesc: "空港送迎で最も人気のある選択肢。VIP メルセデス・ヴィトは広々とした座席、十分な荷物スペース、家族や小グループに最適なプレミアム快適機能を備えています。",
     vitoName: "メルセデス・ヴィト",
     vitoDesc: "お手頃な価格で快適なファミリー向け送迎車両。",
     maybachName: "メルセデス・マイバッハ ミニバン",

@@ -235,8 +235,8 @@ const CappadociaAirportTransferGuide = () => {
                   <TableHead>{t("blogCappadociaDistance")}</TableHead>
                   <TableHead>{t("blogCappadociaDuration")}</TableHead>
                   <TableHead>Mercedes Vito</TableHead>
-                  <TableHead>VIP Mercedes</TableHead>
-                  <TableHead>Maybach</TableHead>
+                  <TableHead>VIP Mercedes Vito</TableHead>
+                  <TableHead>Mercedes Maybach Minivan</TableHead>
                   <TableHead>Minibüs</TableHead>
                 </TableRow>
               </TableHeader>

@@ -978,8 +978,8 @@ export default function AdminWhatsAppChat() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="mercedes-vito">Vito</SelectItem>
-                                  <SelectItem value="mercedes-vclass">VIP Vito</SelectItem>
+                                  <SelectItem value="mercedes-vito">Mercedes Vito</SelectItem>
+                                  <SelectItem value="mercedes-vclass">VIP Mercedes Vito</SelectItem>
                                   <SelectItem value="maybach">Mercedes Maybach Minivan</SelectItem>
                                   <SelectItem value="minibus">Minibus</SelectItem>
                                 </SelectContent>
