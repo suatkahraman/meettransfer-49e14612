@@ -105,7 +105,7 @@ const vehicleData = {
     passengers: 5,
     luggage: 5,
   },
-  "Maybach": {
+  "Mercedes Maybach Minivan": {
     images: [
       { src: maybachUltraLuxury, alt: "Mercedes Maybach ultra luxury interior with starlight galaxy ceiling" },
       { src: meetTransferCyprus, alt: "Meet Transfer Maybach service in Cyprus" },

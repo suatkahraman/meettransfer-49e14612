@@ -19,11 +19,11 @@ import { getCurrencySymbol } from '@/lib/currency';
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes-vito',
   'vip-mercedes': 'Vip Mercedes',
-  'maybach-minibus': 'Maybach Minibus',
+  'maybach-minibus': 'Mercedes Maybach Minivan',
   'minibus': 'Minibus',
   // Legacy support
   'mercedes-vclass': 'Vip Mercedes',
-  'maybach': 'Maybach Minibus',
+  'maybach': 'Mercedes Maybach Minivan',
 };
 
 interface Reservation {

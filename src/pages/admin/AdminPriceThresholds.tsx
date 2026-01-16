@@ -10,7 +10,7 @@ import { usePriceThresholds } from '@/hooks/usePriceThresholds';
 const VEHICLE_LABELS: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
   'vip-mercedes': 'VIP Mercedes',
-  'maybach-minibus': 'Maybach Minibus',
+  'maybach-minibus': 'Mercedes Maybach Minivan',
   'minibus': 'Mercedes Sprinter',
 };
 

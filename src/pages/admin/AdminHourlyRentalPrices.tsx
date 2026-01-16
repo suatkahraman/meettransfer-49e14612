@@ -51,7 +51,7 @@ interface HourlyRentalPrice {
 const vehicleTypes = [
   { value: "vito", label: "Mercedes Vito" },
   { value: "vito_vip", label: "Mercedes Vito VIP" },
-  { value: "maybach", label: "Mercedes Maybach" },
+  { value: "maybach", label: "Mercedes Maybach Minivan" },
   { value: "sprinter", label: "Mercedes Sprinter" },
 ];
 

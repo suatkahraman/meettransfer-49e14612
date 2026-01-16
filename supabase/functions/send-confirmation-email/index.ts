@@ -28,7 +28,7 @@ const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito VIP',
   'mercedes-vclass': 'Mercedes V-Class VIP',
   'mercedes-sprinter': 'Mercedes Sprinter VIP',
-  'maybach': 'Mercedes Maybach',
+  'maybach': 'Mercedes Maybach Minivan',
   'minibus': 'Mercedes Sprinter Minibus',
 };
 

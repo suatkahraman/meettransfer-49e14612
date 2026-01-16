@@ -34,7 +34,7 @@ export const ChatVehicleFeaturesCard = memo(function ChatVehicleFeaturesCard({
   const vehicleNames: Record<string, string> = {
     'mercedes-vito': 'Mercedes Vito',
     'vip-mercedes': 'Mercedes Vito VIP',
-    'maybach-minibus': 'Maybach',
+    'maybach-minibus': 'Mercedes Maybach Minivan',
     'minibus': 'Mercedes Sprinter'
   };
 

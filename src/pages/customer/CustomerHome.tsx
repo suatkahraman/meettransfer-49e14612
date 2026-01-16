@@ -1629,7 +1629,7 @@ const CustomerHome = () => {
                   'mercedes-vito-vip': 'Mercedes Vito VIP',
                   'mercedes-sprinter': 'Sprinter',
                   'minibus': 'Minibüs',
-                  'maybach': 'Maybach',
+                  'maybach': 'Mercedes Maybach Minivan',
                 };
                 
                 return (
@@ -1779,7 +1779,7 @@ const CustomerHome = () => {
                   'mercedes-vito-vip': 'Mercedes Vito VIP',
                   'mercedes-sprinter': 'Sprinter',
                   'minibus': 'Minibüs',
-                  'maybach': 'Maybach',
+                  'maybach': 'Mercedes Maybach Minivan',
                 };
                 
                 return (
