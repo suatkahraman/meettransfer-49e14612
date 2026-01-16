@@ -330,6 +330,54 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_visitors: {
+        Row: {
+          blocked_at: string
+          blocked_by: string | null
+          city: string | null
+          country_code: string | null
+          country_name: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          ip_address: string | null
+          is_active: boolean
+          reason: string | null
+          updated_at: string
+          visitor_id: string
+        }
+        Insert: {
+          blocked_at?: string
+          blocked_by?: string | null
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          reason?: string | null
+          updated_at?: string
+          visitor_id: string
+        }
+        Update: {
+          blocked_at?: string
+          blocked_by?: string | null
+          city?: string | null
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean
+          reason?: string | null
+          updated_at?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           booking_type: string

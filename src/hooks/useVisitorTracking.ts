@@ -105,6 +105,7 @@ export function useVisitorTracking() {
   const lastHeartbeatRef = useRef<number>(0);
   const [isExcludedUser, setIsExcludedUser] = useState<boolean>(true);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const ctxRef = useRef<{
     visitorId: string;
     sessionStart: string;
@@ -192,7 +193,7 @@ export function useVisitorTracking() {
   }, [stopTracking]);
 
   useEffect(() => {
-    if (!isAuthChecked || isExcludedUser || isExcludedDomain()) return;
+    if (!isAuthChecked || isExcludedUser || isExcludedDomain() || isBlocked) return;
     
     const isExcluded = EXCLUDED_ROUTES.some((route) => location.pathname.startsWith(route));
     if (isExcluded) {
@@ -327,7 +328,15 @@ export function useVisitorTracking() {
           },
         });
 
-        if (!error) {
+        if (!error && data) {
+          // Check if visitor is blocked
+          if ((data as any)?.blocked) {
+            console.log('[VisitorTracking] Visitor is blocked, stopping tracking');
+            setIsBlocked(true);
+            stopTracking();
+            return;
+          }
+          
           const newVisitId = (data as any)?.visit_id || (data as any)?.id;
           if (newVisitId) visitIdRef.current = newVisitId;
         }
@@ -359,7 +368,7 @@ export function useVisitorTracking() {
         debounceRef.current = null;
       }
     };
-  }, [location.pathname, isExcludedUser, isAuthChecked, stopTracking]);
+  }, [location.pathname, isExcludedUser, isAuthChecked, isBlocked, stopTracking]);
 
   // Cleanup on unmount
   useEffect(() => {

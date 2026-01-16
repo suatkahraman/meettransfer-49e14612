@@ -41,6 +41,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Check if visitor is blocked
+    const { data: blockedVisitor } = await supabaseAdmin
+      .from("blocked_visitors")
+      .select("id")
+      .eq("visitor_id", body.visitor_id)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (blockedVisitor) {
+      console.log(`[track-visit] Blocked visitor attempted access: ${body.visitor_id}`);
+      return new Response(
+        JSON.stringify({ blocked: true, message: "Visitor is blocked" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const nowIso = new Date().toISOString();
     const sessionStart = body.session_start || nowIso;
     const lastActivity = body.last_activity || nowIso;
