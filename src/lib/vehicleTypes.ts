@@ -197,7 +197,7 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
   },
   {
     value: 'maybach-minibus',
-    label: 'Maybach Minivan',
+    label: 'Mercedes Maybach Minivan',
     passengers: 4,
     luggage: 4,
     description: 'Ultra-luxury Maybach class minivan with exclusive starlight roof, entertainment system, and first-class seating. The pinnacle of private transfers.',
