@@ -415,6 +415,20 @@ const translations: Record<Language, Record<string, string>> = {
     sprinterName: "Mercedes Sprinter VIP Minibus",
     sprinterDesc: "Perfect for larger groups, our VIP Sprinter offers airline-style seating for up to 16 passengers with individual screens and premium amenities.",
     
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "Dubai Exclusive Luxury Fleet",
+    dubaiFleetSubtitle: "Dubai Airport Transfers Only",
+    dubaiFleetDesc: "This exclusive luxury vehicle collection is available only for Dubai International Airport (DXB) and Al Maktoum Airport (DWC) transfers. Experience an unforgettable VIP journey in Dubai with Rolls Royce, Bentley, Range Rover and Mercedes S-Class.",
+    dubaiFleetCta: "Get a custom quote for Dubai transfers",
+    rollsRoyceName: "Rolls Royce Phantom",
+    rollsRoyceDesc: "The pinnacle of automotive luxury. Rolls Royce Phantom offers unmatched comfort and prestige for Dubai's most distinguished guests.",
+    bentleyName: "Bentley Flying Spur",
+    bentleyDesc: "A masterpiece of British craftsmanship. Bentley Flying Spur delivers power and elegance in perfect harmony.",
+    rangeRoverName: "Range Rover Autobiography",
+    rangeRoverDesc: "The undisputed leader in luxury SUV segment. Range Rover Autobiography combines comfort and performance seamlessly.",
+    mercedesSClassName: "Mercedes S-Class S580",
+    mercedesSClassDesc: "The perfect fusion of technology and luxury. Mercedes S-Class is the most preferred sedan for business executives.",
+    
     // Destinations Page
     destinationsTitle: "VIP Destinations Across Turkey",
     destinationsSubtitle: "Premium Airport Transfers & Private Chauffeur Services",
@@ -2184,6 +2198,20 @@ const translations: Record<Language, Record<string, string>> = {
     maybachDesc: "Der Gipfel des automobilen Luxus. Unser Maybach Minivan bietet Executive-Rücksitze und die sanfteste Fahrt für VIP-Gäste und Geschäftsführer.",
     sprinterName: "Mercedes Sprinter VIP Minibus",
     sprinterDesc: "Perfekt für größere Gruppen, unser VIP Sprinter bietet Airline-Sitze für bis zu 16 Passagiere mit individuellen Bildschirmen und Premium-Ausstattung.",
+    
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "Dubai Exklusive Luxusflotte",
+    dubaiFleetSubtitle: "Nur Dubai Flughafentransfers",
+    dubaiFleetDesc: "Diese exklusive Luxusfahrzeugkollektion ist nur für Transfers vom Dubai International Airport (DXB) und Al Maktoum Airport (DWC) verfügbar. Erleben Sie eine unvergessliche VIP-Reise in Dubai mit Rolls Royce, Bentley, Range Rover und Mercedes S-Klasse.",
+    dubaiFleetCta: "Individuelles Angebot für Dubai-Transfers anfordern",
+    rollsRoyceName: "Rolls Royce Phantom",
+    rollsRoyceDesc: "Der Gipfel des automobilen Luxus. Rolls Royce Phantom bietet unübertroffenen Komfort und Prestige für Dubais anspruchsvollste Gäste.",
+    bentleyName: "Bentley Flying Spur",
+    bentleyDesc: "Ein Meisterwerk britischer Handwerkskunst. Bentley Flying Spur vereint Kraft und Eleganz in perfekter Harmonie.",
+    rangeRoverName: "Range Rover Autobiography",
+    rangeRoverDesc: "Der unbestrittene Marktführer im Luxus-SUV-Segment. Range Rover Autobiography vereint Komfort und Leistung nahtlos.",
+    mercedesSClassName: "Mercedes S-Klasse S580",
+    mercedesSClassDesc: "Die perfekte Fusion von Technologie und Luxus. Mercedes S-Klasse ist die bevorzugte Limousine für Geschäftsführer.",
     
     // Destinations Page
     destinationsTitle: "VIP-Reiseziele in der Türkei",
@@ -3994,6 +4022,20 @@ const translations: Record<Language, Record<string, string>> = {
     sprinterName: "Mercedes Sprinter VIP Minibus",
     sprinterDesc: "Parfait pour les grands groupes, notre Sprinter VIP offre des sièges style avion pour jusqu'à 16 passagers avec équipements premium.",
     
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "Flotte de Luxe Exclusive Dubai",
+    dubaiFleetSubtitle: "Transferts Aéroport Dubai Uniquement",
+    dubaiFleetDesc: "Cette collection exclusive de véhicules de luxe est disponible uniquement pour les transferts depuis l'aéroport international de Dubai (DXB) et l'aéroport Al Maktoum (DWC). Vivez un voyage VIP inoubliable à Dubai avec Rolls Royce, Bentley, Range Rover et Mercedes Classe S.",
+    dubaiFleetCta: "Obtenir un devis personnalisé pour les transferts Dubai",
+    rollsRoyceName: "Rolls Royce Phantom",
+    rollsRoyceDesc: "Le summum du luxe automobile. Rolls Royce Phantom offre un confort et un prestige inégalés pour les invités les plus distingués de Dubai.",
+    bentleyName: "Bentley Flying Spur",
+    bentleyDesc: "Un chef-d'œuvre de l'artisanat britannique. Bentley Flying Spur allie puissance et élégance en parfaite harmonie.",
+    rangeRoverName: "Range Rover Autobiography",
+    rangeRoverDesc: "Le leader incontesté du segment SUV de luxe. Range Rover Autobiography combine confort et performance de manière transparente.",
+    mercedesSClassName: "Mercedes Classe S S580",
+    mercedesSClassDesc: "La fusion parfaite de technologie et de luxe. Mercedes Classe S est la berline préférée des dirigeants d'entreprise.",
+    
     // Destinations Page
     destinationsTitle: "Destinations VIP en Turquie",
     destinationsSubtitle: "Transferts Aéroport Premium & Services de Chauffeur Privé",
@@ -5514,6 +5556,20 @@ const translations: Record<Language, Record<string, string>> = {
     sprinterName: "Mercedes Sprinter VIP Минибус",
     sprinterDesc: "Идеально для больших групп, наш VIP Sprinter предлагает сиденья авиационного класса для до 16 пассажиров с индивидуальными экранами и премиум-удобствами.",
     
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "Эксклюзивный Люксовый Автопарк Дубая",
+    dubaiFleetSubtitle: "Только трансферы из аэропорта Дубая",
+    dubaiFleetDesc: "Эта эксклюзивная коллекция люксовых автомобилей доступна только для трансферов из международного аэропорта Дубая (DXB) и аэропорта Аль-Мактум (DWC). Испытайте незабываемое VIP-путешествие в Дубае на Rolls Royce, Bentley, Range Rover и Mercedes S-класса.",
+    dubaiFleetCta: "Получить индивидуальное предложение для трансферов в Дубае",
+    rollsRoyceName: "Rolls Royce Phantom",
+    rollsRoyceDesc: "Вершина автомобильной роскоши. Rolls Royce Phantom предлагает непревзойденный комфорт и престиж для самых взыскательных гостей Дубая.",
+    bentleyName: "Bentley Flying Spur",
+    bentleyDesc: "Шедевр британского мастерства. Bentley Flying Spur сочетает мощь и элегантность в идеальной гармонии.",
+    rangeRoverName: "Range Rover Autobiography",
+    rangeRoverDesc: "Бесспорный лидер в сегменте люксовых внедорожников. Range Rover Autobiography идеально сочетает комфорт и производительность.",
+    mercedesSClassName: "Mercedes S-Класс S580",
+    mercedesSClassDesc: "Идеальное сочетание технологий и роскоши. Mercedes S-Класс - самый востребованный седан для бизнес-руководителей.",
+    
     // Destinations Page
     destinationsTitle: "VIP направления по Турции",
     destinationsSubtitle: "Премиум трансферы из аэропорта и частный сервис с водителем",
@@ -6897,6 +6953,20 @@ const translations: Record<Language, Record<string, string>> = {
     maybachDesc: "L'apice del lusso automobilistico. Il nostro Maybach Minivan offre sedili posteriori executive e il viaggio più fluido per ospiti VIP e dirigenti.",
     sprinterName: "Mercedes Sprinter VIP Minibus",
     sprinterDesc: "Perfetto per gruppi più grandi, il nostro Sprinter VIP offre sedili stile aereo per fino a 16 passeggeri con schermi individuali e comfort premium.",
+    
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "Flotta di Lusso Esclusiva Dubai",
+    dubaiFleetSubtitle: "Solo Trasferimenti Aeroporto Dubai",
+    dubaiFleetDesc: "Questa collezione esclusiva di veicoli di lusso è disponibile solo per i trasferimenti dall'aeroporto internazionale di Dubai (DXB) e dall'aeroporto Al Maktoum (DWC). Vivi un viaggio VIP indimenticabile a Dubai con Rolls Royce, Bentley, Range Rover e Mercedes Classe S.",
+    dubaiFleetCta: "Richiedi un preventivo personalizzato per i trasferimenti Dubai",
+    rollsRoyceName: "Rolls Royce Phantom",
+    rollsRoyceDesc: "L'apice del lusso automobilistico. Rolls Royce Phantom offre comfort e prestigio senza pari per gli ospiti più distinti di Dubai.",
+    bentleyName: "Bentley Flying Spur",
+    bentleyDesc: "Un capolavoro dell'artigianato britannico. Bentley Flying Spur unisce potenza ed eleganza in perfetta armonia.",
+    rangeRoverName: "Range Rover Autobiography",
+    rangeRoverDesc: "Il leader indiscusso nel segmento SUV di lusso. Range Rover Autobiography combina comfort e prestazioni senza soluzione di continuità.",
+    mercedesSClassName: "Mercedes Classe S S580",
+    mercedesSClassDesc: "La fusione perfetta di tecnologia e lusso. Mercedes Classe S è la berlina preferita dai dirigenti aziendali.",
     
     // Destinations Page
     destinationsTitle: "Destinazioni VIP in Turchia",
@@ -8329,6 +8399,20 @@ const translations: Record<Language, Record<string, string>> = {
     sprinterName: "Mercedes Sprinter VIP Minibús",
     sprinterDesc: "Perfecto para grupos más grandes, nuestro Sprinter VIP ofrece asientos estilo avión para hasta 16 pasajeros con pantallas individuales y comodidades premium.",
     
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "Flota de Lujo Exclusiva de Dubai",
+    dubaiFleetSubtitle: "Solo Traslados Aeropuerto Dubai",
+    dubaiFleetDesc: "Esta colección exclusiva de vehículos de lujo está disponible solo para traslados desde el Aeropuerto Internacional de Dubai (DXB) y el Aeropuerto Al Maktoum (DWC). Vive un viaje VIP inolvidable en Dubai con Rolls Royce, Bentley, Range Rover y Mercedes Clase S.",
+    dubaiFleetCta: "Obtener cotización personalizada para traslados Dubai",
+    rollsRoyceName: "Rolls Royce Phantom",
+    rollsRoyceDesc: "La cima del lujo automotriz. Rolls Royce Phantom ofrece confort y prestigio inigualables para los huéspedes más distinguidos de Dubai.",
+    bentleyName: "Bentley Flying Spur",
+    bentleyDesc: "Una obra maestra de la artesanía británica. Bentley Flying Spur combina potencia y elegancia en perfecta armonía.",
+    rangeRoverName: "Range Rover Autobiography",
+    rangeRoverDesc: "El líder indiscutible en el segmento SUV de lujo. Range Rover Autobiography combina confort y rendimiento a la perfección.",
+    mercedesSClassName: "Mercedes Clase S S580",
+    mercedesSClassDesc: "La fusión perfecta de tecnología y lujo. Mercedes Clase S es el sedán preferido por los ejecutivos de negocios.",
+    
     // Destinations Page
     destinationsTitle: "Destinos VIP en Turquía",
     destinationsSubtitle: "Traslados Premium desde el Aeropuerto y Servicios de Chófer Privado",
@@ -9760,6 +9844,20 @@ const translations: Record<Language, Record<string, string>> = {
     sprinterName: "ميني باص مرسيدس سبرينتر VIP",
     sprinterDesc: "مثالي للمجموعات الكبيرة، يقدم سبرينتر VIP مقاعد بطراز الطائرة لما يصل إلى 16 راكباً مع شاشات فردية ووسائل راحة فاخرة.",
     
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "أسطول دبي الفاخر الحصري",
+    dubaiFleetSubtitle: "فقط نقل مطار دبي",
+    dubaiFleetDesc: "هذه المجموعة الحصرية من السيارات الفاخرة متاحة فقط للنقل من مطار دبي الدولي (DXB) ومطار آل مكتوم (DWC). عش رحلة VIP لا تُنسى في دبي مع رولز رويس وبنتلي ورينج روفر ومرسيدس الفئة S.",
+    dubaiFleetCta: "احصل على عرض سعر مخصص لنقل دبي",
+    rollsRoyceName: "رولز رويس فانتوم",
+    rollsRoyceDesc: "قمة الفخامة في السيارات. رولز رويس فانتوم يقدم راحة ومكانة لا مثيل لها لضيوف دبي الأكثر تميزاً.",
+    bentleyName: "بنتلي فلاينج سبير",
+    bentleyDesc: "تحفة من الحرفية البريطانية. بنتلي فلاينج سبير يجمع بين القوة والأناقة في انسجام مثالي.",
+    rangeRoverName: "رينج روفر أوتوبيوغرافي",
+    rangeRoverDesc: "القائد بلا منازع في قطاع السيارات الرياضية الفاخرة. رينج روفر أوتوبيوغرافي يجمع بين الراحة والأداء بسلاسة.",
+    mercedesSClassName: "مرسيدس الفئة S S580",
+    mercedesSClassDesc: "الدمج المثالي بين التكنولوجيا والفخامة. مرسيدس الفئة S هي السيدان المفضلة لرجال الأعمال التنفيذيين.",
+    
     // Destinations Page
     destinationsTitle: "وجهات VIP في تركيا",
     destinationsSubtitle: "نقل فاخر من المطار وخدمات السائق الخاص",
@@ -11163,6 +11261,20 @@ const translations: Record<Language, Record<string, string>> = {
     maybachDesc: "Otomotiv lüksünün zirvesi. Maybach Minivan'ımız VIP misafirler ve iş dünyası yöneticileri için executive arka koltuklar ve en yumuşak sürüş sunar.",
     sprinterName: "Mercedes Sprinter VIP Minibüs",
     sprinterDesc: "Büyük gruplar için mükemmel, VIP Sprinter'ımız bireysel ekranlar ve premium olanaklarla 16 yolcuya kadar uçak tarzı oturma sunar.",
+    
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "Dubai Özel Lüks Filo",
+    dubaiFleetSubtitle: "Sadece Dubai Havalimanı Transferleri",
+    dubaiFleetDesc: "Bu özel lüks araç koleksiyonu sadece Dubai Uluslararası Havalimanı (DXB) ve Al Maktoum Havalimanı (DWC) transferleri için geçerlidir. Rolls Royce, Bentley, Range Rover ve Mercedes S-Class ile Dubai'de unutulmaz bir VIP deneyimi yaşayın.",
+    dubaiFleetCta: "Dubai transferi için özel fiyat teklifi alın",
+    rollsRoyceName: "Rolls Royce Phantom",
+    rollsRoyceDesc: "Otomotiv lüksünün zirvesi. Rolls Royce Phantom, Dubai'nin en seçkin misafirleri için eşsiz konfor ve prestij sunar.",
+    bentleyName: "Bentley Flying Spur",
+    bentleyDesc: "İngiliz zanaatkarlığının şaheseri. Bentley Flying Spur, güç ve zarafeti mükemmel bir uyum içinde sunar.",
+    rangeRoverName: "Range Rover Autobiography",
+    rangeRoverDesc: "Lüks SUV segmentinin tartışmasız lideri. Range Rover Autobiography, konfor ve performansı kusursuzca bir araya getirir.",
+    mercedesSClassName: "Mercedes S-Class S580",
+    mercedesSClassDesc: "Teknoloji ve lüksün mükemmel buluşması. Mercedes S-Class, iş dünyası yöneticilerinin en çok tercih ettiği sedan.",
     
     // Destinations Page
     destinationsTitle: "Türkiye Genelinde VIP Destinasyonlar",
@@ -12659,6 +12771,20 @@ const translations: Record<Language, Record<string, string>> = {
     sprinterName: "Mercedes Sprinter VIP Мікроавтобус",
     sprinterDesc: "Ідеально для великих груп, наш VIP Sprinter пропонує сидіння авіаційного класу для до 16 пасажирів з індивідуальними екранами.",
     
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "Ексклюзивний Люксовий Автопарк Дубая",
+    dubaiFleetSubtitle: "Тільки трансфери з аеропорту Дубая",
+    dubaiFleetDesc: "Ця ексклюзивна колекція люксових автомобілів доступна тільки для трансферів з міжнародного аеропорту Дубая (DXB) та аеропорту Аль-Мактум (DWC). Відчуйте незабутню VIP-подорож в Дубаї на Rolls Royce, Bentley, Range Rover та Mercedes S-класу.",
+    dubaiFleetCta: "Отримати індивідуальну пропозицію для трансферів в Дубаї",
+    rollsRoyceName: "Rolls Royce Phantom",
+    rollsRoyceDesc: "Вершина автомобільної розкоші. Rolls Royce Phantom пропонує неперевершений комфорт та престиж для найвибагливіших гостей Дубая.",
+    bentleyName: "Bentley Flying Spur",
+    bentleyDesc: "Шедевр британської майстерності. Bentley Flying Spur поєднує потужність та елегантність в ідеальній гармонії.",
+    rangeRoverName: "Range Rover Autobiography",
+    rangeRoverDesc: "Безсумнівний лідер у сегменті люксових позашляховиків. Range Rover Autobiography ідеально поєднує комфорт та продуктивність.",
+    mercedesSClassName: "Mercedes S-Клас S580",
+    mercedesSClassDesc: "Ідеальне поєднання технологій та розкоші. Mercedes S-Клас — найпопулярніший седан серед бізнес-керівників.",
+    
     // Destinations Page
     destinationsTitle: "VIP напрямки по Туреччині",
     destinationsSubtitle: "Преміум трансфери з аеропорту та приватний шоферський сервіс",
@@ -14065,6 +14191,20 @@ const translations: Record<Language, Record<string, string>> = {
     maybachDesc: "自動車の高級さの頂点。マイバッハ ミニバンはVIPゲストやビジネスエグゼクティブ向けのエグゼクティブリアシートと最も滑らかな乗り心地を提供します。",
     sprinterName: "メルセデス・スプリンター VIPミニバス",
     sprinterDesc: "大人数グループに最適。VIPスプリンターは最大16名様まで個別スクリーンとプレミアムアメニティを備えた航空機スタイルのシートを提供します。",
+    
+    // Dubai Exclusive Fleet
+    dubaiFleetTitle: "ドバイ限定ラグジュアリーフリート",
+    dubaiFleetSubtitle: "ドバイ空港送迎のみ",
+    dubaiFleetDesc: "この限定ラグジュアリー車両コレクションは、ドバイ国際空港（DXB）およびアル・マクトゥーム空港（DWC）からの送迎のみご利用いただけます。ロールスロイス、ベントレー、レンジローバー、メルセデスSクラスでドバイの忘れられないVIP体験をお楽しみください。",
+    dubaiFleetCta: "ドバイ送迎のカスタム見積もりを取得",
+    rollsRoyceName: "ロールスロイス・ファントム",
+    rollsRoyceDesc: "自動車の高級さの頂点。ロールスロイス・ファントムは、ドバイの最も格式高いゲストに比類のない快適さと威信を提供します。",
+    bentleyName: "ベントレー・フライングスパー",
+    bentleyDesc: "英国職人技の傑作。ベントレー・フライングスパーは、パワーとエレガンスを完璧なハーモニーで実現します。",
+    rangeRoverName: "レンジローバー・オートバイオグラフィー",
+    rangeRoverDesc: "ラグジュアリーSUVセグメントの紛れもないリーダー。レンジローバー・オートバイオグラフィーは、快適性とパフォーマンスをシームレスに融合します。",
+    mercedesSClassName: "メルセデス Sクラス S580",
+    mercedesSClassDesc: "テクノロジーとラグジュアリーの完璧な融合。メルセデスSクラスは、ビジネスエグゼクティブに最も好まれるセダンです。",
     
     // Destinations Page
     destinationsTitle: "トルコ全土のVIP目的地",
