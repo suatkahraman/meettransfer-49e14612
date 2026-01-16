@@ -117,34 +117,5 @@ export function getDubaiVehicleInfo(value: string) {
   return DUBAI_VEHICLE_TYPE_MAP[value];
 }
 
-// Check if a location is in Dubai
-export function isDubaiLocation(location: string): boolean {
-  if (!location) return false;
-  const normalizedLocation = location.toLowerCase();
-  
-  const dubaiKeywords = [
-    'dubai',
-    'دبي', // Arabic for Dubai
-    'burj khalifa',
-    'palm jumeirah',
-    'dubai mall',
-    'dubai marina',
-    'dxb', // Dubai airport code
-    'dubai international',
-    'al maktoum',
-    'dwc', // Al Maktoum airport code
-    'jebel ali',
-    'jumeirah',
-    'downtown dubai',
-    'business bay',
-    'deira',
-    'bur dubai',
-    'sheikh zayed',
-    'emirates hills',
-    'arabian ranches',
-    'jbr',
-    'jumeirah beach',
-  ];
-  
-  return dubaiKeywords.some(keyword => normalizedLocation.includes(keyword));
-}
+// Re-export location detection functions from centralized module
+export { isDubaiLocation, isTurkeyLocation } from './locationDetection';
