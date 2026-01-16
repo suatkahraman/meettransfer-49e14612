@@ -858,6 +858,14 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBodrumBestTitle: "Best Private Transfer from Bodrum Airport 2025 – Meet Transfer Review",
     blogBodrumBestDesc: "Discover why Meet Transfer is the best private transfer from Bodrum Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking.",
     blogBodrumBestCategory: "Bodrum",
+    // Best Izmir Airport Transfer
+    blogIzmirBestTitle: "Best Private Transfer from Izmir Airport 2025 – Meet Transfer Review",
+    blogIzmirBestDesc: "Discover why Meet Transfer is the best private transfer from Izmir Adnan Menderes Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
+    blogIzmirBestCategory: "Izmir",
+    // Best Cappadocia Airport Transfer
+    blogCappadociaBestTitle: "Best Private Transfer from Cappadocia Airports 2025 – Meet Transfer Review",
+    blogCappadociaBestDesc: "Discover why Meet Transfer is the best private transfer from Kayseri & Nevsehir Airports to Cappadocia. 4.9★ rating, fixed prices from €45, Mercedes fleet. Balloon tour pickups.",
+    blogCappadociaBestCategory: "Cappadocia",
   },
   
   DE: {
@@ -1743,6 +1751,14 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBodrumBestTitle: "Bester Privattransfer vom Flughafen Bodrum 2025 – Meet Transfer Bewertung",
     blogBodrumBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Bodrum ist. 4,9★ Bewertung, Festpreise ab €40, Mercedes-Flotte, Flugverfolgung.",
     blogBodrumBestCategory: "Bodrum",
+    // Best Izmir Airport Transfer
+    blogIzmirBestTitle: "Bester Privattransfer vom Flughafen Izmir 2025 – Meet Transfer Bewertung",
+    blogIzmirBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer vom Flughafen Izmir Adnan Menderes ist. 4,9★ Bewertung, Festpreise ab €40, Mercedes-Flotte, Flugverfolgung. Vergleich Meet Transfer vs Taxi.",
+    blogIzmirBestCategory: "Izmir",
+    // Best Cappadocia Airport Transfer
+    blogCappadociaBestTitle: "Bester Privattransfer von Kappadokien-Flughäfen 2025 – Meet Transfer Bewertung",
+    blogCappadociaBestDesc: "Entdecken Sie, warum Meet Transfer der beste Privattransfer von den Flughäfen Kayseri und Nevsehir nach Kappadokien ist. 4,9★ Bewertung, Festpreise ab €45, Mercedes-Flotte. Heißluftballon-Abholungen.",
+    blogCappadociaBestCategory: "Kappadokien",
   },
   
   FR: {
@@ -3355,6 +3371,14 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBodrumBestTitle: "Лучший частный трансфер из аэропорта Бодрума 2025 – Обзор Meet Transfer",
     blogBodrumBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Бодрума. Рейтинг 4,9★, фиксированные цены от €40, автопарк Mercedes, отслеживание рейсов.",
     blogBodrumBestCategory: "Бодрум",
+    // Best Izmir Airport Transfer
+    blogIzmirBestTitle: "Лучший частный трансфер из аэропорта Измира 2025 – Обзор Meet Transfer",
+    blogIzmirBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропорта Измира Аднана Мендереса. Рейтинг 4,9★, фиксированные цены от €40, автопарк Mercedes, отслеживание рейсов. Сравнение Meet Transfer и такси.",
+    blogIzmirBestCategory: "Измир",
+    // Best Cappadocia Airport Transfer
+    blogCappadociaBestTitle: "Лучший частный трансфер из аэропортов Каппадокии 2025 – Обзор Meet Transfer",
+    blogCappadociaBestDesc: "Узнайте, почему Meet Transfer — лучший частный трансфер из аэропортов Кайсери и Невшехира в Каппадокию. Рейтинг 4,9★, фиксированные цены от €45, автопарк Mercedes. Трансферы на воздушные шары.",
+    blogCappadociaBestCategory: "Каппадокия",
   },
   
   IT: {
@@ -6423,6 +6447,14 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBodrumBestTitle: "Bodrum Havalimanı'ndan En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
     blogBodrumBestDesc: "Meet Transfer'in neden Bodrum Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €40'dan başlayan fiyatlar, Mercedes filosu, uçuş takibi.",
     blogBodrumBestCategory: "Bodrum",
+    // Best Izmir Airport Transfer
+    blogIzmirBestTitle: "İzmir Havalimanı'ndan En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
+    blogIzmirBestDesc: "Meet Transfer'in neden İzmir Adnan Menderes Havalimanı'ndan en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €40'dan başlayan fiyatlar, Mercedes filosu, uçuş takibi. Meet Transfer vs taksi karşılaştırması.",
+    blogIzmirBestCategory: "İzmir",
+    // Best Cappadocia Airport Transfer
+    blogCappadociaBestTitle: "Kapadokya Havalimanlarından En İyi Özel Transfer 2025 – Meet Transfer İncelemesi",
+    blogCappadociaBestDesc: "Meet Transfer'in neden Kayseri ve Nevşehir Havalimanlarından Kapadokya'ya en iyi özel transfer olduğunu keşfedin. 4.9★ puan, €45'den başlayan fiyatlar, Mercedes filosu. Balon turu transferleri.",
+    blogCappadociaBestCategory: "Kapadokya",
   },
   
   UK: {
@@ -8053,5 +8085,13 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBodrumBestTitle: "ボドルム空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
     blogBodrumBestDesc: "Meet Transfer がボドルム空港からの最高のプライベート送迎である理由をご覧ください。4.9★評価、€40からの固定価格、メルセデス車両、フライト追跡。",
     blogBodrumBestCategory: "ボドルム",
+    // Best Izmir Airport Transfer
+    blogIzmirBestTitle: "イズミル空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
+    blogIzmirBestDesc: "Meet Transfer がイズミル・アドナン・メンデレス空港からの最高のプライベート送迎である理由をご覧ください。4.9★評価、€40からの固定価格、メルセデス車両、フライト追跡。Meet Transfer とタクシーの比較。",
+    blogIzmirBestCategory: "イズミル",
+    // Best Cappadocia Airport Transfer
+    blogCappadociaBestTitle: "カッパドキア空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
+    blogCappadociaBestDesc: "Meet Transfer がカイセリ・ネヴシェヒル空港からカッパドキアへの最高のプライベート送迎である理由をご覧ください。4.9★評価、€45からの固定価格、メルセデス車両。気球ツアー送迎。",
+    blogCappadociaBestCategory: "カッパドキア",
   },
 };
