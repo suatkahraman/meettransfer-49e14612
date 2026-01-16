@@ -159,6 +159,8 @@ const BestVIPTransferIstanbul = lazy(() => import("./pages/website/blog/BestVIPT
 const HowToChooseReliableTransfer = lazy(() => import("./pages/website/blog/HowToChooseReliableTransfer"));
 const AntalyaAirportTransferBestService = lazy(() => import("./pages/website/blog/AntalyaAirportTransferBestService"));
 const BodrumAirportTransferBestService = lazy(() => import("./pages/website/blog/BodrumAirportTransferBestService"));
+const IzmirAirportTransferBestService = lazy(() => import("./pages/website/blog/IzmirAirportTransferBestService"));
+const CappadociaAirportTransferBestService = lazy(() => import("./pages/website/blog/CappadociaAirportTransferBestService"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -280,6 +282,8 @@ const App = () => (
               {localizedRoutes("/blog/how-to-choose-reliable-transfer-turkey", <HowToChooseReliableTransfer />)}
               {localizedRoutes("/blog/antalya-airport-transfer-best-service", <AntalyaAirportTransferBestService />)}
               {localizedRoutes("/blog/bodrum-airport-transfer-best-service", <BodrumAirportTransferBestService />)}
+              {localizedRoutes("/blog/izmir-airport-transfer-best-service", <IzmirAirportTransferBestService />)}
+              {localizedRoutes("/blog/cappadocia-airport-transfer-best-service", <CappadociaAirportTransferBestService />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}

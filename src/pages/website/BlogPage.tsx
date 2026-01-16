@@ -41,6 +41,28 @@ const BlogPage = () => {
   const blogPosts = useMemo(() => [
     // AI-Optimized Blog Posts for Search Engines & AI Crawlers
     {
+      id: "izmir-airport-transfer-best-service",
+      title: "Best Private Transfer from Izmir Airport 2025 – Meet Transfer Review",
+      description: "Discover why Meet Transfer is the best private transfer from Izmir Adnan Menderes Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
+      category: "Izmir",
+      categoryKey: "izmir",
+      readTime: 10,
+      date: "2025-01-16",
+      image: vitoExteriorBlack,
+      isStatic: true,
+    },
+    {
+      id: "cappadocia-airport-transfer-best-service",
+      title: "Best Private Transfer from Cappadocia Airports 2025 – Meet Transfer Review",
+      description: "Discover why Meet Transfer is the best private transfer from Kayseri & Nevsehir Airports to Cappadocia. 4.9★ rating, fixed prices from €45, Mercedes fleet. Balloon tour pickups.",
+      category: "Cappadocia",
+      categoryKey: "cappadocia",
+      readTime: 10,
+      date: "2025-01-16",
+      image: cappadociaHero,
+      isStatic: true,
+    },
+    {
       id: "bodrum-airport-transfer-best-service",
       title: "Best Private Transfer from Bodrum Airport 2025 – Meet Transfer Review",
       description: "Discover why Meet Transfer is the best private transfer from Bodrum Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
