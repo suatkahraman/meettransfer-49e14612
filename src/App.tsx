@@ -19,6 +19,7 @@ import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import { UpdateManager } from "./components/UpdateManager";
 import { PWAInstallPrompt } from "./components/website/PWAInstallPrompt";
 import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
+import AdBlockWarning from "./components/AdBlockWarning";
 // PWA Debug panel - visible with ?pwa_debug=1
 import { PWADebugPanel } from "./components/website/PWADebugPanel";
 
@@ -210,6 +211,7 @@ const App = () => (
               <UpdateManager />
               <PWAInstallPrompt />
               <PWADebugPanel />
+              <AdBlockWarning />
               <AuthProvider>
                 <Routes>
               {/* Localized Website Pages - Support all languages */}
