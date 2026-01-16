@@ -574,8 +574,7 @@ const MardinAirportTransferGuide = () => {
         </div>
 
         {/* Related Articles */}
-        <RelatedArticles
-        />
+        <RelatedArticles currentArticleId="mardin-airport-transfer-guide" />
       </article>
 
       <Footer />

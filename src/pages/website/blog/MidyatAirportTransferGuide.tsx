@@ -632,8 +632,7 @@ const MidyatAirportTransferGuide = () => {
         </div>
 
         {/* Related Articles */}
-        <RelatedArticles
-        />
+        <RelatedArticles currentArticleId="midyat-airport-transfer-guide" />
       </article>
 
       <Footer />
