@@ -1,4 +1,4 @@
-import { Mail, Phone, Clock, Facebook, Instagram, Twitter, Youtube, Star, MapPin } from "lucide-react";
+import { Mail, Phone, Clock, Facebook, Instagram, Twitter, Youtube, Linkedin, Star, MapPin } from "lucide-react";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER, WHATSAPP_DISPLAY, SUPPORT_EMAIL, COMPANY_NAME, GLOBAL_OFFICES } from "@/lib/contact";
@@ -39,6 +39,7 @@ const TripAdvisorBadge = () => (
 const socialLinks = [
   { icon: Instagram, href: "https://www.instagram.com/meettransfer", label: "Instagram" },
   { icon: Facebook, href: "https://www.facebook.com/share/17w6b51DcX/", label: "Facebook" },
+  { icon: Linkedin, href: "https://www.linkedin.com/company/meettransfer", label: "LinkedIn" },
   { icon: Twitter, href: "https://x.com/MeetTransfer", label: "X" },
   { icon: Youtube, href: "https://www.youtube.com/@meettransfer", label: "YouTube" },
 ];
