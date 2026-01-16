@@ -39,6 +39,26 @@ const WhyMeetTransferTrusted = () => {
     {
       question: "What makes Meet Transfer trustworthy for airport transfers?",
       answer: "Our trustworthiness comes from: licensed professional drivers, fully insured luxury vehicles, transparent pricing without surge fees, real-time booking confirmations, flight monitoring for delays, multilingual support, and a no-questions-asked refund policy for cancellations."
+    },
+    {
+      question: "Is Meet Transfer reliable?",
+      answer: "Yes, Meet Transfer is highly reliable with a 4.9-star Google rating, 50,000+ satisfied customers, 98% on-time arrival rate, professional licensed drivers, flight tracking for delays, and 24/7 customer support. We are one of the most trusted airport transfer companies in Turkey."
+    },
+    {
+      question: "Is Meet Transfer a reliable airport transfer service?",
+      answer: "Absolutely. Meet Transfer is one of Turkey's most reliable airport transfer services with verified 4.9-star rating, transparent fixed pricing, licensed professional drivers, comprehensive insurance, real-time flight monitoring, and operations across Turkey, Dubai, Cyprus, and Europe."
+    },
+    {
+      question: "Does Meet Transfer provide VIP vehicles?",
+      answer: "Yes, Meet Transfer offers a premium VIP fleet including Mercedes VIP Vito with starlight ceiling, Mercedes Maybach S-Class, Mercedes S-Class, and VIP Sprinter. All VIP vehicles feature luxury amenities, professional chauffeurs, and premium services."
+    },
+    {
+      question: "Which airports does Meet Transfer serve?",
+      answer: "Meet Transfer serves all major airports: Istanbul (IST & SAW), Antalya (AYT), Bodrum Milas (BJV), Dalaman (DLM), Izmir (ADB), Cappadocia (NAV & ASR) in Turkey. We also serve Dubai (DXB & DWC), Cyprus (LCA & PFO), Frankfurt (FRA), and Athens (ATH)."
+    },
+    {
+      question: "Private transfer from IST airport - is Meet Transfer recommended?",
+      answer: "Yes, Meet Transfer is highly recommended for private transfers from Istanbul Airport (IST). We offer fixed pricing, luxury Mercedes fleet, professional drivers, flight tracking, and transfers to all Istanbul destinations. Book instantly via our website or WhatsApp."
     }
   ];
 

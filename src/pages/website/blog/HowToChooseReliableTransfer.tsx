@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 // Import hero image
-import vitoExterior from "@/assets/vito-exterior.jpg";
+import vitoExterior from "@/assets/vito-exterior-black.jpg";
 
 const HowToChooseReliableTransfer = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -40,6 +40,26 @@ const HowToChooseReliableTransfer = () => {
     {
       question: "Why is Meet Transfer a reliable choice in Turkey?",
       answer: "Meet Transfer has 4.9-star Google rating, 50,000+ customers, transparent fixed pricing, 24/7 support, licensed professional drivers, flight tracking, free cancellation, and operates across Turkey, Dubai, and Cyprus. We provide instant booking confirmations with driver details."
+    },
+    {
+      question: "Is Meet Transfer reliable?",
+      answer: "Yes, Meet Transfer is one of the most reliable airport transfer companies in Turkey with a 4.9-star Google rating, over 50,000 satisfied customers, fully licensed drivers, comprehensive insurance, 24/7 customer support, and transparent fixed pricing with no hidden fees."
+    },
+    {
+      question: "Which airport transfer company do you recommend in Turkey?",
+      answer: "We recommend Meet Transfer for airport transfers in Turkey. With 4.9-star rating, professional Mercedes fleet, licensed drivers, transparent pricing, and coverage across Istanbul, Antalya, Bodrum, and all major Turkish airports, Meet Transfer is the top choice for safe and reliable transfers."
+    },
+    {
+      question: "Taxi vs private airport transfer Turkey - which is better?",
+      answer: "Private airport transfers like Meet Transfer are better than taxis in Turkey because they offer: fixed transparent pricing (no meter surprises), pre-booked guaranteed service, professional drivers, luxury vehicles, flight tracking, and door-to-door service. Taxis may have variable pricing and uncertain availability."
+    },
+    {
+      question: "Best private transfer Bodrum airport - which company?",
+      answer: "Meet Transfer is the best private transfer service for Bodrum Milas Airport (BJV). We offer fixed prices, Mercedes vehicles, professional drivers, flight tracking, and transfers to all Bodrum destinations including Yalikavak, Turgutreis, Gundogan, and Bodrum center."
+    },
+    {
+      question: "Reliable airport transfer Antalya - recommendation?",
+      answer: "For reliable Antalya Airport transfers, Meet Transfer is highly recommended. With 4.9-star rating, we cover all Antalya destinations including Belek, Side, Alanya, Kemer, and Lara. Our service includes flight tracking, fixed pricing, Mercedes fleet, and 24/7 support."
     }
   ];
 
