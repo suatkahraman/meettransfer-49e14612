@@ -15,7 +15,7 @@ const vehicleTypes = [
   { value: 'Sedan', label: 'Sedan' },
   { value: 'Mercedes Vito', label: 'Mercedes-vito' },
   { value: 'Mercedes VIP Vito', label: 'Vip Mercedes' },
-  { value: 'Maybach Minibus', label: 'Maybach Minibus' },
+  { value: 'Mercedes Maybach Minivan', label: 'Mercedes Maybach Minivan' },
   { value: 'Minibus', label: 'Minibus' },
 ];
 

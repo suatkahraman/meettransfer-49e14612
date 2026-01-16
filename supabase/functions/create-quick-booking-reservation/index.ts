@@ -339,7 +339,7 @@ serve(async (req) => {
           const vehicleLabels: Record<string, string> = {
             "mercedes-vito": "Mercedes Vito",
             "mercedes-vclass": "VIP Mercedes V-Class",
-            "maybach": "Maybach Minivan",
+            "maybach": "Mercedes Maybach Minivan",
             "minibus": "Mercedes Sprinter Minibus",
           };
           const vehicleName = vehicleLabels[requestData.vehicleType] || requestData.vehicleType;
