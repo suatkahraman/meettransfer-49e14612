@@ -65,7 +65,7 @@ const FleetIconsBar = () => {
       nameTR: "Van VIP",
       passengers: "6",
       luggage: "6",
-      description: "Mercedes V-Class VIP",
+      description: "VIP Mercedes Vito",
       images: [vitoVipImg1, vitoVipImg2, vitoVipImg3, vitoVipImg4],
       features: ["WiFi", "TV", "Bar"],
       popular: true,

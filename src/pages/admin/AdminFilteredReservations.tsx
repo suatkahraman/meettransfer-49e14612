@@ -51,10 +51,10 @@ interface Reservation {
 
 const vehicleLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
-  'vip-mercedes': 'VIP Mercedes',
+  'vip-mercedes': 'VIP Mercedes Vito',
   'maybach-minibus': 'Mercedes Maybach Minivan',
   'minibus': 'Mercedes Sprinter',
-  'mercedes-vclass': 'VIP Vito',
+  'mercedes-vclass': 'VIP Mercedes Vito',
   'maybach': 'Mercedes Maybach Minivan',
 };
 

@@ -74,7 +74,7 @@ const VehicleComparison = ({ cityName = "", basePrice = 45 }: VehicleComparisonP
     {
       id: "van-vip",
       name: "Van VIP",
-      subtitle: "Mercedes V-Class VIP",
+      subtitle: "VIP Mercedes Vito",
       image: vitoVipImg,
       passengers: 6,
       luggage: 6,

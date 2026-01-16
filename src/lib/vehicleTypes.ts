@@ -159,7 +159,7 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
   },
   {
     value: 'vip-mercedes',
-    label: 'VIP Mercedes',
+    label: 'VIP Mercedes Vito',
     passengers: 5,
     luggage: 5,
     description: 'Premium VIP transfer with starlight ceiling, ambient lighting, and luxurious leather interior. Ultimate comfort for business and leisure travelers.',

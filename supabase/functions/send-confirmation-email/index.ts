@@ -25,10 +25,12 @@ const currencySymbols: Record<string, string> = {
 };
 
 const vehicleTypeLabels: Record<string, string> = {
-  'mercedes-vito': 'Mercedes Vito VIP',
-  'mercedes-vclass': 'Mercedes V-Class VIP',
+  'mercedes-vito': 'Mercedes Vito',
+  'mercedes-vclass': 'VIP Mercedes Vito',
+  'vip-mercedes': 'VIP Mercedes Vito',
   'mercedes-sprinter': 'Mercedes Sprinter VIP',
   'maybach': 'Mercedes Maybach Minivan',
+  'maybach-minibus': 'Mercedes Maybach Minivan',
   'minibus': 'Mercedes Sprinter Minibus',
 };
 

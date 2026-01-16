@@ -58,7 +58,7 @@ const DestinationsPage = () => {
       icon: "🌊",
       IconComponent: Waves,
       locations: ["Fethiye", "Ölüdeniz", "Göcek", "Marmaris", "Yacht Marina Transfers", "Villa & Resort Transport"],
-      vehicles: "VIP Mercedes fleet",
+      vehicles: "VIP Mercedes Vito fleet",
       link: "/dalaman-airport-transfer",
     },
     {

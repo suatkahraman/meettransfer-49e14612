@@ -12,7 +12,7 @@ export interface VehicleTypeConfig {
 export const VEHICLE_TYPES: VehicleTypeConfig[] = [
   { value: 'sedan', label: 'Sedan', passengers: 3, luggage: 2 },
   { value: 'mercedes-vito', label: 'Mercedes Vito', passengers: 6, luggage: 6 },
-  { value: 'vip-mercedes', label: 'VIP Mercedes', passengers: 5, luggage: 5 },
+  { value: 'vip-mercedes', label: 'VIP Mercedes Vito', passengers: 5, luggage: 5 },
   { value: 'maybach-minibus', label: 'Mercedes Maybach Minivan', passengers: 4, luggage: 4 },
   { value: 'minibus', label: 'Mercedes Sprinter', passengers: 16, luggage: 16 },
 ];

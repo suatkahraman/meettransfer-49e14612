@@ -28,12 +28,12 @@ import { parseMoneyInput } from '@/lib/money';
 import { getWhatsAppUrl } from '@/lib/contact';
 
 const vehicleTypeLabels: Record<string, string> = {
-  'mercedes-vito': 'Mercedes-vito',
-  'vip-mercedes': 'Vip Mercedes',
+  'mercedes-vito': 'Mercedes Vito',
+  'vip-mercedes': 'VIP Mercedes Vito',
   'maybach-minibus': 'Mercedes Maybach Minivan',
   'minibus': 'Minibus',
   // Legacy support
-  'mercedes-vclass': 'Mercedes Vip Vito',
+  'mercedes-vclass': 'VIP Mercedes Vito',
   'maybach': 'Mercedes Maybach Minivan',
 };
 
