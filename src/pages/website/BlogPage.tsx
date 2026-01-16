@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { getWhatsAppUrl } from "@/lib/contact";
 import BlogHourlyRentalPromo from "@/components/website/BlogHourlyRentalPromo";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import aiChatImage from "@/assets/ai-chat-assistant.png";
 
 // Import blog hero images
@@ -461,14 +462,12 @@ const BlogPage = () => {
                   className="group"
                 >
                   <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50">
-                    <div className="aspect-video overflow-hidden">
-                      <img 
-                        src={post.image} 
-                        alt={post.isStatic ? post.title : t(post.titleKey)}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                    </div>
+                    <OptimizedBlogImage
+                      src={post.image}
+                      alt={post.isStatic ? (post.title || '') : t(post.titleKey || '')}
+                      className="aspect-video"
+                      priority={false}
+                    />
                     <CardHeader className="pb-2">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge variant="outline" className="text-xs">
