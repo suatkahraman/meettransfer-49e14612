@@ -33,7 +33,7 @@ const AirportTransferBookingTips = () => {
     },
     {
       question: "How do I know if an airport transfer company is reliable?",
-      answer: "Check for: Google reviews (4.5+ stars), established business history, transparent pricing (no hidden fees), professional website, responsive customer service, clear cancellation policy, and flight tracking feature. Meet Transfer has 500+ Google reviews with 4.9 rating and 5+ years operating."
+      answer: "Check for: Google reviews (4.5+ stars), established business history, transparent pricing (no hidden fees), professional website, responsive customer service, clear cancellation policy, and flight tracking feature. Meet Transfer has 500+ Google reviews with 4.7 rating and 5+ years operating."
     },
     {
       question: "What should I do if my flight is delayed?",

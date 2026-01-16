@@ -460,7 +460,7 @@ const HowToChooseReliableTransfer = () => {
                           <Star className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <div className="font-semibold">4.9★ Google Rating</div>
+                          <div className="font-semibold">4.7★ Google Rating</div>
                           <div className="text-sm text-muted-foreground">500+ verified reviews</div>
                         </div>
                       </div>
