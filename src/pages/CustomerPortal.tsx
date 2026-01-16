@@ -672,36 +672,6 @@ export default function CustomerPortal() {
             </Card>
           </motion.div>
 
-          {/* Return Transfer Discount Banner */}
-          <motion.div variants={itemVariants}>
-            <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 border-green-500/30 overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-green-400/20 to-transparent rounded-bl-full" />
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <motion.div 
-                    className="h-12 w-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg"
-                    animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.05, 1] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  >
-                    <Percent className="h-6 w-6 text-white" />
-                  </motion.div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <Badge className="bg-green-500 text-white text-xs font-bold px-2 py-0.5">
-                        {activePromo?.discountPercentage || 25}% OFF
-                      </Badge>
-                      <Sparkles className="h-4 w-4 text-green-500" />
-                    </div>
-                    <p className="font-semibold text-sm sm:text-base">{t('returnTransferDiscount')}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {t('returnTransferDiscountDesc')}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
           {portalData?.reservations.length === 0 ? (
             <motion.div variants={itemVariants}>
               <Card className="shadow-lg border-border/50 backdrop-blur-sm">
