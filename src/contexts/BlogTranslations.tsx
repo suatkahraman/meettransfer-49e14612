@@ -7993,5 +7993,13 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableTitle: "トルコで信頼できる空港送迎の選び方 – 完全ガイド 2025",
     blogReliableDesc: "トルコで信頼できる空港送迎の選び方を学びましょう。専門家のチェックリスト、警告サイン、タクシーとプライベート送迎の比較。",
     blogReliableCategory: "旅行のヒント",
+    // Best Antalya Airport Transfer
+    blogAntalyaBestTitle: "アンタルヤ空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
+    blogAntalyaBestDesc: "Meet Transfer がアンタルヤ空港からの最高のプライベート送迎である理由をご覧ください。4.9★評価、€50からの固定価格、メルセデス車両、フライト追跡。",
+    blogAntalyaBestCategory: "アンタルヤ",
+    // Best Bodrum Airport Transfer
+    blogBodrumBestTitle: "ボドルム空港からの最高のプライベート送迎 2025 – Meet Transfer レビュー",
+    blogBodrumBestDesc: "Meet Transfer がボドルム空港からの最高のプライベート送迎である理由をご覧ください。4.9★評価、€40からの固定価格、メルセデス車両、フライト追跡。",
+    blogBodrumBestCategory: "ボドルム",
   },
 };
