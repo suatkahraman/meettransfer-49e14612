@@ -10,6 +10,7 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import heroImage from "@/assets/vito-cappadocia-balloon.jpg";
 
 const IntercityTransferTurkey = () => {
@@ -146,13 +147,14 @@ const IntercityTransferTurkey = () => {
 
           {/* Hero Image */}
           <div className="relative rounded-xl overflow-hidden mb-8">
-            <img
+            <OptimizedBlogImage
               src={heroImage}
               alt="Private transfer in Cappadocia with hot air balloons"
-              className="w-full h-[400px] object-cover"
-              loading="eager"
+              priority={true}
+              aspectRatio="hero"
+              className="rounded-xl"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl" />
             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
