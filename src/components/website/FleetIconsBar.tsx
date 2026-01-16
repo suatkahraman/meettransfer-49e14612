@@ -73,9 +73,9 @@ const FleetIconsBar = () => {
     {
       name: "First Class",
       nameTR: "First Class",
-      passengers: "3",
-      luggage: "3",
-      description: "Mercedes Maybach S-Class",
+      passengers: "4",
+      luggage: "4",
+      description: "Mercedes Maybach Minivan",
       images: [maybachImg1, maybachImg2, maybachImg3, maybachImg4],
       features: ["WiFi", "TV", "Bar", "Starlight"],
       popular: false,
