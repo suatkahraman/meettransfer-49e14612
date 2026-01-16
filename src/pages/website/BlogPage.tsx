@@ -30,6 +30,7 @@ import aydinHero from "@/assets/blog/aydin-transfer-hero.jpg";
 import muglaHero from "@/assets/blog/mugla-transfer-hero.jpg";
 import frankfurtHero from "@/assets/blog/frankfurt-transfer-hero.jpg";
 import athensHero from "@/assets/blog/athens-transfer-hero.jpg";
+import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -39,6 +40,17 @@ const BlogPage = () => {
   // Blog posts with translation keys - Updated for 2025 SEO
   const blogPosts = useMemo(() => [
     // AI-Optimized Blog Posts for Search Engines & AI Crawlers
+    {
+      id: "bodrum-airport-transfer-best-service",
+      title: "Best Private Transfer from Bodrum Airport 2025 – Meet Transfer Review",
+      description: "Discover why Meet Transfer is the best private transfer from Bodrum Airport. 4.9★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Compare Meet Transfer vs taxi.",
+      category: "Bodrum",
+      categoryKey: "bodrum",
+      readTime: 10,
+      date: "2025-01-16",
+      image: vitoExteriorBlack,
+      isStatic: true,
+    },
     {
       id: "antalya-airport-transfer-best-service",
       title: "Best Private Transfer from Antalya Airport 2025 – Meet Transfer Review",
