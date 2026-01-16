@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired, VehicleTypeInfo } from "@/lib/vehicleTypes";
-import { DUBAI_VEHICLE_TYPES, DUBAI_VEHICLE_TYPE_MAP, isDubaiLocation } from "@/lib/dubaiVehicleTypes";
+import { DUBAI_VEHICLE_TYPES, DUBAI_VEHICLE_TYPE_MAP } from "@/lib/dubaiVehicleTypes";
+import { isDubaiLocation, isTurkeyLocation } from "@/lib/locationDetection";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import {
@@ -204,8 +205,9 @@ const BookingPage = () => {
   const effectiveCity = tokenBookingData?.city || urlCity;
   const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
 
-  // Check if location is in Dubai
+  // Check if location is in Dubai or Turkey
   const isDubai = isDubaiLocation(effectivePickup) || isDubaiLocation(effectiveDropoff);
+  const isTurkey = isTurkeyLocation(effectivePickup) || isTurkeyLocation(effectiveDropoff);
 
   // Computed values - use Dubai vehicles if location is in Dubai
   const availableVehicles = isDubai 
@@ -695,9 +697,9 @@ const BookingPage = () => {
 
       // If return trip (only for transfers), create return reservation
       if (!isHourlyBooking && hasReturnTrip && returnDate && returnTime) {
-        // Dubai locations don't get return trip discount
-        const returnPrice = !isDubai && isPromoCodeValid && selectedPrice 
-          ? Math.round(selectedPrice * 0.75) // 25% discount (not for Dubai)
+        // Return trip discount ONLY applies for Turkey locations
+        const returnPrice = isTurkey && isPromoCodeValid && selectedPrice 
+          ? Math.round(selectedPrice * 0.75) // 25% discount (ONLY for Turkey)
           : selectedPrice;
 
         await supabase
@@ -1312,24 +1314,24 @@ const BookingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Return Trip Option - Show discount promo only for non-Dubai locations */}
+              {/* Return Trip Option - Show discount promo ONLY for Turkey locations */}
               {!isHourlyBooking && (
-                <Card className={isDubai 
-                  ? "border-muted" 
-                  : "border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20"
+                <Card className={isTurkey 
+                  ? "border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20"
+                  : "border-muted"
                 }>
                   <CardContent className="p-4 sm:p-6 space-y-4">
                     <div 
                       className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer hover:shadow-lg transition-all ${
-                        isDubai 
-                          ? "bg-muted/50 border border-muted-foreground/20" 
-                          : "bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 border border-green-200 dark:border-green-700"
+                        isTurkey 
+                          ? "bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 border border-green-200 dark:border-green-700"
+                          : "bg-muted/50 border border-muted-foreground/20"
                       }`}
                       onClick={() => {
                         const newValue = !hasReturnTrip;
                         setHasReturnTrip(newValue);
-                        // Only auto-apply promo for non-Dubai locations
-                        if (!isDubai && newValue && activePromo.code && !promoCode) {
+                        // Only auto-apply promo for Turkey locations
+                        if (isTurkey && newValue && activePromo.code && !promoCode) {
                           handlePromoCodeChange(activePromo.code);
                         }
                       }}
@@ -1340,8 +1342,8 @@ const BookingPage = () => {
                         onCheckedChange={(checked) => {
                           const newValue = checked === true;
                           setHasReturnTrip(newValue);
-                          // Only auto-apply promo for non-Dubai locations
-                          if (!isDubai && newValue && activePromo.code && !promoCode) {
+                          // Only auto-apply promo for Turkey locations
+                          if (isTurkey && newValue && activePromo.code && !promoCode) {
                             handlePromoCodeChange(activePromo.code);
                           }
                         }}
@@ -1350,8 +1352,8 @@ const BookingPage = () => {
                       <div className="flex-1">
                         <Label htmlFor="returnTrip" className="cursor-pointer font-semibold text-base flex items-center gap-2">
                           {t("addReturnTrip") || "Add return trip"}
-                          {/* Only show discount badge for non-Dubai locations */}
-                          {!isDubai && activePromo.code && (
+                          {/* Only show discount badge for Turkey locations */}
+                          {isTurkey && activePromo.code && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500 text-white text-xs font-bold animate-pulse">
                               <Sparkles className="h-3 w-3" />
                               {activePromo.discountPercentage}% {t("discount") || "OFF"}
@@ -1359,20 +1361,20 @@ const BookingPage = () => {
                           )}
                         </Label>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {isDubai 
+                          {isTurkey 
                             ? (language === 'TR' 
-                                ? 'Dönüş yolculuğu ekleyin'
-                                : 'Add a return trip to your booking')
-                            : (language === 'TR' 
                                 ? `Dönüş yolculuğunuzda %${activePromo.discountPercentage} indirim otomatik uygulanır!`
                                 : `${activePromo.discountPercentage}% discount automatically applied on your return!`)
+                            : (language === 'TR' 
+                                ? 'Dönüş yolculuğu ekleyin'
+                                : 'Add a return trip to your booking')
                           }
                         </p>
                       </div>
                     </div>
 
-                    {/* Only show discount applied message for non-Dubai locations */}
-                    {!isDubai && hasReturnTrip && isPromoCodeValid && promoDiscountPercent && (
+                    {/* Only show discount applied message for Turkey locations */}
+                    {isTurkey && hasReturnTrip && isPromoCodeValid && promoDiscountPercent && (
                       <div className="flex items-center gap-2 text-sm bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg border border-green-300 dark:border-green-700">
                         <CheckCircle className="h-5 w-5 shrink-0" />
                         <span className="font-medium">
