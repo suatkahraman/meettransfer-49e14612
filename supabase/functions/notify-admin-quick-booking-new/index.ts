@@ -67,7 +67,7 @@ serve(async (req) => {
     const vehicleLabels: Record<string, string> = {
       "mercedes-vito": "Mercedes Vito",
       "mercedes-vclass": "VIP Vito",
-      maybach: "Maybach Minivan",
+      maybach: "Mercedes Maybach Minivan",
       minibus: "Minibus",
     };
     
