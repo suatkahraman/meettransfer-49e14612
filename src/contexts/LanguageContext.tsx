@@ -1020,7 +1020,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "Hours",
     
     // Footer
-    footerDescription: "Premium VIP transfer services from all major international airports across Turkey, Dubai, and Cyprus. Experience luxury travel with our professional chauffeurs and premium fleet.",
+    footerDescription: "Premium VIP transfer services from all major international airports across Turkey, Dubai, Cyprus, Germany, and Greece. Experience luxury travel with our professional chauffeurs and premium fleet.",
     footerQuickLinks: "Quick Links",
     footerDestinations: "Destinations",
     footerTerms: "Terms & Conditions",
@@ -2767,7 +2767,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "Stunden",
     
     // Footer
-    footerDescription: "Premium VIP Transferdienste von allen großen internationalen Flughäfen in der Türkei, Dubai und Zypern. Erleben Sie Luxusreisen mit unseren professionellen Chauffeuren und Premium-Flotte.",
+    footerDescription: "Premium VIP Transferdienste von allen großen internationalen Flughäfen in der Türkei, Dubai, Zypern, Deutschland und Griechenland. Erleben Sie Luxusreisen mit unseren professionellen Chauffeuren und Premium-Flotte.",
     footerQuickLinks: "Schnelllinks",
     footerDestinations: "Ziele",
     footerTerms: "AGB",
@@ -4590,7 +4590,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "Heures",
     
     // Footer
-    footerDescription: "Services de transfert VIP premium depuis tous les grands aéroports internationaux en Turquie, Dubaï et Chypre. Vivez le voyage de luxe avec nos chauffeurs professionnels et notre flotte premium.",
+    footerDescription: "Services de transfert VIP premium depuis tous les grands aéroports internationaux en Turquie, Dubaï, Chypre, Allemagne et Grèce. Vivez le voyage de luxe avec nos chauffeurs professionnels et notre flotte premium.",
     footerQuickLinks: "Liens rapides",
     footerDestinations: "Destinations",
     footerTerms: "Conditions générales",
@@ -6124,7 +6124,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "Часов",
     
     // Footer
-    footerDescription: "Премиальные VIP трансферы из всех крупных международных аэропортов Турции, Дубая и Кипра. Испытайте роскошные путешествия с нашими профессиональными водителями и премиальным автопарком.",
+    footerDescription: "Премиальные VIP трансферы из всех крупных международных аэропортов Турции, Дубая, Кипра, Германии и Греции. Испытайте роскошные путешествия с нашими профессиональными водителями и премиальным автопарком.",
     footerQuickLinks: "Быстрые ссылки",
     footerDestinations: "Направления",
     footerTerms: "Условия использования",
@@ -7522,7 +7522,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "Ore",
     
     // Footer
-    footerDescription: "Servizi di trasferimento VIP premium da tutti i principali aeroporti internazionali in Turchia, Dubai e Cipro. Vivi viaggi di lusso con i nostri autisti professionisti e la nostra flotta premium.",
+    footerDescription: "Servizi di trasferimento VIP premium da tutti i principali aeroporti internazionali in Turchia, Dubai, Cipro, Germania e Grecia. Vivi viaggi di lusso con i nostri autisti professionisti e la nostra flotta premium.",
     footerQuickLinks: "Link rapidi",
     footerDestinations: "Destinazioni",
     footerTerms: "Termini e condizioni",
@@ -8967,7 +8967,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "Horas",
     
     // Footer
-    footerDescription: "Servicios de transfer VIP premium desde los principales aeropuertos internacionales de Turquía, Dubái y Chipre. Experimente viajes de lujo con nuestros chóferes profesionales y flota premium.",
+    footerDescription: "Servicios de transfer VIP premium desde los principales aeropuertos internacionales de Turquía, Dubái, Chipre, Alemania y Grecia. Experimente viajes de lujo con nuestros chóferes profesionales y flota premium.",
     footerQuickLinks: "Enlaces rápidos",
     footerDestinations: "Destinos",
     footerTerms: "Términos y condiciones",
@@ -10412,7 +10412,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "ساعات",
     
     // Footer
-    footerDescription: "خدمات النقل VIP الفاخرة من جميع المطارات الدولية الرئيسية في تركيا ودبي وقبرص. استمتع بالسفر الفاخر مع سائقينا المحترفين وأسطولنا المتميز.",
+    footerDescription: "خدمات النقل VIP الفاخرة من جميع المطارات الدولية الرئيسية في تركيا ودبي وقبرص وألمانيا واليونان. استمتع بالسفر الفاخر مع سائقينا المحترفين وأسطولنا المتميز.",
     footerQuickLinks: "روابط سريعة",
     footerDestinations: "الوجهات",
     footerTerms: "الشروط والأحكام",
@@ -11864,7 +11864,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "Saat",
     
     // Footer
-    footerDescription: "Türkiye, Dubai ve Kıbrıs'taki tüm büyük uluslararası havalimanlarından premium VIP transfer hizmetleri. Profesyonel şoförlerimiz ve premium filomuzla lüks seyahatin keyfini çıkarın.",
+    footerDescription: "Türkiye, Dubai, Kıbrıs, Almanya ve Yunanistan'daki tüm büyük uluslararası havalimanlarından premium VIP transfer hizmetleri. Profesyonel şoförlerimiz ve premium filomuzla lüks seyahatin keyfini çıkarın.",
     footerQuickLinks: "Hızlı Bağlantılar",
     footerDestinations: "Destinasyonlar",
     footerTerms: "Şartlar ve Koşullar",
@@ -13401,7 +13401,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbHours: "Годин",
     
     // Footer
-    footerDescription: "Преміальні VIP трансфери з усіх великих міжнародних аеропортів Туреччини, Дубая та Кіпру. Відчуйте розкішні подорожі з нашими професійними водіями та преміальним автопарком.",
+    footerDescription: "Преміальні VIP трансфери з усіх великих міжнародних аеропортів Туреччини, Дубая, Кіпру, Німеччини та Греції. Відчуйте розкішні подорожі з нашими професійними водіями та преміальним автопарком.",
     footerQuickLinks: "Швидкі посилання",
     footerDestinations: "Напрямки",
     footerTerms: "Умови використання",
@@ -14757,7 +14757,7 @@ const translations: Record<Language, Record<string, string>> = {
     qbByConfirming: "確定すると、予約の詳細入力に進みます。",
     
     // Footer
-    footerDescription: "トルコ、ドバイ、キプロスの主要国際空港からのプレミアムVIP送迎サービス。プロのドライバーとプレミアム車両で贅沢な旅をお楽しみください。",
+    footerDescription: "トルコ、ドバイ、キプロス、ドイツ、ギリシャの主要国際空港からのプレミアムVIP送迎サービス。プロのドライバーとプレミアム車両で贅沢な旅をお楽しみください。",
     footerQuickLinks: "クイックリンク",
     footerDestinations: "目的地",
     footerTerms: "利用規約",
