@@ -224,11 +224,12 @@ const CappadociaAirportTransferBestService = () => {
       {/* Hero Image */}
       <div className="container mx-auto px-4 -mt-8 mb-12">
         <div className="max-w-5xl mx-auto">
-          <img
+          <OptimizedBlogImage
             src={cappadociaHero}
             alt="Best private transfer from Cappadocia Airport - Meet Transfer Mercedes with fairy chimneys"
-            className="w-full h-auto rounded-2xl shadow-2xl"
-            loading="eager"
+            aspectRatio="video"
+            priority
+            className="rounded-2xl shadow-2xl"
           />
         </div>
       </div>

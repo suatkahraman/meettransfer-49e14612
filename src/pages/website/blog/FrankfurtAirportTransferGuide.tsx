@@ -107,10 +107,11 @@ const FrankfurtAirportTransferGuide = () => {
       <article className="min-h-screen">
         {/* Hero Section */}
         <header className="relative h-[50vh] md:h-[60vh] overflow-hidden">
-          <img
+          <OptimizedBlogImage
             src={frankfurtTransferHero}
             alt={t("blogFrankfurtHeroAlt")}
-            className="absolute inset-0 w-full h-full object-cover"
+            priority
+            className="absolute inset-0 w-full h-full !aspect-auto"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
           

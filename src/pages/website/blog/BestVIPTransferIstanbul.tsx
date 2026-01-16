@@ -10,6 +10,7 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -241,11 +242,12 @@ const BestVIPTransferIstanbul = () => {
       {/* Hero Image */}
       <div className="container mx-auto px-4 -mt-8 mb-12">
         <div className="max-w-5xl mx-auto">
-          <img
+          <OptimizedBlogImage
             src={vitoVipStarlightPurple}
             alt="Meet Transfer VIP Mercedes Vito with starlight ceiling - Best VIP airport transfer Istanbul"
-            className="w-full h-auto rounded-2xl shadow-2xl"
-            loading="eager"
+            aspectRatio="video"
+            priority
+            className="rounded-2xl shadow-2xl"
           />
         </div>
       </div>
@@ -336,10 +338,11 @@ const BestVIPTransferIstanbul = () => {
                   <Card key={index} className="overflow-hidden">
                     <div className="md:flex">
                       <div className="md:w-1/3">
-                        <img 
+                        <OptimizedBlogImage 
                           src={vehicle.image} 
                           alt={`${vehicle.name} - VIP airport transfer Istanbul`}
-                          className="w-full h-48 md:h-full object-cover"
+                          aspectRatio="square"
+                          className="h-48 md:h-full"
                         />
                       </div>
                       <CardContent className="md:w-2/3 p-6">

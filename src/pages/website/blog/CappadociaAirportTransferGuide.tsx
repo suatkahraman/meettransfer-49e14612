@@ -28,6 +28,7 @@ import vitoVipCouple from "@/assets/vito-vip-couple-starlight.jpg";
 import vitoPassengerCouple from "@/assets/vito-passenger-couple.jpg";
 import vitoAirportWelcome from "@/assets/vito-airport-welcome.jpg";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const CappadociaAirportTransferGuide = () => {
   const { getLocalizedPath, t, language } = useLanguage();
@@ -163,14 +164,13 @@ const CappadociaAirportTransferGuide = () => {
         />
 
         {/* Featured Image */}
-        <div className="aspect-video overflow-hidden rounded-lg md:rounded-xl mb-6 md:mb-8">
-          <img 
-            src={cappadociaTransferHero} 
-            alt={t("blogCappadociaHeroAlt")}
-            className="w-full h-full object-cover"
-            loading="eager"
-          />
-        </div>
+        <OptimizedBlogImage
+          src={cappadociaTransferHero}
+          alt={t("blogCappadociaHeroAlt")}
+          aspectRatio="video"
+          priority
+          className="rounded-lg md:rounded-xl mb-6 md:mb-8"
+        />
 
         {/* Table of Contents */}
         <TableOfContents items={[
