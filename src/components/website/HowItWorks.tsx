@@ -524,37 +524,6 @@ const HowItWorks = () => {
           </div>
         </div>
 
-        {/* Dynamic Promo Banner */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-12 md:mt-16"
-        >
-          <div className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 border border-green-500/20 rounded-2xl p-6 text-center">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="bg-green-500 text-white p-2 rounded-full">
-                  <ArrowLeftRight className="h-5 w-5" />
-                </div>
-                <div className="text-left">
-                  <p className="font-bold text-lg text-green-700 dark:text-green-400">
-                    {discountPercent}% OFF Return Transfers!
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Use code: <span className="font-mono font-bold text-green-600 dark:text-green-400">{activePromo?.code || 'MEET25RETURN'}</span>
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 bg-green-500/20 text-green-700 dark:text-green-400 px-3 py-1.5 rounded-full text-sm font-semibold">
-                <Tag className="h-4 w-4" />
-                Limited Time Offer
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
         {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
