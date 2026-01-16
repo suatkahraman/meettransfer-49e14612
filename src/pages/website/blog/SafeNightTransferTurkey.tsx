@@ -10,6 +10,7 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import heroImage from "@/assets/vito-passenger-night.jpg";
 
 const SafeNightTransferTurkey = () => {
@@ -163,11 +164,12 @@ const SafeNightTransferTurkey = () => {
         {/* Hero Image */}
         <div className="container mx-auto px-4 mb-12">
           <div className="max-w-4xl mx-auto">
-            <img
+            <OptimizedBlogImage
               src={heroImage}
               alt="Safe night airport transfer in Turkey with Meet Transfer"
-              className="w-full h-64 md:h-96 object-cover rounded-2xl shadow-lg"
-              loading="eager"
+              priority={true}
+              aspectRatio="hero"
+              className="rounded-2xl shadow-lg"
             />
           </div>
         </div>
