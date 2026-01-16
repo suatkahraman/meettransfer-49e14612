@@ -11,10 +11,13 @@ import vitoVipPremium from "@/assets/fleet/vito-vip-premium.webp";
 import vitoVipInterior from "@/assets/fleet/vito-vip-interior.webp";
 import vitoAirport from "@/assets/fleet/vito-airport.webp";
 import vitoFamily from "@/assets/fleet/vito-family.webp";
-import maybachInterior from "@/assets/fleet/maybach-interior.webp";
-import maybachExterior from "@/assets/fleet/maybach-exterior.webp";
 import sprinterExterior from "@/assets/fleet/sprinter-exterior.webp";
 import sprinterInterior from "@/assets/fleet/sprinter-interior.webp";
+
+// Maybach Minivan ultra luxury images
+import maybachMinivan1 from "@/assets/maybach-minivan-1.jpg";
+import maybachMinivan2 from "@/assets/maybach-minivan-2.jpg";
+import maybachMinivan3 from "@/assets/maybach-minivan-3.jpg";
 
 // Legacy images for additional variety
 import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
@@ -63,11 +66,11 @@ const FleetPage = () => {
       startingPrice: "€150",
       features: ["Leather seats", "Rear entertainment", "Ambient lighting", "Mini bar", "Star ceiling", "TV"],
       images: [
-        { src: maybachExterior, alt: "Mercedes Maybach luxury sedan at 5-star hotel" },
-        { src: maybachInterior, alt: "Mercedes Maybach galaxy starlight ceiling interior" },
+        { src: maybachMinivan1, alt: "Mercedes Maybach Minivan ultra luxury exterior VIP transfer" },
+        { src: maybachMinivan2, alt: "Mercedes Maybach Minivan premium cream leather interior with champagne" },
+        { src: maybachMinivan3, alt: "Mercedes Maybach Minivan elegant black side profile executive shuttle" },
         { src: meetTransferPromoBanner, alt: "Meet Transfer Premier VIP Airport Transfer - All Major Airports" },
-        { src: meetTransferDubai, alt: "Meet Transfer Maybach luxury service Dubai" },
-        { src: meetTransferCyprus, alt: "Meet Transfer Maybach service in Cyprus" },
+        { src: meetTransferDubai, alt: "Meet Transfer Maybach Minivan luxury service Dubai" },
       ],
     },
     {
