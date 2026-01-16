@@ -20,7 +20,7 @@ const faqItems = [
   { question: "What makes VIP transfer different?", answer: "VIP transfer includes premium Mercedes vehicles, professional suited driver, complimentary refreshments, and priority service." },
   { question: "Is VIP transfer suitable for business travelers?", answer: "Absolutely. Our VIP service is designed for executives who need reliable, professional transport with WiFi to work en route." },
   { question: "Can I book VIP transfer for corporate clients?", answer: "Yes, we offer corporate accounts with invoicing for companies hosting VIP guests in Istanbul." },
-  { question: "What vehicles are used for VIP transfers?", answer: "Mercedes Vito VIP with leather interior, or Mercedes V-Class for ultimate luxury. Maybach available on request." },
+  { question: "What vehicles are used for VIP transfers?", answer: "Mercedes Vito VIP with leather interior, or Mercedes V-Class for ultimate luxury. Mercedes Maybach Minivan available on request." },
 ];
 
 const IstCityCenterVipTransfer = () => {

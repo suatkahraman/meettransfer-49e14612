@@ -87,7 +87,7 @@ const ServicesPage = () => {
       features: [
         "Downtown Dubai, Palm Jumeirah, Marina",
         "Business Bay & JBR Beach Transfers",
-        "Maybach & VIP Mercedes Fleet",
+        "Mercedes Maybach Minivan & VIP Mercedes Fleet",
       ],
     },
     {

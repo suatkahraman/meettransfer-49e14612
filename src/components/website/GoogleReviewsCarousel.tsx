@@ -36,7 +36,7 @@ const fallbackReviews: Review[] = [
   {
     name: "Ahmed Al-Hassan",
     rating: 5,
-    text: "VIP treatment all the way. The Maybach was stunning and the chauffeur was extremely professional. Worth every penny!",
+    text: "VIP treatment all the way. The Mercedes Maybach Minivan was stunning and the chauffeur was extremely professional. Worth every penny!",
     date: "3 weeks ago",
   },
   {
