@@ -10,7 +10,7 @@ import ShareButtons from "@/components/website/ShareButtons";
 import RelatedArticles from "@/components/website/RelatedArticles";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
-import heroImage from "@/assets/vip-mercedes-vito.jpg";
+import heroImage from "@/assets/vito-family-interior.jpg";
 
 const FamilyAirportTransferTurkey = () => {
   const { t, language } = useLanguage();
