@@ -38,13 +38,15 @@ const airports = [
 ];
 
 const prices = [
-  { from: "DXB Airport", to: "Downtown Dubai", price: "$55" },
-  { from: "DXB Airport", to: "Palm Jumeirah", price: "$70" },
-  { from: "DXB Airport", to: "Dubai Marina", price: "$65" },
-  { from: "DXB Airport", to: "JBR Beach", price: "$65" },
-  { from: "DXB Airport", to: "Business Bay", price: "$50" },
-  { from: "DWC Airport", to: "Downtown Dubai", price: "$85" },
-  { from: "DWC Airport", to: "Palm Jumeirah", price: "$90" },
+  { from: "DXB Airport", to: "Downtown Dubai (Sedan)", price: "265 AED" },
+  { from: "DXB Airport", to: "Downtown Dubai (Premium Van)", price: "600 AED" },
+  { from: "DXB Airport", to: "Downtown Dubai (SUV)", price: "650 AED" },
+  { from: "DXB Airport", to: "Downtown Dubai (VIP Sprinter)", price: "1050 AED" },
+  { from: "DXB Airport", to: "Palm Jumeirah", price: "From 300 AED" },
+  { from: "DXB Airport", to: "Dubai Marina", price: "From 280 AED" },
+  { from: "DXB Airport", to: "JBR Beach", price: "From 280 AED" },
+  { from: "DXB Airport", to: "Business Bay", price: "From 265 AED" },
+  { from: "DWC Airport", to: "Downtown Dubai", price: "From 400 AED" },
 ];
 
 const faqItems = [

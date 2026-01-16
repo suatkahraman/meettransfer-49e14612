@@ -38,12 +38,15 @@ const DubaiAirportTransferGuide = () => {
   ];
 
   const transferPrices = [
-    { destination: t("destDowntownDubai"), duration: "15-25 min", price: "$45-60" },
-    { destination: t("destPalmJumeirah"), duration: "25-35 min", price: "$55-70" },
-    { destination: t("destDubaiMarina"), duration: "30-40 min", price: "$55-70" },
-    { destination: t("destJumeirahBeach"), duration: "20-30 min", price: "$50-65" },
-    { destination: t("destBusinessBay"), duration: "15-25 min", price: "$45-60" },
-    { destination: t("destAbuDhabi"), duration: "75-90 min", price: "$120-150" },
+    { destination: t("destDowntownDubai") + " (Sedan)", duration: "15-25 min", price: "265 AED" },
+    { destination: t("destDowntownDubai") + " (Premium Van)", duration: "15-25 min", price: "600 AED" },
+    { destination: t("destDowntownDubai") + " (SUV)", duration: "15-25 min", price: "650 AED" },
+    { destination: t("destDowntownDubai") + " (VIP Sprinter)", duration: "15-25 min", price: "1050 AED" },
+    { destination: t("destPalmJumeirah"), duration: "25-35 min", price: "From 300 AED" },
+    { destination: t("destDubaiMarina"), duration: "30-40 min", price: "From 280 AED" },
+    { destination: t("destJumeirahBeach"), duration: "20-30 min", price: "From 280 AED" },
+    { destination: t("destBusinessBay"), duration: "15-25 min", price: "From 265 AED" },
+    { destination: t("destAbuDhabi"), duration: "75-90 min", price: "From 650 AED" },
   ];
 
   const popularAttractions = [

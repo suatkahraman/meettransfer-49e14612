@@ -30,7 +30,7 @@ import maybach3 from "@/assets/maybach-3.jpg";
 
 const destinations = [
   "City Center", "Messe Frankfurt", "Financial District", "Main Tower",
-  "Palmengarten", "Sachsenhausen", "Wiesbaden", "Mainz", "Darmstadt", "Offenbach"
+  "Palmengarten", "Sachsenhausen", "Mannheim", "Wiesbaden", "Mainz", "Darmstadt", "Offenbach"
 ];
 
 const airports = [
@@ -42,6 +42,7 @@ const prices = [
   { from: "FRA Airport", to: "Messe Frankfurt", price: "€50" },
   { from: "FRA Airport", to: "Financial District", price: "€55" },
   { from: "FRA Airport", to: "Sachsenhausen", price: "€60" },
+  { from: "FRA Airport", to: "Mannheim", price: "€130" },
   { from: "FRA Airport", to: "Wiesbaden", price: "€75" },
   { from: "FRA Airport", to: "Mainz", price: "€70" },
   { from: "FRA Airport", to: "Darmstadt", price: "€65" },

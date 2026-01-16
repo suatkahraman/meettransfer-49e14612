@@ -41,6 +41,7 @@ const FrankfurtAirportTransferGuide = () => {
     { destination: t("destFrankfurtCity"), duration: "15-25 min", price: "€55-70" },
     { destination: t("destMesseFrankfurt"), duration: "10-15 min", price: "€45-55" },
     { destination: t("destFinancialDistrict"), duration: "15-20 min", price: "€50-65" },
+    { destination: "Mannheim", duration: "45-60 min", price: "€130-190" },
     { destination: t("destMainz"), duration: "30-40 min", price: "€75-90" },
     { destination: t("destWiesbaden"), duration: "35-45 min", price: "€85-100" },
     { destination: t("destHeidelberg"), duration: "60-75 min", price: "€120-150" },
