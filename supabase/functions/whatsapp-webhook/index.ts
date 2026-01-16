@@ -17,7 +17,7 @@ Please send:
 • Date & time
 • Number of passengers
 • Email address
-• Vehicle Type: Vito / Vip Vito / Mercedes Maybach / Minibus`;
+• Vehicle Type: Vito / Vip Vito / Mercedes Maybach Minivan / Minibus`;
 
 // Send email notification to admin using Resend API directly
 async function sendAdminEmailNotification(
