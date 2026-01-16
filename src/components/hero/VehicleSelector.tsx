@@ -44,11 +44,11 @@ const vehicleImages: Record<string, string> = {
   'maybach-minibus': maybachImg,
   'sprinter-minibus': sprinterImg,
   'minibus': sprinterImg,
-  // Dubai vehicles
+  // Dubai vehicles - matching DUBAI_VEHICLE_TYPES values
   'dubai-private-sedan': dubaiSedanImg,
-  'dubai-suburban': dubaiSuburbanImg,
-  'dubai-vip-mercedes-van': dubaiVipVanImg,
-  'dubai-v-class': dubaiVClassImg,
+  'dubai-premium-van': dubaiVClassImg,
+  'dubai-suburban-suv': dubaiSuburbanImg,
+  'dubai-vip-sprinter': dubaiVipVanImg,
 };
 
 interface VehicleSelectorProps {
