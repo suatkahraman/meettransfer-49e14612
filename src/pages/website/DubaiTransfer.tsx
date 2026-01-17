@@ -39,17 +39,17 @@ const airports = [
 
 const prices = [
   // Dubai City Center (Downtown, Jumeirah, Marina, JBR, etc.)
-  { from: "DXB Airport", to: "Dubai City Center (Sedan)", price: "350 AED" },
-  { from: "DXB Airport", to: "Dubai City Center (V Class)", price: "500 AED" },
-  { from: "DXB Airport", to: "Dubai City Center (Premium Van)", price: "700 AED" },
-  { from: "DXB Airport", to: "Dubai City Center (Suburban SUV)", price: "550 AED" },
-  { from: "DXB Airport", to: "Dubai City Center (VIP Sprinter)", price: "1150 AED" },
+  { from: "DXB Airport", to: "City Center - Standard Sedan", price: "350 AED" },
+  { from: "DXB Airport", to: "City Center - Mercedes V Class", price: "500 AED" },
+  { from: "DXB Airport", to: "City Center - Suburban SUV", price: "550 AED" },
+  { from: "DXB Airport", to: "City Center - Premium Van", price: "700 AED" },
+  { from: "DXB Airport", to: "City Center - VIP Sprinter", price: "1150 AED" },
   // Dubai Outer Areas (Emirates Hills, Arabian Ranches, JVC, Sports City, etc.)
-  { from: "DXB Airport", to: "Outer Areas (Sedan)", price: "400 AED" },
-  { from: "DXB Airport", to: "Outer Areas (V Class)", price: "550 AED" },
-  { from: "DXB Airport", to: "Outer Areas (Premium Van)", price: "700 AED" },
-  { from: "DXB Airport", to: "Outer Areas (Suburban SUV)", price: "600 AED" },
-  { from: "DXB Airport", to: "Outer Areas (VIP Sprinter)", price: "1250 AED" },
+  { from: "DXB Airport", to: "Outer Areas - Standard Sedan", price: "400 AED" },
+  { from: "DXB Airport", to: "Outer Areas - Mercedes V Class", price: "550 AED" },
+  { from: "DXB Airport", to: "Outer Areas - Suburban SUV", price: "600 AED" },
+  { from: "DXB Airport", to: "Outer Areas - Premium Van", price: "700 AED" },
+  { from: "DXB Airport", to: "Outer Areas - VIP Sprinter", price: "1250 AED" },
 ];
 
 const faqItems = [
