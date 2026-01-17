@@ -66,6 +66,10 @@ interface Reservation {
   reservation_code: string | null;
   luggage_count: number | null;
   baby_seat_count: number | null;
+  drivers?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface Message {
@@ -103,6 +107,9 @@ export default function CustomerPortal() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
+  // Review tracking state
+  const [reviewedReservations, setReviewedReservations] = useState<Set<string>>(new Set());
+  
   // Get dynamic promo code from context
   const { promoCode: activePromo } = usePromo();
 
@@ -136,6 +143,30 @@ export default function CustomerPortal() {
       setLoading(false);
     }
   };
+
+  // Fetch reviewed reservations when portal data loads
+  useEffect(() => {
+    if (!portalData?.reservations) return;
+    
+    const fetchReviewedReservations = async () => {
+      const completedIds = portalData.reservations
+        .filter(r => r.status === 'completed' && r.driver_id)
+        .map(r => r.id);
+      
+      if (completedIds.length === 0) return;
+      
+      const { data: existingReviews } = await supabase
+        .from('driver_reviews')
+        .select('reservation_id')
+        .in('reservation_id', completedIds);
+      
+      if (existingReviews) {
+        setReviewedReservations(new Set(existingReviews.map(r => r.reservation_id)));
+      }
+    };
+    
+    fetchReviewedReservations();
+  }, [portalData?.reservations]);
 
   // Fetch messages and setup realtime subscriptions when chat opens
   useEffect(() => {
@@ -805,6 +836,7 @@ export default function CustomerPortal() {
                         )}
                       </div>
 
+                      {/* Add Return Transfer Button - for non-completed active transfers */}
                       {!reservation.is_return_transfer && 
                        reservation.status !== "cancelled" && 
                        reservation.status !== "completed" && (
@@ -822,6 +854,32 @@ export default function CustomerPortal() {
                                 {t('addReturnTransferDiscount')}
                               </Button>
                             </motion.div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Review Button - for completed transfers with driver */}
+                      {reservation.status === "completed" && reservation.driver_id && (
+                        <>
+                          <Separator className="my-4" />
+                          <div className="flex justify-end">
+                            {reviewedReservations.has(reservation.id) ? (
+                              <div className="flex items-center gap-2 text-green-600 text-sm">
+                                <CheckCircle className="h-4 w-4" />
+                                <span>{language === 'TR' ? 'Değerlendirildi' : 'Reviewed'}</span>
+                              </div>
+                            ) : (
+                              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                <Button
+                                  size="sm"
+                                  className="shadow-sm bg-amber-500 hover:bg-amber-600 text-white"
+                                  onClick={() => navigate(`/customer/review/${reservation.id}`)}
+                                >
+                                  <Star className="h-4 w-4 mr-2" />
+                                  {language === 'TR' ? 'Deneyiminizi Değerlendirin' : 'Rate Your Experience'}
+                                </Button>
+                              </motion.div>
+                            )}
                           </div>
                         </>
                       )}
