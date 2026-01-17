@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
-import { DUBAI_VEHICLE_TYPES, isDubaiLocation } from "@/lib/dubaiVehicleTypes";
+import { getRegionVehicles, getSuitableVehicle, isVehicleValidForRegion, VehicleRegion } from "@/lib/vehicleRegions";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { useHeroFormStorage, parseSavedDate, SavedFormData } from "./useHeroFormStorage";
 import type { BookingData } from "@/components/hero/types";
@@ -116,7 +116,7 @@ export interface UseRideFormReturn {
   allVehiclePrices: any[];
   transferPriceCurrency: string;
   loadingTransferPrice: boolean;
-  isDubaiRoute: boolean;
+  routeRegion: VehicleRegion;
   appliedPromoCode: string;
   // Return trip
   returnDate: Date | undefined;
@@ -165,7 +165,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   const [allVehiclePrices, setAllVehiclePrices] = useState<any[]>([]);
   const [transferPriceCurrency, setTransferPriceCurrency] = useState("EUR");
   const [loadingTransferPrice, setLoadingTransferPrice] = useState(false);
-  const [isDubaiRoute, setIsDubaiRoute] = useState(false); // Track if route is in Dubai from edge function
+  const [routeRegion, setRouteRegion] = useState<VehicleRegion>('default'); // Track region from edge function
   const [appliedPromoCode, setAppliedPromoCode] = useState<string>("");
   
   // Return trip state
@@ -192,7 +192,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   useEffect(() => {
     if (!pickup || !dropoff) {
       setAllVehiclePrices([]);
-      setIsDubaiRoute(false);
+      setRouteRegion('default');
       return;
     }
     
@@ -209,12 +209,13 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
         } else {
           setAllVehiclePrices([]);
         }
-        // Use isDubai from edge function - this is the authoritative source
-        setIsDubaiRoute(data?.isDubai === true);
-        console.log("[useRideForm] Route isDubai:", data?.isDubai);
+        // Use region from edge function - this is the authoritative source
+        const detectedRegion = (data?.region || 'default') as VehicleRegion;
+        setRouteRegion(detectedRegion);
+        console.log("[useRideForm] Route region:", detectedRegion);
       } catch {
         setAllVehiclePrices([]);
-        setIsDubaiRoute(false);
+        setRouteRegion('default');
       } finally {
         setLoadingTransferPrice(false);
       }
@@ -223,28 +224,24 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     return () => clearTimeout(timer);
   }, [pickup, dropoff]);
 
-  // Auto-adjust vehicle type based on passenger count AND location (use isDubaiRoute from edge function)
+  // Auto-adjust vehicle type based on passenger count AND region
   useEffect(() => {
-    const vehicleList = isDubaiRoute ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
-    
-    // Check if current vehicle is valid for this location
-    const isValidVehicle = vehicleList.some(v => v.value === vehicleType);
-    
-    // If vehicle is not valid for this location, switch to first available
-    if (!isValidVehicle) {
-      const suitable = vehicleList.find(v => v.passengers >= parseInt(passengers));
-      if (suitable) setVehicleType(suitable.value);
-      else setVehicleType(vehicleList[0].value);
+    // Check if current vehicle is valid for this region
+    if (!isVehicleValidForRegion(vehicleType, routeRegion)) {
+      // Get suitable vehicle for this region and passenger count
+      const suitable = getSuitableVehicle(routeRegion, parseInt(passengers));
+      setVehicleType(suitable);
       return;
     }
     
     // Check passenger capacity
+    const vehicleList = getRegionVehicles(routeRegion);
     const currentVehicle = vehicleList.find(v => v.value === vehicleType);
     if (currentVehicle && currentVehicle.passengers < parseInt(passengers)) {
-      const suitable = vehicleList.find(v => v.passengers >= parseInt(passengers));
-      if (suitable) setVehicleType(suitable.value);
+      const suitable = getSuitableVehicle(routeRegion, parseInt(passengers), vehicleType);
+      setVehicleType(suitable);
     }
-  }, [passengers, vehicleType, isDubaiRoute]);
+  }, [passengers, vehicleType, routeRegion]);
 
   // Handlers
   const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {
@@ -450,7 +447,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     allVehiclePrices,
     transferPriceCurrency,
     loadingTransferPrice,
-    isDubaiRoute,
+    routeRegion,
     appliedPromoCode,
     // Return trip
     returnDate,
