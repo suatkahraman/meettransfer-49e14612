@@ -403,15 +403,71 @@ const handler = async (req: Request): Promise<Response> => {
 
     const discountApplied = discountInfo.discountApplied;
 
-    // Update reservation with price
+    // ============================================
+    // AUTO DRIVER ASSIGNMENT BASED ON CITY/REGION
+    // ============================================
+    let autoAssignedDriver: { id: string; name: string; user_id: string; phone: string; plate_number: string | null } | null = null;
+    
+    // Determine which city to use for driver matching
+    const driverMatchCity = city || pickupCity || dropoffCity || airportCity;
+    
+    if (driverMatchCity) {
+      console.log(`🚗 Attempting auto-driver assignment for region: ${driverMatchCity}`);
+      
+      // Map city names to driver regions (normalize variations)
+      const cityToRegionMap: Record<string, string[]> = {
+        'Istanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
+        'İstanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
+        'Antalya': ['Antalya', 'antalya', 'ANTALYA'],
+        'Izmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
+        'İzmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
+        'Bodrum': ['Bodrum', 'bodrum', 'BODRUM', 'Mugla', 'Muğla'],
+        'Dalaman': ['Dalaman', 'dalaman', 'DALAMAN', 'Mugla', 'Muğla'],
+        'Fethiye': ['Fethiye', 'fethiye', 'FETHIYE', 'Mugla', 'Muğla'],
+        'Cappadocia': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'],
+        'Dubai': ['Dubai', 'dubai', 'DUBAI', 'UAE'],
+        'Abu Dhabi': ['Abu Dhabi', 'abu dhabi', 'ABU DHABI', 'UAE'],
+        'Cyprus': ['Cyprus', 'Kıbrıs', 'KKTC', 'Larnaca', 'Paphos', 'Ercan'],
+        'Bursa': ['Bursa', 'bursa', 'BURSA'],
+      };
+      
+      // Get possible region values for this city
+      const possibleRegions = cityToRegionMap[driverMatchCity] || [driverMatchCity];
+      
+      // Find an active driver with matching region
+      // Priority: exact region match, then any active driver if no region match
+      const { data: matchingDrivers } = await supabase
+        .from('drivers')
+        .select('id, name, user_id, phone, plate_number, region')
+        .eq('active', true)
+        .in('region', possibleRegions)
+        .limit(5);
+      
+      if (matchingDrivers && matchingDrivers.length > 0) {
+        // Select the first available driver (could be enhanced with load balancing)
+        autoAssignedDriver = matchingDrivers[0];
+        console.log(`✅ Auto-assigning driver: ${autoAssignedDriver.name} (region: ${matchingDrivers[0].region})`);
+      } else {
+        console.log(`⚠️ No active driver found for region: ${driverMatchCity} - manual assignment required`);
+      }
+    }
+
+    // Update reservation with price and optionally driver
+    const updateData: Record<string, any> = {
+      price: finalPrice,
+      price_currency: finalCurrency,
+      status: autoAssignedDriver ? 'sent_to_driver' : 'waiting_for_customer_approval',
+      discount_percentage: discountApplied ? discountInfo.discountPercent : null,
+    };
+    
+    if (autoAssignedDriver) {
+      updateData.driver_id = autoAssignedDriver.id;
+      updateData.driver_user_id = autoAssignedDriver.user_id;
+    }
+    
     const { error: updateError } = await supabase
       .from("reservations")
-      .update({
-        price: finalPrice,
-        price_currency: finalCurrency,
-        status: 'waiting_for_customer_approval',
-        discount_percentage: discountApplied ? discountInfo.discountPercent : null,
-      })
+      .update(updateData)
       .eq("id", reservation_id);
 
     if (updateError) {
@@ -420,14 +476,18 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Record price history
+    const priceHistoryNote = autoAssignedDriver 
+      ? `Otomatik fiyat + Şoför: ${autoAssignedDriver.name}`
+      : discountApplied 
+        ? `Otomatik fiyat + %${discountInfo.discountPercent} indirim` 
+        : `Otomatik fiyat: ${city || 'N/A'} - ${district || 'N/A'} (${airport || 'N/A'})${exchangeRate !== 1 ? ` [Kur: ${exchangeRate.toFixed(2)}]` : ''}`;
+    
     await supabase.from("price_history").insert({
       reservation_id: reservation_id,
       price: finalPrice,
       price_currency: finalCurrency,
-      action: 'auto_priced',
-      customer_note: discountApplied 
-        ? `Otomatik fiyat + %${discountInfo.discountPercent} indirim` 
-        : `Otomatik fiyat: ${city || 'N/A'} - ${district || 'N/A'} (${airport || 'N/A'})${exchangeRate !== 1 ? ` [Kur: ${exchangeRate.toFixed(2)}]` : ''}`,
+      action: autoAssignedDriver ? 'auto_priced_with_driver' : 'auto_priced',
+      customer_note: priceHistoryNote,
     });
 
     console.log(`✅ Auto-priced reservation: ${finalPrice} ${finalCurrency}`);
@@ -482,6 +542,7 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
                 Bu bildirim otomatik fiyat sistemi tarafından gönderilmiştir.<br>
                 <strong>Not:</strong> Havalimanı ↔ Adres transferleri aynı fiyattır.
+                ${autoAssignedDriver ? `<br><strong style="color: #10b981;">🚗 Şoför Otomatik Atandı: ${autoAssignedDriver.name}</strong>` : ''}
               </p>
             </div>
           </div>
@@ -490,6 +551,76 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("📧 Admin notification email sent");
     } catch (adminEmailError) {
       console.error("Failed to send admin notification email:", adminEmailError);
+    }
+
+    // ============================================
+    // SEND DRIVER NOTIFICATION IF AUTO-ASSIGNED
+    // ============================================
+    if (autoAssignedDriver) {
+      try {
+        // Get driver's email
+        const { data: driverUserData } = await supabase.auth.admin.getUserById(autoAssignedDriver.user_id);
+        const driverEmail = driverUserData?.user?.email;
+        
+        if (driverEmail) {
+          await resend.emails.send({
+            from: "Meet Transfer <noreply@mail.meettransfer.app>",
+            to: driverEmail,
+            subject: `🚗 Yeni Transfer Görevi: ${reservation.pickup_date} ${reservation.pickup_time}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
+                  <h1 style="color: white; margin: 0; font-size: 24px;">🚗 Yeni Transfer Görevi</h1>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
+                  <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
+                    <h3 style="margin: 0 0 10px 0; color: #333;">Müşteri Bilgileri</h3>
+                    <p style="margin: 5px 0; color: #666;"><strong>Ad:</strong> ${reservation.customer_name}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>Telefon:</strong> ${reservation.customer_phone}</p>
+                  </div>
+                  
+                  <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #10b981;">
+                    <h3 style="margin: 0 0 10px 0; color: #333;">Transfer Detayları</h3>
+                    <p style="margin: 5px 0; color: #666;"><strong>📅 Tarih:</strong> ${reservation.pickup_date}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>🕐 Saat:</strong> ${reservation.pickup_time}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>📍 Alış:</strong> ${reservation.pickup}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>🏁 Bırakış:</strong> ${reservation.dropoff}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>🚗 Araç:</strong> ${reservation.vehicle_type}</p>
+                    ${reservation.flight_number ? `<p style="margin: 5px 0; color: #666;"><strong>✈️ Uçuş:</strong> ${reservation.flight_number}</p>` : ''}
+                  </div>
+                  
+                  <div style="text-align: center; margin: 20px 0;">
+                    <a href="https://meettransfer.lovable.app/driver" 
+                       style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; 
+                              border-radius: 8px; text-decoration: none; font-weight: 600;">
+                      Görevi Görüntüle
+                    </a>
+                  </div>
+                  
+                  <p style="color: #999; font-size: 12px; text-align: center;">
+                    Bu görev otomatik olarak size atanmıştır.
+                  </p>
+                </div>
+              </div>
+            `,
+          });
+          console.log(`📧 Driver notification email sent to ${driverEmail}`);
+        }
+        
+        // Also create in-app notification for driver
+        await supabase.from('notifications').insert({
+          user_id: autoAssignedDriver.user_id,
+          title: 'Yeni Transfer Görevi',
+          message: `${reservation.pickup_date} ${reservation.pickup_time} - ${reservation.pickup} → ${reservation.dropoff}`,
+          type: 'driver_assignment',
+          reservation_id: reservation_id,
+        });
+        console.log(`🔔 In-app notification created for driver`);
+        
+      } catch (driverNotifyError) {
+        console.error("Failed to notify driver:", driverNotifyError);
+      }
     }
 
     // Get customer email for notification
