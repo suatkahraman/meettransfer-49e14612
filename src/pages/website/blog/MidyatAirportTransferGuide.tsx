@@ -19,6 +19,7 @@ import { useBlogDate } from "@/hooks/useBlogDate";
 // Import images
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
+import midyatHero from "@/assets/blog/midyat-transfer-hero.jpg";
 import midyatStoneHouses from "@/assets/blog/midyat-stone-houses.jpg";
 import morGabrielMonastery from "@/assets/blog/mor-gabriel-monastery.jpg";
 import midyatTelkariSilver from "@/assets/blog/midyat-telkari-silver.jpg";
@@ -226,10 +227,10 @@ const MidyatAirportTransferGuide = () => {
           <ShareButtons title="Midyat Airport Transfer - Private Shuttle to Mor Gabriel, Syriac Monasteries 2025" />
         </header>
 
-        {/* Hero Image - Midyat Stone Houses */}
+        {/* Hero Image - Midyat Transfer */}
         <OptimizedBlogImage
-          src={midyatStoneHouses}
-          alt="Midyat old town cobblestone streets with traditional honey-colored stone houses and intricate carvings"
+          src={midyatHero}
+          alt="Luxury black Mercedes van on cobblestone street in Midyat with ancient stone houses and Mor Gabriel Monastery silhouette at sunset"
           className="w-full aspect-video rounded-xl mb-12"
           priority={true}
         />

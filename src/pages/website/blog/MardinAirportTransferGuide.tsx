@@ -19,6 +19,7 @@ import { useBlogDate } from "@/hooks/useBlogDate";
 // Import images
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
+import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
 import mardinOldTownPanorama from "@/assets/blog/mardin-old-town-panorama.jpg";
 import deyrulzafaranMonastery from "@/assets/blog/deyrulzafaran-monastery.jpg";
 import daraAncientCity from "@/assets/blog/dara-ancient-city.jpg";
@@ -223,10 +224,10 @@ const MardinAirportTransferGuide = () => {
           <ShareButtons title="Mardin Airport Transfer - Private VIP Shuttle to Midyat, Nusaybin 2025" />
         </header>
 
-        {/* Hero Image - Mardin Old Town Panorama */}
+        {/* Hero Image - Mardin Transfer */}
         <OptimizedBlogImage
-          src={mardinOldTownPanorama}
-          alt="Mardin old town panoramic view with honey-colored stone buildings and minarets at sunset"
+          src={mardinHero}
+          alt="Luxury Mercedes Vito on winding road through Mardin's ancient stone houses at sunset with monastery in background"
           className="w-full aspect-video rounded-xl mb-12"
           priority={true}
         />
