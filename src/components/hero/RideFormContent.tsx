@@ -55,6 +55,8 @@ interface RideFormContentProps {
   luggageCount?: number;
   setBabySeatCount?: (count: number) => void;
   setLuggageCount?: (count: number) => void;
+  // Dubai route detection from edge function
+  isDubaiRoute?: boolean;
 }
 
 interface ValidationErrors {
@@ -97,6 +99,8 @@ export const RideFormContent = memo(({
   luggageCount = 0,
   setBabySeatCount,
   setLuggageCount,
+  // Dubai route
+  isDubaiRoute = false,
 }: RideFormContentProps) => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
@@ -258,6 +262,7 @@ export const RideFormContent = memo(({
           hasRoute={hasRoute} 
           language={language} 
           currency={transferPriceCurrency}
+          isDubai={isDubaiRoute}
         />
       </div>
 
