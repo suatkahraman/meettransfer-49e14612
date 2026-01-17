@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, CheckCircle2, Users, Globe, Shield, Handshake, TrendingUp, CreditCard, HeadphonesIcon, Clock4, Building2, Award, Star, Zap, Mail, Phone } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Users, Globe, Shield, Handshake, TrendingUp, CreditCard, HeadphonesIcon, Clock4, Building2, Award, Star, Zap, Mail, MessageCircle } from "lucide-react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -86,9 +86,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "What Partner Agencies Say",
       testimonials: [
-        { name: "TravelWorld Germany", quote: "Meet Transfer has been our go-to partner for Turkey transfers. Reliable, professional, and their B2B rates are unbeatable.", country: "Germany" },
-        { name: "Euro Tours UK", quote: "The agency dashboard is incredibly easy to use. Our guests consistently praise the service quality.", country: "United Kingdom" },
-        { name: "Voyage Plus France", quote: "Excellent communication and flexibility. They've never let us down, even with last-minute bookings.", country: "France" },
+        { quote: "Meet Transfer has been our go-to partner for Turkey transfers. Reliable, professional, and their B2B rates are unbeatable.", country: "Germany" },
+        { quote: "The agency dashboard is incredibly easy to use. Our guests consistently praise the service quality.", country: "United Kingdom" },
+        { quote: "Excellent communication and flexibility. They've never let us down, even with last-minute bookings.", country: "France" },
       ],
       
       faqTitle: "Frequently Asked Questions",
@@ -107,8 +107,8 @@ const AgencyPartnershipGuide = () => {
       ctaSecondary: "Contact Us First",
       
       contactTitle: "Contact Our Partnership Team",
-      contactEmail: "partners@meettransfer.com",
-      contactPhone: "+90 531 763 26 26",
+      contactEmail: "info@meettransfer.app",
+      contactWhatsApp: "+90 531 763 26 26",
     },
     TR: {
       badge: "B2B Ortaklık",
@@ -174,9 +174,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "Ortak Acentalar Ne Diyor",
       testimonials: [
-        { name: "TravelWorld Germany", quote: "Meet Transfer, Türkiye transferleri için başvurduğumuz ortak. Güvenilir, profesyonel ve B2B fiyatları rakipsiz.", country: "Almanya" },
-        { name: "Euro Tours UK", quote: "Acenta panosu inanılmaz kullanışlı. Misafirlerimiz sürekli hizmet kalitesini övüyor.", country: "İngiltere" },
-        { name: "Voyage Plus France", quote: "Mükemmel iletişim ve esneklik. Son dakika rezervasyonlarında bile bizi hiç yarı yolda bırakmadılar.", country: "Fransa" },
+        { quote: "Meet Transfer, Türkiye transferleri için başvurduğumuz ortak. Güvenilir, profesyonel ve B2B fiyatları rakipsiz.", country: "Almanya" },
+        { quote: "Acenta panosu inanılmaz kullanışlı. Misafirlerimiz sürekli hizmet kalitesini övüyor.", country: "İngiltere" },
+        { quote: "Mükemmel iletişim ve esneklik. Son dakika rezervasyonlarında bile bizi hiç yarı yolda bırakmadılar.", country: "Fransa" },
       ],
       
       faqTitle: "Sıkça Sorulan Sorular",
@@ -195,8 +195,8 @@ const AgencyPartnershipGuide = () => {
       ctaSecondary: "Önce Bize Ulaşın",
       
       contactTitle: "Ortaklık Ekibimizle İletişim",
-      contactEmail: "partners@meettransfer.com",
-      contactPhone: "+90 531 763 26 26",
+      contactEmail: "info@meettransfer.app",
+      contactWhatsApp: "+90 531 763 26 26",
     },
     DE: {
       badge: "B2B Partnerschaft",
@@ -262,9 +262,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "Was Partneragenturen sagen",
       testimonials: [
-        { name: "TravelWorld Germany", quote: "Meet Transfer ist unser bevorzugter Partner für Türkei-Transfers. Zuverlässig, professionell und ihre B2B-Preise sind unschlagbar.", country: "Deutschland" },
-        { name: "Euro Tours UK", quote: "Das Agentur-Dashboard ist unglaublich einfach zu bedienen. Unsere Gäste loben konsequent die Servicequalität.", country: "Vereinigtes Königreich" },
-        { name: "Voyage Plus France", quote: "Ausgezeichnete Kommunikation und Flexibilität. Sie haben uns nie im Stich gelassen, selbst bei Last-Minute-Buchungen.", country: "Frankreich" },
+        { quote: "Meet Transfer ist unser bevorzugter Partner für Türkei-Transfers. Zuverlässig, professionell und ihre B2B-Preise sind unschlagbar.", country: "Deutschland" },
+        { quote: "Das Agentur-Dashboard ist unglaublich einfach zu bedienen. Unsere Gäste loben konsequent die Servicequalität.", country: "Vereinigtes Königreich" },
+        { quote: "Ausgezeichnete Kommunikation und Flexibilität. Sie haben uns nie im Stich gelassen, selbst bei Last-Minute-Buchungen.", country: "Frankreich" },
       ],
       
       faqTitle: "Häufig gestellte Fragen",
@@ -283,8 +283,8 @@ const AgencyPartnershipGuide = () => {
       ctaSecondary: "Erst kontaktieren",
       
       contactTitle: "Kontaktieren Sie unser Partnerschaftsteam",
-      contactEmail: "partners@meettransfer.com",
-      contactPhone: "+90 531 763 26 26",
+      contactEmail: "info@meettransfer.app",
+      contactWhatsApp: "+90 531 763 26 26",
     },
     RU: {
       badge: "B2B Партнерство",
@@ -350,9 +350,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "Что говорят агентства-партнеры",
       testimonials: [
-        { name: "TravelWorld Germany", quote: "Meet Transfer - наш основной партнер по трансферам в Турции. Надежные, профессиональные, и их B2B цены непревзойденны.", country: "Германия" },
-        { name: "Euro Tours UK", quote: "Панель агентства невероятно проста в использовании. Наши гости постоянно хвалят качество обслуживания.", country: "Великобритания" },
-        { name: "Voyage Plus France", quote: "Отличная коммуникация и гибкость. Они никогда нас не подводили, даже с бронированиями в последнюю минуту.", country: "Франция" },
+        { quote: "Meet Transfer - наш основной партнер по трансферам в Турции. Надежные, профессиональные, и их B2B цены непревзойденны.", country: "Германия" },
+        { quote: "Панель агентства невероятно проста в использовании. Наши гости постоянно хвалят качество обслуживания.", country: "Великобритания" },
+        { quote: "Отличная коммуникация и гибкость. Они никогда нас не подводили, даже с бронированиями в последнюю минуту.", country: "Франция" },
       ],
       
       faqTitle: "Часто задаваемые вопросы",
@@ -371,8 +371,8 @@ const AgencyPartnershipGuide = () => {
       ctaSecondary: "Сначала связаться",
       
       contactTitle: "Свяжитесь с нашей командой по партнерству",
-      contactEmail: "partners@meettransfer.com",
-      contactPhone: "+90 531 763 26 26",
+      contactEmail: "info@meettransfer.app",
+      contactWhatsApp: "+90 531 763 26 26",
     },
     FR: {
       badge: "Partenariat B2B",
@@ -438,9 +438,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "Ce que Disent les Agences Partenaires",
       testimonials: [
-        { name: "TravelWorld Germany", quote: "Meet Transfer est notre partenaire de référence pour les transferts en Turquie. Fiable, professionnel, et leurs tarifs B2B sont imbattables.", country: "Allemagne" },
-        { name: "Euro Tours UK", quote: "Le tableau de bord agence est incroyablement facile à utiliser. Nos clients louent constamment la qualité du service.", country: "Royaume-Uni" },
-        { name: "Voyage Plus France", quote: "Excellente communication et flexibilité. Ils ne nous ont jamais laissé tomber, même avec des réservations de dernière minute.", country: "France" },
+        { quote: "Meet Transfer est notre partenaire de référence pour les transferts en Turquie. Fiable, professionnel, et leurs tarifs B2B sont imbattables.", country: "Allemagne" },
+        { quote: "Le tableau de bord agence est incroyablement facile à utiliser. Nos clients louent constamment la qualité du service.", country: "Royaume-Uni" },
+        { quote: "Excellente communication et flexibilité. Ils ne nous ont jamais laissé tomber, même avec des réservations de dernière minute.", country: "France" },
       ],
       
       faqTitle: "Questions Fréquemment Posées",
@@ -459,8 +459,8 @@ const AgencyPartnershipGuide = () => {
       ctaSecondary: "Nous Contacter d'Abord",
       
       contactTitle: "Contactez Notre Équipe Partenariats",
-      contactEmail: "partners@meettransfer.com",
-      contactPhone: "+90 531 763 26 26",
+      contactEmail: "info@meettransfer.app",
+      contactWhatsApp: "+90 531 763 26 26",
     },
   };
 
@@ -752,9 +752,8 @@ const AgencyPartnershipGuide = () => {
                     <CardContent className="p-4">
                       <p className="italic text-muted-foreground mb-3">"{testimonial.quote}"</p>
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-primary" />
-                        <span className="font-semibold">{testimonial.name}</span>
-                        <span className="text-sm text-muted-foreground">• {testimonial.country}</span>
+                        <Globe className="h-4 w-4 text-primary" />
+                        <span className="text-sm text-muted-foreground">{testimonial.country}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -794,11 +793,13 @@ const AgencyPartnershipGuide = () => {
                       {c.contactEmail}
                     </a>
                     <a 
-                      href={`tel:${c.contactPhone.replace(/\s/g, '')}`}
-                      className="flex items-center gap-2 text-primary hover:underline"
+                      href={`https://wa.me/${c.contactWhatsApp.replace(/[\s+]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-green-600 hover:underline"
                     >
-                      <Phone className="h-5 w-5" />
-                      {c.contactPhone}
+                      <MessageCircle className="h-5 w-5" />
+                      WhatsApp: {c.contactWhatsApp}
                     </a>
                   </div>
                 </CardContent>
