@@ -60,8 +60,7 @@ interface VehicleSelectorProps {
   hasRoute: boolean;
   language: string;
   currency?: string;
-  pickup?: string;
-  dropoff?: string;
+  isDubai?: boolean; // Use isDubai from edge function instead of local detection
 }
 
 export const VehicleSelector = memo(({
@@ -73,17 +72,12 @@ export const VehicleSelector = memo(({
   hasRoute,
   language,
   currency = "EUR",
-  pickup = "",
-  dropoff = ""
+  isDubai = false
 }: VehicleSelectorProps) => {
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Determine if location is in Dubai and get appropriate vehicle list
-  const isDubai = useMemo(() => {
-    return isDubaiLocation(pickup) || isDubaiLocation(dropoff);
-  }, [pickup, dropoff]);
-
+  // Use isDubai prop from edge function - this is the authoritative source
   const vehicleList: VehicleTypeInfo[] = useMemo(() => {
     return isDubai ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
   }, [isDubai]);
