@@ -419,12 +419,23 @@ const handler = async (req: Request): Promise<Response> => {
         'Istanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
         'İstanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
         'Antalya': ['Antalya', 'antalya', 'ANTALYA'],
+        'Alanya': ['Antalya', 'antalya', 'ANTALYA'], // Alanya is in Antalya region
+        'Kemer': ['Antalya', 'antalya', 'ANTALYA'], // Kemer is in Antalya region
+        'Belek': ['Antalya', 'antalya', 'ANTALYA'], // Belek is in Antalya region
+        'Side': ['Antalya', 'antalya', 'ANTALYA'], // Side is in Antalya region
+        'Manavgat': ['Antalya', 'antalya', 'ANTALYA'], // Manavgat is in Antalya region
+        'Kas': ['Antalya', 'antalya', 'ANTALYA'], // Kaş is in Antalya region
         'Izmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
         'İzmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
+        'Cesme': ['Izmir', 'İzmir', 'izmir', 'İZMİR'], // Çeşme is in İzmir region
+        'Kusadasi': ['Izmir', 'İzmir', 'izmir', 'İZMİR'], // Kuşadası is in İzmir region
         'Bodrum': ['Bodrum', 'bodrum', 'BODRUM', 'Mugla', 'Muğla'],
         'Dalaman': ['Dalaman', 'dalaman', 'DALAMAN', 'Mugla', 'Muğla'],
-        'Fethiye': ['Fethiye', 'fethiye', 'FETHIYE', 'Mugla', 'Muğla'],
+        'Fethiye': ['Fethiye', 'fethiye', 'FETHIYE', 'Dalaman', 'Mugla', 'Muğla'],
+        'Marmaris': ['Dalaman', 'dalaman', 'DALAMAN', 'Mugla', 'Muğla'], // Marmaris uses Dalaman
         'Cappadocia': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'],
+        'Goreme': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'], // Göreme is in Cappadocia
+        'Urgup': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'], // Ürgüp is in Cappadocia
         'Dubai': ['Dubai', 'dubai', 'DUBAI', 'UAE'],
         'Abu Dhabi': ['Abu Dhabi', 'abu dhabi', 'ABU DHABI', 'UAE'],
         'Cyprus': ['Cyprus', 'Kıbrıs', 'KKTC', 'Larnaca', 'Paphos', 'Ercan'],
