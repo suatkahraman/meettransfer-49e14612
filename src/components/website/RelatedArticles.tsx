@@ -5,6 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useLanguage } from "@/contexts/LanguageContext";
 import OptimizedBlogImage from "./OptimizedBlogImage";
 
+// Import hero images for Mardin and Midyat
+import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
+import midyatHero from "@/assets/blog/midyat-transfer-hero.jpg";
+
 // Blog posts data - centralized for reuse
 export const allBlogPosts = [
   // AI-Optimized Blog Posts for Search Engines & AI Crawlers
@@ -49,7 +53,7 @@ export const allBlogPosts = [
     categoryKey: "mardin",
     readTime: 10,
     date: "2025-01-16",
-    image: "/images/vito-exterior-black.jpg",
+    image: mardinHero,
     isStatic: true,
   },
   {
@@ -60,7 +64,7 @@ export const allBlogPosts = [
     categoryKey: "midyat",
     readTime: 11,
     date: "2025-01-16",
-    image: "/images/vito-vip-starlight-purple.jpg",
+    image: midyatHero,
     isStatic: true,
   },
   {
