@@ -39,15 +39,18 @@ const DubaiAirportTransferGuide = () => {
   ];
 
   const transferPrices = [
-    { destination: t("destDowntownDubai") + " (Sedan)", duration: "15-25 min", price: "265 AED" },
-    { destination: t("destDowntownDubai") + " (Premium Van)", duration: "15-25 min", price: "600 AED" },
-    { destination: t("destDowntownDubai") + " (SUV)", duration: "15-25 min", price: "650 AED" },
-    { destination: t("destDowntownDubai") + " (VIP Sprinter)", duration: "15-25 min", price: "1050 AED" },
-    { destination: t("destPalmJumeirah"), duration: "25-35 min", price: "From 300 AED" },
-    { destination: t("destDubaiMarina"), duration: "30-40 min", price: "From 280 AED" },
-    { destination: t("destJumeirahBeach"), duration: "20-30 min", price: "From 280 AED" },
-    { destination: t("destBusinessBay"), duration: "15-25 min", price: "From 265 AED" },
-    { destination: t("destAbuDhabi"), duration: "75-90 min", price: "From 650 AED" },
+    // Dubai City Center (Downtown, Jumeirah, Marina, JBR, etc.)
+    { destination: "Dubai City Center (Sedan)", duration: "15-30 min", price: "350 AED" },
+    { destination: "Dubai City Center (V Class)", duration: "15-30 min", price: "500 AED" },
+    { destination: "Dubai City Center (Premium Van)", duration: "15-30 min", price: "700 AED" },
+    { destination: "Dubai City Center (Suburban SUV)", duration: "15-30 min", price: "550 AED" },
+    { destination: "Dubai City Center (VIP Sprinter)", duration: "15-30 min", price: "1150 AED" },
+    // Dubai Outer Areas (Emirates Hills, Arabian Ranches, JVC, Sports City, etc.)
+    { destination: "Outer Areas (Sedan)", duration: "30-45 min", price: "400 AED" },
+    { destination: "Outer Areas (V Class)", duration: "30-45 min", price: "550 AED" },
+    { destination: "Outer Areas (Premium Van)", duration: "30-45 min", price: "700 AED" },
+    { destination: "Outer Areas (Suburban SUV)", duration: "30-45 min", price: "600 AED" },
+    { destination: "Outer Areas (VIP Sprinter)", duration: "30-45 min", price: "1250 AED" },
   ];
 
   const popularAttractions = [

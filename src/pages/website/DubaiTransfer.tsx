@@ -38,15 +38,18 @@ const airports = [
 ];
 
 const prices = [
-  { from: "DXB Airport", to: "Downtown Dubai (Sedan)", price: "265 AED" },
-  { from: "DXB Airport", to: "Downtown Dubai (Premium Van)", price: "600 AED" },
-  { from: "DXB Airport", to: "Downtown Dubai (SUV)", price: "650 AED" },
-  { from: "DXB Airport", to: "Downtown Dubai (VIP Sprinter)", price: "1050 AED" },
-  { from: "DXB Airport", to: "Palm Jumeirah", price: "From 300 AED" },
-  { from: "DXB Airport", to: "Dubai Marina", price: "From 280 AED" },
-  { from: "DXB Airport", to: "JBR Beach", price: "From 280 AED" },
-  { from: "DXB Airport", to: "Business Bay", price: "From 265 AED" },
-  { from: "DWC Airport", to: "Downtown Dubai", price: "From 400 AED" },
+  // Dubai City Center (Downtown, Jumeirah, Marina, JBR, etc.)
+  { from: "DXB Airport", to: "Dubai City Center (Sedan)", price: "350 AED" },
+  { from: "DXB Airport", to: "Dubai City Center (V Class)", price: "500 AED" },
+  { from: "DXB Airport", to: "Dubai City Center (Premium Van)", price: "700 AED" },
+  { from: "DXB Airport", to: "Dubai City Center (Suburban SUV)", price: "550 AED" },
+  { from: "DXB Airport", to: "Dubai City Center (VIP Sprinter)", price: "1150 AED" },
+  // Dubai Outer Areas (Emirates Hills, Arabian Ranches, JVC, Sports City, etc.)
+  { from: "DXB Airport", to: "Outer Areas (Sedan)", price: "400 AED" },
+  { from: "DXB Airport", to: "Outer Areas (V Class)", price: "550 AED" },
+  { from: "DXB Airport", to: "Outer Areas (Premium Van)", price: "700 AED" },
+  { from: "DXB Airport", to: "Outer Areas (Suburban SUV)", price: "600 AED" },
+  { from: "DXB Airport", to: "Outer Areas (VIP Sprinter)", price: "1250 AED" },
 ];
 
 const faqItems = [
