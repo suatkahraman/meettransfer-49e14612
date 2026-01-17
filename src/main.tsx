@@ -3,8 +3,8 @@ import App from "./App.tsx";
 import "./index.css";
 import { initWebVitals } from "@/utils/webVitals";
 
-// Initialize Core Web Vitals measurement
-initWebVitals({ debug: true, reportToAnalytics: true });
+// Initialize Core Web Vitals measurement (debug only in development)
+initWebVitals({ debug: import.meta.env.DEV, reportToAnalytics: true });
 
 createRoot(document.getElementById("root")!).render(<App />);
 
