@@ -474,6 +474,8 @@ const CustomerHome = () => {
               customerPhone: userPhone,
               paymentMethod: quickBooking.payment_method || 'card',
               hasReturnTrip: quickBooking.has_return_trip,
+              returnDate: quickBooking.return_date,
+              returnTime: quickBooking.return_time,
               returnPrice: quickBooking.return_price,
             }
           });
@@ -539,6 +541,8 @@ const CustomerHome = () => {
           customerPhone: customerPhone.trim(),
           paymentMethod: bookingData.payment_method || 'card',
           hasReturnTrip: bookingData.has_return_trip,
+          returnDate: bookingData.return_date,
+          returnTime: bookingData.return_time,
           returnPrice: bookingData.return_price,
         }
       });
