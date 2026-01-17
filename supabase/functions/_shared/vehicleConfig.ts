@@ -20,6 +20,7 @@ export const VEHICLE_TYPES: VehicleTypeConfig[] = [
 // Dubai-specific vehicle types
 export const DUBAI_VEHICLE_TYPES: VehicleTypeConfig[] = [
   { value: 'dubai-private-sedan', label: 'Private Standard Sedan', passengers: 3, luggage: 2 },
+  { value: 'dubai-v-class', label: 'Mercedes V Class', passengers: 6, luggage: 6 },
   { value: 'dubai-premium-van', label: 'Mercedes Premium Van', passengers: 6, luggage: 6 },
   { value: 'dubai-suburban-suv', label: 'Mercedes Suburban SUV', passengers: 6, luggage: 6 },
   { value: 'dubai-vip-sprinter', label: 'VIP Mercedes Sprinter', passengers: 12, luggage: 12 },
@@ -92,6 +93,7 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   
   // Dubai vehicle mappings
   'dubai-private-sedan': ['dubai-private-sedan', 'sedan'],
+  'dubai-v-class': ['dubai-v-class', 'mercedes-vito'],
   'dubai-premium-van': ['dubai-premium-van', 'mercedes-vito'],
   'dubai-suburban-suv': ['dubai-suburban-suv', 'mercedes-vito'],
   'dubai-vip-sprinter': ['dubai-vip-sprinter', 'minibus'],
@@ -112,6 +114,8 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   'Sedan': ['sedan', 'mercedes-vito'],
   // Dubai aliases
   'Private Sedan': ['dubai-private-sedan', 'sedan'],
+  'V Class': ['dubai-v-class', 'mercedes-vito'],
+  'Mercedes V Class': ['dubai-v-class', 'mercedes-vito'],
   'Premium Van': ['dubai-premium-van', 'mercedes-vito'],
   'Suburban SUV': ['dubai-suburban-suv', 'mercedes-vito'],
   'VIP Sprinter': ['dubai-vip-sprinter', 'minibus'],
