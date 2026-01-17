@@ -29,7 +29,8 @@ import maybach3 from "@/assets/maybach-3.jpg";
 
 const destinations = [
   "Burj Khalifa", "Palm Jumeirah", "Dubai Marina", "Downtown Dubai",
-  "JBR Beach", "Dubai Mall", "Deira", "Business Bay", "DIFC", "Jumeirah"
+  "JBR Beach", "Dubai Mall", "Deira", "Business Bay", "DIFC", "Jumeirah",
+  "Al Barsha", "Creek Harbour", "Dubai Hills", "City Walk", "Meydan"
 ];
 
 const airports = [
