@@ -40,17 +40,17 @@ const DubaiAirportTransferGuide = () => {
 
   const transferPrices = [
     // Dubai City Center (Downtown, Jumeirah, Marina, JBR, etc.)
-    { destination: "Dubai City Center (Sedan)", duration: "15-30 min", price: "350 AED" },
-    { destination: "Dubai City Center (V Class)", duration: "15-30 min", price: "500 AED" },
-    { destination: "Dubai City Center (Premium Van)", duration: "15-30 min", price: "700 AED" },
-    { destination: "Dubai City Center (Suburban SUV)", duration: "15-30 min", price: "550 AED" },
-    { destination: "Dubai City Center (VIP Sprinter)", duration: "15-30 min", price: "1150 AED" },
+    { destination: "Dubai City Center - Standard Sedan", duration: "15-30 min", price: "350 AED" },
+    { destination: "Dubai City Center - Mercedes V Class", duration: "15-30 min", price: "500 AED" },
+    { destination: "Dubai City Center - Suburban SUV", duration: "15-30 min", price: "550 AED" },
+    { destination: "Dubai City Center - Premium Van", duration: "15-30 min", price: "700 AED" },
+    { destination: "Dubai City Center - VIP Sprinter", duration: "15-30 min", price: "1150 AED" },
     // Dubai Outer Areas (Emirates Hills, Arabian Ranches, JVC, Sports City, etc.)
-    { destination: "Outer Areas (Sedan)", duration: "30-45 min", price: "400 AED" },
-    { destination: "Outer Areas (V Class)", duration: "30-45 min", price: "550 AED" },
-    { destination: "Outer Areas (Premium Van)", duration: "30-45 min", price: "700 AED" },
-    { destination: "Outer Areas (Suburban SUV)", duration: "30-45 min", price: "600 AED" },
-    { destination: "Outer Areas (VIP Sprinter)", duration: "30-45 min", price: "1250 AED" },
+    { destination: "Outer Areas - Standard Sedan", duration: "30-45 min", price: "400 AED" },
+    { destination: "Outer Areas - Mercedes V Class", duration: "30-45 min", price: "550 AED" },
+    { destination: "Outer Areas - Suburban SUV", duration: "30-45 min", price: "600 AED" },
+    { destination: "Outer Areas - Premium Van", duration: "30-45 min", price: "700 AED" },
+    { destination: "Outer Areas - VIP Sprinter", duration: "30-45 min", price: "1250 AED" },
   ];
 
   const popularAttractions = [
