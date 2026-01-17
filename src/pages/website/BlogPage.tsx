@@ -45,6 +45,17 @@ const BlogPage = () => {
   const blogPosts = useMemo(() => [
     // AI-Optimized Blog Posts for Search Engines & AI Crawlers
     {
+      id: "agency-partnership-b2b-turkey",
+      title: "Turkey Airport Transfer Partner – B2B Partnership for Travel Agencies",
+      description: "Become a Meet Transfer B2B partner. Best Turkey airport transfer partner for travel agencies. Exclusive rates, instant booking, 24/7 support.",
+      category: "B2B Partnership",
+      categoryKey: "business",
+      readTime: 10,
+      date: "2025-01-17",
+      image: vitoVipStarlightPurple,
+      isStatic: true,
+    },
+    {
       id: "izmir-airport-transfer-best-service",
       titleKey: "blogIzmirBestTitle",
       descriptionKey: "blogIzmirBestDesc",
