@@ -86,9 +86,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "What Partner Agencies Say",
       testimonials: [
-        { quote: "Meet Transfer has been our go-to partner for Turkey transfers. Reliable, professional, and their B2B rates are unbeatable.", country: "Germany" },
-        { quote: "The agency dashboard is incredibly easy to use. Our guests consistently praise the service quality.", country: "United Kingdom" },
-        { quote: "Excellent communication and flexibility. They've never let us down, even with last-minute bookings.", country: "France" },
+        { quote: "Meet Transfer has been our go-to partner for Turkey transfers. Reliable, professional, and their B2B rates are unbeatable.", country: "Germany", rating: 5 },
+        { quote: "The agency dashboard is incredibly easy to use. Our guests consistently praise the service quality.", country: "United Kingdom", rating: 5 },
+        { quote: "Excellent communication and flexibility. They've never let us down, even with last-minute bookings.", country: "France", rating: 5 },
       ],
       
       faqTitle: "Frequently Asked Questions",
@@ -174,9 +174,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "Ortak Acentalar Ne Diyor",
       testimonials: [
-        { quote: "Meet Transfer, Türkiye transferleri için başvurduğumuz ortak. Güvenilir, profesyonel ve B2B fiyatları rakipsiz.", country: "Almanya" },
-        { quote: "Acenta panosu inanılmaz kullanışlı. Misafirlerimiz sürekli hizmet kalitesini övüyor.", country: "İngiltere" },
-        { quote: "Mükemmel iletişim ve esneklik. Son dakika rezervasyonlarında bile bizi hiç yarı yolda bırakmadılar.", country: "Fransa" },
+        { quote: "Meet Transfer, Türkiye transferleri için başvurduğumuz ortak. Güvenilir, profesyonel ve B2B fiyatları rakipsiz.", country: "Almanya", rating: 5 },
+        { quote: "Acenta panosu inanılmaz kullanışlı. Misafirlerimiz sürekli hizmet kalitesini övüyor.", country: "İngiltere", rating: 5 },
+        { quote: "Mükemmel iletişim ve esneklik. Son dakika rezervasyonlarında bile bizi hiç yarı yolda bırakmadılar.", country: "Fransa", rating: 5 },
       ],
       
       faqTitle: "Sıkça Sorulan Sorular",
@@ -262,9 +262,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "Was Partneragenturen sagen",
       testimonials: [
-        { quote: "Meet Transfer ist unser bevorzugter Partner für Türkei-Transfers. Zuverlässig, professionell und ihre B2B-Preise sind unschlagbar.", country: "Deutschland" },
-        { quote: "Das Agentur-Dashboard ist unglaublich einfach zu bedienen. Unsere Gäste loben konsequent die Servicequalität.", country: "Vereinigtes Königreich" },
-        { quote: "Ausgezeichnete Kommunikation und Flexibilität. Sie haben uns nie im Stich gelassen, selbst bei Last-Minute-Buchungen.", country: "Frankreich" },
+        { quote: "Meet Transfer ist unser bevorzugter Partner für Türkei-Transfers. Zuverlässig, professionell und ihre B2B-Preise sind unschlagbar.", country: "Deutschland", rating: 5 },
+        { quote: "Das Agentur-Dashboard ist unglaublich einfach zu bedienen. Unsere Gäste loben konsequent die Servicequalität.", country: "Vereinigtes Königreich", rating: 5 },
+        { quote: "Ausgezeichnete Kommunikation und Flexibilität. Sie haben uns nie im Stich gelassen, selbst bei Last-Minute-Buchungen.", country: "Frankreich", rating: 5 },
       ],
       
       faqTitle: "Häufig gestellte Fragen",
@@ -350,9 +350,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "Что говорят агентства-партнеры",
       testimonials: [
-        { quote: "Meet Transfer - наш основной партнер по трансферам в Турции. Надежные, профессиональные, и их B2B цены непревзойденны.", country: "Германия" },
-        { quote: "Панель агентства невероятно проста в использовании. Наши гости постоянно хвалят качество обслуживания.", country: "Великобритания" },
-        { quote: "Отличная коммуникация и гибкость. Они никогда нас не подводили, даже с бронированиями в последнюю минуту.", country: "Франция" },
+        { quote: "Meet Transfer - наш основной партнер по трансферам в Турции. Надежные, профессиональные, и их B2B цены непревзойденны.", country: "Германия", rating: 5 },
+        { quote: "Панель агентства невероятно проста в использовании. Наши гости постоянно хвалят качество обслуживания.", country: "Великобритания", rating: 5 },
+        { quote: "Отличная коммуникация и гибкость. Они никогда нас не подводили, даже с бронированиями в последнюю минуту.", country: "Франция", rating: 5 },
       ],
       
       faqTitle: "Часто задаваемые вопросы",
@@ -438,9 +438,9 @@ const AgencyPartnershipGuide = () => {
       
       testimonialsTitle: "Ce que Disent les Agences Partenaires",
       testimonials: [
-        { quote: "Meet Transfer est notre partenaire de référence pour les transferts en Turquie. Fiable, professionnel, et leurs tarifs B2B sont imbattables.", country: "Allemagne" },
-        { quote: "Le tableau de bord agence est incroyablement facile à utiliser. Nos clients louent constamment la qualité du service.", country: "Royaume-Uni" },
-        { quote: "Excellente communication et flexibilité. Ils ne nous ont jamais laissé tomber, même avec des réservations de dernière minute.", country: "France" },
+        { quote: "Meet Transfer est notre partenaire de référence pour les transferts en Turquie. Fiable, professionnel, et leurs tarifs B2B sont imbattables.", country: "Allemagne", rating: 5 },
+        { quote: "Le tableau de bord agence est incroyablement facile à utiliser. Nos clients louent constamment la qualité du service.", country: "Royaume-Uni", rating: 5 },
+        { quote: "Excellente communication et flexibilité. Ils ne nous ont jamais laissé tomber, même avec des réservations de dernière minute.", country: "France", rating: 5 },
       ],
       
       faqTitle: "Questions Fréquemment Posées",
@@ -750,6 +750,11 @@ const AgencyPartnershipGuide = () => {
                 {c.testimonials.map((testimonial, index) => (
                   <Card key={index} className="border-l-4 border-l-primary">
                     <CardContent className="p-4">
+                      <div className="flex gap-1 mb-2">
+                        {Array.from({ length: testimonial.rating }).map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
                       <p className="italic text-muted-foreground mb-3">"{testimonial.quote}"</p>
                       <div className="flex items-center gap-2">
                         <Globe className="h-4 w-4 text-primary" />
