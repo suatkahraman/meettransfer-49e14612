@@ -178,8 +178,8 @@ export const Hero = () => {
                           luggageCount={rideForm.luggageCount}
                           setBabySeatCount={rideForm.handleSetBabySeatCount}
                           setLuggageCount={rideForm.handleSetLuggageCount}
-                          // Dubai route detection
-                          isDubaiRoute={rideForm.isDubaiRoute}
+                          // Route region detection
+                          routeRegion={rideForm.routeRegion}
                         />
                       ) : (
                         <HourlyFormContent

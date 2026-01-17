@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck } from "../_shared/priceMatching.ts";
 import { corsHeaders, dynamicCacheHeaders } from "../_shared/cacheHeaders.ts";
-import { isDubaiLocation, DUBAI_VEHICLE_TYPES, VEHICLE_TYPES } from "../_shared/vehicleConfig.ts";
+import { detectRegion, getVehicleTypesForRegion, VehicleRegion, VEHICLE_TYPES } from "../_shared/vehicleConfig.ts";
 
 interface GetPricesRequest {
   pickup: string;
@@ -78,12 +78,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("🚗 Getting all vehicle prices for route:", pickup, "→", dropoff);
 
-    // Check if this is a Dubai route
-    const isDubai = isDubaiLocation(pickup) || isDubaiLocation(dropoff);
-    const activeVehicleTypes = isDubai ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
+    // Detect region from locations - this is the authoritative source
+    const region: VehicleRegion = detectRegion(pickup, dropoff);
+    const isDubai = region === 'dubai';
+    const activeVehicleTypes = getVehicleTypesForRegion(region);
     const vehicleConfig = buildVehicleConfig(activeVehicleTypes);
     
-    console.log("🏙️ Location type:", isDubai ? "Dubai" : "Standard", "- Using", activeVehicleTypes.length, "vehicle types");
+    console.log("🏙️ Detected region:", region, "- Using", activeVehicleTypes.length, "vehicle types");
 
     // Analyze transfer using shared module
     const transferInfo = analyzeTransfer(pickup, dropoff);
@@ -382,7 +383,9 @@ const handler = async (req: Request): Promise<Response> => {
         exchangeRate: exchangeRate !== 1 ? exchangeRate : null,
         sanityCheckFailed: sanityFailedCount > 0,
         requiresManualPricing: sanityFailedCount > 0,
-        isDubai,
+        // Region-based response - frontend uses this
+        region,
+        isDubai, // Keep for backward compatibility
       }),
       { headers: { "Content-Type": "application/json", ...dynamicCacheHeaders } }
     );

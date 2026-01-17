@@ -1,8 +1,8 @@
 import { memo, lazy, Suspense, useState, useCallback, useRef, useMemo } from "react";
 import { Users, Check, Briefcase, Snowflake, Wifi, Star, Tv, Crown, Armchair, Sparkles, Wine, Droplets, Luggage, BatteryCharging } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
-import { DUBAI_VEHICLE_TYPES } from "@/lib/dubaiVehicleTypes";
+import { VehicleTypeInfo } from "@/lib/vehicleTypes";
+import { getRegionVehicles, VehicleRegion } from "@/lib/vehicleRegions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VehiclePrice } from "./types";
 
@@ -60,7 +60,7 @@ interface VehicleSelectorProps {
   hasRoute: boolean;
   language: string;
   currency?: string;
-  isDubai?: boolean; // Use isDubai from edge function instead of local detection
+  region?: VehicleRegion; // Region from edge function determines vehicle list
 }
 
 export const VehicleSelector = memo(({
@@ -72,15 +72,15 @@ export const VehicleSelector = memo(({
   hasRoute,
   language,
   currency = "EUR",
-  isDubai = false
+  region = 'default'
 }: VehicleSelectorProps) => {
   const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Use isDubai prop from edge function - this is the authoritative source
+  // Use region prop from edge function - this is the authoritative source
   const vehicleList: VehicleTypeInfo[] = useMemo(() => {
-    return isDubai ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
-  }, [isDubai]);
+    return getRegionVehicles(region);
+  }, [region]);
 
   // Simple click handler
   const handleVehicleClick = useCallback((vehicle: VehicleTypeInfo, isDisabled: boolean) => {

@@ -8,7 +8,10 @@ export interface VehicleTypeConfig {
   luggage: number;
 }
 
-// Central vehicle types - matches frontend
+// Supported regions - add new regions here
+export type VehicleRegion = 'turkey' | 'dubai' | 'default';
+
+// Central vehicle types - matches frontend (Turkey/Standard)
 export const VEHICLE_TYPES: VehicleTypeConfig[] = [
   { value: 'sedan', label: 'Sedan', passengers: 3, luggage: 2 },
   { value: 'mercedes-vito', label: 'Mercedes Vito', passengers: 6, luggage: 6 },
@@ -26,6 +29,13 @@ export const DUBAI_VEHICLE_TYPES: VehicleTypeConfig[] = [
   { value: 'dubai-vip-sprinter', label: 'VIP Mercedes Sprinter', passengers: 12, luggage: 12 },
 ];
 
+// Region to vehicle types mapping - ADD NEW REGIONS HERE
+const REGION_VEHICLE_MAP: Record<VehicleRegion, VehicleTypeConfig[]> = {
+  'turkey': VEHICLE_TYPES,
+  'dubai': DUBAI_VEHICLE_TYPES,
+  'default': VEHICLE_TYPES,
+};
+
 // Vehicle labels lookup
 export const VEHICLE_LABELS: Record<string, string> = Object.fromEntries(
   [...VEHICLE_TYPES, ...DUBAI_VEHICLE_TYPES].map(v => [v.value, v.label])
@@ -36,77 +46,68 @@ export function getVehicleLabel(vehicleType: string): string {
   return VEHICLE_LABELS[vehicleType] || vehicleType;
 }
 
-// Check if location is in Dubai
+// Check if location is in Dubai/UAE
 export function isDubaiLocation(location: string): boolean {
   if (!location) return false;
   const normalizedLocation = location.toLowerCase();
   
   const dubaiKeywords = [
-    'dubai',
-    'دبي',
-    'burj khalifa',
-    'palm jumeirah',
-    'dubai mall',
-    'dubai marina',
-    'dxb',
-    'dubai international',
-    'al maktoum',
-    'dwc',
-    'jebel ali',
-    'jumeirah',
-    'downtown dubai',
-    'business bay',
-    'deira',
-    'bur dubai',
-    'sheikh zayed',
-    'emirates hills',
-    'arabian ranches',
-    'jbr',
-    'jumeirah beach',
-    'jvc', 'jumeirah village',
-    'sports city',
-    'motor city',
-    'silicon oasis',
-    'al barsha',
-    'discovery gardens',
-    'international city',
-    'dubai investment park',
-    // New popular areas
-    'difc', 'dubai international financial centre',
-    'creek harbour', 'dubai creek harbour',
-    'city walk',
-    'al quoz',
-    'mirdif',
-    'al nahda',
-    'al mamzar',
-    'dubai hills',
-    'damac hills',
-    'town square',
-    'mudon',
-    'remraam',
-    'meydan',
-    'nad al sheba',
-    'al khawaneej',
-    'warsan',
-    'dubai south',
-    'expo city',
-    // Other Emirates
-    'abu dhabi',
-    'sharjah',
-    'ajman',
-    'ras al khaimah',
-    'fujairah',
-    'uae',
-    'united arab emirates',
+    'dubai', 'دبي', 'burj khalifa', 'palm jumeirah', 'dubai mall', 'dubai marina',
+    'dxb', 'dubai international', 'al maktoum', 'dwc', 'jebel ali', 'jumeirah',
+    'downtown dubai', 'business bay', 'deira', 'bur dubai', 'sheikh zayed',
+    'emirates hills', 'arabian ranches', 'jbr', 'jumeirah beach', 'jvc',
+    'jumeirah village', 'sports city', 'motor city', 'silicon oasis', 'al barsha',
+    'discovery gardens', 'international city', 'dubai investment park',
+    'difc', 'dubai international financial centre', 'creek harbour', 'dubai creek harbour',
+    'city walk', 'al quoz', 'mirdif', 'al nahda', 'al mamzar', 'dubai hills',
+    'damac hills', 'town square', 'mudon', 'remraam', 'meydan', 'nad al sheba',
+    'al khawaneej', 'warsan', 'dubai south', 'expo city',
+    'abu dhabi', 'sharjah', 'ajman', 'ras al khaimah', 'fujairah', 'uae', 'united arab emirates',
   ];
   
   return dubaiKeywords.some(keyword => normalizedLocation.includes(keyword));
 }
 
-// Get vehicle types based on location
+// Check if location is in Turkey
+export function isTurkeyLocation(location: string): boolean {
+  if (!location) return false;
+  const normalizedLocation = location.toLowerCase();
+  
+  const turkeyKeywords = [
+    'turkey', 'türkiye', 'turkiye', 'türkei',
+    'ist', 'istanbul', 'saw', 'sabiha', 'ayt', 'antalya', 'bjv', 'bodrum',
+    'dlm', 'dalaman', 'adb', 'izmir', 'ankara', 'bursa', 'konya', 'adana',
+    'cappadocia', 'kapadokya', 'goreme', 'göreme', 'fethiye', 'marmaris',
+    'kusadasi', 'kuşadası', 'cesme', 'çeşme', 'alanya', 'belek', 'side',
+    'taksim', 'sultanahmet', 'kadikoy', 'kadıköy', 'besiktas', 'beşiktaş',
+  ];
+  
+  return turkeyKeywords.some(keyword => normalizedLocation.includes(keyword));
+}
+
+// Detect region from pickup/dropoff locations
+export function detectRegion(pickup: string, dropoff: string): VehicleRegion {
+  // Check Dubai first (more specific)
+  if (isDubaiLocation(pickup) || isDubaiLocation(dropoff)) {
+    return 'dubai';
+  }
+  // Check Turkey
+  if (isTurkeyLocation(pickup) || isTurkeyLocation(dropoff)) {
+    return 'turkey';
+  }
+  // Default to Turkey/standard vehicles
+  return 'default';
+}
+
+// Get vehicle types for a region
+export function getVehicleTypesForRegion(region: VehicleRegion): VehicleTypeConfig[] {
+  return REGION_VEHICLE_MAP[region] || REGION_VEHICLE_MAP['default'];
+}
+
+// Get vehicle types based on location (convenience function)
 export function getVehicleTypesForLocation(pickup: string, dropoff: string): VehicleTypeConfig[] {
-  const isDubai = isDubaiLocation(pickup) || isDubaiLocation(dropoff);
-  return isDubai ? DUBAI_VEHICLE_TYPES : VEHICLE_TYPES;
+  const region = detectRegion(pickup, dropoff);
+  return getVehicleTypesForRegion(region);
 }
 
 // Vehicle fallback order for price matching
