@@ -34,6 +34,26 @@ export const DUBAI_VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
   },
   {
+    value: 'dubai-v-class',
+    label: 'Mercedes V Class',
+    passengers: 6,
+    luggage: 6,
+    description: 'Elegant Mercedes V Class for comfortable group transfers. Spacious interior with premium amenities for relaxed Dubai airport transfers.',
+    descriptionTr: 'Konforlu grup transferleri için zarif Mercedes V Class. Dubai havalimanı transferleri için premium donanımlarla geniş iç mekan.',
+    features: [
+      { icon: 'snowflake', label: 'Climate Control', labelTr: 'Klima Kontrolü' },
+      { icon: 'armchair', label: 'Leather Seats', labelTr: 'Deri Koltuk' },
+      { icon: 'wifi', label: 'Free WiFi', labelTr: 'Ücretsiz WiFi' },
+      { icon: 'battery-charging', label: 'USB Charging', labelTr: 'USB Şarj' },
+      { icon: 'luggage', label: 'Luggage Space', labelTr: 'Bagaj Alanı' },
+      { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
+    ],
+    images: [
+      { src: dubaiVClass, alt: "Mercedes V Class luxury Dubai airport transfer" },
+      { src: dubaiVClassInterior, alt: "Mercedes V Class leather interior with ambient lighting" },
+    ],
+  },
+  {
     value: 'dubai-premium-van',
     label: 'Mercedes Premium Van',
     passengers: 6,
@@ -49,8 +69,8 @@ export const DUBAI_VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'droplets', label: 'Refreshments', labelTr: 'İkramlar' },
     ],
     images: [
-      { src: dubaiVClass, alt: "Mercedes Premium Van luxury Dubai airport transfer with Burj Al Arab" },
-      { src: dubaiVClassInterior, alt: "Mercedes Premium Van leather interior with ambient lighting" },
+      { src: dubaiVipMercedesVan, alt: "Mercedes Premium Van luxury Dubai airport transfer" },
+      { src: dubaiVipVanExterior, alt: "Mercedes Premium Van exterior Dubai airport" },
     ],
   },
   {
