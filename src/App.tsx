@@ -170,6 +170,7 @@ const IntercityTransferTurkey = lazy(() => import("./pages/website/blog/Intercit
 const LuxuryMaybachTransferTurkey = lazy(() => import("./pages/website/blog/LuxuryMaybachTransferTurkey"));
 const MardinAirportTransferGuide = lazy(() => import("./pages/website/blog/MardinAirportTransferGuide"));
 const MidyatAirportTransferGuide = lazy(() => import("./pages/website/blog/MidyatAirportTransferGuide"));
+const AgencyPartnershipGuide = lazy(() => import("./pages/website/blog/AgencyPartnershipGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 
@@ -302,6 +303,7 @@ const App = () => (
               {localizedRoutes("/blog/luxury-maybach-transfer-turkey", <LuxuryMaybachTransferTurkey />)}
               {localizedRoutes("/blog/mardin-airport-transfer-guide", <MardinAirportTransferGuide />)}
               {localizedRoutes("/blog/midyat-airport-transfer-guide", <MidyatAirportTransferGuide />)}
+              {localizedRoutes("/blog/agency-partnership-b2b-turkey", <AgencyPartnershipGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}

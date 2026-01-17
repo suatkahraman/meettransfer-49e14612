@@ -14,6 +14,17 @@ import adanaHero from "@/assets/blog/adana-transfer-hero.jpg";
 export const allBlogPosts = [
   // AI-Optimized Blog Posts for Search Engines & AI Crawlers
   {
+    id: "agency-partnership-b2b-turkey",
+    title: "Turkey Airport Transfer Partner – B2B Partnership for Travel Agencies",
+    description: "Become a Meet Transfer B2B partner. Best Turkey airport transfer partner for travel agencies. Exclusive rates, instant booking, 24/7 support.",
+    category: "B2B Partnership",
+    categoryKey: "business",
+    readTime: 10,
+    date: "2025-01-17",
+    image: "/images/meet-transfer-vip-mercedes-vito.jpg",
+    isStatic: true,
+  },
+  {
     id: "vip-airport-transfer-turkey",
     title: "VIP Airport Transfer Turkey - Maybach, S-Class, VIP Vito",
     description: "Book VIP airport transfer in Turkey. Luxury Mercedes Maybach, S-Class fleet. Professional chauffeurs, meet & greet service.",
