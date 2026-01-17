@@ -2,7 +2,7 @@ import { memo, lazy, Suspense, useState, useCallback, useRef, useMemo } from "re
 import { Users, Check, Briefcase, Snowflake, Wifi, Star, Tv, Crown, Armchair, Sparkles, Wine, Droplets, Luggage, BatteryCharging } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
-import { DUBAI_VEHICLE_TYPES, isDubaiLocation } from "@/lib/dubaiVehicleTypes";
+import { DUBAI_VEHICLE_TYPES } from "@/lib/dubaiVehicleTypes";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VehiclePrice } from "./types";
 
