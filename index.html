@@ -52,8 +52,8 @@
     <link rel="dns-prefetch" href="//api.mapbox.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
-    <!-- Preload LCP Image for Mobile -->
-    <link rel="preload" as="image" href="/src/assets/hero-mercedes-vito.jpg" fetchpriority="high" />
+    <!-- Preload LCP Image for Mobile - Note: Vite will hash the actual asset path, this is a fallback hint -->
+    <!-- The actual preload happens via the Hero component with fetchpriority="high" -->
     
     <!-- Font Preload - Critical fonts for LCP/FCP -->
     <!-- Playfair Display - Used in hero headings (most visible first) -->
