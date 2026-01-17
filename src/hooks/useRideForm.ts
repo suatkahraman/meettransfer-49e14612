@@ -199,9 +199,10 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: { pickup, dropoff, customerCurrency: "EUR" }
         });
-        if (data?.vehicles?.length > 0) {
-          setAllVehiclePrices(data.vehicles);
-          setTransferPriceCurrency(data.currency || "EUR");
+        // Edge function returns 'prices' not 'vehicles'
+        if (data?.prices?.length > 0) {
+          setAllVehiclePrices(data.prices);
+          setTransferPriceCurrency(data.baseCurrency || data.currency || "EUR");
         } else {
           setAllVehiclePrices([]);
         }
