@@ -141,6 +141,17 @@ const DestinationsPage = () => {
       vehicles: "Mercedes Vito, V-Class VIP",
       link: "/greece-transfer",
     },
+    {
+      id: 12,
+      name: "Adana",
+      airports: "ADA",
+      tagline: t("southernTurkeysGateway"),
+      icon: "🌶️",
+      IconComponent: Building2,
+      locations: ["Adana City Center", "Seyhan", "Çukurova", "Mersin", "Tarsus", "Antakya"],
+      vehicles: "Mercedes Vito VIP",
+      link: "/adana-transfer",
+    },
   ];
   
   return (
