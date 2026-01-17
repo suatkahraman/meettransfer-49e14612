@@ -16,6 +16,9 @@ export function PWAPromoBanner() {
   const [showIOSModal, setShowIOSModal] = useState(false);
   const navigate = useNavigate();
 
+  // Use centralized rating from Google Reviews hook (must be before any early return)
+  const { rating, totalReviews: reviewCount } = useGoogleReviewStats();
+
   // Don't show if already installed, in standalone mode, or dismissed
   if (isStandalone || isInstalled || dismissed) {
     return null;
@@ -52,9 +55,6 @@ export function PWAPromoBanner() {
         { icon: Wifi, text: "Works offline" },
         { icon: Bell, text: "Push notifications" },
       ];
-
-  // Use centralized rating from Google Reviews hook
-  const { rating, totalReviews: reviewCount } = useGoogleReviewStats();
 
   return (
     <>

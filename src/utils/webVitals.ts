@@ -43,11 +43,6 @@ function logMetric(metric: Metric) {
     console.log(`  → ID: ${metric.id}`);
     console.log(`  → Delta: ${formatValue(metric.name, metric.delta)}`);
     console.log(`  → Navigation Type: ${metric.navigationType}`);
-    // Attribution exists on some metric types but not on base Metric type
-    const metricWithAttribution = metric as Metric & { attribution?: unknown };
-    if (metricWithAttribution.attribution) {
-      console.log(`  → Attribution:`, metricWithAttribution.attribution);
-    }
   }
 }
 
@@ -78,17 +73,19 @@ export function getWebVitalsSummary(): { score: number; metrics: Record<string, 
 
 // Initialize web vitals measurement
 export function initWebVitals(options?: { debug?: boolean; reportToAnalytics?: boolean }) {
+  const debug = options?.debug === true;
+
   const handleMetric = (metric: Metric) => {
     collectedMetrics[metric.name] = metric;
 
-    if (options?.debug !== false) {
+    if (debug) {
       logMetric(metric);
     }
 
     // Optional: Send to analytics endpoint
     if (options?.reportToAnalytics) {
-      // Could send to Supabase edge function or analytics service
-      // For now, just store in sessionStorage for debugging
+      // Could send to backend function or analytics service
+      // For now, just store in sessionStorage for later inspection
       try {
         const stored = sessionStorage.getItem('web_vitals') || '{}';
         const data = JSON.parse(stored);
@@ -113,8 +110,8 @@ export function initWebVitals(options?: { debug?: boolean; reportToAnalytics?: b
   onFCP(handleMetric);
   onTTFB(handleMetric);
 
-  // Log summary after page is fully loaded
-  if (typeof window !== 'undefined') {
+  // Log summary after page is fully loaded (debug only)
+  if (debug && typeof window !== 'undefined') {
     window.addEventListener('load', () => {
       setTimeout(() => {
         const summary = getWebVitalsSummary();
@@ -128,9 +125,4 @@ export function initWebVitals(options?: { debug?: boolean; reportToAnalytics?: b
       }, 3000); // Wait for metrics to settle
     });
   }
-}
-
-// Export for debugging in console
-if (typeof window !== 'undefined') {
-  (window as unknown as Record<string, unknown>).getWebVitals = getWebVitalsSummary;
 }
