@@ -162,6 +162,12 @@ const CustomerHome = () => {
     customerNotes: '',
   });
 
+  // Price fetching state
+  const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
+  const [priceCurrency, setPriceCurrency] = useState<string>('EUR');
+  const [isPricesLoading, setIsPricesLoading] = useState(false);
+  const [pricesError, setPricesError] = useState<string | null>(null);
+
   // Computed: available vehicles based on passengers and luggage
   const passengerNum = passengerNames.filter(n => n.trim()).length || 1;
   const luggageNum = parseInt(formData.luggageCount) || 1;
@@ -175,6 +181,71 @@ const CustomerHome = () => {
       setFormData(prev => ({ ...prev, vehicleType: 'minibus' }));
     }
   }, [minibusRequired, formData.vehicleType]);
+
+  // Get currency based on language
+  const getCurrencyByLanguage = useCallback(() => {
+    switch (language) {
+      case 'TR': return 'TRY';
+      case 'AR': return 'AED';
+      case 'DE': return 'EUR';
+      default: return 'EUR';
+    }
+  }, [language]);
+
+  // Fetch prices when pickup and dropoff are filled
+  useEffect(() => {
+    const fetchVehiclePrices = async () => {
+      if (!formData.pickup || !formData.dropoff) {
+        setVehiclePrices({});
+        setPricesError(null);
+        return;
+      }
+
+      // Minimum length check
+      if (formData.pickup.length < 3 || formData.dropoff.length < 3) {
+        return;
+      }
+
+      setIsPricesLoading(true);
+      setPricesError(null);
+
+      try {
+        const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
+          body: {
+            pickup: formData.pickup,
+            dropoff: formData.dropoff,
+            customerCurrency: getCurrencyByLanguage(),
+          },
+        });
+
+        if (error) throw error;
+
+        if (data?.prices && data.prices.length > 0) {
+          const pricesMap: Record<string, number> = {};
+          data.prices.forEach((p: any) => {
+            if (p.price) {
+              pricesMap[p.vehicleType] = p.price;
+            }
+          });
+          setVehiclePrices(pricesMap);
+          setPriceCurrency(data.currency || getCurrencyByLanguage());
+        } else {
+          setVehiclePrices({});
+          setPricesError(t('noPriceFound') || 'Bu güzergah için fiyat bulunamadı');
+        }
+      } catch (error) {
+        console.error("Error fetching vehicle prices:", error);
+        setVehiclePrices({});
+        setPricesError(t('priceError') || 'Fiyat alınırken hata oluştu');
+      } finally {
+        setIsPricesLoading(false);
+      }
+    };
+
+    // Debounce the fetch
+    const timeoutId = setTimeout(fetchVehiclePrices, 500);
+    return () => clearTimeout(timeoutId);
+  }, [formData.pickup, formData.dropoff, getCurrencyByLanguage, t]);
 
   // Memoized greeting
   const greeting = useMemo(() => getGreeting(t), [t]);
@@ -2418,18 +2489,64 @@ const CustomerHome = () => {
                 />
               </div>
 
-              {/* Info message */}
-              <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg text-center border border-primary/20">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Star className="h-4 w-4 text-primary" />
-                  <span className="font-medium text-primary text-sm">
-                    {t('bestPriceGuaranteeLabel')}
-                  </span>
+              {/* Price Display Section */}
+              {(formData.pickup && formData.dropoff) && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-3"
+                >
+                  {isPricesLoading ? (
+                    <div className="bg-muted/50 p-4 rounded-lg text-center border border-border">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        <span className="text-sm text-muted-foreground">
+                          {t('calculatingPrice') || 'Fiyat hesaplanıyor...'}
+                        </span>
+                      </div>
+                    </div>
+                  ) : vehiclePrices[formData.vehicleType] ? (
+                    <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-4 rounded-lg text-center border border-green-500/30">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <span className="font-semibold text-green-700 dark:text-green-400 text-lg">
+                          {t('priceLabel') || 'Fiyat'}: {vehiclePrices[formData.vehicleType]} {priceCurrency}
+                        </span>
+                      </div>
+                      <p className="text-muted-foreground text-xs">
+                        {VEHICLE_TYPE_MAP[formData.vehicleType]?.label || formData.vehicleType} - {t('bestPriceGuaranteeLabel')}
+                      </p>
+                    </div>
+                  ) : pricesError ? (
+                    <div className="bg-amber-500/10 p-4 rounded-lg text-center border border-amber-500/30">
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <Star className="h-4 w-4 text-amber-600" />
+                        <span className="font-medium text-amber-700 dark:text-amber-400 text-sm">
+                          {t('priceOnRequest') || 'Fiyat Talebi Gönderilecek'}
+                        </span>
+                      </div>
+                      <p className="text-muted-foreground text-xs">
+                        {t('priceApprovalMessage')}
+                      </p>
+                    </div>
+                  ) : null}
+                </motion.div>
+              )}
+
+              {/* Default info message when no locations entered */}
+              {(!formData.pickup || !formData.dropoff) && (
+                <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg text-center border border-primary/20">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Star className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-primary text-sm">
+                      {t('bestPriceGuaranteeLabel')}
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground text-xs">
+                    {t('enterLocationsForPrice') || 'Alış ve bırakış noktasını girerek fiyatı görün'}
+                  </p>
                 </div>
-                <p className="text-muted-foreground text-xs">
-                  {t('priceApprovalMessage')}
-                </p>
-              </div>
+              )}
 
               <Button type="submit" className="w-full h-12 text-base font-semibold" size="lg" disabled={isLoading}>
                 {isLoading ? (
