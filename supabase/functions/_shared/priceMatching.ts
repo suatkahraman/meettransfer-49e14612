@@ -667,12 +667,105 @@ export interface DistrictMatchResult extends MatchResult {
   city: string;
 }
 
+// Turkish postal code to district mapping for precise location detection
+const POSTAL_CODE_TO_DISTRICT: Record<string, { district: string; city: string }> = {
+  // Antalya - Kaş district
+  '07580': { district: 'Kas', city: 'Antalya' },
+  '07960': { district: 'Kas', city: 'Antalya' },
+  // Antalya - Kalkan district
+  '07970': { district: 'Kalkan', city: 'Antalya' },
+  // Antalya - Alanya district
+  '07400': { district: 'Alanya', city: 'Antalya' },
+  '07430': { district: 'Alanya', city: 'Antalya' },
+  '07450': { district: 'Alanya', city: 'Antalya' },
+  // Antalya - Manavgat district
+  '07500': { district: 'Manavgat', city: 'Antalya' },
+  '07600': { district: 'Manavgat', city: 'Antalya' },
+  // Antalya - Side district
+  '07330': { district: 'Side', city: 'Antalya' },
+  '07550': { district: 'Side', city: 'Antalya' },
+  // Antalya - Belek/Serik district
+  '07506': { district: 'Belek', city: 'Antalya' },
+  '07300': { district: 'Serik', city: 'Antalya' },
+  // Antalya - Kemer district
+  '07190': { district: 'Kemer', city: 'Antalya' },
+  '07980': { district: 'Finike', city: 'Antalya' },
+  '07570': { district: 'Demre', city: 'Antalya' },
+  '07350': { district: 'Kumluca', city: 'Antalya' },
+  // Istanbul districts
+  '34000': { district: 'Fatih', city: 'Istanbul' },
+  '34130': { district: 'Fatih', city: 'Istanbul' },
+  '34122': { district: 'Beyoglu', city: 'Istanbul' },
+  '34421': { district: 'Beyoglu', city: 'Istanbul' },
+  '34437': { district: 'Beyoglu', city: 'Istanbul' },
+  '34435': { district: 'Taksim', city: 'Istanbul' },
+  '34360': { district: 'Sisli', city: 'Istanbul' },
+  '34340': { district: 'Besiktas', city: 'Istanbul' },
+  '34357': { district: 'Besiktas', city: 'Istanbul' },
+  '34710': { district: 'Kadikoy', city: 'Istanbul' },
+  '34714': { district: 'Kadikoy', city: 'Istanbul' },
+  '34740': { district: 'Kadikoy', city: 'Istanbul' },
+  '34758': { district: 'Atasehir', city: 'Istanbul' },
+  // Izmir districts
+  '35000': { district: 'Konak', city: 'Izmir' },
+  '35220': { district: 'Konak', city: 'Izmir' },
+  '35040': { district: 'Bornova', city: 'Izmir' },
+  '35390': { district: 'Karsiyaka', city: 'Izmir' },
+  '35930': { district: 'Cesme', city: 'Izmir' },
+  '09400': { district: 'Kusadasi', city: 'Izmir' },
+  // Mugla districts
+  '48400': { district: 'Bodrum Center', city: 'Bodrum' },
+  '48700': { district: 'Marmaris', city: 'Dalaman' },
+  '48300': { district: 'Fethiye', city: 'Dalaman' },
+  '48340': { district: 'Oludeniz', city: 'Dalaman' },
+  '48770': { district: 'Dalyan', city: 'Dalaman' },
+};
+
+// Extract postal code from address string
+function extractPostalCode(location: string): string | null {
+  // Turkish postal codes are 5 digits
+  const match = location.match(/\b(0[1-9]\d{3}|[1-9]\d{4})\b/);
+  return match ? match[1] : null;
+}
+
+// Check if keyword appears in the end portion of address (more reliable for district identification)
+function isKeywordInEndPortion(normalized: string, keywordNorm: string): boolean {
+  // Split by common separators and check last 2-3 parts
+  const parts = normalized.split(/\s+/);
+  if (parts.length <= 2) return normalized.includes(keywordNorm);
+  
+  // Check if keyword appears in the last half of the address
+  const midPoint = Math.floor(parts.length / 2);
+  const endPortion = parts.slice(midPoint).join(' ');
+  return endPortion.includes(keywordNorm);
+}
+
 export function findDistrict(location: string, cityHint?: string | null): DistrictMatchResult | null {
   const normalized = normalizeLocation(location);
   let bestMatch: DistrictMatchResult | null = null;
+  
+  // PRIORITY 1: Check postal code first - most reliable method
+  const postalCode = extractPostalCode(location);
+  if (postalCode && POSTAL_CODE_TO_DISTRICT[postalCode]) {
+    const postalMatch = POSTAL_CODE_TO_DISTRICT[postalCode];
+    // If cityHint is provided, verify it matches
+    if (!cityHint || postalMatch.city === cityHint) {
+      console.log(`[findDistrict] Postal code ${postalCode} matched to ${postalMatch.district}, ${postalMatch.city}`);
+      return {
+        value: postalMatch.district,
+        city: postalMatch.city,
+        confidence: 0.99, // Very high confidence for postal code match
+        priority: 0, // Highest priority
+        matchedKeyword: `postal:${postalCode}`,
+      };
+    }
+  }
 
   // Skip fuzzy matching for very short inputs (likely just city names)
   const isShortInput = normalized.split(' ').filter((w) => w.length > 2).length <= 1;
+  
+  // Collect all matching districts first
+  const allMatches: DistrictMatchResult[] = [];
 
   for (const [district, data] of Object.entries(DISTRICT_KEYWORDS)) {
     if (cityHint && data.city !== cityHint) continue;
@@ -682,20 +775,18 @@ export function findDistrict(location: string, cityHint?: string | null): Distri
 
     // Always prefer direct match on the district name itself
     if (normalized.includes(thisDistrictNorm)) {
-      const confidence = Math.min(1, 0.85 + (thisDistrictNorm.length / 40));
-      if (
-        !bestMatch ||
-        confidence > bestMatch.confidence ||
-        (confidence === bestMatch.confidence && data.priority < bestMatch.priority)
-      ) {
-        bestMatch = {
-          value: district,
-          city: data.city,
-          confidence,
-          priority: data.priority,
-          matchedKeyword: district,
-        };
-      }
+      // ENHANCEMENT: Check if this keyword appears in the end portion of the address
+      const isInEndPortion = isKeywordInEndPortion(normalized, thisDistrictNorm);
+      const positionBonus = isInEndPortion ? 0.15 : 0;
+      
+      const confidence = Math.min(1, 0.85 + (thisDistrictNorm.length / 40) + positionBonus);
+      allMatches.push({
+        value: district,
+        city: data.city,
+        confidence,
+        priority: isInEndPortion ? 0 : data.priority, // Boost priority if in end portion
+        matchedKeyword: district + (isInEndPortion ? ' (end-position)' : ''),
+      });
     }
 
     // Ensure the district's own name is always a keyword (defensive)
@@ -716,37 +807,52 @@ export function findDistrict(location: string, cityHint?: string | null): Distri
 
       // Only do exact substring match
       if (normalized.includes(keywordNorm)) {
-        const confidence = Math.min(1, 0.7 + (keywordNorm.length / 25));
-
-        if (
-          !bestMatch ||
-          confidence > bestMatch.confidence ||
-          (confidence === bestMatch.confidence && data.priority < bestMatch.priority)
-        ) {
-          bestMatch = {
-            value: district,
-            city: data.city,
-            confidence,
-            priority: data.priority,
-            matchedKeyword: keyword,
-          };
-        }
+        // ENHANCEMENT: Check position in address string
+        const isInEndPortion = isKeywordInEndPortion(normalized, keywordNorm);
+        const positionBonus = isInEndPortion ? 0.15 : 0;
+        
+        const confidence = Math.min(1, 0.7 + (keywordNorm.length / 25) + positionBonus);
+        
+        allMatches.push({
+          value: district,
+          city: data.city,
+          confidence,
+          priority: isInEndPortion ? 0 : data.priority,
+          matchedKeyword: keyword + (isInEndPortion ? ' (end-position)' : ''),
+        });
       }
       // Fuzzy match for districts - BUT only for longer inputs to avoid false positives
       // Skip fuzzy for short inputs like "Bursa, Türkiye"
       else if (!isShortInput && keywordNorm.length >= 6 && fuzzyMatch(normalized, keywordNorm, 0.9)) {
         const confidence = Math.min(0.7, 0.4 + (keywordNorm.length / 35));
 
-        if (!bestMatch || confidence > bestMatch.confidence) {
-          bestMatch = {
-            value: district,
-            city: data.city,
-            confidence,
-            priority: data.priority,
-            matchedKeyword: keyword + ' (fuzzy)',
-          };
-        }
+        allMatches.push({
+          value: district,
+          city: data.city,
+          confidence,
+          priority: data.priority,
+          matchedKeyword: keyword + ' (fuzzy)',
+        });
       }
+    }
+  }
+  
+  // Sort matches: first by priority (lower is better), then by confidence (higher is better)
+  allMatches.sort((a, b) => {
+    if (a.priority !== b.priority) return a.priority - b.priority;
+    return b.confidence - a.confidence;
+  });
+  
+  if (allMatches.length > 0) {
+    bestMatch = allMatches[0];
+    
+    // Log if there were multiple candidates
+    if (allMatches.length > 1) {
+      console.log(`[findDistrict] Multiple matches found for "${location}":`);
+      allMatches.slice(0, 3).forEach((m, i) => {
+        console.log(`  ${i + 1}. ${m.value} (confidence: ${m.confidence.toFixed(2)}, priority: ${m.priority}, keyword: ${m.matchedKeyword})`);
+      });
+      console.log(`  Selected: ${bestMatch.value}`);
     }
   }
 
