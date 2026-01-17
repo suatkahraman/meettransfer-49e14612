@@ -255,6 +255,9 @@ const CustomerHome = () => {
     return profileData.full_name || user?.email?.split('@')[0] || t('valuedCustomer');
   }, [profileData.full_name, user?.email, t]);
 
+  // Track if profile phone has been auto-filled to prevent loops
+  const [hasAutoFilledPhone, setHasAutoFilledPhone] = useState(false);
+
   // Fetch data function - extracted for refresh capability
   const fetchData = useCallback(async () => {
     if (!user?.id) {
@@ -357,9 +360,15 @@ const CustomerHome = () => {
           full_name: profile.full_name || '',
           phone: profile.phone || ''
         });
-        // Auto-fill phone if empty
-        if (!formData.passengerPhone && profile.phone) {
-          setFormData(prev => ({ ...prev, passengerPhone: profile.phone || '' }));
+        // Auto-fill phone only once if empty and not already auto-filled
+        if (!hasAutoFilledPhone && profile.phone) {
+          setFormData(prev => {
+            if (!prev.passengerPhone) {
+              return { ...prev, passengerPhone: profile.phone || '' };
+            }
+            return prev;
+          });
+          setHasAutoFilledPhone(true);
         }
       }
     } catch (error) {
@@ -368,7 +377,7 @@ const CustomerHome = () => {
       setIsRefreshing(false);
       setIsLoading(false);
     }
-  }, [user?.id, formData.passengerPhone]);
+  }, [user?.id, hasAutoFilledPhone]);
 
   // Pull to refresh handler
   const handlePullToRefresh = useCallback(async () => {
