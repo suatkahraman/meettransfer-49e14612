@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useLanguage } from "@/contexts/LanguageContext";
 import OptimizedBlogImage from "./OptimizedBlogImage";
 
-// Import hero images for Mardin and Midyat
+// Import hero images for Mardin, Midyat and Adana
 import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
 import midyatHero from "@/assets/blog/midyat-transfer-hero.jpg";
+import adanaHero from "@/assets/blog/adana-transfer-hero.jpg";
 
 // Blog posts data - centralized for reuse
 export const allBlogPosts = [
@@ -65,6 +66,17 @@ export const allBlogPosts = [
     readTime: 11,
     date: "2025-01-16",
     image: midyatHero,
+    isStatic: true,
+  },
+  {
+    id: "adana-airport-transfer-guide",
+    title: "Adana Airport Transfer - Private VIP Shuttle to City Center, Mersin",
+    description: "Book private airport transfer from Adana Şakirpaşa Airport to city center, Mersin, Tarsus, Antakya. Mercedes fleet, meet & greet service.",
+    category: "Adana",
+    categoryKey: "adana",
+    readTime: 10,
+    date: "2025-01-17",
+    image: adanaHero,
     isStatic: true,
   },
   {

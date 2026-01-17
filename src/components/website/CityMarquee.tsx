@@ -18,7 +18,7 @@ import fethiyeImg from "@/assets/destinations/fethiye-city.webp";
 import marmarisImg from "@/assets/destinations/marmaris-city.webp";
 import frankfurtImg from "@/assets/destinations/frankfurt-city.webp";
 import athensImg from "@/assets/destinations/athens-city.webp";
-
+import adanaImg from "@/assets/destinations/adana-city.webp";
 // Preload critical images for faster display
 const preloadImages = (images: string[]) => {
   images.forEach((src) => {
@@ -153,6 +153,16 @@ const cities = [
     rating: 4.7,
     popular: true,
     gradient: "from-blue-500/60 to-indigo-600/60",
+  },
+  {
+    name: "Adana",
+    nameTR: "Adana",
+    image: adanaImg,
+    fromPrice: 40,
+    airports: ["ADA"],
+    rating: 4.7,
+    popular: false,
+    gradient: "from-orange-500/60 to-red-600/60",
   },
 ];
 

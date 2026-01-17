@@ -19,6 +19,8 @@ export function isTurkeyLocation(location: string): boolean {
     'asr', 'kayseri airport',
     'nav', 'nevsehir', 'nevşehir', 'kapadokya airport', 'cappadocia airport',
     'yei', 'bursa airport', 'yenisehir',
+    'ada', 'adana airport', 'adana şakirpaşa', 'adana sakirpasa', 'şakirpaşa',
+    'mqm', 'mardin airport', 'mardin havalimanı',
     
     // Major cities
     'istanbul', 'İstanbul',
@@ -35,6 +37,10 @@ export function isTurkeyLocation(location: string): boolean {
     'diyarbakir', 'diyarbakır',
     'samsun',
     'trabzon',
+    'mardin',
+    'midyat',
+    'antakya', 'hatay',
+    'tarsus',
     
     // Istanbul districts
     'taksim', 'sultanahmet', 'kadikoy', 'kadıköy', 'besiktas', 'beşiktaş',
@@ -65,6 +71,12 @@ export function isTurkeyLocation(location: string): boolean {
     // Aegean & Mediterranean coast
     'bodrum peninsula', 'turgutreis', 'yalikavak', 'yalıkavak', 'gumbet', 'gümbet',
     'bitez', 'ortakent', 'gumusluk', 'gümüşlük',
+    
+    // Adana region
+    'seyhan', 'çukurova', 'cukurova', 'yüreğir', 'yuregir',
+    
+    // Mardin/Midyat region
+    'nusaybin', 'deyrulzafaran', 'mor gabriel', 'savur', 'dargeçit', 'hasankeyf',
   ];
   
   return turkeyKeywords.some(keyword => normalizedLocation.includes(keyword));

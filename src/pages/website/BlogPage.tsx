@@ -34,6 +34,7 @@ import athensHero from "@/assets/blog/athens-transfer-hero.jpg";
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
 import midyatHero from "@/assets/blog/midyat-transfer-hero.jpg";
+import adanaHero from "@/assets/blog/adana-transfer-hero.jpg";
 
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -310,6 +311,17 @@ const BlogPage = () => {
       readTime: 11,
       date: "2025-01-16",
       image: midyatHero,
+      isStatic: true,
+    },
+    {
+      id: "adana-airport-transfer-guide",
+      title: "Adana Airport Transfer - Private VIP Shuttle to City Center, Mersin",
+      description: "Book private airport transfer from Adana Şakirpaşa Airport to city center, Mersin, Tarsus, Antakya. Mercedes fleet, meet & greet service.",
+      category: "Adana",
+      categoryKey: "adana",
+      readTime: 10,
+      date: "2025-01-17",
+      image: adanaHero,
       isStatic: true,
     },
   ], []);
