@@ -276,7 +276,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "Free WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "Extra Options",
+    extraOptions: "Add Return",
     returnShort: "Return",
     seatLabel: "seat",
     bagLabel: "bag",
@@ -2060,7 +2060,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "Kostenloses WLAN",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "Zusätzliche Optionen",
+    extraOptions: "Rückfahrt hinzufügen",
     returnShort: "Rückfahrt",
     seatLabel: "Sitz",
     bagLabel: "Tasche",
@@ -3884,7 +3884,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "WiFi Gratuit",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "Options supplémentaires",
+    extraOptions: "Ajouter le retour",
     returnShort: "Retour",
     seatLabel: "siège",
     bagLabel: "sac",
@@ -5418,7 +5418,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "Бесплатный WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "Дополнительные опции",
+    extraOptions: "Добавить обратно",
     returnShort: "Обратно",
     seatLabel: "сиденье",
     bagLabel: "сумка",
@@ -6816,7 +6816,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "WiFi Gratuito",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "Opzioni Extra",
+    extraOptions: "Aggiungi Ritorno",
     returnShort: "Ritorno",
     seatLabel: "sedile",
     bagLabel: "borsa",
@@ -8261,7 +8261,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "WiFi Gratis",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "Opciones Extra",
+    extraOptions: "Agregar Regreso",
     returnShort: "Regreso",
     seatLabel: "asiento",
     bagLabel: "maleta",
@@ -9706,7 +9706,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "واي فاي مجاني",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "خيارات إضافية",
+    extraOptions: "إضافة العودة",
     returnShort: "العودة",
     seatLabel: "مقعد",
     bagLabel: "حقيبة",
@@ -11102,7 +11102,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "Ücretsiz WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "Ek Seçenekler",
+    extraOptions: "Dönüş Ekle",
     returnShort: "Dönüş",
     seatLabel: "koltuk",
     bagLabel: "bavul",
@@ -12693,7 +12693,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "Безкоштовний WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "Додаткові опції",
+    extraOptions: "Додати назад",
     returnShort: "Назад",
     seatLabel: "місце",
     bagLabel: "сумка",
@@ -14054,7 +14054,7 @@ const translations: Record<Language, Record<string, string>> = {
     freeWifi: "無料WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
-    extraOptions: "追加オプション",
+    extraOptions: "復路を追加",
     returnShort: "復路",
     seatLabel: "席",
     bagLabel: "バッグ",
