@@ -1,55 +1,57 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_RATING, DEFAULT_TOTAL_REVIEWS } from "@/constants/ratings";
 
-// Safe hook to get language without requiring context
-function useSafeLanguage(): string {
-  try {
-    // Dynamic import to avoid circular dependency issues
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { useLanguage } = require("@/contexts/LanguageContext");
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { language } = useLanguage();
-    return language || "EN";
-  } catch {
-    return "EN";
-  }
-}
+// Global cache to prevent multiple API calls from different components
+let globalCache: { rating: number; totalReviews: number; timestamp: number } | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export function useGoogleReviewStats() {
-  const [rating, setRating] = useState<number>(DEFAULT_RATING);
-  const [totalReviews, setTotalReviews] = useState<number>(DEFAULT_TOTAL_REVIEWS);
+  const [rating, setRating] = useState<number>(() => globalCache?.rating ?? DEFAULT_RATING);
+  const [totalReviews, setTotalReviews] = useState<number>(() => globalCache?.totalReviews ?? DEFAULT_TOTAL_REVIEWS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [language, setLanguage] = useState<string>("EN");
+  const fetchedRef = useRef(false);
 
-  // Get language on mount/update from document lang attribute as fallback
   useEffect(() => {
-    try {
-      const docLang = document.documentElement.lang?.toUpperCase() || "EN";
-      setLanguage(docLang === "EN" ? "EN" : docLang);
-    } catch {
-      setLanguage("EN");
+    // Skip if already fetched in this component instance
+    if (fetchedRef.current) return;
+    
+    // Check cache validity
+    if (globalCache && Date.now() - globalCache.timestamp < CACHE_DURATION) {
+      setRating(globalCache.rating);
+      setTotalReviews(globalCache.totalReviews);
+      return;
     }
-  }, []);
 
-  useEffect(() => {
     let cancelled = false;
+    fetchedRef.current = true;
 
     const run = async () => {
       try {
         setIsLoading(true);
+        
+        // Get language from document
+        const docLang = document.documentElement.lang?.toUpperCase() || "EN";
+        
         const { data, error } = await supabase.functions.invoke("get-google-reviews", {
-          body: { language },
+          body: { language: docLang },
         });
 
-        if (error) return;
+        if (error || cancelled) return;
 
         const nextRating = Number(data?.rating);
         const nextTotal = Number(data?.totalReviews);
 
-        if (!cancelled) {
-          if (Number.isFinite(nextRating) && nextRating > 0) setRating(nextRating);
-          if (Number.isFinite(nextTotal) && nextTotal > 0) setTotalReviews(nextTotal);
+        if (!cancelled && Number.isFinite(nextRating) && nextRating > 0) {
+          setRating(nextRating);
+          setTotalReviews(Number.isFinite(nextTotal) && nextTotal > 0 ? nextTotal : DEFAULT_TOTAL_REVIEWS);
+          
+          // Update global cache
+          globalCache = {
+            rating: nextRating,
+            totalReviews: nextTotal > 0 ? nextTotal : DEFAULT_TOTAL_REVIEWS,
+            timestamp: Date.now(),
+          };
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -60,7 +62,7 @@ export function useGoogleReviewStats() {
     return () => {
       cancelled = true;
     };
-  }, [language]);
+  }, []);
 
   return { rating, totalReviews, isLoading };
 }
