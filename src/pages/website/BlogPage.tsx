@@ -32,6 +32,8 @@ import muglaHero from "@/assets/blog/mugla-transfer-hero.jpg";
 import frankfurtHero from "@/assets/blog/frankfurt-transfer-hero.jpg";
 import athensHero from "@/assets/blog/athens-transfer-hero.jpg";
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
+import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
+import midyatHero from "@/assets/blog/midyat-transfer-hero.jpg";
 
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -296,7 +298,7 @@ const BlogPage = () => {
       categoryKey: "mardin",
       readTime: 10,
       date: "2025-01-16",
-      image: vitoExteriorBlack,
+      image: mardinHero,
       isStatic: true,
     },
     {
@@ -307,7 +309,7 @@ const BlogPage = () => {
       categoryKey: "midyat",
       readTime: 11,
       date: "2025-01-16",
-      image: vitoVipStarlightPurple,
+      image: midyatHero,
       isStatic: true,
     },
   ], []);
