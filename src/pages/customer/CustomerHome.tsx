@@ -23,6 +23,7 @@ import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { CompactRouteMap } from '@/components/ui/compact-route-map';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -2233,6 +2234,26 @@ const CustomerHome = () => {
                 />
                 {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
               </div>
+
+              {/* Route Map Preview */}
+              {formData.pickup && formData.dropoff && formData.pickup.length >= 3 && formData.dropoff.length >= 3 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2"
+                >
+                  <Label className="flex items-center gap-2 text-muted-foreground">
+                    <Route className="h-4 w-4" />
+                    {t('routePreview') || 'Güzergah Önizlemesi'}
+                  </Label>
+                  <CompactRouteMap
+                    pickup={formData.pickup}
+                    dropoff={formData.dropoff}
+                    className="h-[160px]"
+                  />
+                </motion.div>
+              )}
 
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-3">
