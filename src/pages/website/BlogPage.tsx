@@ -288,6 +288,28 @@ const BlogPage = () => {
       date: "2025-01-14",
       image: athensHero,
     },
+    {
+      id: "mardin-airport-transfer-guide",
+      title: "Mardin Airport Transfer - Private VIP Shuttle to Midyat, Nusaybin",
+      description: "Book private airport transfer from Mardin Airport to city center, Midyat, Deyrulzafaran Monastery. Mercedes fleet, meet & greet.",
+      category: "Mardin",
+      categoryKey: "mardin",
+      readTime: 10,
+      date: "2025-01-16",
+      image: vitoExteriorBlack,
+      isStatic: true,
+    },
+    {
+      id: "midyat-airport-transfer-guide",
+      title: "Midyat Airport Transfer - Private Shuttle to Mor Gabriel Monastery",
+      description: "Book private airport transfer to Midyat from Mardin Airport. Visit Mor Gabriel Monastery, stone houses, telkari workshops.",
+      category: "Midyat",
+      categoryKey: "midyat",
+      readTime: 11,
+      date: "2025-01-16",
+      image: vitoVipStarlightPurple,
+      isStatic: true,
+    },
   ], []);
 
   // Get unique categories
