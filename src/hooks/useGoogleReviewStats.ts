@@ -1,13 +1,36 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { DEFAULT_RATING, DEFAULT_TOTAL_REVIEWS } from "@/constants/ratings";
 
+// Safe hook to get language without requiring context
+function useSafeLanguage(): string {
+  try {
+    // Dynamic import to avoid circular dependency issues
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { useLanguage } = require("@/contexts/LanguageContext");
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { language } = useLanguage();
+    return language || "EN";
+  } catch {
+    return "EN";
+  }
+}
+
 export function useGoogleReviewStats() {
-  const { language } = useLanguage();
   const [rating, setRating] = useState<number>(DEFAULT_RATING);
   const [totalReviews, setTotalReviews] = useState<number>(DEFAULT_TOTAL_REVIEWS);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [language, setLanguage] = useState<string>("EN");
+
+  // Get language on mount/update from document lang attribute as fallback
+  useEffect(() => {
+    try {
+      const docLang = document.documentElement.lang?.toUpperCase() || "EN";
+      setLanguage(docLang === "EN" ? "EN" : docLang);
+    } catch {
+      setLanguage("EN");
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
