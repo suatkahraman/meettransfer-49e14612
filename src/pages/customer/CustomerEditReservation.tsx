@@ -42,6 +42,7 @@ interface Reservation {
   driver_notes: string | null;
   status: string;
   driver_id: string | null;
+  luggage_count: number | null;
 }
 
 const CustomerEditReservation = () => {
@@ -69,6 +70,7 @@ const CustomerEditReservation = () => {
     customer_name: '',
     customer_phone: '',
     driver_notes: '',
+    luggage_count: 1,
   });
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
 
@@ -114,6 +116,7 @@ const CustomerEditReservation = () => {
         customer_name: data.customer_name || '',
         customer_phone: data.customer_phone || '',
         driver_notes: data.driver_notes || '',
+        luggage_count: data.luggage_count || 1,
       });
       
       const names = data.passenger_names && data.passenger_names.length > 0 
@@ -226,6 +229,7 @@ const CustomerEditReservation = () => {
           customer_phone: formData.customer_phone,
           passenger_names: validPassengerNames,
           driver_notes: formData.driver_notes || null,
+          luggage_count: formData.luggage_count,
           status: newStatus,
           // Clear price if price-affecting changes were made
           ...(priceChangeRequired ? { price: null, admin_set_price: null } : {}),
@@ -508,6 +512,24 @@ const CustomerEditReservation = () => {
                   onChange={(e) => setFormData({ ...formData, flight_number: e.target.value })}
                   placeholder={t('flightExample')}
                 />
+              </div>
+
+              {/* Luggage Count */}
+              <div className="space-y-2">
+                <Label htmlFor="luggage">{t('luggageCount') || 'Valiz Sayısı'}</Label>
+                <Select 
+                  value={String(formData.luggage_count)} 
+                  onValueChange={(v) => setFormData({ ...formData, luggage_count: parseInt(v) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('selectLuggageCount') || 'Valiz sayısı seçin'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
+                      <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Passenger Names */}

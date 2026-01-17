@@ -1719,7 +1719,7 @@ const CustomerHome = () => {
                             </div>
                             
                             {/* Date, time and vehicle */}
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 <span>{new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}</span>
@@ -1733,6 +1733,41 @@ const CustomerHome = () => {
                                 <span>{vehicleLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
                               </div>
                             </div>
+                            
+                            {/* Vehicle capacity and features */}
+                            {(() => {
+                              const vehicleInfo = VEHICLE_TYPE_MAP[reservation.vehicle_type];
+                              if (!vehicleInfo) return null;
+                              return (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <div className="flex items-center gap-2 text-xs bg-muted/50 px-2 py-1 rounded">
+                                    <Users className="h-3 w-3 text-primary" />
+                                    <span>{vehicleInfo.passengers}</span>
+                                    <Briefcase className="h-3 w-3 text-orange-500 ml-1" />
+                                    <span>{vehicleInfo.luggage}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    {vehicleInfo.features.slice(0, 3).map((feature, idx) => {
+                                      const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
+                                      return (
+                                        <div 
+                                          key={idx} 
+                                          className="bg-muted/50 p-1 rounded"
+                                          title={language === 'TR' ? feature.labelTr : feature.label}
+                                        >
+                                          <FeatureIcon className={cn("h-3 w-3", color)} />
+                                        </div>
+                                      );
+                                    })}
+                                    {vehicleInfo.features.length > 3 && (
+                                      <div className="bg-muted/50 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground">
+                                        +{vehicleInfo.features.length - 3}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </div>
                           
                           {/* Arrow indicator */}
