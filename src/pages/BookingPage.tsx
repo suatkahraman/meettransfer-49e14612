@@ -955,6 +955,26 @@ const BookingPage = () => {
   }
 
   // Booking Success Screen
+  // Auto-redirect to customer home after booking is completed
+  const [redirectCountdown, setRedirectCountdown] = useState(5);
+  
+  useEffect(() => {
+    if (bookingCompleted && user) {
+      const timer = setInterval(() => {
+        setRedirectCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            navigate('/customer/home', { replace: true });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [bookingCompleted, user, navigate]);
+
   if (bookingCompleted) {
     return (
       <WebsiteLayout>
@@ -971,7 +991,18 @@ const BookingPage = () => {
               <p className="text-sm text-muted-foreground mb-6">
                 {t("whatsappConfirmation") || "You will receive a WhatsApp message with your reservation details."}
               </p>
-              <Button onClick={() => navigate("/customer/bookings")} className="w-full" size="lg">
+              
+              {/* Auto-redirect countdown for logged-in users */}
+              {user && (
+                <p className="text-sm text-primary mb-4 animate-pulse">
+                  {language === 'TR' 
+                    ? `${redirectCountdown} saniye içinde panele yönlendiriliyorsunuz...`
+                    : `Redirecting to your panel in ${redirectCountdown} seconds...`
+                  }
+                </p>
+              )}
+              
+              <Button onClick={() => navigate("/customer/home")} className="w-full" size="lg">
                 {t("viewMyReservations") || "View My Reservations"}
               </Button>
             </CardContent>
