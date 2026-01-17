@@ -245,7 +245,7 @@ export const GooglePlacesAutocomplete = ({
         {
           types: ['establishment', 'geocode'],
           fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
-          componentRestrictions: { country: ['tr', 'ae', 'cy'] },
+          componentRestrictions: { country: ['tr', 'ae', 'cy', 'de', 'gr'] },
         }
       );
 
