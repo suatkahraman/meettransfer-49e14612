@@ -1356,43 +1356,6 @@ const CustomerHome = () => {
           </motion.div>
         )}
 
-        {/* Promo Campaign Banner - More compact on mobile */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          className="mb-4 sm:mb-6"
-        >
-          <Card className="bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 border-green-500/30 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-20 h-20 sm:w-32 sm:h-32 bg-gradient-to-bl from-green-400/20 to-transparent rounded-bl-full" />
-            <CardContent className="p-2.5 sm:p-4">
-              <div className="flex items-center gap-2.5 sm:gap-4">
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="h-10 w-10 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg"
-                >
-                  <Tag className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
-                </motion.div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
-                    <Badge className="bg-green-500 text-white text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5">
-                      {t('promo')}
-                    </Badge>
-                    <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
-                  </div>
-                  <h3 className="font-bold text-foreground text-xs sm:text-base line-clamp-1">
-                    {t('roundTrip30Off')}
-                  </h3>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 hidden xs:block">
-                    {t('autoDiscountReturn')}
-                  </p>
-                </div>
-                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0" />
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
 
         {/* Next Transfer Card with Animation */}
         <AnimatePresence>
