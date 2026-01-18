@@ -313,8 +313,26 @@ const SEODebugPage = () => {
           } else {
             isAbsoluteUrl = canonicalUrl.startsWith('http');
             if (!isAbsoluteUrl) issues.push({ level: 'error', message: 'Canonical URL mutlak olmalı' });
-            isSelfReferencing = canonicalUrl === url;
-            if (!isSelfReferencing) issues.push({ level: 'warning', message: `Canonical başka URL'ye işaret ediyor: ${canonicalUrl}` });
+            
+            // Self-referencing check: compare paths, handle preview vs production URL difference
+            const expectedPath = prefix + (basePath === '/' ? '' : basePath);
+            const expectedProductionUrl = 'https://meettransfer.app' + (expectedPath || '/');
+            
+            // Canonical should match either current URL or production URL for same path
+            isSelfReferencing = canonicalUrl === url || canonicalUrl === expectedProductionUrl;
+            
+            // Only show warning if canonical points to a completely different path
+            if (!isSelfReferencing) {
+              // Check if it's just a domain difference (preview vs production) - this is OK
+              const canonicalPath = canonicalUrl.replace(/^https?:\/\/[^/]+/, '');
+              const currentPath = expectedPath || '/';
+              if (canonicalPath !== currentPath) {
+                issues.push({ level: 'warning', message: `Canonical başka URL'ye işaret ediyor: ${canonicalUrl}` });
+              } else {
+                // Same path, different domain - this is expected in preview
+                isSelfReferencing = true;
+              }
+            }
           }
 
           results.push({ language: lang, url, canonicalUrl, issues, isSelfReferencing, isAbsoluteUrl, scannedAt: new Date() });
