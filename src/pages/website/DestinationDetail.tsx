@@ -378,6 +378,43 @@ const destinationData: Record<string, {
     locations: ["Marmaris Center", "İçmeler", "Turunç", "Marmaris Marina", "Datça", "Akyaka"],
     gradient: "from-rose-500/80 to-pink-600/80",
   },
+  adana: {
+    name: "Adana",
+    nameTR: "Adana",
+    airports: ["ADA"],
+    rating: 4.7,
+    fromPrice: 60,
+    popular: false,
+    description: {
+      en: "Welcome to Adana, Turkey's gateway to the Mediterranean and Çukurova region. From Adana Şakirpaşa Airport (ADA), we provide premium transfers to city center, Mersin, Tarsus, and the beautiful coastal destinations of Silifke, Erdemli and Taşucu.",
+      tr: "Türkiye'nin Akdeniz ve Çukurova bölgesine açılan kapısı Adana'ya hoş geldiniz. Adana Şakirpaşa Havalimanı'ndan (ADA) şehir merkezine, Mersin'e, Tarsus'a ve Silifke, Erdemli, Taşucu gibi güzel kıyı destinasyonlarına premium transfer sağlıyoruz."
+    },
+    highlights: {
+      en: ["Direct service to Mersin coast", "Tarsus historical city access", "Silifke & Mediterranean beaches", "24/7 meet & greet service"],
+      tr: ["Mersin sahiline direkt servis", "Tarsus tarihi şehir erişimi", "Silifke ve Akdeniz plajları", "7/24 karşılama hizmeti"]
+    },
+    prices: [
+      { route: "ADA Airport → Adana Merkez", price: "€60" },
+      { route: "ADA Airport → Mersin", price: "€65" },
+      { route: "ADA Airport → Erdemli", price: "€80" },
+      { route: "ADA Airport → Silifke", price: "€110" },
+      { route: "ADA Airport → Taşucu", price: "€135" },
+      { route: "ADA Airport → Tarsus", price: "€50" },
+    ],
+    faqItems: [
+      { question: "How long is the transfer from Adana Airport to Mersin?", answer: "The transfer takes approximately 60-70 minutes. Our comfortable VIP vehicles make the journey pleasant with air conditioning and refreshments." },
+      { question: "Do you offer transfers to Silifke and Taşucu?", answer: "Yes! We provide direct transfers to Silifke, Taşucu, and all destinations along the Mediterranean coast. Taşucu is the ferry port to Cyprus." },
+      { question: "Can you transfer us to Tarsus for historical sites?", answer: "Absolutely! Tarsus, the birthplace of St. Paul, is just 30 minutes from Adana Airport. We can arrange transfers with optional waiting time for sightseeing." },
+    ],
+    locations: ["Adana Merkez", "Mersin", "Tarsus", "Erdemli", "Silifke", "Taşucu"],
+    gradient: "from-orange-500/80 to-red-600/80",
+    galleryImages: [
+      { src: "https://images.unsplash.com/photo-1570698473651-b2de99bae12f?w=800", alt: "Adana Taş Köprü" },
+      { src: "https://images.unsplash.com/photo-1589182337358-2cb63099350c?w=800", alt: "Mediterranean Coast" },
+      { src: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800", alt: "Mersin Marina" },
+      { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800", alt: "Silifke Castle" },
+    ],
+  },
   frankfurt: {
     name: "Frankfurt",
     nameTR: "Frankfurt",
