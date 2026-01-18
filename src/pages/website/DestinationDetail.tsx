@@ -415,6 +415,41 @@ const destinationData: Record<string, {
       { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800", alt: "Silifke Castle" },
     ],
   },
+  mardin: {
+    name: "Mardin",
+    nameTR: "Mardin",
+    airports: ["MQM"],
+    rating: 4.8,
+    fromPrice: 65,
+    popular: false,
+    description: {
+      en: "Welcome to Mardin, the mesmerizing stone city of Mesopotamia. Perched on a hilltop overlooking the Syrian plains, Mardin enchants visitors with its honey-colored stone architecture, ancient monasteries, and rich multicultural heritage. Our premium transfer service connects Mardin Airport (MQM) to the historic city center and the famous artisan town of Midyat.",
+      tr: "Mezopotamya'nın büyüleyici taş şehri Mardin'e hoş geldiniz. Suriye ovalarına bakan bir tepe üzerinde kurulu Mardin, bal rengi taş mimarisi, antik manastırları ve zengin çok kültürlü mirasıyla ziyaretçileri büyülüyor. Premium transfer hizmetimiz, Mardin Havalimanı'nı (MQM) tarihi şehir merkezine ve ünlü zanaatkar kasabası Midyat'a bağlıyor."
+    },
+    highlights: {
+      en: ["UNESCO-worthy stone architecture", "Ancient Syriac monasteries", "Midyat silvercraft artisans", "Breathtaking Mesopotamian views"],
+      tr: ["UNESCO değerinde taş mimari", "Antik Süryani manastırları", "Midyat gümüş zanaatkarları", "Nefes kesen Mezopotamya manzaraları"]
+    },
+    prices: [
+      { route: "MQM Airport → Mardin Merkez", price: "€65" },
+      { route: "MQM Airport → Midyat", price: "€135" },
+      { route: "Mardin Midyat Tour (6h)", price: "€199" },
+      { route: "Mardin Midyat Tour (8h)", price: "€350" },
+    ],
+    faqItems: [
+      { question: "How long is the transfer from Mardin Airport to city center?", answer: "The transfer takes approximately 20-25 minutes. Our comfortable VIP vehicles make the journey pleasant through the scenic Mesopotamian landscape." },
+      { question: "Do you offer transfers to Midyat?", answer: "Yes! We provide direct transfers to Midyat, famous for its silver filigree craftsmen and historic stone houses. The journey takes about 60-70 minutes." },
+      { question: "Can you arrange Mardin city tours?", answer: "Absolutely! We offer 6-hour and 8-hour Mardin-Midyat tours. Visit ancient monasteries like Mor Gabriel, explore the stone houses, and experience local culture with our knowledgeable drivers." },
+    ],
+    locations: ["Mardin Merkez", "Midyat", "Mor Gabriel Manastırı", "Kasımiye Medresesi", "Dara Antik Kenti"],
+    gradient: "from-amber-600/80 to-yellow-700/80",
+    galleryImages: [
+      { src: "https://images.unsplash.com/photo-1570698473651-b2de99bae12f?w=800", alt: "Mardin Stone Houses" },
+      { src: "https://images.unsplash.com/photo-1631040284467-09a61cb6d31a?w=800", alt: "Mesopotamian Plains" },
+      { src: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800", alt: "Midyat Architecture" },
+      { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800", alt: "Historic Monastery" },
+    ],
+  },
   frankfurt: {
     name: "Frankfurt",
     nameTR: "Frankfurt",
