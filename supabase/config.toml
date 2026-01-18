@@ -1,5 +1,8 @@
 project_id = "zqykoyugubaeealrspxm"
 
+[functions.seo-meta]
+verify_jwt = false
+
 [functions.notify-flight-delay]
 verify_jwt = true
 
