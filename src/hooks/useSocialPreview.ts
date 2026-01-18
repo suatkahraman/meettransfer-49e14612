@@ -106,7 +106,22 @@ export const useSocialPreview = () => {
     if (!imageUrl) return undefined;
 
     const recommendations: string[] = [];
-    const fullUrl = imageUrl.startsWith('/') ? window.location.origin + imageUrl : imageUrl;
+    
+    // Handle different URL formats and CORS issues
+    let fullUrl = imageUrl;
+    if (imageUrl.startsWith('/')) {
+      fullUrl = window.location.origin + imageUrl;
+    } else if (imageUrl.startsWith('https://meettransfer.app')) {
+      // In preview environment, try to use local origin or proxy
+      const isPreview = window.location.hostname.includes('lovable.app') || 
+                        window.location.hostname.includes('localhost');
+      if (isPreview) {
+        // Replace production domain with current origin for local testing
+        const imagePath = imageUrl.replace('https://meettransfer.app', '');
+        fullUrl = window.location.origin + imagePath;
+      }
+    }
+    
     const format = detectImageFormat(imageUrl);
     const cacheBusting = hasCacheBusting(imageUrl);
 
@@ -116,7 +131,7 @@ export const useSocialPreview = () => {
         const image = new window.Image();
         image.crossOrigin = 'anonymous';
         image.onload = () => resolve(image);
-        image.onerror = () => reject(new Error('Görsel yüklenemedi'));
+        image.onerror = () => reject(new Error('Görsel yüklenemedi (CORS veya dosya bulunamadı)'));
         image.src = fullUrl;
         setTimeout(() => reject(new Error('Zaman aşımı')), 10000);
       });
@@ -250,15 +265,24 @@ export const useSocialPreview = () => {
       
       img.onerror = () => {
         setImageLoading(false);
-        resolve({ isValid: false, error: 'Görsel yüklenemedi' });
+        resolve({ isValid: false, error: 'Görsel yüklenemedi (CORS veya dosya bulunamadı)' });
       };
       
-      // Handle relative URLs
+      // Handle different URL formats
+      let finalUrl = imageUrl;
       if (imageUrl.startsWith('/')) {
-        img.src = window.location.origin + imageUrl;
-      } else {
-        img.src = imageUrl;
+        finalUrl = window.location.origin + imageUrl;
+      } else if (imageUrl.startsWith('https://meettransfer.app')) {
+        // In preview environment, try to use local origin
+        const isPreview = window.location.hostname.includes('lovable.app') || 
+                          window.location.hostname.includes('localhost');
+        if (isPreview) {
+          const imagePath = imageUrl.replace('https://meettransfer.app', '');
+          finalUrl = window.location.origin + imagePath;
+        }
       }
+      
+      img.src = finalUrl;
       
       // Timeout after 5 seconds
       setTimeout(() => {
