@@ -398,11 +398,25 @@ const SEODebugPage = () => {
           });
         } else {
           const contentType = response.headers.get('content-type') || '';
-          
-          if (contentType.includes('text/html')) {
+          const ssrMode = (response.headers.get('x-ssr-mode') || response.headers.get('X-SSR-Mode') || '').toLowerCase();
+
+          // Read body once (Response streams can only be consumed once)
+          const rawBody = await response.text();
+          const bodyStart = rawBody.trimStart();
+
+          // Some runtimes may return SSR HTML with a non-HTML content-type (e.g. text/plain).
+          // Detect HTML via headers and body signature.
+          const looksLikeHtml =
+            contentType.includes('text/html') ||
+            contentType.includes('application/xhtml+xml') ||
+            ssrMode === 'crawler' ||
+            bodyStart.startsWith('<!DOCTYPE') ||
+            bodyStart.startsWith('<html') ||
+            bodyStart.startsWith('<head');
+
+          if (looksLikeHtml) {
             // SSR HTML response - parse canonical
-            const html = await response.text();
-            const canonicalUrl = parseCanonicalUrl(html);
+            const canonicalUrl = parseCanonicalUrl(rawBody);
             const issues: CanonicalIssue[] = [];
             let isSelfReferencing = false;
             let isAbsoluteUrl = false;
@@ -414,50 +428,48 @@ const SEODebugPage = () => {
               if (!isAbsoluteUrl) {
                 issues.push({ level: 'error', message: 'Canonical URL mutlak olmalı' });
               }
-              
+
               // Self-referencing check
               const canonicalPath = canonicalUrl.replace(/^https?:\/\/[^/]+/, '') || '/';
               const normalizedExpectedPath = fullPath || '/';
-              
+
               // Canonical should point to production URL with same path
               isSelfReferencing = canonicalUrl === expectedProductionUrl || canonicalPath === normalizedExpectedPath;
-              
+
               if (!isSelfReferencing) {
                 issues.push({ level: 'warning', message: `Canonical başka URL'ye işaret ediyor: ${canonicalUrl} (beklenen: ${expectedProductionUrl})` });
               }
             }
 
-            results.push({ 
-              language: lang, 
-              url: expectedProductionUrl, 
-              canonicalUrl, 
-              issues, 
-              isSelfReferencing, 
-              isAbsoluteUrl, 
-              scannedAt: new Date() 
+            results.push({
+              language: lang,
+              url: expectedProductionUrl,
+              canonicalUrl,
+              issues,
+              isSelfReferencing,
+              isAbsoluteUrl,
+              scannedAt: new Date(),
             });
           } else {
             // Non-HTML response - try to parse as JSON, but handle gracefully
-            const text = await response.text();
             let errorMessage = 'Beklenmeyen yanıt türü';
-            
+
             try {
-              const jsonData = JSON.parse(text);
+              const jsonData = JSON.parse(rawBody);
               errorMessage = jsonData.message || 'Crawler algılanmadı';
             } catch {
-              // Not JSON, use generic message
-              errorMessage = `Beklenmeyen içerik türü: ${contentType}`;
+              errorMessage = `Beklenmeyen içerik türü: ${contentType || 'unknown'}`;
             }
-            
-            results.push({ 
-              language: lang, 
-              url: expectedProductionUrl, 
-              canonicalUrl: null, 
-              issues: [{ level: 'error', message: `SSR aktif değil: ${errorMessage}` }], 
-              isSelfReferencing: false, 
-              isAbsoluteUrl: false, 
-              scannedAt: new Date(), 
-              error: 'SSR not triggered' 
+
+            results.push({
+              language: lang,
+              url: expectedProductionUrl,
+              canonicalUrl: null,
+              issues: [{ level: 'error', message: `SSR aktif değil: ${errorMessage}` }],
+              isSelfReferencing: false,
+              isAbsoluteUrl: false,
+              scannedAt: new Date(),
+              error: 'SSR not triggered',
             });
           }
         }
