@@ -31,7 +31,7 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <h1 className="text-base md:text-xl lg:text-2xl font-bold text-foreground leading-tight whitespace-nowrap">
-              <span className="text-primary">{language === 'TR' ? t("luxuryTransfer").split(" ")[0] : "VIP"}</span> Transfer
+              <span className="text-primary">Meet</span> Transfer
             </h1>
             {/* Inline badges on mobile */}
             <div className="flex items-center gap-1">
