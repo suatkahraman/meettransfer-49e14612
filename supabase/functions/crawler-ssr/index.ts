@@ -516,6 +516,9 @@ serve(async (req) => {
     
     if (!isBot) {
       // Return JSON response for non-crawlers (can be used for debugging)
+      const headers = new Headers(corsHeaders);
+      headers.set('content-type', 'application/json; charset=utf-8');
+
       return new Response(
         JSON.stringify({
           isCrawler: false,
@@ -523,36 +526,29 @@ serve(async (req) => {
           path,
           userAgent: userAgent.substring(0, 100),
         }),
-        {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
+        { headers }
       );
     }
-    
+
     // Generate SSR HTML for crawlers
     const seoConfig = getSeoConfig(path);
     const metaTags = generateMetaTags(path, seoConfig);
     const noscriptContent = generateNoscriptContent(path, seoConfig);
-    
+
     const html = baseHtml
       .replace('{{META_TAGS}}', metaTags)
       .replace('{{NOSCRIPT_CONTENT}}', noscriptContent)
       .replace('lang="en"', `lang="${getLanguageCode(path)}"`);
-    
+
     console.log(`[crawler-ssr] Generated SSR HTML for ${path}, Title: ${seoConfig.title}`);
-    
-    return new Response(html, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600, s-maxage=86400',
-        'X-SSR-Mode': 'crawler',
-        'X-Robots-Tag': 'index, follow',
-      },
-    });
+
+    const headers = new Headers(corsHeaders);
+    headers.set('content-type', 'text/html; charset=utf-8');
+    headers.set('cache-control', 'public, max-age=3600, s-maxage=86400');
+    headers.set('x-ssr-mode', 'crawler');
+    headers.set('x-robots-tag', 'index, follow');
+
+    return new Response(html, { headers });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('[crawler-ssr] Error:', errorMessage);
