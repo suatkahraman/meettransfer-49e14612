@@ -154,7 +154,7 @@ export interface MetaTagSummary {
   inconsistentTitles: boolean;
 }
 
-export type SEODebugTab = 'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical' | 'metatags' | 'sitemap' | 'vitals' | 'social';
+export type SEODebugTab = 'current' | 'scanned' | 'languages' | 'hreflang' | 'canonical' | 'metatags' | 'sitemap' | 'vitals' | 'social' | 'ssr';
 
 export const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   EN: "",
