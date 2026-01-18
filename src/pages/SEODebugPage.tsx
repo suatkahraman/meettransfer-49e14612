@@ -354,64 +354,114 @@ const SEODebugPage = () => {
     return { totalLanguages: SUPPORTED_LANGUAGES.length, scannedLanguages: successfulScans.length, languagesWithIssues: withIssues.length, missingBidirectional: bidirectionalErrors.length, missingXDefault: missingXDefault.length, missingSelfReference: missingSelfRef.length };
   };
 
-  // Canonical scan
+  // Canonical scan - Uses crawler-ssr edge function to get SSR HTML (what crawlers actually see)
   const scanCanonicalUrls = async (basePath: string = '/') => {
     setIsScanningCanonical(true);
     setCanonicalScanProgress(0);
     setCanonicalResults([]);
     setActiveTab('canonical');
 
-    const baseUrl = window.location.origin;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     const results: CanonicalValidationResult[] = [];
 
     for (let i = 0; i < SUPPORTED_LANGUAGES.length; i++) {
       const lang = SUPPORTED_LANGUAGES[i];
       const prefix = LANGUAGE_TO_PREFIX[lang];
       const path = prefix + (basePath === '/' ? '' : basePath);
-      const url = baseUrl + (path || '/');
+      const fullPath = path || '/';
+      const expectedProductionUrl = 'https://meettransfer.app' + fullPath;
 
       try {
-        const response = await fetch(url, { headers: { 'Accept': 'text/html' } });
-        if (!response.ok) {
-          results.push({ language: lang, url, canonicalUrl: null, issues: [], isSelfReferencing: false, isAbsoluteUrl: false, scannedAt: new Date(), error: `HTTP ${response.status}` });
-        } else {
-          const html = await response.text();
-          const canonicalUrl = parseCanonicalUrl(html);
-          const issues: CanonicalIssue[] = [];
-          let isSelfReferencing = false;
-          let isAbsoluteUrl = false;
+        // Call crawler-ssr edge function with force=true to get SSR HTML
+        const response = await fetch(
+          `${supabaseUrl}/functions/v1/crawler-ssr?path=${encodeURIComponent(fullPath)}&force=true`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${supabaseKey}`,
+              'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+            },
+          }
+        );
 
-          if (!canonicalUrl) {
-            issues.push({ level: 'error', message: 'Canonical tag eksik' });
-          } else {
-            isAbsoluteUrl = canonicalUrl.startsWith('http');
-            if (!isAbsoluteUrl) issues.push({ level: 'error', message: 'Canonical URL mutlak olmalı' });
-            
-            // Self-referencing check: compare paths, handle preview vs production URL difference
-            const expectedPath = prefix + (basePath === '/' ? '' : basePath);
-            const expectedProductionUrl = 'https://meettransfer.app' + (expectedPath || '/');
-            
-            // Canonical should match either current URL or production URL for same path
-            isSelfReferencing = canonicalUrl === url || canonicalUrl === expectedProductionUrl;
-            
-            // Only show warning if canonical points to a completely different path
-            if (!isSelfReferencing) {
-              // Check if it's just a domain difference (preview vs production) - this is OK
-              const canonicalPath = canonicalUrl.replace(/^https?:\/\/[^/]+/, '');
-              const currentPath = expectedPath || '/';
-              if (canonicalPath !== currentPath) {
-                issues.push({ level: 'warning', message: `Canonical başka URL'ye işaret ediyor: ${canonicalUrl}` });
-              } else {
-                // Same path, different domain - this is expected in preview
-                isSelfReferencing = true;
+        if (!response.ok) {
+          results.push({ 
+            language: lang, 
+            url: expectedProductionUrl, 
+            canonicalUrl: null, 
+            issues: [{ level: 'error', message: `SSR yanıtı başarısız: HTTP ${response.status}` }], 
+            isSelfReferencing: false, 
+            isAbsoluteUrl: false, 
+            scannedAt: new Date(), 
+            error: `HTTP ${response.status}` 
+          });
+        } else {
+          const contentType = response.headers.get('content-type') || '';
+          
+          if (contentType.includes('text/html')) {
+            // SSR HTML response - parse canonical
+            const html = await response.text();
+            const canonicalUrl = parseCanonicalUrl(html);
+            const issues: CanonicalIssue[] = [];
+            let isSelfReferencing = false;
+            let isAbsoluteUrl = false;
+
+            if (!canonicalUrl) {
+              issues.push({ level: 'error', message: 'Canonical tag eksik (SSR HTML)' });
+            } else {
+              isAbsoluteUrl = canonicalUrl.startsWith('http');
+              if (!isAbsoluteUrl) {
+                issues.push({ level: 'error', message: 'Canonical URL mutlak olmalı' });
+              }
+              
+              // Self-referencing check
+              const canonicalPath = canonicalUrl.replace(/^https?:\/\/[^/]+/, '') || '/';
+              const normalizedExpectedPath = fullPath || '/';
+              
+              // Canonical should point to production URL with same path
+              isSelfReferencing = canonicalUrl === expectedProductionUrl || canonicalPath === normalizedExpectedPath;
+              
+              if (!isSelfReferencing) {
+                issues.push({ level: 'warning', message: `Canonical başka URL'ye işaret ediyor: ${canonicalUrl} (beklenen: ${expectedProductionUrl})` });
               }
             }
-          }
 
-          results.push({ language: lang, url, canonicalUrl, issues, isSelfReferencing, isAbsoluteUrl, scannedAt: new Date() });
+            results.push({ 
+              language: lang, 
+              url: expectedProductionUrl, 
+              canonicalUrl, 
+              issues, 
+              isSelfReferencing, 
+              isAbsoluteUrl, 
+              scannedAt: new Date() 
+            });
+          } else {
+            // JSON response - crawler not detected or error
+            const jsonData = await response.json();
+            results.push({ 
+              language: lang, 
+              url: expectedProductionUrl, 
+              canonicalUrl: null, 
+              issues: [{ level: 'error', message: `SSR aktif değil: ${jsonData.message || 'Crawler algılanmadı'}` }], 
+              isSelfReferencing: false, 
+              isAbsoluteUrl: false, 
+              scannedAt: new Date(), 
+              error: 'SSR not triggered' 
+            });
+          }
         }
       } catch (error) {
-        results.push({ language: lang, url, canonicalUrl: null, issues: [], isSelfReferencing: false, isAbsoluteUrl: false, scannedAt: new Date(), error: error instanceof Error ? error.message : 'Bilinmeyen hata' });
+        results.push({ 
+          language: lang, 
+          url: expectedProductionUrl, 
+          canonicalUrl: null, 
+          issues: [], 
+          isSelfReferencing: false, 
+          isAbsoluteUrl: false, 
+          scannedAt: new Date(), 
+          error: error instanceof Error ? error.message : 'Bilinmeyen hata' 
+        });
       }
 
       setCanonicalScanProgress(((i + 1) / SUPPORTED_LANGUAGES.length) * 100);
