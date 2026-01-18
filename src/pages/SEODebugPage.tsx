@@ -647,7 +647,7 @@ const SEODebugPage = () => {
           <Button onClick={() => { scanCanonicalUrls(canonicalScanPath); }} disabled={isScanningCanonical} variant="outline" size="sm" className="w-full"><FileText className="h-4 w-4 mr-1" />Canonical</Button>
           <Button onClick={() => { scanMetaTags(metaTagScanPath); }} disabled={isScanningMetaTags} variant="outline" size="sm" className="w-full"><Tag className="h-4 w-4 mr-1" />Meta Tags</Button>
           <Button onClick={() => { scanRobotsAndSitemap(); setActiveTab('sitemap'); }} disabled={isScanningRobots} variant="outline" size="sm" className="w-full"><Bot className="h-4 w-4 mr-1" />Robots</Button>
-          <Button onClick={() => { scanWebVitals(); setActiveTab('vitals'); }} disabled={isScanningVitals} variant="outline" size="sm" className="w-full"><Zap className="h-4 w-4 mr-1" />Vitals</Button>
+          <Button onClick={() => { scanWebVitals(); setActiveTab('vitals'); }} disabled={isScanningVitals} variant="default" size="sm" className="w-full bg-green-600 hover:bg-green-700"><Gauge className="h-4 w-4 mr-1" />Web Vitals Test</Button>
           <Button onClick={() => { scanSocialPreview(); setActiveTab('social'); }} disabled={isScanningSocial} variant="outline" size="sm" className="w-full"><Image className="h-4 w-4 mr-1" />Sosyal</Button>
         </div>
 
