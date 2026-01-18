@@ -46,6 +46,7 @@ import { SEODebugMetaTagsTab } from '@/components/seo/debug/SEODebugMetaTagsTab'
 import { SEODebugSitemapTab } from '@/components/seo/debug/SEODebugSitemapTab';
 import { SEODebugVitalsTab } from '@/components/seo/debug/SEODebugVitalsTab';
 import { SEODebugSSRTab } from '@/components/seo/debug/SEODebugSSRTab';
+import { SEODebugCrawlerTab } from '@/components/seo/debug/SEODebugCrawlerTab';
 
 const SEODebugPage = () => {
   const [currentPageSchemas, setCurrentPageSchemas] = useState<SchemaScript[]>([]);
@@ -584,6 +585,7 @@ const SEODebugPage = () => {
     { id: 'vitals' as SEODebugTab, label: `Web Vitals ${vitalsResult ? '✓' : ''}`, icon: Gauge },
     { id: 'social' as SEODebugTab, label: `Sosyal ${socialResult ? '✓' : ''}`, icon: Share2 },
     { id: 'ssr' as SEODebugTab, label: 'SSR Meta', icon: Bot },
+    { id: 'crawler' as SEODebugTab, label: 'Crawler SSR', icon: Bot },
   ];
 
   return (
@@ -681,6 +683,7 @@ const SEODebugPage = () => {
         {activeTab === 'vitals' && <SEODebugVitalsTab vitalsResult={vitalsResult} />}
         {activeTab === 'social' && <SEODebugSocialTab socialResult={socialResult} imageLoading={socialImageLoading} />}
         {activeTab === 'ssr' && <SEODebugSSRTab />}
+        {activeTab === 'crawler' && <SEODebugCrawlerTab />}
       </div>
     </div>
   );
