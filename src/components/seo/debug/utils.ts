@@ -252,32 +252,30 @@ export const parseMetaTags = (html: string): MetaTagData => {
 export const validateMetaTags = (metaTags: MetaTagData): MetaTagIssue[] => {
   const issues: MetaTagIssue[] = [];
 
-  // Title validation
+  // Title validation - Google typically displays 50-60 chars, but allows up to ~70
   if (!metaTags.title) {
     issues.push({ level: 'error', field: 'title', message: 'Title etiketi eksik - her sayfada title olmalı' });
   } else {
-    if (metaTags.titleLength < 30) {
-      issues.push({ level: 'warning', field: 'title', message: `Title çok kısa (${metaTags.titleLength} karakter) - 50-60 karakter önerilir` });
-    } else if (metaTags.titleLength > 60) {
-      issues.push({ level: 'warning', field: 'title', message: `Title çok uzun (${metaTags.titleLength} karakter) - 60 karakteri geçmemeli` });
+    if (metaTags.titleLength < 20) {
+      issues.push({ level: 'warning', field: 'title', message: `Title çok kısa (${metaTags.titleLength} karakter) - 30-60 karakter önerilir` });
+    } else if (metaTags.titleLength > 70) {
+      issues.push({ level: 'info', field: 'title', message: `Title uzun (${metaTags.titleLength} karakter) - 60 karaktere kadarı Google'da tam görünür` });
     }
   }
 
-  // Description validation
+  // Description validation - Google shows ~155-160 chars on desktop, ~120 on mobile
   if (!metaTags.description) {
     issues.push({ level: 'error', field: 'description', message: 'Meta description eksik - SEO için kritik' });
   } else {
-    if (metaTags.descriptionLength < 70) {
+    if (metaTags.descriptionLength < 50) {
       issues.push({ level: 'warning', field: 'description', message: `Description çok kısa (${metaTags.descriptionLength} karakter) - 120-160 karakter önerilir` });
-    } else if (metaTags.descriptionLength > 160) {
-      issues.push({ level: 'warning', field: 'description', message: `Description çok uzun (${metaTags.descriptionLength} karakter) - 160 karakteri geçmemeli` });
+    } else if (metaTags.descriptionLength > 170) {
+      issues.push({ level: 'info', field: 'description', message: `Description uzun (${metaTags.descriptionLength} karakter) - 160 karaktere kadarı Google'da görünür` });
     }
   }
 
-  // Robots validation
-  if (!metaTags.robots) {
-    issues.push({ level: 'info', field: 'robots', message: 'Robots meta etiketi tanımlı değil (varsayılan: index, follow)' });
-  } else if (metaTags.robots.includes('noindex')) {
+  // Robots validation - only warn if noindex is set
+  if (metaTags.robots?.includes('noindex')) {
     issues.push({ level: 'warning', field: 'robots', message: 'Sayfa noindex olarak işaretlenmiş - Google\'da görünmeyecek' });
   }
 
@@ -286,22 +284,19 @@ export const validateMetaTags = (metaTags: MetaTagData): MetaTagIssue[] => {
     issues.push({ level: 'error', field: 'viewport', message: 'Viewport meta etiketi eksik - mobil uyumluluk için gerekli' });
   }
 
-  // Open Graph validation
-  if (!metaTags.ogTitle) {
-    issues.push({ level: 'warning', field: 'og:title', message: 'Open Graph title eksik - sosyal medya paylaşımları için önemli' });
-  }
-  if (!metaTags.ogDescription) {
-    issues.push({ level: 'warning', field: 'og:description', message: 'Open Graph description eksik' });
-  }
-  if (!metaTags.ogImage) {
-    issues.push({ level: 'warning', field: 'og:image', message: 'Open Graph image eksik - sosyal medya görseleri için' });
-  }
-  if (!metaTags.ogType) {
-    issues.push({ level: 'info', field: 'og:type', message: 'Open Graph type eksik' });
+  // Open Graph validation - only warn if ALL are missing
+  const hasAnyOgTag = metaTags.ogTitle || metaTags.ogDescription || metaTags.ogImage;
+  if (!hasAnyOgTag) {
+    issues.push({ level: 'warning', field: 'og:*', message: 'Open Graph etiketleri eksik - sosyal medya paylaşımları için önemli' });
+  } else {
+    // Only info level for individual missing OG tags if some exist
+    if (!metaTags.ogImage) {
+      issues.push({ level: 'info', field: 'og:image', message: 'Open Graph image eksik' });
+    }
   }
 
-  // Twitter Card validation
-  if (!metaTags.twitterCard) {
+  // Twitter Card validation - info only
+  if (!metaTags.twitterCard && !hasAnyOgTag) {
     issues.push({ level: 'info', field: 'twitter:card', message: 'Twitter Card tipi eksik' });
   }
 
