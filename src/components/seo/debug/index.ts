@@ -11,3 +11,4 @@ export { SEODebugCanonicalTab } from './SEODebugCanonicalTab';
 export { SEODebugMetaTagsTab } from './SEODebugMetaTagsTab';
 export { SEODebugSitemapTab } from './SEODebugSitemapTab';
 export { SEODebugVitalsTab } from './SEODebugVitalsTab';
+export { SEODebugSSRTab } from './SEODebugSSRTab';

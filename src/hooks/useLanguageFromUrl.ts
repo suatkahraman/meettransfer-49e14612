@@ -15,7 +15,7 @@ const LANGUAGE_PREFIXES: Record<string, Language> = {
   ja: "JA",
 };
 
-const LANGUAGE_TO_PREFIX: Record<Language, string> = {
+export const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   EN: "",
   TR: "/tr",
   DE: "/de",
