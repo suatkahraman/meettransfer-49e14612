@@ -268,16 +268,78 @@ const SEODebugPage = () => {
       setHreflangResults([...results]);
     }
 
-    // Validate issues
+    // Validate issues including bidirectional links
     const validatedResults = results.map(result => {
       if (result.error) return result;
       const issues: HreflangIssue[] = [];
+      
+      // Basic checks
       if (!result.hasXDefault) issues.push({ level: 'warning', message: 'x-default hreflang etiketi eksik' });
       if (!result.hasSelfReference) issues.push({ level: 'error', message: 'Kendine referans (self-referencing) hreflang etiketi eksik' });
+      
+      // Check for missing language links (this page should link to all other languages)
+      const linkedLanguages = result.hreflangTags.map(t => t.hreflang.toLowerCase().split('-')[0]);
+      const missingLinks: string[] = [];
+      
+      SUPPORTED_LANGUAGES.forEach(lang => {
+        const langCode = lang.toLowerCase();
+        if (!linkedLanguages.includes(langCode) && langCode !== 'x-default') {
+          missingLinks.push(lang);
+        }
+      });
+      
+      if (missingLinks.length > 0) {
+        issues.push({ 
+          level: 'warning', 
+          message: `Eksik dil bağlantıları: ${missingLinks.join(', ')}`,
+          affectedLanguages: missingLinks
+        });
+      }
+      
       return { ...result, issues };
     });
 
-    setHreflangResults(validatedResults);
+    // Bidirectional check: For each page, check if the pages it links to also link back
+    const bidirectionalValidatedResults = validatedResults.map(result => {
+      if (result.error) return result;
+      const additionalIssues: HreflangIssue[] = [];
+      
+      // Get all languages this page links to
+      result.hreflangTags.forEach(tag => {
+        if (tag.hreflang === 'x-default') return;
+        
+        const linkedLangCode = tag.hreflang.toLowerCase().split('-')[0];
+        const linkedLang = SUPPORTED_LANGUAGES.find(l => l.toLowerCase() === linkedLangCode);
+        
+        if (!linkedLang) return;
+        
+        // Find the result for the linked language
+        const linkedResult = validatedResults.find(r => r.language === linkedLang);
+        if (!linkedResult || linkedResult.error) return;
+        
+        // Check if the linked page has a hreflang tag pointing back to this page
+        const currentLangCode = result.language.toLowerCase();
+        const hasBacklink = linkedResult.hreflangTags.some(t => {
+          const tLangCode = t.hreflang.toLowerCase().split('-')[0];
+          return tLangCode === currentLangCode;
+        });
+        
+        if (!hasBacklink) {
+          additionalIssues.push({
+            level: 'error',
+            message: `${linkedLang} sayfasından geri bağlantı yok (bidirectional link eksik)`,
+            affectedLanguages: [linkedLang]
+          });
+        }
+      });
+      
+      return { 
+        ...result, 
+        issues: [...result.issues, ...additionalIssues] 
+      };
+    });
+
+    setHreflangResults(bidirectionalValidatedResults);
     setIsScanningHreflang(false);
   };
 
