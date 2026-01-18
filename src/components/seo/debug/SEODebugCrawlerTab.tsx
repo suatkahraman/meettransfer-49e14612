@@ -2,31 +2,30 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, Globe, Code, Eye, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { Bot, Clock, CheckCircle, XCircle, Code, Eye, Loader2, Globe } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Common crawler user agents for testing
 const CRAWLER_USER_AGENTS = {
   googlebot: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
   bingbot: "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
   facebookbot: "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
   twitterbot: "Twitterbot/1.0",
   linkedinbot: "LinkedInBot/1.0 (compatible; Mozilla/5.0; Apache-HttpClient +http://www.linkedin.com)",
-  whatsapp: "WhatsApp/2.21.12.21 A",
-  telegram: "TelegramBot (like TwitterBot)",
   slackbot: "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
-  discordbot: "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
-  pinterest: "Pinterest/0.2 (+http://www.pinterest.com/)",
-  lighthouse: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36 Lighthouse",
-  pagespeed: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko; Google Page Speed Insights) Chrome/91.0.4472.114 Safari/537.36",
-  semrush: "Mozilla/5.0 (compatible; SemrushBot/7~bl; +http://www.semrush.com/bot.html)",
-  ahrefs: "Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)",
-  regular_chrome: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  regular_firefox: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+  telegrambot: "TelegramBot (like TwitterBot)",
+  whatsapp: "WhatsApp/2.21.12.21 A",
+  pinterest: "Pinterest/0.2 (+https://www.pinterest.com/bot.html)",
+  yandexbot: "Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)",
+  baidubot: "Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html)",
+  duckduckbot: "DuckDuckBot/1.0; (+http://duckduckgo.com/duckduckbot.html)",
+  applebot: "Applebot/0.1 (+http://www.apple.com/go/applebot)",
+  chrome: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  firefox: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+  safari: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_2) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
 };
 
 interface CrawlerTestResult {
@@ -34,12 +33,14 @@ interface CrawlerTestResult {
   userAgent: string;
   isCrawler: boolean;
   responseTime: number;
-  title?: string;
-  description?: string;
-  htmlPreview?: string;
-  fullHtml?: string;
-  error?: string;
+  html?: string;
+  seoData?: {
+    title?: string;
+    description?: string;
+    metaTags?: Array<{ name: string; content: string }>;
+  };
   headers?: Record<string, string>;
+  error?: string;
 }
 
 export function SEODebugCrawlerTab() {
@@ -58,15 +59,7 @@ export function SEODebugCrawlerTab() {
     const userAgent = customUserAgent || CRAWLER_USER_AGENTS[selectedBot as keyof typeof CRAWLER_USER_AGENTS];
 
     try {
-      // Call the crawler-ssr edge function with force=true to simulate crawler
-      const { data, error } = await supabase.functions.invoke("crawler-ssr", {
-        body: {},
-        headers: {
-          "User-Agent": userAgent,
-        },
-      });
-
-      // Also make a direct fetch with the path parameter
+      // Make a direct fetch with the path parameter - handle as text, not JSON
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/crawler-ssr?path=${encodeURIComponent(testPath)}&force=true`,
         {
@@ -78,141 +71,208 @@ export function SEODebugCrawlerTab() {
         }
       );
 
-      const responseTime = performance.now() - startTime;
-      const responseHeaders: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        responseHeaders[key] = value;
-      });
+      const endTime = performance.now();
+      const responseTime = Math.round(endTime - startTime);
 
+      // Get content type to determine how to parse
       const contentType = response.headers.get("content-type") || "";
       
+      // Get response headers
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+
+      // Check if it's a crawler response (HTML) or regular response (JSON)
       if (contentType.includes("text/html")) {
+        // It's an HTML response - crawler was detected
         const html = await response.text();
         
-        // Extract title and description from HTML
-        const titleMatch = html.match(/<title>([^<]+)<\/title>/);
-        const descMatch = html.match(/<meta name="description" content="([^"]+)"/);
-        
+        // Extract SEO data from HTML
+        const seoData = extractMetaTags(html);
+
         setResult({
           path: testPath,
           userAgent,
           isCrawler: true,
           responseTime,
-          title: titleMatch ? titleMatch[1] : undefined,
-          description: descMatch ? descMatch[1] : undefined,
-          htmlPreview: html.substring(0, 2000),
-          fullHtml: html,
-          headers: responseHeaders,
+          html,
+          seoData,
+          headers,
         });
-      } else {
-        // JSON response (non-crawler)
-        const json = await response.json();
+      } else if (contentType.includes("application/json")) {
+        // It's a JSON response - not detected as crawler
+        const jsonData = await response.json();
         
         setResult({
           path: testPath,
           userAgent,
-          isCrawler: json.isCrawler || false,
+          isCrawler: false,
           responseTime,
-          error: json.message,
-          headers: responseHeaders,
+          headers,
+          error: jsonData.message || "User-Agent was not detected as a crawler",
         });
+      } else {
+        // Unknown content type - try to read as text
+        const text = await response.text();
+        
+        // Check if it looks like HTML
+        if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+          const seoData = extractMetaTags(text);
+          setResult({
+            path: testPath,
+            userAgent,
+            isCrawler: true,
+            responseTime,
+            html: text,
+            seoData,
+            headers,
+          });
+        } else {
+          setResult({
+            path: testPath,
+            userAgent,
+            isCrawler: false,
+            responseTime,
+            headers,
+            error: `Unexpected response type: ${contentType}`,
+          });
+        }
       }
-    } catch (err) {
-      const responseTime = performance.now() - startTime;
+    } catch (error) {
+      const endTime = performance.now();
       setResult({
         path: testPath,
         userAgent,
         isCrawler: false,
-        responseTime,
-        error: err instanceof Error ? err.message : "Unknown error",
+        responseTime: Math.round(endTime - startTime),
+        error: error instanceof Error ? error.message : "Unknown error occurred",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const extractMetaTags = (html: string): { name: string; content: string }[] => {
-    const tags: { name: string; content: string }[] = [];
-    const regex = /<meta\s+(?:name|property)="([^"]+)"\s+content="([^"]+)"/g;
-    let match;
-    while ((match = regex.exec(html)) !== null) {
-      tags.push({ name: match[1], content: match[2] });
+  const extractMetaTags = (html: string): CrawlerTestResult["seoData"] => {
+    const seoData: CrawlerTestResult["seoData"] = {
+      metaTags: [],
+    };
+
+    // Extract title
+    const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+    if (titleMatch) {
+      seoData.title = titleMatch[1].trim();
     }
-    return tags;
+
+    // Extract meta description
+    const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i) ||
+                      html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["'][^>]*>/i);
+    if (descMatch) {
+      seoData.description = descMatch[1].trim();
+    }
+
+    // Extract all meta tags
+    const metaRegex = /<meta[^>]*(?:name|property)=["']([^"']*)["'][^>]*content=["']([^"']*)["'][^>]*>|<meta[^>]*content=["']([^"']*)["'][^>]*(?:name|property)=["']([^"']*)["'][^>]*>/gi;
+    let match;
+    while ((match = metaRegex.exec(html)) !== null) {
+      const name = match[1] || match[4];
+      const content = match[2] || match[3];
+      if (name && content) {
+        seoData.metaTags?.push({ name, content });
+      }
+    }
+
+    return seoData;
   };
+
+  const quickTestPaths = ["/", "/tr", "/ru", "/de", "/services", "/pricing", "/about"];
 
   return (
     <div className="space-y-6">
-      {/* Test Configuration */}
+      {/* Configuration */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5" />
             Crawler SSR Test
           </CardTitle>
+          <CardDescription>
+            Test how the crawler-ssr edge function renders pages for different bots
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Test Path</Label>
-              <Input
-                value={testPath}
-                onChange={(e) => setTestPath(e.target.value)}
-                placeholder="/"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Bot Type</Label>
-              <Select value={selectedBot} onValueChange={setSelectedBot}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="googlebot">🔍 Googlebot</SelectItem>
-                  <SelectItem value="bingbot">🔎 Bingbot</SelectItem>
-                  <SelectItem value="facebookbot">📘 Facebook</SelectItem>
-                  <SelectItem value="twitterbot">🐦 Twitter/X</SelectItem>
-                  <SelectItem value="linkedinbot">💼 LinkedIn</SelectItem>
-                  <SelectItem value="whatsapp">💬 WhatsApp</SelectItem>
-                  <SelectItem value="telegram">✈️ Telegram</SelectItem>
-                  <SelectItem value="slackbot">💼 Slack</SelectItem>
-                  <SelectItem value="discordbot">🎮 Discord</SelectItem>
-                  <SelectItem value="pinterest">📌 Pinterest</SelectItem>
-                  <SelectItem value="lighthouse">🏠 Lighthouse</SelectItem>
-                  <SelectItem value="pagespeed">⚡ PageSpeed</SelectItem>
-                  <SelectItem value="semrush">📊 SEMrush</SelectItem>
-                  <SelectItem value="ahrefs">🔗 Ahrefs</SelectItem>
-                  <SelectItem value="regular_chrome">🌐 Chrome (Regular)</SelectItem>
-                  <SelectItem value="regular_firefox">🦊 Firefox (Regular)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Test Path */}
+          <div className="space-y-2">
+            <Label htmlFor="testPath">Test Path</Label>
+            <Input
+              id="testPath"
+              value={testPath}
+              onChange={(e) => setTestPath(e.target.value)}
+              placeholder="/"
+            />
           </div>
 
+          {/* Bot Selection */}
           <div className="space-y-2">
-            <Label>Custom User-Agent (optional)</Label>
+            <Label>Bot Type</Label>
+            <Select value={selectedBot} onValueChange={setSelectedBot}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="googlebot">🔍 Googlebot</SelectItem>
+                <SelectItem value="bingbot">🔍 Bingbot</SelectItem>
+                <SelectItem value="facebookbot">📘 Facebook</SelectItem>
+                <SelectItem value="twitterbot">🐦 Twitter</SelectItem>
+                <SelectItem value="linkedinbot">💼 LinkedIn</SelectItem>
+                <SelectItem value="slackbot">💬 Slack</SelectItem>
+                <SelectItem value="telegrambot">✈️ Telegram</SelectItem>
+                <SelectItem value="whatsapp">📱 WhatsApp</SelectItem>
+                <SelectItem value="pinterest">📌 Pinterest</SelectItem>
+                <SelectItem value="yandexbot">🔍 Yandex</SelectItem>
+                <SelectItem value="baidubot">🔍 Baidu</SelectItem>
+                <SelectItem value="duckduckbot">🦆 DuckDuckGo</SelectItem>
+                <SelectItem value="applebot">🍎 Applebot</SelectItem>
+                <SelectItem value="chrome">🌐 Chrome (Regular)</SelectItem>
+                <SelectItem value="firefox">🦊 Firefox (Regular)</SelectItem>
+                <SelectItem value="safari">🧭 Safari (Regular)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Custom User Agent */}
+          <div className="space-y-2">
+            <Label htmlFor="customUA">Custom User-Agent (optional)</Label>
             <Input
+              id="customUA"
               value={customUserAgent}
               onChange={(e) => setCustomUserAgent(e.target.value)}
               placeholder="Leave empty to use selected bot's user-agent"
             />
           </div>
 
-          <div className="p-3 bg-muted rounded-lg text-sm font-mono break-all">
+          {/* Current User Agent Display */}
+          <div className="p-3 bg-muted rounded-lg text-sm">
             <span className="text-muted-foreground">User-Agent: </span>
-            {customUserAgent || CRAWLER_USER_AGENTS[selectedBot as keyof typeof CRAWLER_USER_AGENTS]}
+            <span className="font-mono text-xs break-all">
+              {customUserAgent || CRAWLER_USER_AGENTS[selectedBot as keyof typeof CRAWLER_USER_AGENTS]}
+            </span>
           </div>
 
-          <Button onClick={runCrawlerTest} disabled={isLoading} className="w-full">
+          {/* Run Test Button */}
+          <Button 
+            onClick={runCrawlerTest} 
+            disabled={isLoading}
+            className="w-full"
+          >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Testing...
               </>
             ) : (
               <>
-                <Bot className="mr-2 h-4 w-4" />
+                <Bot className="h-4 w-4 mr-2" />
                 Run Crawler Test
               </>
             )}
@@ -220,123 +280,116 @@ export function SEODebugCrawlerTab() {
         </CardContent>
       </Card>
 
-      {/* Test Results */}
+      {/* Results */}
       {result && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                {result.isCrawler ? (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                ) : (
-                  <XCircle className="h-5 w-5 text-yellow-500" />
-                )}
-                Test Result
-              </span>
-              <div className="flex items-center gap-2">
-                <Badge variant={result.isCrawler ? "default" : "secondary"}>
-                  {result.isCrawler ? "SSR HTML" : "JSON Response"}
-                </Badge>
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {result.responseTime.toFixed(0)}ms
-                </Badge>
-              </div>
+            <CardTitle className="flex items-center gap-2">
+              {result.error ? (
+                <XCircle className="h-5 w-5 text-destructive" />
+              ) : (
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              )}
+              Test Result
+              <Badge variant={result.isCrawler ? "default" : "secondary"}>
+                {result.isCrawler ? "Crawler Detected" : "JSON Response"}
+              </Badge>
+              <Badge variant="outline" className="ml-auto">
+                <Clock className="h-3 w-3 mr-1" />
+                {result.responseTime}ms
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {result.error && (
-              <div className="p-3 bg-destructive/10 text-destructive rounded-lg">
+            {result.error ? (
+              <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
                 {result.error}
               </div>
-            )}
-
-            {result.isCrawler && result.fullHtml && (
+            ) : result.isCrawler && result.seoData ? (
               <>
-                {/* SEO Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                {/* SEO Data */}
+                <div className="space-y-3">
+                  <div>
                     <Label className="text-muted-foreground">Title</Label>
-                    <div className="p-3 bg-muted rounded-lg font-medium">
-                      {result.title || "Not found"}
-                    </div>
+                    <p className="font-medium">{result.seoData.title || "No title found"}</p>
                   </div>
-                  <div className="space-y-2">
+                  <div>
                     <Label className="text-muted-foreground">Description</Label>
-                    <div className="p-3 bg-muted rounded-lg text-sm">
-                      {result.description || "Not found"}
-                    </div>
+                    <p className="text-sm">{result.seoData.description || "No description found"}</p>
                   </div>
+                  
+                  {/* Meta Tags */}
+                  {result.seoData.metaTags && result.seoData.metaTags.length > 0 && (
+                    <div>
+                      <Label className="text-muted-foreground mb-2 block">Meta Tags ({result.seoData.metaTags.length})</Label>
+                      <ScrollArea className="h-[200px]">
+                        <div className="space-y-1">
+                          {result.seoData.metaTags.map((tag, index) => (
+                            <div key={index} className="text-xs font-mono p-2 bg-muted rounded flex gap-2">
+                              <Badge variant="outline" className="shrink-0">{tag.name}</Badge>
+                              <span className="text-muted-foreground truncate">{tag.content}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  )}
                 </div>
 
-                {/* Meta Tags */}
-                <div className="space-y-2">
-                  <Label className="text-muted-foreground">Extracted Meta Tags</Label>
-                  <div className="max-h-48 overflow-y-auto space-y-1">
-                    {extractMetaTags(result.fullHtml).map((tag, i) => (
-                      <div key={i} className="flex gap-2 text-xs p-2 bg-muted rounded">
-                        <Badge variant="outline" className="shrink-0">
-                          {tag.name}
-                        </Badge>
-                        <span className="text-muted-foreground truncate">
-                          {tag.content}
-                        </span>
+                {/* HTML View */}
+                <div className="border-t pt-4">
+                  <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "preview" | "source")}>
+                    <TabsList>
+                      <TabsTrigger value="preview">
+                        <Eye className="h-4 w-4 mr-1" />
+                        Preview
+                      </TabsTrigger>
+                      <TabsTrigger value="source">
+                        <Code className="h-4 w-4 mr-1" />
+                        Source
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="preview" className="mt-4">
+                      <div className="border rounded-lg overflow-hidden bg-white">
+                        <iframe
+                          srcDoc={result.html}
+                          className="w-full h-[400px]"
+                          title="SSR Preview"
+                          sandbox="allow-same-origin"
+                        />
                       </div>
-                    ))}
-                  </div>
+                    </TabsContent>
+                    <TabsContent value="source" className="mt-4">
+                      <ScrollArea className="h-[400px]">
+                        <pre className="text-xs font-mono p-4 bg-muted rounded-lg whitespace-pre-wrap break-all">
+                          {result.html}
+                        </pre>
+                      </ScrollArea>
+                    </TabsContent>
+                  </Tabs>
                 </div>
-
-                {/* HTML View Toggle */}
-                <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "preview" | "source")}>
-                  <TabsList>
-                    <TabsTrigger value="preview" className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      Preview
-                    </TabsTrigger>
-                    <TabsTrigger value="source" className="flex items-center gap-1">
-                      <Code className="h-4 w-4" />
-                      Source
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="preview" className="mt-4">
-                    <div className="border rounded-lg overflow-hidden bg-background">
-                      <iframe
-                        srcDoc={result.fullHtml}
-                        className="w-full h-96"
-                        title="SSR Preview"
-                        sandbox="allow-same-origin"
-                      />
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="source" className="mt-4">
-                    <pre className="p-4 bg-muted rounded-lg overflow-auto max-h-96 text-xs font-mono whitespace-pre-wrap">
-                      {result.fullHtml}
-                    </pre>
-                  </TabsContent>
-                </Tabs>
 
                 {/* Response Headers */}
-                {result.headers && (
-                  <div className="space-y-2">
-                    <Label className="text-muted-foreground">Response Headers</Label>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {Object.entries(result.headers).map(([key, value]) => (
-                        <div key={key} className="flex gap-2 p-2 bg-muted rounded">
-                          <span className="font-medium">{key}:</span>
-                          <span className="text-muted-foreground truncate">{value}</span>
-                        </div>
-                      ))}
-                    </div>
+                {result.headers && Object.keys(result.headers).length > 0 && (
+                  <div className="border-t pt-4">
+                    <Label className="text-muted-foreground mb-2 block">Response Headers</Label>
+                    <ScrollArea className="h-[150px]">
+                      <div className="space-y-1">
+                        {Object.entries(result.headers).map(([key, value]) => (
+                          <div key={key} className="text-xs font-mono p-2 bg-muted rounded flex gap-2">
+                            <Badge variant="outline" className="shrink-0">{key}</Badge>
+                            <span className="text-muted-foreground truncate">{value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
                   </div>
                 )}
               </>
-            )}
-
-            {!result.isCrawler && !result.error && (
-              <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                <p className="text-yellow-600 dark:text-yellow-400">
-                  <Globe className="inline h-4 w-4 mr-2" />
-                  This user-agent was not detected as a crawler. Regular SPA will be served.
+            ) : (
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  The user-agent was not detected as a crawler. The server would serve the regular SPA.
                 </p>
               </div>
             )}
@@ -344,23 +397,24 @@ export function SEODebugCrawlerTab() {
         </Card>
       )}
 
-      {/* Quick Test Buttons */}
+      {/* Quick Tests */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Tests</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Quick Tests
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {["/", "/tr", "/ru", "/de", "/services", "/pricing", "/about"].map((path) => (
+            {quickTestPaths.map((path) => (
               <Button
                 key={path}
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   setTestPath(path);
-                  setTimeout(() => runCrawlerTest(), 100);
                 }}
-                disabled={isLoading}
               >
                 {path}
               </Button>
