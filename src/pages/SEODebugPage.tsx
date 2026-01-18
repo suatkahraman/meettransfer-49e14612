@@ -437,13 +437,23 @@ const SEODebugPage = () => {
               scannedAt: new Date() 
             });
           } else {
-            // JSON response - crawler not detected or error
-            const jsonData = await response.json();
+            // Non-HTML response - try to parse as JSON, but handle gracefully
+            const text = await response.text();
+            let errorMessage = 'Beklenmeyen yanıt türü';
+            
+            try {
+              const jsonData = JSON.parse(text);
+              errorMessage = jsonData.message || 'Crawler algılanmadı';
+            } catch {
+              // Not JSON, use generic message
+              errorMessage = `Beklenmeyen içerik türü: ${contentType}`;
+            }
+            
             results.push({ 
               language: lang, 
               url: expectedProductionUrl, 
               canonicalUrl: null, 
-              issues: [{ level: 'error', message: `SSR aktif değil: ${jsonData.message || 'Crawler algılanmadı'}` }], 
+              issues: [{ level: 'error', message: `SSR aktif değil: ${errorMessage}` }], 
               isSelfReferencing: false, 
               isAbsoluteUrl: false, 
               scannedAt: new Date(), 
