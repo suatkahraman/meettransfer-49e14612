@@ -10,9 +10,11 @@ import heroSkylane from "@/assets/hero/hero-city-skyline.webp";
 import heroFuturistic1 from "@/assets/hero/hero-futuristic-1.webp";
 import heroFuturistic2 from "@/assets/hero/hero-futuristic-2.webp";
 import heroMercedes from "@/assets/hero/hero-mercedes-vito.webp";
+import heroFuturisticCity from "@/assets/hero/hero-futuristic-city.webp";
 
 // Background images configuration - optimized WebP format for fast loading
 const HERO_BACKGROUNDS = [
+  { src: heroFuturisticCity, label: "Futuristic City", labelTR: "Fütüristik Şehir" },
   { src: heroAirportFleet, label: "Airport Fleet", labelTR: "Havalimanı Filosu" },
   { src: heroSkylane, label: "City Skyline", labelTR: "Şehir Silüeti" },
   { src: heroFuturistic1, label: "VIP Transfer", labelTR: "VIP Transfer" },
