@@ -22,6 +22,7 @@ import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
 import AdBlockWarning from "./components/AdBlockWarning";
 // PWA Debug panel - visible with ?pwa_debug=1
 import { PWADebugPanel } from "./components/website/PWADebugPanel";
+import CanonicalManager from "./components/seo/CanonicalManager";
 
 // Critical pages - lazy loaded with prefetch for better UX
 const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
@@ -229,6 +230,7 @@ const App = () => (
               <PWAInstallPrompt />
               <PWADebugPanel />
               <AdBlockWarning />
+              <CanonicalManager />
               <AuthProvider>
                 <Routes>
               {/* Localized Website Pages - Support all languages */}
