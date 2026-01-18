@@ -34,17 +34,17 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
               <span className="text-primary">Meet</span> Transfer
             </h1>
             {/* Inline badges on mobile */}
-            <div className="flex items-center gap-1">
-              <span className="inline-flex items-center gap-0.5 bg-primary/10 text-primary rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
-                <Shield className="h-2.5 w-2.5 md:h-3 md:w-3" />
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-1 text-[10px] md:text-xs font-medium">
+                <Shield className="h-3 w-3 md:h-4 md:w-4" />
                 <span className="hidden xs:inline">{t("safe")}</span>
               </span>
-              <span className="inline-flex items-center gap-0.5 bg-accent/10 text-accent rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
-                <Zap className="h-2.5 w-2.5 md:h-3 md:w-3" />
+              <span className="inline-flex items-center gap-1 bg-accent/10 text-accent rounded-full px-2 py-1 text-[10px] md:text-xs font-medium">
+                <Zap className="h-3 w-3 md:h-4 md:w-4" />
                 <span className="hidden xs:inline">{t("fast")}</span>
               </span>
-              <span className="inline-flex items-center gap-0.5 bg-yellow-500/10 text-yellow-600 rounded-full px-1.5 py-0.5 text-[8px] md:text-[10px] font-medium">
-                <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-current" />
+              <span className="inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-600 rounded-full px-2 py-1 text-[10px] md:text-xs font-medium">
+                <Star className="h-3 w-3 md:h-4 md:w-4 fill-current" />
                 {rating.toFixed(1)}
               </span>
             </div>
@@ -52,20 +52,20 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
         </div>
       </div>
       
-      {/* Trust Badges Row - More compact */}
-      <div className="flex items-center gap-1.5 md:gap-2 text-[8px] md:text-[10px] text-muted-foreground">
-        <div className="flex items-center gap-0.5">
-          <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
+      {/* Trust Badges Row */}
+      <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <Check className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
           <span>{t("fixedPrice")}</span>
         </div>
         <span className="text-border">•</span>
-        <div className="flex items-center gap-0.5">
-          <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
+        <div className="flex items-center gap-1">
+          <Check className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
           <span>{t("freeCancel")}</span>
         </div>
         <span className="text-border">•</span>
-        <div className="flex items-center gap-0.5">
-          <Check className="h-2.5 w-2.5 md:h-3 md:w-3 text-green-500" />
+        <div className="flex items-center gap-1">
+          <Check className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
           <span>{t("proDriver")}</span>
         </div>
       </div>
