@@ -228,7 +228,28 @@ const SEODebugPage = () => {
         } else {
           const html = await response.text();
           const hreflangTags = parseHreflangTags(html);
-          results.push({ language: lang, url, hreflangTags, issues: [], hasXDefault: hreflangTags.some(t => t.hreflang === 'x-default'), hasSelfReference: hreflangTags.some(t => t.href === url), scannedAt: new Date() });
+          
+          // Self-reference check: compare paths, not full URLs (preview vs production difference)
+          const currentLangCode = lang.toLowerCase();
+          const expectedPath = prefix + (basePath === '/' ? '' : basePath);
+          const expectedProductionUrl = 'https://meettransfer.app' + (expectedPath || '/');
+          
+          // Check if any hreflang tag matches either the current URL or the production URL for this language
+          const hasSelfRef = hreflangTags.some(t => {
+            if (t.hreflang !== currentLangCode && t.hreflang !== 'x-default') return false;
+            // Match against production URL pattern
+            return t.href === expectedProductionUrl || t.href === url;
+          });
+          
+          results.push({ 
+            language: lang, 
+            url, 
+            hreflangTags, 
+            issues: [], 
+            hasXDefault: hreflangTags.some(t => t.hreflang === 'x-default'), 
+            hasSelfReference: hasSelfRef, 
+            scannedAt: new Date() 
+          });
         }
       } catch (error) {
         results.push({ language: lang, url, hreflangTags: [], issues: [], hasXDefault: false, hasSelfReference: false, scannedAt: new Date(), error: error instanceof Error ? error.message : 'Bilinmeyen hata' });
