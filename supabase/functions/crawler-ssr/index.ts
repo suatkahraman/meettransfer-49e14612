@@ -196,9 +196,46 @@ function getSeoConfig(path: string) {
   return defaultSeo;
 }
 
+// Supported language prefixes
+const LANG_PREFIXES = ['tr', 'de', 'fr', 'ru', 'it', 'es', 'ar', 'uk', 'ja', 'zh', 'pt'];
+const LANG_REGEX = new RegExp(`^/(${LANG_PREFIXES.join('|')})(?=/|$)`);
+
+function normalizeCanonicalPath(path: string): string {
+  // Remove trailing slash except for root
+  let normalized = path.endsWith('/') && path.length > 1 ? path.slice(0, -1) : path;
+  // Ensure starts with /
+  if (!normalized.startsWith('/')) {
+    normalized = '/' + normalized;
+  }
+  return normalized;
+}
+
+function getBasePath(path: string): string {
+  // Remove language prefix to get base path
+  const normalized = normalizeCanonicalPath(path);
+  const withoutLang = normalized.replace(LANG_REGEX, '');
+  return withoutLang || '/';
+}
+
 function generateMetaTags(path: string, config: typeof defaultSeo): string {
   const baseUrl = 'https://meettransfer.app';
-  const canonicalUrl = `${baseUrl}${path === '/' ? '' : path}`;
+  const normalizedPath = normalizeCanonicalPath(path);
+  const basePath = getBasePath(normalizedPath);
+  
+  // Canonical URL should be self-referencing (exact current path)
+  const canonicalUrl = normalizedPath === '/' 
+    ? baseUrl 
+    : `${baseUrl}${normalizedPath}`;
+  
+  // For hreflang, generate URLs for all language variants
+  const generateHreflangUrl = (lang: string): string => {
+    if (lang === 'en' || lang === 'x-default') {
+      // English and x-default use the base path without language prefix
+      return basePath === '/' ? baseUrl : `${baseUrl}${basePath}`;
+    }
+    // Other languages add prefix
+    return basePath === '/' ? `${baseUrl}/${lang}` : `${baseUrl}/${lang}${basePath}`;
+  };
   
   return `
     <title>${config.title}</title>
@@ -221,18 +258,19 @@ function generateMetaTags(path: string, config: typeof defaultSeo): string {
     <meta name="twitter:image" content="${config.ogImage}">
     
     <!-- Hreflang Tags -->
-    <link rel="alternate" hreflang="en" href="${baseUrl}${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="tr" href="${baseUrl}/tr${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="ru" href="${baseUrl}/ru${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="de" href="${baseUrl}/de${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="ar" href="${baseUrl}/ar${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="fr" href="${baseUrl}/fr${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="es" href="${baseUrl}/es${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="it" href="${baseUrl}/it${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="pt" href="${baseUrl}/pt${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="ja" href="${baseUrl}/ja${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="zh" href="${baseUrl}/zh${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
-    <link rel="alternate" hreflang="x-default" href="${baseUrl}${path.replace(/^\/(tr|ru|de|ar|fr|es|it|pt|ja|zh)/, '')}">
+    <link rel="alternate" hreflang="en" href="${generateHreflangUrl('en')}">
+    <link rel="alternate" hreflang="tr" href="${generateHreflangUrl('tr')}">
+    <link rel="alternate" hreflang="de" href="${generateHreflangUrl('de')}">
+    <link rel="alternate" hreflang="fr" href="${generateHreflangUrl('fr')}">
+    <link rel="alternate" hreflang="ru" href="${generateHreflangUrl('ru')}">
+    <link rel="alternate" hreflang="it" href="${generateHreflangUrl('it')}">
+    <link rel="alternate" hreflang="es" href="${generateHreflangUrl('es')}">
+    <link rel="alternate" hreflang="ar" href="${generateHreflangUrl('ar')}">
+    <link rel="alternate" hreflang="uk" href="${generateHreflangUrl('uk')}">
+    <link rel="alternate" hreflang="ja" href="${generateHreflangUrl('ja')}">
+    <link rel="alternate" hreflang="zh" href="${generateHreflangUrl('zh')}">
+    <link rel="alternate" hreflang="pt" href="${generateHreflangUrl('pt')}">
+    <link rel="alternate" hreflang="x-default" href="${generateHreflangUrl('x-default')}">
   `;
 }
 
