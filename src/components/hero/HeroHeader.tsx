@@ -30,21 +30,21 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <h1 className="text-base md:text-xl lg:text-2xl font-bold text-foreground leading-tight whitespace-nowrap">
+            <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-foreground leading-tight whitespace-nowrap">
               <span className="text-primary">Meet</span> Transfer
             </h1>
             {/* Inline badges on mobile */}
-            <div className="flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-1 text-[10px] md:text-xs font-medium">
-                <Shield className="h-3 w-3 md:h-4 md:w-4" />
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2.5 py-1 text-[13px] md:text-sm font-medium">
+                <Shield className="h-5 w-5 md:h-6 md:w-6" />
                 <span className="hidden xs:inline">{t("safe")}</span>
               </span>
-              <span className="inline-flex items-center gap-1 bg-accent/10 text-accent rounded-full px-2 py-1 text-[10px] md:text-xs font-medium">
-                <Zap className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="inline-flex items-center gap-1 bg-accent/10 text-accent rounded-full px-2.5 py-1 text-[13px] md:text-sm font-medium">
+                <Zap className="h-5 w-5 md:h-6 md:w-6" />
                 <span className="hidden xs:inline">{t("fast")}</span>
               </span>
-              <span className="inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-600 rounded-full px-2 py-1 text-[10px] md:text-xs font-medium">
-                <Star className="h-3 w-3 md:h-4 md:w-4 fill-current" />
+              <span className="inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-600 rounded-full px-2.5 py-1 text-[13px] md:text-sm font-medium">
+                <Star className="h-5 w-5 md:h-6 md:w-6 fill-current" />
                 {rating.toFixed(1)}
               </span>
             </div>
@@ -53,19 +53,19 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
       </div>
       
       {/* Trust Badges Row */}
-      <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-muted-foreground">
+      <div className="flex items-center gap-2.5 md:gap-3 text-[13px] md:text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
-          <Check className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
+          <Check className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
           <span>{t("fixedPrice")}</span>
         </div>
         <span className="text-border">•</span>
         <div className="flex items-center gap-1">
-          <Check className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
+          <Check className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
           <span>{t("freeCancel")}</span>
         </div>
         <span className="text-border">•</span>
         <div className="flex items-center gap-1">
-          <Check className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
+          <Check className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
           <span>{t("proDriver")}</span>
         </div>
       </div>
