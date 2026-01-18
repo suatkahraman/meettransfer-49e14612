@@ -234,11 +234,20 @@ const SEODebugPage = () => {
           const expectedPath = prefix + (basePath === '/' ? '' : basePath);
           const expectedProductionUrl = 'https://meettransfer.app' + (expectedPath || '/');
           
-          // Check if any hreflang tag matches either the current URL or the production URL for this language
+          // Check if any hreflang tag points to the same path (self-reference)
+          // The hreflang attribute might be in different formats: "en", "en-us", "en-US", etc.
           const hasSelfRef = hreflangTags.some(t => {
-            if (t.hreflang !== currentLangCode && t.hreflang !== 'x-default') return false;
-            // Match against production URL pattern
-            return t.href === expectedProductionUrl || t.href === url;
+            // Check if href matches expected production URL for this language
+            if (t.href === expectedProductionUrl || t.href === url) {
+              return true;
+            }
+            // Also check by path matching - if the path matches, it's a self-reference
+            const tagPath = t.href.replace(/^https?:\/\/[^/]+/, '') || '/';
+            const selfPath = expectedPath || '/';
+            if (tagPath === selfPath && (t.hreflang.toLowerCase().startsWith(currentLangCode) || t.hreflang === 'x-default')) {
+              return true;
+            }
+            return false;
           });
           
           results.push({ 
