@@ -32,49 +32,13 @@ export interface OfficeLocation {
 
 export const GLOBAL_OFFICES: OfficeLocation[] = [
   {
-    flag: "🇹🇷",
-    country: "Turkey",
-    city: "Istanbul",
-    address: "Atatürk Mahallesi",
+    flag: "🇺🇸",
+    country: "USA",
+    city: "Cheyenne",
+    address: "1908 Thomes Ave STE 12994, Cheyenne, WY 82001",
     phone: WHATSAPP_DISPLAY,
     whatsappOnly: true,
     email: SUPPORT_EMAIL,
-  },
-  {
-    flag: "🇩🇪",
-    country: "Germany",
-    city: "Berlin",
-    address: "Street Business Center, Berlin 245",
-    phone: WHATSAPP_DISPLAY,
-    whatsappOnly: true,
-    email: null,
-  },
-  {
-    flag: "🇦🇪",
-    country: "UAE",
-    city: "Dubai",
-    address: "Downtown Business Tower, Dubai 35",
-    phone: WHATSAPP_DISPLAY,
-    whatsappOnly: true,
-    email: null,
-  },
-  {
-    flag: "🇬🇷",
-    country: "Greece",
-    city: "Athens",
-    address: "Syntagma Square, Athens",
-    phone: WHATSAPP_DISPLAY,
-    whatsappOnly: true,
-    email: null,
-  },
-  {
-    flag: "🇨🇾",
-    country: "Cyprus",
-    city: "Larnaca",
-    address: "Airport Road, Larnaca",
-    phone: WHATSAPP_DISPLAY,
-    whatsappOnly: true,
-    email: null,
   },
 ];
 
