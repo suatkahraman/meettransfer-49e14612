@@ -102,6 +102,10 @@ const FleetIconsBar = () => {
       popular: false,
       badge: null,
     },
+  ];
+
+  // Switzerland exclusive fleet items
+  const switzerlandFleetItems = [
     {
       name: "S-Class",
       nameTR: "S-Class",
@@ -155,12 +159,37 @@ const FleetIconsBar = () => {
           </p>
         </motion.div>
 
-        {/* Fleet Grid - Transfeero Style */}
+        {/* Fleet Grid - Main Fleet */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {fleetItems.map((item, index) => (
             <VehicleCard key={index} item={item} index={index} isTR={isTR} getLocalizedPath={getLocalizedPath} />
           ))}
         </div>
+
+        {/* Switzerland Fleet Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-10"
+        >
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-sky-500/10 to-blue-500/10 border border-sky-500/20">
+              <Snowflake className="h-4 w-4 text-sky-500" />
+              <span className="text-sm font-semibold text-sky-600 dark:text-sky-400">
+                {isTR ? "İsviçre Kayak Transferleri" : "Swiss Ski Transfers"}
+              </span>
+            </div>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 max-w-2xl mx-auto">
+            {switzerlandFleetItems.map((item, index) => (
+              <VehicleCard key={`ch-${index}`} item={item} index={index + 6} isTR={isTR} getLocalizedPath={getLocalizedPath} />
+            ))}
+          </div>
+        </motion.div>
 
         {/* View Fleet CTA */}
         <motion.div
