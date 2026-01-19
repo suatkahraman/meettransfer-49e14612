@@ -1,6 +1,6 @@
-import React, { createContext, useContext, ReactNode, useEffect, useMemo } from "react";
+import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { blogTranslations } from "./BlogTranslations";
+// BlogTranslations removed from main bundle – use useBlogTranslations hook in blog pages
 
 export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES" | "AR" | "TR" | "UK" | "JA";
 
@@ -15348,33 +15348,17 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const { language, fromPrefix } = resolveLanguage(location.pathname);
 
-  // Merge base translations with blog translations
-  // Blog translations from BlogTranslations.tsx take precedence, then fall back to main translations
-  const mergedTranslations = useMemo(() => {
-    const result: Record<Language, Record<string, string>> = {} as Record<Language, Record<string, string>>;
-    const languages: Language[] = ["EN", "DE", "FR", "RU", "IT", "ES", "AR", "TR", "UK", "JA"];
-    
-    for (const lang of languages) {
-      // First add blog translations, then main translations
-      // This ensures main translations (which have complete blog content) are available
-      // and blog translations can override specific keys if needed
-      result[lang] = {
-        ...blogTranslations[lang],
-        ...translations[lang],
-      };
-    }
-    
-    return result;
-  }, []);
+  // Main translations only – blog translations are loaded lazily via useBlogTranslations hook
+  const currentTranslations = translations;
 
   const t = (key: string): string => {
-    const translation = mergedTranslations[language][key];
+    const translation = currentTranslations[language]?.[key];
     if (translation) {
       return translation;
     }
     
     // Fallback to English
-    const englishTranslation = mergedTranslations["EN"][key];
+    const englishTranslation = currentTranslations["EN"]?.[key];
     if (englishTranslation) {
       // Only log in development and for non-blog keys to reduce noise
       if (import.meta.env.DEV && !key.startsWith("blog") && !key.startsWith("seo")) {
@@ -15383,8 +15367,8 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       return englishTranslation;
     }
     
-    // Return key if no translation exists at all
-    if (import.meta.env.DEV) {
+    // Return key if no translation exists at all (likely a blog key that should use tBlog)
+    if (import.meta.env.DEV && !key.startsWith("blog")) {
       console.warn(`[i18n] Missing translation key: ${key}`);
     }
     return key;

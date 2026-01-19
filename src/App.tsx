@@ -190,6 +190,9 @@ const PageLoader = () => (
   </div>
 );
 
+// Lazy-load BlogLayout to keep it out of main bundle
+const BlogLayout = lazy(() => import("./components/blog/BlogLayout").then(m => ({ default: m.BlogLayout })));
+
 // Helper to create localized routes with Suspense
 const localizedRoutes = (basePath: string, element: React.ReactNode) => {
   const wrappedElement = <Suspense fallback={<PageLoader />}>{element}</Suspense>;
@@ -201,6 +204,27 @@ const localizedRoutes = (basePath: string, element: React.ReactNode) => {
     const localizedPath = basePath === "/" 
       ? `/${prefix}` 
       : `/${prefix}${basePath}`;
+    routes.push(
+      <Route key={`${prefix}-${basePath}`} path={localizedPath} element={wrappedElement} />
+    );
+  });
+  
+  return routes;
+};
+
+// Helper to create localized blog routes with BlogLayout wrapper
+const localizedBlogRoutes = (basePath: string, element: React.ReactNode) => {
+  const wrappedElement = (
+    <Suspense fallback={<PageLoader />}>
+      <BlogLayout>{element}</BlogLayout>
+    </Suspense>
+  );
+  const routes = [
+    <Route key={`en-${basePath}`} path={basePath} element={wrappedElement} />,
+  ];
+  
+  LANG_PREFIXES.forEach((prefix) => {
+    const localizedPath = `/${prefix}${basePath}`;
     routes.push(
       <Route key={`${prefix}-${basePath}`} path={localizedPath} element={wrappedElement} />
     );
@@ -276,42 +300,42 @@ const App = () => (
               {localizedRoutes("/istanbul-airport-hotel-transfer", <IstanbulAirportHotelTransfer />)}
               {localizedRoutes("/ist-city-center-vip-transfer", <IstCityCenterVipTransfer />)}
               {localizedRoutes("/sabiha-gokcen-private-transfer", <SabihaGokcenPrivateTransfer />)}
-              {localizedRoutes("/blog", <BlogPage />)}
-              {localizedRoutes("/blog/istanbul-airport-to-city-best-way", <IstanbulAirportToCityGuide />)}
-              {localizedRoutes("/blog/istanbul-airport-transfer-price-guide", <IstanbulTransferPriceGuide />)}
-              {localizedRoutes("/blog/private-vs-taxi-transfer-turkey", <PrivateVsTaxiTurkey />)}
-              {localizedRoutes("/blog/antalya-airport-transfer-to-hotels", <AntalyaAirportTransferGuide />)}
-              {localizedRoutes("/blog/is-private-transfer-worth-it-turkey", <IsPrivateTransferWorthIt />)}
-              {localizedRoutes("/blog/dubai-airport-transfer-guide", <DubaiAirportTransferGuide />)}
-              {localizedRoutes("/blog/cyprus-airport-transfer-guide", <CyprusAirportTransferGuide />)}
-{localizedRoutes("/blog/istanbul-bursa-day-tour-guide", <BursaDayTourGuide />)}
-              {localizedRoutes("/blog/cappadocia-airport-transfer-guide", <CappadociaAirportTransferGuide />)}
-              {localizedRoutes("/blog/fethiye-airport-transfer-guide", <FethiyeAirportTransferGuide />)}
-              {localizedRoutes("/blog/marmaris-airport-transfer-guide", <MarmarisAirportTransferGuide />)}
-              {localizedRoutes("/blog/oludeniz-airport-transfer-guide", <OludenizAirportTransferGuide />)}
-              {localizedRoutes("/blog/aydin-airport-transfer-guide", <AydinAirportTransferGuide />)}
-              {localizedRoutes("/blog/mugla-airport-transfer-guide", <MuglaAirportTransferGuide />)}
-              {localizedRoutes("/blog/frankfurt-airport-transfer-guide", <FrankfurtAirportTransferGuide />)}
-              {localizedRoutes("/blog/ai-booking-assistant-guide", <AIBookingAssistantGuide />)}
-              {localizedRoutes("/blog/athens-airport-transfer-guide", <AthensAirportTransferGuide />)}
-              {localizedRoutes("/blog/why-meet-transfer-trusted-company", <WhyMeetTransferTrusted />)}
-              {localizedRoutes("/blog/best-vip-transfer-istanbul-review", <BestVIPTransferIstanbul />)}
-              {localizedRoutes("/blog/how-to-choose-reliable-transfer-turkey", <HowToChooseReliableTransfer />)}
-              {localizedRoutes("/blog/antalya-airport-transfer-best-service", <AntalyaAirportTransferBestService />)}
-              {localizedRoutes("/blog/bodrum-airport-transfer-best-service", <BodrumAirportTransferBestService />)}
-              {localizedRoutes("/blog/izmir-airport-transfer-best-service", <IzmirAirportTransferBestService />)}
-              {localizedRoutes("/blog/cappadocia-airport-transfer-best-service", <CappadociaAirportTransferBestService />)}
-              {localizedRoutes("/blog/safe-night-transfer-turkey", <SafeNightTransferTurkey />)}
-              {localizedRoutes("/blog/family-airport-transfer-turkey", <FamilyAirportTransferTurkey />)}
-              {localizedRoutes("/blog/business-travel-transfer-istanbul", <BusinessTravelTransferIstanbul />)}
-              {localizedRoutes("/blog/airport-transfer-booking-tips", <AirportTransferBookingTips />)}
-              {localizedRoutes("/blog/vip-airport-transfer-turkey", <VIPAirportTransferTurkey />)}
-              {localizedRoutes("/blog/intercity-transfer-turkey", <IntercityTransferTurkey />)}
-              {localizedRoutes("/blog/luxury-maybach-transfer-turkey", <LuxuryMaybachTransferTurkey />)}
-              {localizedRoutes("/blog/mardin-airport-transfer-guide", <MardinAirportTransferGuide />)}
-              {localizedRoutes("/blog/midyat-airport-transfer-guide", <MidyatAirportTransferGuide />)}
-              {localizedRoutes("/blog/agency-partnership-b2b-turkey", <AgencyPartnershipGuide />)}
-              {localizedRoutes("/blog/switzerland-airport-transfer-guide", <SwitzerlandAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog", <BlogPage />)}
+              {localizedBlogRoutes("/blog/istanbul-airport-to-city-best-way", <IstanbulAirportToCityGuide />)}
+              {localizedBlogRoutes("/blog/istanbul-airport-transfer-price-guide", <IstanbulTransferPriceGuide />)}
+              {localizedBlogRoutes("/blog/private-vs-taxi-transfer-turkey", <PrivateVsTaxiTurkey />)}
+              {localizedBlogRoutes("/blog/antalya-airport-transfer-to-hotels", <AntalyaAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/is-private-transfer-worth-it-turkey", <IsPrivateTransferWorthIt />)}
+              {localizedBlogRoutes("/blog/dubai-airport-transfer-guide", <DubaiAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/cyprus-airport-transfer-guide", <CyprusAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/istanbul-bursa-day-tour-guide", <BursaDayTourGuide />)}
+              {localizedBlogRoutes("/blog/cappadocia-airport-transfer-guide", <CappadociaAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/fethiye-airport-transfer-guide", <FethiyeAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/marmaris-airport-transfer-guide", <MarmarisAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/oludeniz-airport-transfer-guide", <OludenizAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/aydin-airport-transfer-guide", <AydinAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/mugla-airport-transfer-guide", <MuglaAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/frankfurt-airport-transfer-guide", <FrankfurtAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/ai-booking-assistant-guide", <AIBookingAssistantGuide />)}
+              {localizedBlogRoutes("/blog/athens-airport-transfer-guide", <AthensAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/why-meet-transfer-trusted-company", <WhyMeetTransferTrusted />)}
+              {localizedBlogRoutes("/blog/best-vip-transfer-istanbul-review", <BestVIPTransferIstanbul />)}
+              {localizedBlogRoutes("/blog/how-to-choose-reliable-transfer-turkey", <HowToChooseReliableTransfer />)}
+              {localizedBlogRoutes("/blog/antalya-airport-transfer-best-service", <AntalyaAirportTransferBestService />)}
+              {localizedBlogRoutes("/blog/bodrum-airport-transfer-best-service", <BodrumAirportTransferBestService />)}
+              {localizedBlogRoutes("/blog/izmir-airport-transfer-best-service", <IzmirAirportTransferBestService />)}
+              {localizedBlogRoutes("/blog/cappadocia-airport-transfer-best-service", <CappadociaAirportTransferBestService />)}
+              {localizedBlogRoutes("/blog/safe-night-transfer-turkey", <SafeNightTransferTurkey />)}
+              {localizedBlogRoutes("/blog/family-airport-transfer-turkey", <FamilyAirportTransferTurkey />)}
+              {localizedBlogRoutes("/blog/business-travel-transfer-istanbul", <BusinessTravelTransferIstanbul />)}
+              {localizedBlogRoutes("/blog/airport-transfer-booking-tips", <AirportTransferBookingTips />)}
+              {localizedBlogRoutes("/blog/vip-airport-transfer-turkey", <VIPAirportTransferTurkey />)}
+              {localizedBlogRoutes("/blog/intercity-transfer-turkey", <IntercityTransferTurkey />)}
+              {localizedBlogRoutes("/blog/luxury-maybach-transfer-turkey", <LuxuryMaybachTransferTurkey />)}
+              {localizedBlogRoutes("/blog/mardin-airport-transfer-guide", <MardinAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/midyat-airport-transfer-guide", <MidyatAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/agency-partnership-b2b-turkey", <AgencyPartnershipGuide />)}
+              {localizedBlogRoutes("/blog/switzerland-airport-transfer-guide", <SwitzerlandAirportTransferGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
