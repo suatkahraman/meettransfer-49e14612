@@ -9,9 +9,10 @@ import { useHourlyForm } from "@/hooks/useHourlyForm";
 import { useHeroVideos } from "@/hooks/useHeroVideos";
 import { useHeroFormStorage } from "@/hooks/useHeroFormStorage";
 
-// Critical lightweight components - import directly (no barrel export)
+// Critical components for LCP - import directly (NOT lazy loaded)
 import { HeroHeader } from "@/components/hero/HeroHeader";
 import { HeroTrustBadges } from "@/components/hero/HeroTrustBadges";
+import { HeroBackground } from "@/components/hero/HeroBackground";
 
 // Lazy load AnimatePresence - framer-motion is heavy
 const AnimatePresence = lazy(() => 
@@ -21,7 +22,6 @@ const AnimatePresence = lazy(() =>
 // Lazy load heavier form components - they render after initial paint
 const RideFormContent = lazy(() => import("@/components/hero/RideFormContent").then(m => ({ default: m.RideFormContent })));
 const HourlyFormContent = lazy(() => import("@/components/hero/HourlyFormContent").then(m => ({ default: m.HourlyFormContent })));
-const HeroBackground = lazy(() => import("@/components/hero/HeroBackground").then(m => ({ default: m.HeroBackground })));
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
 // HeroAIAssistant temporarily disabled
 const ReturnTripPromoBanner = lazy(() => import("@/components/hero/ReturnTripPromoBanner").then(m => ({ default: m.ReturnTripPromoBanner })));
@@ -83,15 +83,14 @@ export const Hero = () => {
 
   return (
     <section ref={heroRef} id="booking-form" className="relative overflow-hidden bg-background">
-      <Suspense fallback={<div className="absolute inset-0 bg-gradient-to-br from-background to-muted" />}>
-        <HeroBackground 
-          videosLoaded={videoState.videosLoaded} 
-          cityVideos={videoState.cityVideos} 
-          currentVideoIndex={videoState.currentVideoIndex} 
-          setCurrentVideoIndex={videoState.setCurrentVideoIndex} 
-          language={language} 
-        />
-      </Suspense>
+      {/* HeroBackground is NOT lazy loaded - critical for LCP */}
+      <HeroBackground 
+        videosLoaded={videoState.videosLoaded} 
+        cityVideos={videoState.cityVideos} 
+        currentVideoIndex={videoState.currentVideoIndex} 
+        setCurrentVideoIndex={videoState.setCurrentVideoIndex} 
+        language={language} 
+      />
 
       {/* Mobile: pb-20 for bottom nav, desktop: normal padding. pt handled by WebsiteLayout */}
       <div className="container relative z-10 px-2 sm:px-3 md:px-4 pt-4 md:pt-8 pb-4 md:pb-8 lg:pb-16">
