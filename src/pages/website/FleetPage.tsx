@@ -5,7 +5,7 @@ import WhatsAppButton from "@/components/website/WhatsAppButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
-import { MapPin, Plane } from "lucide-react";
+import { MapPin, Plane, Snowflake } from "lucide-react";
 
 // Optimized WebP fleet images
 import vitoVipPremium from "@/assets/fleet/vito-vip-premium.webp";
@@ -29,6 +29,12 @@ import dubaiSuburban from "@/assets/dubai/dubai-suburban.jpg";
 import dubaiSuburbanInterior from "@/assets/dubai/dubai-suburban-interior.jpg";
 import dubaiVipSprinter from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
 import dubaiVipSprinterExterior from "@/assets/dubai/dubai-vip-van-exterior.jpg";
+
+// Switzerland fleet images (using high-quality Unsplash images)
+const switzerlandSClassExterior = "https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=800&auto=format&fit=crop";
+const switzerlandSClassInterior = "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&auto=format&fit=crop";
+const switzerlandVClassExterior = "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&auto=format&fit=crop";
+const switzerlandVClassInterior = "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=800&auto=format&fit=crop";
 
 const FleetPage = () => {
   const { t, language } = useLanguage();
@@ -137,6 +143,38 @@ const FleetPage = () => {
     },
   ];
 
+  // Switzerland exclusive fleet - luxury vehicles for Swiss Alps ski transfers
+  const switzerlandVehicles = [
+    {
+      name: isTurkish ? "Mercedes S-Class" : "Mercedes S-Class",
+      description: isTurkish 
+        ? "Lüks sedan seyahatinin zirvesi. İsviçre alp yollarında en yüksek konforu arayan yöneticiler ve VIP misafirler için mükemmel."
+        : "The epitome of luxury sedan travel. Perfect for executives and VIP guests seeking the ultimate comfort on Swiss alpine roads.",
+      passengers: 3,
+      luggage: 3,
+      startingPrice: "CHF 450",
+      features: ["Climate Control", "Heated Massage Seats", "Burmester Sound", "Ambient Lighting", "Privacy Glass", "Free WiFi"],
+      images: [
+        { src: switzerlandSClassExterior, alt: "Mercedes S-Class luxury sedan Switzerland airport transfer Zurich Geneva to ski resorts" },
+        { src: switzerlandSClassInterior, alt: "Mercedes S-Class interior premium leather Swiss Alps St. Moritz Zermatt transfer" },
+      ],
+    },
+    {
+      name: isTurkish ? "Mercedes V-Class" : "Mercedes V-Class",
+      description: isTurkish 
+        ? "İsviçre kayak merkezlerine tüm ekipmanlarıyla seyahat eden aileler ve kayak grupları için ideal geniş lüks MPV."
+        : "Spacious luxury MPV ideal for families and ski groups traveling to Swiss ski resorts with all their equipment.",
+      passengers: 7,
+      luggage: 7,
+      startingPrice: "CHF 450",
+      features: ["Dual-Zone Climate", "Leather Captain Seats", "Ski Equipment Storage", "USB Chargers", "Panoramic Roof", "Free WiFi"],
+      images: [
+        { src: switzerlandVClassExterior, alt: "Mercedes V-Class luxury MPV Swiss ski resort transfer St. Moritz Verbier Gstaad" },
+        { src: switzerlandVClassInterior, alt: "Mercedes V-Class interior spacious Swiss Alps group transfer ski families" },
+      ],
+    },
+  ];
+
   return (
     <WebsiteLayout>
       <SEOHead
@@ -236,6 +274,70 @@ const FleetPage = () => {
                     message={isTurkish 
                       ? "Merhaba, Dubai havalimanı transferi için lüks araç hakkında bilgi almak istiyorum."
                       : "Hello, I'd like to inquire about luxury vehicle options for Dubai airport transfer."}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Switzerland Exclusive Fleet Section */}
+        <section className="mt-16">
+          <div className="relative bg-gradient-to-br from-sky-500/10 via-blue-500/5 to-cyan-500/10 rounded-3xl p-8 md:p-12 border border-sky-500/20 overflow-hidden">
+            {/* Decorative elements - snow/mountain theme */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-sky-400/20 to-transparent rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-400/15 to-transparent rounded-full blur-2xl" />
+            <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-xl" />
+            
+            <div className="relative z-10">
+              {/* Switzerland Badge */}
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <div className="flex items-center gap-2 bg-gradient-to-r from-sky-500 to-blue-600 text-white px-4 py-2 rounded-full shadow-lg">
+                  <Snowflake className="w-5 h-5" />
+                  <span className="font-bold text-sm uppercase tracking-wider">
+                    {isTurkish ? "İsviçre Özel" : "Switzerland Exclusive"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center mb-8">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-sky-600 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                  {isTurkish ? "İsviçre Kayak Merkezi Transferleri" : "Swiss Ski Resort Transfers"}
+                </h2>
+                <div className="flex items-center justify-center gap-2 text-sky-600 dark:text-sky-400 mb-4">
+                  <Plane className="w-5 h-5" />
+                  <span className="font-semibold">
+                    {isTurkish ? "ZRH • GVA • BSL • MXP Havalimanları" : "ZRH • GVA • BSL • MXP Airports"}
+                  </span>
+                </div>
+                <p className="text-muted-foreground leading-relaxed max-w-3xl mx-auto text-lg">
+                  {isTurkish 
+                    ? "St. Moritz, Zermatt, Verbier, Gstaad, Davos, Arosa ve Crans-Montana gibi İsviçre'nin en prestijli kayak merkezlerine lüks Mercedes araçlarla konforlu transfer hizmeti."
+                    : "Premium Mercedes transfers to Switzerland's most prestigious ski destinations including St. Moritz, Zermatt, Verbier, Gstaad, Davos, Arosa, and Crans-Montana."}
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {switzerlandVehicles.map((vehicle) => (
+                  <VehicleCard key={vehicle.name} {...vehicle} />
+                ))}
+              </div>
+
+              {/* Switzerland Contact CTA */}
+              <div className="mt-10 text-center">
+                <div className="inline-flex items-center gap-2 bg-sky-500/10 border border-sky-500/30 rounded-xl px-6 py-4">
+                  <span className="text-sky-700 dark:text-sky-300 font-medium">
+                    {isTurkish 
+                      ? "Sabit Fiyat: Tüm araçlar için aynı fiyat • Kayak ekipmanı taşıma dahil"
+                      : "Flat Rate Pricing: Same price for all vehicles • Ski equipment transport included"}
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <WhatsAppButton
+                    variant="large"
+                    message={isTurkish 
+                      ? "Merhaba, İsviçre kayak merkezi transferi için bilgi almak istiyorum."
+                      : "Hello, I'd like to inquire about Switzerland ski resort transfer options."}
                   />
                 </div>
               </div>
