@@ -3373,6 +3373,17 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusTroodosDesc: "Bergdörfer und Weinrouten",
     blogCyprusSection8Title: "Transfers nach Nordzypern",
     blogCyprusSection8Intro: "Wir bieten auch Transfers nach Nordzypern an, einschließlich Kyrenia und Famagusta über die Grenzübergänge.",
+    blogCyprusErcanPricesTitle: "Ercan Flughafen (ECN) Transferpreise",
+    blogCyprusErcanPricesIntro: "Der Ercan Flughafen ist das Haupttor nach Nordzypern (TRNC). Wir bieten private Transfers zu allen wichtigen Zielen einschließlich Girne, Lefkoşa, Mağusa und mehr.",
+    blogCyprusErcanNote: "Hinweis: Mercedes Maybach Minivan und Mercedes Sprinter sind für Ercan Flughafen-Routen nicht verfügbar.",
+    blogCyprusTableRegion: "Region / Ziele",
+    blogCyprusTableSedan: "Standard Limousine",
+    blogCyprusTableVito: "Mercedes Vito",
+    blogCyprusTableVipVito: "VIP Mercedes Vito",
+    destGirneMerkez: "Girne Zentrum Region",
+    destAlsancakMagusa: "Alsancak / Mağusa Region",
+    destLapta: "Lapta",
+    destBafra: "Bafra",
     blogCyprusSection9Title: "Welchen Flughafen sollten Sie wählen?",
     blogCyprusSection9Intro: "Fliegen Sie nach Larnaca für Ayia Napa, Protaras und Nordzypern. Fliegen Sie nach Paphos für Coral Bay und die Akamas-Halbinsel.",
     blogCyprusConclusion: "Buchen Sie Ihren Zypern Flughafentransfer",
@@ -4962,6 +4973,21 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusPriceFaq4Q: "Quel aéroport est meilleur pour Limassol?",
     blogCyprusPriceFaq4A: "Larnaca et Paphos sont à peu près équidistants de Limassol (env. 65 km). Choisissez l'aéroport avec les meilleures connexions aériennes.",
 
+    // Cyprus North (Ercan) Transfer Prices
+    blogCyprusSection8Title: "Transferts vers Chypre du Nord",
+    blogCyprusSection8Intro: "Nous proposons également des transferts vers Chypre du Nord, y compris Kyrenia et Famagouste via le passage frontalier.",
+    blogCyprusErcanPricesTitle: "Prix des Transferts Aéroport d'Ercan (ECN)",
+    blogCyprusErcanPricesIntro: "L'aéroport d'Ercan est la porte d'entrée principale vers Chypre du Nord (RTCN). Nous proposons des transferts privés vers toutes les destinations majeures, y compris Girne, Lefkoşa, Mağusa et plus.",
+    blogCyprusErcanNote: "Note: Mercedes Maybach Minivan et Mercedes Sprinter ne sont pas disponibles pour les routes de l'aéroport d'Ercan.",
+    blogCyprusTableRegion: "Région / Destinations",
+    blogCyprusTableSedan: "Berline Standard",
+    blogCyprusTableVito: "Mercedes Vito",
+    blogCyprusTableVipVito: "VIP Mercedes Vito",
+    destGirneMerkez: "Région de Girne Centre",
+    destAlsancakMagusa: "Région Alsancak / Mağusa",
+    destLapta: "Lapta",
+    destBafra: "Bafra",
+
     // ============================================
     // BLOG 5: Bursa Day Tour Guide - FULL
     // ============================================
@@ -6384,6 +6410,21 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusGuideFaq4Q: "Есть ли ночные трансферы?",
     blogCyprusGuideFaq4A: "Да, мы работаем 24/7 и встретим вас в любое время.",
     
+    // Cyprus North (Ercan) Transfer Prices
+    blogCyprusSection8Title: "Трансферы в Северный Кипр",
+    blogCyprusSection8Intro: "Мы также предлагаем трансферы в Северный Кипр, включая Кирению и Фамагусту через пограничный переход.",
+    blogCyprusErcanPricesTitle: "Цены на трансфер из аэропорта Эрджан (ECN)",
+    blogCyprusErcanPricesIntro: "Аэропорт Эрджан — главные ворота в Северный Кипр (ТРСК). Мы предлагаем частные трансферы во все основные направления, включая Гирне, Лефкоша, Магуса и другие.",
+    blogCyprusErcanNote: "Примечание: Mercedes Maybach Minivan и Mercedes Sprinter недоступны для маршрутов аэропорта Эрджан.",
+    blogCyprusTableRegion: "Регион / Направления",
+    blogCyprusTableSedan: "Стандартный седан",
+    blogCyprusTableVito: "Mercedes Vito",
+    blogCyprusTableVipVito: "VIP Mercedes Vito",
+    destGirneMerkez: "Регион Гирне Центр",
+    destAlsancakMagusa: "Регион Алсанджак / Магуса",
+    destLapta: "Лапта",
+    destBafra: "Бафра",
+
     // Blog Post: Bursa Day Tour Guide - Detailed
     blogBursaGuideTitle: "Однодневный тур из Стамбула в Бурсу 2025 | Полный гид",
     blogBursaGuideDesc: "Полный гид по однодневному туру в Бурсу из Стамбула. Улудаг, Джумалыкызык, Зелёная мечеть, канатная дорога.",
@@ -7826,6 +7867,21 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusGuideFaq4Q: "C'è servizio notturno disponibile?",
     blogCyprusGuideFaq4A: "Sì, operiamo 24/7 senza costi aggiuntivi per voli notturni.",
     
+    // Cyprus North (Ercan) Transfer Prices
+    blogCyprusSection8Title: "Trasferimenti per Cipro del Nord",
+    blogCyprusSection8Intro: "Offriamo anche trasferimenti per Cipro del Nord, inclusi Kyrenia e Famagusta tramite passaggio di frontiera.",
+    blogCyprusErcanPricesTitle: "Prezzi Trasferimenti Aeroporto di Ercan (ECN)",
+    blogCyprusErcanPricesIntro: "L'aeroporto di Ercan è il principale punto di accesso a Cipro del Nord (TRNC). Offriamo trasferimenti privati verso tutte le principali destinazioni, incluse Girne, Lefkoşa, Mağusa e altre.",
+    blogCyprusErcanNote: "Nota: Mercedes Maybach Minivan e Mercedes Sprinter non sono disponibili per le rotte dell'aeroporto di Ercan.",
+    blogCyprusTableRegion: "Regione / Destinazioni",
+    blogCyprusTableSedan: "Berlina Standard",
+    blogCyprusTableVito: "Mercedes Vito",
+    blogCyprusTableVipVito: "VIP Mercedes Vito",
+    destGirneMerkez: "Regione Girne Centro",
+    destAlsancakMagusa: "Regione Alsancak / Mağusa",
+    destLapta: "Lapta",
+    destBafra: "Bafra",
+
     // Blog - Bursa Day Tour Guide (Detailed)
     blogBursaGuideTitle: "Guida Escursione Istanbul-Bursa 2025",
     blogBursaGuideDesc: "Guida completa per visitare Bursa da Istanbul in un giorno. Cosa vedere, come arrivare, periodi migliori e tour disponibili.",
@@ -9272,6 +9328,21 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusGuideFaq4Q: "¿Hay servicio nocturno disponible?",
     blogCyprusGuideFaq4A: "Sí, operamos 24/7 sin cargos adicionales por vuelos nocturnos.",
     
+    // Cyprus North (Ercan) Transfer Prices
+    blogCyprusSection8Title: "Transfers a Chipre del Norte",
+    blogCyprusSection8Intro: "También ofrecemos transfers a Chipre del Norte, incluyendo Kyrenia y Famagusta a través del paso fronterizo.",
+    blogCyprusErcanPricesTitle: "Precios de Transfer Aeropuerto Ercan (ECN)",
+    blogCyprusErcanPricesIntro: "El aeropuerto de Ercan es la puerta principal a Chipre del Norte (TRNC). Ofrecemos transfers privados a todos los destinos principales, incluyendo Girne, Lefkoşa, Mağusa y más.",
+    blogCyprusErcanNote: "Nota: Mercedes Maybach Minivan y Mercedes Sprinter no están disponibles para las rutas del aeropuerto de Ercan.",
+    blogCyprusTableRegion: "Región / Destinos",
+    blogCyprusTableSedan: "Sedán Estándar",
+    blogCyprusTableVito: "Mercedes Vito",
+    blogCyprusTableVipVito: "VIP Mercedes Vito",
+    destGirneMerkez: "Región Centro de Girne",
+    destAlsancakMagusa: "Región Alsancak / Mağusa",
+    destLapta: "Lapta",
+    destBafra: "Bafra",
+
     // Blog - Bursa Day Tour Guide (Detailed)
     blogBursaGuideTitle: "Guía Excursión Estambul-Bursa 2025",
     blogBursaGuideDesc: "Guía completa para visitar Bursa desde Estambul en un día. Qué ver, cómo llegar, mejores momentos y tours disponibles.",
@@ -10675,6 +10746,21 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusGuideFaq4Q: "هل هناك نقل ليلي؟",
     blogCyprusGuideFaq4A: "نعم، نعمل 24/7 وسنستقبلك في أي وقت.",
     
+    // Cyprus North (Ercan) Transfer Prices
+    blogCyprusSection8Title: "التوصيل إلى شمال قبرص",
+    blogCyprusSection8Intro: "نقدم أيضاً خدمات التوصيل إلى شمال قبرص، بما في ذلك كيرينيا وفاماغوستا عبر المعبر الحدودي.",
+    blogCyprusErcanPricesTitle: "أسعار التوصيل من مطار إركان (ECN)",
+    blogCyprusErcanPricesIntro: "مطار إركان هو البوابة الرئيسية لشمال قبرص (TRNC). نقدم خدمات التوصيل الخاصة إلى جميع الوجهات الرئيسية بما في ذلك غيرنة، ليفكوشا، ماغوسا والمزيد.",
+    blogCyprusErcanNote: "ملاحظة: مرسيدس مايباخ ميني فان ومرسيدس سبرينتر غير متوفرة لمسارات مطار إركان.",
+    blogCyprusTableRegion: "المنطقة / الوجهات",
+    blogCyprusTableSedan: "سيدان قياسي",
+    blogCyprusTableVito: "مرسيدس فيتو",
+    blogCyprusTableVipVito: "مرسيدس فيتو VIP",
+    destGirneMerkez: "منطقة وسط غيرنة",
+    destAlsancakMagusa: "منطقة ألسانجاك / ماغوسا",
+    destLapta: "لابتا",
+    destBafra: "بافرا",
+
     // Blog Post: Bursa Day Tour Guide - Detailed
     blogBursaGuideTitle: "رحلة يومية من إسطنبول إلى بورصة 2025 | الدليل الشامل",
     blogBursaGuideDesc: "دليل شامل للرحلة اليومية إلى بورصة من إسطنبول. أولوداغ، جمالي كيزيك، الجامع الأخضر، التلفريك.",
@@ -13679,6 +13765,21 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusFaq6Q: "Чи надаєте ви дитячі крісла?",
     blogCyprusFaq6A: "Так, дитячі крісла доступні безкоштовно на запит при бронюванні.",
     
+    // Cyprus North (Ercan) Transfer Prices
+    blogCyprusSection8Title: "Трансфери до Північного Кіпру",
+    blogCyprusSection8Intro: "Ми також пропонуємо трансфери до Північного Кіпру, включаючи Кіренію та Фамагусту через прикордонний перехід.",
+    blogCyprusErcanPricesTitle: "Ціни на трансфер з аеропорту Ерджан (ECN)",
+    blogCyprusErcanPricesIntro: "Аеропорт Ерджан — головні ворота до Північного Кіпру (ТРНК). Ми пропонуємо приватні трансфери до всіх основних напрямків, включаючи Гірне, Лефкошу, Магусу та інші.",
+    blogCyprusErcanNote: "Примітка: Mercedes Maybach Minivan та Mercedes Sprinter недоступні для маршрутів аеропорту Ерджан.",
+    blogCyprusTableRegion: "Регіон / Напрямки",
+    blogCyprusTableSedan: "Стандартний седан",
+    blogCyprusTableVito: "Mercedes Vito",
+    blogCyprusTableVipVito: "VIP Mercedes Vito",
+    destGirneMerkez: "Регіон Гірне Центр",
+    destAlsancakMagusa: "Регіон Алсанджак / Магуса",
+    destLapta: "Лапта",
+    destBafra: "Бафра",
+
     // Blog - Bursa Day Tour Guide
     blogBursaTitle: "Одноденний тур зі Стамбула до Бурси — Повний гід 2025",
     blogBursaDesc: "Все про одноденну поїздку зі Стамбула до Бурси: транспорт, пам'ятки, гора Улудаг, село Куамликизик. Поради та бронювання.",
@@ -15040,6 +15141,21 @@ const translations: Record<Language, Record<string, string>> = {
     blogCyprusFaq6Q: "チャイルドシートは提供していますか？",
     blogCyprusFaq6A: "はい、チャイルドシートは予約時のリクエストで無料。",
     
+    // Cyprus North (Ercan) Transfer Prices
+    blogCyprusSection8Title: "北キプロスへの送迎",
+    blogCyprusSection8Intro: "国境通過により、北キプロスへの送迎も提供しています。キレニアやファマグスタなど。",
+    blogCyprusErcanPricesTitle: "エルカン空港（ECN）送迎料金",
+    blogCyprusErcanPricesIntro: "エルカン空港は北キプロス（TRNC）への主要な玄関口です。ギルネ、レフコシャ、マグサなど、すべての主要な目的地へのプライベート送迎を提供しています。",
+    blogCyprusErcanNote: "注意：メルセデス・マイバッハミニバンとメルセデス・スプリンターはエルカン空港ルートでは利用できません。",
+    blogCyprusTableRegion: "地域 / 目的地",
+    blogCyprusTableSedan: "スタンダードセダン",
+    blogCyprusTableVito: "メルセデス・ビト",
+    blogCyprusTableVipVito: "VIPメルセデス・ビト",
+    destGirneMerkez: "ギルネ中央地域",
+    destAlsancakMagusa: "アルサンジャック / マグサ地域",
+    destLapta: "ラプタ",
+    destBafra: "バフラ",
+
     // Blog - Bursa Day Tour Guide
     blogBursaTitle: "イスタンブールからブルサへの日帰りツアー — 完全ガイド 2025",
     blogBursaDesc: "イスタンブールからブルサへの日帰り旅行について：交通、観光スポット、ウルダー山、ジュマルクズック村。ヒントと予約。",
