@@ -113,6 +113,7 @@ const EphesusPamukkale = lazy(() => import("./pages/website/EphesusPamukkale"));
 const LuxuryChauffeur = lazy(() => import("./pages/website/LuxuryChauffeur"));
 const DubaiTransfer = lazy(() => import("./pages/website/DubaiTransfer"));
 const CyprusTransfer = lazy(() => import("./pages/website/CyprusTransfer"));
+const NorthCyprusTransfer = lazy(() => import("./pages/website/NorthCyprusTransfer"));
 const BursaTransfer = lazy(() => import("./pages/website/BursaTransfer"));
 const FrankfurtTransfer = lazy(() => import("./pages/website/FrankfurtTransfer"));
 const GreeceTransfer = lazy(() => import("./pages/website/GreeceTransfer"));
@@ -255,6 +256,7 @@ const App = () => (
               {localizedRoutes("/luxury-chauffeur", <LuxuryChauffeur />)}
               {localizedRoutes("/dubai-transfer", <DubaiTransfer />)}
               {localizedRoutes("/cyprus-transfer", <CyprusTransfer />)}
+              {localizedRoutes("/north-cyprus-transfer", <NorthCyprusTransfer />)}
               {localizedRoutes("/bursa-transfer", <BursaTransfer />)}
               {localizedRoutes("/frankfurt-transfer", <FrankfurtTransfer />)}
               {localizedRoutes("/greece-transfer", <GreeceTransfer />)}
