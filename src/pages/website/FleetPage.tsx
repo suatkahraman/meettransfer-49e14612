@@ -30,11 +30,11 @@ import dubaiSuburbanInterior from "@/assets/dubai/dubai-suburban-interior.jpg";
 import dubaiVipSprinter from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
 import dubaiVipSprinterExterior from "@/assets/dubai/dubai-vip-van-exterior.jpg";
 
-// Switzerland fleet images (using high-quality Unsplash images)
-const switzerlandSClassExterior = "https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=800&auto=format&fit=crop";
-const switzerlandSClassInterior = "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&auto=format&fit=crop";
-const switzerlandVClassExterior = "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&auto=format&fit=crop";
-const switzerlandVClassInterior = "https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=800&auto=format&fit=crop";
+// Switzerland fleet images
+import switzerlandSClassExterior from "@/assets/switzerland/switzerland-s-class-exterior.webp";
+import switzerlandSClassInterior from "@/assets/switzerland/switzerland-s-class-interior.webp";
+import switzerlandVClassExterior from "@/assets/switzerland/switzerland-v-class-exterior.webp";
+import switzerlandVClassInterior from "@/assets/switzerland/switzerland-v-class-interior.webp";
 
 const FleetPage = () => {
   const { t, language } = useLanguage();
