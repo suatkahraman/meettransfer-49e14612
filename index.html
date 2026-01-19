@@ -63,8 +63,8 @@
     <link rel="dns-prefetch" href="//api.mapbox.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
-    <!-- LCP Image preload handled by img tag with fetchPriority="high" in HeroBackground component -->
-    <!-- Vite transforms asset paths, so we cannot preload here with static paths -->
+    <!-- LCP Image Preload - Build-safe (public folder) -->
+    <link rel="preload" as="image" fetchpriority="high" href="/hero-lcp.webp" type="image/webp" />
     
     <!-- Font Preload - Critical fonts for LCP/FCP -->
     <!-- Playfair Display - Used in hero headings (most visible first) -->
