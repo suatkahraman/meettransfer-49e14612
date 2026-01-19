@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Users, Briefcase, ArrowRight, Star, Shield, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Briefcase, ArrowRight, Star, Shield, ChevronLeft, ChevronRight, Snowflake } from "lucide-react";
 import { useState, useEffect } from "react";
 
 // Import all vehicle images for carousel
@@ -25,6 +25,12 @@ import sprinterImg2 from "@/assets/sprinter-2.jpg";
 import sprinterImg3 from "@/assets/sprinter-3.jpg";
 import sprinterImg4 from "@/assets/sprinter-4.jpg";
 
+// Switzerland fleet images
+import switzerlandSClassExterior from "@/assets/switzerland/switzerland-s-class-exterior.webp";
+import switzerlandSClassInterior from "@/assets/switzerland/switzerland-s-class-interior.webp";
+import switzerlandVClassExterior from "@/assets/switzerland/switzerland-v-class-exterior.webp";
+import switzerlandVClassInterior from "@/assets/switzerland/switzerland-v-class-interior.webp";
+
 const FleetIconsBar = () => {
   const { t, getLocalizedPath, language } = useLanguage();
   const isTR = language?.toLowerCase() === "tr";
@@ -39,6 +45,7 @@ const FleetIconsBar = () => {
       images: [vitoImg1, vitoImg2, vitoImg3],
       features: ["AC", "USB"],
       popular: false,
+      badge: null,
     },
     {
       name: "Business",
@@ -49,6 +56,7 @@ const FleetIconsBar = () => {
       images: [vitoVipImg1, vitoVipImg2, vitoVipImg3, vitoVipImg4],
       features: ["AC", "WiFi", "Water"],
       popular: false,
+      badge: null,
     },
     {
       name: "Van Standard",
@@ -59,6 +67,7 @@ const FleetIconsBar = () => {
       images: [vitoImg1, vitoImg2, vitoImg3, vitoImg4],
       features: ["AC", "USB", "Water"],
       popular: true,
+      badge: null,
     },
     {
       name: "Van VIP",
@@ -69,6 +78,7 @@ const FleetIconsBar = () => {
       images: [vitoVipImg1, vitoVipImg2, vitoVipImg3, vitoVipImg4],
       features: ["WiFi", "TV", "Bar"],
       popular: true,
+      badge: null,
     },
     {
       name: "First Class",
@@ -79,6 +89,7 @@ const FleetIconsBar = () => {
       images: [maybachImg1, maybachImg2, maybachImg3, maybachImg4],
       features: ["WiFi", "TV", "Bar", "Starlight"],
       popular: false,
+      badge: null,
     },
     {
       name: "Minibus",
@@ -89,6 +100,29 @@ const FleetIconsBar = () => {
       images: [sprinterImg1, sprinterImg2, sprinterImg3, sprinterImg4],
       features: ["AC", "WiFi", "TV"],
       popular: false,
+      badge: null,
+    },
+    {
+      name: "S-Class",
+      nameTR: "S-Class",
+      passengers: "3",
+      luggage: "3",
+      description: isTR ? "İsviçre Kayak Transferi" : "Swiss Ski Transfer",
+      images: [switzerlandSClassExterior, switzerlandSClassInterior],
+      features: ["Massage", "WiFi", "Climate"],
+      popular: false,
+      badge: "switzerland",
+    },
+    {
+      name: "V-Class",
+      nameTR: "V-Class",
+      passengers: "7",
+      luggage: "7",
+      description: isTR ? "İsviçre Grup Transferi" : "Swiss Group Transfer",
+      images: [switzerlandVClassExterior, switzerlandVClassInterior],
+      features: ["Ski Storage", "WiFi", "Panoramic"],
+      popular: false,
+      badge: "switzerland",
     },
   ];
 
@@ -158,6 +192,7 @@ interface VehicleCardProps {
     images: string[];
     features: string[];
     popular: boolean;
+    badge: string | null;
   };
   index: number;
   isTR: boolean;
@@ -218,6 +253,16 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
             <span className="flex items-center gap-1 bg-yellow-500 text-yellow-950 rounded-full px-2 py-0.5 text-[10px] font-bold">
               <Star className="h-2.5 w-2.5 fill-current" />
               {isTR ? "Popüler" : "Popular"}
+            </span>
+          </div>
+        )}
+
+        {/* Switzerland Badge */}
+        {item.badge === "switzerland" && (
+          <div className="absolute top-2 right-2 z-10">
+            <span className="flex items-center gap-1 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-full px-2 py-0.5 text-[10px] font-bold shadow-lg">
+              <Snowflake className="h-2.5 w-2.5" />
+              {isTR ? "İsviçre" : "Swiss"}
             </span>
           </div>
         )}
