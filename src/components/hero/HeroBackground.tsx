@@ -1,25 +1,19 @@
 import { memo, useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CityVideo } from "./types";
 
-// Optimized WebP hero backgrounds - local assets for fast loading
-import heroAirportFleet from "@/assets/hero/hero-airport-fleet.webp";
-import heroSkylane from "@/assets/hero/hero-city-skyline.webp";
-import heroFuturistic1 from "@/assets/hero/hero-futuristic-1.webp";
-import heroFuturistic2 from "@/assets/hero/hero-futuristic-2.webp";
-import heroMercedes from "@/assets/hero/hero-mercedes-vito.webp";
+// Only import the FIRST (LCP) image statically - others loaded dynamically
 import heroFuturisticCity from "@/assets/hero/hero-futuristic-city.webp";
 
-// Background images configuration - optimized WebP format for fast loading
-const HERO_BACKGROUNDS = [
+// Background images configuration - paths for dynamic loading
+const HERO_BACKGROUND_PATHS = [
   { src: heroFuturisticCity, label: "Futuristic City", labelTR: "Fütüristik Şehir" },
-  { src: heroAirportFleet, label: "Airport Fleet", labelTR: "Havalimanı Filosu" },
-  { src: heroSkylane, label: "City Skyline", labelTR: "Şehir Silüeti" },
-  { src: heroFuturistic1, label: "VIP Transfer", labelTR: "VIP Transfer" },
-  { src: heroFuturistic2, label: "Luxury Journey", labelTR: "Lüks Yolculuk" },
-  { src: heroMercedes, label: "Mercedes Vito", labelTR: "Mercedes Vito" },
+  { path: "/src/assets/hero/hero-airport-fleet.webp", label: "Airport Fleet", labelTR: "Havalimanı Filosu" },
+  { path: "/src/assets/hero/hero-city-skyline.webp", label: "City Skyline", labelTR: "Şehir Silüeti" },
+  { path: "/src/assets/hero/hero-futuristic-1.webp", label: "VIP Transfer", labelTR: "VIP Transfer" },
+  { path: "/src/assets/hero/hero-futuristic-2.webp", label: "Luxury Journey", labelTR: "Lüks Yolculuk" },
+  { path: "/src/assets/hero/hero-mercedes-vito.webp", label: "Mercedes Vito", labelTR: "Mercedes Vito" },
 ];
 
 interface HeroBackgroundProps {
@@ -31,60 +25,68 @@ interface HeroBackgroundProps {
 }
 
 export const HeroBackground = memo(({
-  videosLoaded,
-  cityVideos,
-  currentVideoIndex,
-  setCurrentVideoIndex,
   language
 }: HeroBackgroundProps) => {
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
-  const [imagesPreloaded, setImagesPreloaded] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<string[]>([heroFuturisticCity]);
+  const [slideshowReady, setSlideshowReady] = useState(false);
 
-  // Defer preloading of non-LCP images to avoid bandwidth competition
+  // Defer slideshow initialization - don't block LCP
   useEffect(() => {
-    // First image is LCP - already loading, skip preloading others initially
-    const preloadRemainingImages = () => {
-      // Start from index 1 to skip the first (LCP) image
-      HERO_BACKGROUNDS.slice(1).forEach((bg, index) => {
-        // Stagger loading to avoid bandwidth competition
-        setTimeout(() => {
-          const img = new Image();
-          img.src = bg.src;
-        }, (index + 1) * 500); // 500ms delay between each
-      });
-      setImagesPreloaded(true);
+    // Wait for page to be interactive before loading slideshow images
+    const initSlideshow = async () => {
+      // Dynamically import remaining images
+      const imports = await Promise.all([
+        import("@/assets/hero/hero-airport-fleet.webp"),
+        import("@/assets/hero/hero-city-skyline.webp"),
+        import("@/assets/hero/hero-futuristic-1.webp"),
+        import("@/assets/hero/hero-futuristic-2.webp"),
+        import("@/assets/hero/hero-mercedes-vito.webp"),
+      ]);
+      
+      setLoadedImages([
+        heroFuturisticCity,
+        imports[0].default,
+        imports[1].default,
+        imports[2].default,
+        imports[3].default,
+        imports[4].default,
+      ]);
+      setSlideshowReady(true);
     };
-    
-    // Wait for LCP image to likely be loaded before preloading others
+
+    // Use requestIdleCallback to load after main content is painted
     if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => preloadRemainingImages(), { timeout: 2000 });
+      requestIdleCallback(() => initSlideshow(), { timeout: 3000 });
     } else {
-      setTimeout(preloadRemainingImages, 1500);
+      setTimeout(initSlideshow, 2000);
     }
   }, []);
 
-  // Auto-rotate through backgrounds
+  // Auto-rotate only when slideshow is ready
   useEffect(() => {
+    if (!slideshowReady) return;
+    
     const interval = setInterval(() => {
-      setCurrentBgIndex((prev) => (prev + 1) % HERO_BACKGROUNDS.length);
+      setCurrentBgIndex((prev) => (prev + 1) % loadedImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slideshowReady, loadedImages.length]);
 
-  const currentBg = HERO_BACKGROUNDS[currentBgIndex];
+  const currentBg = HERO_BACKGROUND_PATHS[currentBgIndex];
+  const currentSrc = loadedImages[currentBgIndex] || heroFuturisticCity;
 
   return (
     <>
-      {/* Mobile Background */}
+      {/* Mobile Background - Simple solid color, no images */}
       <div className="absolute inset-0 z-0 md:hidden bg-muted/40" />
 
-      {/* Desktop Image Slideshow Background */}
+      {/* Desktop Image Background - CSS transitions instead of framer-motion */}
       <div className="absolute inset-0 z-0 hidden md:block">
-        {/* Static Backgrounds - Fast Loading with Local Assets */}
         <div className="absolute inset-0">
-          {/* First image loads immediately as base layer */}
+          {/* Primary LCP Image - Always visible as base */}
           <img
-            src={HERO_BACKGROUNDS[0].src}
+            src={heroFuturisticCity}
             alt="VIP Transfer Background"
             className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 saturate-110"
             loading="eager"
@@ -92,29 +94,24 @@ export const HeroBackground = memo(({
             fetchPriority="high"
           />
           
-          {/* Animated crossfade between backgrounds */}
-          <AnimatePresence mode="wait">
-            <motion.img
+          {/* Slideshow overlay - CSS transition for crossfade */}
+          {slideshowReady && currentBgIndex > 0 && (
+            <img
               key={currentBgIndex}
-              src={currentBg.src}
+              src={currentSrc}
               alt={language === 'TR' ? currentBg.labelTR : currentBg.label}
-              className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 saturate-110"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1, ease: "easeInOut" }}
-              loading="eager"
+              className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 saturate-110 animate-fade-in"
+              loading="lazy"
               decoding="async"
             />
-          </AnimatePresence>
+          )}
           
-          {/* Background Label Badge - Desktop */}
-          <motion.div
-            key={`label-${currentBgIndex}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            className="absolute bottom-8 right-8 z-20"
+          {/* Background Label Badge - Desktop - Simple CSS animation */}
+          <div 
+            className={cn(
+              "absolute bottom-8 right-8 z-20 transition-all duration-300",
+              slideshowReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            )}
           >
             <div className="flex items-center gap-2 bg-background/90 backdrop-blur-md rounded-full px-4 py-2 border border-primary/30 shadow-xl">
               <Globe className="h-4 w-4 text-primary" />
@@ -122,24 +119,26 @@ export const HeroBackground = memo(({
                 {language === 'TR' ? currentBg.labelTR : currentBg.label}
               </span>
             </div>
-          </motion.div>
-          
-          {/* Navigation Dots - Desktop */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {HERO_BACKGROUNDS.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentBgIndex(index)}
-                className={cn(
-                  "w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-md",
-                  currentBgIndex === index 
-                    ? "bg-primary w-7" 
-                    : "bg-white/60 hover:bg-white/80"
-                )}
-                aria-label={`Go to background ${index + 1}`}
-              />
-            ))}
           </div>
+          
+          {/* Navigation Dots - Desktop - Only show when slideshow ready */}
+          {slideshowReady && (
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+              {loadedImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentBgIndex(index)}
+                  className={cn(
+                    "w-2.5 h-2.5 rounded-full transition-all duration-300 shadow-md",
+                    currentBgIndex === index 
+                      ? "bg-primary w-7" 
+                      : "bg-white/60 hover:bg-white/80"
+                  )}
+                  aria-label={`Go to background ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
         
         {/* Gradient Overlays */}

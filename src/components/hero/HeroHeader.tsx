@@ -1,18 +1,19 @@
 import { memo } from "react";
 import { Shield, Zap, Star, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
-// Logo
+// Logo - inline for LCP optimization
 import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
 
 interface HeroHeaderProps {
   language: string;
 }
 
+// Hardcoded rating to avoid API call blocking LCP - update periodically
+const CACHED_RATING = 4.9;
+
 export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   const { t } = useLanguage();
-  const { rating } = useGoogleReviewStats();
   
   return (
     <div className="mb-3 md:mb-5">
@@ -45,7 +46,7 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
               </span>
               <span className="inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-600 rounded-full px-2.5 py-1 text-[13px] md:text-sm font-medium">
                 <Star className="h-5 w-5 md:h-6 md:w-6 fill-current" />
-                {rating.toFixed(1)}
+                {CACHED_RATING}
               </span>
             </div>
           </div>
