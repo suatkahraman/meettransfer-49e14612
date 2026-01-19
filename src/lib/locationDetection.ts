@@ -149,6 +149,45 @@ export function isDubaiLocation(location: string): boolean {
   return dubaiKeywords.some(keyword => normalizedLocation.includes(keyword));
 }
 
+// Switzerland defined airports
+const SWITZERLAND_AIRPORTS = ['zrh', 'zurich airport', 'zürich flughafen', 'gva', 'geneva airport', 'genève aéroport', 'bsl', 'basel airport', 'euroairport', 'basel-mulhouse', 'mxp', 'milan malpensa', 'malpensa'];
+
+// Switzerland defined ski resorts (only these have prices)
+const SWITZERLAND_SKI_RESORTS = [
+  'st. moritz', 'st moritz', 'saint moritz', 'sankt moritz',
+  'gstaad',
+  'davos',
+  'arosa',
+  'zermatt',
+  'verbier',
+  'crans-montana', 'crans montana',
+];
+
+// Check if location matches Switzerland airports
+export function isSwitzerlandAirport(location: string): boolean {
+  if (!location) return false;
+  const normalizedLocation = location.toLowerCase();
+  return SWITZERLAND_AIRPORTS.some(keyword => normalizedLocation.includes(keyword));
+}
+
+// Check if location matches Switzerland defined ski resorts
+export function isSwitzerlandSkiResort(location: string): boolean {
+  if (!location) return false;
+  const normalizedLocation = location.toLowerCase();
+  return SWITZERLAND_SKI_RESORTS.some(keyword => normalizedLocation.includes(keyword));
+}
+
+// Check if a Switzerland route is valid (airport ↔ ski resort only)
+export function isValidSwitzerlandRoute(pickup: string, dropoff: string): boolean {
+  const pickupIsAirport = isSwitzerlandAirport(pickup);
+  const dropoffIsAirport = isSwitzerlandAirport(dropoff);
+  const pickupIsSkiResort = isSwitzerlandSkiResort(pickup);
+  const dropoffIsSkiResort = isSwitzerlandSkiResort(dropoff);
+  
+  // Valid routes: Airport → Ski Resort OR Ski Resort → Airport
+  return (pickupIsAirport && dropoffIsSkiResort) || (pickupIsSkiResort && dropoffIsAirport);
+}
+
 // Check if a location is in Switzerland
 export function isSwitzerlandLocation(location: string): boolean {
   if (!location) return false;

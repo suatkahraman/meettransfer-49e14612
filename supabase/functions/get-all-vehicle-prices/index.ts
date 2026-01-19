@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck } from "../_shared/priceMatching.ts";
 import { corsHeaders, dynamicCacheHeaders } from "../_shared/cacheHeaders.ts";
-import { detectRegion, getVehicleTypesForRegion, VehicleRegion, VEHICLE_TYPES } from "../_shared/vehicleConfig.ts";
+import { detectRegion, getVehicleTypesForRegion, VehicleRegion, VEHICLE_TYPES, isValidSwitzerlandRoute } from "../_shared/vehicleConfig.ts";
 
 interface GetPricesRequest {
   pickup: string;
@@ -81,10 +81,37 @@ const handler = async (req: Request): Promise<Response> => {
     // Detect region from locations - this is the authoritative source
     const region: VehicleRegion = detectRegion(pickup, dropoff);
     const isDubai = region === 'dubai';
+    const isSwitzerlandRegion = region === 'switzerland';
     const activeVehicleTypes = getVehicleTypesForRegion(region);
     const vehicleConfig = buildVehicleConfig(activeVehicleTypes);
     
     console.log("🏙️ Detected region:", region, "- Using", activeVehicleTypes.length, "vehicle types");
+
+    // For Switzerland, check if route is valid (airport ↔ ski resort only)
+    // If not valid, return prices as unavailable and require manual pricing
+    if (isSwitzerlandRegion && !isValidSwitzerlandRoute(pickup, dropoff)) {
+      console.log("🇨🇭 Switzerland route not in defined airport-resort pairs, requiring manual pricing");
+      return new Response(
+        JSON.stringify({
+          prices: activeVehicleTypes.map(vt => ({
+            vehicleType: vt.value,
+            vehicleLabel: vt.label,
+            price: null,
+            currency: customerCurrency || 'EUR',
+            passengers: vt.passengers,
+            luggage: vt.luggage,
+            available: false,
+          })),
+          matched: false,
+          reason: "switzerland_route_not_defined",
+          region,
+          isDubai: false,
+          requiresManualPricing: true,
+          switzerlandValidRouteRequired: true,
+        }),
+        { headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     // Analyze transfer using shared module
     const transferInfo = analyzeTransfer(pickup, dropoff);
