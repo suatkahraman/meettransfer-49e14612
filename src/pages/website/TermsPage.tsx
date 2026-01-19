@@ -1,9 +1,15 @@
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { SEOHead, SchemaOrg } from "@/components/seo";
-import { Shield, CreditCard, User, Calendar, Check, Banknote, Clock, Plane } from "lucide-react";
+import { User, Calendar, Check, Banknote, HelpCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const TermsPage = () => {
   const { language, getLocalizedPath } = useLanguage();
@@ -307,6 +313,157 @@ const TermsPage = () => {
           <p className="text-muted-foreground text-sm mt-8">
             {isTurkish ? "Son güncelleme: Ocak 2025" : "Last updated: January 2025"}
           </p>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-12 not-prose">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+              <HelpCircle className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">
+                {isTurkish ? "Sıkça Sorulan Sorular" : "Frequently Asked Questions"}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {isTurkish ? "En çok merak edilen sorular ve cevapları" : "Common questions and answers"}
+              </p>
+            </div>
+          </div>
+
+          <Accordion type="single" collapsible className="w-full space-y-3">
+            {/* Booking Questions */}
+            <AccordionItem value="booking-1" className="border border-border rounded-xl px-4 bg-card">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium">
+                  {isTurkish ? "Rezervasyonumu nasıl yapabilirim?" : "How can I make a booking?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Web sitemiz, WhatsApp veya telefon aracılığıyla 7/24 rezervasyon yapabilirsiniz. Alış ve bırakış noktalarınızı, tarih ve saati girin, araç tipinizi seçin. Onay anında WhatsApp ve e-posta ile gönderilir."
+                  : "You can book 24/7 via our website, WhatsApp, or phone. Enter your pickup and drop-off locations, date and time, select your vehicle type. Confirmation is sent instantly via WhatsApp and email."
+                }
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="booking-2" className="border border-border rounded-xl px-4 bg-card">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium">
+                  {isTurkish ? "Rezervasyonumu değiştirebilir veya iptal edebilir miyim?" : "Can I modify or cancel my booking?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Evet! 24 saat öncesine kadar ücretsiz iptal veya değişiklik yapabilirsiniz. Değişiklik için müşteri panelinizden veya WhatsApp üzerinden bize ulaşın. Üyelik hesabınızla tüm rezervasyonlarınızı kolayca yönetebilirsiniz."
+                  : "Yes! You can cancel or modify for free up to 24 hours before pickup. For changes, contact us via your customer panel or WhatsApp. With a member account, you can easily manage all your bookings."
+                }
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Payment Questions */}
+            <AccordionItem value="payment-1" className="border-2 border-amber-400/50 rounded-xl px-4 bg-gradient-to-r from-amber-50/50 to-yellow-50/50 dark:from-amber-950/20 dark:to-yellow-950/20">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium flex items-center gap-2">
+                  <Banknote className="h-4 w-4 text-amber-600" />
+                  {isTurkish ? "Nakit ödeme yapabilir miyim?" : "Can I pay in cash?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Evet! Şoförünüze doğrudan nakit ödeme yapabilirsiniz. EUR, USD, TRY ve GBP kabul ediyoruz. Ön ödeme veya kredi kartı bilgisi vermenize gerek yok. Sadece rezervasyonunuzu yapın ve transfer sonunda ödemenizi yapın."
+                  : "Yes! You can pay cash directly to your driver. We accept EUR, USD, TRY, and GBP. No upfront payment or credit card information required. Just make your booking and pay at the end of your transfer."
+                }
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="payment-2" className="border border-border rounded-xl px-4 bg-card">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium">
+                  {isTurkish ? "Kredi kartı ile ödeme yapabilir miyim?" : "Can I pay by credit card?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Evet, online ödeme linkiyle güvenli kredi kartı ödemesi yapabilirsiniz. Visa, Mastercard ve American Express kabul ediyoruz. Kurumsal müşterilerimiz için fatura ile ödeme seçeneği de mevcuttur."
+                  : "Yes, you can make secure credit card payments via our online payment link. We accept Visa, Mastercard, and American Express. Invoice payment option is also available for corporate clients."
+                }
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Service Questions */}
+            <AccordionItem value="service-1" className="border border-border rounded-xl px-4 bg-card">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium">
+                  {isTurkish ? "Uçuşum gecikirse ne olur?" : "What happens if my flight is delayed?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Tüm uçuşları gerçek zamanlı takip ediyoruz ve şoförünüzün alış saatini otomatik olarak ayarlıyoruz. Ek ücret ödemenize gerek yok. 60 dakika ücretsiz bekleme süresi sağlıyoruz."
+                  : "We monitor all flights in real-time and automatically adjust your driver's pickup time. No extra charge needed. We provide 60 minutes of free waiting time for airport pickups."
+                }
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="service-2" className="border border-border rounded-xl px-4 bg-card">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium">
+                  {isTurkish ? "Bebek koltuğu isteyebilir miyim?" : "Can I request a child seat?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Evet! Bebek koltukları ve yükseltici koltuklar ücretsiz olarak sağlanmaktadır. Rezervasyon sırasında çocuğunuzun yaşını ve kilosunu belirtmeniz yeterli. Uygun koltuğu sizin için hazırlayacağız."
+                  : "Yes! Child seats and booster seats are provided free of charge. Just specify your child's age and weight when booking. We'll prepare the appropriate seat for you."
+                }
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="service-3" className="border border-border rounded-xl px-4 bg-card">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium">
+                  {isTurkish ? "Şoförümü havalimanında nasıl bulacağım?" : "How will I find my driver at the airport?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Şoförünüz adınızın yazılı olduğu bir tabela ile varış kapısında sizi bekleyecektir. Uçuşunuz indikten sonra şoförünüzün tam konumunu içeren bir WhatsApp mesajı alacaksınız."
+                  : "Your driver will wait for you at the arrivals gate with a sign displaying your name. After your flight lands, you'll receive a WhatsApp message with your driver's exact location."
+                }
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Account Questions */}
+            <AccordionItem value="account-1" className="border border-border rounded-xl px-4 bg-card">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium flex items-center gap-2">
+                  <User className="h-4 w-4 text-primary" />
+                  {isTurkish ? "Üye olmamın avantajları neler?" : "What are the benefits of creating an account?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Üye olarak: Tüm rezervasyonlarınızı tek panelden yönetebilir, hızlı rezervasyon için bilgilerinizi kaydedebilir, özel indirimlerden yararlanabilir, transfer geçmişinizi görüntüleyebilir ve favori rotalarınızı kaydedebilirsiniz."
+                  : "As a member, you can: Manage all bookings from one dashboard, save your details for quick booking, access exclusive discounts, view your transfer history, and save your favorite routes."
+                }
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="account-2" className="border border-border rounded-xl px-4 bg-card">
+              <AccordionTrigger className="text-left hover:no-underline py-4">
+                <span className="font-medium">
+                  {isTurkish ? "Fiyatlarınız sabit mi?" : "Are your prices fixed?"}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground pb-4">
+                {isTurkish 
+                  ? "Evet! Tüm fiyatlarımız sabittir ve gizli ücret yoktur. Rezervasyon sırasında gördüğünüz fiyat, ödeyeceğiniz son fiyattır. Trafik, bekleme süresi veya bagaj için ek ücret almıyoruz (60 dakikaya kadar ücretsiz bekleme dahildir)."
+                  : "Yes! All our prices are fixed with no hidden fees. The price you see when booking is the final price you'll pay. We don't charge extra for traffic, waiting time, or luggage (up to 60 minutes free waiting included)."
+                }
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
     </WebsiteLayout>
