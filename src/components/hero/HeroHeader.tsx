@@ -52,21 +52,19 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
         </div>
       </div>
       
-      {/* Trust Badges Row */}
-      <div className="flex items-center gap-2.5 md:gap-3 text-[13px] md:text-sm text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <Check className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
-          <span>{t("fixedPrice")}</span>
+      {/* Trust Badges Row - Prominent */}
+      <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+        <div className="flex items-center gap-1.5 bg-green-500/15 border border-green-500/30 rounded-full px-3 py-1.5">
+          <Check className="h-4 w-4 md:h-5 md:w-5 text-green-500" />
+          <span className="text-[13px] md:text-sm font-semibold text-green-600 dark:text-green-400">{t("fixedPrice")}</span>
         </div>
-        <span className="text-border">•</span>
-        <div className="flex items-center gap-1">
-          <Check className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
-          <span>{t("freeCancel")}</span>
+        <div className="flex items-center gap-1.5 bg-primary/15 border border-primary/30 rounded-full px-3 py-1.5">
+          <Check className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+          <span className="text-[13px] md:text-sm font-semibold text-primary">{t("freeCancel")}</span>
         </div>
-        <span className="text-border">•</span>
-        <div className="flex items-center gap-1">
-          <Check className="h-5 w-5 md:h-6 md:w-6 text-green-500" />
-          <span>{t("proDriver")}</span>
+        <div className="flex items-center gap-1.5 bg-accent/15 border border-accent/30 rounded-full px-3 py-1.5">
+          <Check className="h-4 w-4 md:h-5 md:w-5 text-accent" />
+          <span className="text-[13px] md:text-sm font-semibold text-accent">{t("proDriver")}</span>
         </div>
       </div>
     </div>
