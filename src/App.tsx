@@ -117,6 +117,7 @@ const NorthCyprusTransfer = lazy(() => import("./pages/website/NorthCyprusTransf
 const BursaTransfer = lazy(() => import("./pages/website/BursaTransfer"));
 const FrankfurtTransfer = lazy(() => import("./pages/website/FrankfurtTransfer"));
 const GreeceTransfer = lazy(() => import("./pages/website/GreeceTransfer"));
+const SwitzerlandTransfer = lazy(() => import("./pages/website/SwitzerlandTransfer"));
 
 // New SEO Landing Pages
 const IstanbulAirportTransfer = lazy(() => import("./pages/website/IstanbulAirportTransfer"));
@@ -260,6 +261,7 @@ const App = () => (
               {localizedRoutes("/bursa-transfer", <BursaTransfer />)}
               {localizedRoutes("/frankfurt-transfer", <FrankfurtTransfer />)}
               {localizedRoutes("/greece-transfer", <GreeceTransfer />)}
+              {localizedRoutes("/switzerland-transfer", <SwitzerlandTransfer />)}
               {localizedRoutes("/book", <BookingPage />)}
               {localizedRoutes("/book/complete", <ReservationForm />)}
               
