@@ -197,7 +197,7 @@
       /* Hero Section - Instant visual fill for Speed Index */
       .hero-loading { 
         position: relative;
-        background: hsl(0 0% 7%);
+        background: hsl(30 20% 96%);
         min-height: 100vh;
         min-height: 100dvh;
         display: flex; 
@@ -208,14 +208,6 @@
         padding: 5rem 1.5rem;
         overflow: hidden;
       }
-      /* Instant gradient overlay - renders before image */
-      .hero-loading::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, hsl(0 0% 5%) 0%, hsl(0 0% 10%) 40%, hsl(0 0% 15%) 100%);
-        z-index: 0;
-      }
       
       /* Hero Typography - Left-aligned for visual match */
       .hero-loading h1 { 
@@ -224,21 +216,20 @@
         font-weight: 700; 
         margin: 0 0 0.75rem 0; 
         line-height: 1.1;
-        color: white;
+        color: hsl(0 0% 10%);
         letter-spacing: -0.02em;
       }
       .hero-loading .hero-subtitle { 
         font-size: clamp(0.9rem, 1.5vw, 1.125rem); 
-        opacity: 0.85; 
         margin: 0; 
         max-width: 28rem;
         line-height: 1.5;
-        color: hsl(0 0% 80%);
+        color: hsl(0 0% 40%);
       }
       
       /* Gold accent for keywords */
       .hero-loading .text-gold {
-        color: hsl(var(--gold));
+        color: hsl(45 100% 35%);
       }
       
       /* Skeleton loading animation */
@@ -247,7 +238,7 @@
         100% { background-position: 200% 0; }
       }
       .skeleton {
-        background: linear-gradient(90deg, hsl(0 0% 15%) 25%, hsl(0 0% 20%) 50%, hsl(0 0% 15%) 75%);
+        background: linear-gradient(90deg, hsl(30 15% 90%) 25%, hsl(30 15% 85%) 50%, hsl(30 15% 90%) 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
         border-radius: var(--radius);

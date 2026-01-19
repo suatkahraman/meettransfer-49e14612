@@ -78,11 +78,8 @@ export const HeroBackground = memo(({
 
   return (
     <>
-      {/* Instant background color - renders before any images */}
-      <div className="absolute inset-0 z-0 bg-foreground" />
-      
-      {/* Mobile Background - Simple gradient, no images for speed */}
-      <div className="absolute inset-0 z-0 md:hidden bg-gradient-to-br from-foreground via-foreground/95 to-muted/80" />
+      {/* Instant background color - static off-white, no images/gradients */}
+      <div className="absolute inset-0 z-0 bg-background" />
 
       {/* Desktop Image Background - CSS transitions instead of framer-motion */}
       <div className="absolute inset-0 z-0 hidden md:block">
