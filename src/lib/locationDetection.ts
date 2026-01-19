@@ -148,3 +148,69 @@ export function isDubaiLocation(location: string): boolean {
   
   return dubaiKeywords.some(keyword => normalizedLocation.includes(keyword));
 }
+
+// Check if a location is in Switzerland
+export function isSwitzerlandLocation(location: string): boolean {
+  if (!location) return false;
+  const normalizedLocation = location.toLowerCase();
+  
+  const switzerlandKeywords = [
+    // Country
+    'switzerland', 'schweiz', 'suisse', 'svizzera', 'swiss',
+    
+    // Major airports
+    'zrh', 'zurich airport', 'zürich flughafen', 'zurich flughafen',
+    'gva', 'geneva airport', 'genève aéroport', 'genf flughafen',
+    'bsl', 'basel airport', 'euroairport', 'basel-mulhouse',
+    'mxp', 'milan malpensa', 'malpensa airport',
+    
+    // Ski resorts & destinations
+    'st. moritz', 'st moritz', 'saint moritz', 'sankt moritz',
+    'zermatt',
+    'verbier',
+    'gstaad',
+    'davos',
+    'arosa',
+    'crans-montana', 'crans montana',
+    'klosters',
+    'grindelwald',
+    'wengen',
+    'lauterbrunnen',
+    'interlaken',
+    'saas-fee', 'saas fee',
+    'laax',
+    'flims',
+    'engelberg',
+    'andermatt',
+    'leukerbad',
+    'champéry', 'champery',
+    'nendaz',
+    
+    // Major cities
+    'zurich', 'zürich',
+    'geneva', 'genève', 'genf',
+    'basel', 'bâle',
+    'bern', 'berne',
+    'lausanne',
+    'lucerne', 'luzern',
+    'lugano',
+    'winterthur',
+    'st. gallen', 'st gallen', 'sankt gallen',
+    'montreux',
+    
+    // Cantons
+    'graubünden', 'graubunden', 'grisons',
+    'valais', 'wallis',
+    'ticino',
+    'vaud',
+    
+    // Popular areas
+    'engadin', 'engadine',
+    'jungfrau region',
+    'bernese oberland',
+    'swiss alps',
+    'matterhorn',
+  ];
+  
+  return switzerlandKeywords.some(keyword => normalizedLocation.includes(keyword));
+}

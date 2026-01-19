@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
 import { usePromo } from "@/contexts/PromoContext";
+import { VehicleRegion } from "@/lib/vehicleRegions";
+
 // Memoize time options generation - only compute once
 const timeOptions = (() => {
   const times: string[] = [];
@@ -56,7 +58,7 @@ interface RideFormContentProps {
   setBabySeatCount?: (count: number) => void;
   setLuggageCount?: (count: number) => void;
   // Route region from edge function
-  routeRegion?: 'turkey' | 'dubai' | 'default';
+  routeRegion?: VehicleRegion;
 }
 
 interface ValidationErrors {
