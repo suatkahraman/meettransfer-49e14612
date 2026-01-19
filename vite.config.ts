@@ -433,7 +433,17 @@ export default defineConfig(({ mode }) => ({
           "vendor-excel": ["xlsx"],
           "vendor-markdown": ["react-markdown", "remark-gfm"],
           // Carousel - defer
-          "vendor-carousel": ["embla-carousel-react", "embla-carousel-autoplay", "embla-carousel-fade"]
+          "vendor-carousel": ["embla-carousel-react", "embla-carousel-autoplay", "embla-carousel-fade"],
+          // Map - heavy, defer
+          "vendor-map": ["mapbox-gl"]
+        },
+        // Isolate large app chunks for better caching
+        chunkFileNames: (chunkInfo) => {
+          // Put translations in their own cached chunk
+          if (chunkInfo.name?.includes('LanguageContext') || chunkInfo.name?.includes('BlogTranslations')) {
+            return 'assets/translations-[hash].js';
+          }
+          return 'assets/[name]-[hash].js';
         }
       }
     },
