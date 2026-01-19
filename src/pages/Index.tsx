@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
-import { HeroErrorBoundary, HeroSkeleton } from "@/components/hero";
+import { Hero } from "@/components/Hero";
+import { HeroErrorBoundary } from "@/components/hero";
 // BookingForm removed - form is now inside Hero component
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -8,8 +9,6 @@ import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
 import TrustBar from "@/components/website/TrustBar";
 
-// Hero is lazy loaded for faster initial paint - it's heavy
-const Hero = lazy(() => import("@/components/Hero").then(m => ({ default: m.Hero })));
 
 // Below-the-fold components are lazy loaded for better TTFB
 const CoreServices = lazy(() => import("@/components/website/CoreServices"));
@@ -56,9 +55,7 @@ const Index = () => {
       />
       {/* Critical above-the-fold content - wrapped with error boundary */}
       <HeroErrorBoundary>
-        <Suspense fallback={<HeroSkeleton />}>
-          <Hero />
-        </Suspense>
+        <Hero />
       </HeroErrorBoundary>
       <TrustBar />
       
