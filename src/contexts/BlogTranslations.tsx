@@ -175,6 +175,21 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     destPolis: "Polis Chrysochous",
     destTroodosMount: "Troodos Mountains",
     
+    // North Cyprus / Ercan Airport Destinations
+    destGirneMerkez: "Girne Merkez Region",
+    destAlsancakMagusa: "Alsancak / Mağusa Region",
+    destLapta: "Lapta",
+    destBafra: "Bafra",
+    
+    // Cyprus Ercan Table Headers
+    blogCyprusTableRegion: "Region / Destinations",
+    blogCyprusTableSedan: "Standard Sedan",
+    blogCyprusTableVito: "Mercedes Vito",
+    blogCyprusTableVipVito: "VIP Mercedes Vito",
+    blogCyprusErcanPricesTitle: "Ercan Airport (ECN) Transfer Prices",
+    blogCyprusErcanPricesIntro: "Ercan Airport is the main gateway to North Cyprus (TRNC). We offer private transfers to all major destinations including Girne, Lefkoşe, Mağusa, and more.",
+    blogCyprusErcanNote: "Note: Mercedes Maybach Minivan and Mercedes Sprinter are not available for Ercan Airport routes.",
+    
     // Dubai Destinations (for tables)
     destDowntownDubai: "Downtown Dubai / Burj Khalifa",
     destPalmJumeirah: "Palm Jumeirah",

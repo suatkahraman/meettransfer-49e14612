@@ -55,6 +55,38 @@ const CyprusAirportTransferGuide = () => {
     { destination: t("destAyiaNapa"), duration: "120-140 min", price: "€120-140" },
   ];
 
+  // Ercan Airport (Northern Cyprus) Transfer Prices
+  const ercanTransferPrices = [
+    { 
+      region: t("destGirneMerkez"), 
+      destinations: "Girne Merkez, Lefkoşe, Karakum, Çatalköy",
+      sedan: "€62", 
+      vito: "€68", 
+      vipVito: "€88" 
+    },
+    { 
+      region: t("destAlsancakMagusa"), 
+      destinations: "Alsancak, Mağusa, İskele",
+      sedan: "€74", 
+      vito: "€82", 
+      vipVito: "€108" 
+    },
+    { 
+      region: t("destLapta"), 
+      destinations: "Lapta",
+      sedan: "€88", 
+      vito: "€98", 
+      vipVito: "€148" 
+    },
+    { 
+      region: t("destBafra"), 
+      destinations: "Bafra",
+      sedan: "€96", 
+      vito: "€108", 
+      vipVito: "€188" 
+    },
+  ];
+
   const popularDestinations = [
     { name: t("destAyiaNapa"), description: t("blogCyprusAyiaNapaDesc") },
     { name: t("destProtaras"), description: t("blogCyprusProtarasDesc") },
@@ -324,6 +356,37 @@ const CyprusAirportTransferGuide = () => {
           <h2 id="cyprus-north">{t("blogCyprusSection8Title")}</h2>
           <p>{t("blogCyprusSection8Intro")}</p>
           <p>{t("blogCyprusNorthernP1")}</p>
+
+          <h3>{t("blogCyprusErcanPricesTitle")}</h3>
+          <p>{t("blogCyprusErcanPricesIntro")}</p>
+          
+          <div className="overflow-x-auto not-prose my-8">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("blogCyprusTableRegion")}</TableHead>
+                  <TableHead>{t("blogCyprusTableSedan")}</TableHead>
+                  <TableHead>{t("blogCyprusTableVito")}</TableHead>
+                  <TableHead>{t("blogCyprusTableVipVito")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {ercanTransferPrices.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      <div>{item.region}</div>
+                      <div className="text-xs text-muted-foreground">{item.destinations}</div>
+                    </TableCell>
+                    <TableCell>{item.sedan}</TableCell>
+                    <TableCell>{item.vito}</TableCell>
+                    <TableCell>{item.vipVito}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <p className="text-sm text-muted-foreground italic">{t("blogCyprusErcanNote")}</p>
 
           <h2 id="cyprus-booking">{t("blogCyprusSection9Title")}</h2>
           <p>{t("blogCyprusSection9Intro")}</p>
