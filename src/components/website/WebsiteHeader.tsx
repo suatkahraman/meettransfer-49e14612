@@ -58,6 +58,7 @@ const WebsiteHeader = () => {
     { path: "/cappadocia-transfer", label: t("footerCappadocia") || "Cappadocia Transfer" },
     { path: "/dubai-transfer", label: t("footerDubai") || "Dubai Transfer" },
     { path: "/cyprus-transfer", label: t("footerCyprus") || "Cyprus Transfer" },
+    { path: "/switzerland-transfer", label: t("footerSwitzerland") || "Switzerland Transfer" },
   ];
 
   // Get dashboard path based on role
