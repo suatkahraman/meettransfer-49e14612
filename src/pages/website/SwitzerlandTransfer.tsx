@@ -32,6 +32,17 @@ const genevaPrices = [
   { destination: "Crans-Montana", price: 800, duration: "2h" },
 ];
 
+// Basel Airport (BSL) prices
+const baselPrices = [
+  { destination: "St. Moritz", price: 1200, duration: "3h 30min" },
+  { destination: "Gstaad", price: 900, duration: "2h 30min" },
+  { destination: "Davos", price: 960, duration: "2h 45min" },
+  { destination: "Arosa", price: 960, duration: "2h 45min" },
+  { destination: "Zermatt", price: 1070, duration: "3h" },
+  { destination: "Verbier", price: 1080, duration: "3h" },
+  { destination: "Crans-Montana", price: 1050, duration: "2h 45min" },
+];
+
 const destinations = [
   "St. Moritz", "Gstaad", "Davos", "Arosa", 
   "Zermatt", "Verbier", "Crans-Montana", "Zurich City", "Geneva City"
@@ -89,16 +100,19 @@ const SwitzerlandTransfer = () => {
   
   const translations = {
     en: {
-      pageTitle: "Switzerland Airport Transfer | Zurich & Geneva to Ski Resorts",
-      pageSubtitle: "Luxury private transfers from Zurich and Geneva Airports to St. Moritz, Gstaad, Davos, Zermatt and all Swiss ski resorts",
+      pageTitle: "Switzerland Airport Transfer | Zurich, Geneva & Basel to Ski Resorts",
+      pageSubtitle: "Luxury private transfers from Zurich, Geneva and Basel Airports to St. Moritz, Gstaad, Davos, Zermatt and all Swiss ski resorts",
       h1: "Switzerland Airport Private Transfer to Swiss Ski Resorts",
-      intro: "Experience luxury private transfers from Zurich (ZRH) and Geneva (GVA) Airports to Switzerland's premier ski destinations. Our professional chauffeurs provide seamless, comfortable transportation in premium Mercedes vehicles to St. Moritz, Gstaad, Davos, Zermatt, and beyond.",
+      intro: "Experience luxury private transfers from Zurich (ZRH), Geneva (GVA) and Basel (BSL) Airports to Switzerland's premier ski destinations. Our professional chauffeurs provide seamless, comfortable transportation in premium Mercedes vehicles to St. Moritz, Gstaad, Davos, Zermatt, and beyond.",
       zurichAirportTitle: "Zurich International Airport (ZRH)",
       zurichAirportDesc: "Switzerland's largest airport, ideal gateway to eastern Swiss resorts like St. Moritz, Davos, and Arosa",
       genevaAirportTitle: "Geneva International Airport (GVA)",
       genevaAirportDesc: "Perfect gateway to western Swiss resorts including Verbier, Zermatt, and Crans-Montana",
+      baselAirportTitle: "Basel EuroAirport (BSL)",
+      baselAirportDesc: "Convenient tri-national airport serving northern Switzerland, ideal for central Swiss destinations",
       zurichPricesTitle: "From Zurich Airport (ZRH)",
       genevaPricesTitle: "From Geneva Airport (GVA)",
+      baselPricesTitle: "From Basel Airport (BSL)",
       pricesSubtitle: "Fixed prices in EUR • Same rate for all vehicles • Winter-equipped fleet",
       destinationColumn: "Destination",
       priceColumn: "Price (All Vehicles)",
@@ -122,16 +136,19 @@ const SwitzerlandTransfer = () => {
       luggage: "luggage",
     },
     tr: {
-      pageTitle: "İsviçre Havalimanı Transfer | Zürih & Cenevre'den Kayak Merkezlerine",
-      pageSubtitle: "Zürih ve Cenevre Havalimanları'ndan St. Moritz, Gstaad, Davos, Zermatt ve tüm İsviçre kayak merkezlerine lüks özel transfer",
+      pageTitle: "İsviçre Havalimanı Transfer | Zürih, Cenevre & Basel'den Kayak Merkezlerine",
+      pageSubtitle: "Zürih, Cenevre ve Basel Havalimanları'ndan St. Moritz, Gstaad, Davos, Zermatt ve tüm İsviçre kayak merkezlerine lüks özel transfer",
       h1: "İsviçre Havalimanlarından Kayak Merkezlerine Özel Transfer",
-      intro: "Zürih (ZRH) ve Cenevre (GVA) Havalimanları'ndan İsviçre'nin en prestijli kayak destinasyonlarına lüks özel transfer deneyimi yaşayın. Profesyonel şoförlerimiz, premium Mercedes araçlarla St. Moritz, Gstaad, Davos, Zermatt ve daha fazlasına sorunsuz ve konforlu ulaşım sağlar.",
+      intro: "Zürih (ZRH), Cenevre (GVA) ve Basel (BSL) Havalimanları'ndan İsviçre'nin en prestijli kayak destinasyonlarına lüks özel transfer deneyimi yaşayın. Profesyonel şoförlerimiz, premium Mercedes araçlarla St. Moritz, Gstaad, Davos, Zermatt ve daha fazlasına sorunsuz ve konforlu ulaşım sağlar.",
       zurichAirportTitle: "Zürih Uluslararası Havalimanı (ZRH)",
       zurichAirportDesc: "İsviçre'nin en büyük havalimanı, St. Moritz, Davos ve Arosa gibi doğu İsviçre tatil merkezlerine ideal kapı",
       genevaAirportTitle: "Cenevre Uluslararası Havalimanı (GVA)",
       genevaAirportDesc: "Verbier, Zermatt ve Crans-Montana dahil batı İsviçre tatil merkezlerine mükemmel kapı",
+      baselAirportTitle: "Basel EuroAirport (BSL)",
+      baselAirportDesc: "Kuzey İsviçre'ye hizmet veren uluslararası havalimanı, merkezi İsviçre destinasyonları için ideal",
       zurichPricesTitle: "Zürih Havalimanı'ndan (ZRH)",
       genevaPricesTitle: "Cenevre Havalimanı'ndan (GVA)",
+      baselPricesTitle: "Basel Havalimanı'ndan (BSL)",
       pricesSubtitle: "Euro cinsinden sabit fiyatlar • Tüm araçlar için aynı ücret • Kış donanımlı filo",
       destinationColumn: "Destinasyon",
       priceColumn: "Fiyat (Tüm Araçlar)",
@@ -208,7 +225,7 @@ const SwitzerlandTransfer = () => {
         </section>
 
         {/* Airports Info */}
-        <section className="grid md:grid-cols-2 gap-4">
+        <section className="grid md:grid-cols-3 gap-4">
           <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl p-6 flex items-start gap-4">
             <Plane className="h-8 w-8 text-primary shrink-0 mt-1" />
             <div>
@@ -221,6 +238,13 @@ const SwitzerlandTransfer = () => {
             <div>
               <h2 className="text-xl font-bold mb-2">{txt.genevaAirportTitle}</h2>
               <p className="text-muted-foreground text-sm">{txt.genevaAirportDesc}</p>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 rounded-2xl p-6 flex items-start gap-4">
+            <Plane className="h-8 w-8 text-amber-600 shrink-0 mt-1" />
+            <div>
+              <h2 className="text-xl font-bold mb-2">{txt.baselAirportTitle}</h2>
+              <p className="text-muted-foreground text-sm">{txt.baselAirportDesc}</p>
             </div>
           </div>
         </section>
@@ -316,6 +340,57 @@ const SwitzerlandTransfer = () => {
                     </td>
                     <td className="p-4 text-center">
                       <Link to={`/?ai=true&route=${encodeURIComponent(`Geneva Airport to ${item.destination}`)}`}>
+                        <Button size="sm" variant="outline" className="gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          {txt.bookNow}
+                        </Button>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Basel Airport Price Table */}
+        <section>
+          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+            <span className="text-xs font-bold bg-amber-500/20 text-amber-600 px-2 py-1 rounded">BSL</span>
+            {txt.baselPricesTitle}
+          </h2>
+          <p className="text-muted-foreground mb-4">{txt.pricesSubtitle}</p>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse bg-card rounded-xl overflow-hidden shadow-sm">
+              <thead>
+                <tr className="bg-amber-500/10">
+                  <th className="text-left p-4 font-semibold">{txt.destinationColumn}</th>
+                  <th className="text-center p-4 font-semibold">{txt.priceColumn}</th>
+                  <th className="text-center p-4 font-semibold">{txt.durationColumn}</th>
+                  <th className="text-center p-4 font-semibold"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {baselPrices.map((item, index) => (
+                  <tr key={index} className="border-t border-border/50 hover:bg-muted/50 transition-colors">
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Mountain className="h-4 w-4 text-amber-600" />
+                        <span className="font-medium">{item.destination}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-center">
+                      <span className="text-2xl font-bold text-amber-600">€{item.price}</span>
+                    </td>
+                    <td className="p-4 text-center text-muted-foreground">
+                      <span className="flex items-center justify-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {item.duration}
+                      </span>
+                    </td>
+                    <td className="p-4 text-center">
+                      <Link to={`/?ai=true&route=${encodeURIComponent(`Basel Airport to ${item.destination}`)}`}>
                         <Button size="sm" variant="outline" className="gap-1">
                           <Sparkles className="h-3 w-3" />
                           {txt.bookNow}
