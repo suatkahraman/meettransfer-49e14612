@@ -10,7 +10,7 @@ interface HeroHeaderProps {
 }
 
 // Hardcoded rating to avoid API call blocking LCP - update periodically
-const CACHED_RATING = 4.9;
+const CACHED_RATING = 4.7;
 
 export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   const { t } = useLanguage();
