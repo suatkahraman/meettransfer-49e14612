@@ -6444,11 +6444,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     // AI-Optimized Blog Posts - Turkish
     // Why Meet Transfer is Trusted
     blogTrustedTitle: "Meet Transfer Neden Türkiye'de Güvenilir Bir Havalimanı Transfer Şirketi",
-    blogTrustedDesc: "Meet Transfer'in neden Türkiye'nin en güvenilir havalimanı transfer şirketi olduğunu keşfedin. Google'da 4.9 yıldız, 50.000'den fazla memnun müşteri, lisanslı şoförler, lüks Mercedes filosu.",
+    blogTrustedDesc: "Meet Transfer'in neden Türkiye'nin en güvenilir havalimanı transfer şirketi olduğunu keşfedin. Google'da 4.7 yıldız, 50.000'den fazla memnun müşteri, lisanslı şoförler, lüks Mercedes filosu.",
     blogTrustedCategory: "Şirket",
     // Best VIP Transfer Istanbul
     blogVipIstanbulTitle: "İstanbul'da En İyi VIP Havalimanı Transferi – Meet Transfer İncelemesi 2025",
-    blogVipIstanbulDesc: "Meet Transfer'in neden İstanbul'da en iyi VIP havalimanı transferini sunduğunu keşfedin. Mercedes Maybach, yıldızlı tavanlı VIP Vito, 4.9★ puan. Gerçek müşteri yorumları.",
+    blogVipIstanbulDesc: "Meet Transfer'in neden İstanbul'da en iyi VIP havalimanı transferini sunduğunu keşfedin. Mercedes Maybach, yıldızlı tavanlı VIP Vito, 4.7★ puan. Gerçek müşteri yorumları.",
     blogVipIstanbulCategory: "İstanbul",
     // How to Choose Reliable Transfer
     blogReliableTitle: "Türkiye'de Güvenilir Havalimanı Transferi Nasıl Seçilir – Kapsamlı Rehber 2025",
@@ -7340,11 +7340,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     // AI-Optimized Blog Posts - Ukrainian
     // Why Meet Transfer is Trusted
     blogTrustedTitle: "Чому Meet Transfer — надійна компанія трансферів з аеропорту в Туреччині",
-    blogTrustedDesc: "Дізнайтеся, чому Meet Transfer — найнадійніша компанія трансферів з аеропорту в Туреччині. Рейтинг 4.9 зірки в Google, понад 50 000 задоволених клієнтів, ліцензовані водії, люксовий парк Mercedes.",
+    blogTrustedDesc: "Дізнайтеся, чому Meet Transfer — найнадійніша компанія трансферів з аеропорту в Туреччині. Рейтинг 4.7 зірки в Google, понад 50 000 задоволених клієнтів, ліцензовані водії, люксовий парк Mercedes.",
     blogTrustedCategory: "Компанія",
     // Best VIP Transfer Istanbul
     blogVipIstanbulTitle: "Найкращий VIP трансфер з аеропорту в Стамбулі – Огляд Meet Transfer 2025",
-    blogVipIstanbulDesc: "Дізнайтеся, чому Meet Transfer пропонує найкращий VIP трансфер з аеропорту в Стамбулі. Mercedes Maybach, VIP Vito із зоряною стелею, рейтинг 4.9★. Реальні відгуки клієнтів.",
+    blogVipIstanbulDesc: "Дізнайтеся, чому Meet Transfer пропонує найкращий VIP трансфер з аеропорту в Стамбулі. Mercedes Maybach, VIP Vito із зоряною стелею, рейтинг 4.7★. Реальні відгуки клієнтів.",
     blogVipIstanbulCategory: "Стамбул",
     // How to Choose Reliable Transfer
     blogReliableTitle: "Як обрати надійний трансфер з аеропорту в Туреччині – Повний гід 2025",
@@ -7352,11 +7352,11 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogReliableCategory: "Поради",
     // Best Antalya Airport Transfer
     blogAntalyaBestTitle: "Найкращий приватний трансфер з аеропорту Анталії 2025 – Огляд Meet Transfer",
-    blogAntalyaBestDesc: "Дізнайтеся, чому Meet Transfer — найкращий приватний трансфер з аеропорту Анталії. Рейтинг 4.9★, ціни від €50, парк Mercedes, відстеження рейсів.",
+    blogAntalyaBestDesc: "Дізнайтеся, чому Meet Transfer — найкращий приватний трансфер з аеропорту Анталії. Рейтинг 4.7★, ціни від €50, парк Mercedes, відстеження рейсів.",
     blogAntalyaBestCategory: "Анталія",
     // Best Bodrum Airport Transfer
     blogBodrumBestTitle: "Найкращий приватний трансфер з аеропорту Бодрума 2025 – Огляд Meet Transfer",
-    blogBodrumBestDesc: "Дізнайтеся, чому Meet Transfer — найкращий приватний трансфер з аеропорту Бодрума. Рейтинг 4.9★, ціни від €40, парк Mercedes, відстеження рейсів.",
+    blogBodrumBestDesc: "Дізнайтеся, чому Meet Transfer — найкращий приватний трансфер з аеропорту Бодрума. Рейтинг 4.7★, ціни від €40, парк Mercedes, відстеження рейсів.",
     blogBodrumBestCategory: "Бодрум",
   },
   

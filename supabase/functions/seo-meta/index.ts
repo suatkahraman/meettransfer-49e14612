@@ -226,7 +226,7 @@ const seoConfig: Record<string, {
   // Reviews page
   "/reviews": {
     title: "Customer Reviews | 5-Star Rated | Meet Transfer",
-    description: "Read what our customers say about Meet Transfer. 4.9 star rating with 2000+ verified reviews.",
+    description: "Read what our customers say about Meet Transfer. 4.7 star rating with 2000+ verified reviews.",
     keywords: "transfer reviews, customer testimonials, Meet Transfer ratings",
     ogType: "website"
   }
