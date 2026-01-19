@@ -3,23 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { initWebVitals } from "@/utils/webVitals";
 
-// LCP image preload - Vite resolves this to the hashed production URL
-import heroLcpImage from "@/assets/hero/hero-futuristic-city.webp";
-
-// Inject preload link for LCP image immediately (before React renders)
-const preloadLcpImage = () => {
-  const existingPreload = document.querySelector(`link[href="${heroLcpImage}"]`);
-  if (!existingPreload) {
-    const link = document.createElement("link");
-    link.rel = "preload";
-    link.as = "image";
-    link.type = "image/webp";
-    link.href = heroLcpImage;
-    link.fetchPriority = "high";
-    document.head.appendChild(link);
-  }
-};
-preloadLcpImage();
+// LCP image is now preloaded directly in index.html from public folder
 
 // Initialize Core Web Vitals measurement (debug only in development)
 // Defer in production so it doesn't compete with critical rendering work.

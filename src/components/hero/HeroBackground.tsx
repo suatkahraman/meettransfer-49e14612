@@ -3,12 +3,12 @@ import { Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CityVideo } from "./types";
 
-// Only import the FIRST (LCP) image statically - others loaded dynamically
-import heroFuturisticCity from "@/assets/hero/hero-futuristic-city.webp";
+// LCP image from public folder - preloaded in index.html
+const heroLcpImage = "/hero-lcp.webp";
 
 // Background images configuration - paths for dynamic loading
 const HERO_BACKGROUND_PATHS = [
-  { src: heroFuturisticCity, label: "Futuristic City", labelTR: "Fütüristik Şehir" },
+  { src: heroLcpImage, label: "Futuristic City", labelTR: "Fütüristik Şehir" },
   { path: "/src/assets/hero/hero-airport-fleet.webp", label: "Airport Fleet", labelTR: "Havalimanı Filosu" },
   { path: "/src/assets/hero/hero-city-skyline.webp", label: "City Skyline", labelTR: "Şehir Silüeti" },
   { path: "/src/assets/hero/hero-futuristic-1.webp", label: "VIP Transfer", labelTR: "VIP Transfer" },
@@ -28,7 +28,7 @@ export const HeroBackground = memo(({
   language
 }: HeroBackgroundProps) => {
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
-  const [loadedImages, setLoadedImages] = useState<string[]>([heroFuturisticCity]);
+  const [loadedImages, setLoadedImages] = useState<string[]>([heroLcpImage]);
   const [slideshowReady, setSlideshowReady] = useState(false);
 
   // Defer slideshow initialization - don't block LCP
@@ -45,7 +45,7 @@ export const HeroBackground = memo(({
       ]);
       
       setLoadedImages([
-        heroFuturisticCity,
+        heroLcpImage,
         imports[0].default,
         imports[1].default,
         imports[2].default,
@@ -74,7 +74,7 @@ export const HeroBackground = memo(({
   }, [slideshowReady, loadedImages.length]);
 
   const currentBg = HERO_BACKGROUND_PATHS[currentBgIndex];
-  const currentSrc = loadedImages[currentBgIndex] || heroFuturisticCity;
+  const currentSrc = loadedImages[currentBgIndex] || heroLcpImage;
 
   return (
     <>
@@ -84,13 +84,13 @@ export const HeroBackground = memo(({
       {/* Desktop Image Background - CSS transitions instead of framer-motion */}
       <div className="absolute inset-0 z-0 hidden md:block">
         <div className="absolute inset-0">
-          {/* Primary LCP Image - Always visible as base */}
+          {/* Primary LCP Image - Always visible as base, preloaded in index.html */}
           <img
-            src={heroFuturisticCity}
+            src={heroLcpImage}
             alt="VIP Transfer Background"
             className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105 saturate-110"
             loading="eager"
-            decoding="async"
+            decoding="sync"
             fetchPriority="high"
           />
           
