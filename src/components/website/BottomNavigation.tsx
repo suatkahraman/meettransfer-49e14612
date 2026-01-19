@@ -1,4 +1,4 @@
-import { Home, MapPin, Car, Info, Phone } from "lucide-react";
+import { Home, MapPin, Car, FileText, Phone } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAIChat } from "@/contexts/AIChatContext";
@@ -13,7 +13,7 @@ const BottomNavigation = () => {
     { path: "/", icon: Home, label: t("home") },
     { path: "/destinations", icon: MapPin, label: t("cities") },
     { path: "/fleet", icon: Car, label: t("fleet") },
-    { path: "/about", icon: Info, label: t("about") },
+    { path: "/terms", icon: FileText, label: t("terms") || "Terms" },
     { path: "/contact", icon: Phone, label: t("contact") },
   ];
 
