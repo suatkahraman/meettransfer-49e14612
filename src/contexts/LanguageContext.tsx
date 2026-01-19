@@ -458,6 +458,7 @@ const translations: Record<Language, Record<string, string>> = {
     europeanFinanceHub: "European Finance Hub",
     frankfurtTours: "Frankfurt Airport",
     frankfurtDesc: "Premium VIP transfer from Frankfurt Airport (FRA) to city center, trade fairs, and nearby destinations. Mercedes fleet with professional chauffeurs.",
+    alpineSkiResorts: "Alpine Ski Resorts",
     
     // Common
     passengers: "Passengers",
@@ -11409,6 +11410,7 @@ const translations: Record<Language, Record<string, string>> = {
     europeanFinanceHub: "Avrupa Finans Merkezi",
     frankfurtTours: "Frankfurt Havalimanı",
     frankfurtDesc: "Frankfurt Havalimanı'ndan (FRA) şehir merkezine, fuarlara ve çevre bölgelere premium VIP transfer. Profesyonel şoförlerle Mercedes filosu.",
+    alpineSkiResorts: "Alp Kayak Merkezleri",
     
     // Common
     passengers: "Yolcular",
