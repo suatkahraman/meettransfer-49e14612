@@ -35,6 +35,7 @@ import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
 import midyatHero from "@/assets/blog/midyat-transfer-hero.jpg";
 import adanaHero from "@/assets/blog/adana-transfer-hero.jpg";
+import switzerlandHero from "@/assets/blog/switzerland-transfer-hero.jpg";
 
 const BlogPage = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -333,6 +334,17 @@ const BlogPage = () => {
       readTime: 10,
       date: "2025-01-17",
       image: adanaHero,
+      isStatic: true,
+    },
+    {
+      id: "switzerland-airport-transfer-guide",
+      title: "Switzerland Airport Transfer Guide – Zurich, Geneva, Basel & Milan to Ski Resorts",
+      description: "Complete guide to Switzerland airport transfers. Private transfers from Zurich, Geneva, Basel & Milan airports to St. Moritz, Zermatt, Verbier, Gstaad.",
+      category: "Switzerland",
+      categoryKey: "switzerland",
+      readTime: 15,
+      date: "2025-01-19",
+      image: switzerlandHero,
       isStatic: true,
     },
   ], []);
