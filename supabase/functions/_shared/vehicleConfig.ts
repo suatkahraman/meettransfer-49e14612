@@ -1,5 +1,5 @@
 // Shared vehicle configuration for edge functions
-// Keep in sync with src/lib/vehicleTypes.ts and src/lib/dubaiVehicleTypes.ts
+// Keep in sync with src/lib/vehicleTypes.ts, src/lib/dubaiVehicleTypes.ts, and src/lib/switzerlandVehicleTypes.ts
 
 export interface VehicleTypeConfig {
   value: string;
@@ -9,7 +9,7 @@ export interface VehicleTypeConfig {
 }
 
 // Supported regions - add new regions here
-export type VehicleRegion = 'turkey' | 'dubai' | 'default';
+export type VehicleRegion = 'turkey' | 'dubai' | 'switzerland' | 'default';
 
 // Central vehicle types - matches frontend (Turkey/Standard)
 export const VEHICLE_TYPES: VehicleTypeConfig[] = [
@@ -29,16 +29,23 @@ export const DUBAI_VEHICLE_TYPES: VehicleTypeConfig[] = [
   { value: 'dubai-vip-sprinter', label: 'VIP Mercedes Sprinter', passengers: 12, luggage: 12 },
 ];
 
+// Switzerland-specific vehicle types - flat pricing
+export const SWITZERLAND_VEHICLE_TYPES: VehicleTypeConfig[] = [
+  { value: 's_class', label: 'Mercedes S-Class', passengers: 3, luggage: 3 },
+  { value: 'mercedes_vclass', label: 'Mercedes V-Class', passengers: 7, luggage: 7 },
+];
+
 // Region to vehicle types mapping - ADD NEW REGIONS HERE
 const REGION_VEHICLE_MAP: Record<VehicleRegion, VehicleTypeConfig[]> = {
   'turkey': VEHICLE_TYPES,
   'dubai': DUBAI_VEHICLE_TYPES,
+  'switzerland': SWITZERLAND_VEHICLE_TYPES,
   'default': VEHICLE_TYPES,
 };
 
 // Vehicle labels lookup
 export const VEHICLE_LABELS: Record<string, string> = Object.fromEntries(
-  [...VEHICLE_TYPES, ...DUBAI_VEHICLE_TYPES].map(v => [v.value, v.label])
+  [...VEHICLE_TYPES, ...DUBAI_VEHICLE_TYPES, ...SWITZERLAND_VEHICLE_TYPES].map(v => [v.value, v.label])
 );
 
 // Get vehicle label for display
@@ -85,9 +92,42 @@ export function isTurkeyLocation(location: string): boolean {
   return turkeyKeywords.some(keyword => normalizedLocation.includes(keyword));
 }
 
+// Check if location is in Switzerland
+export function isSwitzerlandLocation(location: string): boolean {
+  if (!location) return false;
+  const normalizedLocation = location.toLowerCase();
+  
+  const switzerlandKeywords = [
+    // Country
+    'switzerland', 'schweiz', 'suisse', 'svizzera', 'swiss',
+    // Airports
+    'zrh', 'zurich airport', 'zürich flughafen',
+    'gva', 'geneva airport', 'genève aéroport',
+    'bsl', 'basel airport', 'euroairport', 'basel-mulhouse',
+    'mxp', 'milan malpensa', 'malpensa',
+    // Ski resorts
+    'st. moritz', 'st moritz', 'saint moritz', 'zermatt', 'verbier', 'gstaad',
+    'davos', 'arosa', 'crans-montana', 'crans montana', 'klosters',
+    'grindelwald', 'wengen', 'lauterbrunnen', 'interlaken', 'saas-fee',
+    'laax', 'flims', 'engelberg', 'andermatt', 'leukerbad', 'champéry', 'nendaz',
+    // Cities
+    'zurich', 'zürich', 'geneva', 'genève', 'genf', 'basel', 'bâle',
+    'bern', 'berne', 'lausanne', 'lucerne', 'luzern', 'lugano', 'montreux',
+    // Regions
+    'graubünden', 'graubunden', 'grisons', 'valais', 'wallis', 'engadin', 'engadine',
+    'swiss alps', 'matterhorn', 'jungfrau',
+  ];
+  
+  return switzerlandKeywords.some(keyword => normalizedLocation.includes(keyword));
+}
+
 // Detect region from pickup/dropoff locations
 export function detectRegion(pickup: string, dropoff: string): VehicleRegion {
-  // Check Dubai first (more specific)
+  // Check Switzerland first (most specific for ski transfers)
+  if (isSwitzerlandLocation(pickup) || isSwitzerlandLocation(dropoff)) {
+    return 'switzerland';
+  }
+  // Check Dubai
   if (isDubaiLocation(pickup) || isDubaiLocation(dropoff)) {
     return 'dubai';
   }
@@ -134,12 +174,19 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   'dubai-suburban-suv': ['dubai-suburban-suv', 'mercedes-vito'],
   'dubai-vip-sprinter': ['dubai-vip-sprinter', 'minibus'],
   
+  // Switzerland vehicle mappings
+  's_class': ['s_class'],
+  'mercedes_vclass': ['mercedes_vclass'],
+  'Mercedes S-Class': ['s_class'],
+  'Mercedes V-Class': ['mercedes_vclass'],
+  's-class': ['s_class'],
+  'v-class': ['mercedes_vclass'],
+  
   // Common aliases
   'Mercedes Vito': ['mercedes-vito'],
   'Mercedes Vito VIP': ['mercedes-vito-vip', 'vip-mercedes'],
   'VIP Vito': ['mercedes-vito-vip', 'vip-mercedes'],
-  'Mercedes V-Class': ['mercedes-vito-vip', 'vip-mercedes'],
-  'V-Class': ['mercedes-vito-vip', 'vip-mercedes'],
+  'V-Class': ['mercedes_vclass', 'mercedes-vito-vip', 'vip-mercedes'],
   'Mercedes Sprinter': ['mercedes-sprinter', 'minibus'],
   'Mercedes Sprinter VIP': ['mercedes-sprinter', 'minibus'],
   'Mercedes Maybach': ['mercedes-maybach', 'maybach-minibus'],
@@ -151,7 +198,6 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   // Dubai aliases
   'Private Sedan': ['dubai-private-sedan', 'sedan'],
   'V Class': ['dubai-v-class', 'mercedes-vito'],
-  'Mercedes V Class': ['dubai-v-class', 'mercedes-vito'],
   'Premium Van': ['dubai-premium-van', 'mercedes-vito'],
   'Suburban SUV': ['dubai-suburban-suv', 'mercedes-vito'],
   'VIP Sprinter': ['dubai-vip-sprinter', 'minibus'],
