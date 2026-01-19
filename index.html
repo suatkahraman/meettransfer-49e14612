@@ -63,8 +63,9 @@
     <link rel="dns-prefetch" href="//api.mapbox.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
-    <!-- Preload LCP Image for Mobile - Note: Vite will hash the actual asset path, this is a fallback hint -->
-    <!-- The actual preload happens via the Hero component with fetchpriority="high" -->
+    <!-- Preload LCP Image - Critical for fast Largest Contentful Paint -->
+    <!-- Desktop hero background - primary LCP element -->
+    <link rel="preload" as="image" fetchpriority="high" href="/src/assets/hero/hero-futuristic-city.webp" type="image/webp" />
     
     <!-- Font Preload - Critical fonts for LCP/FCP -->
     <!-- Playfair Display - Used in hero headings (most visible first) -->

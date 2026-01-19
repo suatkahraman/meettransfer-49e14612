@@ -40,21 +40,27 @@ export const HeroBackground = memo(({
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   const [imagesPreloaded, setImagesPreloaded] = useState(false);
 
-  // Preload all images immediately for instant transitions
+  // Defer preloading of non-LCP images to avoid bandwidth competition
   useEffect(() => {
-    const preloadImages = async () => {
-      const promises = HERO_BACKGROUNDS.map((bg) => {
-        return new Promise<void>((resolve) => {
+    // First image is LCP - already loading, skip preloading others initially
+    const preloadRemainingImages = () => {
+      // Start from index 1 to skip the first (LCP) image
+      HERO_BACKGROUNDS.slice(1).forEach((bg, index) => {
+        // Stagger loading to avoid bandwidth competition
+        setTimeout(() => {
           const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
           img.src = bg.src;
-        });
+        }, (index + 1) * 500); // 500ms delay between each
       });
-      await Promise.all(promises);
       setImagesPreloaded(true);
     };
-    preloadImages();
+    
+    // Wait for LCP image to likely be loaded before preloading others
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => preloadRemainingImages(), { timeout: 2000 });
+    } else {
+      setTimeout(preloadRemainingImages, 1500);
+    }
   }, []);
 
   // Auto-rotate through backgrounds
