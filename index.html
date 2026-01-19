@@ -66,39 +66,34 @@
     <!-- LCP Image Preload - Build-safe (public folder) -->
     <link rel="preload" as="image" fetchpriority="high" href="/hero-lcp.webp" type="image/webp" />
     
-    <!-- Font Preload - Critical fonts for LCP/FCP -->
-    <!-- Playfair Display - Used in hero headings (most visible first) -->
-    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qO0g.woff2" crossorigin />
-    <!-- Inter Regular - Used in body text -->
-    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2" crossorigin />
-    <!-- Inter Medium - Used in buttons/labels -->
-    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fAZ9hjp-Ek-_EeA.woff2" crossorigin />
+    <!-- Font Preload - ONLY critical hero fonts (Playfair Bold for heading) -->
+    <!-- Playfair Display 700 - Hero heading only -->
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qO0g.woff2" crossorigin fetchpriority="high" />
+    <!-- Inter 400 - Hero body text only -->
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2" crossorigin fetchpriority="high" />
     
-    <!-- Non-render-blocking font loading with display=swap for FOUT prevention -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+    <!-- Critical hero fonts - loaded immediately with minimal weights -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400&display=swap" media="all" />
     
-    <!-- Font loading detection script -->
+    <!-- Deferred non-critical font weights - loaded after hero renders -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=swap" /></noscript>
+    
+    <!-- Font loading detection - only wait for critical hero fonts -->
     <script>
-      // Remove font-loading class when fonts are ready
       if ('fonts' in document) {
-        Promise.all([
-          document.fonts.load('700 1em "Playfair Display"'),
-          document.fonts.load('400 1em Inter')
+        Promise.race([
+          Promise.all([
+            document.fonts.load('700 1em "Playfair Display"'),
+            document.fonts.load('400 1em Inter')
+          ]),
+          new Promise(function(r) { setTimeout(r, 1500); }) // 1.5s timeout for hero
         ]).then(function() {
           document.body.classList.remove('font-loading');
           document.body.classList.add('fonts-loaded');
-        }).catch(function() {
-          // Fallback: remove class after timeout
-          setTimeout(function() {
-            document.body.classList.remove('font-loading');
-          }, 3000);
         });
       } else {
-        // Fallback for older browsers
-        setTimeout(function() {
-          document.body.classList.remove('font-loading');
-        }, 1000);
+        setTimeout(function() { document.body.classList.remove('font-loading'); }, 800);
       }
     </script>
 
