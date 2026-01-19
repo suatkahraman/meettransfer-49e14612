@@ -7,16 +7,16 @@
  */
 
 // Default rating value (used as fallback when API unavailable)
-export const DEFAULT_RATING = 4.8;
+export const DEFAULT_RATING = 4.7;
 
 // Default total reviews count (used as fallback when API unavailable)
 export const DEFAULT_TOTAL_REVIEWS = 2847;
 
 // Formatted rating string for display
-export const DEFAULT_RATING_DISPLAY = "4.8";
+export const DEFAULT_RATING_DISPLAY = "4.7";
 
-// Rating with denominator for display (e.g., "4.8/5")
-export const DEFAULT_RATING_WITH_MAX = "4.8/5";
+// Rating with denominator for display (e.g., "4.7/5")
+export const DEFAULT_RATING_WITH_MAX = "4.7/5";
 
 // Platform-specific ratings (these are independent and verified per platform)
 export const PLATFORM_RATINGS = {
