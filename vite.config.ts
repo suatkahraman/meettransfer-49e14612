@@ -439,9 +439,12 @@ export default defineConfig(({ mode }) => ({
         },
         // Isolate large app chunks for better caching
         chunkFileNames: (chunkInfo) => {
-          // Put translations in their own cached chunk
-          if (chunkInfo.name?.includes('LanguageContext') || chunkInfo.name?.includes('BlogTranslations')) {
-            return 'assets/translations-[hash].js';
+          // Put translations in their own cached chunk - each language separately
+          if (chunkInfo.name?.includes('LanguageContext')) {
+            return 'assets/translations-main-[hash].js';
+          }
+          if (chunkInfo.name?.includes('BlogTranslations')) {
+            return 'assets/translations-blog-[hash].js';
           }
           return 'assets/[name]-[hash].js';
         }
