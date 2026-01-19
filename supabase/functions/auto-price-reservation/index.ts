@@ -8,7 +8,7 @@ import {
   checkPriceSanity,
   logPriceSanityCheck,
 } from "../_shared/priceMatching.ts";
-import { getVehicleFallbackList, getVehicleLabel } from "../_shared/vehicleConfig.ts";
+import { getVehicleFallbackList, getVehicleLabel, detectRegion } from "../_shared/vehicleConfig.ts";
 import { convertCurrency, getCurrencySymbol } from "../_shared/currencyUtils.ts";
 import { autoPriceSuccessEmail, manualPriceRequiredEmail } from "../_shared/emailTemplates.ts";
 
@@ -380,12 +380,17 @@ const handler = async (req: Request): Promise<Response> => {
     const basePriceCurrency = bestPrice.price_currency || 'EUR';
     const customerRequestedCurrency = reservation.price_currency || basePriceCurrency;
     
-    // Calculate final price with discount
+    // Detect region to check if discount is disabled
+    const detectedRegion = detectRegion(reservation.pickup, reservation.dropoff);
+    console.log(`🌍 Detected region for discount check: ${detectedRegion}`);
+    
+    // Calculate final price with discount (region check disables discount for Dubai/Switzerland)
     const hasReturnTrip = reservation.is_return_transfer || false;
     const discountInfo = calculateDiscount(
       bestPrice.price,
       hasReturnTrip,
-      reservation.promo_code
+      reservation.promo_code,
+      detectedRegion // Pass region to disable discounts for Dubai/Switzerland
     );
 
     let finalPrice = discountInfo.price;
