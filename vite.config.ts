@@ -388,36 +388,52 @@ export default defineConfig(({ mode }) => ({
       output: {
         // Manual chunks for better code splitting
         manualChunks: {
-          // Vendor chunks - split by usage pattern
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-ui": [
+          // Core React - smallest possible initial chunk
+          "vendor-react": ["react", "react-dom"],
+          "vendor-router": ["react-router-dom"],
+          // UI components - split for better caching
+          "vendor-ui-core": [
             "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
             "@radix-ui/react-select",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-toast",
             "@radix-ui/react-popover",
-            "@radix-ui/react-accordion",
+            "@radix-ui/react-slot"
+          ],
+          "vendor-ui-forms": [
             "@radix-ui/react-checkbox",
             "@radix-ui/react-label",
-            "@radix-ui/react-slot",
-            "@radix-ui/react-switch",
+            "@radix-ui/react-radio-group",
+            "@radix-ui/react-switch"
+          ],
+          "vendor-ui-feedback": [
+            "@radix-ui/react-toast",
             "@radix-ui/react-tooltip",
             "@radix-ui/react-alert-dialog",
-            "@radix-ui/react-radio-group",
-            "@radix-ui/react-progress",
+            "@radix-ui/react-progress"
+          ],
+          "vendor-ui-layout": [
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-accordion",
+            "@radix-ui/react-collapsible",
             "@radix-ui/react-scroll-area",
             "@radix-ui/react-separator",
-            "@radix-ui/react-collapsible"
+            "@radix-ui/react-dropdown-menu"
           ],
+          // Forms & validation
           "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
+          // Data fetching
           "vendor-query": ["@tanstack/react-query"],
+          // Animation - heavy, defer loading
           "vendor-motion": ["framer-motion"],
+          // Backend
           "vendor-supabase": ["@supabase/supabase-js"],
+          // Date handling
           "vendor-date": ["date-fns", "react-day-picker"],
+          // Heavy utilities - only loaded when needed
           "vendor-pdf": ["jspdf", "jspdf-autotable"],
           "vendor-excel": ["xlsx"],
-          "vendor-markdown": ["react-markdown", "remark-gfm"]
+          "vendor-markdown": ["react-markdown", "remark-gfm"],
+          // Carousel - defer
+          "vendor-carousel": ["embla-carousel-react", "embla-carousel-autoplay", "embla-carousel-fade"]
         }
       }
     },
