@@ -46,6 +46,7 @@ const WebsiteHeader = () => {
     { path: "/blog", label: t("blog") || "Blog" },
     { path: "/about", label: t("about") },
     { path: "/contact", label: t("contact") },
+    { path: "/terms", label: t("terms") || "Terms" },
   ];
 
   const destinationLinks = [
