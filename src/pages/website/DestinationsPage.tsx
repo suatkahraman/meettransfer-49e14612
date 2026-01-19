@@ -2,7 +2,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark, ArrowRight, Palmtree, Trees } from "lucide-react";
+import { MapPin, Car, Anchor, Mountain, Building2, Waves, Landmark, ArrowRight, Palmtree, Trees, Snowflake } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -152,20 +152,34 @@ const DestinationsPage = () => {
       vehicles: "Mercedes Vito VIP",
       link: "/adana-transfer",
     },
+    {
+      id: 13,
+      name: "Switzerland",
+      airports: "ZRH, GVA, BSL & MXP",
+      tagline: t("alpineSkiResorts"),
+      icon: "🇨🇭",
+      IconComponent: Snowflake,
+      locations: ["St. Moritz", "Zermatt", "Verbier", "Gstaad", "Davos", "Arosa", "Crans-Montana"],
+      vehicles: "Mercedes S-Class, V-Class VIP",
+      link: "/switzerland-transfer",
+      extraLinks: [
+        { label: "Ski Resort Guide", path: "/blog/switzerland-airport-transfer-guide" },
+      ],
+    },
   ];
   
   return (
     <WebsiteLayout>
       <SEOHead
-        title="Airport Transfer Destinations | Turkey, Dubai, Cyprus, Germany & Bursa VIP Transfers | Meet Transfer"
-        description="Premium airport transfer service across Turkey, Dubai, Cyprus and Germany. VIP transfers from Istanbul, Antalya, Bodrum, Dubai, Larnaca, Paphos, Frankfurt airports. Istanbul-Bursa day tours. Mercedes fleet, 24/7 meet & greet service, professional drivers."
-        keywords="airport transfer destinations, Turkey airport transfer, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, Dubai airport transfer, Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Frankfurt airport transfer, Germany transfer, Istanbul Bursa transfer, Bursa day tour, VIP transfer, private chauffeur, Mercedes transfer"
+        title="Airport Transfer Destinations | Turkey, Dubai, Cyprus, Germany, Switzerland VIP Transfers | Meet Transfer"
+        description="Premium airport transfer service across Turkey, Dubai, Cyprus, Germany and Switzerland. VIP transfers from Istanbul, Antalya, Bodrum, Dubai, Larnaca, Paphos, Frankfurt, Zurich, Geneva airports. Swiss ski resort transfers. Mercedes fleet, 24/7 meet & greet service."
+        keywords="airport transfer destinations, Turkey airport transfer, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, Dubai airport transfer, Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Frankfurt airport transfer, Germany transfer, Switzerland airport transfer, Zurich airport transfer, Geneva airport transfer, St Moritz transfer, Zermatt transfer, ski resort transfer, VIP transfer, private chauffeur, Mercedes transfer"
         canonicalPath="/destinations"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos', 'Bursa', 'Uludağ', 'Frankfurt', 'Germany', 'Athens', 'Greece', 'Thessaloniki'] },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos', 'Bursa', 'Uludağ', 'Frankfurt', 'Germany', 'Athens', 'Greece', 'Thessaloniki', 'Switzerland', 'Zurich', 'Geneva', 'Basel', 'St. Moritz', 'Zermatt', 'Verbier', 'Davos'] },
           {
             type: 'BreadcrumbList',
             items: [
