@@ -112,6 +112,9 @@ export const RideFormContent = memo(({
   const { promoCode } = usePromo();
   const discountPercent = promoCode?.discountPercentage || 25;
   
+  // Disable return trip discount for Dubai and Switzerland regions
+  const isDiscountDisabledRegion = routeRegion === 'dubai' || routeRegion === 'switzerland';
+  
   const hasRoute = !!(pickup && dropoff);
   const hasExtras = hasReturnTrip || babySeatCount > 0 || luggageCount > 0;
   
@@ -304,8 +307,8 @@ export const RideFormContent = memo(({
         </CollapsibleTrigger>
         
         <CollapsibleContent className="mt-2 space-y-3">
-          {/* Return Trip Toggle with Discount Badge */}
-          {setHasReturnTrip && (
+          {/* Return Trip Toggle with Discount Badge - Hidden for Dubai/Switzerland */}
+          {setHasReturnTrip && !isDiscountDisabledRegion && (
             <div className={cn(
               "p-3 rounded-lg border transition-all",
               hasReturnTrip 

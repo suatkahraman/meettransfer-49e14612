@@ -144,52 +144,52 @@ export const getLocalizedDiscountText = (
 
   const templates: Record<string, { heroSubtitle: string; returnTripDiscount: string; validUntilText: string }> = {
     en: {
-      heroSubtitle: `✈️ ${discount}% OFF Round-Trip Transfers! 🎁 Code: ${code} | Turkey • Dubai • Cyprus`,
+      heroSubtitle: `✈️ ${discount}% OFF Round-Trip Transfers! 🎁 Code: ${code} | Turkey • Cyprus`,
       returnTripDiscount: `Book return trip and get ${discount}% OFF with code: ${code}`,
       validUntilText: validUntil ? `⏰ Valid until: ${formattedDate}` : '',
     },
     de: {
-      heroSubtitle: `✈️ ${discount}% RABATT auf Hin- und Rücktransfers! 🎁 Code: ${code} | Türkei • Dubai • Zypern`,
+      heroSubtitle: `✈️ ${discount}% RABATT auf Hin- und Rücktransfers! 🎁 Code: ${code} | Türkei • Zypern`,
       returnTripDiscount: `Buchen Sie die Rückfahrt und erhalten Sie ${discount}% Rabatt mit Code: ${code}`,
       validUntilText: validUntil ? `⏰ Gültig bis: ${formattedDate}` : '',
     },
     fr: {
-      heroSubtitle: `✈️ ${discount}% DE RÉDUCTION sur les transferts aller-retour! 🎁 Code: ${code} | Turquie • Dubai • Chypre`,
+      heroSubtitle: `✈️ ${discount}% DE RÉDUCTION sur les transferts aller-retour! 🎁 Code: ${code} | Turquie • Chypre`,
       returnTripDiscount: `Réservez le trajet retour et obtenez ${discount}% de réduction avec le code: ${code}`,
       validUntilText: validUntil ? `⏰ Valable jusqu'au: ${formattedDate}` : '',
     },
     ru: {
-      heroSubtitle: `✈️ СКИДКА ${discount}% на трансферы туда-обратно! 🎁 Код: ${code} | Турция • Дубай • Кипр`,
+      heroSubtitle: `✈️ СКИДКА ${discount}% на трансферы туда-обратно! 🎁 Код: ${code} | Турция • Кипр`,
       returnTripDiscount: `Забронируйте обратный трансфер и получите скидку ${discount}% с кодом: ${code}`,
       validUntilText: validUntil ? `⏰ Действует до: ${formattedDate}` : '',
     },
     it: {
-      heroSubtitle: `✈️ ${discount}% DI SCONTO sui trasferimenti andata e ritorno! 🎁 Codice: ${code} | Turchia • Dubai • Cipro`,
+      heroSubtitle: `✈️ ${discount}% DI SCONTO sui trasferimenti andata e ritorno! 🎁 Codice: ${code} | Turchia • Cipro`,
       returnTripDiscount: `Prenota il viaggio di ritorno e ottieni il ${discount}% di sconto con il codice: ${code}`,
       validUntilText: validUntil ? `⏰ Valido fino al: ${formattedDate}` : '',
     },
     es: {
-      heroSubtitle: `✈️ ¡${discount}% DE DESCUENTO en traslados de ida y vuelta! 🎁 Código: ${code} | Turquía • Dubái • Chipre`,
+      heroSubtitle: `✈️ ¡${discount}% DE DESCUENTO en traslados de ida y vuelta! 🎁 Código: ${code} | Turquía • Chipre`,
       returnTripDiscount: `Reserva el viaje de regreso y obtén ${discount}% de descuento con el código: ${code}`,
       validUntilText: validUntil ? `⏰ Válido hasta: ${formattedDate}` : '',
     },
     ar: {
-      heroSubtitle: `✈️ خصم ${discount}% على الرحلات ذهابًا وإيابًا! 🎁 الكود: ${code} | تركيا • دبي • قبرص`,
+      heroSubtitle: `✈️ خصم ${discount}% على الرحلات ذهابًا وإيابًا! 🎁 الكود: ${code} | تركيا • قبرص`,
       returnTripDiscount: `احجز رحلة العودة واحصل على خصم ${discount}% مع الكود: ${code}`,
       validUntilText: validUntil ? `⏰ صالح حتى: ${formattedDate}` : '',
     },
     tr: {
-      heroSubtitle: `✈️ Gidiş-Dönüş Transferlerde %${discount} İNDİRİM! 🎁 Kod: ${code} | Türkiye • Dubai • Kıbrıs`,
+      heroSubtitle: `✈️ Gidiş-Dönüş Transferlerde %${discount} İNDİRİM! 🎁 Kod: ${code} | Türkiye • Kıbrıs`,
       returnTripDiscount: `Dönüş yolculuğu rezervasyonu yapın ve ${code} koduyla %${discount} indirim kazanın`,
       validUntilText: validUntil ? `⏰ Son Geçerlilik: ${formattedDate}` : '',
     },
     uk: {
-      heroSubtitle: `✈️ ЗНИЖКА ${discount}% на трансфери туди-назад! 🎁 Код: ${code} | Туреччина • Дубай • Кіпр`,
+      heroSubtitle: `✈️ ЗНИЖКА ${discount}% на трансфери туди-назад! 🎁 Код: ${code} | Туреччина • Кіпр`,
       returnTripDiscount: `Забронюйте зворотню поїздку та отримайте знижку ${discount}% з кодом: ${code}`,
       validUntilText: validUntil ? `⏰ Дійсний до: ${formattedDate}` : '',
     },
     ja: {
-      heroSubtitle: `✈️ 往復送迎${discount}%オフ! 🎁 コード: ${code} | トルコ • ドバイ • キプロス`,
+      heroSubtitle: `✈️ 往復送迎${discount}%オフ! 🎁 コード: ${code} | トルコ • キプロス`,
       returnTripDiscount: `復路予約で${discount}%オフ コード: ${code}`,
       validUntilText: validUntil ? `⏰ 有効期限: ${formattedDate}` : '',
     },

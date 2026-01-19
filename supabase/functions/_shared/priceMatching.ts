@@ -1086,31 +1086,45 @@ export async function getActiveReturnPromoCode(supabase: any): Promise<PromoCode
   }
 }
 
+// Regions where return trip discount is disabled
+const DISCOUNT_DISABLED_REGIONS = ['dubai', 'switzerland'];
+
+// Check if discount should be disabled based on region
+export function isDiscountDisabledForRegion(region: string): boolean {
+  return DISCOUNT_DISABLED_REGIONS.includes(region.toLowerCase());
+}
+
 // Calculate discount using promo code config (already fetched from DB)
 export function calculateDiscountWithConfig(
   basePrice: number,
   hasReturnTrip: boolean,
-  promoConfig: PromoCodeInfo | null
+  promoConfig: PromoCodeInfo | null,
+  region?: string // Optional region to disable discounts
 ): { price: number; returnPrice: number | null; totalPrice: number; discountApplied: boolean; discountPercent: number; promoCode: string | null } {
   let discountApplied = false;
   let discountPercent = 0;
   let returnPrice: number | null = null;
   let price = basePrice;
   
+  // Skip discount for Dubai and Switzerland regions
+  const discountDisabled = region ? isDiscountDisabledForRegion(region) : false;
+  
   if (hasReturnTrip) {
     returnPrice = basePrice;
     
-    // Apply discount for return trip with valid promo code
-    if (promoConfig && promoConfig.appliesToReturn) {
+    // Apply discount for return trip with valid promo code (unless region is disabled)
+    if (promoConfig && promoConfig.appliesToReturn && !discountDisabled) {
       returnPrice = Math.round(basePrice * (1 - promoConfig.discountPercent / 100));
       discountApplied = true;
       discountPercent = promoConfig.discountPercent;
       console.log(`Applied ${promoConfig.discountPercent}% discount to return trip: ${basePrice} -> ${returnPrice}`);
+    } else if (discountDisabled) {
+      console.log(`⛔ Discount disabled for region: ${region}`);
     }
   }
   
-  // Apply discount to total if applicable
-  if (promoConfig && promoConfig.appliesToTotal && !discountApplied) {
+  // Apply discount to total if applicable (unless region is disabled)
+  if (promoConfig && promoConfig.appliesToTotal && !discountApplied && !discountDisabled) {
     price = Math.round(basePrice * (1 - promoConfig.discountPercent / 100));
     if (returnPrice !== null) {
       returnPrice = Math.round(returnPrice * (1 - promoConfig.discountPercent / 100));
@@ -1135,10 +1149,11 @@ export function calculateDiscountWithConfig(
 export function calculateDiscount(
   basePrice: number,
   hasReturnTrip: boolean,
-  promoCode: string | null
+  promoCode: string | null,
+  region?: string // Optional region to disable discounts
 ): { price: number; returnPrice: number | null; totalPrice: number; discountApplied: boolean; discountPercent: number } {
   const promoConfig = promoCode ? PROMO_CODE_CONFIG[promoCode.toUpperCase()] : null;
-  const result = calculateDiscountWithConfig(basePrice, hasReturnTrip, promoConfig);
+  const result = calculateDiscountWithConfig(basePrice, hasReturnTrip, promoConfig, region);
   return {
     price: result.price,
     returnPrice: result.returnPrice,
