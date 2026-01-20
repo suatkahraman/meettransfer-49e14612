@@ -26,10 +26,10 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
 
-// Vehicle images - premium collection
-import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+// Vehicle images - premium collection (WebP optimized where possible)
+import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
-import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import vipVitoStarlightLuxury from "@/assets/vehicles/vip-vito-starlight.webp";
 import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
 import vitoAirportWelcome from "@/assets/vito-airport-welcome.jpg";
 import vitoCappadociaBalloon from "@/assets/vito-cappadocia-balloon.jpg";
@@ -47,12 +47,12 @@ import vitoVipStarlightRoof from "@/assets/vito-vip-starlight-roof.jpg";
 import vitoVipLuxuryWhite from "@/assets/vito-vip-luxury-white.jpg";
 import vitoVipCoupleStarlight from "@/assets/vito-vip-couple-starlight.jpg";
 import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
-import maybachUltraLuxury from "@/assets/maybach-ultra-luxury.jpg";
+import maybachUltraLuxury from "@/assets/vehicles/maybach-luxury.webp";
 import maybachInterior from "@/assets/maybach-interior-starlight.jpg";
 import maybachPassengersBlue from "@/assets/maybach-passengers-blue.jpg";
 import maybachInteriorPurple from "@/assets/maybach-interior-purple.jpg";
 import maybachInteriorOrange from "@/assets/maybach-interior-orange.jpg";
-import sprinterHotelArrival from "@/assets/sprinter-hotel-arrival.jpg";
+import sprinterHotelArrival from "@/assets/vehicles/sprinter-arrival.webp";
 import sprinterVipInterior from "@/assets/sprinter-vip-interior.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import sprinterExteriorVip from "@/assets/sprinter-exterior-vip.jpg";

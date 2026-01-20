@@ -7,10 +7,10 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 import { MapPin, Plane, Snowflake } from "lucide-react";
 
-// Fleet images - using main assets
+// Fleet images - using main assets (WebP optimized)
 import vitoVipPremium from "@/assets/vito-vip-1.jpg";
 import vitoVipInterior from "@/assets/vito-vip-starlight-purple.jpg";
-import vitoAirport from "@/assets/vito-airport-premium.jpg";
+import vitoAirport from "@/assets/vehicles/vito-airport-premium.webp";
 import vitoFamily from "@/assets/vito-family-interior.jpg";
 import sprinterExterior from "@/assets/sprinter-exterior-vip.jpg";
 import sprinterInterior from "@/assets/sprinter-interior-starlight.jpg";
@@ -27,7 +27,7 @@ import dubaiPremiumVan from "@/assets/dubai/dubai-v-class.jpg";
 import dubaiPremiumVanInterior from "@/assets/dubai/dubai-v-class-interior.jpg";
 import dubaiSuburban from "@/assets/dubai/dubai-suburban.jpg";
 import dubaiSuburbanInterior from "@/assets/dubai/dubai-suburban-interior.jpg";
-import dubaiVipSprinter from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
+import dubaiVipSprinter from "@/assets/dubai/dubai-vip-mercedes-van.webp";
 import dubaiVipSprinterExterior from "@/assets/dubai/dubai-vip-van-exterior.jpg";
 
 // Switzerland fleet images
