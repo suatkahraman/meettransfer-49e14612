@@ -399,10 +399,34 @@ export default defineConfig(({ mode }) => ({
             return 'vendor-router';
           }
           
-          // All Radix UI packages in ONE chunk to avoid circular dependency issues
-          // between chunks (e.g. vendor-ui-core importing vendor-ui-primitives and vice versa)
+          // Radix UI: Split into base primitives (loaded first) and components
+          // This avoids circular dependency issues while keeping chunks smaller
+          // Base primitives that ALL Radix components depend on - MUST load first
+          if (id.includes('@radix-ui/primitive') ||
+              id.includes('@radix-ui/react-primitive') ||
+              id.includes('@radix-ui/react-slot') ||
+              id.includes('@radix-ui/react-compose-refs') ||
+              id.includes('@radix-ui/react-context') ||
+              id.includes('@radix-ui/react-id') ||
+              id.includes('@radix-ui/react-use-') ||
+              id.includes('@radix-ui/react-collection') ||
+              id.includes('@radix-ui/react-direction') ||
+              id.includes('@radix-ui/react-presence') ||
+              id.includes('@radix-ui/react-portal') ||
+              id.includes('@radix-ui/react-focus-scope') ||
+              id.includes('@radix-ui/react-focus-guards') ||
+              id.includes('@radix-ui/react-dismissable-layer') ||
+              id.includes('@radix-ui/react-roving-focus') ||
+              id.includes('@radix-ui/react-popper') ||
+              id.includes('@radix-ui/react-visually-hidden') ||
+              id.includes('@radix-ui/react-arrow') ||
+              id.includes('@radix-ui/number') ||
+              id.includes('@radix-ui/rect')) {
+            return 'vendor-radix-base';
+          }
+          // Higher-level Radix components - can load after base
           if (id.includes('@radix-ui/')) {
-            return 'vendor-radix';
+            return 'vendor-radix-components';
           }
           
           // Forms & validation
