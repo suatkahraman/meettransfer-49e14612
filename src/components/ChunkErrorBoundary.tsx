@@ -188,10 +188,6 @@ class ChunkErrorBoundary extends Component<Props, State> {
               )}
             </Button>
 
-            {/* Additional info */}
-            <p className="text-xs text-muted-foreground/70">
-              Problem devam ederse tarayıcı önbelleğinizi temizleyin veya gizli sekmede açın.
-            </p>
           </div>
         </div>
       );
