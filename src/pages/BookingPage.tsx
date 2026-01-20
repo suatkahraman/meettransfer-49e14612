@@ -511,8 +511,8 @@ const BookingPage = () => {
   const validateGuestForm = (): boolean => {
     const errors: Record<string, string> = {};
     
-    if (!customerName.trim() || customerName.trim().length < 2) {
-      errors.name = t("nameRequired") || "Name must be at least 2 characters";
+    if (!customerName.trim()) {
+      errors.name = t("nameRequired") || "Name is required";
     }
     
     if (!customerPhone.trim() || customerPhone.length < 7) {
