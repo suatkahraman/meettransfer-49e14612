@@ -197,15 +197,9 @@ class HeroErrorBoundary extends Component<Props, State> {
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                {!this.state.isChunkError && (
-                  <Button onClick={this.handleRetry} variant="outline" className="gap-2">
-                    <RefreshCw className="h-4 w-4" />
-                    Tekrar Dene
-                  </Button>
-                )}
-                <Button onClick={this.handleRefresh} className="gap-2" disabled={this.state.isRefreshing}>
-                  <RefreshCw className={this.state.isRefreshing ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
-                  {this.state.isRefreshing ? "Yenileniyor..." : "Önbelleği Temizle & Yenile"}
+                <Button onClick={this.handleRetry} variant="outline" className="gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Tekrar Dene
                 </Button>
               </div>
             </div>
