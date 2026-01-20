@@ -34,6 +34,13 @@ if (import.meta.env.DEV) {
 
 createRoot(document.getElementById("root")!).render(<App />);
 
+// Signal that the React app has mounted (used by index.html boot recovery watchdog)
+try {
+  (window as any).__APP_MOUNTED__ = true;
+} catch {
+  // ignore
+}
+
 // PWA service worker is registered by the app (prompt mode) and will
 // show an in-app "Yeni Sürüm Hazır" banner when an update is available.
 
