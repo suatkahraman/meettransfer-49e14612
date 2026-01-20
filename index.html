@@ -448,6 +448,60 @@
         var SHOWN_KEY = "boot_recovery_shown";
         var shown = false;
 
+        // If the app mounts AFTER this overlay is shown (slow connection / heavy device),
+        // auto-dismiss it so the page doesn't stay blocked.
+        var overlayEl = null;
+        var dismissInterval = null;
+        var DISMISS_EVENT = "lovable:app-mounted";
+
+        function removeOverlay() {
+          try {
+            if (dismissInterval) {
+              clearInterval(dismissInterval);
+              dismissInterval = null;
+            }
+          } catch (e) {}
+
+          try {
+            if (overlayEl && overlayEl.parentNode) overlayEl.parentNode.removeChild(overlayEl);
+          } catch (e) {}
+
+          overlayEl = null;
+        }
+
+        function scheduleAutoDismiss() {
+          // Event-based dismissal (fast path)
+          try {
+            window.addEventListener(
+              DISMISS_EVENT,
+              function () {
+                removeOverlay();
+              },
+              { once: true }
+            );
+          } catch (e) {}
+
+          // Flag-based fallback (covers cases where only __APP_MOUNTED__ is set)
+          try {
+            var startedAt = Date.now();
+            dismissInterval = setInterval(function () {
+              try {
+                if (window.__APP_MOUNTED__) {
+                  removeOverlay();
+                  return;
+                }
+              } catch (e) {}
+
+              if (Date.now() - startedAt > 30000) {
+                try {
+                  clearInterval(dismissInterval);
+                } catch (e) {}
+                dismissInterval = null;
+              }
+            }, 250);
+          } catch (e) {}
+        }
+
         function safeSessionGet(key) {
           try {
             return sessionStorage.getItem(key);
@@ -547,6 +601,9 @@
           card.appendChild(actions);
           overlay.appendChild(card);
           document.body.appendChild(overlay);
+
+          overlayEl = overlay;
+          scheduleAutoDismiss();
         }
 
         // Avoid showing multiple times in the same session.

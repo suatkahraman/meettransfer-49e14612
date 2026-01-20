@@ -295,12 +295,9 @@ export function PWAUpdatePrompt() {
               });
               lastSeenVersionRef.current = fingerprint;
 
+              // IMPORTANT: Do NOT do any "hard update" (SW unregister + cache purge + hard reload)
+              // based on version.json changes. We only trigger a normal SW update check.
               await requestUpdateCheck();
-
-              // If still no waiting SW, do ONE guarded hard update for this fingerprint.
-              if (!registration?.waiting) {
-                await forceHardUpdate("version_json_changed_no_waiting_sw", fingerprint);
-              }
             }
           } catch {
             // ignore
