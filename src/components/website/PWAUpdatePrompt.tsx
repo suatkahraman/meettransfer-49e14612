@@ -77,6 +77,10 @@ export function PWAUpdatePrompt() {
   const lastPromptedSwUrlRef = useRef<string | null>(null);
   const lastSeenVersionRef = useRef<string | null>(null);
 
+  // If the page had no SW controller at boot, the first controllerchange is the initial install.
+  // We should NOT reload in that case.
+  const hadControllerAtStartRef = useRef<boolean>(false);
+
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null);
 
@@ -368,11 +372,29 @@ export function PWAUpdatePrompt() {
     const onControllerChange = async () => {
       const now = Date.now();
 
+      // On first install (no controller at initial load), DON'T reload.
+      // Some browsers can get stuck in a reload loop during first boot.
+      if (!hadControllerAtStartRef.current) {
+        hadControllerAtStartRef.current = true;
+        console.log("[PWA Update] controllerchange on first install; skipping reload");
+        return;
+      }
+
       // If an explicit reload was already scheduled very recently, skip double-reload.
       const scheduledAt = Number(sessionStorage.getItem(PWA_RELOAD_SCHEDULED_AT_KEY) ?? "0");
       if (scheduledAt && now - scheduledAt < 8000) {
         console.log("[PWA Update] controllerchange: reload already scheduled, skipping");
         return;
+      }
+
+      // Extra safety: avoid reloading during the very first seconds of navigation.
+      try {
+        if (typeof performance !== "undefined" && performance.now() < 8000 && document.readyState !== "complete") {
+          console.log("[PWA Update] controllerchange during early boot; skipping reload");
+          return;
+        }
+      } catch {
+        // ignore
       }
 
       // Detect rapid reload loops (3 controllerchanges within 15s)
@@ -384,21 +406,12 @@ export function PWAUpdatePrompt() {
       writeReloadGuard(next);
 
       if (next.count >= 3) {
-        console.warn("[PWA Update] Detected reload loop; disabling updates and hard-refreshing without SW");
+        console.warn("[PWA Update] Detected reload loop; disabling updates for this session.");
         try {
           sessionStorage.setItem(PWA_DISABLE_UPDATES_KEY, "1");
         } catch {
           // ignore
         }
-
-        try {
-          await unregisterAllServiceWorkers();
-          await clearAllCaches();
-        } catch {
-          // ignore
-        }
-
-        hardReloadWithBust();
         return;
       }
 
