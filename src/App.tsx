@@ -24,10 +24,12 @@ import { Button } from "@/components/ui/button";
 import { PWADebugPanel } from "./components/website/PWADebugPanel"; // visible with ?pwa_debug=1
 import CanonicalManager from "./components/seo/CanonicalManager";
 
-// IMPORTANT: Keep the homepage eager-loaded.
+// IMPORTANT: Keep homepage and debug page eager-loaded.
 // In installed PWAs, stale SW/cache edge-cases can cause lazy chunks to hang indefinitely,
-// which leaves the app stuck on the Suspense loader.
+// which leaves the app stuck on the Suspense loader. Debug page must always be accessible
+// for troubleshooting such issues.
 import Index from "./pages/Index";
+import DebugPage from "./pages/DebugPage";
 
 // Critical pages - NotFound can remain lazy
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -181,7 +183,7 @@ const AgencyPartnershipGuide = lazy(() => import("./pages/website/blog/AgencyPar
 const SwitzerlandAirportTransferGuide = lazy(() => import("./pages/website/blog/SwitzerlandAirportTransferGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
-const DebugPage = lazy(() => import("./pages/DebugPage"));
+// DebugPage is now eager-loaded at the top of the file for PWA troubleshooting
 
 const queryClient = new QueryClient();
 
@@ -424,8 +426,8 @@ const App = () => (
               {/* SEO Debug Page - Public */}
               <Route path="/seo-debug" element={<LazyRoute><SEODebugPage /></LazyRoute>} />
               
-              {/* Debug Page - Public */}
-              <Route path="/debug" element={<LazyRoute><DebugPage /></LazyRoute>} />
+              {/* Debug Page - Public, Eager-loaded for PWA troubleshooting */}
+              <Route path="/debug" element={<DebugPage />} />
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>
