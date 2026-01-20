@@ -66,12 +66,6 @@
     <!-- LCP Image Preload - Build-safe (public folder) -->
     <!-- No LCP image preload - using CSS gradients only for performance -->
     
-    <!-- Font Preload - ONLY critical hero fonts (Playfair Bold for heading) -->
-    <!-- Playfair Display 700 - Hero heading only -->
-    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtXK-F2qO0g.woff2" crossorigin fetchpriority="high" />
-    <!-- Inter 400 - Hero body text only -->
-    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2" crossorigin fetchpriority="high" />
-    
     <!-- Non-blocking font loading using media swap technique -->
     <!-- Critical hero fonts - async load with media swap (not render-blocking) -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400&display=swap" media="print" onload="this.media='all'" />
