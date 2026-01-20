@@ -505,21 +505,12 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 500,
     // Enable source maps for production debugging
     sourcemap: false,
-    // Minification - use terser for better compression
-    minify: "terser",
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug'],
-        passes: 2
-      },
-      mangle: {
-        safari10: true
-      },
-      format: {
-        comments: false
-      }
+    // Minification - use esbuild to avoid rare terser minification edge-cases
+    // that can break vendor chunks on some devices/browsers.
+    minify: "esbuild",
+    esbuild: {
+      // Keep bundles lean without risking terser-specific transforms.
+      drop: ["console", "debugger"],
     },
     // Target modern browsers
     target: "es2020",
