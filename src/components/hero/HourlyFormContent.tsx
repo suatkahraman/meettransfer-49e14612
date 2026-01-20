@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useMemo } from "react";
 import { CalendarIcon, Clock, Users, MapPin, Timer, ArrowRight, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
+import { LazyFloatingLabelSelect } from "@/components/ui/lazy-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { VehicleSelector } from "@/components/hero";
 import { VehiclePrice } from "./types";
@@ -176,7 +176,7 @@ export const HourlyFormContent = memo(({
       {/* City & Duration - larger touch targets on mobile */}
       <div className="grid grid-cols-2 gap-2.5 md:gap-2">
         <div className={cn(shakeFields.city && "animate-shake")}>
-          <FloatingLabelSelect 
+          <LazyFloatingLabelSelect 
             label={t("city") || "City"} 
             value={hourlyCity} 
             onValueChange={handleCityChange} 
@@ -189,7 +189,7 @@ export const HourlyFormContent = memo(({
             )}
           />
         </div>
-        <FloatingLabelSelect 
+        <LazyFloatingLabelSelect 
           label={t("duration") || "Duration"} 
           value={hourlyDuration} 
           onValueChange={setHourlyDuration} 
@@ -203,7 +203,7 @@ export const HourlyFormContent = memo(({
 
       {/* Custom Hours - larger touch target on mobile */}
       {hourlyDuration === "custom" && (
-        <FloatingLabelSelect 
+        <LazyFloatingLabelSelect 
           label={t("customHours") || "Custom Hours"} 
           value={customHours} 
           onValueChange={setCustomHours} 
@@ -230,7 +230,7 @@ export const HourlyFormContent = memo(({
           />
         </div>
         <div className={cn(shakeFields.time && "animate-shake")}>
-        <FloatingLabelSelect 
+        <LazyFloatingLabelSelect 
           label={t("time") || "Time"} 
           value={hourlyTime} 
           onValueChange={handleTimeChange} 
@@ -243,7 +243,7 @@ export const HourlyFormContent = memo(({
           )}
         />
         </div>
-        <FloatingLabelSelect 
+        <LazyFloatingLabelSelect 
           label={t("passengers") || "Pax"} 
           value={hourlyPassengers} 
           onValueChange={setHourlyPassengers} 

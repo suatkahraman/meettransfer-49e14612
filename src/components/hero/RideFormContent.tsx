@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useMemo } from "react";
 import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, Baby, Briefcase, RotateCcw, ChevronDown, ChevronUp, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FloatingLabelSelect } from "@/components/ui/floating-label-select";
+import { LazyFloatingLabelSelect } from "@/components/ui/lazy-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { LocationInputs, VehicleSelector } from "@/components/hero";
 import { VehiclePrice } from "./types";
@@ -232,7 +232,7 @@ export const RideFormContent = memo(({
           />
         </div>
         <div className={cn(shakeFields.time && "animate-shake")}>
-        <FloatingLabelSelect 
+        <LazyFloatingLabelSelect 
           label={t("time") || "Time"} 
           value={time} 
           onValueChange={handleTimeChange} 
@@ -245,7 +245,7 @@ export const RideFormContent = memo(({
           )}
         />
         </div>
-        <FloatingLabelSelect 
+        <LazyFloatingLabelSelect 
           label={t("passengers") || "Pax"} 
           value={passengers} 
           onValueChange={setPassengers} 
@@ -360,7 +360,7 @@ export const RideFormContent = memo(({
                 disabledDates={(d) => d < (date || new Date())} 
                 triggerClassName="h-12 min-h-[48px] text-sm"
               />
-              <FloatingLabelSelect 
+              <LazyFloatingLabelSelect 
                 label={t("returnTime") || "Return Time"} 
                 value={returnTime || ""} 
                 onValueChange={setReturnTime} 
