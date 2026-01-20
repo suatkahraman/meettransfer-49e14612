@@ -399,37 +399,10 @@ export default defineConfig(({ mode }) => ({
             return 'vendor-router';
           }
           
-          // UI components - split for better caching
-          if (id.includes('@radix-ui/react-dialog') || 
-              id.includes('@radix-ui/react-select') || 
-              id.includes('@radix-ui/react-popover') ||
-              id.includes('@radix-ui/react-slot')) {
-            return 'vendor-ui-core';
-          }
-          if (id.includes('@radix-ui/react-checkbox') || 
-              id.includes('@radix-ui/react-label') || 
-              id.includes('@radix-ui/react-radio-group') ||
-              id.includes('@radix-ui/react-switch')) {
-            return 'vendor-ui-forms';
-          }
-          if (id.includes('@radix-ui/react-toast') || 
-              id.includes('@radix-ui/react-tooltip') || 
-              id.includes('@radix-ui/react-alert-dialog') ||
-              id.includes('@radix-ui/react-progress')) {
-            return 'vendor-ui-feedback';
-          }
-          if (id.includes('@radix-ui/react-tabs') || 
-              id.includes('@radix-ui/react-accordion') || 
-              id.includes('@radix-ui/react-collapsible') ||
-              id.includes('@radix-ui/react-scroll-area') ||
-              id.includes('@radix-ui/react-separator') ||
-              id.includes('@radix-ui/react-dropdown-menu') ||
-              id.includes('@radix-ui/react-navigation-menu')) {
-            return 'vendor-ui-layout';
-          }
-          // Other radix primitives
+          // All Radix UI packages in ONE chunk to avoid circular dependency issues
+          // between chunks (e.g. vendor-ui-core importing vendor-ui-primitives and vice versa)
           if (id.includes('@radix-ui/')) {
-            return 'vendor-ui-primitives';
+            return 'vendor-radix';
           }
           
           // Forms & validation
