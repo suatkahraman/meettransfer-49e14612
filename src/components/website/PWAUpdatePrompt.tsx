@@ -78,8 +78,12 @@ export function PWAUpdatePrompt() {
   const lastSeenVersionRef = useRef<string | null>(null);
 
   // If the page had no SW controller at boot, the first controllerchange is the initial install.
-  // We should NOT reload in that case.
-  const hadControllerAtStartRef = useRef<boolean>(false);
+  // We should NOT reload in that case. Check SYNCHRONOUSLY at module load.
+  const hadControllerAtStartRef = useRef<boolean>(
+    typeof navigator !== "undefined" && 
+    "serviceWorker" in navigator && 
+    !!navigator.serviceWorker.controller
+  );
 
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
   const updateSWRef = useRef<((reloadPage?: boolean) => Promise<void>) | null>(null);
@@ -304,13 +308,18 @@ export function PWAUpdatePrompt() {
           }
         };
 
-        // Reasonable update checks (avoid aggressive loops in production)
-        const interval = window.setInterval(requestUpdateCheck, 60 * 1000);
-        const versionInterval = window.setInterval(pollVersionJson, 60 * 1000);
+        // More aggressive update checks (30s) but still loop-safe
+        const UPDATE_INTERVAL_MS = 30 * 1000; // 30 seconds
+        const interval = window.setInterval(requestUpdateCheck, UPDATE_INTERVAL_MS);
+        const versionInterval = window.setInterval(pollVersionJson, UPDATE_INTERVAL_MS);
 
-        // One early check after load
-        setTimeout(requestUpdateCheck, 1500);
-        setTimeout(pollVersionJson, 2500);
+        // Immediate check on mount (publish sonrası anında)
+        void requestUpdateCheck();
+        void pollVersionJson();
+        
+        // Second check after short delay to catch race conditions
+        setTimeout(requestUpdateCheck, 800);
+        setTimeout(pollVersionJson, 1200);
 
         const onFastTrigger = () => {
           void requestUpdateCheck();
@@ -385,8 +394,9 @@ export function PWAUpdatePrompt() {
       }
 
       // Extra safety: avoid reloading during the very first seconds of navigation.
+      // Reduced from 8s to 5s for faster updates while still preventing boot loops.
       try {
-        if (typeof performance !== "undefined" && performance.now() < 8000 && document.readyState !== "complete") {
+        if (typeof performance !== "undefined" && performance.now() < 5000 && document.readyState !== "complete") {
           console.log("[PWA Update] controllerchange during early boot; skipping reload");
           return;
         }
