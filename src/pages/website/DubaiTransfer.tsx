@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import dubaiHeroImage from "@/assets/dubai-transfer-hero.jpg";
+import dubaiHeroImage from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
 // Vito VIP images
 import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
