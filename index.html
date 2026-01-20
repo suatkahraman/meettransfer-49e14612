@@ -72,11 +72,13 @@
     <!-- Inter 400 - Hero body text only -->
     <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff2" crossorigin fetchpriority="high" />
     
-    <!-- Critical hero fonts - loaded immediately with minimal weights -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400&display=swap" media="all" />
+    <!-- Non-blocking font loading using media swap technique -->
+    <!-- Critical hero fonts - async load with media swap (not render-blocking) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400&display=swap" /></noscript>
     
-    <!-- Deferred non-critical font weights - loaded after hero renders -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <!-- Non-critical font weights - async load -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=swap" /></noscript>
     
     <!-- Font loading detection - only wait for critical hero fonts -->
