@@ -12,18 +12,18 @@ import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import frankfurtHeroImage from "@/assets/destinations/frankfurt-city.webp";
-// Vito VIP images
-import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+// Vito VIP images - WebP optimized
+import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
-import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import vipVitoStarlightLuxury from "@/assets/vehicles/vip-vito-starlight.webp";
 import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 // Vito images
 import vito1 from "@/assets/vito-1.jpg";
 import vito2 from "@/assets/vito-2.jpg";
 import vito3 from "@/assets/vito-3.jpg";
-// Maybach images
-import maybachUltraLuxury from "@/assets/maybach-ultra-luxury.jpg";
+// Maybach images - WebP optimized
+import maybachUltraLuxury from "@/assets/vehicles/maybach-luxury.webp";
 import maybach1 from "@/assets/maybach-1.jpg";
 import maybach2 from "@/assets/maybach-2.jpg";
 import maybach3 from "@/assets/maybach-3.jpg";

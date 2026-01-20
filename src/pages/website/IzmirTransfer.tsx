@@ -10,10 +10,10 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-// Vito VIP images
-import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+// Vito VIP images - WebP optimized
+import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
-import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import vipVitoStarlightLuxury from "@/assets/vehicles/vip-vito-starlight.webp";
 import vitoVip1 from "@/assets/vito-vip-1.jpg";
 import vitoVip2 from "@/assets/vito-vip-2.jpg";
 // Vito images

@@ -13,10 +13,10 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import bursaHeroImage from "@/assets/bursa-transfer-hero.jpg";
 
-// Premium images
-import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+// Premium images - WebP optimized
+import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
-import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
+import vipVitoStarlightLuxury from "@/assets/vehicles/vip-vito-starlight.webp";
 import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
 
 // Popular destinations in Bursa and between Istanbul-Bursa

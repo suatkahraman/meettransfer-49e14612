@@ -11,7 +11,7 @@ import RelatedArticles from "@/components/website/RelatedArticles";
 import BlogCTA from "@/components/website/BlogCTA";
 import { useBlogDate } from "@/hooks/useBlogDate";
 import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
-import heroImage from "@/assets/vito-airport-premium.jpg";
+import heroImage from "@/assets/vehicles/vito-airport-premium.webp";
 
 const AirportTransferBookingTips = () => {
   const { t, language } = useLanguage();
