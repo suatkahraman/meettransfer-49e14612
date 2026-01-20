@@ -187,7 +187,7 @@ return (
           relative overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer group
           transition-all duration-500 ease-out
           ${isSelected 
-            ? 'ring-2 sm:ring-3 ring-primary shadow-xl sm:shadow-2xl scale-[1.02] sm:scale-[1.03] z-10' 
+            ? 'ring-2 sm:ring-3 ring-primary shadow-xl sm:shadow-2xl scale-[1.02] sm:scale-[1.03] z-10 animate-[selectedPop_0.4s_cubic-bezier(0.34,1.56,0.64,1)]' 
             : available 
               ? 'hover:shadow-2xl sm:hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] hover:ring-1 sm:hover:ring-2 hover:ring-primary/40' 
               : 'opacity-50 cursor-not-allowed grayscale'
@@ -196,7 +196,6 @@ return (
         style={{
           transformStyle: 'preserve-3d',
           perspective: '1000px',
-          ...(isSelected ? { animation: 'selectedPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' } : {})
         }}
         onMouseMove={(e) => {
           if (!available || isSelected) return;
@@ -221,19 +220,15 @@ return (
           className="absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl sm:rounded-2xl overflow-hidden"
         >
           <div 
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-            style={{
-              backgroundSize: '200% 100%',
-              animation: 'cardShine 1.5s ease-in-out infinite',
-            }}
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[cardShine_1.5s_ease-in-out_infinite]"
+            style={{ backgroundSize: '200% 100%' }}
           />
         </div>
         
         {/* Animated Glow Effect for Selected */}
         {isSelected && (
           <div 
-            className="absolute -inset-1 rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary/80 to-primary opacity-30 blur-md z-0"
-            style={{ animation: 'selectedGlow 2s ease-in-out infinite' }}
+            className="absolute -inset-1 rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary/80 to-primary opacity-30 blur-md z-0 animate-[selectedGlow_2s_ease-in-out_infinite]"
           />
         )}
         
@@ -315,17 +310,12 @@ return (
               }}
             >
               <div className={`bg-gradient-to-r ${badgeConfig.gradient} ${badgeConfig.textColor} px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-br-xl sm:rounded-br-2xl rounded-tl-xl sm:rounded-tl-2xl shadow-lg relative overflow-hidden`}>
-                {/* Shimmer effect */}
                 <div 
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  style={{ 
-                    animation: `shimmerBadge 2s ease-in-out ${badgeAnimationDelay + 500}ms infinite`
-                  }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmerBadge_2s_ease-in-out_infinite]"
                 />
                 <span className="relative flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wide">
                   <BadgeIcon 
-                    className="h-3 w-3 sm:h-3.5 sm:w-3.5" 
-                    style={{ animation: `iconPop 0.3s ease-out ${badgeAnimationDelay + 300}ms both` }}
+                    className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-[iconPop_0.3s_ease-out_both]"
                   />
                   <span>{isTurkish ? badgeConfig.labelTr : badgeConfig.label}</span>
                 </span>
@@ -561,128 +551,6 @@ return (
           </div>
         </DialogContent>
       </Dialog>
-      
-      {/* Badge & Selection Animation Styles */}
-      <style>{`
-        @keyframes badgeSlideIn {
-          0% {
-            opacity: 0;
-            transform: translateX(-20px) scale(0.8);
-          }
-          60% {
-            opacity: 1;
-            transform: translateX(5px) scale(1.05);
-          }
-          100% {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-        
-        @keyframes shimmerBadge {
-          0% {
-            transform: translateX(-100%);
-          }
-          50%, 100% {
-            transform: translateX(100%);
-          }
-        }
-        
-        @keyframes iconPop {
-          0% {
-            transform: scale(0) rotate(-180deg);
-          }
-          100% {
-            transform: scale(1) rotate(0deg);
-          }
-        }
-        
-        @keyframes selectedPop {
-          0% {
-            transform: scale(1);
-          }
-          40% {
-            transform: scale(1.04);
-          }
-          100% {
-            transform: scale(1.02);
-          }
-        }
-        
-        @keyframes selectedGlow {
-          0%, 100% {
-            opacity: 0.2;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.4;
-            transform: scale(1.02);
-          }
-        }
-        
-        @keyframes borderPulse {
-          0%, 100% {
-            opacity: 0.3;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.6;
-            transform: scale(1.005);
-          }
-        }
-        
-        @keyframes rippleOut {
-          0% {
-            transform: scale(1);
-            opacity: 0.5;
-          }
-          100% {
-            transform: scale(1.8);
-            opacity: 0;
-          }
-        }
-        
-        @keyframes checkBounce {
-          0% {
-            transform: scale(0);
-          }
-          60% {
-            transform: scale(1.2);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-        
-        @keyframes checkmarkPop {
-          0% {
-            transform: scale(0) rotate(-45deg);
-            opacity: 0;
-          }
-          100% {
-            transform: scale(1) rotate(0deg);
-            opacity: 1;
-          }
-        }
-        
-        @keyframes cardFloat {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-4px);
-          }
-        }
-        
-        @keyframes cardShine {
-          0% {
-            background-position: -200% center;
-          }
-          100% {
-            background-position: 200% center;
-          }
-        }
-      `}</style>
     </>
   );
 }

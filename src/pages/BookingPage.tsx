@@ -1077,9 +1077,8 @@ const BookingPage = () => {
             
             <div className="mb-4 sm:mb-6">
               <div 
-                className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-primary/20 shadow-sm min-h-[60px] sm:min-h-[72px] flex items-center justify-center"
+                className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-primary/20 shadow-sm min-h-[60px] sm:min-h-[72px] flex items-center justify-center animate-tip-fade-in"
                 key={tipIndex}
-                style={{ animation: 'tipFadeIn 0.5s ease-out' }}
               >
                 <p className="text-xs sm:text-sm font-medium text-foreground leading-relaxed">
                   {(language === 'TR' ? loadingTips.TR : loadingTips.EN)[tipIndex]}
@@ -1094,17 +1093,6 @@ const BookingPage = () => {
             </div>
           </div>
         </div>
-        
-        <style>{`
-          @keyframes tipFadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-          }
-        `}</style>
       </WebsiteLayout>
     );
   }
@@ -1262,23 +1250,10 @@ const BookingPage = () => {
                               ? "border-primary bg-primary/10 shadow-lg ring-2 ring-primary/50 sm:scale-[1.02]"
                               : "border-border hover:border-primary/50 hover:bg-muted/50",
                             isDisabled && "opacity-50 cursor-not-allowed",
-                            justSelectedVehicle === vehicleOption.value && "animate-[vehicleShake_0.4s_ease-in-out]"
+                            justSelectedVehicle === vehicleOption.value && "animate-vehicle-shake"
                           )}
                           onAnimationEnd={() => setJustSelectedVehicle(null)}
                         >
-                          <style>{`
-                            @keyframes vehicleShake {
-                              0%, 100% { transform: translateX(0) scale(1.02); }
-                              10% { transform: translateX(-3px) scale(1.04); }
-                              20% { transform: translateX(3px) scale(1.04); }
-                              30% { transform: translateX(-3px) scale(1.03); }
-                              40% { transform: translateX(3px) scale(1.03); }
-                              50% { transform: translateX(-2px) scale(1.03); }
-                              60% { transform: translateX(2px) scale(1.02); }
-                              70% { transform: translateX(-1px) scale(1.02); }
-                              80% { transform: translateX(1px) scale(1.02); }
-                            }
-                          `}</style>
                           {isSelected && (
                             <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 bg-primary text-primary-foreground rounded-full p-1 sm:p-1.5 shadow-lg animate-[pulse_1.5s_ease-in-out_infinite]">
                               <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />

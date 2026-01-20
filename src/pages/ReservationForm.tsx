@@ -1195,10 +1195,7 @@ const ReservationForm = () => {
               {/* Progress bar animation */}
               <div className="w-full max-w-xs mx-auto mb-6">
                 <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-full"
-                    style={{ animation: 'progressSlide 3s ease-out forwards' }}
-                  />
+                  <div className="h-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-full animate-progress-slide" />
                 </div>
               </div>
               
@@ -1216,17 +1213,6 @@ const ReservationForm = () => {
             </div>
           </CardContent>
         </Card>
-        
-        <style>{`
-          @keyframes shimmer {
-            0% { background-position: 200% center; }
-            100% { background-position: -200% center; }
-          }
-          @keyframes progressSlide {
-            0% { width: 0%; }
-            100% { width: 100%; }
-          }
-        `}</style>
       </div>
     );
   }
@@ -1828,24 +1814,9 @@ const ReservationForm = () => {
                     "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40",
                     "border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300",
                     "shadow-[0_0_15px_rgba(16,185,129,0.3)] dark:shadow-[0_0_20px_rgba(52,211,153,0.25)]",
-                    discountJustApplied && "animate-[pulse-glow_2s_ease-in-out_infinite]"
+                    discountJustApplied && "animate-pulse-glow"
                   )}
-                  style={{
-                    animation: discountJustApplied ? 'pulse-glow 2s ease-in-out infinite' : undefined
-                  }}
                 >
-                  <style>{`
-                    @keyframes pulse-glow {
-                      0%, 100% { 
-                        box-shadow: 0 0 15px rgba(16,185,129,0.3), 0 0 30px rgba(16,185,129,0.1);
-                        transform: scale(1);
-                      }
-                      50% { 
-                        box-shadow: 0 0 25px rgba(16,185,129,0.5), 0 0 50px rgba(16,185,129,0.2);
-                        transform: scale(1.02);
-                      }
-                    }
-                  `}</style>
                   <div className="flex items-center gap-2">
                     <Gift className={cn(
                       "h-5 w-5 text-green-600 dark:text-green-400",
