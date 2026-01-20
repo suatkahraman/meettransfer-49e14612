@@ -181,6 +181,7 @@ const AgencyPartnershipGuide = lazy(() => import("./pages/website/blog/AgencyPar
 const SwitzerlandAirportTransferGuide = lazy(() => import("./pages/website/blog/SwitzerlandAirportTransferGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
+const DebugPage = lazy(() => import("./pages/DebugPage"));
 
 const queryClient = new QueryClient();
 
@@ -471,6 +472,9 @@ const App = () => (
               
               {/* SEO Debug Page - Public */}
               <Route path="/seo-debug" element={<LazyRoute><SEODebugPage /></LazyRoute>} />
+              
+              {/* Debug Page - Public */}
+              <Route path="/debug" element={<LazyRoute><DebugPage /></LazyRoute>} />
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>
