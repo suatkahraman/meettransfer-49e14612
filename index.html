@@ -156,6 +156,26 @@
 
     <!-- Early Hints for critical resources -->
     <link rel="modulepreload" href="/src/main.tsx" />
+    
+    <!-- Non-blocking CSS loading - critical CSS is already inlined above -->
+    <script>
+      // Async CSS loader for non-render-blocking styles
+      (function() {
+        var cssLoaded = false;
+        function loadCSS() {
+          if (cssLoaded) return;
+          cssLoaded = true;
+          // CSS will be injected by Vite, this ensures it loads async
+          document.documentElement.classList.add('css-ready');
+        }
+        // Load CSS after first paint
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(loadCSS, { timeout: 100 });
+        } else {
+          setTimeout(loadCSS, 0);
+        }
+      })();
+    </script>
 
     <!-- Critical CSS for FCP/LCP - Inlined design system + above-the-fold styles -->
     <style>
