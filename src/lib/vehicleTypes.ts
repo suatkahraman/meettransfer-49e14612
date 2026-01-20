@@ -36,17 +36,17 @@ import sprinterAirportNight from "@/assets/sprinter-airport-night.jpg";
 import meetTransferCyprus from "@/assets/meet-transfer-cyprus.png";
 import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 
-// New premium images
-import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
+// New premium images - WebP optimized for hero
+import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
 
-// Sedan images
-import sedanAirport1 from "@/assets/sedan-airport-1.jpg";
+// Sedan images - WebP optimized for hero
+import sedanAirport1 from "@/assets/vehicles/sedan-airport.webp";
 import sedanExterior2 from "@/assets/sedan-exterior-2.jpg";
 import sedanInterior3 from "@/assets/sedan-interior-3.jpg";
-import vipVitoStarlightLuxury from "@/assets/vip-vito-starlight-luxury.jpg";
-import maybachUltraLuxury from "@/assets/maybach-ultra-luxury.jpg";
-import sprinterHotelArrival from "@/assets/sprinter-hotel-arrival.jpg";
+import vipVitoStarlightLuxury from "@/assets/vehicles/vip-vito-starlight.webp";
+import maybachUltraLuxury from "@/assets/vehicles/maybach-luxury.webp";
+import sprinterHotelArrival from "@/assets/vehicles/sprinter-arrival.webp";
 import sprinterVipInterior from "@/assets/sprinter-vip-interior.jpg";
 
 // Meet Transfer service images
