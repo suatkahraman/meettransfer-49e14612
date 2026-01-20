@@ -179,181 +179,33 @@
       })();
     </script>
 
-    <!-- Critical CSS for FCP/LCP - Inlined design system + above-the-fold styles -->
+    <!-- Critical CSS - Minimal above-the-fold only -->
     <style>
-      /* Design System Tokens - Matching src/index.css */
-      :root {
-        --background: 0 0% 100%;
-        --foreground: 0 0% 7%;
-        --primary: 0 0% 7%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 30 33% 93%;
-        --accent: 49 97% 60%;
-        --muted: 30 20% 96%;
-        --muted-foreground: 0 0% 40%;
-        --border: 30 20% 88%;
-        --radius: 0.75rem;
-        --gold: 49 97% 60%;
-        --cream: 30 33% 93%;
-      }
+      /* Minimal tokens */
+      :root{--background:0 0% 100%;--foreground:0 0% 7%;--muted:30 20% 96%;--radius:0.75rem}
       
-      /* Critical Reset */
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      /* Critical reset */
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      html{-webkit-font-smoothing:antialiased}
+      body{font-family:system-ui,-apple-system,sans-serif;background:hsl(var(--background));color:hsl(var(--foreground));line-height:1.5}
+      #root{min-height:100vh;min-height:100dvh}
       
-      /* Base Styles */
-      html { 
-        -webkit-font-smoothing: antialiased; 
-        -moz-osx-font-smoothing: grayscale;
-        scroll-behavior: smooth;
-      }
-      body { 
-        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-        background: hsl(var(--background)); 
-        color: hsl(var(--foreground));
-        line-height: 1.5;
-      }
+      /* Hero skeleton - immediate visual */
+      .hero-loading{background:hsl(30 20% 96%);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:5rem 1.5rem}
+      .hero-loading h1{font-family:Georgia,serif;font-size:clamp(1.875rem,4vw,3.5rem);font-weight:700;margin:0 0 0.75rem;line-height:1.1;color:hsl(0 0% 10%)}
+      .hero-loading .hero-subtitle{font-size:clamp(0.9rem,1.5vw,1.125rem);max-width:28rem;color:hsl(0 0% 40%)}
+      .hero-loading .text-gold{color:hsl(45 100% 35%)}
       
-      /* App Container */
-      #root { min-height: 100vh; min-height: 100dvh; }
+      /* Skeleton shimmer */
+      @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+      .skeleton{background:linear-gradient(90deg,hsl(30 15% 90%) 25%,hsl(30 15% 85%) 50%,hsl(30 15% 90%) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius)}
+      .form-skeleton{width:100%;max-width:28rem;height:380px;margin-top:1.5rem}
+      .trust-skeleton{display:flex;gap:1rem;margin-top:1rem}
+      .trust-skeleton-item{width:80px;height:24px}
       
-      /* Hero Section - Instant visual fill for Speed Index */
-      .hero-loading { 
-        position: relative;
-        background: hsl(30 20% 96%);
-        min-height: 100vh;
-        min-height: 100dvh;
-        display: flex; 
-        flex-direction: column; 
-        align-items: flex-start; 
-        justify-content: center; 
-        text-align: left; 
-        padding: 5rem 1.5rem;
-        overflow: hidden;
-      }
-      
-      /* Hero Typography - Left-aligned for visual match */
-      .hero-loading h1 { 
-        font-family: 'Playfair Display', Georgia, serif;
-        font-size: clamp(1.875rem, 4vw, 3.5rem); 
-        font-weight: 700; 
-        margin: 0 0 0.75rem 0; 
-        line-height: 1.1;
-        color: hsl(0 0% 10%);
-        letter-spacing: -0.02em;
-      }
-      .hero-loading .hero-subtitle { 
-        font-size: clamp(0.9rem, 1.5vw, 1.125rem); 
-        margin: 0; 
-        max-width: 28rem;
-        line-height: 1.5;
-        color: hsl(0 0% 40%);
-      }
-      
-      /* Gold accent for keywords */
-      .hero-loading .text-gold {
-        color: hsl(45 100% 35%);
-      }
-      
-      /* Skeleton loading animation */
-      @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-      }
-      .skeleton {
-        background: linear-gradient(90deg, hsl(30 15% 90%) 25%, hsl(30 15% 85%) 50%, hsl(30 15% 90%) 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: var(--radius);
-      }
-      
-      /* Form skeleton placeholder */
-      .form-skeleton {
-        width: 100%;
-        max-width: 28rem;
-        height: 320px;
-        margin-top: 2rem;
-      }
-      
-      /* Trust bar skeleton */
-      .trust-skeleton {
-        display: flex;
-        gap: 2rem;
-        justify-content: center;
-        margin-top: 2rem;
-        flex-wrap: wrap;
-      }
-      .trust-skeleton-item {
-        width: 80px;
-        height: 24px;
-      }
-      
-      /* Fade-in for hydration */
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .fade-in {
-        animation: fadeIn 0.3s ease-out forwards;
-      }
-      
-      /* Layout utilities used immediately */
-      .flex { display: flex; }
-      .flex-col { flex-direction: column; }
-      .items-center { align-items: center; }
-      .justify-center { justify-content: center; }
-      .gap-4 { gap: 1rem; }
-      .w-full { width: 100%; }
-      .text-center { text-align: center; }
-      
-      /* Hide content until JS loads */
-      .js-loading { opacity: 0; }
-      .js-loaded .js-loading { opacity: 1; transition: opacity 0.3s ease; }
-      
-      /* Responsive adjustments */
-      @media (min-width: 768px) { 
-        .hero-loading { padding: 4rem 3rem; align-items: flex-start; }
-        .hero-loading .hero-content { max-width: 36rem; }
-      }
-      @media (min-width: 1024px) { 
-        .hero-loading { min-height: 100vh; min-height: 100dvh; padding: 5rem 4rem; }
-      }
-      
-      /* Prevent layout shift for images */
-      img { max-width: 100%; height: auto; }
-      
-      /* Prevent FOUT (Flash of Unstyled Text) - Use system fonts during loading */
-      .font-loading body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      }
-      .font-loading h1, .font-loading h2, .font-loading h3, 
-      .font-loading h4, .font-loading h5, .font-loading h6 {
-        font-family: Georgia, 'Times New Roman', serif;
-      }
-      
-      /* Smooth transition when fonts load */
-      .fonts-loaded body {
-        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      }
-      .fonts-loaded h1, .fonts-loaded h2, .fonts-loaded h3, 
-      .fonts-loaded h4, .fonts-loaded h5, .fonts-loaded h6 {
-        font-family: 'Playfair Display', Georgia, serif;
-      }
-      
-      /* Font display swap fallback */
-      @font-face {
-        font-family: 'Playfair Display';
-        font-style: normal;
-        font-weight: 600 800;
-        font-display: swap;
-        src: local('Playfair Display');
-      }
-      @font-face {
-        font-family: 'Inter';
-        font-style: normal;
-        font-weight: 400 700;
-        font-display: swap;
-        src: local('Inter');
-      }
+      /* Font swap - prevent FOUT */
+      .fonts-loaded body{font-family:'Inter',system-ui,sans-serif}
+      .fonts-loaded h1,.fonts-loaded h2,.fonts-loaded h3{font-family:'Playfair Display',Georgia,serif}
     </style>
 
     <!-- Structured Data - Organization (Enhanced) -->
