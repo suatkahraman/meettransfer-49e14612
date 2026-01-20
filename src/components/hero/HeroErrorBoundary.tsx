@@ -190,7 +190,7 @@ class HeroErrorBoundary extends Component<Props, State> {
                 </h2>
                 <p className="text-muted-foreground text-sm">
                   {this.state.isChunkError
-                    ? "Sayfa güncellendi. Yeni sürümü yüklemek için önbellek temizlenerek yenilenecek."
+                    ? "Sayfa güncellendi. Yeni sürümü yüklemek için sayfa yenilenecek."
                     : "Rezervasyon formu yüklenirken bir sorun oluştu. Lütfen sayfayı yenileyin."}
                 </p>
               </div>

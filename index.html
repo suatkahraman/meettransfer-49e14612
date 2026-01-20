@@ -442,7 +442,124 @@
       }
     </script>
 
-    <!-- Boot recovery watchdog disabled -->
+    <!-- Boot recovery watchdog (no cache wording) -->
+    <script>
+      (function () {
+        var SHOWN_KEY = "boot_recovery_shown";
+        var shown = false;
+
+        function safeSessionGet(key) {
+          try {
+            return sessionStorage.getItem(key);
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function safeSessionSet(key, value) {
+          try {
+            sessionStorage.setItem(key, value);
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        function createButton(label) {
+          var btn = document.createElement("button");
+          btn.textContent = label;
+          btn.style.cssText =
+            "appearance:none;border:0;border-radius:12px;padding:12px 14px;font-weight:600;cursor:pointer;" +
+            "background:hsl(var(--foreground));color:hsl(var(--background));";
+          return btn;
+        }
+
+        function createGhostButton(label) {
+          var btn = document.createElement("button");
+          btn.textContent = label;
+          btn.style.cssText =
+            "appearance:none;border:1px solid hsl(var(--foreground) / 0.2);border-radius:12px;padding:12px 14px;" +
+            "font-weight:600;cursor:pointer;background:transparent;color:hsl(var(--foreground));";
+          return btn;
+        }
+
+        async function hardRecover() {
+          // No user-facing cache wording; only a best-effort recovery for stale PWA assets.
+          try {
+            if ("serviceWorker" in navigator) {
+              var regs = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(regs.map(function (r) { return r.unregister(); }));
+            }
+          } catch (e) {}
+
+          try {
+            if ("caches" in window) {
+              var names = await caches.keys();
+              await Promise.all(names.map(function (n) { return caches.delete(n); }));
+            }
+          } catch (e) {}
+
+          var base = window.location.href.split("?")[0];
+          window.location.href = base + "?_t=" + Date.now();
+        }
+
+        function showOverlay() {
+          if (shown) return;
+          shown = true;
+          safeSessionSet(SHOWN_KEY, "1");
+
+          var overlay = document.createElement("div");
+          overlay.id = "boot-recovery";
+          overlay.style.cssText =
+            "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;" +
+            "background:hsl(var(--background) / 0.92);backdrop-filter:blur(8px);padding:16px;";
+
+          var card = document.createElement("div");
+          card.style.cssText =
+            "width:min(520px, 100%);border-radius:16px;border:1px solid hsl(var(--foreground) / 0.12);" +
+            "background:hsl(var(--background));box-shadow:0 20px 60px -20px rgba(0,0,0,0.25);padding:18px;";
+
+          var title = document.createElement("div");
+          title.textContent = "Sayfa yüklenemedi";
+          title.style.cssText = "font-weight:700;font-size:18px;color:hsl(var(--foreground));";
+
+          var desc = document.createElement("div");
+          desc.textContent = "Bağlantı veya güncelleme nedeniyle açılış uzadı. Aşağıdan yeniden deneyebilirsiniz.";
+          desc.style.cssText = "margin-top:6px;font-size:13px;color:hsl(var(--foreground) / 0.72);line-height:1.45;";
+
+          var actions = document.createElement("div");
+          actions.style.cssText = "display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;";
+
+          var retry = createGhostButton("Tekrar Dene");
+          retry.onclick = function () {
+            window.location.reload();
+          };
+
+          var fix = createButton("Sert Yenile");
+          fix.onclick = function () {
+            hardRecover();
+          };
+
+          actions.appendChild(retry);
+          actions.appendChild(fix);
+
+          card.appendChild(title);
+          card.appendChild(desc);
+          card.appendChild(actions);
+          overlay.appendChild(card);
+          document.body.appendChild(overlay);
+        }
+
+        // Avoid showing multiple times in the same session.
+        if (safeSessionGet(SHOWN_KEY)) return;
+
+        setTimeout(function () {
+          try {
+            if (window.__APP_MOUNTED__) return;
+          } catch (e) {}
+          showOverlay();
+        }, 9000);
+      })();
+    </script>
 
     <script type="module" src="/src/main.tsx"></script>
 
