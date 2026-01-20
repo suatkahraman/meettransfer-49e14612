@@ -351,8 +351,9 @@ export const LazyGooglePlacesAutocomplete = memo(({
   // Cleanup
   useEffect(() => {
     return () => {
-      if (autocompleteRef.current && window.google?.maps?.event) {
-        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      const maps = getGoogleMaps();
+      if (autocompleteRef.current && maps?.event) {
+        maps.event.clearInstanceListeners(autocompleteRef.current);
         autocompleteRef.current = null;
         hasInitializedRef.current = false;
       }
