@@ -24,8 +24,12 @@ import { Button } from "@/components/ui/button";
 import { PWADebugPanel } from "./components/website/PWADebugPanel"; // visible with ?pwa_debug=1
 import CanonicalManager from "./components/seo/CanonicalManager";
 
-// Critical pages - lazy loaded with prefetch for better UX
-const Index = lazy(() => import(/* webpackPrefetch: true */ "./pages/Index"));
+// IMPORTANT: Keep the homepage eager-loaded.
+// In installed PWAs, stale SW/cache edge-cases can cause lazy chunks to hang indefinitely,
+// which leaves the app stuck on the Suspense loader.
+import Index from "./pages/Index";
+
+// Critical pages - NotFound can remain lazy
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Auth pages - lazy loaded
