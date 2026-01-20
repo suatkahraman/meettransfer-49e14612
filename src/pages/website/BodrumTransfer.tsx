@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
-import bodrumMeetTransfer from "@/assets/bodrum-meet-transfer.png";
+import bodrumMeetTransfer from "@/assets/bodrum-transfer.webp";
 
 // Premium images
 import vitoAirportPremium from "@/assets/vito-airport-premium.jpg";
