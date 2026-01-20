@@ -49,6 +49,7 @@ const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   AR: "/ar",
   UK: "/uk",
   JA: "/ja",
+  PT: "/pt",
 };
 
 export const useSitemapRobotsValidation = () => {

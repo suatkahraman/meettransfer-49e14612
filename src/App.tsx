@@ -186,7 +186,7 @@ const DebugPage = lazy(() => import("./pages/DebugPage"));
 const queryClient = new QueryClient();
 
 // Language prefixes for non-English routes
-const LANG_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja"];
+const LANG_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt"];
 
 // Simple loading fallback
 const PageLoader = () => (

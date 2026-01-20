@@ -189,6 +189,7 @@ const SEOHead = ({
       tr: 'tr_TR',
       uk: 'uk_UA',
       ja: 'ja_JP',
+      pt: 'pt_PT',
     };
     updateMeta('og:locale', localeMap[currentLangFromUrl] || 'en_US', true);
 
@@ -244,7 +245,7 @@ const SEOHead = ({
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
 
     // All languages for hreflang
-    const allLanguages = ["en", "de", "fr", "ru", "it", "es", "ar", "tr", "uk", "ja"];
+    const allLanguages = ["en", "de", "fr", "ru", "it", "es", "ar", "tr", "uk", "ja", "pt"];
     
     // Add hreflang tags for all languages
     allLanguages.forEach(lang => {
