@@ -29,7 +29,7 @@ import sprinterImg from "@/assets/vehicles/sprinter-hero.webp";
 import sedanImg from "@/assets/vehicles/sedan-hero.webp";
 
 // Dubai vehicle images - WebP optimized
-import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
+import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.webp";
 
 // Lazy load heavy components
 const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
