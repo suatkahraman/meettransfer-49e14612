@@ -5,6 +5,12 @@ import { Language, SUPPORTED_LANGUAGES } from "./useLanguageFromUrl";
 const LANGUAGE_DETECTED_KEY = "meet_transfer_lang_detected";
 const GEO_LANG_VALUE_KEY = "meet_transfer_detected_lang";
 
+// Session guard: prevents redirect loops if storage is blocked (iOS/private mode)
+const hasSessionGuard = () => (window as any).__MEET_TRANSFER_LANG_REDIRECT_DONE__ === true;
+const setSessionGuard = () => {
+  (window as any).__MEET_TRANSFER_LANG_REDIRECT_DONE__ = true;
+};
+
 const safeStorageGet = (key: string): string | null => {
   try {
     return localStorage.getItem(key);
@@ -117,8 +123,14 @@ export const useBrowserLanguageRedirect = () => {
   const [isDetecting, setIsDetecting] = useState(false);
 
   useEffect(() => {
+    // Run at most once per tab/session even if storage is blocked
+    if (hasSessionGuard()) {
+      return;
+    }
+
     // Only run on first visit
     if (safeStorageGet(LANGUAGE_DETECTED_KEY)) {
+      setSessionGuard();
       return;
     }
 
@@ -130,10 +142,12 @@ export const useBrowserLanguageRedirect = () => {
     if (languagePrefixes.includes(firstPart)) {
       // Already on a language path, mark as detected
       safeStorageSet(LANGUAGE_DETECTED_KEY, "true");
+      setSessionGuard();
       return;
     }
 
     const detectAndRedirect = async () => {
+      setSessionGuard();
       setIsDetecting(true);
       let detectedLang: Language = "EN";
 

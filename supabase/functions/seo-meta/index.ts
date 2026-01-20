@@ -234,7 +234,19 @@ const seoConfig: Record<string, {
 
 // Get language prefix from path
 function getLanguageFromPath(path: string): string {
-  const langPrefixes = ["/de", "/tr", "/ru", "/nl", "/pl", "/uk", "/ar", "/he", "/cs", "/fr"];
+  const langPrefixes = [
+    "/tr",
+    "/de",
+    "/fr",
+    "/ru",
+    "/it",
+    "/es",
+    "/ar",
+    "/uk",
+    "/ja",
+    "/pt",
+  ];
+
   for (const prefix of langPrefixes) {
     if (path.startsWith(prefix + "/") || path === prefix) {
       return prefix.substring(1);
@@ -245,7 +257,19 @@ function getLanguageFromPath(path: string): string {
 
 // Get base path without language prefix
 function getBasePath(path: string): string {
-  const langPrefixes = ["/de", "/tr", "/ru", "/nl", "/pl", "/uk", "/ar", "/he", "/cs", "/fr"];
+  const langPrefixes = [
+    "/tr",
+    "/de",
+    "/fr",
+    "/ru",
+    "/it",
+    "/es",
+    "/ar",
+    "/uk",
+    "/ja",
+    "/pt",
+  ];
+
   for (const prefix of langPrefixes) {
     if (path.startsWith(prefix + "/")) {
       return path.substring(prefix.length);
@@ -261,7 +285,7 @@ function getBasePath(path: string): string {
 function generateHreflangTags(path: string): string {
   const basePath = getBasePath(path);
   const baseUrl = "https://meettransfer.app";
-  const languages = ["en", "de", "tr", "ru", "nl", "pl", "uk", "ar", "he", "cs", "fr"];
+  const languages = ["en", "tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt"];
   
   let tags = "";
   for (const lang of languages) {
