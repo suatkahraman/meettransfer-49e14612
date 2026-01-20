@@ -2,7 +2,7 @@ import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 // BlogTranslations removed from main bundle – use useBlogTranslations hook in blog pages
 
-export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES" | "AR" | "TR" | "UK" | "JA";
+export type Language = "EN" | "DE" | "FR" | "RU" | "IT" | "ES" | "AR" | "TR" | "UK" | "JA" | "PT";
 
 interface LanguageContextType {
   language: Language;
@@ -21,6 +21,7 @@ const LANGUAGE_PREFIXES: Record<string, Language> = {
   tr: "TR",
   uk: "UK",
   ja: "JA",
+  pt: "PT",
 };
 
 const LANGUAGE_TO_PREFIX: Record<Language, string> = {
@@ -34,6 +35,7 @@ const LANGUAGE_TO_PREFIX: Record<Language, string> = {
   TR: "/tr",
   UK: "/uk",
   JA: "/ja",
+  PT: "/pt",
 };
 
 const translations: Record<Language, Record<string, string>> = {
@@ -15246,6 +15248,42 @@ const translations: Record<Language, Record<string, string>> = {
     blogAthensDesc: "アテネ空港送迎の完全ガイド。市内中心部、ピレウス港、島々への料金。",
     blogAthensH1: "アテネ空港送迎ガイド 2025",
     blogAthensIntro: "アテネ国際空港（ATH）はギリシャとその美しい島々への玄関口です。このガイドではすべての送迎オプションと料金をカバーします。",
+  },
+  // Portuguese - use English as fallback base (same translations structure)
+  PT: {
+    // Navigation
+    home: "Início",
+    cities: "Cidades",
+    fleet: "Frota",
+    about: "Sobre",
+    contact: "Contacto",
+    services: "Serviços",
+    login: "Entrar",
+    logout: "Sair",
+    myAccount: "Minha Conta",
+    bookNow: "Solicitar Preço",
+    installApp: "Instalar App",
+    blog: "Blog",
+    terms: "Termos",
+    // Hero Section
+    heroTitle: "Transfers Privados VIP",
+    heroSubtitle: "Serviço de transporte premium com motorista profissional",
+    heroDescription: "Reserve seu transfer de aeroporto com facilidade",
+    // Common
+    loading: "A carregar...",
+    error: "Erro",
+    success: "Sucesso",
+    cancel: "Cancelar",
+    confirm: "Confirmar",
+    save: "Guardar",
+    delete: "Eliminar",
+    edit: "Editar",
+    close: "Fechar",
+    back: "Voltar",
+    next: "Próximo",
+    submit: "Enviar",
+    search: "Pesquisar",
+    // All other keys will use English as fallback through the t() function
   },
 };
 

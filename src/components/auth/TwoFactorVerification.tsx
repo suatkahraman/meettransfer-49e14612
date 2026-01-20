@@ -377,10 +377,10 @@ const TwoFactorVerification = ({
 // Helper function for role labels
 function getRoleLabel(role: string, language: Language): string {
   const labels: Record<string, Record<Language, string>> = {
-    admin: { TR: 'Admin', EN: 'Admin', DE: 'Admin', FR: 'Admin', RU: 'Админ', IT: 'Admin', ES: 'Admin', AR: 'مشرف', UK: 'Адмін', JA: '管理者' },
-    agency: { TR: 'Acenta', EN: 'Agency', DE: 'Agentur', FR: 'Agence', RU: 'Агентство', IT: 'Agenzia', ES: 'Agencia', AR: 'وكالة', UK: 'Агентство', JA: '代理店' },
-    driver: { TR: 'Şoför', EN: 'Driver', DE: 'Fahrer', FR: 'Chauffeur', RU: 'Водитель', IT: 'Autista', ES: 'Conductor', AR: 'سائق', UK: 'Водій', JA: 'ドライバー' },
-    customer: { TR: 'Müşteri', EN: 'Customer', DE: 'Kunde', FR: 'Client', RU: 'Клиент', IT: 'Cliente', ES: 'Cliente', AR: 'عميل', UK: 'Клієнт', JA: '顧客' },
+    admin: { TR: 'Admin', EN: 'Admin', DE: 'Admin', FR: 'Admin', RU: 'Админ', IT: 'Admin', ES: 'Admin', AR: 'مشرف', UK: 'Адмін', JA: '管理者', PT: 'Admin' },
+    agency: { TR: 'Acenta', EN: 'Agency', DE: 'Agentur', FR: 'Agence', RU: 'Агентство', IT: 'Agenzia', ES: 'Agencia', AR: 'وكالة', UK: 'Агентство', JA: '代理店', PT: 'Agência' },
+    driver: { TR: 'Şoför', EN: 'Driver', DE: 'Fahrer', FR: 'Chauffeur', RU: 'Водитель', IT: 'Autista', ES: 'Conductor', AR: 'سائق', UK: 'Водій', JA: 'ドライバー', PT: 'Motorista' },
+    customer: { TR: 'Müşteri', EN: 'Customer', DE: 'Kunde', FR: 'Client', RU: 'Клиент', IT: 'Cliente', ES: 'Cliente', AR: 'عميل', UK: 'Клієнт', JA: '顧客', PT: 'Cliente' },
   };
   return labels[role]?.[language] || role;
 }
