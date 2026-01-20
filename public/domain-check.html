@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Diagnostics - Meet Transfer</title>
+  <style>
+    :root {
+      --bg: #fafaf9;
+      --fg: #1c1917;
+      --muted: #78716c;
+      --border: #e7e5e4;
+      --success: #16a34a;
+      --warning: #d97706;
+      --error: #dc2626;
+      --blue: #2563eb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      padding: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    .subtitle { color: var(--muted); margin-bottom: 24px; }
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card h2 { font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    .status.ok { background: var(--success); }
+    .status.warn { background: var(--warning); }
+    .status.error { background: var(--error); }
+    .status.pending { background: var(--muted); animation: pulse 1s infinite; }
+    @keyframes pulse { 50% { opacity: 0.5; } }
+    .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; }
+    .label { color: var(--muted); font-size: 0.875rem; }
+    .value { font-family: monospace; font-size: 0.875rem; word-break: break-all; }
+    .value.success { color: var(--success); }
+    .value.warning { color: var(--warning); }
+    .value.error { color: var(--error); }
+    .checklist { list-style: none; }
+    .checklist li { padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 10px; }
+    .checklist li:last-child { border-bottom: none; }
+    .check-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .check-icon.ok::before { content: "✅"; }
+    .check-icon.warn::before { content: "⚠️"; }
+    .check-icon.error::before { content: "❌"; }
+    .check-icon.info::before { content: "ℹ️"; }
+    .check-text { flex: 1; }
+    .check-text strong { display: block; }
+    .check-text small { color: var(--muted); }
+    button {
+      background: var(--fg);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+    button:hover { opacity: 0.9; }
+    .copy-btn {
+      background: transparent;
+      color: var(--blue);
+      border: 1px solid var(--blue);
+      padding: 8px 16px;
+      font-size: 0.875rem;
+    }
+    pre {
+      background: #f5f5f4;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.75rem;
+      margin-top: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    a.btn {
+      display: inline-block;
+      background: var(--blue);
+      color: white;
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Domain Diagnostics</h1>
+  <p class="subtitle">Meet Transfer - DNS ve Domain yapılandırma kontrolü</p>
+
+  <div class="card">
+    <h2><span class="status pending" id="status-dot"></span> Mevcut Ortam</h2>
+    <div class="row">
+      <span class="label">Şu an açık URL:</span>
+      <span class="value" id="current-url"></span>
+    </div>
+    <div class="row">
+      <span class="label">Hostname:</span>
+      <span class="value" id="current-host"></span>
+    </div>
+    <div class="row">
+      <span class="label">Protocol:</span>
+      <span class="value" id="current-protocol"></span>
+    </div>
+    <div class="row">
+      <span class="label">Ortam Tipi:</span>
+      <span class="value" id="env-type"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 DNS Kontrol Listesi</h2>
+    <ul class="checklist" id="checklist"></ul>
+  </div>
+
+  <div class="card">
+    <h2>🌐 Domain Fetch Testleri</h2>
+    <p style="color: var(--muted); font-size: 0.875rem; margin-bottom: 12px;">Her domain'den /version.json çekmeyi dener:</p>
+    <div id="fetch-results"></div>
+    <button onclick="runFetchTests()">Testleri Çalıştır</button>
+  </div>
+
+  <div class="card">
+    <h2>📄 Tam Rapor</h2>
+    <button class="copy-btn" onclick="copyReport()">Raporu Kopyala</button>
+    <pre id="full-report"></pre>
+  </div>
+
+  <div class="card">
+    <h2>🔗 Faydalı Linkler</h2>
+    <div class="actions">
+      <a class="btn" href="https://dnschecker.org/#A/meettransfer.app" target="_blank">DNS Checker (A)</a>
+      <a class="btn" href="https://dnschecker.org/#TXT/meettransfer.app" target="_blank">DNS Checker (TXT)</a>
+      <a class="btn" href="/recover.html?to=/" target="_blank">Recovery Page</a>
+      <a class="btn" href="/debug" target="_blank">Debug Page</a>
+    </div>
+  </div>
+
+  <script>
+    const PROD_DOMAIN = "meettransfer.app";
+    const LOVABLE_DOMAIN = "meettransfer.lovable.app";
+    const LOVABLE_IP = "185.158.133.1";
+
+    const host = window.location.hostname;
+    const protocol = window.location.protocol;
+    const fullUrl = window.location.href;
+
+    document.getElementById("current-url").textContent = fullUrl;
+    document.getElementById("current-host").textContent = host;
+    document.getElementById("current-protocol").textContent = protocol;
+
+    // Determine environment type
+    let envType = "Unknown";
+    let envClass = "";
+    if (host === PROD_DOMAIN || host === "www." + PROD_DOMAIN) {
+      envType = "Production (Custom Domain)";
+      envClass = "success";
+    } else if (host.includes("lovable.app")) {
+      envType = "Lovable Subdomain";
+      envClass = "warning";
+    } else if (host.includes("localhost") || host.includes("127.0.0.1")) {
+      envType = "Local Development";
+      envClass = "";
+    } else if (host.includes("lovableproject.com")) {
+      envType = "Preview Environment";
+      envClass = "";
+    }
+    document.getElementById("env-type").textContent = envType;
+    document.getElementById("env-type").className = "value " + envClass;
+    document.getElementById("status-dot").className = "status " + (envClass === "success" ? "ok" : envClass === "warning" ? "warn" : "pending");
+
+    // Build checklist
+    const checklist = [
+      {
+        status: "info",
+        title: "Lovable IP Adresi",
+        desc: `A kaydı ${LOVABLE_IP} adresine yönlendirilmeli`
+      },
+      {
+        status: "info",
+        title: "Apex Domain (meettransfer.app)",
+        desc: "A kaydı @ için 185.158.133.1"
+      },
+      {
+        status: "info",
+        title: "WWW Subdomain",
+        desc: "A kaydı www için 185.158.133.1"
+      },
+      {
+        status: "info",
+        title: "TXT Doğrulama Kaydı",
+        desc: "_lovable TXT kaydı lovable_verify=... değeriyle"
+      },
+      {
+        status: host === PROD_DOMAIN ? "ok" : (host.includes("lovable") ? "warn" : "info"),
+        title: "Şu an doğru domain'de misiniz?",
+        desc: host === PROD_DOMAIN 
+          ? "Evet, production domain'desiniz" 
+          : `Hayır, ${host} üzerindesiniz. Production: ${PROD_DOMAIN}`
+      },
+      {
+        status: protocol === "https:" ? "ok" : "error",
+        title: "HTTPS aktif mi?",
+        desc: protocol === "https:" ? "Evet, SSL sertifikası aktif" : "Hayır, HTTP kullanılıyor - SSL sorunu olabilir"
+      }
+    ];
+
+    const checklistEl = document.getElementById("checklist");
+    checklist.forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span class="check-icon ${item.status}"></span>
+        <span class="check-text">
+          <strong>${item.title}</strong>
+          <small>${item.desc}</small>
+        </span>
+      `;
+      checklistEl.appendChild(li);
+    });
+
+    // Fetch tests
+    async function runFetchTests() {
+      const resultsEl = document.getElementById("fetch-results");
+      resultsEl.innerHTML = "<p>Test ediliyor...</p>";
+
+      const domains = [
+        { name: "Production", url: `https://${PROD_DOMAIN}/version.json` },
+        { name: "Lovable Subdomain", url: `https://${LOVABLE_DOMAIN}/version.json` },
+        { name: "Current Origin", url: `${window.location.origin}/version.json` }
+      ];
+
+      let html = "";
+      for (const d of domains) {
+        try {
+          const start = Date.now();
+          const res = await fetch(d.url, { mode: "cors", cache: "no-store" });
+          const elapsed = Date.now() - start;
+          
+          if (res.ok) {
+            const data = await res.json();
+            html += `<div class="row">
+              <span class="label">${d.name}</span>
+              <span class="value success">✅ ${res.status} - v${data.version || "?"} (${elapsed}ms)</span>
+            </div>`;
+          } else {
+            html += `<div class="row">
+              <span class="label">${d.name}</span>
+              <span class="value warning">⚠️ ${res.status} ${res.statusText} (${elapsed}ms)</span>
+            </div>`;
+          }
+        } catch (err) {
+          html += `<div class="row">
+            <span class="label">${d.name}</span>
+            <span class="value error">❌ ${err.message}</span>
+          </div>`;
+        }
+      }
+
+      resultsEl.innerHTML = html;
+      updateReport();
+    }
+
+    // Generate full report
+    function generateReport() {
+      const lines = [
+        "=== Meet Transfer Domain Diagnostics ===",
+        `Generated: ${new Date().toISOString()}`,
+        "",
+        "--- Environment ---",
+        `URL: ${fullUrl}`,
+        `Host: ${host}`,
+        `Protocol: ${protocol}`,
+        `Type: ${envType}`,
+        `User-Agent: ${navigator.userAgent}`,
+        "",
+        "--- Expected DNS Records ---",
+        `A @ -> ${LOVABLE_IP}`,
+        `A www -> ${LOVABLE_IP}`,
+        `TXT _lovable -> lovable_verify=<your-value>`,
+        "",
+        "--- Checklist ---"
+      ];
+
+      checklist.forEach(item => {
+        lines.push(`[${item.status.toUpperCase()}] ${item.title}: ${item.desc}`);
+      });
+
+      lines.push("");
+      lines.push("--- Fetch Test Results ---");
+      lines.push("(Run tests to populate)");
+
+      return lines.join("\n");
+    }
+
+    function updateReport() {
+      document.getElementById("full-report").textContent = generateReport();
+    }
+
+    function copyReport() {
+      const text = document.getElementById("full-report").textContent;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+        alert("Rapor kopyalandı!");
+      } else {
+        prompt("Kopyalayın:", text);
+      }
+    }
+
+    // Initial report
+    updateReport();
+  </script>
+</body>
+</html>
