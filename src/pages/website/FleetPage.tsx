@@ -7,13 +7,13 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 import { MapPin, Plane, Snowflake } from "lucide-react";
 
-// Optimized WebP fleet images
-import vitoVipPremium from "@/assets/fleet/vito-vip-premium.webp";
-import vitoVipInterior from "@/assets/fleet/vito-vip-interior.webp";
-import vitoAirport from "@/assets/fleet/vito-airport.webp";
-import vitoFamily from "@/assets/fleet/vito-family.webp";
-import sprinterExterior from "@/assets/fleet/sprinter-exterior.webp";
-import sprinterInterior from "@/assets/fleet/sprinter-interior.webp";
+// Fleet images - using main assets
+import vitoVipPremium from "@/assets/vito-vip-1.jpg";
+import vitoVipInterior from "@/assets/vito-vip-starlight-purple.jpg";
+import vitoAirport from "@/assets/vito-airport-premium.jpg";
+import vitoFamily from "@/assets/vito-family-interior.jpg";
+import sprinterExterior from "@/assets/sprinter-exterior-vip.jpg";
+import sprinterInterior from "@/assets/sprinter-interior-starlight.jpg";
 
 // Maybach Minivan ultra luxury images
 import maybachMinivan1 from "@/assets/maybach-minivan-1.jpg";
