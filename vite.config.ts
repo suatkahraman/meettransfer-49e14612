@@ -387,55 +387,106 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         // Manual chunks for better code splitting
-        manualChunks: {
+        manualChunks: (id) => {
           // Core React - smallest possible initial chunk
-          "vendor-react": ["react", "react-dom"],
-          "vendor-router": ["react-router-dom"],
+          if (id.includes('node_modules/react-dom')) {
+            return 'vendor-react-dom';
+          }
+          if (id.includes('node_modules/react/') || id.includes('node_modules/scheduler')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/react-router')) {
+            return 'vendor-router';
+          }
+          
           // UI components - split for better caching
-          "vendor-ui-core": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-select",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-slot"
-          ],
-          "vendor-ui-forms": [
-            "@radix-ui/react-checkbox",
-            "@radix-ui/react-label",
-            "@radix-ui/react-radio-group",
-            "@radix-ui/react-switch"
-          ],
-          "vendor-ui-feedback": [
-            "@radix-ui/react-toast",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-alert-dialog",
-            "@radix-ui/react-progress"
-          ],
-          "vendor-ui-layout": [
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-accordion",
-            "@radix-ui/react-collapsible",
-            "@radix-ui/react-scroll-area",
-            "@radix-ui/react-separator",
-            "@radix-ui/react-dropdown-menu"
-          ],
+          if (id.includes('@radix-ui/react-dialog') || 
+              id.includes('@radix-ui/react-select') || 
+              id.includes('@radix-ui/react-popover') ||
+              id.includes('@radix-ui/react-slot')) {
+            return 'vendor-ui-core';
+          }
+          if (id.includes('@radix-ui/react-checkbox') || 
+              id.includes('@radix-ui/react-label') || 
+              id.includes('@radix-ui/react-radio-group') ||
+              id.includes('@radix-ui/react-switch')) {
+            return 'vendor-ui-forms';
+          }
+          if (id.includes('@radix-ui/react-toast') || 
+              id.includes('@radix-ui/react-tooltip') || 
+              id.includes('@radix-ui/react-alert-dialog') ||
+              id.includes('@radix-ui/react-progress')) {
+            return 'vendor-ui-feedback';
+          }
+          if (id.includes('@radix-ui/react-tabs') || 
+              id.includes('@radix-ui/react-accordion') || 
+              id.includes('@radix-ui/react-collapsible') ||
+              id.includes('@radix-ui/react-scroll-area') ||
+              id.includes('@radix-ui/react-separator') ||
+              id.includes('@radix-ui/react-dropdown-menu') ||
+              id.includes('@radix-ui/react-navigation-menu')) {
+            return 'vendor-ui-layout';
+          }
+          // Other radix primitives
+          if (id.includes('@radix-ui/')) {
+            return 'vendor-ui-primitives';
+          }
+          
           // Forms & validation
-          "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
+          if (id.includes('react-hook-form') || id.includes('@hookform/resolvers') || id.includes('node_modules/zod')) {
+            return 'vendor-forms';
+          }
+          
           // Data fetching
-          "vendor-query": ["@tanstack/react-query"],
+          if (id.includes('@tanstack/react-query')) {
+            return 'vendor-query';
+          }
+          
           // Animation - heavy, defer loading
-          "vendor-motion": ["framer-motion"],
+          if (id.includes('framer-motion')) {
+            return 'vendor-motion';
+          }
+          
           // Backend
-          "vendor-supabase": ["@supabase/supabase-js"],
+          if (id.includes('@supabase/')) {
+            return 'vendor-supabase';
+          }
+          
           // Date handling
-          "vendor-date": ["date-fns", "react-day-picker"],
+          if (id.includes('date-fns') || id.includes('react-day-picker')) {
+            return 'vendor-date';
+          }
+          
           // Heavy utilities - only loaded when needed
-          "vendor-pdf": ["jspdf", "jspdf-autotable"],
-          "vendor-excel": ["xlsx"],
-          "vendor-markdown": ["react-markdown", "remark-gfm"],
-          // Carousel - defer
-          "vendor-carousel": ["embla-carousel-react", "embla-carousel-autoplay", "embla-carousel-fade"],
+          if (id.includes('jspdf')) {
+            return 'vendor-pdf';
+          }
+          if (id.includes('node_modules/xlsx')) {
+            return 'vendor-excel';
+          }
+          if (id.includes('react-markdown') || id.includes('remark-gfm')) {
+            return 'vendor-markdown';
+          }
+          
+          // Carousel - defer (keep small)
+          if (id.includes('embla-carousel')) {
+            return 'vendor-carousel';
+          }
+          
           // Map - heavy, defer
-          "vendor-map": ["mapbox-gl"]
+          if (id.includes('mapbox-gl')) {
+            return 'vendor-map';
+          }
+          
+          // Lucide icons - common across pages
+          if (id.includes('lucide-react')) {
+            return 'vendor-icons';
+          }
+          
+          // clsx, tailwind-merge, class-variance-authority - very small, but used everywhere
+          if (id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority')) {
+            return 'vendor-utils';
+          }
         },
         // Isolate large app chunks for better caching
         chunkFileNames: (chunkInfo) => {
@@ -454,9 +505,27 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 500,
     // Enable source maps for production debugging
     sourcemap: false,
-    // Minification
-    minify: "esbuild",
+    // Minification - use terser for better compression
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        passes: 2
+      },
+      mangle: {
+        safari10: true
+      },
+      format: {
+        comments: false
+      }
+    },
     // Target modern browsers
-    target: "es2020"
+    target: "es2020",
+    // Enable CSS code splitting
+    cssCodeSplit: true,
+    // Reduce asset inline limit for better caching
+    assetsInlineLimit: 2048
   }
 }));
