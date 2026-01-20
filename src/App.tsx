@@ -11,7 +11,7 @@ import { AITestProvider } from "./contexts/AITestContext";
 import { AgencyLanguageProvider } from "./contexts/AgencyLanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
 import GeoLanguageInitializer from "./components/GeoLanguageInitializer";
 import HashScroll from "@/components/HashScroll";
@@ -20,8 +20,8 @@ import { UpdateManager } from "./components/UpdateManager";
 import { PWAInstallPrompt } from "./components/website/PWAInstallPrompt";
 import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
 import AdBlockWarning from "./components/AdBlockWarning";
-// PWA Debug panel - visible with ?pwa_debug=1
-import { PWADebugPanel } from "./components/website/PWADebugPanel";
+import { Button } from "@/components/ui/button";
+import { PWADebugPanel } from "./components/website/PWADebugPanel"; // visible with ?pwa_debug=1
 import CanonicalManager from "./components/seo/CanonicalManager";
 
 // Critical pages - lazy loaded with prefetch for better UX
@@ -184,11 +184,62 @@ const queryClient = new QueryClient();
 const LANG_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja"];
 
 // Simple loading fallback
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-  </div>
-);
+const PageLoader = () => {
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setShowRecovery(true), 7000);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  const clearCachesAndReload = async () => {
+    setIsRefreshing(true);
+
+    try {
+      // Unregister SW
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
+      }
+
+      // Clear caches
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch {
+      // ignore
+    } finally {
+      // Force reload from server
+      window.location.href = window.location.href.split("?")[0] + "?_t=" + Date.now();
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center space-y-4 px-6">
+        <div className="mx-auto animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+
+        {showRecovery && (
+          <div className="mx-auto max-w-xs space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Yükleme uzun sürüyor. PWA’da eski önbellek takılmış olabilir.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Tekrar dene
+              </Button>
+              <Button onClick={clearCachesAndReload} disabled={isRefreshing}>
+                {isRefreshing ? "Yenileniyor..." : "Önbelleği temizle & yenile"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // Lazy-load BlogLayout to keep it out of main bundle
 const BlogLayout = lazy(() => import("./components/blog/BlogLayout").then(m => ({ default: m.BlogLayout })));
