@@ -234,7 +234,8 @@ export const OptimizedImage = memo(function OptimizedImage({
             alt={alt}
             loading={priority ? 'eager' : 'lazy'}
             decoding={priority ? 'sync' : 'async'}
-            fetchPriority={priority ? 'high' : 'auto'}
+            // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+            fetchpriority={priority ? 'high' : 'auto'}
             className="w-full h-full"
             style={imageStyle}
             onLoad={() => setIsLoaded(true)}
