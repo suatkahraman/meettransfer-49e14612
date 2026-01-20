@@ -1,7 +1,20 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
-import "./index.css";
 import { initWebVitals } from "@/utils/webVitals";
+
+// Load CSS asynchronously to prevent render-blocking
+// Critical CSS is already inlined in index.html
+const loadStyles = () => {
+  import("./index.css");
+};
+
+// Load styles after first paint for non-blocking rendering
+if (typeof requestIdleCallback !== "undefined") {
+  requestIdleCallback(() => loadStyles(), { timeout: 50 });
+} else {
+  // Fallback: use setTimeout with 0 for immediate async loading
+  setTimeout(loadStyles, 0);
+}
 
 // LCP image is now preloaded directly in index.html from public folder
 
