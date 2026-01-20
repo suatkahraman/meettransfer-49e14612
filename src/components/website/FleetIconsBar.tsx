@@ -4,26 +4,11 @@ import { motion } from "framer-motion";
 import { Users, Briefcase, ArrowRight, Star, Shield, ChevronLeft, ChevronRight, Snowflake } from "lucide-react";
 import { useState, useEffect } from "react";
 
-// Import all vehicle images for carousel
-import vitoImg1 from "@/assets/vito-1.jpg";
-import vitoImg2 from "@/assets/vito-2.jpg";
-import vitoImg3 from "@/assets/vito-3.jpg";
-import vitoImg4 from "@/assets/vito-4.jpg";
-
-import vitoVipImg1 from "@/assets/vito-vip-1.jpg";
-import vitoVipImg2 from "@/assets/vito-vip-2.jpg";
-import vitoVipImg3 from "@/assets/vito-vip-3.jpg";
-import vitoVipImg4 from "@/assets/vito-vip-4.jpg";
-
-import maybachImg1 from "@/assets/maybach-1.jpg";
-import maybachImg2 from "@/assets/maybach-2.jpg";
-import maybachImg3 from "@/assets/maybach-3.jpg";
-import maybachImg4 from "@/assets/maybach-4.jpg";
-
-import sprinterImg1 from "@/assets/sprinter-1.jpg";
-import sprinterImg2 from "@/assets/sprinter-2.jpg";
-import sprinterImg3 from "@/assets/sprinter-3.jpg";
-import sprinterImg4 from "@/assets/sprinter-4.jpg";
+// Import optimized WebP vehicle images for hero carousel
+import vitoHeroImg from "@/assets/vehicles/vito-hero.webp";
+import vitoVipHeroImg from "@/assets/vehicles/vito-vip-hero.webp";
+import maybachHeroImg from "@/assets/vehicles/maybach-hero.webp";
+import sprinterHeroImg from "@/assets/vehicles/sprinter-hero.webp";
 
 // Switzerland fleet images
 import switzerlandSClassExterior from "@/assets/switzerland/switzerland-s-class-exterior.webp";
@@ -42,7 +27,7 @@ const FleetIconsBar = () => {
       passengers: "3",
       luggage: "3",
       description: "Skoda Octavia, Toyota Prius",
-      images: [vitoImg1, vitoImg2, vitoImg3],
+      images: [vitoHeroImg],
       features: ["AC", "USB"],
       popular: false,
       badge: null,
@@ -53,7 +38,7 @@ const FleetIconsBar = () => {
       passengers: "3",
       luggage: "3",
       description: "Mercedes E-Class, BMW 5",
-      images: [vitoVipImg1, vitoVipImg2, vitoVipImg3, vitoVipImg4],
+      images: [vitoVipHeroImg],
       features: ["AC", "WiFi", "Water"],
       popular: false,
       badge: null,
@@ -64,7 +49,7 @@ const FleetIconsBar = () => {
       passengers: "7",
       luggage: "7",
       description: "Mercedes Vito",
-      images: [vitoImg1, vitoImg2, vitoImg3, vitoImg4],
+      images: [vitoHeroImg],
       features: ["AC", "USB", "Water"],
       popular: true,
       badge: null,
@@ -75,7 +60,7 @@ const FleetIconsBar = () => {
       passengers: "6",
       luggage: "6",
       description: "VIP Mercedes Vito",
-      images: [vitoVipImg1, vitoVipImg2, vitoVipImg3, vitoVipImg4],
+      images: [vitoVipHeroImg],
       features: ["WiFi", "TV", "Bar"],
       popular: true,
       badge: null,
@@ -86,7 +71,7 @@ const FleetIconsBar = () => {
       passengers: "4",
       luggage: "4",
       description: "Mercedes Maybach Minivan",
-      images: [maybachImg1, maybachImg2, maybachImg3, maybachImg4],
+      images: [maybachHeroImg],
       features: ["WiFi", "TV", "Bar", "Starlight"],
       popular: false,
       badge: null,
@@ -97,7 +82,7 @@ const FleetIconsBar = () => {
       passengers: "12",
       luggage: "12",
       description: "Mercedes Sprinter VIP",
-      images: [sprinterImg1, sprinterImg2, sprinterImg3, sprinterImg4],
+      images: [sprinterHeroImg],
       features: ["AC", "WiFi", "TV"],
       popular: false,
       badge: null,

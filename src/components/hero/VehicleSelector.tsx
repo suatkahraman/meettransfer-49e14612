@@ -21,18 +21,15 @@ const featureIcons: Record<string, React.ElementType> = {
   'battery-charging': BatteryCharging,
 };
 
-// Vehicle images
-import vitoImg from "@/assets/vito-1.jpg";
-import vitoVipImg from "@/assets/vito-vip-1.jpg";
-import maybachImg from "@/assets/maybach-1.jpg";
-import sprinterImg from "@/assets/sprinter-1.jpg";
-import sedanImg from "@/assets/sedan-airport-1.jpg";
+// Vehicle images - optimized WebP
+import vitoImg from "@/assets/vehicles/vito-hero.webp";
+import vitoVipImg from "@/assets/vehicles/vito-vip-hero.webp";
+import maybachImg from "@/assets/vehicles/maybach-hero.webp";
+import sprinterImg from "@/assets/vehicles/sprinter-hero.webp";
+import sedanImg from "@/assets/vehicles/sedan-hero.webp";
 
-// Dubai vehicle images
-import dubaiSedanImg from "@/assets/dubai/dubai-sedan-private.jpg";
-import dubaiSuburbanImg from "@/assets/dubai/dubai-suburban.jpg";
+// Dubai vehicle images - WebP optimized
 import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.jpg";
-import dubaiVClassImg from "@/assets/dubai/dubai-v-class.jpg";
 
 // Lazy load heavy components
 const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
@@ -44,10 +41,10 @@ const vehicleImages: Record<string, string> = {
   'maybach-minibus': maybachImg,
   'sprinter-minibus': sprinterImg,
   'minibus': sprinterImg,
-  // Dubai vehicles - matching DUBAI_VEHICLE_TYPES values
-  'dubai-private-sedan': dubaiSedanImg,
-  'dubai-premium-van': dubaiVClassImg,
-  'dubai-suburban-suv': dubaiSuburbanImg,
+  // Dubai vehicles - using VIP van as fallback for all Dubai types
+  'dubai-private-sedan': sedanImg,
+  'dubai-premium-van': vitoVipImg,
+  'dubai-suburban-suv': vitoImg,
   'dubai-vip-sprinter': dubaiVipVanImg,
 };
 
