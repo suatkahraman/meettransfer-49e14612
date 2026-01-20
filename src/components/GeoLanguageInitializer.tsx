@@ -77,6 +77,10 @@ const COUNTRY_TO_LANGUAGE: Record<string, Language> = {
   
   // Japanese-speaking
   JP: "JA",
+
+  // Portuguese-speaking
+  PT: "PT",
+  BR: "PT",
   
   // English-speaking (default)
   US: "EN",
@@ -106,6 +110,7 @@ const BROWSER_LANG_MAP: Record<string, Language> = {
   ar: "AR",
   uk: "UK",
   ja: "JA",
+  pt: "PT",
 };
 
 /**
