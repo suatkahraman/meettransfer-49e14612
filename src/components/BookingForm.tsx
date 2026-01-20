@@ -16,7 +16,7 @@ const bookingSchema = z.object({
   dropoffLocation: z.string().max(200).optional(),
   passengers: z.number().min(1).max(50),
   vehicleType: z.string().min(1),
-  passengerName: z.string().min(2).max(100),
+  passengerName: z.string().min(1).max(100),
   passengerEmail: z.string().email().max(255),
   passengerPhone: z.string().min(10).max(20),
   flightNumber: z.string().max(20).optional(),

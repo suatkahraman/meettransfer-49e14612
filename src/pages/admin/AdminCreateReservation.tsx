@@ -43,7 +43,7 @@ const statuses = [
 
 // Validation schema
 const reservationSchema = z.object({
-  customer_name: z.string().trim().min(2, 'İsim en az 2 karakter olmalı').max(100, 'İsim 100 karakteri geçemez'),
+  customer_name: z.string().trim().min(1, 'İsim gerekli').max(100, 'İsim 100 karakteri geçemez'),
   customer_phone: z.string().trim().min(10, 'Geçerli bir telefon numarası girin').max(20, 'Telefon numarası çok uzun'),
   pickup: z.string().trim().min(3, 'Alış noktası gerekli'),
   dropoff: z.string().trim().min(3, 'Bırakış noktası gerekli'),
