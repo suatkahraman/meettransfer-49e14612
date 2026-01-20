@@ -128,28 +128,18 @@ Deno.serve(async (req) => {
       created_at: timestamp || new Date().toISOString(),
     };
 
-    // Upsert to visitor_interactions table
+    // Insert to visitor_interactions table (no upsert - table lacks unique constraint)
     const { error: insertError } = await supabaseAdmin
       .from("visitor_interactions")
-      .upsert(interactionData, {
-        onConflict: "visitor_id,page_path,created_at::date",
-        ignoreDuplicates: false,
-      });
+      .insert(interactionData);
 
     if (insertError) {
-      // If upsert fails (likely due to missing table), try insert
-      const { error: insertError2 } = await supabaseAdmin
-        .from("visitor_interactions")
-        .insert(interactionData);
-        
-      if (insertError2) {
-        console.error("Insert error:", insertError2);
-        // Table might not exist yet, return success anyway
-        return new Response(
-          JSON.stringify({ success: true, note: "Table may need to be created" }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      console.error("Insert error:", insertError);
+      // Table might not exist yet, return success anyway
+      return new Response(
+        JSON.stringify({ success: true, note: "Insert failed, table may need adjustment" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     return new Response(

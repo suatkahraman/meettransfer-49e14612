@@ -423,11 +423,11 @@ const App = () => (
               {/* Security Settings - Protected (all authenticated users) */}
               <Route path="/security-settings" element={<LazyRoute><SecuritySettings /></LazyRoute>} />
               
-              {/* SEO Debug Page - Public */}
-              <Route path="/seo-debug" element={<LazyRoute><SEODebugPage /></LazyRoute>} />
+              {/* SEO Debug Page - Public, localized */}
+              {localizedRoutes("/seo-debug", <SEODebugPage />)}
               
-              {/* Debug Page - Public, Eager-loaded for PWA troubleshooting */}
-              <Route path="/debug" element={<DebugPage />} />
+              {/* Debug Page - Public, Eager-loaded for PWA troubleshooting, localized */}
+              {localizedRoutes("/debug", <DebugPage />)}
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>
