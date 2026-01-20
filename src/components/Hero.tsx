@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Car, Timer } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { SilentSectionErrorBoundary } from "@/components/hero/SilentSectionErrorBoundary";
 
 // Custom hooks for form state management
 import { useRideForm } from "@/hooks/useRideForm";
@@ -40,6 +41,17 @@ export const Hero = () => {
   const { t, language } = useLanguage();
   const heroRef = useRef<HTMLElement>(null);
   const { loadSavedFormData, saveFormData } = useHeroFormStorage();
+
+  // Never block first render on i18n readiness; always provide a stable fallback string.
+  const tSafe = (key: string, fallback: string) => {
+    try {
+      const value = t?.(key);
+      if (!value || value === key) return fallback;
+      return value;
+    } catch {
+      return fallback;
+    }
+  };
   
   // Tab state
   const [activeTab, setActiveTab] = useState<"ride" | "hourly">(() => 
@@ -93,9 +105,11 @@ export const Hero = () => {
           <div className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
             {/* AI Assistant temporarily disabled */}
-            <Suspense fallback={null}>
-              <ReturnTripPromoBanner language={language} onApplyPromoCode={rideForm.handleApplyPromoCode} />
-            </Suspense>
+            <SilentSectionErrorBoundary fallback={null}>
+              <Suspense fallback={null}>
+                <ReturnTripPromoBanner language={language} onApplyPromoCode={rideForm.handleApplyPromoCode} />
+              </Suspense>
+            </SilentSectionErrorBoundary>
 
             {/* Booking Form Card - Enhanced visibility */}
             <SwipeableBookingCard 
@@ -118,7 +132,7 @@ export const Hero = () => {
                   )}
                 >
                   <Car className="h-4 w-4 md:h-4 md:w-4" />
-                  <span>{t("pointToPoint") || "Transfer"}</span>
+                  <span>{tSafe("pointToPoint", "Transfer")}</span>
                 </button>
                 <button 
                   onClick={() => setActiveTab("hourly")} 
@@ -128,7 +142,7 @@ export const Hero = () => {
                   )}
                 >
                   <Timer className="h-4 w-4 md:h-4 md:w-4" />
-                  <span>{t("perHour") || "Hourly"}</span>
+                  <span>{tSafe("perHour", "Hourly")}</span>
                 </button>
               </div>
 
@@ -204,15 +218,17 @@ export const Hero = () => {
           </div>
 
           {/* Visual Sections */}
-          <Suspense fallback={<div className="hidden md:block" />}>
-            <HeroVisualSection 
-              videosLoaded={false} 
-              cityVideos={[]} 
-              currentVideoIndex={0} 
-              language={language} 
-              t={t} 
-            />
-          </Suspense>
+          <SilentSectionErrorBoundary fallback={<div className="hidden md:block" />}>
+            <Suspense fallback={<div className="hidden md:block" />}>
+              <HeroVisualSection 
+                videosLoaded={false} 
+                cityVideos={[]} 
+                currentVideoIndex={0} 
+                language={language} 
+                t={t} 
+              />
+            </Suspense>
+          </SilentSectionErrorBoundary>
         </div>
       </div>
     </section>

@@ -27,6 +27,10 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
           height={48}
           loading="eager"
           decoding="async"
+          onError={(e) => {
+            // Never block/blank the hero if the logo fails to load
+            e.currentTarget.style.display = "none";
+          }}
           className="h-8 w-8 md:h-12 md:w-12 rounded-lg object-cover shadow-lg ring-1 ring-primary/30 flex-shrink-0"
         />
         <div className="flex-1 min-w-0">
