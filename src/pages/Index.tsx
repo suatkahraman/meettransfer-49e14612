@@ -21,7 +21,7 @@ const HourlyRentalSection = lazy(() => import("@/components/website/HourlyRental
 const GoogleReviewsCarousel = lazy(() => import("@/components/website/GoogleReviewsCarousel"));
 const ReviewPlatformLogos = lazy(() => import("@/components/website/ReviewPlatformLogos"));
 // AIAssistantPromo temporarily disabled
-const TrustedPartners = lazy(() => import("@/components/website/TrustedPartners"));
+// TrustedPartners removed for performance
 const PWAPromoBanner = lazy(() => import("@/components/website/PWAPromoBanner").then(m => ({ default: m.PWAPromoBanner })));
 const PromoBannerCarousel = lazy(() => import("@/components/website/PromoBannerCarousel"));
 const HomeFAQ = lazy(() => import("@/components/website/HomeFAQ"));
@@ -104,7 +104,6 @@ const Index = () => {
       {/* AI Assistant Promo temporarily disabled */}
       
       <Suspense fallback={<SectionPlaceholder />}>
-        <TrustedPartners />
         <PWAPromoBanner />
       </Suspense>
       
