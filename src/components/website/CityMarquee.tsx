@@ -2,8 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
 import { ArrowRight, Plane, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, memo } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState, memo } from "react";
 
 // Import optimized WebP city images
 import istanbulImg from "@/assets/destinations/istanbul-city.webp";
@@ -19,18 +18,20 @@ import marmarisImg from "@/assets/destinations/marmaris-city.webp";
 import frankfurtImg from "@/assets/destinations/frankfurt-city.webp";
 import athensImg from "@/assets/destinations/athens-city.webp";
 import adanaImg from "@/assets/destinations/adana-city.webp";
-// Preload critical images for faster display
-const preloadImages = (images: string[]) => {
-  images.forEach((src) => {
-    const img = new Image();
-    img.src = src;
-  });
+// Preload only first 2 visible images during idle time
+const preloadCriticalImages = () => {
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    requestIdleCallback(() => {
+      [istanbulImg, antalyaImg].forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    }, { timeout: 2000 });
+  }
 };
 
-// Preload first 4 images immediately (visible in viewport)
-if (typeof window !== 'undefined') {
-  preloadImages([istanbulImg, antalyaImg, bodrumImg, dalamanImg]);
-}
+// Trigger preload on module load
+preloadCriticalImages();
 
 // City data with images and starting prices
 const cities = [
@@ -276,16 +277,6 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Preload the image properly
-  useEffect(() => {
-    if (city.image) {
-      const img = new Image();
-      img.onload = () => setImageLoaded(true);
-      img.onerror = () => setImageError(true);
-      img.src = city.image;
-    }
-  }, [city.image]);
-
   return (
     <motion.div
       whileHover={{ scale: 1.03, y: -6 }}
@@ -300,16 +291,18 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
         
         {/* Skeleton Loading State */}
         {!imageLoaded && !imageError && (
-          <Skeleton className="absolute inset-0 w-full h-full z-10" />
+          <div className="absolute inset-0 w-full h-full z-10 bg-gradient-to-r from-muted via-muted/80 to-muted animate-pulse" />
         )}
         
-        {/* Real Image - Using imported bundled assets */}
+        {/* Real Image - Lazy loaded with native browser support */}
         {city.image && !imageError && (
           <img
             src={city.image}
             alt={city.name}
-            loading="eager"
+            loading="lazy"
             decoding="async"
+            width={224}
+            height={288}
             className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 z-20 ${
               imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             } group-hover:scale-110`}
