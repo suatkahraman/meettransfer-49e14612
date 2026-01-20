@@ -1,13 +1,22 @@
 import { memo, useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
 import { toast } from "sonner";
-import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO } from "date-fns";
 import { enUS } from "date-fns/locale";
 import type { Locale } from "date-fns";
 import { loadLocale, getCachedLocale } from "@/utils/dateFnsLocaleLoader";
+
+// Dynamic import for canvas-confetti - only load when needed
+const triggerConfetti = async () => {
+  const confetti = (await import("canvas-confetti")).default;
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+    colors: ['#FFD700', '#FFA500', '#FF8C00']
+  });
+};
 
 // Multi-language translations for promo banner
 const promoTranslations: Record<string, Record<string, string>> = {
@@ -103,13 +112,8 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
     if (onApplyPromoCode && promoData) {
       onApplyPromoCode(promoData.code);
       
-      // Confetti animation
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#22c55e', '#16a34a', '#15803d', '#fbbf24', '#f59e0b']
-      });
+      // Confetti animation - dynamically imported
+      triggerConfetti();
       
       const message = (promoTranslations.promoApplied[language] || promoTranslations.promoApplied.EN)
         .replace('{code}', promoData.code)
@@ -150,24 +154,18 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
         onClick={handleClick}
         className="w-full text-left relative bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 border border-green-500/30 rounded-xl px-3 md:px-4 py-2 md:py-2.5 backdrop-blur-sm hover:border-green-500/50 hover:from-green-500/15 hover:to-green-500/15 transition-all cursor-pointer group"
       >
-        {/* Animated background shimmer */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-          animate={{ x: ["-100%", "100%"] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        {/* Animated background shimmer - CSS only */}
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
         />
         
         <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           {/* Top Row - Promo Info */}
           <div className="flex items-center justify-between md:justify-start gap-2">
             <div className="flex items-center gap-2">
-              <motion.span
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="text-base md:text-lg"
-              >
+              <span className="text-base md:text-lg animate-bounce">
                 🎁
-              </motion.span>
+              </span>
               <span className="font-bold text-green-700 dark:text-green-400 text-xs md:text-sm">
                 {promoTranslations.return[language] || promoTranslations.return.EN}: 
                 <span className="ml-1 text-sm md:text-base">%{promoData.discount_percentage} {promoTranslations.discount[language] || promoTranslations.discount.EN}</span>
@@ -208,13 +206,11 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
             )}
             
             {/* Click hint - Desktop only */}
-            <motion.span
-              className="text-[10px] md:text-xs text-green-600 dark:text-green-400 font-medium hidden md:inline-flex items-center gap-1"
-              animate={{ x: [0, 3, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+            <span
+              className="text-[10px] md:text-xs text-green-600 dark:text-green-400 font-medium hidden md:inline-flex items-center gap-1 animate-pulse"
             >
               {promoTranslations.click[language] || promoTranslations.click.EN}
-            </motion.span>
+            </span>
           </div>
         </div>
       </button>

@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 // Custom hooks for form state management
 import { useRideForm } from "@/hooks/useRideForm";
 import { useHourlyForm } from "@/hooks/useHourlyForm";
-import { useHeroVideos } from "@/hooks/useHeroVideos";
 import { useHeroFormStorage } from "@/hooks/useHeroFormStorage";
 
 // Critical components for LCP - import directly (NOT lazy loaded)
@@ -14,16 +13,10 @@ import { HeroHeader } from "@/components/hero/HeroHeader";
 import { HeroTrustBadges } from "@/components/hero/HeroTrustBadges";
 import { HeroBackground } from "@/components/hero/HeroBackground";
 
-// Lazy load AnimatePresence - framer-motion is heavy
-const AnimatePresence = lazy(() => 
-  import("framer-motion").then(m => ({ default: m.AnimatePresence }))
-);
-
 // Lazy load heavier form components - they render after initial paint
 const RideFormContent = lazy(() => import("@/components/hero/RideFormContent").then(m => ({ default: m.RideFormContent })));
 const HourlyFormContent = lazy(() => import("@/components/hero/HourlyFormContent").then(m => ({ default: m.HourlyFormContent })));
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
-// HeroAIAssistant temporarily disabled
 const ReturnTripPromoBanner = lazy(() => import("@/components/hero/ReturnTripPromoBanner").then(m => ({ default: m.ReturnTripPromoBanner })));
 const SwipeableBookingCard = lazy(() => import("@/components/hero/SwipeableBookingCard").then(m => ({ default: m.SwipeableBookingCard })));
 
@@ -54,7 +47,6 @@ export const Hero = () => {
   // Use custom hooks for form management
   const rideForm = useRideForm(t);
   const hourlyForm = useHourlyForm(t, rideForm.appliedPromoCode);
-  const videoState = useHeroVideos();
   
   // Save form data to localStorage when it changes
   useEffect(() => {
@@ -85,10 +77,10 @@ export const Hero = () => {
     <section ref={heroRef} id="booking-form" className="relative overflow-hidden bg-background">
       {/* HeroBackground is NOT lazy loaded - critical for LCP */}
       <HeroBackground 
-        videosLoaded={videoState.videosLoaded} 
-        cityVideos={videoState.cityVideos} 
-        currentVideoIndex={videoState.currentVideoIndex} 
-        setCurrentVideoIndex={videoState.setCurrentVideoIndex} 
+        videosLoaded={false} 
+        cityVideos={[]} 
+        currentVideoIndex={0} 
+        setCurrentVideoIndex={() => {}} 
         language={language} 
       />
 
@@ -142,71 +134,69 @@ export const Hero = () => {
                 {/* Form Content */}
                 <div className="p-4 sm:p-4 md:p-5 lg:p-5">
                   <Suspense fallback={<FormSkeleton />}>
-                    <AnimatePresence mode="wait">
-                      {activeTab === "ride" ? (
-                        <RideFormContent
-                          pickup={rideForm.pickup}
-                          dropoff={rideForm.dropoff}
-                          date={rideForm.date}
-                          time={rideForm.time}
-                          passengers={rideForm.passengers}
-                          vehicleType={rideForm.vehicleType}
-                          allVehiclePrices={rideForm.allVehiclePrices}
-                          loadingTransferPrice={rideForm.loadingTransferPrice}
-                          transferPriceCurrency={rideForm.transferPriceCurrency}
-                          submitting={rideForm.submitting}
-                          language={language}
-                          t={t}
-                          onPickupSelected={rideForm.handlePickupSelected}
-                          onDropoffSelected={rideForm.handleDropoffSelected}
-                          onSwapLocations={rideForm.handleSwapLocations}
-                          setDate={rideForm.handleSetDate}
-                          setTime={rideForm.handleSetTime}
-                          setPassengers={rideForm.handleSetPassengers}
-                          setVehicleType={rideForm.handleSetVehicleType}
-                          handleRideContinue={rideForm.handleRideContinue}
-                          // Return trip
-                          returnDate={rideForm.returnDate}
-                          returnTime={rideForm.returnTime}
-                          hasReturnTrip={rideForm.hasReturnTrip}
-                          setReturnDate={rideForm.handleSetReturnDate}
-                          setReturnTime={rideForm.handleSetReturnTime}
-                          setHasReturnTrip={rideForm.handleSetHasReturnTrip}
-                          // Extras
-                          babySeatCount={rideForm.babySeatCount}
-                          luggageCount={rideForm.luggageCount}
-                          setBabySeatCount={rideForm.handleSetBabySeatCount}
-                          setLuggageCount={rideForm.handleSetLuggageCount}
-                          // Route region detection
-                          routeRegion={rideForm.routeRegion}
-                        />
-                      ) : (
-                        <HourlyFormContent
-                          hourlyCity={hourlyForm.hourlyCity}
-                          hourlyDuration={hourlyForm.hourlyDuration}
-                          customHours={hourlyForm.customHours}
-                          hourlyDate={hourlyForm.hourlyDate}
-                          hourlyTime={hourlyForm.hourlyTime}
-                          hourlyPassengers={hourlyForm.hourlyPassengers}
-                          hourlyVehicleType={hourlyForm.hourlyVehicleType}
-                          allHourlyPrices={hourlyForm.allHourlyPrices}
-                          loadingPrice={hourlyForm.loadingPrice}
-                          submitting={hourlyForm.submitting}
-                          availableCities={hourlyForm.availableCities}
-                          availableDurations={hourlyForm.availableDurations}
-                          language={language}
-                          t={t}
-                          setHourlyCity={hourlyForm.handleSetHourlyCity}
-                          setHourlyDuration={hourlyForm.handleSetHourlyDuration}
-                          setCustomHours={hourlyForm.handleSetCustomHours}
-                          setHourlyDate={hourlyForm.handleSetHourlyDate}
-                          setHourlyTime={hourlyForm.handleSetHourlyTime}
-                          setHourlyPassengers={hourlyForm.handleSetHourlyPassengers}
-                          setHourlyVehicleType={hourlyForm.handleSetHourlyVehicleType}
-                          handleHourlyContinue={hourlyForm.handleHourlyContinue}
-                        />
-                      )}
-                    </AnimatePresence>
+                    {activeTab === "ride" ? (
+                      <RideFormContent
+                        pickup={rideForm.pickup}
+                        dropoff={rideForm.dropoff}
+                        date={rideForm.date}
+                        time={rideForm.time}
+                        passengers={rideForm.passengers}
+                        vehicleType={rideForm.vehicleType}
+                        allVehiclePrices={rideForm.allVehiclePrices}
+                        loadingTransferPrice={rideForm.loadingTransferPrice}
+                        transferPriceCurrency={rideForm.transferPriceCurrency}
+                        submitting={rideForm.submitting}
+                        language={language}
+                        t={t}
+                        onPickupSelected={rideForm.handlePickupSelected}
+                        onDropoffSelected={rideForm.handleDropoffSelected}
+                        onSwapLocations={rideForm.handleSwapLocations}
+                        setDate={rideForm.handleSetDate}
+                        setTime={rideForm.handleSetTime}
+                        setPassengers={rideForm.handleSetPassengers}
+                        setVehicleType={rideForm.handleSetVehicleType}
+                        handleRideContinue={rideForm.handleRideContinue}
+                        // Return trip
+                        returnDate={rideForm.returnDate}
+                        returnTime={rideForm.returnTime}
+                        hasReturnTrip={rideForm.hasReturnTrip}
+                        setReturnDate={rideForm.handleSetReturnDate}
+                        setReturnTime={rideForm.handleSetReturnTime}
+                        setHasReturnTrip={rideForm.handleSetHasReturnTrip}
+                        // Extras
+                        babySeatCount={rideForm.babySeatCount}
+                        luggageCount={rideForm.luggageCount}
+                        setBabySeatCount={rideForm.handleSetBabySeatCount}
+                        setLuggageCount={rideForm.handleSetLuggageCount}
+                        // Route region detection
+                        routeRegion={rideForm.routeRegion}
+                      />
+                    ) : (
+                      <HourlyFormContent
+                        hourlyCity={hourlyForm.hourlyCity}
+                        hourlyDuration={hourlyForm.hourlyDuration}
+                        customHours={hourlyForm.customHours}
+                        hourlyDate={hourlyForm.hourlyDate}
+                        hourlyTime={hourlyForm.hourlyTime}
+                        hourlyPassengers={hourlyForm.hourlyPassengers}
+                        hourlyVehicleType={hourlyForm.hourlyVehicleType}
+                        allHourlyPrices={hourlyForm.allHourlyPrices}
+                        loadingPrice={hourlyForm.loadingPrice}
+                        submitting={hourlyForm.submitting}
+                        availableCities={hourlyForm.availableCities}
+                        availableDurations={hourlyForm.availableDurations}
+                        language={language}
+                        t={t}
+                        setHourlyCity={hourlyForm.handleSetHourlyCity}
+                        setHourlyDuration={hourlyForm.handleSetHourlyDuration}
+                        setCustomHours={hourlyForm.handleSetCustomHours}
+                        setHourlyDate={hourlyForm.handleSetHourlyDate}
+                        setHourlyTime={hourlyForm.handleSetHourlyTime}
+                        setHourlyPassengers={hourlyForm.handleSetHourlyPassengers}
+                        setHourlyVehicleType={hourlyForm.handleSetHourlyVehicleType}
+                        handleHourlyContinue={hourlyForm.handleHourlyContinue}
+                      />
+                    )}
                   </Suspense>
                 </div>
               </SwipeableBookingCard>
@@ -218,9 +208,9 @@ export const Hero = () => {
           {/* Visual Sections */}
           <Suspense fallback={<div className="hidden md:block" />}>
             <HeroVisualSection 
-              videosLoaded={videoState.videosLoaded} 
-              cityVideos={videoState.cityVideos} 
-              currentVideoIndex={videoState.currentVideoIndex} 
+              videosLoaded={false} 
+              cityVideos={[]} 
+              currentVideoIndex={0} 
               language={language} 
               t={t} 
             />
