@@ -24,6 +24,54 @@ const isPreviewEnvironment = () => {
 
 const PWA_UPDATE_FLAG = "pwa_just_updated";
 
+// Guards to prevent infinite reload loops on some browsers/SW edge-cases
+const PWA_DISABLE_UPDATES_KEY = "pwa_disable_sw_updates";
+const PWA_RELOAD_GUARD_KEY = "pwa_reload_guard";
+const PWA_RELOAD_SCHEDULED_AT_KEY = "pwa_reload_scheduled_at";
+const PWA_HARD_UPDATE_FINGERPRINT_KEY = "pwa_hard_update_fingerprint";
+
+type ReloadGuardState = { ts: number; count: number };
+
+const readReloadGuard = (): ReloadGuardState => {
+  try {
+    const raw = sessionStorage.getItem(PWA_RELOAD_GUARD_KEY);
+    if (!raw) return { ts: 0, count: 0 };
+    const parsed = JSON.parse(raw) as Partial<ReloadGuardState>;
+    return {
+      ts: typeof parsed.ts === "number" ? parsed.ts : 0,
+      count: typeof parsed.count === "number" ? parsed.count : 0,
+    };
+  } catch {
+    return { ts: 0, count: 0 };
+  }
+};
+
+const writeReloadGuard = (state: ReloadGuardState) => {
+  try {
+    sessionStorage.setItem(PWA_RELOAD_GUARD_KEY, JSON.stringify(state));
+  } catch {
+    // ignore
+  }
+};
+
+const hardReloadWithBust = () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set("_t", String(Date.now()));
+  window.location.href = url.toString();
+};
+
+async function unregisterAllServiceWorkers() {
+  if (!("serviceWorker" in navigator)) return;
+  const regs = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(regs.map((r) => r.unregister()));
+}
+
+async function clearAllCaches() {
+  if (!("caches" in window)) return;
+  const keys = await caches.keys();
+  await Promise.all(keys.map((k) => caches.delete(k)));
+}
+
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
   const lastPromptedSwUrlRef = useRef<string | null>(null);
@@ -35,23 +83,25 @@ export function PWAUpdatePrompt() {
   // Show toast if we just updated (flag set before reload)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     const flag = sessionStorage.getItem(PWA_UPDATE_FLAG);
     if (flag) {
       sessionStorage.removeItem(PWA_UPDATE_FLAG);
-      
-      const toastText = {
-        TR: "Uygulama güncellendi ✓",
-        EN: "App updated ✓",
-        DE: "App aktualisiert ✓",
-        FR: "Application mise à jour ✓",
-        RU: "Приложение обновлено ✓",
-        IT: "App aggiornata ✓",
-        ES: "App actualizada ✓",
-        AR: "تم تحديث التطبيق ✓",
-        UK: "Додаток оновлено ✓",
-        JA: "アプリが更新されました ✓",
-      }[language] ?? "App updated ✓";
+
+      const toastText =
+        {
+          TR: "Uygulama güncellendi ✓",
+          EN: "App updated ✓",
+          DE: "App aktualisiert ✓",
+          FR: "Application mise à jour ✓",
+          RU: "Приложение обновлено ✓",
+          IT: "App aggiornata ✓",
+          ES: "App actualizada ✓",
+          AR: "تم تحديث التطبيق ✓",
+          UK: "Додаток оновлено ✓",
+          JA: "アプリが更新されました ✓",
+          PT: "App updated ✓",
+        }[language] ?? "App updated ✓";
 
       // Short delay to let the app settle
       setTimeout(() => {
@@ -67,6 +117,12 @@ export function PWAUpdatePrompt() {
     // Skip in preview/development environments
     if (isPreviewEnvironment()) {
       console.log("[PWA Update] Skipping in preview environment:", window.location.hostname);
+      return;
+    }
+
+    // If we detected a reload loop earlier in this session, disable the update manager.
+    if (sessionStorage.getItem(PWA_DISABLE_UPDATES_KEY) === "1") {
+      console.warn("[PWA Update] Disabled due to previous reload loop; skipping SW update manager.");
       return;
     }
 
@@ -90,31 +146,35 @@ export function PWAUpdatePrompt() {
 
       lastPromptedSwUrlRef.current = waitingUrl;
 
-      // Auto-apply the update without showing prompt
       try {
         // Force update check to get the absolute latest SW
         await registration?.update();
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 300));
         await registration?.update();
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         const latestWaiting = registration?.waiting;
         console.log("[PWA Update] ✅ Auto-applying LATEST update:", {
           scriptURL: latestWaiting?.scriptURL,
-          state: latestWaiting?.state
+          state: latestWaiting?.state,
         });
 
         // Set flag before reload so we can show toast after
         sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
 
-        // Use vite-plugin-pwa helper if available
+        // Use vite-plugin-pwa helper if available (it can reload itself)
         if (updateSWRef.current) {
+          try {
+            sessionStorage.setItem(PWA_RELOAD_SCHEDULED_AT_KEY, String(Date.now()));
+          } catch {
+            // ignore
+          }
           console.log("[PWA Update] Using updateSW helper for auto-update");
           void updateSWRef.current(true);
           return;
         }
 
-        // Fallback - tell the waiting SW to take over
+        // Fallback - tell the waiting SW to take over; controllerchange listener will reload once.
         if (latestWaiting) {
           console.log("[PWA Update] Using SKIP_WAITING message for auto-update");
           latestWaiting.postMessage({ type: "SKIP_WAITING" });
@@ -125,6 +185,11 @@ export function PWAUpdatePrompt() {
         // Even on error, try to apply
         if (updateSWRef.current) {
           sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
+          try {
+            sessionStorage.setItem(PWA_RELOAD_SCHEDULED_AT_KEY, String(Date.now()));
+          } catch {
+            // ignore
+          }
           void updateSWRef.current(true);
         }
       }
@@ -145,31 +210,30 @@ export function PWAUpdatePrompt() {
           installing: !!registration?.installing,
         });
 
-        // If there's already a waiting worker, auto-apply immediately.
-        if (registration?.waiting) {
-          console.log("[PWA Update] Found waiting worker, auto-applying update");
-          applyUpdateAutomatically();
-        }
-
         const requestUpdateCheck = async () => {
-          console.log("[PWA Update] Checking for updates...");
           try {
             await registration?.update();
             if (registration?.waiting) {
               console.log("[PWA Update] New version waiting after check, auto-applying");
               applyUpdateAutomatically();
-            } else {
-              console.log("[PWA Update] No new version found");
             }
           } catch (e) {
             console.log("[PWA Update] Update check error:", e);
           }
         };
 
-        // Nuclear option: if a new publish is detected but the browser refuses to install a new SW,
-        // we unregister + clear caches once and reload. This maximizes "always latest" behavior.
-        const forceHardUpdate = async (reason: string) => {
+        // Hard update (unregister + clear caches) is a last resort and MUST be guarded.
+        const forceHardUpdate = async (reason: string, fingerprint?: string) => {
           console.log("[PWA Update] ☢️ Forcing hard update:", reason);
+
+          if (fingerprint) {
+            const last = sessionStorage.getItem(PWA_HARD_UPDATE_FINGERPRINT_KEY);
+            if (last === fingerprint) {
+              console.log("[PWA Update] Hard update already attempted for fingerprint; skipping", fingerprint);
+              return;
+            }
+            sessionStorage.setItem(PWA_HARD_UPDATE_FINGERPRINT_KEY, fingerprint);
+          }
 
           try {
             sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
@@ -180,30 +244,38 @@ export function PWAUpdatePrompt() {
           try {
             if (registration) {
               await registration.unregister();
+            } else {
+              await unregisterAllServiceWorkers();
             }
           } catch {
             // ignore
           }
 
           try {
-            if ("caches" in window) {
-              const keys = await caches.keys();
-              await Promise.all(keys.map((k) => caches.delete(k)));
-            }
+            await clearAllCaches();
           } catch {
             // ignore
           }
 
-          window.location.reload();
+          hardReloadWithBust();
         };
 
-        // Extra-fast detection for installed PWAs:
-        // version.json is fetched with no-store to bypass caches; if it changes, we force a SW update + reload.
+        // If there's already a waiting worker, auto-apply.
+        if (registration?.waiting) {
+          console.log("[PWA Update] Found waiting worker, auto-applying update");
+          applyUpdateAutomatically();
+        }
+
+        // version.json is fetched with no-store to bypass caches; if it changes, we trigger update.
         const pollVersionJson = async () => {
           try {
             const res = await fetch("/version.json", { cache: "no-store" });
             if (!res.ok) return;
-            const v = (await res.json()) as { version?: string; buildNumber?: number; releaseDate?: string };
+            const v = (await res.json()) as {
+              version?: string;
+              buildNumber?: number;
+              releaseDate?: string;
+            };
             const fingerprint = `${v?.version ?? ""}-${v?.buildNumber ?? ""}-${v?.releaseDate ?? ""}`;
             if (!fingerprint || fingerprint === "--") return;
 
@@ -213,7 +285,7 @@ export function PWAUpdatePrompt() {
             }
 
             if (lastSeenVersionRef.current !== fingerprint) {
-              console.log("[PWA Update] 🔥 version.json changed → forcing immediate update", {
+              console.log("[PWA Update] 🔥 version.json changed → checking update", {
                 from: lastSeenVersionRef.current,
                 to: fingerprint,
               });
@@ -221,9 +293,9 @@ export function PWAUpdatePrompt() {
 
               await requestUpdateCheck();
 
-              // If we still don't have a waiting SW, go nuclear once (per fingerprint).
+              // If still no waiting SW, do ONE guarded hard update for this fingerprint.
               if (!registration?.waiting) {
-                await forceHardUpdate("version_json_changed_no_waiting_sw");
+                await forceHardUpdate("version_json_changed_no_waiting_sw", fingerprint);
               }
             }
           } catch {
@@ -231,36 +303,28 @@ export function PWAUpdatePrompt() {
           }
         };
 
-        // ULTRA-AGGRESSIVE update checks (foreground) - every 3 seconds
-        const interval = window.setInterval(requestUpdateCheck, 3 * 1000);
-        const versionInterval = window.setInterval(pollVersionJson, 3 * 1000);
+        // Reasonable update checks (avoid aggressive loops in production)
+        const interval = window.setInterval(requestUpdateCheck, 60 * 1000);
+        const versionInterval = window.setInterval(pollVersionJson, 60 * 1000);
 
-        // Check IMMEDIATELY on page load
-        setTimeout(requestUpdateCheck, 600);
-        setTimeout(requestUpdateCheck, 1600);
-        setTimeout(pollVersionJson, 800);
+        // One early check after load
+        setTimeout(requestUpdateCheck, 1500);
+        setTimeout(pollVersionJson, 2500);
 
         const onFastTrigger = () => {
-          requestUpdateCheck();
+          void requestUpdateCheck();
           void pollVersionJson();
         };
 
-        // Check immediately on visibility change
         const onVisible = () => {
-          if (document.visibilityState === "visible") {
-            onFastTrigger();
-          }
+          if (document.visibilityState === "visible") onFastTrigger();
         };
 
-        // Listen to all triggers for immediate update detection
         window.addEventListener("focus", onFastTrigger);
         window.addEventListener("online", onFastTrigger);
         document.addEventListener("visibilitychange", onVisible);
-
-        // Also check when page becomes interactive again
         window.addEventListener("pageshow", onFastTrigger);
 
-        // Check on any user interaction (first touch/click)
         const onFirstInteraction = () => {
           onFastTrigger();
         };
@@ -300,12 +364,54 @@ export function PWAUpdatePrompt() {
       }
     });
 
-    // Fallback reload when the new SW takes control.
-    const onControllerChange = () => {
-      console.log("[PWA Update] Controller changed, setting flag and reloading...");
-      sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
+    // Reload when the new SW takes control — with loop protection.
+    const onControllerChange = async () => {
+      const now = Date.now();
+
+      // If an explicit reload was already scheduled very recently, skip double-reload.
+      const scheduledAt = Number(sessionStorage.getItem(PWA_RELOAD_SCHEDULED_AT_KEY) ?? "0");
+      if (scheduledAt && now - scheduledAt < 8000) {
+        console.log("[PWA Update] controllerchange: reload already scheduled, skipping");
+        return;
+      }
+
+      // Detect rapid reload loops (3 controllerchanges within 15s)
+      const prev = readReloadGuard();
+      const isRapid = prev.ts && now - prev.ts < 15000;
+      const next: ReloadGuardState = isRapid
+        ? { ts: prev.ts, count: prev.count + 1 }
+        : { ts: now, count: 1 };
+      writeReloadGuard(next);
+
+      if (next.count >= 3) {
+        console.warn("[PWA Update] Detected reload loop; disabling updates and hard-refreshing without SW");
+        try {
+          sessionStorage.setItem(PWA_DISABLE_UPDATES_KEY, "1");
+        } catch {
+          // ignore
+        }
+
+        try {
+          await unregisterAllServiceWorkers();
+          await clearAllCaches();
+        } catch {
+          // ignore
+        }
+
+        hardReloadWithBust();
+        return;
+      }
+
+      console.log("[PWA Update] Controller changed, reloading once...");
+      try {
+        sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
+        sessionStorage.setItem(PWA_RELOAD_SCHEDULED_AT_KEY, String(now));
+      } catch {
+        // ignore
+      }
       window.location.reload();
     };
+
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
 
     return () => {
