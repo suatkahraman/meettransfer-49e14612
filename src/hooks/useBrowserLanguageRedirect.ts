@@ -5,6 +5,22 @@ import { Language, SUPPORTED_LANGUAGES } from "./useLanguageFromUrl";
 const LANGUAGE_DETECTED_KEY = "meet_transfer_lang_detected";
 const GEO_LANG_VALUE_KEY = "meet_transfer_detected_lang";
 
+const safeStorageGet = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeStorageSet = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+};
+
 // Country code to language mapping
 const COUNTRY_TO_LANGUAGE: Record<string, Language> = {
   // Turkish-speaking
@@ -100,7 +116,7 @@ export const useBrowserLanguageRedirect = () => {
 
   useEffect(() => {
     // Only run on first visit
-    if (localStorage.getItem(LANGUAGE_DETECTED_KEY)) {
+    if (safeStorageGet(LANGUAGE_DETECTED_KEY)) {
       return;
     }
 
@@ -111,7 +127,7 @@ export const useBrowserLanguageRedirect = () => {
     
     if (languagePrefixes.includes(firstPart)) {
       // Already on a language path, mark as detected
-      localStorage.setItem(LANGUAGE_DETECTED_KEY, "true");
+      safeStorageSet(LANGUAGE_DETECTED_KEY, "true");
       return;
     }
 
@@ -176,8 +192,8 @@ export const useBrowserLanguageRedirect = () => {
       }
 
       // Mark as detected and save the language
-      localStorage.setItem(LANGUAGE_DETECTED_KEY, "true");
-      localStorage.setItem(GEO_LANG_VALUE_KEY, detectedLang);
+      safeStorageSet(LANGUAGE_DETECTED_KEY, "true");
+      safeStorageSet(GEO_LANG_VALUE_KEY, detectedLang);
       setIsDetecting(false);
 
       // Redirect if not English

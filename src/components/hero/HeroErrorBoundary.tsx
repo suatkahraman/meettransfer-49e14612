@@ -13,6 +13,7 @@ interface State {
   retryCount: number;
   isChunkError: boolean;
   isRefreshing: boolean;
+  errorAt: number;
 }
 
 function isChunkLoadError(error: Error): boolean {
@@ -68,11 +69,12 @@ class HeroErrorBoundary extends Component<Props, State> {
       retryCount: 0,
       isChunkError: false,
       isRefreshing: false,
+      errorAt: 0,
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
-    return { hasError: true, isChunkError: isChunkLoadError(error) };
+    return { hasError: true, isChunkError: isChunkLoadError(error), errorAt: Date.now() };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
@@ -99,6 +101,7 @@ class HeroErrorBoundary extends Component<Props, State> {
       isRetrying: true,
       retryCount: prev.retryCount + 1,
       isChunkError: false,
+      errorAt: 0,
     }));
 
     // Reset retrying state after a moment
@@ -109,15 +112,29 @@ class HeroErrorBoundary extends Component<Props, State> {
 
   handleHardRefresh = async () => {
     const lastRefreshKey = "hero_chunk_error_last_refresh";
-    const lastRefresh = sessionStorage.getItem(lastRefreshKey);
     const now = Date.now();
 
-    // Prevent refresh loops
-    if (lastRefresh && now - parseInt(lastRefresh) < 30000) {
-      return;
+    let lastRefresh: string | null = null;
+    try {
+      lastRefresh = sessionStorage.getItem(lastRefreshKey);
+    } catch {
+      // sessionStorage may be blocked in some browsers; ignore
     }
 
-    sessionStorage.setItem(lastRefreshKey, now.toString());
+    // Prevent refresh loops (only if we can read the timestamp)
+    if (lastRefresh) {
+      const parsed = parseInt(lastRefresh, 10);
+      if (!Number.isNaN(parsed) && now - parsed < 30000) {
+        return;
+      }
+    }
+
+    try {
+      sessionStorage.setItem(lastRefreshKey, now.toString());
+    } catch {
+      // ignore
+    }
+
     this.setState({ isRefreshing: true });
 
     try {
@@ -137,62 +154,64 @@ class HeroErrorBoundary extends Component<Props, State> {
   };
 
   render() {
+    // During retry, don't swap the whole hero into a skeleton again; try rendering immediately.
     if (this.state.isRetrying) {
-      return <HeroSkeleton />;
+      return this.props.children;
     }
 
     if (this.state.hasError) {
-      // Show skeleton with subtle error indicator after retries exhausted
-      if (this.state.retryCount >= 1 || this.state.isChunkError) {
-        return (
-          <section className="relative overflow-hidden bg-background">
-            <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-background" />
-
-            <div className="container relative z-10 px-4 py-16 md:py-24">
-              <div className="max-w-md mx-auto text-center space-y-6">
-                {/* Icon */}
-                <div className="flex justify-center">
-                  <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
-                    {this.state.isChunkError ? (
-                      <Wifi className="h-8 w-8 text-amber-500" />
-                    ) : (
-                      <AlertCircle className="h-8 w-8 text-amber-500" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Message */}
-                <div className="space-y-2">
-                  <h2 className="text-xl font-semibold text-foreground">
-                    {this.state.isChunkError ? "Yeni Sürüm Hazır" : "Yükleme Hatası"}
-                  </h2>
-                  <p className="text-muted-foreground text-sm">
-                    {this.state.isChunkError
-                      ? "Sayfa güncellendi. Yeni sürümü yüklemek için önbellek temizlenerek yenilenecek."
-                      : "Rezervasyon formu yüklenirken bir sorun oluştu. Lütfen sayfayı yenileyin."}
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  {!this.state.isChunkError && (
-                    <Button onClick={this.handleRetry} variant="outline" className="gap-2">
-                      <RefreshCw className="h-4 w-4" />
-                      Tekrar Dene
-                    </Button>
-                  )}
-                  <Button onClick={this.handleRefresh} className="gap-2" disabled={this.state.isRefreshing}>
-                    <RefreshCw className={this.state.isRefreshing ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
-                    {this.state.isRefreshing ? "Yenileniyor..." : "Önbelleği Temizle & Yenile"}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </section>
-        );
+      // Time-based skeleton (never data/locale/image-based). Keeps UX smooth without deadlocking.
+      const msSinceError = Date.now() - (this.state.errorAt || 0);
+      if (!this.state.isChunkError && msSinceError < 650) {
+        return <HeroSkeleton />;
       }
 
-      return <HeroSkeleton />;
+      return (
+        <section className="relative overflow-hidden bg-background">
+          <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-background" />
+
+          <div className="container relative z-10 px-4 py-16 md:py-24">
+            <div className="max-w-md mx-auto text-center space-y-6">
+              {/* Icon */}
+              <div className="flex justify-center">
+                <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  {this.state.isChunkError ? (
+                    <Wifi className="h-8 w-8 text-amber-500" />
+                  ) : (
+                    <AlertCircle className="h-8 w-8 text-amber-500" />
+                  )}
+                </div>
+              </div>
+
+              {/* Message */}
+              <div className="space-y-2">
+                <h2 className="text-xl font-semibold text-foreground">
+                  {this.state.isChunkError ? "Yeni Sürüm Hazır" : "Yükleme Hatası"}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {this.state.isChunkError
+                    ? "Sayfa güncellendi. Yeni sürümü yüklemek için önbellek temizlenerek yenilenecek."
+                    : "Rezervasyon formu yüklenirken bir sorun oluştu. Lütfen sayfayı yenileyin."}
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                {!this.state.isChunkError && (
+                  <Button onClick={this.handleRetry} variant="outline" className="gap-2">
+                    <RefreshCw className="h-4 w-4" />
+                    Tekrar Dene
+                  </Button>
+                )}
+                <Button onClick={this.handleRefresh} className="gap-2" disabled={this.state.isRefreshing}>
+                  <RefreshCw className={this.state.isRefreshing ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+                  {this.state.isRefreshing ? "Yenileniyor..." : "Önbelleği Temizle & Yenile"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
     }
 
     return this.props.children;
