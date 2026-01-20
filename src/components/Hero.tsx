@@ -13,12 +13,14 @@ import { HeroHeader } from "@/components/hero/HeroHeader";
 import { HeroTrustBadges } from "@/components/hero/HeroTrustBadges";
 import { HeroBackground } from "@/components/hero/HeroBackground";
 
-// Lazy load heavier form components - they render after initial paint
-const RideFormContent = lazy(() => import("@/components/hero/RideFormContent").then(m => ({ default: m.RideFormContent })));
-const HourlyFormContent = lazy(() => import("@/components/hero/HourlyFormContent").then(m => ({ default: m.HourlyFormContent })));
+// Non-lazy imports for critical booking form components
+import { RideFormContent } from "@/components/hero/RideFormContent";
+import { HourlyFormContent } from "@/components/hero/HourlyFormContent";
+import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
+
+// Only lazy load non-critical visual components
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
 const ReturnTripPromoBanner = lazy(() => import("@/components/hero/ReturnTripPromoBanner").then(m => ({ default: m.ReturnTripPromoBanner })));
-const SwipeableBookingCard = lazy(() => import("@/components/hero/SwipeableBookingCard").then(m => ({ default: m.SwipeableBookingCard })));
 
 // Minimal skeleton for form content
 const FormSkeleton = () => (
@@ -96,111 +98,107 @@ export const Hero = () => {
             </Suspense>
 
             {/* Booking Form Card - Enhanced visibility */}
-            <Suspense fallback={<div className="bg-card rounded-2xl shadow-lg p-4"><FormSkeleton /></div>}>
-              <SwipeableBookingCard 
-                activeTab={activeTab} 
-                setActiveTab={setActiveTab}
-                language={language}
-                t={t}
-              >
-                {/* Tabs */}
-                <div className="flex bg-muted/50 relative">
-                  <div 
-                    className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300"
-                    style={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }}
-                  />
-                  <button 
-                    onClick={() => setActiveTab("ride")} 
-                    className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative",
-                      activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <Car className="h-4 w-4 md:h-4 md:w-4" />
-                    <span>{t("pointToPoint") || "Transfer"}</span>
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab("hourly")} 
-                    className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm",
-                      activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <Timer className="h-4 w-4 md:h-4 md:w-4" />
-                    <span>{t("perHour") || "Hourly"}</span>
-                  </button>
-                </div>
+            <SwipeableBookingCard 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab}
+              language={language}
+              t={t}
+            >
+              {/* Tabs */}
+              <div className="flex bg-muted/50 relative">
+                <div 
+                  className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300"
+                  style={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }}
+                />
+                <button 
+                  onClick={() => setActiveTab("ride")} 
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative",
+                    activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Car className="h-4 w-4 md:h-4 md:w-4" />
+                  <span>{t("pointToPoint") || "Transfer"}</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab("hourly")} 
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm",
+                    activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Timer className="h-4 w-4 md:h-4 md:w-4" />
+                  <span>{t("perHour") || "Hourly"}</span>
+                </button>
+              </div>
 
-                {/* Form Content */}
-                <div className="p-4 sm:p-4 md:p-5 lg:p-5">
-                  <Suspense fallback={<FormSkeleton />}>
-                    {activeTab === "ride" ? (
-                      <RideFormContent
-                        pickup={rideForm.pickup}
-                        dropoff={rideForm.dropoff}
-                        date={rideForm.date}
-                        time={rideForm.time}
-                        passengers={rideForm.passengers}
-                        vehicleType={rideForm.vehicleType}
-                        allVehiclePrices={rideForm.allVehiclePrices}
-                        loadingTransferPrice={rideForm.loadingTransferPrice}
-                        transferPriceCurrency={rideForm.transferPriceCurrency}
-                        submitting={rideForm.submitting}
-                        language={language}
-                        t={t}
-                        onPickupSelected={rideForm.handlePickupSelected}
-                        onDropoffSelected={rideForm.handleDropoffSelected}
-                        onSwapLocations={rideForm.handleSwapLocations}
-                        setDate={rideForm.handleSetDate}
-                        setTime={rideForm.handleSetTime}
-                        setPassengers={rideForm.handleSetPassengers}
-                        setVehicleType={rideForm.handleSetVehicleType}
-                        handleRideContinue={rideForm.handleRideContinue}
-                        // Return trip
-                        returnDate={rideForm.returnDate}
-                        returnTime={rideForm.returnTime}
-                        hasReturnTrip={rideForm.hasReturnTrip}
-                        setReturnDate={rideForm.handleSetReturnDate}
-                        setReturnTime={rideForm.handleSetReturnTime}
-                        setHasReturnTrip={rideForm.handleSetHasReturnTrip}
-                        // Extras
-                        babySeatCount={rideForm.babySeatCount}
-                        luggageCount={rideForm.luggageCount}
-                        setBabySeatCount={rideForm.handleSetBabySeatCount}
-                        setLuggageCount={rideForm.handleSetLuggageCount}
-                        // Route region detection
-                        routeRegion={rideForm.routeRegion}
-                      />
-                    ) : (
-                      <HourlyFormContent
-                        hourlyCity={hourlyForm.hourlyCity}
-                        hourlyDuration={hourlyForm.hourlyDuration}
-                        customHours={hourlyForm.customHours}
-                        hourlyDate={hourlyForm.hourlyDate}
-                        hourlyTime={hourlyForm.hourlyTime}
-                        hourlyPassengers={hourlyForm.hourlyPassengers}
-                        hourlyVehicleType={hourlyForm.hourlyVehicleType}
-                        allHourlyPrices={hourlyForm.allHourlyPrices}
-                        loadingPrice={hourlyForm.loadingPrice}
-                        submitting={hourlyForm.submitting}
-                        availableCities={hourlyForm.availableCities}
-                        availableDurations={hourlyForm.availableDurations}
-                        language={language}
-                        t={t}
-                        setHourlyCity={hourlyForm.handleSetHourlyCity}
-                        setHourlyDuration={hourlyForm.handleSetHourlyDuration}
-                        setCustomHours={hourlyForm.handleSetCustomHours}
-                        setHourlyDate={hourlyForm.handleSetHourlyDate}
-                        setHourlyTime={hourlyForm.handleSetHourlyTime}
-                        setHourlyPassengers={hourlyForm.handleSetHourlyPassengers}
-                        setHourlyVehicleType={hourlyForm.handleSetHourlyVehicleType}
-                        handleHourlyContinue={hourlyForm.handleHourlyContinue}
-                      />
-                    )}
-                  </Suspense>
-                </div>
-              </SwipeableBookingCard>
-            </Suspense>
+              {/* Form Content */}
+              <div className="p-4 sm:p-4 md:p-5 lg:p-5">
+                {activeTab === "ride" ? (
+                  <RideFormContent
+                    pickup={rideForm.pickup}
+                    dropoff={rideForm.dropoff}
+                    date={rideForm.date}
+                    time={rideForm.time}
+                    passengers={rideForm.passengers}
+                    vehicleType={rideForm.vehicleType}
+                    allVehiclePrices={rideForm.allVehiclePrices}
+                    loadingTransferPrice={rideForm.loadingTransferPrice}
+                    transferPriceCurrency={rideForm.transferPriceCurrency}
+                    submitting={rideForm.submitting}
+                    language={language}
+                    t={t}
+                    onPickupSelected={rideForm.handlePickupSelected}
+                    onDropoffSelected={rideForm.handleDropoffSelected}
+                    onSwapLocations={rideForm.handleSwapLocations}
+                    setDate={rideForm.handleSetDate}
+                    setTime={rideForm.handleSetTime}
+                    setPassengers={rideForm.handleSetPassengers}
+                    setVehicleType={rideForm.handleSetVehicleType}
+                    handleRideContinue={rideForm.handleRideContinue}
+                    // Return trip
+                    returnDate={rideForm.returnDate}
+                    returnTime={rideForm.returnTime}
+                    hasReturnTrip={rideForm.hasReturnTrip}
+                    setReturnDate={rideForm.handleSetReturnDate}
+                    setReturnTime={rideForm.handleSetReturnTime}
+                    setHasReturnTrip={rideForm.handleSetHasReturnTrip}
+                    // Extras
+                    babySeatCount={rideForm.babySeatCount}
+                    luggageCount={rideForm.luggageCount}
+                    setBabySeatCount={rideForm.handleSetBabySeatCount}
+                    setLuggageCount={rideForm.handleSetLuggageCount}
+                    // Route region detection
+                    routeRegion={rideForm.routeRegion}
+                  />
+                ) : (
+                  <HourlyFormContent
+                    hourlyCity={hourlyForm.hourlyCity}
+                    hourlyDuration={hourlyForm.hourlyDuration}
+                    customHours={hourlyForm.customHours}
+                    hourlyDate={hourlyForm.hourlyDate}
+                    hourlyTime={hourlyForm.hourlyTime}
+                    hourlyPassengers={hourlyForm.hourlyPassengers}
+                    hourlyVehicleType={hourlyForm.hourlyVehicleType}
+                    allHourlyPrices={hourlyForm.allHourlyPrices}
+                    loadingPrice={hourlyForm.loadingPrice}
+                    submitting={hourlyForm.submitting}
+                    availableCities={hourlyForm.availableCities}
+                    availableDurations={hourlyForm.availableDurations}
+                    language={language}
+                    t={t}
+                    setHourlyCity={hourlyForm.handleSetHourlyCity}
+                    setHourlyDuration={hourlyForm.handleSetHourlyDuration}
+                    setCustomHours={hourlyForm.handleSetCustomHours}
+                    setHourlyDate={hourlyForm.handleSetHourlyDate}
+                    setHourlyTime={hourlyForm.handleSetHourlyTime}
+                    setHourlyPassengers={hourlyForm.handleSetHourlyPassengers}
+                    setHourlyVehicleType={hourlyForm.handleSetHourlyVehicleType}
+                    handleHourlyContinue={hourlyForm.handleHourlyContinue}
+                  />
+                )}
+              </div>
+            </SwipeableBookingCard>
 
             <HeroTrustBadges />
           </div>
