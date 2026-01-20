@@ -123,6 +123,20 @@ export const useBrowserLanguageRedirect = () => {
   const [isDetecting, setIsDetecting] = useState(false);
 
   useEffect(() => {
+    // Check if already on a language-prefixed path FIRST - this must never redirect away
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const firstPart = pathParts[0]?.toLowerCase();
+    const languagePrefixes = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt"];
+    const isOnLanguagePath = languagePrefixes.includes(firstPart);
+    
+    // CRITICAL: If user manually navigated to a language path, respect it completely
+    if (isOnLanguagePath) {
+      safeStorageSet(LANGUAGE_DETECTED_KEY, "true");
+      setSessionGuard();
+      console.log("[BrowserLangRedirect] Already on language path:", firstPart, "- no redirect");
+      return;
+    }
+
     // Run at most once per tab/session even if storage is blocked
     if (hasSessionGuard()) {
       return;
@@ -134,13 +148,9 @@ export const useBrowserLanguageRedirect = () => {
       return;
     }
 
-    // Check if already on a language-prefixed path
-    const pathParts = location.pathname.split("/").filter(Boolean);
-    const firstPart = pathParts[0]?.toLowerCase();
-    const languagePrefixes = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt"];
-    
-    if (languagePrefixes.includes(firstPart)) {
-      // Already on a language path, mark as detected
+    // Only proceed with geo detection if on root path
+    if (location.pathname !== "/" && location.pathname !== "") {
+      // On some other non-language path, don't interfere
       safeStorageSet(LANGUAGE_DETECTED_KEY, "true");
       setSessionGuard();
       return;
