@@ -454,6 +454,112 @@
         var dismissInterval = null;
         var DISMISS_EVENT = "lovable:app-mounted";
 
+        // Capture early boot errors (resource load failures, JS runtime errors)
+        // so we can diagnose cases where React never mounts on production.
+        var bootErrors = [];
+        function pushBootError(entry) {
+          try {
+            if (!entry) return;
+            bootErrors.push(entry);
+            if (bootErrors.length > 20) bootErrors.shift();
+            try {
+              window.__BOOT_ERRORS__ = bootErrors;
+            } catch (e) {}
+          } catch (e) {}
+        }
+
+        function getDebugReport() {
+          var lines = [];
+          try {
+            lines.push("URL: " + String(window.location.href));
+          } catch (e) {}
+          try {
+            lines.push("UA: " + String(navigator.userAgent));
+          } catch (e) {}
+          try {
+            lines.push("Time: " + new Date().toISOString());
+          } catch (e) {}
+          lines.push("Errors: " + String(bootErrors.length));
+          lines.push("---");
+
+          for (var i = 0; i < bootErrors.length; i++) {
+            try {
+              var e = bootErrors[i];
+              lines.push("#" + (i + 1) + " " + (e.type || "error"));
+              if (e.url) lines.push("url: " + e.url);
+              if (e.tag) lines.push("tag: " + e.tag);
+              if (e.message) lines.push("message: " + e.message);
+              if (e.filename) lines.push("file: " + e.filename);
+              if (e.lineno != null) lines.push("line: " + e.lineno + ":" + e.colno);
+              if (e.stack) lines.push("stack: " + e.stack);
+              lines.push("---");
+            } catch (err) {}
+          }
+
+          // Extra hint: list last few resource URLs we attempted to load.
+          try {
+            if (window.performance && performance.getEntriesByType) {
+              var res = performance.getEntriesByType("resource");
+              var tail = res.slice(Math.max(0, res.length - 15));
+              lines.push("Resources (last " + tail.length + "):");
+              for (var j = 0; j < tail.length; j++) {
+                try {
+                  var r = tail[j];
+                  if (r && r.name) lines.push("- " + r.name);
+                } catch (e2) {}
+              }
+            }
+          } catch (e) {}
+
+          return lines.join("\n");
+        }
+
+        try {
+          window.addEventListener(
+            "error",
+            function (event) {
+              try {
+                // Resource loading error (script/link/img)
+                var t = event && event.target;
+                var tag = t && t.tagName ? String(t.tagName).toLowerCase() : null;
+                var url = null;
+                try {
+                  url = t && (t.src || t.href) ? String(t.src || t.href) : null;
+                } catch (e) {}
+
+                if (tag && url) {
+                  pushBootError({ type: "resource", tag: tag, url: url });
+                  return;
+                }
+
+                // JS runtime error
+                pushBootError({
+                  type: "runtime",
+                  message: event && event.message ? String(event.message) : "Unknown error",
+                  filename: event && event.filename ? String(event.filename) : null,
+                  lineno: event && event.lineno != null ? event.lineno : null,
+                  colno: event && event.colno != null ? event.colno : null,
+                  stack: event && event.error && event.error.stack ? String(event.error.stack) : null,
+                });
+              } catch (e) {}
+            },
+            true
+          );
+        } catch (e) {}
+
+        try {
+          window.addEventListener("unhandledrejection", function (event) {
+            try {
+              var reason = event && event.reason;
+              pushBootError({
+                type: "unhandledrejection",
+                message: reason && reason.message ? String(reason.message) : String(reason || "Unknown rejection"),
+                stack: reason && reason.stack ? String(reason.stack) : null,
+              });
+            } catch (e) {}
+          });
+        } catch (e) {}
+
         function removeOverlay() {
           try {
             if (dismissInterval) {
@@ -593,12 +699,50 @@
             hardRecover();
           };
 
+          var copy = createGhostButton("Detayları Kopyala");
+          copy.onclick = function () {
+            var text = "";
+            try {
+              text = getDebugReport();
+            } catch (e) {
+              text = "Debug report unavailable";
+            }
+
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text);
+              } else {
+                window.prompt("Kopyalayın:", text);
+              }
+            } catch (e) {
+              try {
+                window.prompt("Kopyalayın:", text);
+              } catch (e2) {}
+            }
+          };
+
           actions.appendChild(retry);
           actions.appendChild(fix);
+          actions.appendChild(copy);
+
+          var details = document.createElement("details");
+          details.style.cssText = "margin-top:12px;border:1px solid hsl(var(--foreground) / 0.12);border-radius:12px;padding:10px;";
+
+          var summary = document.createElement("summary");
+          summary.textContent = "Teknik detaylar";
+          summary.style.cssText = "cursor:pointer;font-weight:600;color:hsl(var(--foreground) / 0.85);";
+
+          var pre = document.createElement("pre");
+          pre.textContent = getDebugReport();
+          pre.style.cssText = "margin-top:10px;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.4;color:hsl(var(--foreground) / 0.78);max-height:220px;overflow:auto;";
+
+          details.appendChild(summary);
+          details.appendChild(pre);
 
           card.appendChild(title);
           card.appendChild(desc);
           card.appendChild(actions);
+          card.appendChild(details);
           overlay.appendChild(card);
           document.body.appendChild(overlay);
 
