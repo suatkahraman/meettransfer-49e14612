@@ -18,7 +18,7 @@ interface SEOHeadProps {
 }
 
 // All supported language prefixes in URL paths
-const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar", "tr", "uk", "ja"];
+const LANGUAGE_PREFIXES = ["de", "fr", "ru", "it", "es", "ar", "tr", "uk", "ja", "pt"];
 
 // Language code mapping for hreflang attributes
 const LANGUAGE_CODES: Record<Language, string> = {
@@ -32,6 +32,7 @@ const LANGUAGE_CODES: Record<Language, string> = {
   TR: "tr",
   UK: "uk",
   JA: "ja",
+  PT: "pt",
 };
 
 // Default OG images for different page types (1200x630 recommended for social media)

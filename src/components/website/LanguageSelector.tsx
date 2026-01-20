@@ -19,9 +19,10 @@ const languages = [
   { code: "ES" as Language, label: "Español", flag: "🇪🇸", prefix: "/es" },
   { code: "AR" as Language, label: "العربية", flag: "🇸🇦", prefix: "/ar" },
   { code: "JA" as Language, label: "日本語", flag: "🇯🇵", prefix: "/ja" },
+  { code: "PT" as Language, label: "Português", flag: "🇵🇹", prefix: "/pt" },
 ] as const;
 
-const LANGUAGE_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja"];
+const LANGUAGE_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt"];
 
 const LanguageSelector = () => {
   const { language } = useLanguage();
