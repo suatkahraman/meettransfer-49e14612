@@ -147,15 +147,15 @@ export function PWADebugPanel() {
     }
   }, []);
 
-  // Initial fetch and periodic refresh
+  // Initial fetch and periodic refresh (only when panel is open)
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible || !isOpen) return;
 
     fetchSWInfo();
-    const interval = setInterval(fetchSWInfo, 5000);
+    const interval = setInterval(fetchSWInfo, 15000);
 
     return () => clearInterval(interval);
-  }, [isVisible, fetchSWInfo]);
+  }, [isVisible, isOpen, fetchSWInfo]);
 
   // Check for updates
   const handleCheckUpdate = useCallback(async () => {
