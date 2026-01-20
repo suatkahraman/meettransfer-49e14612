@@ -21,6 +21,7 @@ import {
   Clock,
 } from "lucide-react";
 import { loadGoogleMapsScript, isGoogleMapsLoaded, getGoogleMaps } from "@/utils/googleMapsLoader";
+import { PWAHealthPanel } from "@/components/debug/PWAHealthPanel";
 
 interface LogEntry {
   timestamp: string;
@@ -466,6 +467,9 @@ export default function DebugPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* PWA Health Panel - Real-time */}
+        <PWAHealthPanel />
 
         {/* System Info */}
         <Card>
