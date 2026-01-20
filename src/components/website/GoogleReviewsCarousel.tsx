@@ -190,18 +190,8 @@ const GoogleReviewsCarousel = () => {
           </p>
         )}
         <div className="flex items-center gap-3 pt-4 border-t">
-          {review.avatar ? (
-            <img 
-              src={review.avatar} 
-              alt={review.name}
-              className="w-10 h-10 rounded-full object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling?.classList.remove('hidden');
-              }}
-            />
-          ) : null}
-          <div className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center ${review.avatar ? 'hidden' : ''}`}>
+          {/* Initial-based avatar only - no profile pictures for performance */}
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
             <span className="font-bold text-primary">
               {review.name.charAt(0)}
             </span>
