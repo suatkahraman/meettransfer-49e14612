@@ -498,6 +498,25 @@ export default defineConfig(({ mode }) => ({
         }
       }
     },
+    // Optimize module preloading - don't preload heavy vendor chunks
+    modulePreload: {
+      resolveDependencies: (filename: string, deps: string[], { hostId, hostType }: { hostId: string; hostType: 'html' | 'js' }) => {
+        // Don't preload heavy/deferred chunks
+        return deps.filter((dep: string) => {
+          // Skip preloading these - they're loaded on demand
+          if (dep.includes('vendor-radix-components') ||
+              dep.includes('vendor-motion') ||
+              dep.includes('vendor-map') ||
+              dep.includes('vendor-pdf') ||
+              dep.includes('vendor-excel') ||
+              dep.includes('vendor-markdown') ||
+              dep.includes('vendor-carousel')) {
+            return false;
+          }
+          return true;
+        });
+      }
+    },
     // Increase chunk size warning limit
     chunkSizeWarningLimit: 500,
     // Enable source maps for production debugging

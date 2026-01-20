@@ -1,10 +1,10 @@
 import {
-  Dialog,
+  LazyDialog as Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/lazy-dialog";
 import { Share, Plus, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import logo from "@/assets/meet-transfer-logo.webp";
