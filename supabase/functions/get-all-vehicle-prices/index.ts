@@ -79,7 +79,17 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("🚗 Getting all vehicle prices for route:", pickup, "→", dropoff);
 
     // Detect region from locations - this is the authoritative source
-    const region: VehicleRegion = detectRegion(pickup, dropoff);
+    // PRIORITY CHECK: Turkey keywords before Dubai to prevent false positives
+    const combinedLocation = (pickup + ' ' + dropoff).toLowerCase();
+    const hasTurkeyKeywords = ['istanbul', 'ankara', 'antalya', 'izmir', 'bodrum', 'dalaman', 'turkiye', 'turkey', 'taksim', 'kadikoy', 'besiktas', 'fethiye', 'marmaris', 'alanya', 'belek', 'side', 'kas', 'kalkan', 'cappadocia', 'goreme', 'bursa', 'konya', 'adana', 'trabzon', 'mugla', 'denizli', 'pamukkale'].some(k => combinedLocation.includes(k));
+    
+    let region: VehicleRegion = detectRegion(pickup, dropoff);
+    // Override to Turkey if Turkey keywords detected but region is incorrectly dubai
+    if (hasTurkeyKeywords && region === 'dubai') {
+      console.log("🔄 Overriding region from dubai to turkey (Turkey keywords detected)");
+      region = 'turkey';
+    }
+    
     const isDubai = region === 'dubai';
     const isSwitzerlandRegion = region === 'switzerland';
     const activeVehicleTypes = getVehicleTypesForRegion(region);

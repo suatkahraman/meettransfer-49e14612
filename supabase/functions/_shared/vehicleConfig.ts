@@ -53,10 +53,29 @@ export function getVehicleLabel(vehicleType: string): string {
   return VEHICLE_LABELS[vehicleType] || vehicleType;
 }
 
+// Normalize Turkish characters for reliable matching
+function normalizeTurkishChars(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/İ/g, 'i')
+    .replace(/I/g, 'i')  
+    .replace(/ı/g, 'i')
+    .replace(/Ğ/g, 'g')
+    .replace(/ğ/g, 'g')
+    .replace(/Ü/g, 'u')
+    .replace(/ü/g, 'u')
+    .replace(/Ş/g, 's')
+    .replace(/ş/g, 's')
+    .replace(/Ö/g, 'o')
+    .replace(/ö/g, 'o')
+    .replace(/Ç/g, 'c')
+    .replace(/ç/g, 'c');
+}
+
 // Check if location is in Dubai/UAE
 export function isDubaiLocation(location: string): boolean {
   if (!location) return false;
-  const normalizedLocation = location.toLowerCase();
+  const normalizedLocation = normalizeTurkishChars(location);
   
   const dubaiKeywords = [
     'dubai', 'دبي', 'burj khalifa', 'palm jumeirah', 'dubai mall', 'dubai marina',
@@ -78,15 +97,20 @@ export function isDubaiLocation(location: string): boolean {
 // Check if location is in Turkey
 export function isTurkeyLocation(location: string): boolean {
   if (!location) return false;
-  const normalizedLocation = location.toLowerCase();
+  const normalizedLocation = normalizeTurkishChars(location);
   
   const turkeyKeywords = [
-    'turkey', 'türkiye', 'turkiye', 'türkei',
-    'ist', 'istanbul', 'saw', 'sabiha', 'ayt', 'antalya', 'bjv', 'bodrum',
-    'dlm', 'dalaman', 'adb', 'izmir', 'ankara', 'bursa', 'konya', 'adana',
-    'cappadocia', 'kapadokya', 'goreme', 'göreme', 'fethiye', 'marmaris',
-    'kusadasi', 'kuşadası', 'cesme', 'çeşme', 'alanya', 'belek', 'side',
-    'taksim', 'sultanahmet', 'kadikoy', 'kadıköy', 'besiktas', 'beşiktaş',
+    'turkey', 'turkiye',
+    'istanbul', 'sabiha', 'antalya', 'bodrum',
+    'dalaman', 'izmir', 'ankara', 'bursa', 'konya', 'adana',
+    'cappadocia', 'kapadokya', 'goreme', 'fethiye', 'marmaris',
+    'kusadasi', 'cesme', 'alanya', 'belek', 'side',
+    'taksim', 'sultanahmet', 'kadikoy', 'besiktas',
+    'arnavutkoy', 'beyoglu', 'uskudar', 'sisli', 'bakirkoy',
+    'kemer', 'kas', 'kalkan', 'oludeniz', 'mugla', 'aydin',
+    'denizli', 'pamukkale', 'efes', 'ephesus', 'selcuk',
+    'mardin', 'midyat', 'gaziantep', 'sanliurfa',
+    'trabzon', 'samsun', 'mersin', 'hatay', 'ercan',
   ];
   
   return turkeyKeywords.some(keyword => normalizedLocation.includes(keyword));
@@ -134,26 +158,26 @@ export function isValidSwitzerlandRoute(pickup: string, dropoff: string): boolea
 // Check if location is in Switzerland
 export function isSwitzerlandLocation(location: string): boolean {
   if (!location) return false;
-  const normalizedLocation = location.toLowerCase();
+  const normalizedLocation = normalizeTurkishChars(location);
   
   const switzerlandKeywords = [
     // Country
     'switzerland', 'schweiz', 'suisse', 'svizzera', 'swiss',
     // Airports
-    'zrh', 'zurich airport', 'zürich flughafen',
-    'gva', 'geneva airport', 'genève aéroport',
+    'zrh', 'zurich airport', 'zurich flughafen',
+    'gva', 'geneva airport', 'geneve aeroport',
     'bsl', 'basel airport', 'euroairport', 'basel-mulhouse',
     'mxp', 'milan malpensa', 'malpensa',
     // Ski resorts
     'st. moritz', 'st moritz', 'saint moritz', 'zermatt', 'verbier', 'gstaad',
     'davos', 'arosa', 'crans-montana', 'crans montana', 'klosters',
     'grindelwald', 'wengen', 'lauterbrunnen', 'interlaken', 'saas-fee',
-    'laax', 'flims', 'engelberg', 'andermatt', 'leukerbad', 'champéry', 'nendaz',
+    'laax', 'flims', 'engelberg', 'andermatt', 'leukerbad', 'champery', 'nendaz',
     // Cities
-    'zurich', 'zürich', 'geneva', 'genève', 'genf', 'basel', 'bâle',
+    'zurich', 'geneva', 'genf', 'basel', 'bale',
     'bern', 'berne', 'lausanne', 'lucerne', 'luzern', 'lugano', 'montreux',
     // Regions
-    'graubünden', 'graubunden', 'grisons', 'valais', 'wallis', 'engadin', 'engadine',
+    'graubunden', 'grisons', 'valais', 'wallis', 'engadin', 'engadine',
     'swiss alps', 'matterhorn', 'jungfrau',
   ];
   
