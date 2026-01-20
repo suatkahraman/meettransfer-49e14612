@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Kurtarma • MeetTransfer</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+        padding: 24px;
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      .card {
+        border: 1px solid rgba(127,127,127,0.25);
+        border-radius: 14px;
+        padding: 18px;
+      }
+      h1 { font-size: 18px; margin: 0 0 8px; }
+      p { margin: 0 0 12px; opacity: 0.9; }
+      .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+      button {
+        appearance: none;
+        border: 1px solid rgba(127,127,127,0.35);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-weight: 600;
+        cursor: pointer;
+        background: rgba(127,127,127,0.12);
+      }
+      button.primary { background: rgba(127,127,127,0.22); }
+      button:disabled { opacity: 0.6; cursor: not-allowed; }
+      .log {
+        margin-top: 14px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(127,127,127,0.25);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        min-height: 110px;
+      }
+      .muted { opacity: 0.75; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Kurtarma Aracı</h1>
+        <p>
+          Sayfa açılmıyorsa (özellikle güncellemeden sonra), bu sayfa Service Worker ve Cache’i temizleyip yeniden
+          yüklemenize yardımcı olur.
+        </p>
+        <p class="muted">
+          İpucu: <b>recover.html?to=/tr</b> ile TR ana sayfasına, <b>recover.html?to=/tr/debug</b> ile debug sayfasına
+          yönlendirebilirsiniz.
+        </p>
+
+        <div class="row">
+          <button class="primary" id="btn-hard">SW + Cache Temizle (Önerilen)</button>
+          <button id="btn-soft">Sadece Yenile</button>
+        </div>
+
+        <div class="log" id="log" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const logEl = document.getElementById('log');
+        const btnHard = document.getElementById('btn-hard');
+        const btnSoft = document.getElementById('btn-soft');
+
+        function log(line) {
+          const ts = new Date().toISOString().slice(11, 19);
+          logEl.textContent += `[${ts}] ${line}\n`;
+        }
+
+        function getRedirectPath() {
+          const url = new URL(window.location.href);
+          const to = url.searchParams.get('to') || '/';
+          // Basic safety: only allow same-origin relative paths
+          if (!to.startsWith('/')) return '/';
+          return to;
+        }
+
+        function redirect(bust = true) {
+          const to = getRedirectPath();
+          const target = bust ? `${to}${to.includes('?') ? '&' : '?'}_t=${Date.now()}` : to;
+          log(`Yönlendiriliyor: ${target}`);
+          window.location.replace(target);
+        }
+
+        async function clearCaches() {
+          if (!('caches' in window)) {
+            log('Cache API desteklenmiyor.');
+            return;
+          }
+          const names = await caches.keys();
+          log(`Cache bulundu: ${names.length}`);
+          await Promise.all(
+            names.map((name) => {
+              if (String(name).includes('push')) return Promise.resolve();
+              return caches.delete(name);
+            })
+          );
+          log('Cache temizlendi.');
+        }
+
+        async function unregisterSW() {
+          if (!('serviceWorker' in navigator)) {
+            log('Service Worker desteklenmiyor.');
+            return;
+          }
+          const regs = await navigator.serviceWorker.getRegistrations();
+          log(`Service Worker kaydı: ${regs.length}`);
+          await Promise.all(regs.map((r) => r.unregister()));
+          log('Service Worker kayıtları kaldırıldı.');
+        }
+
+        function clearGuards() {
+          try {
+            sessionStorage.removeItem('chunk_error_last_refresh');
+            sessionStorage.removeItem('pwa_reload_guard');
+            sessionStorage.removeItem('pwa_update_reload_guard');
+          } catch (e) {
+            // ignore
+          }
+          log('Oturum koruma bayrakları temizlendi.');
+        }
+
+        async function hardRecover() {
+          btnHard.disabled = true;
+          btnSoft.disabled = true;
+          log('Başlıyor: SW + Cache temizleme');
+
+          clearGuards();
+
+          try {
+            await unregisterSW();
+          } catch (e) {
+            log(`SW kaldırma hatası: ${String(e)}`);
+          }
+
+          try {
+            await clearCaches();
+          } catch (e) {
+            log(`Cache temizleme hatası: ${String(e)}`);
+          }
+
+          log('Tamamlandı. 500ms sonra yönlendirme...');
+          setTimeout(() => redirect(true), 500);
+        }
+
+        function softReload() {
+          btnHard.disabled = true;
+          btnSoft.disabled = true;
+          log('Sadece yenileniyor...');
+          redirect(true);
+        }
+
+        btnHard.addEventListener('click', hardRecover);
+        btnSoft.addEventListener('click', softReload);
+
+        log('Hazır.');
+        log(`Hedef: ${getRedirectPath()}`);
+      })();
+    </script>
+  </body>
+</html>
