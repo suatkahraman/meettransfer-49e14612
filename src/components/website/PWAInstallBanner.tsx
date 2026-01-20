@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
-import logo from "@/assets/meet-transfer-logo-optimized.webp";
+import logo from "@/assets/meet-transfer-logo.webp";
 
 const BANNER_DISMISSED_KEY = "pwa-banner-dismissed";
 const BANNER_DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days

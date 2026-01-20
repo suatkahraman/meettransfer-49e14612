@@ -4,7 +4,7 @@ import { Menu, X, LogOut, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
-import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
+import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
 
 export const Header = () => {
   const { user, signOut } = useAuth();

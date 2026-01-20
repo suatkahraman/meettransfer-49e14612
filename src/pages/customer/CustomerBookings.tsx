@@ -17,7 +17,7 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
-import meetTransferLogo from '@/assets/meet-transfer-logo-optimized.webp';
+import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 import { WHATSAPP_NUMBER } from '@/lib/contact';

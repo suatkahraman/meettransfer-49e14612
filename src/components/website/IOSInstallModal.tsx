@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Share, Plus, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import logo from "@/assets/meet-transfer-logo-optimized.webp";
+import logo from "@/assets/meet-transfer-logo.webp";
 
 interface IOSInstallModalProps {
   open: boolean;

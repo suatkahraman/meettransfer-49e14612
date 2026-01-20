@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { CURRENCY_OPTIONS, getCurrencySymbol } from '@/lib/currency';
-import logo from '@/assets/meet-transfer-logo-optimized.webp';
+import logo from '@/assets/meet-transfer-logo.webp';
 
 interface TransferLine {
   id: string;

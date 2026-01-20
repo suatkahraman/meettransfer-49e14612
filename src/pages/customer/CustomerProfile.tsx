@@ -12,7 +12,7 @@ import { ArrowLeft, Save, Loader2, User, Phone, Mail, CheckCircle, AlertCircle, 
 import { PhoneInput } from '@/components/ui/phone-input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
-import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
+import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
