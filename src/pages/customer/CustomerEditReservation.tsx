@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import { motion } from 'framer-motion';
-import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
+import meetTransferLogo from '@/assets/meet-transfer-logo-optimized.webp';
 
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';

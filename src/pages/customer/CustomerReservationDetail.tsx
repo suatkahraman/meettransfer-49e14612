@@ -21,7 +21,7 @@ import MissingInfoAlerts from '@/components/customer/MissingInfoAlerts';
 import { ReviewPromptBanner } from '@/components/customer/ReviewPromptBanner';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
+import meetTransferLogo from '@/assets/meet-transfer-logo-optimized.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 import { WHATSAPP_NUMBER, getWhatsAppUrl } from '@/lib/contact';
