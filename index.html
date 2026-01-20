@@ -64,7 +64,7 @@
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
     <!-- LCP Image Preload - Build-safe (public folder) -->
-    <link rel="preload" as="image" fetchpriority="high" href="/hero-lcp.webp" type="image/webp" />
+    <!-- No LCP image preload - using CSS gradients only for performance -->
     
     <!-- Font Preload - ONLY critical hero fonts (Playfair Bold for heading) -->
     <!-- Playfair Display 700 - Hero heading only -->
@@ -559,7 +559,7 @@
           </div>
         </div>
         <!-- LCP Image - eager loaded with fetchpriority -->
-        <img src="/hero-lcp.webp" alt="" fetchpriority="high" decoding="sync" loading="eager" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.4;z-index:0;" />
+        <!-- No LCP image - using CSS gradient only for performance -->
       </section>
     </div>
     <script>
