@@ -34,7 +34,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Language } from '@/contexts/LanguageContext';
-import meetTransferLogo from '@/assets/meet-transfer-logo-small.webp';
+import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from '@/lib/contact';

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowLeft, Download, Share, Plus, MoreVertical, Check, Bell, Zap, Wifi, AlertTriangle, Menu, Chrome, Globe } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import logo from '@/assets/meet-transfer-logo-optimized.webp';
+import logo from '@/assets/meet-transfer-logo.webp';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useLanguage } from '@/contexts/LanguageContext';
 

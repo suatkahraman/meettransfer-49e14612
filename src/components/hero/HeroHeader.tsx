@@ -3,7 +3,7 @@ import { Shield, Zap, Star, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // Logo - inline for LCP optimization
-import meetTransferLogo from "@/assets/meet-transfer-logo-small.webp";
+import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
 
 interface HeroHeaderProps {
   language: string;
