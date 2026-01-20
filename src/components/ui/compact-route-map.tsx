@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 import { MapPin, Loader2, Clock, Route, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { loadGoogleMapsScript, getGoogleMaps, geocodeAddress as geoCode } from '@/utils/googleMapsLoader';
 
 interface CompactRouteMapProps {
   pickup: string;
@@ -18,71 +19,7 @@ interface TripInfo {
   distance: string;
 }
 
-// Same API key as Google Places Autocomplete
-const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
-
-// Track script loading globally
-let isScriptLoading = false;
-let isScriptLoaded = false;
-const loadCallbacks: (() => void)[] = [];
-
-const getGoogleMaps = (): any => {
-  return (window as any).google?.maps;
-};
-
-const loadGoogleMapsScript = (): Promise<void> => {
-  return new Promise((resolve) => {
-    const maps = getGoogleMaps();
-    if (isScriptLoaded && maps) {
-      resolve();
-      return;
-    }
-
-    if (isScriptLoading) {
-      loadCallbacks.push(resolve);
-      return;
-    }
-
-    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
-    if (existingScript && getGoogleMaps()) {
-      isScriptLoaded = true;
-      resolve();
-      return;
-    }
-
-    if (existingScript) {
-      existingScript.addEventListener('load', () => {
-        isScriptLoaded = true;
-        resolve();
-      });
-      return;
-    }
-
-    isScriptLoading = true;
-
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry&loading=async`;
-    script.async = true;
-    script.defer = true;
-
-    script.onload = () => {
-      isScriptLoaded = true;
-      isScriptLoading = false;
-      resolve();
-      loadCallbacks.forEach((cb) => cb());
-      loadCallbacks.length = 0;
-    };
-
-    script.onerror = () => {
-      isScriptLoading = false;
-      console.error('Failed to load Google Maps script');
-    };
-
-    document.head.appendChild(script);
-  });
-};
-
-export const CompactRouteMap = ({
+const CompactRouteMapComponent = ({
   pickup,
   dropoff,
   className,
@@ -95,26 +32,6 @@ export const CompactRouteMap = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tripInfo, setTripInfo] = useState<TripInfo | null>(null);
-
-  const geocodeAddress = async (address: string): Promise<Coordinates | null> => {
-    const maps = getGoogleMaps();
-    if (!maps) return null;
-    
-    return new Promise((resolve) => {
-      const geocoder = new maps.Geocoder();
-      geocoder.geocode(
-        { address, region: 'TR' },
-        (results: any[], status: string) => {
-          if (status === 'OK' && results && results[0]) {
-            const location = results[0].geometry.location;
-            resolve({ lat: location.lat(), lng: location.lng() });
-          } else {
-            resolve(null);
-          }
-        }
-      );
-    });
-  };
 
   useEffect(() => {
     let isCancelled = false;
@@ -140,8 +57,8 @@ export const CompactRouteMap = ({
       }
 
       const [pickupResult, dropoffResult] = await Promise.all([
-        geocodeAddress(pickup),
-        geocodeAddress(dropoff)
+        geoCode(pickup),
+        geoCode(dropoff)
       ]);
 
       if (isCancelled) return;
@@ -306,4 +223,5 @@ export const CompactRouteMap = ({
   );
 };
 
+export const CompactRouteMap = memo(CompactRouteMapComponent);
 export default CompactRouteMap;

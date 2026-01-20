@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { loadGoogleMapsScript, getGoogleMaps, geocodeAddress as geoCode } from '@/utils/googleMapsLoader';
 
 interface GoogleRouteMapProps {
   pickup: string;
@@ -21,74 +22,7 @@ interface TripInfo {
   distance: string;
 }
 
-// Same API key as Google Places Autocomplete
-const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
-
-// Track script loading globally
-let isScriptLoading = false;
-let isScriptLoaded = false;
-const loadCallbacks: (() => void)[] = [];
-
-// Access google maps via any to avoid type conflicts
-const getGoogleMaps = (): any => {
-  return (window as any).google?.maps;
-};
-
-const loadGoogleMapsScript = (): Promise<void> => {
-  return new Promise((resolve) => {
-    const maps = getGoogleMaps();
-    if (isScriptLoaded && maps) {
-      resolve();
-      return;
-    }
-
-    if (isScriptLoading) {
-      loadCallbacks.push(resolve);
-      return;
-    }
-
-    // Check if script already exists (may have been loaded by autocomplete)
-    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
-    if (existingScript && getGoogleMaps()) {
-      isScriptLoaded = true;
-      resolve();
-      return;
-    }
-
-    if (existingScript) {
-      // Script exists but not yet loaded, wait for it
-      existingScript.addEventListener('load', () => {
-        isScriptLoaded = true;
-        resolve();
-      });
-      return;
-    }
-
-    isScriptLoading = true;
-
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry&loading=async`;
-    script.async = true;
-    script.defer = true;
-
-    script.onload = () => {
-      isScriptLoaded = true;
-      isScriptLoading = false;
-      resolve();
-      loadCallbacks.forEach((cb) => cb());
-      loadCallbacks.length = 0;
-    };
-
-    script.onerror = () => {
-      isScriptLoading = false;
-      console.error('Failed to load Google Maps script');
-    };
-
-    document.head.appendChild(script);
-  });
-};
-
-export const GoogleRouteMap = ({
+const GoogleRouteMapComponent = ({
   pickup,
   dropoff,
   customerPhone,
@@ -103,27 +37,6 @@ export const GoogleRouteMap = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tripInfo, setTripInfo] = useState<TripInfo | null>(null);
-
-  // Geocode an address to coordinates
-  const geocodeAddress = async (address: string): Promise<Coordinates | null> => {
-    const maps = getGoogleMaps();
-    if (!maps) return null;
-    
-    return new Promise((resolve) => {
-      const geocoder = new maps.Geocoder();
-      geocoder.geocode(
-        { address, region: 'TR' },
-        (results: any[], status: string) => {
-          if (status === 'OK' && results && results[0]) {
-            const location = results[0].geometry.location;
-            resolve({ lat: location.lat(), lng: location.lng() });
-          } else {
-            resolve(null);
-          }
-        }
-      );
-    });
-  };
 
   useEffect(() => {
     let isCancelled = false;
@@ -150,8 +63,8 @@ export const GoogleRouteMap = ({
 
       // Geocode both addresses
       const [pickupResult, dropoffResult] = await Promise.all([
-        geocodeAddress(pickup),
-        geocodeAddress(dropoff)
+        geoCode(pickup),
+        geoCode(dropoff)
       ]);
 
       if (isCancelled) return;
@@ -396,4 +309,5 @@ export const GoogleRouteMap = ({
   );
 };
 
+export const GoogleRouteMap = memo(GoogleRouteMapComponent);
 export default GoogleRouteMap;
