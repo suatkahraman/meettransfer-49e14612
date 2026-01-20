@@ -37,6 +37,8 @@ createRoot(document.getElementById("root")!).render(<App />);
 // Signal that the React app has mounted (used by index.html boot recovery watchdog)
 try {
   (window as any).__APP_MOUNTED__ = true;
+  // Also emit an event so the watchdog UI can dismiss itself if it already showed.
+  window.dispatchEvent(new Event("lovable:app-mounted"));
 } catch {
   // ignore
 }
