@@ -98,7 +98,11 @@ serve(async (req) => {
     if (reservationId) {
       await supabase
         .from("reservations")
-        .update({ payment_status: "paid" })
+        .update({ 
+          payment_status: "paid",
+          payment_provider: "paypal",
+          payment_completed_at: new Date().toISOString()
+        })
         .eq("id", reservationId);
 
       console.log("Reservation payment marked as paid:", reservationId);

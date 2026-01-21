@@ -12,6 +12,14 @@
  * - STRIPE_WEBHOOK_SECRET
  * - PAYPAL_CLIENT_ID
  * - PAYPAL_CLIENT_SECRET
+ * 
+ * PAYMENT FLOW:
+ * 1. Reservation is created first (payment NOT required)
+ * 2. User can pay anytime (after reservation, before transfer, or on transfer day)
+ * 3. Only logged-in users (customer/agency) see payment options
+ * 4. Statuses: pending, paid, partial, pay_on_transfer
  */
 
 export { PaymentMethodSelector } from "./PaymentMethodSelector";
+export { PaymentStatusBadge } from "./PaymentStatusBadge";
+export { ReservationPaymentPanel } from "./ReservationPaymentPanel";
