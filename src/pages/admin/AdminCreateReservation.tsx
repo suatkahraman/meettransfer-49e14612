@@ -12,8 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus, Users, MapPin, Calendar, Banknote, ClipboardCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { ArrowLeft, Save, Plus, BookmarkPlus, FileText, X, UserPlus, Users, MapPin, Calendar, Banknote, ClipboardCheck, AlertCircle, CheckCircle2, CreditCard } from 'lucide-react';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
@@ -21,6 +21,7 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
+import { AdminPaymentLinkGenerator } from '@/components/admin/AdminPaymentLinkGenerator';
 
 // Airports list removed - pickup is now free text
 // Use centralized vehicle types
@@ -93,6 +94,14 @@ const AdminCreateReservation = () => {
   const [templateName, setTemplateName] = useState('');
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  
+  // Payment link dialog state
+  const [paymentLinkDialog, setPaymentLinkDialog] = useState(false);
+  const [createdReservation, setCreatedReservation] = useState<{
+    id: string;
+    reservation_code: string;
+  } | null>(null);
+  const [customerEmail, setCustomerEmail] = useState('');
   
   // Pre-fill from URL params (for duplicate functionality)
   const [formData, setFormData] = useState({
@@ -443,8 +452,18 @@ const AdminCreateReservation = () => {
         }
       }
 
-      toast.success('Reservation created successfully');
-      navigate('/admin/reservations');
+      // If payment_link is selected, show payment link dialog
+      if (formData.payment_type === 'payment_link' && reservation) {
+        setCreatedReservation({
+          id: reservation.id,
+          reservation_code: reservation.reservation_code || reservation.id.slice(0, 8),
+        });
+        setPaymentLinkDialog(true);
+        toast.success('Rezervasyon oluşturuldu! Şimdi ödeme linki oluşturabilirsiniz.');
+      } else {
+        toast.success('Reservation created successfully');
+        navigate('/admin/reservations');
+      }
     } catch (error: any) {
       console.error('Error creating reservation:', error);
       toast.error(error.message || 'Failed to create reservation');
@@ -992,6 +1011,68 @@ const AdminCreateReservation = () => {
               <Button onClick={saveAsTemplate} disabled={savingTemplate}>
                 <BookmarkPlus className="h-4 w-4 mr-2" />
                 {savingTemplate ? 'Kaydediliyor...' : 'Şablonu Kaydet'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Payment Link Dialog */}
+        <Dialog open={paymentLinkDialog} onOpenChange={(open) => {
+          if (!open) {
+            navigate('/admin/reservations');
+          }
+          setPaymentLinkDialog(open);
+        }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Ödeme Linki Oluştur
+              </DialogTitle>
+              <DialogDescription>
+                Rezervasyon #{createdReservation?.reservation_code} için ödeme linki oluşturun ve müşteriye gönderin.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              {/* Customer email input if not available */}
+              <div className="space-y-2">
+                <Label>Müşteri E-posta Adresi</Label>
+                <Input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="musteri@email.com"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ödeme linki bu adrese gönderilecek
+                </p>
+              </div>
+
+              {createdReservation && (
+                <AdminPaymentLinkGenerator
+                  reservationId={createdReservation.id}
+                  amount={safeParseFloat(formData.price) || 0}
+                  currency={formData.price_currency}
+                  customerEmail={customerEmail}
+                  customerName={passengerNames[0] || ''}
+                  pickup={formData.pickup}
+                  dropoff={formData.dropoff}
+                  pickupDate={formData.pickup_date}
+                  pickupTime={formData.pickup_time}
+                  onLinkGenerated={(link) => {
+                    console.log('Payment link generated:', link);
+                  }}
+                  onLinkSent={() => {
+                    toast.success('Ödeme linki müşteriye gönderildi!');
+                  }}
+                />
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => navigate('/admin/reservations')}>
+                Kapat ve Bitir
               </Button>
             </DialogFooter>
           </DialogContent>
