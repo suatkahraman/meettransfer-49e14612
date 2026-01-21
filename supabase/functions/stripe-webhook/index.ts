@@ -64,7 +64,11 @@ serve(async (req) => {
         if (reservationId) {
           const { error } = await supabase
             .from("reservations")
-            .update({ payment_status: "paid" })
+            .update({ 
+              payment_status: "paid",
+              payment_provider: "stripe",
+              payment_completed_at: new Date().toISOString()
+            })
             .eq("id", reservationId);
 
           if (error) {

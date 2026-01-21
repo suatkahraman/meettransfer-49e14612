@@ -12,6 +12,12 @@
  * - STRIPE_WEBHOOK_SECRET
  * - PAYPAL_CLIENT_ID
  * - PAYPAL_CLIENT_SECRET
+ * 
+ * PAYMENT FLOW:
+ * 1. Reservation is created FIRST (payment is optional)
+ * 2. Customer can pay anytime after reservation (even on transfer day)
+ * 3. Only logged-in users (customer/agency) can access payment options
+ * 4. Supported statuses: pending, paid, partial, pay_on_transfer
  */
 
 export const paymentConfig = {
@@ -38,11 +44,20 @@ export const paymentConfig = {
   
   // Default currency
   defaultCurrency: 'EUR',
+  
+  // Payment statuses
+  statuses: {
+    PENDING: 'pending',
+    PAID: 'paid',
+    PARTIAL: 'partial',
+    PAY_ON_TRANSFER: 'pay_on_transfer',
+  } as const,
 } as const;
 
 // Type exports
 export type SupportedCurrency = typeof paymentConfig.supportedCurrencies[number];
 export type PaymentProvider = 'stripe' | 'paypal';
+export type PaymentStatus = 'pending' | 'paid' | 'partial' | 'pay_on_transfer';
 
 // Helper to check if payments are available
 export const isPaymentsEnabled = (): boolean => {

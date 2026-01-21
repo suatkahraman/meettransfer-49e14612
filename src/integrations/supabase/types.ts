@@ -1232,9 +1232,12 @@ export type Database = {
           id: string
           language: string | null
           luggage_count: number | null
+          partial_amount: number | null
           passengers: number
           payment_link: string | null
           payment_method: string | null
+          payment_provider: string | null
+          payment_status: string | null
           pickup: string
           pickup_date: string
           pickup_time: string
@@ -1272,9 +1275,12 @@ export type Database = {
           id?: string
           language?: string | null
           luggage_count?: number | null
+          partial_amount?: number | null
           passengers?: number
           payment_link?: string | null
           payment_method?: string | null
+          payment_provider?: string | null
+          payment_status?: string | null
           pickup: string
           pickup_date: string
           pickup_time: string
@@ -1312,9 +1318,12 @@ export type Database = {
           id?: string
           language?: string | null
           luggage_count?: number | null
+          partial_amount?: number | null
           passengers?: number
           payment_link?: string | null
           payment_method?: string | null
+          payment_provider?: string | null
+          payment_status?: string | null
           pickup?: string
           pickup_date?: string
           pickup_time?: string
@@ -1485,10 +1494,13 @@ export type Database = {
           last_notified_arrival_time: string | null
           luggage_count: number | null
           original_reservation_id: string | null
+          partial_amount: number | null
           passenger_cash_amount: number | null
           passenger_cash_currency: string | null
           passenger_names: string[] | null
+          payment_completed_at: string | null
           payment_link: string | null
+          payment_provider: string | null
           payment_status: string | null
           payment_type: string
           pickup: string
@@ -1538,10 +1550,13 @@ export type Database = {
           last_notified_arrival_time?: string | null
           luggage_count?: number | null
           original_reservation_id?: string | null
+          partial_amount?: number | null
           passenger_cash_amount?: number | null
           passenger_cash_currency?: string | null
           passenger_names?: string[] | null
+          payment_completed_at?: string | null
           payment_link?: string | null
+          payment_provider?: string | null
           payment_status?: string | null
           payment_type: string
           pickup: string
@@ -1591,10 +1606,13 @@ export type Database = {
           last_notified_arrival_time?: string | null
           luggage_count?: number | null
           original_reservation_id?: string | null
+          partial_amount?: number | null
           passenger_cash_amount?: number | null
           passenger_cash_currency?: string | null
           passenger_names?: string[] | null
+          payment_completed_at?: string | null
           payment_link?: string | null
+          payment_provider?: string | null
           payment_status?: string | null
           payment_type?: string
           pickup?: string
