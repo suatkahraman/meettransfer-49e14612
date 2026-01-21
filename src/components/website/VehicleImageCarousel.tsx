@@ -19,9 +19,9 @@ const generateCarouselSrcSet = (src: string): string | undefined => {
 // Default sizes attribute for carousel images
 const CAROUSEL_SIZES = "(max-width: 480px) 320px, (max-width: 768px) 480px, (max-width: 1024px) 640px, 800px";
 
-// Fixed dimensions for LCP image to prevent CLS
-const LCP_IMAGE_WIDTH = 640;
-const LCP_IMAGE_HEIGHT = 480;
+// Fixed dimensions for LCP image to prevent CLS - optimized for fast loading
+const LCP_IMAGE_WIDTH = 480;
+const LCP_IMAGE_HEIGHT = 360;
 
 interface VehicleImageCarouselProps {
   images: string[];
