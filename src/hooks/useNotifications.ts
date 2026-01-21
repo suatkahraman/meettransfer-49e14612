@@ -17,6 +17,7 @@ type NotificationType =
   | 'driver_updated_payment'
   | 'driver_reminder'
   | 'admin_updated_price'
+  | 'payment_method_changed'
   | 'other';
 
 interface NotificationOptions {
@@ -335,6 +336,31 @@ export const useNotifications = () => {
     });
   }, [sendNotification]);
 
+  // Notify admins when customer/agency changes payment method
+  const notifyAdminsPaymentMethodChanged = useCallback(async (
+    reservationId: string,
+    customerName: string,
+    oldMethod: string,
+    newMethod: string
+  ) => {
+    const methodLabels: Record<string, string> = {
+      stripe: 'Credit Card',
+      paypal: 'PayPal',
+      cash: 'Cash to Driver',
+    };
+    const oldLabel = methodLabels[oldMethod] || oldMethod;
+    const newLabel = methodLabels[newMethod] || newMethod;
+    
+    return sendNotification({
+      reservation_id: reservationId,
+      title: '💳 Payment Method Changed',
+      message: `${customerName} changed payment: ${oldLabel} → ${newLabel}`,
+      type: 'payment_method_changed',
+      notify_admins: true,
+      send_push: true,
+    });
+  }, [sendNotification]);
+
   return {
     sendNotification,
     // Customer notifications
@@ -354,5 +380,6 @@ export const useNotifications = () => {
     notifyAdminsCustomerCancelled,
     notifyAdminsDriverAccepted,
     notifyAdminsDriverUpdatedPayment,
+    notifyAdminsPaymentMethodChanged,
   };
 };

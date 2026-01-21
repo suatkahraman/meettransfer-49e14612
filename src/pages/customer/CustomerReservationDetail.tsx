@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -115,7 +116,8 @@ const CustomerReservationDetail = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const navigate = useNavigate();
-  const { emailAdminPriceAccepted, emailAdminPriceRejected, emailAdminReservationCancelled, emailDriverReservationCancelled } = useEmailNotifications();
+  const { emailAdminPriceAccepted, emailAdminPriceRejected, emailAdminReservationCancelled, emailDriverReservationCancelled, emailAdminPaymentMethodChanged } = useEmailNotifications();
+  const { notifyAdminsPaymentMethodChanged } = useNotifications();
   const { isSubscribed, subscribe, unsubscribe, isLoading: pushLoading
  } = usePushNotifications();
   const [reservation, setReservation] = useState<Reservation | null>(null);
@@ -1195,7 +1197,11 @@ const CustomerReservationDetail = () => {
                         currentPaymentStatus={reservation.payment_status as PaymentStatus}
                         currentPaymentType={reservation.payment_type}
                         locale={language === 'TR' ? 'tr' : 'en'}
-                        onMethodChanged={() => fetchReservation()}
+                        onMethodChanged={(newMethod, oldMethod) => {
+                          fetchReservation();
+                          notifyAdminsPaymentMethodChanged(reservation.id, reservation.customer_name, oldMethod, newMethod);
+                          emailAdminPaymentMethodChanged(reservation.id, reservation.customer_name, oldMethod, newMethod);
+                        }}
                         variant="compact"
                       />
                     )}
@@ -1455,7 +1461,11 @@ const CustomerReservationDetail = () => {
                     currentPaymentStatus={reservation.payment_status as PaymentStatus}
                     currentPaymentType={reservation.payment_type}
                     locale={language === 'TR' ? 'tr' : 'en'}
-                    onMethodChanged={() => fetchReservation()}
+                    onMethodChanged={(newMethod, oldMethod) => {
+                      fetchReservation();
+                      notifyAdminsPaymentMethodChanged(reservation.id, reservation.customer_name, oldMethod, newMethod);
+                      emailAdminPaymentMethodChanged(reservation.id, reservation.customer_name, oldMethod, newMethod);
+                    }}
                   />
                 )}
               </div>

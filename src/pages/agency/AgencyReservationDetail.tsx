@@ -4,6 +4,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,7 +115,8 @@ const AgencyReservationDetail = () => {
   const { id } = useParams();
   const { agencyId } = useUserRole();
   const { t, locale } = useAgencyTranslations();
-  const { emailAdminAgencyPriceApproved, emailAdminAgencyPriceRejected, emailAdminReservationCancelled } = useEmailNotifications();
+  const { emailAdminAgencyPriceApproved, emailAdminAgencyPriceRejected, emailAdminReservationCancelled, emailAdminPaymentMethodChanged } = useEmailNotifications();
+  const { notifyAdminsPaymentMethodChanged } = useNotifications();
   const navigate = useNavigate();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [agencyDetails, setAgencyDetails] = useState<AgencyReservationDetail | null>(null);
@@ -1223,7 +1225,11 @@ const AgencyReservationDetail = () => {
                 currentPaymentType={reservation.payment_type}
                 locale="tr"
                 translations={PAYMENT_METHOD_CHANGER_TR}
-                onMethodChanged={() => window.location.reload()}
+                onMethodChanged={(newMethod, oldMethod) => {
+                  notifyAdminsPaymentMethodChanged(reservation.id, reservation.customer_name, oldMethod, newMethod);
+                  emailAdminPaymentMethodChanged(reservation.id, reservation.customer_name, oldMethod, newMethod);
+                  window.location.reload();
+                }}
               />
             )}
           </div>
@@ -1238,7 +1244,11 @@ const AgencyReservationDetail = () => {
             currentPaymentType={reservation.payment_type}
             locale="tr"
             translations={PAYMENT_METHOD_CHANGER_TR}
-            onMethodChanged={() => window.location.reload()}
+            onMethodChanged={(newMethod, oldMethod) => {
+              notifyAdminsPaymentMethodChanged(reservation.id, reservation.customer_name, oldMethod, newMethod);
+              emailAdminPaymentMethodChanged(reservation.id, reservation.customer_name, oldMethod, newMethod);
+              window.location.reload();
+            }}
           />
         )}
       </main>

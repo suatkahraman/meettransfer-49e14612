@@ -32,7 +32,8 @@ type EmailType =
   | 'agency_rejected_agency'     // Admin rejects agency request → Agency
   | 'agency_price_set_agency'    // Admin sets price for agency → Agency
   | 'agency_price_approved_admin' // Agency approves price → Admin
-  | 'agency_price_rejected_admin'; // Agency rejects price → Admin
+  | 'agency_price_rejected_admin' // Agency rejects price → Admin
+  | 'payment_method_changed_admin'; // Customer/agency changes payment method → Admin
 
 interface EmailRequest {
   type: EmailType;
@@ -46,6 +47,9 @@ interface EmailRequest {
     payment_link?: string;
     agency_email?: string;
     rejection_reason?: string;
+    old_method?: string;
+    new_method?: string;
+    customer_name?: string;
   };
 }
 
@@ -1687,6 +1691,88 @@ const getEmailTemplate = (type: EmailType, data: any) => {
         `,
       };
 
+    case 'payment_method_changed_admin':
+      const methodLabels: Record<string, string> = {
+        stripe: 'Credit/Debit Card',
+        paypal: 'PayPal',
+        cash: 'Cash to Driver',
+        payment_link: 'Online Payment',
+      };
+      const oldMethodLabel = methodLabels[data.old_method] || data.old_method || 'Unknown';
+      const newMethodLabel = methodLabels[data.new_method] || data.new_method || 'Unknown';
+      
+      return {
+        subject: `💳 Payment Method Changed - ${data.reservation_code}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%); padding: 30px; text-align: center; border-radius: 12px 12px 0 0;">
+              <h1 style="color: #fff; margin: 0; font-size: 24px;">💳 Payment Method Changed</h1>
+              <p style="color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 14px;">A customer has changed their payment method</p>
+            </div>
+            
+            <div style="background: #fff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+              <div style="background: #111; padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;">
+                <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Reservation Code</p>
+                <p style="margin: 5px 0 0; font-size: 26px; font-weight: bold; color: #2196f3; letter-spacing: 3px;">${data.reservation_code}</p>
+              </div>
+
+              <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #bbdefb; text-align: center;">
+                <p style="margin: 0 0 15px; color: #1565c0; font-weight: bold; font-size: 16px;">Payment Method Change</p>
+                <div style="display: inline-block; padding: 10px 20px; background: #ffebee; border-radius: 6px; margin: 5px;">
+                  <span style="color: #c62828; text-decoration: line-through;">${oldMethodLabel}</span>
+                </div>
+                <span style="color: #666; font-size: 18px; margin: 0 10px;">→</span>
+                <div style="display: inline-block; padding: 10px 20px; background: #e8f5e9; border-radius: 6px; margin: 5px;">
+                  <span style="color: #2e7d32; font-weight: bold;">${newMethodLabel}</span>
+                </div>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666; width: 40%;"><strong>Customer Name</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.customer_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Phone</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.customer_phone}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Date & Time</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_date} at ${data.pickup_time}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Pick-up</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.pickup_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Drop-off</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee;">${data.dropoff_display}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; color: #666;"><strong>Price</strong></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #333;">${data.price_display}</td>
+                </tr>
+              </table>
+
+              <div style="text-align: center; margin-top: 25px;">
+                <a href="${baseUrl}/admin/reservations" style="display: inline-block; background: #fdd835; color: #111; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">View Reservation</a>
+              </div>
+
+              <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
+                <p>© 2025 Meet Transfer. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
     default:
       throw new Error(`Unknown email type: ${type}`);
   }
@@ -1806,7 +1892,7 @@ const handler = async (req: Request): Promise<Response> => {
     const templateData = {
       reservation_id: reservation.id,
       reservation_code: reservation.reservation_code || 'N/A',
-      customer_name: reservation.customer_name,
+      customer_name: additional_data?.customer_name || reservation.customer_name,
       customer_email: customerEmail,
       customer_phone: reservation.customer_phone,
       pickup: reservation.pickup,
@@ -1826,6 +1912,9 @@ const handler = async (req: Request): Promise<Response> => {
       driver_plate: reservation.drivers?.plate_number || additional_data?.driver_plate || null,
       agency_name: (reservation as any).agencies?.agency_name || null,
       rejection_reason: additional_data?.rejection_reason || null,
+      // Payment method change data
+      old_method: additional_data?.old_method || null,
+      new_method: additional_data?.new_method || null,
     };
 
     const template = getEmailTemplate(type, templateData);
@@ -1871,6 +1960,7 @@ const handler = async (req: Request): Promise<Response> => {
       case 'agency_request_admin':
       case 'agency_price_approved_admin':
       case 'agency_price_rejected_admin':
+      case 'payment_method_changed_admin':
         recipient = ADMIN_EMAIL;
         break;
       case 'price_set_customer':
