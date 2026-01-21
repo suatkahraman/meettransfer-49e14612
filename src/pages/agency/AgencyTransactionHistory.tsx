@@ -10,9 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Loader2, RefreshCw, ArrowUpCircle, ArrowDownCircle, Receipt, Calendar, Filter, X } from 'lucide-react';
+import { ArrowLeft, Loader2, RefreshCw, ArrowUpCircle, ArrowDownCircle, Receipt, Calendar, Filter, X, CreditCard } from 'lucide-react';
 import { format, parseISO, isAfter, isBefore, startOfDay, endOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { AgencyPaymentDialog } from '@/components/agency/AgencyPaymentDialog';
+import { isPaymentsEnabled } from '@/config/payments';
 
 interface Transaction {
   id: string;
@@ -41,6 +43,10 @@ const AgencyTransactionHistory = () => {
   const [endDate, setEndDate] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Payment dialog state
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [selectedCurrencyForPayment, setSelectedCurrencyForPayment] = useState<CurrencyBalance | null>(null);
 
   const fetchData = async (showRefresh = false) => {
     if (!agencyId) return;
@@ -273,33 +279,36 @@ const AgencyTransactionHistory = () => {
               <Card 
                 key={cb.currency}
                 className={cn(
-                  "cursor-pointer hover:shadow-lg transition-shadow",
+                  "hover:shadow-lg transition-shadow",
                   cb.netBalance > 0 
                     ? "bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-red-200 dark:border-red-800" 
                     : cb.netBalance < 0 
                       ? "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800"
                       : "bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
                 )}
-                onClick={() => navigate(`/agency/currency/${cb.currency}`)}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="font-mono text-sm">
-                      {cb.currency}
-                    </Badge>
-                  </div>
-                  <p className={cn(
-                    "text-2xl font-bold",
-                    cb.netBalance > 0 ? "text-destructive" : cb.netBalance < 0 ? "text-green-600" : ""
-                  )}>
-                    {getCurrencySymbol(cb.currency)}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                  </p>
-                  {cb.netBalance > 0 && (
-                    <p className="text-xs text-destructive mt-1">{t('amountOwed') || 'Borçlu tutar'}</p>
-                  )}
-                  {cb.netBalance < 0 && (
-                    <p className="text-xs text-green-600 mt-1">{t('creditBalance') || 'Alacak bakiyesi'}</p>
-                  )}
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/agency/currency/${cb.currency}`)}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline" className="font-mono text-sm">
+                        {cb.currency}
+                      </Badge>
+                    </div>
+                    <p className={cn(
+                      "text-2xl font-bold",
+                      cb.netBalance > 0 ? "text-destructive" : cb.netBalance < 0 ? "text-green-600" : ""
+                    )}>
+                      {getCurrencySymbol(cb.currency)}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                    </p>
+                    {cb.netBalance > 0 && (
+                      <p className="text-xs text-destructive mt-1">{t('amountOwed') || 'Borçlu tutar'}</p>
+                    )}
+                    {cb.netBalance < 0 && (
+                      <p className="text-xs text-green-600 mt-1">{t('creditBalance') || 'Alacak bakiyesi'}</p>
+                    )}
                     <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-muted-foreground">
                       <div>
                         <span>{t('total') || 'Toplam'}: </span>
@@ -310,6 +319,23 @@ const AgencyTransactionHistory = () => {
                         <span className="font-medium text-blue-600">{getCurrencySymbol(cb.currency)}{cb.totalPaid.toLocaleString('tr-TR')}</span>
                       </div>
                     </div>
+                  </div>
+                  
+                  {/* Pay Now Button - only show if balance > 0 and payments enabled */}
+                  {cb.netBalance > 0 && isPaymentsEnabled() && (
+                    <Button
+                      size="sm"
+                      className="w-full mt-3"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCurrencyForPayment(cb);
+                        setPaymentDialogOpen(true);
+                      }}
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Şimdi Öde
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -322,6 +348,20 @@ const AgencyTransactionHistory = () => {
           </Card>
         )}
 
+        {/* Payment Dialog */}
+        {selectedCurrencyForPayment && agencyId && (
+          <AgencyPaymentDialog
+            open={paymentDialogOpen}
+            onOpenChange={setPaymentDialogOpen}
+            amount={selectedCurrencyForPayment.netBalance}
+            currency={selectedCurrencyForPayment.currency}
+            agencyId={agencyId}
+            onPaymentComplete={() => {
+              setPaymentDialogOpen(false);
+              fetchData(true);
+            }}
+          />
+        )}
         {/* Transactions List */}
         <Card>
           <CardHeader>
