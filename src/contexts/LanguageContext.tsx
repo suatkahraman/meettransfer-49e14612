@@ -15455,6 +15455,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   // Main translations only – blog translations are loaded lazily via useBlogTranslations hook
   const currentTranslations = translations;
 
+  // Dev-only i18n logs can be silenced via env flag.
+  // Default: enabled (current behavior). Set VITE_I18N_LOGS="false" to disable.
+  const i18nLogsEnabled = import.meta.env.VITE_I18N_LOGS !== "false";
+
   const t = (key: string): string => {
     const translation = currentTranslations[language]?.[key];
     if (translation) {
@@ -15465,14 +15469,14 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const englishTranslation = currentTranslations["EN"]?.[key];
     if (englishTranslation) {
       // Only log in development and for non-blog keys to reduce noise
-      if (import.meta.env.DEV && !key.startsWith("blog") && !key.startsWith("seo")) {
+      if (import.meta.env.DEV && i18nLogsEnabled && !key.startsWith("blog") && !key.startsWith("seo")) {
         console.debug(`[i18n] Missing ${language} translation for: ${key}`);
       }
       return englishTranslation;
     }
     
     // Return key if no translation exists at all (likely a blog key that should use tBlog)
-    if (import.meta.env.DEV && !key.startsWith("blog")) {
+    if (import.meta.env.DEV && i18nLogsEnabled && !key.startsWith("blog")) {
       console.warn(`[i18n] Missing translation key: ${key}`);
     }
     return key;
