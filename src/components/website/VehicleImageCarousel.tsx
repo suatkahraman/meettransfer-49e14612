@@ -180,9 +180,6 @@ export const VehicleImageCarousel = memo(({
   const firstImage = images[0];
   const secondaryImages = images.slice(1);
 
-  // Generate srcset for first image (LCP) - uses higher quality
-  const firstImageSrcSet = generateCarouselSrcSet(firstImage);
-
   return (
     <div 
       ref={containerRef} 
@@ -190,11 +187,9 @@ export const VehicleImageCarousel = memo(({
       style={{ aspectRatio: `${width} / ${height}` }}
       {...swipeHandlers}
     >
-      {/* FIRST IMAGE - Static, no animation, LCP element with explicit dimensions and srcset */}
+      {/* FIRST IMAGE - LCP element: NO srcset, NO animation, NO transform */}
       <img
         src={firstImage}
-        srcSet={firstImageSrcSet}
-        sizes={firstImageSrcSet ? CAROUSEL_SIZES : undefined}
         alt={`${alt} 1`}
         width={width}
         height={height}
@@ -202,9 +197,10 @@ export const VehicleImageCarousel = memo(({
         loading="eager"
         decoding="async"
         draggable={false}
-        className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-200 ${
+        className={`absolute inset-0 w-full h-full object-cover pointer-events-none ${
           currentIndex === 0 ? 'opacity-100 z-10' : 'opacity-0 z-1'
         }`}
+        style={{ transform: 'none' }}
         onLoad={() => {
           setImagesLoaded(prev => new Set([...prev, 0]));
         }}
