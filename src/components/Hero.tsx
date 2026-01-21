@@ -28,6 +28,7 @@ const SwipeableBookingCard = lazy(() =>
 // Lazy load non-critical visual components
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
 const ReturnTripPromoBanner = lazy(() => import("@/components/hero/ReturnTripPromoBanner").then(m => ({ default: m.ReturnTripPromoBanner })));
+const PaymentComingSoonBanner = lazy(() => import("@/components/hero/PaymentComingSoonBanner").then(m => ({ default: m.PaymentComingSoonBanner })));
 
 // Skeleton for booking card - shows during hydration
 const BookingCardSkeleton = () => (
@@ -253,6 +254,11 @@ export const Hero = () => {
             </Suspense>
 
             <HeroTrustBadges />
+            
+            {/* Payment Coming Soon Banner */}
+            <Suspense fallback={null}>
+              <PaymentComingSoonBanner language={language} compact className="mt-3" />
+            </Suspense>
           </div>
 
           {/* Visual Sections */}
