@@ -10,6 +10,7 @@ const corsHeaders = {
 interface CheckoutRequest {
   reservationId?: string;
   quickBookingId?: string;
+  agencyId?: string;
   amount: number;
   currency: string;
   customerEmail?: string;
@@ -49,6 +50,7 @@ serve(async (req) => {
     const {
       reservationId,
       quickBookingId,
+      agencyId,
       amount,
       currency,
       customerEmail,
@@ -76,6 +78,7 @@ serve(async (req) => {
       currency,
       reservationId,
       quickBookingId,
+      agencyId,
     });
 
     // Convert amount to smallest currency unit (cents/kuruş)
@@ -95,7 +98,9 @@ serve(async (req) => {
                 ? `Reservation: ${reservationId}` 
                 : quickBookingId 
                   ? `Booking: ${quickBookingId}`
-                  : "Transfer booking",
+                  : agencyId
+                    ? `Agency Payment`
+                    : "Transfer booking",
             },
             unit_amount: amountInSmallestUnit,
           },
@@ -108,6 +113,9 @@ serve(async (req) => {
       metadata: {
         reservation_id: reservationId || "",
         quick_booking_id: quickBookingId || "",
+        agency_id: agencyId || "",
+        agency_amount: agencyId ? amount.toString() : "",
+        agency_currency: agencyId ? currency : "",
         customer_name: customerName || "",
       },
     });

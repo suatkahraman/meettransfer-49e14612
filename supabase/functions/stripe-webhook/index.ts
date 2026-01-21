@@ -60,6 +60,9 @@ serve(async (req) => {
 
         const reservationId = session.metadata?.reservation_id;
         const quickBookingId = session.metadata?.quick_booking_id;
+        const agencyId = session.metadata?.agency_id;
+        const agencyAmount = session.metadata?.agency_amount;
+        const agencyCurrency = session.metadata?.agency_currency;
 
         if (reservationId) {
           const { error } = await supabase
@@ -93,6 +96,48 @@ serve(async (req) => {
             console.error("Error updating quick booking status:", error);
           } else {
             console.log("Quick booking marked as paid:", quickBookingId);
+          }
+        }
+
+        // Handle agency payment
+        if (agencyId && agencyAmount) {
+          const amount = parseFloat(agencyAmount);
+          const currency = agencyCurrency || "EUR";
+          
+          console.log("Recording agency payment:", { agencyId, amount, currency });
+          
+          // Insert into agency_payments
+          const { error: paymentError } = await supabase
+            .from("agency_payments")
+            .insert({
+              agency_id: agencyId,
+              amount: amount,
+              currency: currency,
+              payment_date: new Date().toISOString().split('T')[0],
+              notes: `Stripe ile online ödeme (Session: ${session.id})`,
+            });
+
+          if (paymentError) {
+            console.error("Error recording agency payment:", paymentError);
+          } else {
+            console.log("Agency payment recorded successfully:", { agencyId, amount, currency });
+            
+            // Update agency balance (deduct the paid amount)
+            const { data: agency, error: agencyError } = await supabase
+              .from("agencies")
+              .select("balance")
+              .eq("id", agencyId)
+              .single();
+
+            if (!agencyError && agency) {
+              const newBalance = (agency.balance || 0) - amount;
+              await supabase
+                .from("agencies")
+                .update({ balance: newBalance })
+                .eq("id", agencyId);
+              
+              console.log("Agency balance updated:", { agencyId, oldBalance: agency.balance, newBalance });
+            }
           }
         }
         break;

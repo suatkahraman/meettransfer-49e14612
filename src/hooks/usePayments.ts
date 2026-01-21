@@ -13,6 +13,7 @@ import { toast } from "sonner";
 interface CreatePaymentOptions {
   reservationId?: string;
   quickBookingId?: string;
+  agencyId?: string;
   amount: number;
   currency: SupportedCurrency;
   customerEmail?: string;

@@ -9,6 +9,7 @@ const corsHeaders = {
 interface PayPalOrderRequest {
   reservationId?: string;
   quickBookingId?: string;
+  agencyId?: string;
   amount: number;
   currency: string;
   description?: string;
@@ -64,6 +65,7 @@ serve(async (req) => {
     const {
       reservationId,
       quickBookingId,
+      agencyId,
       amount,
       currency,
       description,
@@ -82,6 +84,7 @@ serve(async (req) => {
       currency,
       reservationId,
       quickBookingId,
+      agencyId,
     });
 
     // Always use sandbox for now
@@ -102,7 +105,7 @@ serve(async (req) => {
         intent: "CAPTURE",
         purchase_units: [
           {
-            reference_id: reservationId || quickBookingId || "transfer",
+            reference_id: reservationId || quickBookingId || agencyId || "transfer",
             description: description || "Transfer Service",
             amount: {
               currency_code: currency.toUpperCase(),
@@ -111,6 +114,9 @@ serve(async (req) => {
             custom_id: JSON.stringify({
               reservation_id: reservationId,
               quick_booking_id: quickBookingId,
+              agency_id: agencyId,
+              agency_amount: agencyId ? amount : undefined,
+              agency_currency: agencyId ? currency : undefined,
             }),
           },
         ],

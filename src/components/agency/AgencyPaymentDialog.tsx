@@ -46,10 +46,11 @@ export const AgencyPaymentDialog = ({
 
     // Pass agency context for payment tracking
     await redirectToPayment(selectedProvider, {
+      agencyId,
       amount,
       currency: currency as SupportedCurrency,
       description: `Acenta bakiye ödemesi - ${getCurrencySymbol(currency)}${amount.toFixed(2)}`,
-      successUrl: `${window.location.origin}/agency/payment-success?amount=${amount}&currency=${currency}`,
+      successUrl: `${window.location.origin}/agency/payment-success?amount=${amount}&currency=${currency}&agency_id=${agencyId}`,
       cancelUrl: `${window.location.origin}/agency/transactions`,
     });
   };
