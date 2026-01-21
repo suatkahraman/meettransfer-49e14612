@@ -107,11 +107,7 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'battery-charging', label: 'USB Charging', labelTr: 'USB Şarj' },
       { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
     ],
-    images: [
-      { src: sedanAirport1, alt: "Executive sedan airport transfer with professional chauffeur" },
-      { src: sedanExterior2, alt: "Elegant silver sedan for business transfers" },
-      { src: sedanInterior3, alt: "Premium sedan interior with leather seats" },
-    ],
+    images: [],
   },
   {
     value: 'mercedes-vito',
