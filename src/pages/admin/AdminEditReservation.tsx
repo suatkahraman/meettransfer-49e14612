@@ -2609,64 +2609,7 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                       </p>
                     </div>
 
-                    <Button
-                      type="button"
-                      onClick={async () => {
-                        const customerPrice = parseFloat(agencyDetails.customer_price) || 0;
-
-                        try {
-                          const { data: existingRecord } = await supabase
-                            .from('agency_reservation_details')
-                            .select('id')
-                            .eq('reservation_id', id)
-                            .maybeSingle();
-
-                          let error;
-                          
-                          if (existingRecord) {
-                            const result = await supabase
-                              .from('agency_reservation_details')
-                              .update({
-                                customer_price: customerPrice || null,
-                                agency_price_currency: agencyDetails.agency_price_currency,
-                                // company_amount artık customer_price ile aynı değeri alacak
-                                company_amount: customerPrice || null,
-                                // TRY çevirimi tamamlanma anında yapılacak
-                                company_amount_try: null,
-                                exchange_rate_used: null,
-                                conversion_date: null,
-                              })
-                              .eq('reservation_id', id);
-                            error = result.error;
-                          } else {
-                            const result = await supabase
-                              .from('agency_reservation_details')
-                              .insert({
-                                reservation_id: id,
-                                customer_price: customerPrice || null,
-                                agency_price_currency: agencyDetails.agency_price_currency,
-                                company_amount: customerPrice || null,
-                              });
-                            error = result.error;
-                          }
-
-                          if (error) {
-                            console.error('Agency details save error:', error);
-                            toast.error(error.message || 'Acenta bilgileri kaydedilemedi');
-                          } else {
-                            setAgencyPriceSaved(true);
-                            toast.success('Acenta fiyatlandırması kaydedildi');
-                          }
-                        } catch (err: any) {
-                          console.error('Agency details save exception:', err);
-                          toast.error(err.message || 'Acenta bilgileri kaydedilemedi');
-                        }
-                      }}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Acenta Fiyatlandırmasını Kaydet
-                    </Button>
+                    {/* Acenta fiyatlandırması ana form kaydı ile birlikte kaydedilir */}
                     
                     {agencyPriceSaved && (
                       <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border space-y-2">
