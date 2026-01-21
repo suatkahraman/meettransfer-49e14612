@@ -40,10 +40,10 @@ import meetTransferDubai from "@/assets/meet-transfer-dubai.png";
 import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
 
-// Sedan images - WebP optimized for hero
-import sedanAirport1 from "@/assets/vehicles/sedan-airport.webp";
-import sedanExterior2 from "@/assets/sedan-exterior-2.jpg";
-import sedanInterior3 from "@/assets/sedan-interior-3.jpg";
+// Sedan images - WebP optimized for performance (standard sedans like Toyota Corolla, Renault Megane)
+import sedanStandardAirport from "@/assets/vehicles/sedan-standard-airport.webp";
+import sedanStandardExterior from "@/assets/vehicles/sedan-standard-exterior.webp";
+import sedanStandardInterior from "@/assets/vehicles/sedan-standard-interior.webp";
 import vipVitoStarlightLuxury from "@/assets/vehicles/vip-vito-starlight.webp";
 import maybachUltraLuxury from "@/assets/vehicles/maybach-luxury.webp";
 import sprinterHotelArrival from "@/assets/vehicles/sprinter-arrival.webp";
@@ -107,7 +107,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'battery-charging', label: 'USB Charging', labelTr: 'USB Şarj' },
       { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
     ],
-    images: [],
+    images: [
+      { src: sedanStandardAirport, alt: "Standard sedan airport transfer with professional chauffeur" },
+      { src: sedanStandardExterior, alt: "Elegant sedan for business transfers" },
+      { src: sedanStandardInterior, alt: "Premium sedan interior with leather seats" },
+    ],
   },
   {
     value: 'mercedes-vito',
