@@ -98,10 +98,51 @@ export function useAdBlockDetection(): AdBlockStatus {
       setIsBlocked(blocked);
     };
 
-    // Run detection after a short delay to ensure DOM is ready
-    const timeoutId = setTimeout(detectAdBlock, 500);
+    // Defer detection until after window load AND at least 500ms to avoid blocking initial render
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let isCancelled = false;
     
-    return () => clearTimeout(timeoutId);
+    const scheduleDetection = () => {
+      if (isCancelled) return;
+      
+      // Use requestIdleCallback for lowest priority, with 2s timeout fallback
+      if ('requestIdleCallback' in window) {
+        (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(
+          () => {
+            if (!isCancelled) detectAdBlock();
+          },
+          { timeout: 2000 }
+        );
+      } else {
+        // Fallback for browsers without requestIdleCallback
+        timeoutId = setTimeout(() => {
+          if (!isCancelled) detectAdBlock();
+        }, 1000);
+      }
+    };
+    
+    // Wait for window load + 500ms minimum
+    if (document.readyState === 'complete') {
+      // Already loaded, wait 500ms more
+      timeoutId = setTimeout(scheduleDetection, 500);
+    } else {
+      const onLoad = () => {
+        // After load, wait another 500ms to ensure we're past initial render
+        timeoutId = setTimeout(scheduleDetection, 500);
+      };
+      window.addEventListener('load', onLoad, { once: true });
+      
+      return () => {
+        isCancelled = true;
+        window.removeEventListener('load', onLoad);
+        if (timeoutId) clearTimeout(timeoutId);
+      };
+    }
+    
+    return () => {
+      isCancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   const dismiss = () => {
