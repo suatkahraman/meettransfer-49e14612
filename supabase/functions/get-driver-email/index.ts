@@ -204,6 +204,25 @@ const handler = async (req: Request): Promise<Response> => {
     const email = userData.user.email;
     console.log("Found email for driver (admin request)");
 
+    // Audit log: track sensitive data access
+    const auditIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
+                    req.headers.get("cf-connecting-ip") || "unknown";
+    const userAgent = req.headers.get("user-agent") || "unknown";
+    
+    await supabase.from("audit_logs").insert({
+      user_id: user.id,
+      user_email: user.email,
+      action: "ACCESS_DRIVER_EMAIL",
+      table_name: "auth.users",
+      record_id: targetUserId,
+      new_data: { 
+        accessed_email: email ? `${email.substring(0, 3)}***` : null,
+        driver_id: driver_id || null
+      },
+      ip_address: auditIP,
+      user_agent: userAgent,
+    });
+
     return new Response(
       JSON.stringify({ 
         success: true, 

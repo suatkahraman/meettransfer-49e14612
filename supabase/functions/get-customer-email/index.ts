@@ -178,6 +178,22 @@ const handler = async (req: Request): Promise<Response> => {
     const email = userData.user.email;
     console.log("Found email for customer");
 
+    // Audit log: track sensitive data access
+    const auditIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
+                    req.headers.get("cf-connecting-ip") || "unknown";
+    const userAgent = req.headers.get("user-agent") || "unknown";
+    
+    await supabase.from("audit_logs").insert({
+      user_id: userId,
+      user_email: claimsData.user.email,
+      action: "ACCESS_CUSTOMER_EMAIL",
+      table_name: "auth.users",
+      record_id: customer_id,
+      new_data: { accessed_email: email ? `${email.substring(0, 3)}***` : null },
+      ip_address: auditIP,
+      user_agent: userAgent,
+    });
+
     return new Response(
       JSON.stringify({ 
         success: true, 
