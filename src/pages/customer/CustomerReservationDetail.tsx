@@ -19,12 +19,14 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import MissingInfoAlerts from '@/components/customer/MissingInfoAlerts';
 import { ReviewPromptBanner } from '@/components/customer/ReviewPromptBanner';
+import { ReservationPaymentPanel } from '@/components/payments';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 import { WHATSAPP_NUMBER, getWhatsAppUrl } from '@/lib/contact';
+import type { SupportedCurrency, PaymentStatus } from '@/config/payments';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,6 +63,7 @@ interface Reservation {
   payment_type: string;
   payment_status: string | null;
   payment_link: string | null;
+  partial_amount: number | null;
   price: number | null;
   price_currency: string | null;
   passenger_cash_amount: number | null;
@@ -75,6 +78,8 @@ interface Reservation {
   discount_amount: number | null;
   luggage_count: number | null;
   baby_seat_count: number | null;
+  customer_name: string;
+  customer_phone: string;
   // Place details
   pickup_place_name: string | null;
   pickup_lat: number | null;
@@ -1414,6 +1419,20 @@ const CustomerReservationDetail = () => {
                   {t('bookingConfirmed')}
                 </p>
               </div>
+            )}
+
+            {/* Payment Panel - Show for confirmed reservations with price */}
+            {reservation.price && reservation.price_currency && 
+              ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status) && (
+              <ReservationPaymentPanel
+                reservationId={reservation.id}
+                amount={reservation.price}
+                currency={reservation.price_currency as SupportedCurrency}
+                currentStatus={reservation.payment_status as PaymentStatus}
+                partialAmount={reservation.partial_amount}
+                customerName={reservation.customer_name}
+                onPaymentComplete={() => fetchReservation()}
+              />
             )}
 
             {/* Completed Message & Review Prompt */}
