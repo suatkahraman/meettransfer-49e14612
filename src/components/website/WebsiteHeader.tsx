@@ -114,8 +114,8 @@ const WebsiteHeader = () => {
           </Link>
           
           {/* Destinations Dropdown */}
-          <NavigationMenu>
-            <NavigationMenuList>
+          <NavigationMenu className="flex-none">
+            <NavigationMenuList className="flex-none">
               <NavigationMenuItem>
                 <NavigationMenuTrigger 
                   className={`text-sm font-medium bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 ${
