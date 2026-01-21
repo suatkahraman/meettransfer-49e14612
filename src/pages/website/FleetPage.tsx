@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 import { MapPin, Plane, Snowflake } from "lucide-react";
+import { PaymentComingSoonBanner } from "@/components/hero/PaymentComingSoonBanner";
 
 // Fleet images - using main assets (WebP optimized)
 import vitoVipPremium from "@/assets/vito-vip-1.jpg";
@@ -355,6 +356,9 @@ const FleetPage = () => {
             message="Hello, I need help choosing the right vehicle for my transfer."
           />
         </div>
+
+        {/* Payment Coming Soon Banner */}
+        <PaymentComingSoonBanner language={language} />
 
         {/* PWA Install Banner */}
         <PWAPromoBanner />

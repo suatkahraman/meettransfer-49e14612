@@ -7,6 +7,7 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PWAPromoBanner } from "@/components/website/PWAPromoBanner";
 import { COMPANY_NAME, GLOBAL_OFFICES } from "@/lib/contact";
+import { PaymentComingSoonBanner } from "@/components/hero/PaymentComingSoonBanner";
 
 const cities = [
   // Turkey
@@ -23,7 +24,7 @@ const cities = [
 ];
 
 const AboutPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const stats = [
     { value: "10+", label: t("yearsExperience") },
@@ -177,6 +178,9 @@ const AboutPage = () => {
             message="Hello, I would like to learn more about Meet Transfer services."
           />
         </div>
+
+        {/* Payment Coming Soon Banner */}
+        <PaymentComingSoonBanner language={language} />
 
         {/* PWA Install Banner */}
         <PWAPromoBanner />
