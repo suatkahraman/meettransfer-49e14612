@@ -21,6 +21,7 @@ import { AirlineDisplay } from '@/components/ui/airline-display';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 import { AgencyReservationPaymentPanel } from '@/components/agency/AgencyReservationPaymentPanel';
+import { PaymentMethodChanger, PAYMENT_METHOD_CHANGER_TR } from '@/components/payments';
 import type { SupportedCurrency, PaymentStatus } from '@/config/payments';
 
 interface Driver {
@@ -1182,35 +1183,62 @@ const AgencyReservationDetail = () => {
         {/* Online Payment Panel - Show for payment_link type reservations */}
         {isOnlinePayment && reservation.price && reservation.price_currency && 
           ['customer_approved', 'confirmed', 'sent_to_driver', 'active'].includes(reservation.status) && (
-          <AgencyReservationPaymentPanel
+          <div className="space-y-4">
+            <AgencyReservationPaymentPanel
+              reservationId={reservation.id}
+              amount={reservation.price}
+              currency={reservation.price_currency as SupportedCurrency}
+              currentStatus={reservation.payment_status as PaymentStatus}
+              partialAmount={reservation.partial_amount}
+              paymentLink={reservation.payment_link}
+              customerName={reservation.customer_name}
+              onPaymentComplete={() => window.location.reload()}
+              translations={{
+                payment: t('paymentTitle') || 'Ödeme',
+                total: t('totalAmount') || 'Toplam',
+                paid: t('paidAmount') || 'ödendi',
+                cashToDriver: t('cashToDriver') || 'Şoföre Nakit',
+                toBePaid: t('toBePaid') || 'şoföre ödenecek',
+                creditCard: t('creditCard') || 'Kredi/Banka Kartı',
+                visaMastercard: t('visaMastercard') || 'Visa, Mastercard, vb.',
+                fastSecure: t('fastSecure') || 'Hızlı ve güvenli',
+                payOnTransfer: t('payOnTransfer') || 'Şoföre Nakit',
+                payOnTransferDay: t('payOnTransferDay') || 'Transfer gününde ödeme',
+                confirmCashPayment: t('confirmCashPayment') || 'Nakit Ödemeyi Onayla',
+                pay: t('payButton') || 'Öde',
+                processing: t('processingPayment') || 'İşleniyor...',
+                paymentOptional: t('paymentOptional') || 'Ödeme isteğe bağlıdır.',
+                onlineNotAvailable: t('onlineNotAvailable') || 'Online ödeme mevcut değil.',
+                paymentComplete: t('paymentComplete') || 'Ödeme Tamamlandı',
+                openPaymentLink: t('openPaymentLink') || 'Ödeme Linkini Aç',
+                existingPaymentLink: t('existingPaymentLink') || 'Ödeme linki mevcut',
+              }}
+            />
+            
+            {/* Payment Method Changer - Allow changing if not yet paid */}
+            {reservation.payment_status !== 'paid' && (
+              <PaymentMethodChanger
+                reservationId={reservation.id}
+                currentPaymentStatus={reservation.payment_status as PaymentStatus}
+                currentPaymentType={reservation.payment_type}
+                locale="tr"
+                translations={PAYMENT_METHOD_CHANGER_TR}
+                onMethodChanged={() => window.location.reload()}
+              />
+            )}
+          </div>
+        )}
+        
+        {/* Payment Method Changer for Cash Reservations - Allow switching to online */}
+        {isCashPayment && reservation.payment_status !== 'paid' && 
+          ['customer_approved', 'confirmed', 'sent_to_driver', 'active'].includes(reservation.status) && (
+          <PaymentMethodChanger
             reservationId={reservation.id}
-            amount={reservation.price}
-            currency={reservation.price_currency as SupportedCurrency}
-            currentStatus={reservation.payment_status as PaymentStatus}
-            partialAmount={reservation.partial_amount}
-            paymentLink={reservation.payment_link}
-            customerName={reservation.customer_name}
-            onPaymentComplete={() => window.location.reload()}
-            translations={{
-              payment: t('paymentTitle') || 'Ödeme',
-              total: t('totalAmount') || 'Toplam',
-              paid: t('paidAmount') || 'ödendi',
-              cashToDriver: t('cashToDriver') || 'Şoföre Nakit',
-              toBePaid: t('toBePaid') || 'şoföre ödenecek',
-              creditCard: t('creditCard') || 'Kredi/Banka Kartı',
-              visaMastercard: t('visaMastercard') || 'Visa, Mastercard, vb.',
-              fastSecure: t('fastSecure') || 'Hızlı ve güvenli',
-              payOnTransfer: t('payOnTransfer') || 'Şoföre Nakit',
-              payOnTransferDay: t('payOnTransferDay') || 'Transfer gününde ödeme',
-              confirmCashPayment: t('confirmCashPayment') || 'Nakit Ödemeyi Onayla',
-              pay: t('payButton') || 'Öde',
-              processing: t('processingPayment') || 'İşleniyor...',
-              paymentOptional: t('paymentOptional') || 'Ödeme isteğe bağlıdır.',
-              onlineNotAvailable: t('onlineNotAvailable') || 'Online ödeme mevcut değil.',
-              paymentComplete: t('paymentComplete') || 'Ödeme Tamamlandı',
-              openPaymentLink: t('openPaymentLink') || 'Ödeme Linkini Aç',
-              existingPaymentLink: t('existingPaymentLink') || 'Ödeme linki mevcut',
-            }}
+            currentPaymentStatus={reservation.payment_status as PaymentStatus}
+            currentPaymentType={reservation.payment_type}
+            locale="tr"
+            translations={PAYMENT_METHOD_CHANGER_TR}
+            onMethodChanged={() => window.location.reload()}
           />
         )}
       </main>
