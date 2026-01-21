@@ -54,9 +54,10 @@ const AgencyTransactionHistory = () => {
     if (showRefresh) setRefreshing(true);
 
     // Fetch completed reservations with agency details
+    // YENİ: customer_price kullanılıyor (hem borç hem kâr hesabı için)
     const { data: completedRes } = await supabase
       .from('reservations')
-      .select('id, passenger_cash_amount, passenger_cash_currency, agency_reservation_details!inner(company_amount, agency_price_currency)')
+      .select('id, passenger_cash_amount, passenger_cash_currency, agency_reservation_details!inner(customer_price, company_amount, agency_price_currency)')
       .eq('agency_id', agencyId)
       .eq('status', 'completed');
 
@@ -67,13 +68,14 @@ const AgencyTransactionHistory = () => {
       .eq('agency_id', agencyId);
 
     // Calculate currency balances using shared helper (no EUR fallback)
-    const reservationData = (completedRes || []).map((r) => ({
-      passenger_cash_amount: r.passenger_cash_amount,
-      passenger_cash_currency: r.passenger_cash_currency,
-      agency_reservation_details: r.agency_reservation_details as unknown as {
-        company_amount: number | null;
-        agency_price_currency: string | null;
-      }
+    const reservationData: import('@/lib/currency').CompletedReservationData[] = (completedRes || []).map((r) => ({
+      passenger_cash_amount: r.passenger_cash_amount ?? null,
+      passenger_cash_currency: r.passenger_cash_currency ?? null,
+      agency_reservation_details: r.agency_reservation_details ? {
+        customer_price: (r.agency_reservation_details as any).customer_price ?? null,
+        company_amount: (r.agency_reservation_details as any).company_amount ?? null,
+        agency_price_currency: (r.agency_reservation_details as any).agency_price_currency ?? null,
+      } : null
     }));
     
     const balances = calculateCurrencyBalances(reservationData, payments || []);

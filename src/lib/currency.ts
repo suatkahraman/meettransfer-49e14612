@@ -90,13 +90,15 @@ export interface CurrencyBalance {
 
 /**
  * Completed reservation data for balance calculation
+ * YENİ: customer_price kullanılıyor (hem borç hem kâr hesabı için)
  */
 export interface CompletedReservationData {
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
   agency_reservation_details: {
-    company_amount: number | null;
-    agency_price_currency: string | null;
+    customer_price?: number | null;
+    company_amount?: number | null; // Backward compatibility for old data
+    agency_price_currency?: string | null;
   } | null;
 }
 
@@ -123,6 +125,7 @@ export function calculateCurrencyBalances(
   const currencyData: Record<string, { companyAmount: number; passengerCash: number; paid: number }> = {};
 
   // Process completed reservations - use agency_price_currency (TRY fallback for very old data)
+  // YENİ: customer_price öncelikli (eski veriler için company_amount fallback)
   completedReservations.forEach((r) => {
     const detail = r.agency_reservation_details;
     if (!detail) return;
@@ -134,7 +137,9 @@ export function calculateCurrencyBalances(
       currencyData[currency] = { companyAmount: 0, passengerCash: 0, paid: 0 };
     }
     
-    currencyData[currency].companyAmount += detail.company_amount || 0;
+    // YENİ SİSTEM: customer_price kullanılıyor, eski veriler için company_amount fallback
+    const priceAmount = detail.customer_price ?? detail.company_amount ?? 0;
+    currencyData[currency].companyAmount += priceAmount;
     
     // Passenger cash - only subtract if same currency
     const passengerCashCurrency = r.passenger_cash_currency || 'TRY';
