@@ -23,7 +23,8 @@ type EmailType =
   | 'agency_rejected_agency'
   | 'agency_price_set_agency'
   | 'agency_price_approved_admin'
-  | 'agency_price_rejected_admin';
+  | 'agency_price_rejected_admin'
+  | 'payment_method_changed_admin';
 
 interface EmailOptions {
   type: EmailType;
@@ -37,6 +38,9 @@ interface EmailOptions {
     payment_link?: string;
     agency_email?: string;
     rejection_reason?: string;
+    old_method?: string;
+    new_method?: string;
+    customer_name?: string;
   };
 }
 
@@ -296,6 +300,24 @@ export const useEmailNotifications = () => {
     });
   }, [sendEmail]);
 
+  // 21. When customer/agency changes payment method → Email to admin
+  const emailAdminPaymentMethodChanged = useCallback(async (
+    reservationId: string,
+    customerName: string,
+    oldMethod: string,
+    newMethod: string
+  ) => {
+    return sendEmail({
+      type: 'payment_method_changed_admin',
+      reservation_id: reservationId,
+      additional_data: { 
+        customer_name: customerName,
+        old_method: oldMethod, 
+        new_method: newMethod 
+      },
+    });
+  }, [sendEmail]);
+
   return {
     sendEmail,
     emailAdminNewReservation,
@@ -320,5 +342,6 @@ export const useEmailNotifications = () => {
     emailCustomerReservationCancelled,
     emailCustomerReservationUpdated,
     emailCustomerTripCompleted,
+    emailAdminPaymentMethodChanged,
   };
 };
