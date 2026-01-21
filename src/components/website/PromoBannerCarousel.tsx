@@ -1,7 +1,8 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Plane, Users, Briefcase } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 // Import promo banner images
@@ -17,6 +18,7 @@ interface PromoBanner {
   descKey: string;
   ctaKey: string;
   gradient: string;
+  action: "book" | "fleet" | "contact";
 }
 
 const PROMO_BANNERS: PromoBanner[] = [
@@ -28,6 +30,7 @@ const PROMO_BANNERS: PromoBanner[] = [
     descKey: "promoAirportDesc",
     ctaKey: "promoAirportCta",
     gradient: "from-primary/90 via-primary/70 to-transparent",
+    action: "book",
   },
   {
     id: "family",
@@ -37,6 +40,7 @@ const PROMO_BANNERS: PromoBanner[] = [
     descKey: "promoFamilyDesc",
     ctaKey: "promoFamilyCta",
     gradient: "from-emerald-600/90 via-emerald-600/70 to-transparent",
+    action: "fleet",
   },
   {
     id: "business",
@@ -46,6 +50,7 @@ const PROMO_BANNERS: PromoBanner[] = [
     descKey: "promoBusinessDesc",
     ctaKey: "promoBusinessCta",
     gradient: "from-slate-800/90 via-slate-800/70 to-transparent",
+    action: "contact",
   },
 ];
 
@@ -120,7 +125,8 @@ const translations: Record<string, Record<string, string>> = {
 };
 
 const PromoBannerCarousel = memo(() => {
-  const { language } = useLanguage();
+  const { language, getLocalizedPath } = useLanguage();
+  const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -128,6 +134,26 @@ const PromoBannerCarousel = memo(() => {
     const lang = language.toLowerCase();
     return translations[lang]?.[key] || translations.en[key] || key;
   };
+
+  const handleCTAClick = useCallback((action: PromoBanner["action"]) => {
+    switch (action) {
+      case "book":
+        // Scroll to booking form on homepage
+        const bookingForm = document.getElementById("booking-form");
+        if (bookingForm) {
+          bookingForm.scrollIntoView({ behavior: "smooth" });
+        } else {
+          navigate(getLocalizedPath("/"));
+        }
+        break;
+      case "fleet":
+        navigate(getLocalizedPath("/fleet"));
+        break;
+      case "contact":
+        navigate(getLocalizedPath("/contact"));
+        break;
+    }
+  }, [navigate, getLocalizedPath]);
 
   // Auto-rotate banners
   useEffect(() => {
@@ -205,7 +231,10 @@ const PromoBannerCarousel = memo(() => {
                     <p className="text-base sm:text-lg opacity-90 mb-6 leading-relaxed">
                       {t(currentBanner.descKey)}
                     </p>
-                    <button className="px-6 py-3 bg-white text-foreground font-semibold rounded-full hover:bg-white/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <button 
+                      onClick={() => handleCTAClick(currentBanner.action)}
+                      className="px-6 py-3 bg-white text-foreground font-semibold rounded-full hover:bg-white/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
                       {t(currentBanner.ctaKey)}
                     </button>
                   </motion.div>

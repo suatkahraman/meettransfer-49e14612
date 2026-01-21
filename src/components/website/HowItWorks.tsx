@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo } from "@/contexts/PromoContext";
@@ -18,7 +19,7 @@ import {
   Tag,
   ArrowLeftRight
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 // Complete translations for all 10 languages
@@ -371,11 +372,27 @@ const HowItWorks = () => {
   const { getLocalizedPath, language } = useLanguage();
   const { promoCode: activePromo } = usePromo();
   const { rating } = useGoogleReviewStats();
+  const navigate = useNavigate();
+  const location = useLocation();
   const lang = language.toLowerCase();
   
   // Get translations for current language, fallback to English
   const t = translations[lang] || translations.en;
   const discountPercent = activePromo?.discountPercentage || 25;
+
+  const scrollToBookingForm = useCallback(() => {
+    const bookingForm = document.getElementById("booking-form");
+    if (bookingForm) {
+      bookingForm.scrollIntoView({ behavior: "smooth" });
+    } else if (location.pathname !== "/" && location.pathname !== getLocalizedPath("/")) {
+      // Navigate to homepage first, then scroll
+      navigate(getLocalizedPath("/"));
+      setTimeout(() => {
+        const form = document.getElementById("booking-form");
+        form?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [navigate, getLocalizedPath, location.pathname]);
 
   return (
     <section className="py-20 md:py-32 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
@@ -535,12 +552,14 @@ const HowItWorks = () => {
           className="text-center mt-8 md:mt-12"
         >
           <div className="inline-flex flex-col sm:flex-row gap-4 items-center">
-            <Link to={getLocalizedPath("/")}>
-              <Button size="lg" className="gap-2 px-8 h-14 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all">
-                {t.cta}
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              className="gap-2 px-8 h-14 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+              onClick={scrollToBookingForm}
+            >
+              {t.cta}
+              <ArrowRight className="h-5 w-5" />
+            </Button>
             <Link to={getLocalizedPath("/fleet")}>
               <Button variant="outline" size="lg" className="gap-2 px-8 h-14 text-base font-semibold rounded-xl hover:bg-muted">
                 <Car className="h-5 w-5" />
