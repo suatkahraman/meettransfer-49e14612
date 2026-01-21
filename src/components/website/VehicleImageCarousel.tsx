@@ -19,12 +19,20 @@ const generateCarouselSrcSet = (src: string): string | undefined => {
 // Default sizes attribute for carousel images
 const CAROUSEL_SIZES = "(max-width: 480px) 320px, (max-width: 768px) 480px, (max-width: 1024px) 640px, 800px";
 
+// Fixed dimensions for LCP image to prevent CLS
+const LCP_IMAGE_WIDTH = 640;
+const LCP_IMAGE_HEIGHT = 480;
+
 interface VehicleImageCarouselProps {
   images: string[];
   alt: string;
   className?: string;
   interval?: number;
   isHovered?: boolean;
+  /** Explicit width for CLS prevention */
+  width?: number;
+  /** Explicit height for CLS prevention */
+  height?: number;
 }
 
 export const VehicleImageCarousel = memo(({ 
@@ -32,7 +40,9 @@ export const VehicleImageCarousel = memo(({
   alt, 
   className = "",
   interval = 3000,
-  isHovered = false 
+  isHovered = false,
+  width = LCP_IMAGE_WIDTH,
+  height = LCP_IMAGE_HEIGHT
 }: VehicleImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(0);
@@ -170,16 +180,22 @@ export const VehicleImageCarousel = memo(({
   const firstImage = images[0];
   const secondaryImages = images.slice(1);
 
+  // Calculate aspect ratio for container sizing
+  const aspectRatio = width / height;
+
   return (
     <div 
       ref={containerRef} 
       className={`relative overflow-hidden touch-pan-y ${className}`}
+      style={{ aspectRatio: `${width} / ${height}` }}
       {...swipeHandlers}
     >
-      {/* FIRST IMAGE - Static, no animation, LCP element */}
+      {/* FIRST IMAGE - Static, no animation, LCP element with explicit dimensions */}
       <img
         src={firstImage}
         alt={`${alt} 1`}
+        width={width}
+        height={height}
         fetchPriority="high"
         loading="eager"
         decoding="async"
