@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface PromoCodeData {
   code: string;
@@ -42,29 +41,31 @@ export const PromoProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchActivePromo = async () => {
     try {
-      const now = new Date().toISOString();
-      
-      const { data, error } = await supabase
-        .from("promo_codes")
-        .select("code, discount_percentage, is_active, valid_until")
-        .eq("is_active", true)
-        .eq("applies_to", "return_transfer")
-        .or(`valid_until.is.null,valid_until.gte.${now}`)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Use edge function for secure access (promo_codes table is not publicly readable)
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-active-promo`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        }
+      );
 
-      if (error) {
-        console.error("Error fetching promo code:", error);
+      if (!response.ok) {
+        console.error("Error fetching promo code:", response.statusText);
         return;
       }
+
+      const data = await response.json();
 
       if (data) {
         setPromoCode({
           code: data.code,
-          discountPercentage: data.discount_percentage,
-          isActive: data.is_active,
-          validUntil: data.valid_until,
+          discountPercentage: data.discountPercentage,
+          isActive: data.isActive,
+          validUntil: data.validUntil,
         });
       }
     } catch (err) {
@@ -77,26 +78,11 @@ export const PromoProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchActivePromo();
 
-    // Subscribe to realtime changes on promo_codes table
-    const channel = supabase
-      .channel('promo-codes-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'promo_codes'
-        },
-        (payload) => {
-          console.log('Promo code changed:', payload);
-          // Refetch when any change occurs
-          fetchActivePromo();
-        }
-      )
-      .subscribe();
+    // Poll for updates every 5 minutes (since we can't use realtime without direct table access)
+    const interval = setInterval(fetchActivePromo, 5 * 60 * 1000);
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, []);
 
