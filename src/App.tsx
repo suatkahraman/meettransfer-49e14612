@@ -96,6 +96,10 @@ const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const ConfirmBooking = lazy(() => import("./pages/ConfirmBooking"));
 const QuickBookingCustomerInfo = lazy(() => import("./pages/QuickBookingCustomerInfo"));
 
+// Payment Pages
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const PaymentCancel = lazy(() => import("./pages/PaymentCancel"));
+
 // Admin Quick Bookings
 const AdminQuickBookings = lazy(() => import("./pages/admin/AdminQuickBookings"));
 
@@ -419,6 +423,11 @@ const App = () => (
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
               <Route path="/confirm-booking" element={<LazyRoute><ConfirmBooking /></LazyRoute>} />
               <Route path="/quick-booking-info" element={<LazyRoute><QuickBookingCustomerInfo /></LazyRoute>} />
+              
+              {/* Payment Result Pages - Public */}
+              <Route path="/payment-success" element={<LazyRoute><PaymentSuccess /></LazyRoute>} />
+              <Route path="/payment-cancel" element={<LazyRoute><PaymentCancel /></LazyRoute>} />
+              <Route path="/payment-error" element={<LazyRoute><PaymentCancel /></LazyRoute>} />
               
               {/* Security Settings - Protected (all authenticated users) */}
               <Route path="/security-settings" element={<LazyRoute><SecuritySettings /></LazyRoute>} />
