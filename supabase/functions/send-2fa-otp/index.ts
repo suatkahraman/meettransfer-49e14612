@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 interface OTPRequest {
@@ -13,27 +14,133 @@ interface OTPRequest {
   language?: string;
 }
 
-// Rate limiting: max 5 OTP requests per email per 10 minutes
-const otpRateLimit = new Map<string, { count: number; resetAt: number }>();
+// Rate limiting configuration
+const RATE_LIMIT_MAX_REQUESTS = 5;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes lockout after exceeding
 
-const checkRateLimit = (email: string): { allowed: boolean; remaining: number; resetIn: number } => {
+// Minimum response time to prevent timing attacks (ms)
+const MIN_RESPONSE_TIME_MS = 150;
+
+// In-memory rate limit store (keyed by email)
+const rateLimitStore = new Map<string, { 
+  count: number; 
+  windowStart: number; 
+  lockedUntil: number | null;
+}>();
+
+// Clean up old entries periodically
+function cleanupRateLimitStore(): void {
   const now = Date.now();
-  const limit = otpRateLimit.get(email);
-  const maxRequests = 5;
-  const windowMs = 600000; // 10 minutes
+  for (const [key, value] of rateLimitStore.entries()) {
+    if (value.lockedUntil && now > value.lockedUntil) {
+      rateLimitStore.delete(key);
+    } else if (!value.lockedUntil && now > value.windowStart + RATE_LIMIT_WINDOW_MS) {
+      rateLimitStore.delete(key);
+    }
+  }
+}
+
+interface RateLimitResult {
+  allowed: boolean;
+  locked: boolean;
+  remaining: number;
+  retryAfterSeconds?: number;
+}
+
+function checkRateLimit(email: string): RateLimitResult {
+  const now = Date.now();
+  const normalizedEmail = email.toLowerCase().trim();
   
-  if (!limit || now > limit.resetAt) {
-    otpRateLimit.set(email, { count: 1, resetAt: now + windowMs });
-    return { allowed: true, remaining: maxRequests - 1, resetIn: windowMs };
+  // Cleanup if store is getting large
+  if (rateLimitStore.size > 1000) {
+    cleanupRateLimitStore();
   }
   
-  if (limit.count >= maxRequests) {
-    return { allowed: false, remaining: 0, resetIn: limit.resetAt - now };
+  const record = rateLimitStore.get(normalizedEmail);
+  
+  // No record - first attempt
+  if (!record) {
+    rateLimitStore.set(normalizedEmail, { 
+      count: 1, 
+      windowStart: now, 
+      lockedUntil: null 
+    });
+    return { 
+      allowed: true, 
+      locked: false, 
+      remaining: RATE_LIMIT_MAX_REQUESTS - 1 
+    };
   }
   
-  limit.count++;
-  return { allowed: true, remaining: maxRequests - limit.count, resetIn: limit.resetAt - now };
-};
+  // Check if currently locked out
+  if (record.lockedUntil && now < record.lockedUntil) {
+    const retryAfterSeconds = Math.ceil((record.lockedUntil - now) / 1000);
+    return { 
+      allowed: false, 
+      locked: true, 
+      remaining: 0,
+      retryAfterSeconds
+    };
+  }
+  
+  // If lock expired, reset
+  if (record.lockedUntil && now >= record.lockedUntil) {
+    rateLimitStore.set(normalizedEmail, { 
+      count: 1, 
+      windowStart: now, 
+      lockedUntil: null 
+    });
+    return { 
+      allowed: true, 
+      locked: false, 
+      remaining: RATE_LIMIT_MAX_REQUESTS - 1 
+    };
+  }
+  
+  // Check if window has expired
+  if (now > record.windowStart + RATE_LIMIT_WINDOW_MS) {
+    rateLimitStore.set(normalizedEmail, { 
+      count: 1, 
+      windowStart: now, 
+      lockedUntil: null 
+    });
+    return { 
+      allowed: true, 
+      locked: false, 
+      remaining: RATE_LIMIT_MAX_REQUESTS - 1 
+    };
+  }
+  
+  // Within window - check count
+  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+    // Lock the account
+    record.lockedUntil = now + LOCKOUT_DURATION_MS;
+    const retryAfterSeconds = Math.ceil(LOCKOUT_DURATION_MS / 1000);
+    return { 
+      allowed: false, 
+      locked: true, 
+      remaining: 0,
+      retryAfterSeconds
+    };
+  }
+  
+  // Increment count
+  record.count++;
+  return { 
+    allowed: true, 
+    locked: false, 
+    remaining: RATE_LIMIT_MAX_REQUESTS - record.count 
+  };
+}
+
+// Ensure consistent response time to prevent timing attacks
+async function delayResponse(startTime: number): Promise<void> {
+  const elapsed = Date.now() - startTime;
+  if (elapsed < MIN_RESPONSE_TIME_MS) {
+    await new Promise(resolve => setTimeout(resolve, MIN_RESPONSE_TIME_MS - elapsed));
+  }
+}
 
 const getEmailContent = (otp: string, role: string, language: string = 'en', expiryMinutes: number = 5) => {
   const roleLabels: Record<string, Record<string, string>> = {
@@ -334,6 +441,14 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Restrict to POST method only
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ success: false, error: "method_not_allowed", message: "Method not allowed" }),
+      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   const startTime = Date.now();
 
   try {
@@ -345,6 +460,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Validate required fields
     if (!userId || !email || !role) {
       console.error("Missing required fields:", { userId: !!userId, email: !!email, role: !!role });
+      await delayResponse(startTime);
       return new Response(
         JSON.stringify({ success: false, error: "missing_fields", message: "Eksik alanlar" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -354,6 +470,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Validate email format
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
+      await delayResponse(startTime);
       return new Response(
         JSON.stringify({ success: false, error: "invalid_email", message: "Geçersiz email formatı" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -363,17 +480,28 @@ const handler = async (req: Request): Promise<Response> => {
     // Validate role
     const validRoles = ['admin', 'agency', 'driver', 'customer'];
     if (!validRoles.includes(role)) {
+      await delayResponse(startTime);
       return new Response(
         JSON.stringify({ success: false, error: "invalid_role", message: "Geçersiz rol" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Check rate limit
+    // Check rate limit BEFORE any processing
     const rateLimit = checkRateLimit(email);
     if (!rateLimit.allowed) {
-      const waitMinutes = Math.ceil(rateLimit.resetIn / 60000);
-      console.warn(`Rate limit exceeded for email: ${email}, reset in ${waitMinutes} minutes`);
+      const headers: Record<string, string> = {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+      };
+      if (rateLimit.retryAfterSeconds) {
+        headers["Retry-After"] = String(rateLimit.retryAfterSeconds);
+      }
+      
+      const waitMinutes = rateLimit.retryAfterSeconds ? Math.ceil(rateLimit.retryAfterSeconds / 60) : 15;
+      console.warn(`Rate limit exceeded for email: ${email.substring(0, 3)}***, locked: ${rateLimit.locked}`);
+      
+      await delayResponse(startTime);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -381,9 +509,10 @@ const handler = async (req: Request): Promise<Response> => {
           message: language === 'tr' 
             ? `Çok fazla istek. ${waitMinutes} dakika bekleyin.`
             : `Too many requests. Please wait ${waitMinutes} minutes.`,
-          resetIn: rateLimit.resetIn
+          locked: rateLimit.locked,
+          retryAfter: rateLimit.retryAfterSeconds
         }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 429, headers }
       );
     }
 
@@ -450,8 +579,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!emailResult.success) {
       console.error("All email methods failed:", emailResult.error);
       
-      // Store OTP anyway - user can see it in logs for now (dev mode)
-      // In production, this should fail
+      await delayResponse(startTime);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -468,6 +596,7 @@ const handler = async (req: Request): Promise<Response> => {
     const duration = Date.now() - startTime;
     console.log(`2FA OTP sent successfully: ${email.substring(0, 5)}*** (role: ${role}, method: ${emailResult.method}, duration: ${duration}ms)`);
 
+    await delayResponse(startTime);
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -478,8 +607,9 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error("Error in send-2fa-otp function:", error);
+    await delayResponse(Date.now());
     return new Response(
-      JSON.stringify({ success: false, error: "internal_error", message: error.message }),
+      JSON.stringify({ success: false, error: "internal_error", message: "Bir hata oluştu" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
