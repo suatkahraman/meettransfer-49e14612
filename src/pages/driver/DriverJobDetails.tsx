@@ -393,14 +393,20 @@ const DriverJobDetails = () => {
                 .eq('id', resData.customer_id)
                 .maybeSingle();
               
-              // Get customer email from auth (need to get from reservation or booking info)
-              const { data: authData } = await supabase.auth.admin?.getUserById?.(resData.customer_id) || {};
+              // Get customer email via secure edge function
+              let customerEmail = '';
+              if (resData.customer_id) {
+                const { data: emailData } = await supabase.functions.invoke('get-customer-email', {
+                  body: { customer_id: resData.customer_id }
+                });
+                customerEmail = emailData?.email || '';
+              }
               
               // Send review request
               await supabase.functions.invoke('send-review-request', {
                 body: {
                   reservationId: id,
-                  customerEmail: authData?.user?.email || '',
+                  customerEmail: customerEmail,
                   customerName: reservation?.customer_name || profileData?.full_name || 'Customer',
                   driverName: driverData?.name || 'Your Driver',
                   reservationCode: resData.reservation_code || id.slice(0, 8),
