@@ -180,8 +180,8 @@ export const VehicleImageCarousel = memo(({
   const firstImage = images[0];
   const secondaryImages = images.slice(1);
 
-  // Calculate aspect ratio for container sizing
-  const aspectRatio = width / height;
+  // Generate srcset for first image (LCP) - uses higher quality
+  const firstImageSrcSet = generateCarouselSrcSet(firstImage);
 
   return (
     <div 
@@ -190,9 +190,11 @@ export const VehicleImageCarousel = memo(({
       style={{ aspectRatio: `${width} / ${height}` }}
       {...swipeHandlers}
     >
-      {/* FIRST IMAGE - Static, no animation, LCP element with explicit dimensions */}
+      {/* FIRST IMAGE - Static, no animation, LCP element with explicit dimensions and srcset */}
       <img
         src={firstImage}
+        srcSet={firstImageSrcSet}
+        sizes={firstImageSrcSet ? CAROUSEL_SIZES : undefined}
         alt={`${alt} 1`}
         width={width}
         height={height}
