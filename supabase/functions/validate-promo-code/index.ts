@@ -7,6 +7,75 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+// Rate limiting configuration
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const CODE_RATE_LIMIT_MAX = 5; // Max attempts per code per IP
+const CODE_RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+
+interface RateLimitEntry {
+  count: number;
+  windowStart: number;
+}
+
+const rateLimitStore = new Map<string, RateLimitEntry>();
+const codeRateLimitStore = new Map<string, RateLimitEntry>();
+
+// Cleanup old entries periodically
+function cleanupRateLimitStore(store: Map<string, RateLimitEntry>, windowMs: number) {
+  const now = Date.now();
+  if (store.size > 1000) {
+    for (const [key, entry] of store.entries()) {
+      if (now - entry.windowStart > windowMs * 2) {
+        store.delete(key);
+      }
+    }
+  }
+}
+
+interface RateLimitResult {
+  allowed: boolean;
+  retryAfter?: number;
+  remaining?: number;
+}
+
+function checkRateLimit(
+  identifier: string,
+  store: Map<string, RateLimitEntry>,
+  maxRequests: number,
+  windowMs: number
+): RateLimitResult {
+  const now = Date.now();
+  const entry = store.get(identifier);
+
+  if (!entry) {
+    store.set(identifier, { count: 1, windowStart: now });
+    return { allowed: true, remaining: maxRequests - 1 };
+  }
+
+  if (now - entry.windowStart > windowMs) {
+    store.set(identifier, { count: 1, windowStart: now });
+    return { allowed: true, remaining: maxRequests - 1 };
+  }
+
+  if (entry.count >= maxRequests) {
+    const retryAfter = Math.ceil((entry.windowStart + windowMs - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+
+  entry.count++;
+  return { allowed: true, remaining: maxRequests - entry.count };
+}
+
+function getClientIP(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("cf-connecting-ip") ||
+    "unknown"
+  );
+}
+
 interface PromoValidationRequest {
   code: string;
   language?: string;
@@ -57,6 +126,13 @@ const ERROR_MESSAGES: Record<string, Record<string, string>> = {
     ar: "وصل هذا الرمز الترويجي إلى حد الاستخدام",
     de: "Dieser Promo-Code hat sein Nutzungslimit erreicht",
   },
+  rate_limited: {
+    en: "Too many requests. Please try again later.",
+    tr: "Çok fazla istek. Lütfen daha sonra tekrar deneyin.",
+    ru: "Слишком много запросов. Попробуйте позже.",
+    ar: "طلبات كثيرة جدًا. يرجى المحاولة لاحقًا.",
+    de: "Zu viele Anfragen. Bitte versuchen Sie es später erneut.",
+  },
   error: {
     en: "Error validating promo code",
     tr: "Promosyon kodu doğrulanırken hata oluştu",
@@ -78,7 +154,47 @@ serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Only allow POST
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   try {
+    const clientIP = getClientIP(req);
+    
+    // Cleanup stores periodically
+    cleanupRateLimitStore(rateLimitStore, RATE_LIMIT_WINDOW_MS);
+    cleanupRateLimitStore(codeRateLimitStore, CODE_RATE_LIMIT_WINDOW_MS);
+
+    // Check general rate limit per IP
+    const ipRateCheck = checkRateLimit(
+      `ip:${clientIP}`,
+      rateLimitStore,
+      RATE_LIMIT_MAX_REQUESTS,
+      RATE_LIMIT_WINDOW_MS
+    );
+
+    if (!ipRateCheck.allowed) {
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          errorCode: "rate_limited",
+          errorMessage: getErrorMessage("rate_limited", "en"),
+        } as PromoValidationResponse),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(ipRateCheck.retryAfter),
+          },
+        }
+      );
+    }
+
     const { code, language = "en" }: PromoValidationRequest = await req.json();
 
     if (!code || typeof code !== "string") {
@@ -92,13 +208,39 @@ serve(async (req: Request) => {
       );
     }
 
+    const normalizedCode = code.toUpperCase().trim();
+
+    // Check rate limit for specific promo code attempts per IP
+    const codeRateCheck = checkRateLimit(
+      `code:${clientIP}:${normalizedCode}`,
+      codeRateLimitStore,
+      CODE_RATE_LIMIT_MAX,
+      CODE_RATE_LIMIT_WINDOW_MS
+    );
+
+    if (!codeRateCheck.allowed) {
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          errorCode: "rate_limited",
+          errorMessage: getErrorMessage("rate_limited", language),
+        } as PromoValidationResponse),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(codeRateCheck.retryAfter),
+          },
+        }
+      );
+    }
+
     // Use service role to query promo codes (not exposed to client)
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
-
-    const normalizedCode = code.toUpperCase().trim();
 
     const { data: promoCode, error } = await supabaseAdmin
       .from("promo_codes")
