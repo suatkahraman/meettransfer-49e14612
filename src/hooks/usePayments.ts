@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   paymentConfig, 
   isPaymentsEnabled, 
   isStripeEnabled, 
   isPayPalEnabled,
+  getAvailablePaymentMethods,
   type PaymentProvider,
   type SupportedCurrency 
 } from "@/config/payments";
@@ -29,15 +30,46 @@ interface PaymentResult {
   sessionId?: string;
   orderId?: string;
   error?: string;
+  code?: string;
 }
+
+// Error messages for different failure scenarios
+const ERROR_MESSAGES = {
+  PAYMENTS_DISABLED: "Payment system is not configured yet",
+  INVALID_AMOUNT: "Invalid payment amount",
+  NETWORK_ERROR: "Network error. Please try again.",
+  UNKNOWN: "Failed to process payment",
+} as const;
+
+// Validate payment options before making API call
+const validatePaymentOptions = (options: CreatePaymentOptions): string | null => {
+  if (!options.amount || options.amount <= 0) {
+    return ERROR_MESSAGES.INVALID_AMOUNT;
+  }
+  if (!options.currency) {
+    return "Currency is required";
+  }
+  return null;
+};
 
 export const usePayments = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Memoize static values
+  const paymentsEnabled = useMemo(() => isPaymentsEnabled(), []);
+  const stripeEnabled = useMemo(() => isStripeEnabled(), []);
+  const paypalEnabled = useMemo(() => isPayPalEnabled(), []);
+  const availableMethods = useMemo(() => getAvailablePaymentMethods(), []);
+
   const createStripeCheckout = useCallback(async (options: CreatePaymentOptions): Promise<PaymentResult> => {
-    if (!isStripeEnabled()) {
-      return { success: false, error: "Stripe payments are not enabled" };
+    if (!stripeEnabled) {
+      return { success: false, error: "Stripe payments are not enabled", code: "STRIPE_DISABLED" };
+    }
+
+    const validationError = validatePaymentOptions(options);
+    if (validationError) {
+      return { success: false, error: validationError, code: "VALIDATION_ERROR" };
     }
 
     setIsLoading(true);
@@ -55,14 +87,18 @@ export const usePayments = () => {
       });
 
       if (invokeError) {
-        throw new Error(invokeError.message);
+        throw new Error(invokeError.message || ERROR_MESSAGES.NETWORK_ERROR);
       }
 
       if (data?.error) {
         if (data.code === "PAYMENTS_DISABLED") {
-          return { success: false, error: "Payment system is not configured yet" };
+          return { success: false, error: ERROR_MESSAGES.PAYMENTS_DISABLED, code: data.code };
         }
         throw new Error(data.error);
+      }
+
+      if (!data?.url) {
+        throw new Error("No payment URL returned");
       }
 
       return {
@@ -71,17 +107,22 @@ export const usePayments = () => {
         sessionId: data.sessionId,
       };
     } catch (err: any) {
-      const errorMessage = err.message || "Failed to create payment session";
+      const errorMessage = err.message || ERROR_MESSAGES.UNKNOWN;
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [stripeEnabled]);
 
   const createPayPalOrder = useCallback(async (options: CreatePaymentOptions): Promise<PaymentResult> => {
-    if (!isPayPalEnabled()) {
-      return { success: false, error: "PayPal payments are not enabled" };
+    if (!paypalEnabled) {
+      return { success: false, error: "PayPal payments are not enabled", code: "PAYPAL_DISABLED" };
+    }
+
+    const validationError = validatePaymentOptions(options);
+    if (validationError) {
+      return { success: false, error: validationError, code: "VALIDATION_ERROR" };
     }
 
     setIsLoading(true);
@@ -93,14 +134,18 @@ export const usePayments = () => {
       });
 
       if (invokeError) {
-        throw new Error(invokeError.message);
+        throw new Error(invokeError.message || ERROR_MESSAGES.NETWORK_ERROR);
       }
 
       if (data?.error) {
         if (data.code === "PAYMENTS_DISABLED") {
-          return { success: false, error: "PayPal is not configured yet" };
+          return { success: false, error: ERROR_MESSAGES.PAYMENTS_DISABLED, code: data.code };
         }
         throw new Error(data.error);
+      }
+
+      if (!data?.approvalUrl) {
+        throw new Error("No PayPal approval URL returned");
       }
 
       return {
@@ -109,55 +154,66 @@ export const usePayments = () => {
         orderId: data.orderId,
       };
     } catch (err: any) {
-      const errorMessage = err.message || "Failed to create PayPal order";
+      const errorMessage = err.message || ERROR_MESSAGES.UNKNOWN;
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [paypalEnabled]);
 
   const createPayment = useCallback(async (
     provider: PaymentProvider,
     options: CreatePaymentOptions
   ): Promise<PaymentResult> => {
-    if (!isPaymentsEnabled()) {
+    if (!paymentsEnabled) {
       toast.error("Online payments are not available yet");
-      return { success: false, error: "Payments are disabled" };
+      return { success: false, error: "Payments are disabled", code: "PAYMENTS_DISABLED" };
     }
 
-    if (provider === "stripe") {
-      return createStripeCheckout(options);
-    } else if (provider === "paypal") {
-      return createPayPalOrder(options);
+    switch (provider) {
+      case "stripe":
+        return createStripeCheckout(options);
+      case "paypal":
+        return createPayPalOrder(options);
+      default:
+        return { success: false, error: "Invalid payment provider", code: "INVALID_PROVIDER" };
     }
-
-    return { success: false, error: "Invalid payment provider" };
-  }, [createStripeCheckout, createPayPalOrder]);
+  }, [paymentsEnabled, createStripeCheckout, createPayPalOrder]);
 
   const redirectToPayment = useCallback(async (
     provider: PaymentProvider,
     options: CreatePaymentOptions
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     const result = await createPayment(provider, options);
 
     if (result.success && result.url) {
+      // Use replace to prevent back button issues
       window.location.href = result.url;
-    } else {
-      toast.error(result.error || "Failed to initiate payment");
+      return true;
     }
+    
+    toast.error(result.error || ERROR_MESSAGES.UNKNOWN);
+    return false;
   }, [createPayment]);
+
+  // Clear error helper
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   return {
     isLoading,
     error,
-    isPaymentsEnabled: isPaymentsEnabled(),
-    isStripeEnabled: isStripeEnabled(),
-    isPayPalEnabled: isPayPalEnabled(),
-    availableProviders: {
-      stripe: isStripeEnabled(),
-      paypal: isPayPalEnabled(),
-    },
+    clearError,
+    isPaymentsEnabled: paymentsEnabled,
+    isStripeEnabled: stripeEnabled,
+    isPayPalEnabled: paypalEnabled,
+    availableProviders: useMemo(() => ({
+      stripe: stripeEnabled,
+      paypal: paypalEnabled,
+    }), [stripeEnabled, paypalEnabled]),
+    availableMethods,
     createStripeCheckout,
     createPayPalOrder,
     createPayment,

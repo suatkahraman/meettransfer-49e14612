@@ -20,6 +20,15 @@
  * 4. Statuses: pending, paid, partial, pay_on_transfer
  */
 
+// Main unified panel with full customization
+export { 
+  UnifiedPaymentPanel, 
+  TURKISH_TRANSLATIONS,
+  type UnifiedPaymentPanelProps,
+  type PaymentPanelTranslations,
+} from "./UnifiedPaymentPanel";
+
+// Convenience wrappers
 export { PaymentMethodSelector } from "./PaymentMethodSelector";
 export { PaymentStatusBadge } from "./PaymentStatusBadge";
-export { ReservationPaymentPanel } from "./ReservationPaymentPanel";
+export { ReservationPaymentPanel, type ReservationPaymentPanelProps } from "./ReservationPaymentPanel";
