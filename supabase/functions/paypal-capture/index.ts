@@ -75,16 +75,22 @@ serve(async (req) => {
     const captureData = await captureResponse.json();
     console.log("PayPal payment captured:", captureData.id);
 
-    // Extract custom_id to get reservation/booking info
+    // Extract custom_id to get reservation/booking/agency info
     const customId = captureData.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id;
     let reservationId: string | undefined;
     let quickBookingId: string | undefined;
+    let agencyId: string | undefined;
+    let agencyAmount: number | undefined;
+    let agencyCurrency: string | undefined;
 
     if (customId) {
       try {
         const parsed = JSON.parse(customId);
         reservationId = parsed.reservation_id;
         quickBookingId = parsed.quick_booking_id;
+        agencyId = parsed.agency_id;
+        agencyAmount = parsed.agency_amount;
+        agencyCurrency = parsed.agency_currency;
       } catch (e) {
         console.log("Could not parse custom_id");
       }
@@ -120,6 +126,47 @@ serve(async (req) => {
         .eq("id", quickBookingId);
 
       console.log("Quick booking marked as paid:", quickBookingId);
+    }
+
+    // Handle agency payment
+    if (agencyId && agencyAmount) {
+      const currency = agencyCurrency || "EUR";
+      
+      console.log("Recording agency PayPal payment:", { agencyId, agencyAmount, currency });
+      
+      // Insert into agency_payments
+      const { error: paymentError } = await supabase
+        .from("agency_payments")
+        .insert({
+          agency_id: agencyId,
+          amount: agencyAmount,
+          currency: currency,
+          payment_date: new Date().toISOString().split('T')[0],
+          notes: `PayPal ile online ödeme (Order: ${orderId})`,
+        });
+
+      if (paymentError) {
+        console.error("Error recording agency payment:", paymentError);
+      } else {
+        console.log("Agency payment recorded successfully:", { agencyId, agencyAmount, currency });
+        
+        // Update agency balance (deduct the paid amount)
+        const { data: agency, error: agencyError } = await supabase
+          .from("agencies")
+          .select("balance")
+          .eq("id", agencyId)
+          .single();
+
+        if (!agencyError && agency) {
+          const newBalance = (agency.balance || 0) - agencyAmount;
+          await supabase
+            .from("agencies")
+            .update({ balance: newBalance })
+            .eq("id", agencyId);
+          
+          console.log("Agency balance updated:", { agencyId, oldBalance: agency.balance, newBalance });
+        }
+      }
     }
 
     // Redirect to success page
