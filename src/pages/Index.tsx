@@ -10,7 +10,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import TrustBar from "@/components/website/TrustBar";
 
 
-// Below-the-fold components are lazy loaded for better TTFB
+// Below-the-fold components are lazy loaded with deferred imports
+// These load AFTER the critical hero section renders
+const PromoBannerCarousel = lazy(() => import("@/components/website/PromoBannerCarousel"));
 const CoreServices = lazy(() => import("@/components/website/CoreServices"));
 const StatsCounter = lazy(() => import("@/components/website/StatsCounter"));
 const HowItWorks = lazy(() => import("@/components/website/HowItWorks"));
@@ -20,16 +22,11 @@ const WhyChooseUs = lazy(() => import("@/components/website/WhyChooseUs"));
 const HourlyRentalSection = lazy(() => import("@/components/website/HourlyRentalSection"));
 const GoogleReviewsCarousel = lazy(() => import("@/components/website/GoogleReviewsCarousel"));
 const ReviewPlatformLogos = lazy(() => import("@/components/website/ReviewPlatformLogos"));
-// AIAssistantPromo temporarily disabled
-// TrustedPartners removed for performance
 const PWAPromoBanner = lazy(() => import("@/components/website/PWAPromoBanner").then(m => ({ default: m.PWAPromoBanner })));
-const PromoBannerCarousel = lazy(() => import("@/components/website/PromoBannerCarousel"));
 const HomeFAQ = lazy(() => import("@/components/website/HomeFAQ"));
 
-// Minimal loading placeholder for lazy sections
-const SectionPlaceholder = () => (
-  <div className="min-h-[200px]" aria-hidden="true" />
-);
+// Smaller placeholder - reduces layout shift perception
+const SectionPlaceholder = () => <div className="min-h-[100px]" aria-hidden="true" />;
 
 const Index = () => {
   // Auto-redirect first-time visitors based on browser language
@@ -53,13 +50,13 @@ const Index = () => {
           { type: 'AIBookingAssistant' },
         ]}
       />
-      {/* Critical above-the-fold content - wrapped with error boundary */}
+      {/* Hero and TrustBar are critical - no Suspense wrapper */}
       <HeroErrorBoundary>
         <Hero />
       </HeroErrorBoundary>
       <TrustBar />
       
-      {/* Below-the-fold content - lazy loaded for better TTFB */}
+      {/* All below-the-fold content - deferred loading */}
       <Suspense fallback={<SectionPlaceholder />}>
         <PromoBannerCarousel />
       </Suspense>

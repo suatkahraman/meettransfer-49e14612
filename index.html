@@ -75,7 +75,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=swap" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=swap" /></noscript>
     
-    <!-- Font loading detection - only wait for critical hero fonts -->
+    <!-- Font loading detection - aggressive timeout for fast LCP -->
     <script>
       if ('fonts' in document) {
         Promise.race([
@@ -83,13 +83,13 @@
             document.fonts.load('700 1em "Playfair Display"'),
             document.fonts.load('400 1em Inter')
           ]),
-          new Promise(function(r) { setTimeout(r, 1500); }) // 1.5s timeout for hero
+          new Promise(function(r) { setTimeout(r, 800); }) // 800ms timeout - faster LCP
         ]).then(function() {
           document.body.classList.remove('font-loading');
           document.body.classList.add('fonts-loaded');
         });
       } else {
-        setTimeout(function() { document.body.classList.remove('font-loading'); }, 800);
+        setTimeout(function() { document.body.classList.remove('font-loading'); }, 400);
       }
     </script>
 

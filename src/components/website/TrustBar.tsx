@@ -36,11 +36,10 @@ const TrustBar = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
           {trustItems.map((item, index) => (
-            // CLS fix: Remove y offset animation, use opacity-only fade
+            // Remove animation delay for faster perceived load
             <div
               key={index}
-              className="flex items-start gap-3 group cursor-default animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'backwards' }}
+              className="flex items-start gap-3 group cursor-default"
             >
               <div className={`p-2 rounded-lg bg-muted/50 group-hover:bg-muted transition-colors`}>
                 <item.icon className={`w-5 h-5 ${item.color}`} />

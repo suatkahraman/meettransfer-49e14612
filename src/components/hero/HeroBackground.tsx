@@ -1,9 +1,6 @@
 import { memo, useState, useEffect } from "react";
 import { CityVideo } from "./types";
 
-// Lazy load the background image
-const heroBgUrl = new URL("@/assets/hero-bg-futuristic.webp", import.meta.url).href;
-
 interface HeroBackgroundProps {
   videosLoaded: boolean;
   cityVideos: CityVideo[];
@@ -17,30 +14,34 @@ export const HeroBackground = memo(({
 }: HeroBackgroundProps) => {
   const [bgLoaded, setBgLoaded] = useState(false);
 
-  // Lazy load background image after initial paint
+  // Load background image after 2 seconds (way after LCP) for desktop only
   useEffect(() => {
+    // Skip on mobile for better performance
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) return;
+
     const timer = setTimeout(() => {
       const img = new Image();
       img.onload = () => setBgLoaded(true);
-      img.src = heroBgUrl;
-    }, 100); // Small delay to prioritize critical content
+      // Dynamic import to avoid bundling the image in critical path
+      img.src = new URL("@/assets/hero-bg-futuristic.webp", import.meta.url).href;
+    }, 2000); // 2s delay - well after LCP
 
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <>
-      {/* Static off-white background - no images for performance */}
+      {/* Static background - immediate render */}
       <div className="absolute inset-0 z-0 bg-background" />
       
-      {/* Desktop: Futuristic background image with lazy loading */}
+      {/* Desktop: Futuristic background image - deferred loading */}
       <div className="absolute inset-0 z-0 hidden md:block">
-        {/* Lazy loaded futuristic background */}
         {bgLoaded && (
           <div 
-            className="absolute inset-0 opacity-30 transition-opacity duration-700"
+            className="absolute inset-0 opacity-30"
             style={{
-              backgroundImage: `url(${heroBgUrl})`,
+              backgroundImage: `url(${new URL("@/assets/hero-bg-futuristic.webp", import.meta.url).href})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center right',
               backgroundRepeat: 'no-repeat',
@@ -53,7 +54,6 @@ export const HeroBackground = memo(({
         
         {/* Bottom fade */}
         <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
-        
       </div>
     </>
   );

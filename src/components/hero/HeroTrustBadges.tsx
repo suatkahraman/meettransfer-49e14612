@@ -9,11 +9,8 @@ export const HeroTrustBadges = memo(() => {
   const { t } = useLanguage();
   
   return (
-    // CLS fix: Remove initial y offset animation, use opacity only
-    <div 
-      className="flex flex-wrap items-center justify-center gap-3 mt-4 animate-fade-in"
-      style={{ animationDelay: '0.5s', animationFillMode: 'backwards' }}
-    >
+    // CLS fix: No animation delay for faster perceived load
+    <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
       <div 
         className="flex items-center gap-1.5 bg-green-500/10 rounded-full px-3 py-1.5 hover:scale-105 transition-transform"
       >
