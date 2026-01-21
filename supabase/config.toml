@@ -49,7 +49,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.get-driver-email]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-whatsapp]
 verify_jwt = true
