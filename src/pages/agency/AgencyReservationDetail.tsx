@@ -14,12 +14,14 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle, CheckCircle, XCircle, DollarSign, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, Loader2, Save, Edit, Copy, MessageCircle, CheckCircle, XCircle, DollarSign, Pencil, Trash2, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
+import { AgencyReservationPaymentPanel } from '@/components/agency/AgencyReservationPaymentPanel';
+import type { SupportedCurrency, PaymentStatus } from '@/config/payments';
 
 interface Driver {
   id: string;
@@ -48,6 +50,9 @@ interface Reservation {
   price: number | null;
   price_currency: string | null;
   payment_type: string;
+  payment_status: string | null;
+  payment_link: string | null;
+  partial_amount: number | null;
   passenger_cash_amount: number | null;
   passenger_cash_currency: string | null;
   luggage_count: number | null;
@@ -136,6 +141,7 @@ const AgencyReservationDetail = () => {
           pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type, status,
           passenger_names, driver_id, price, price_currency, payment_type,
+          payment_status, payment_link, partial_amount,
           passenger_cash_amount, passenger_cash_currency, luggage_count, baby_seat_count,
           drivers:driver_id (id, name, plate_number, vehicle_model, vehicle_color)
         `)
@@ -177,6 +183,9 @@ const AgencyReservationDetail = () => {
 
   // Check if this is a cash payment reservation (payment_type === 'cash')
   const isCashPayment = reservation?.payment_type === 'cash';
+  
+  // Check if this is an online payment reservation (payment_type === 'payment_link')
+  const isOnlinePayment = reservation?.payment_type === 'payment_link';
 
   // Check if reservation needs cash amount entry (approved, cash payment, no cash entered)
   const needsCashAmountEntry = () => {
@@ -1168,6 +1177,41 @@ const AgencyReservationDetail = () => {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* Online Payment Panel - Show for payment_link type reservations */}
+        {isOnlinePayment && reservation.price && reservation.price_currency && 
+          ['customer_approved', 'confirmed', 'sent_to_driver', 'active'].includes(reservation.status) && (
+          <AgencyReservationPaymentPanel
+            reservationId={reservation.id}
+            amount={reservation.price}
+            currency={reservation.price_currency as SupportedCurrency}
+            currentStatus={reservation.payment_status as PaymentStatus}
+            partialAmount={reservation.partial_amount}
+            paymentLink={reservation.payment_link}
+            customerName={reservation.customer_name}
+            onPaymentComplete={() => window.location.reload()}
+            translations={{
+              payment: t('paymentTitle') || 'Ödeme',
+              total: t('totalAmount') || 'Toplam',
+              paid: t('paidAmount') || 'ödendi',
+              cashToDriver: t('cashToDriver') || 'Şoföre Nakit',
+              toBePaid: t('toBePaid') || 'şoföre ödenecek',
+              creditCard: t('creditCard') || 'Kredi/Banka Kartı',
+              visaMastercard: t('visaMastercard') || 'Visa, Mastercard, vb.',
+              fastSecure: t('fastSecure') || 'Hızlı ve güvenli',
+              payOnTransfer: t('payOnTransfer') || 'Şoföre Nakit',
+              payOnTransferDay: t('payOnTransferDay') || 'Transfer gününde ödeme',
+              confirmCashPayment: t('confirmCashPayment') || 'Nakit Ödemeyi Onayla',
+              pay: t('payButton') || 'Öde',
+              processing: t('processingPayment') || 'İşleniyor...',
+              paymentOptional: t('paymentOptional') || 'Ödeme isteğe bağlıdır.',
+              onlineNotAvailable: t('onlineNotAvailable') || 'Online ödeme mevcut değil.',
+              paymentComplete: t('paymentComplete') || 'Ödeme Tamamlandı',
+              openPaymentLink: t('openPaymentLink') || 'Ödeme Linkini Aç',
+              existingPaymentLink: t('existingPaymentLink') || 'Ödeme linki mevcut',
+            }}
+          />
         )}
       </main>
     </div>
