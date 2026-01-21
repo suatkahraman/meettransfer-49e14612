@@ -25,8 +25,8 @@ import dubaiStandardSedan from "@/assets/dubai/dubai-standard-sedan.jpg";
 import dubaiStandardSedanInterior from "@/assets/dubai/dubai-standard-sedan-interior.jpg";
 import dubaiPremiumVan from "@/assets/dubai/dubai-v-class.jpg";
 import dubaiPremiumVanInterior from "@/assets/dubai/dubai-v-class-interior.jpg";
-import dubaiSuburban from "@/assets/dubai/dubai-suburban.jpg";
-import dubaiSuburbanInterior from "@/assets/dubai/dubai-suburban-interior.jpg";
+import dubaiSuburban from "@/assets/dubai/dubai-suburban.webp";
+import dubaiSuburbanInterior from "@/assets/dubai/dubai-suburban-interior.webp";
 import dubaiVipSprinter from "@/assets/dubai/dubai-vip-mercedes-van.webp";
 import dubaiVipSprinterExterior from "@/assets/dubai/dubai-vip-van-exterior.jpg";
 
