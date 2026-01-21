@@ -196,7 +196,7 @@
     <!-- Critical CSS - Minimal above-the-fold only -->
     <style>
       /* Minimal tokens */
-      :root{--background:0 0% 100%;--foreground:0 0% 7%;--muted:30 20% 96%;--radius:0.75rem}
+      :root{--background:0 0% 100%;--foreground:0 0% 7%;--muted:30 20% 96%;--primary:45 100% 35%;--radius:0.75rem}
       
       /* Critical reset */
       *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -204,22 +204,42 @@
       body{font-family:system-ui,-apple-system,sans-serif;background:hsl(var(--background));color:hsl(var(--foreground));line-height:1.5}
       #root{min-height:100vh;min-height:100dvh}
       
-      /* Hero skeleton - immediate visual */
-      .hero-loading{background:hsl(30 20% 96%);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:5rem 1.5rem}
-      .hero-loading h1{font-family:Georgia,serif;font-size:clamp(1.875rem,4vw,3.5rem);font-weight:700;margin:0 0 0.75rem;line-height:1.1;color:hsl(0 0% 10%)}
-      .hero-loading .hero-subtitle{font-size:clamp(0.9rem,1.5vw,1.125rem);max-width:28rem;color:hsl(0 0% 40%)}
-      .hero-loading .text-gold{color:hsl(45 100% 35%)}
+      /* Static hero - no JS required, immediate visual */
+      .static-hero{position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:5rem 1.5rem;background:linear-gradient(135deg,hsl(30 20% 98%),hsl(30 15% 94%))}
+      .static-hero-content{position:relative;z-index:2;max-width:32rem}
+      .static-hero-logo{display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem}
+      .static-hero-logo img{width:40px;height:40px;border-radius:8px}
+      .static-hero-logo span{font-size:1.25rem;font-weight:700;color:hsl(var(--foreground))}
+      .static-hero-logo .text-primary{color:hsl(var(--primary))}
+      .static-hero h1{font-family:Georgia,serif;font-size:clamp(1.875rem,4vw,3rem);font-weight:700;margin:0 0 0.75rem;line-height:1.15;color:hsl(0 0% 10%)}
+      .static-hero h1 .text-primary{color:hsl(var(--primary))}
+      .static-hero .hero-subtitle{font-size:clamp(0.95rem,1.5vw,1.125rem);max-width:28rem;color:hsl(0 0% 35%);line-height:1.6;margin-bottom:1.25rem}
       
-      /* Skeleton shimmer */
+      /* Trust badges - static */
+      .static-trust-badges{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem}
+      .static-trust-badge{display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 0.75rem;border-radius:999px;font-size:0.8rem;font-weight:600}
+      .static-trust-badge.green{background:hsl(142 70% 90%);color:hsl(142 70% 30%);border:1px solid hsl(142 60% 80%)}
+      .static-trust-badge.gold{background:hsl(45 90% 90%);color:hsl(45 90% 30%);border:1px solid hsl(45 80% 75%)}
+      .static-trust-badge.blue{background:hsl(210 80% 92%);color:hsl(210 80% 35%);border:1px solid hsl(210 60% 80%)}
+      .static-trust-badge svg{width:14px;height:14px;flex-shrink:0}
+      
+      /* Skeleton shimmer for form */
       @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-      .skeleton{background:linear-gradient(90deg,hsl(30 15% 90%) 25%,hsl(30 15% 85%) 50%,hsl(30 15% 90%) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius)}
-      .form-skeleton{width:100%;max-width:28rem;height:380px;margin-top:1.5rem}
-      .trust-skeleton{display:flex;gap:1rem;margin-top:1rem}
-      .trust-skeleton-item{width:80px;height:24px}
+      .skeleton{background:linear-gradient(90deg,hsl(30 15% 92%) 25%,hsl(30 15% 87%) 50%,hsl(30 15% 92%) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius)}
+      .form-skeleton{width:100%;max-width:28rem;height:340px;border-radius:1rem;box-shadow:0 4px 20px -4px rgba(0,0,0,0.08)}
+      
+      /* Hide static hero when React mounts */
+      .js-loaded .static-hero{display:none}
       
       /* Font swap - prevent FOUT */
       .fonts-loaded body{font-family:'Inter',system-ui,sans-serif}
       .fonts-loaded h1,.fonts-loaded h2,.fonts-loaded h3{font-family:'Playfair Display',Georgia,serif}
+      
+      /* Noscript fallback */
+      noscript .noscript-hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;background:linear-gradient(135deg,hsl(30 20% 98%),hsl(30 15% 94%))}
+      noscript .noscript-hero h1{font-family:Georgia,serif;font-size:2rem;margin-bottom:1rem;color:hsl(0 0% 10%)}
+      noscript .noscript-hero p{max-width:32rem;color:hsl(0 0% 35%);margin-bottom:1.5rem}
+      noscript .noscript-cta{display:inline-flex;padding:0.875rem 1.75rem;background:hsl(var(--primary));color:white;text-decoration:none;font-weight:600;border-radius:0.75rem}
     </style>
 
     <!-- Structured Data - Organization (Enhanced) -->
@@ -433,23 +453,58 @@
   </head>
 
   <body class="font-loading">
+    <!-- Noscript fallback for users without JavaScript -->
+    <noscript>
+      <div class="noscript-hero">
+        <h1>Meet Transfer - VIP Airport Transfer</h1>
+        <p>Premium airport transfer and chauffeur service across Turkey, Dubai & Cyprus. Professional drivers, luxury vehicles, 24/7 availability.</p>
+        <a href="https://wa.me/905321748390" class="noscript-cta">WhatsApp: +90 532 174 83 90</a>
+      </div>
+    </noscript>
+
     <div id="root">
-      <!-- Hero with instant background - matches React component structure -->
-      <section class="hero-loading">
-        <div class="hero-content" style="position:relative;z-index:1;max-width:32rem;">
-          <h1>Premium <span class="text-gold">VIP</span> Airport Transfer</h1>
-          <p class="hero-subtitle">Experience luxury travel with professional chauffeur service across Turkey, Dubai & Cyprus</p>
-          <div class="form-skeleton skeleton" style="margin-top:1.5rem;height:380px;border-radius:1rem;"></div>
-          <div class="trust-skeleton" style="margin-top:1rem;justify-content:flex-start;gap:1rem;">
-            <div class="trust-skeleton-item skeleton"></div>
-            <div class="trust-skeleton-item skeleton"></div>
-            <div class="trust-skeleton-item skeleton"></div>
+      <!-- Static Hero - Server-rendered HTML, visible without JavaScript -->
+      <section class="static-hero" aria-label="Hero">
+        <div class="static-hero-content">
+          <!-- Logo & Brand -->
+          <div class="static-hero-logo">
+            <img src="/pwa-192x192.png" alt="Meet Transfer" width="40" height="40" />
+            <span><span class="text-primary">Meet</span> Transfer</span>
           </div>
+          
+          <!-- Main Heading - SEO optimized, immediately visible -->
+          <h1>Premium <span class="text-primary">VIP</span> Airport Transfer</h1>
+          
+          <!-- Description -->
+          <p class="hero-subtitle">Experience luxury travel with professional chauffeur service. Fixed prices, free cancellation, 24/7 availability across Turkey, Dubai & Cyprus.</p>
+          
+          <!-- Trust Badges - Static HTML, no JS needed -->
+          <div class="static-trust-badges">
+            <span class="static-trust-badge green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+              Fixed Price
+            </span>
+            <span class="static-trust-badge gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+              Free Cancellation
+            </span>
+            <span class="static-trust-badge blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Safe & Insured
+            </span>
+          </div>
+          
+          <!-- Form Skeleton - Shows loading state until React hydrates -->
+          <div class="form-skeleton skeleton" aria-hidden="true"></div>
         </div>
-        <!-- LCP Image - eager loaded with fetchpriority -->
-        <!-- No LCP image - using CSS gradient only for performance -->
       </section>
     </div>
+    
+    <!-- Mark body as JS-loaded when React mounts to hide static hero -->
+    <script>
+      // This runs immediately but static hero is already painted
+      // React will replace #root content, but until then static hero is visible
+    </script>
     <script>
       // Mark fonts as loaded when ready
       if (document.fonts) {
