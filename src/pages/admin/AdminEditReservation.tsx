@@ -126,6 +126,8 @@ const AdminEditReservation = () => {
   const [agencyName, setAgencyName] = useState<string | null>(null);
   const [driverEmail, setDriverEmail] = useState<string | null>(null);
   const [loadingDriverEmail, setLoadingDriverEmail] = useState(false);
+  const [customerEmail, setCustomerEmail] = useState<string | null>(null);
+  const [loadingCustomerEmail, setLoadingCustomerEmail] = useState(false);
   const [agencyDetails, setAgencyDetails] = useState<{
     customer_price: string;
     agency_price_currency: string;
@@ -419,6 +421,11 @@ const AdminEditReservation = () => {
       if (r.driver_id) {
         fetchDriverEmail(r.driver_id);
       }
+      
+      // Fetch customer email if customer is assigned
+      if (r.customer_id) {
+        fetchCustomerEmail(r.customer_id);
+      }
     };
 
     const fetchDriverEmail = async (driverId: string) => {
@@ -441,6 +448,29 @@ const AdminEditReservation = () => {
         setDriverEmail(null);
       } finally {
         setLoadingDriverEmail(false);
+      }
+    };
+    
+    const fetchCustomerEmail = async (customerId: string) => {
+      setLoadingCustomerEmail(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('get-customer-email', {
+          body: { customer_id: customerId }
+        });
+        if (error) {
+          console.error('Failed to fetch customer email:', error);
+          setCustomerEmail(null);
+        } else if (data?.email) {
+          setCustomerEmail(data.email);
+        } else {
+          console.warn('No email found for customer:', customerId);
+          setCustomerEmail(null);
+        }
+      } catch (e) {
+        console.error('Exception fetching customer email:', e);
+        setCustomerEmail(null);
+      } finally {
+        setLoadingCustomerEmail(false);
       }
     };
 
@@ -1971,6 +2001,7 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                   reservationId={id!}
                   amount={parseFloat(formData.price) || 0}
                   currency={formData.price_currency}
+                  customerEmail={customerEmail || undefined}
                   customerName={passengerNames[0] || ''}
                   pickup={formData.pickup}
                   dropoff={formData.dropoff}
@@ -1985,82 +2016,15 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                 />
               )}
 
-              {/* Payment Link Input */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Link className="h-4 w-4" />
-                  Ödeme Linki (URL)
-                </Label>
-                <Input
-                  type="url"
-                  value={formData.payment_link}
-                  onChange={(e) => setFormData({...formData, payment_link: e.target.value})}
-                  placeholder="https://pay.stripe.com/... veya başka bir ödeme linki"
-                  disabled={formData.payment_status === 'paid'}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Stripe, Wise, banka linki veya başka bir ödeme sağlayıcısından URL girin
-                </p>
-              </div>
-
-              {/* Send Payment Request Button */}
-              {formData.payment_status !== 'paid' && (
-                <Button
-                  type="button"
-                  onClick={async () => {
-                    if (!formData.payment_link) {
-                      toast.error('Lütfen önce bir ödeme linki girin');
-                      return;
-                    }
-                    if (!formData.price || parseFloat(formData.price) <= 0) {
-                      toast.error('Lütfen önce fiyatı belirleyin');
-                      return;
-                    }
-
-                    setSendingPaymentLink(true);
-                    try {
-                      // First save the payment link to reservation
-                      const { error: saveError } = await supabase
-                        .from('reservations')
-                        .update({
-                          payment_link: formData.payment_link,
-                          status: 'waiting_for_customer_approval',
-                        })
-                        .eq('id', id);
-
-                      if (saveError) throw saveError;
-
-                      // Send payment request email to customer
-                      await emailPaymentRequest(id!, formData.payment_link);
-
-                      // Notify customer in-app
-                      if (customerId) {
-                        await supabase.functions.invoke('create-notification', {
-                          body: {
-                            user_id: customerId,
-                            reservation_id: id,
-                            title: 'Payment Required',
-                            message: `Please complete your payment of ${currencySymbol}${formData.price} using the provided link.`,
-                            type: 'payment_request',
-                            send_push: true
-                          }
-                        });
-                      }
-
-                      toast.success('Ödeme linki müşteriye e-posta ile gönderildi!');
-                      setFormData({ ...formData, status: 'waiting_for_customer_approval' });
-                    } catch (error: any) {
-                      toast.error(error.message || 'Ödeme linki gönderilemedi');
-                    } finally {
-                      setSendingPaymentLink(false);
-                    }
-                  }}
-                  disabled={sendingPaymentLink || !formData.payment_link}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  {sendingPaymentLink ? 'Gönderiliyor...' : 'Fiyat ve Ödeme Linkini Müşteriye Gönder'}
-                </Button>
+              {/* Show current payment link if exists */}
+              {formData.payment_link && (
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <Label className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                    <Link className="h-4 w-4" />
+                    Mevcut Ödeme Linki
+                  </Label>
+                  <p className="text-sm font-mono break-all">{formData.payment_link}</p>
+                </div>
               )}
 
               {/* Mark as Paid Button */}
