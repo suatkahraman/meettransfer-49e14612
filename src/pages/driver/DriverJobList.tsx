@@ -25,6 +25,7 @@ interface Reservation {
   flight_number: string | null;
   vehicle_type: string;
   payment_type: string;
+  payment_status: string | null;
   price: number | null;
   price_currency: string | null;
   passenger_cash_amount: number | null;

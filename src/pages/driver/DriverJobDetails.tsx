@@ -26,6 +26,7 @@ import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol } from '@/lib/currency';
 import { parseMoneyInput } from '@/lib/money';
 import { getWhatsAppUrl } from '@/lib/contact';
+import { PaymentStatusBadge } from '@/components/payments/PaymentStatusBadge';
 
 const vehicleTypeLabels: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -51,6 +52,7 @@ interface Reservation {
   flight_status: string | null;
   vehicle_type: string;
   payment_type: string;
+  payment_status: string | null;
   price: number;
   price_currency: string | null;
   status: string;
@@ -740,22 +742,26 @@ const DriverJobDetails = () => {
                 <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="text-sm text-muted-foreground">{t('paymentMethod')}</div>
-                  {reservation.payment_type === 'payment_link' ? (
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 mt-1">
-                      <CreditCard className="h-3 w-3 mr-1" />
-                      {t('paymentLink')}
-                    </Badge>
-                  ) : reservation.payment_type === 'agency_pay' ? (
-                    <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 mt-1">
-                      <CreditCard className="h-3 w-3 mr-1" />
-                      {t('agencyPayment')}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 mt-1">
-                      <Banknote className="h-3 w-3 mr-1" />
-                      {t('cash')}
-                    </Badge>
-                  )}
+                  <div className="flex items-center gap-2 flex-wrap mt-1">
+                    {reservation.payment_type === 'payment_link' ? (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        <CreditCard className="h-3 w-3 mr-1" />
+                        {t('paymentLink')}
+                      </Badge>
+                    ) : reservation.payment_type === 'agency_pay' ? (
+                      <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                        <CreditCard className="h-3 w-3 mr-1" />
+                        {t('agencyPayment')}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Banknote className="h-3 w-3 mr-1" />
+                        {t('cash')}
+                      </Badge>
+                    )}
+                    {/* Payment Status Badge */}
+                    <PaymentStatusBadge status={reservation.payment_status} />
+                  </div>
                   {reservation.payment_type === 'cash' && (
                     <p className="text-xs text-muted-foreground mt-1">
                       {t('customerWillPayCash')}
