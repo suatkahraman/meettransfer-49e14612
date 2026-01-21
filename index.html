@@ -137,14 +137,34 @@
     <!-- Bing Webmaster Verification -->
     <meta name="msvalidate.01" content="0CAD332D394D79C6D5C254FFC9FF906B" />
 
-    <!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js) - Deferred initialization for better Speed Index -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-668686697"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'AW-668686697');
+      // Defer gtag initialization to after first paint using requestIdleCallback
+      (function() {
+        function initGtag() {
+          gtag('js', new Date());
+          gtag('config', 'AW-668686697', {
+            'send_page_view': true,
+            'transport_type': 'beacon'
+          });
+        }
+        // Use requestIdleCallback if available, otherwise defer with setTimeout
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(initGtag, { timeout: 3000 });
+        } else {
+          // Fallback: run after load event + short delay
+          if (document.readyState === 'complete') {
+            setTimeout(initGtag, 100);
+          } else {
+            window.addEventListener('load', function() {
+              setTimeout(initGtag, 100);
+            });
+          }
+        }
+      })();
     </script>
 
     <!-- Canonical tag - Default for homepage, dynamically updated by SEOHead component for each page -->
