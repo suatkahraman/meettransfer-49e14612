@@ -13,6 +13,7 @@ import { LocationDisplay } from '@/components/ui/location-display';
 import { getCurrencySymbol, formatCurrency } from '@/lib/currency';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { supabase } from '@/integrations/supabase/client';
+import { PaymentStatusBadge } from '@/components/payments/PaymentStatusBadge';
 interface Reservation {
   id: string;
   customer_name: string;
@@ -24,6 +25,7 @@ interface Reservation {
   flight_number: string | null;
   vehicle_type: string;
   payment_type: string;
+  payment_status?: string | null;
   price: number | null;
   price_currency: string | null;
   passenger_cash_amount: number | null;
@@ -405,6 +407,8 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                 <CreditCard className="h-3 w-3" />
                 <span>{getPaymentTypeLabel(reservation.payment_type)}</span>
               </div>
+              {/* Payment Status Badge */}
+              <PaymentStatusBadge status={reservation.payment_status} size="sm" />
               {/* Only show price badge for non-agency reservations - agency price is between agency and admin, not for driver */}
               {!reservation.agency_id && reservation.price && reservation.price > 0 && (
                 <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded text-xs text-amber-700 dark:text-amber-400 font-semibold">
