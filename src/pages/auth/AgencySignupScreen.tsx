@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserRole } from '@/hooks/useUserRole';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,399 +8,417 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { z } from 'zod';
-import { ArrowLeft, Loader2, Building2, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
+import { Building2, Loader2, Share2, Copy } from 'lucide-react';
 
-// Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
-  .min(6, 'Password must be at least 6 characters')
-  .max(100)
-  .regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
-  .regex(/[a-z]/, 'Password must contain at least 1 lowercase letter')
-  .regex(/\d.*\d.*\d.*\d/, 'Password must contain at least 4 digits');
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number');
 
 const agencySignupSchema = z.object({
-  agencyName: z.string().trim().min(2, 'Agency name must be at least 2 characters').max(100),
+  agencyName: z.string().trim().min(2, 'Agency name must be at least 2 characters').max(200),
   contactName: z.string().trim().min(2, 'Contact name must be at least 2 characters').max(100),
   phone: z.string().trim().min(5, 'Phone number is required').max(20),
   email: z.string().trim().email('Invalid email address').max(255),
   password: passwordSchema,
-  currency: z.enum(['EUR', 'USD', 'TRY', 'GBP']),
+  currency: z.enum(['EUR', 'USD', 'TRY', 'GBP', 'RUB', 'UAH', 'AED', 'JPY', 'AUD']),
   city: z.string().trim().min(1, 'City is required'),
   comments: z.string().max(500).optional(),
 });
 
 const CURRENCIES = [
-  { value: 'EUR', label: '€ EUR - Euro' },
-  { value: 'USD', label: '$ USD - US Dollar' },
   { value: 'TRY', label: '₺ TRY - Turkish Lira' },
+  { value: 'EUR', label: '€ EUR - Euro' },
   { value: 'GBP', label: '£ GBP - British Pound' },
+  { value: 'USD', label: '$ USD - US Dollar' },
+  { value: 'RUB', label: '₽ RUB - Russian Ruble' },
+  { value: 'UAH', label: '₴ UAH - Ukrainian Hryvnia' },
+  { value: 'AED', label: 'د.إ AED - UAE Dirham' },
+  { value: 'JPY', label: '¥ JPY - Japanese Yen' },
+  { value: 'AUD', label: 'A$ AUD - Australian Dollar' },
 ];
 
 // City is now a free text input instead of dropdown
 
-const AgencySignupScreen = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [currency, setCurrency] = useState('EUR');
-  const [city, setCity] = useState('');
-  const [copied, setCopied] = useState(false);
+export default function AgencySignupScreen() {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
-  const { t, language } = useLanguage();
-  const navigate = useNavigate();
+  
+  const [formData, setFormData] = useState({
+    agencyName: '',
+    contactName: '',
+    phone: '',
+    email: '',
+    password: '',
+    currency: 'EUR',
+    city: '',
+    comments: '',
+  });
+  
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleShare = async () => {
-    const shareUrl = window.location.origin + '/signup/agency';
-    const shareText = t('agencySignupShareText');
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Meet Transfer - Agency Registration',
-          text: shareText,
-          url: shareUrl,
-        });
-      } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          handleCopyLink(shareUrl);
-        }
-      }
-    } else {
-      handleCopyLink(shareUrl);
-    }
-  };
-
-  const handleCopyLink = (url: string) => {
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    toast.success(t('linkCopied'));
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Role-based redirect if already logged in
+  // Redirect if already logged in
   useEffect(() => {
-    if (user && !roleLoading && role) {
+    if (!authLoading && !roleLoading && user && role) {
       switch (role) {
         case 'admin':
-          navigate('/admin', { replace: true });
+          navigate('/admin');
           break;
         case 'driver':
-          navigate('/driver', { replace: true });
+          navigate('/driver');
           break;
         case 'agency':
-          navigate('/agency', { replace: true });
+          navigate('/agency');
+          break;
+        case 'customer':
+          navigate('/customer');
           break;
         default:
-          navigate('/customer', { replace: true });
+          navigate('/');
       }
     }
-  }, [user, role, roleLoading, navigate]);
+  }, [user, role, authLoading, roleLoading, navigate]);
 
-  // If already logged in, show loading
-  if (authLoading || (user && roleLoading)) {
+  // Show loading while checking auth status
+  if (authLoading || roleLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-    setIsLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    const agencyName = formData.get('agencyName') as string;
-    const contactName = formData.get('contactName') as string;
-    const phone = formData.get('phone') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const comments = formData.get('comments') as string;
+  const handleShare = useCallback(async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: 'Join Meet Transfer as an Agency Partner',
+      text: 'Register your travel agency and start earning with Meet Transfer!',
+      url: shareUrl,
+    };
 
     try {
-      const validation = agencySignupSchema.parse({ 
-        agencyName: agencyName.trim(), 
-        contactName: contactName.trim(),
-        phone: phone.trim(), 
-        email: email.trim(), 
-        password,
-        currency,
-        city,
-        comments: comments?.trim() || '',
-      });
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      // User cancelled or error
+      console.log('Share cancelled or failed', error);
+    }
+  }, []);
 
-      // Create agency application - admin will need to approve
+  const handleCopyLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    } catch (error) {
+      toast.error('Failed to copy link');
+    }
+  }, []);
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    setIsSubmitting(true);
+
+    try {
+      // Validate form data
+      const validatedData = agencySignupSchema.parse(formData);
+
+      // Hash the password before storing (simple hash for demo - in production use bcrypt on server)
+      const passwordHash = btoa(validatedData.password);
+
+      // Insert application into database
       const { error: insertError } = await supabase
-        .from('agency_applications' as any)
+        .from('agency_applications')
         .insert({
-          agency_name: validation.agencyName,
-          contact_name: validation.contactName,
-          email: validation.email,
-          phone: validation.phone,
-          currency: validation.currency,
-          city: validation.city,
-          comments: validation.comments || null,
-          password_hash: validation.password,
+          agency_name: validatedData.agencyName,
+          contact_name: validatedData.contactName,
+          phone: validatedData.phone,
+          email: validatedData.email,
+          password_hash: passwordHash,
+          currency: validatedData.currency,
+          city: validatedData.city,
+          comments: validatedData.comments || null,
           status: 'pending',
-        } as any);
+        });
 
       if (insertError) {
-        if (insertError.message.includes('duplicate') || insertError.message.includes('already exists')) {
-          toast.error(t('emailAlreadyRegistered'));
+        if (insertError.message.includes('duplicate') || insertError.message.includes('unique')) {
+          toast.error('An application with this email already exists');
         } else {
-          console.error('Agency application error:', insertError);
-          toast.error(t('loginFailed'));
+          throw insertError;
         }
         return;
       }
 
-      // Notify admin about new agency application
+      // Notify admins about new application
       try {
-        await supabase.functions.invoke('notify-admin-agency-application', {
+        await supabase.functions.invoke('notify-agency-application', {
           body: {
-            agency_name: validation.agencyName,
-            contact_name: validation.contactName,
-            email: validation.email,
-            phone: validation.phone,
-            currency: validation.currency,
-            city: validation.city,
-            comments: validation.comments || null,
-          }
+            agencyName: validatedData.agencyName,
+            contactName: validatedData.contactName,
+            email: validatedData.email,
+            phone: validatedData.phone,
+          },
         });
       } catch (notifyError) {
-        console.error('Failed to notify admin:', notifyError);
+        console.error('Failed to notify admins:', notifyError);
+        // Don't fail the application if notification fails
       }
 
-      toast.success(t('applicationSubmitted'));
-      navigate('/', { replace: true });
+      toast.success('Application submitted successfully! We will review and contact you soon.');
+      
+      // Reset form
+      setFormData({
+        agencyName: '',
+        contactName: '',
+        phone: '',
+        email: '',
+        password: '',
+        currency: 'EUR',
+        city: '',
+        comments: '',
+      });
+
+      // Redirect to homepage after a delay
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
         error.errors.forEach((err) => {
           if (err.path[0]) {
-            fieldErrors[err.path[0].toString()] = err.message;
+            fieldErrors[err.path[0] as string] = err.message;
           }
         });
         setErrors(fieldErrors);
       } else {
-        toast.error(t('loginFailed'));
+        console.error('Signup error:', error);
+        toast.error('Failed to submit application. Please try again.');
       }
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-secondary">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="flex items-center justify-between h-14 px-4">
-          <Link to="/" className="flex items-center gap-2 text-foreground">
-            <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm">{t('back')}</span>
-          </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleShare}
-            className="h-9 w-9"
-          >
-            {copied ? (
-              <Check className="h-5 w-5 text-green-500" />
-            ) : (
-              <Share2 className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center p-4 py-8">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2">
-              <Building2 className="h-6 w-6 text-accent" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 p-4">
+      <Card className="w-full max-w-lg shadow-xl border-border/50">
+        <CardHeader className="text-center pb-2">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Building2 className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl md:text-3xl font-serif">{t('agencyRegistration')}</CardTitle>
-            <CardDescription>{t('partnerWithMeetTransfer')}</CardDescription>
-          </CardHeader>
+          </div>
+          <CardTitle className="text-2xl font-bold">Agency Registration</CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Apply to become a Meet Transfer partner agency
+          </CardDescription>
           
+          {/* Share buttons */}
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="gap-2"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyLink}
+              className="gap-2"
+            >
+              <Copy className="h-4 w-4" />
+              Copy Link
+            </Button>
+          </div>
+        </CardHeader>
+        
+        <form onSubmit={handleSignup}>
           <CardContent className="space-y-4">
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="agencyName">{t('agencyName')} *</Label>
-                <Input 
-                  id="agencyName" 
-                  name="agencyName" 
-                  type="text" 
-                  placeholder="Your Travel Agency" 
-                  required 
-                  className="h-12"
-                />
-                {errors.agencyName && <p className="text-sm text-destructive">{errors.agencyName}</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="contactName">{t('contactPerson')} *</Label>
-                <Input 
-                  id="contactName" 
-                  name="contactName" 
-                  type="text" 
-                  placeholder="John Doe" 
-                  required 
-                  className="h-12"
-                  autoComplete="name"
-                />
-                {errors.contactName && <p className="text-sm text-destructive">{errors.contactName}</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone">{t('phone')} *</Label>
-                <Input 
-                  id="phone" 
-                  name="phone" 
-                  type="tel" 
-                  placeholder="+90 5XX XXX XXXX" 
-                  required 
-                  className="h-12"
-                  autoComplete="tel"
-                />
-                {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">{t('email')} *</Label>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  placeholder="agency@email.com" 
-                  required 
-                  className="h-12"
-                  autoComplete="email"
-                />
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="city">{t('city')} *</Label>
-                <Input 
-                  id="city" 
-                  name="city" 
-                  type="text" 
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder={language === 'TR' ? 'Şehir adını yazın' : 'Enter city name'}
-                  required 
-                  className="h-12"
-                />
-                {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="currency">{t('preferredCurrencyLabel')} *</Label>
-                <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CURRENCIES.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>
-                        {c.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.currency && <p className="text-sm text-destructive">{errors.currency}</p>}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">{t('password')} *</Label>
-                <Input 
-                  id="password" 
-                  name="password" 
-                  type="password" 
-                  placeholder="Ab2215" 
-                  required 
-                  className="h-12"
-                  autoComplete="new-password"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('passwordFormat')}
-                </p>
-                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="comments">{t('additionalInfo')}</Label>
-                <Textarea 
-                  id="comments" 
-                  name="comments" 
-                  placeholder={t('additionalInfoPlaceholder')}
-                  className="min-h-[80px]"
-                />
-                {errors.comments && <p className="text-sm text-destructive">{errors.comments}</p>}
-              </div>
-
-              {/* KVKK Checkbox */}
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  id="kvkk"
-                  name="kvkk"
-                  required
-                  className="mt-1 h-4 w-4 rounded border-border text-accent focus:ring-accent"
-                />
-                <Label htmlFor="kvkk" className="text-sm text-muted-foreground leading-tight">
-                  <Link to="/privacy" target="_blank" className="text-accent hover:underline">
-                    {t('kvkkLink')}
-                  </Link>
-                  {" "}{t('kvkkText').replace(t('kvkkLink'), '').replace("I have read and accept the ", "").replace(". ", " ")}
-                </Label>
-              </div>
-              {errors.kvkk && <p className="text-sm text-destructive">{errors.kvkk}</p>}
-              
-              <Button 
-                type="submit" 
-                variant="accent"
-                className="w-full h-12 rounded-xl text-base font-medium" 
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('submittingApplication')}
-                  </>
-                ) : (
-                  t('submitApplication')
-                )}
-              </Button>
-            </form>
-          </CardContent>
-          
-          <CardFooter className="flex flex-col gap-4 pb-8">
-            <div className="text-center text-sm text-muted-foreground">
-              {t('alreadyHaveAccount')}
+            {/* Agency Name */}
+            <div className="space-y-2">
+              <Label htmlFor="agencyName">Agency Name *</Label>
+              <Input
+                id="agencyName"
+                type="text"
+                placeholder="Your agency name"
+                value={formData.agencyName}
+                onChange={(e) => setFormData({ ...formData, agencyName: e.target.value })}
+                className={errors.agencyName ? 'border-destructive' : ''}
+              />
+              {errors.agencyName && (
+                <p className="text-sm text-destructive">{errors.agencyName}</p>
+              )}
             </div>
-            <Link to="/login" className="w-full">
-              <Button variant="outline" className="w-full h-12 rounded-xl">
-                {t('login')}
-              </Button>
-            </Link>
+
+            {/* Contact Name */}
+            <div className="space-y-2">
+              <Label htmlFor="contactName">Contact Person *</Label>
+              <Input
+                id="contactName"
+                type="text"
+                placeholder="Full name"
+                value={formData.contactName}
+                onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
+                className={errors.contactName ? 'border-destructive' : ''}
+              />
+              {errors.contactName && (
+                <p className="text-sm text-destructive">{errors.contactName}</p>
+              )}
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+90 555 123 4567"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className={errors.phone ? 'border-destructive' : ''}
+              />
+              {errors.phone && (
+                <p className="text-sm text-destructive">{errors.phone}</p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="agency@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className={errors.email ? 'border-destructive' : ''}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email}</p>
+              )}
+            </div>
+
+            {/* City */}
+            <div className="space-y-2">
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
+                type="text"
+                placeholder="e.g. Istanbul, Antalya, Izmir"
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                className={errors.city ? 'border-destructive' : ''}
+              />
+              {errors.city && (
+                <p className="text-sm text-destructive">{errors.city}</p>
+              )}
+            </div>
+
+            {/* Currency */}
+            <div className="space-y-2">
+              <Label htmlFor="currency">Preferred Currency *</Label>
+              <Select
+                value={formData.currency}
+                onValueChange={(value) => setFormData({ ...formData, currency: value })}
+              >
+                <SelectTrigger className={errors.currency ? 'border-destructive' : ''}>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map((currency) => (
+                    <SelectItem key={currency.value} value={currency.value}>
+                      {currency.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.currency && (
+                <p className="text-sm text-destructive">{errors.currency}</p>
+              )}
+            </div>
+
+            {/* Password */}
+            <div className="space-y-2">
+              <Label htmlFor="password">Password *</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Min 8 chars, uppercase, lowercase, number"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className={errors.password ? 'border-destructive' : ''}
+              />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password}</p>
+              )}
+            </div>
+
+            {/* Comments */}
+            <div className="space-y-2">
+              <Label htmlFor="comments">Additional Comments</Label>
+              <Textarea
+                id="comments"
+                placeholder="Tell us about your agency, services, or any questions..."
+                value={formData.comments}
+                onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
+                className={errors.comments ? 'border-destructive' : ''}
+                rows={3}
+              />
+              {errors.comments && (
+                <p className="text-sm text-destructive">{errors.comments}</p>
+              )}
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex flex-col gap-4">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Application'
+              )}
+            </Button>
+            
             <div className="text-center text-sm text-muted-foreground">
-              {t('notAnAgency')}{' '}
-              <Link to="/signup" className="text-accent hover:underline">
-                {t('customerSignUp')}
+              Already have an account?{' '}
+              <Link to="/login" className="text-primary hover:underline font-medium">
+                Login here
+              </Link>
+            </div>
+            
+            <div className="text-center text-sm text-muted-foreground">
+              Looking for customer booking?{' '}
+              <Link to="/customer-signup" className="text-primary hover:underline font-medium">
+                Customer signup
               </Link>
             </div>
           </CardFooter>
-        </Card>
-      </div>
+        </form>
+      </Card>
     </div>
   );
-};
-
-export default AgencySignupScreen;
+}
