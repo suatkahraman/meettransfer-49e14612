@@ -20,6 +20,7 @@ interface CreateUserRequest {
   agency_name?: string // For creating new agency with user
   agency_comments?: string // For creating new agency with user
   agency_currency?: string // Currency for agency panel
+  agency_city?: string // City for agency
 }
 
 Deno.serve(async (req) => {
@@ -81,7 +82,7 @@ Deno.serve(async (req) => {
     }
 
     const body: CreateUserRequest = await req.json()
-    const { email, password, role, name, full_name, phone, plate_number, vehicle_model, region, commission_rate, agency_id, agency_name, agency_comments, agency_currency } = body
+    const { email, password, role, name, full_name, phone, plate_number, vehicle_model, region, commission_rate, agency_id, agency_name, agency_comments, agency_currency, agency_city } = body
     
     // Use full_name or name
     const userName = full_name || name || agency_name || 'User'
@@ -206,7 +207,8 @@ Deno.serve(async (req) => {
             comments: agency_comments || null,
             balance: 0,
             user_id: newUserId,
-            currency: agency_currency || 'EUR'
+            currency: agency_currency || 'EUR',
+            city: agency_city || null
           })
           .select('id')
           .single()
