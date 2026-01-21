@@ -184,13 +184,15 @@ const AgencyHome = () => {
       .eq('agency_id', agencyId);
 
     // Calculate currency balances using shared helper (no EUR fallback)
-    const reservationData = (completedRes || []).map((r) => ({
-      passenger_cash_amount: r.passenger_cash_amount,
-      passenger_cash_currency: r.passenger_cash_currency,
-      agency_reservation_details: r.agency_reservation_details as unknown as {
-        company_amount: number | null;
-        agency_price_currency: string | null;
-      }
+    // YENİ: customer_price kullanılıyor (hem borç hem kâr hesabı için)
+    const reservationData: import('@/lib/currency').CompletedReservationData[] = (completedRes || []).map((r) => ({
+      passenger_cash_amount: r.passenger_cash_amount ?? null,
+      passenger_cash_currency: r.passenger_cash_currency ?? null,
+      agency_reservation_details: r.agency_reservation_details ? {
+        customer_price: (r.agency_reservation_details as any).customer_price ?? null,
+        company_amount: (r.agency_reservation_details as any).company_amount ?? null,
+        agency_price_currency: (r.agency_reservation_details as any).agency_price_currency ?? null,
+      } : null
     }));
     
     const currencyBalances = calculateCurrencyBalances(reservationData, payments || []);
@@ -419,6 +421,57 @@ const AgencyHome = () => {
     
     return groups;
   }, [upcomingJobs, t, locale]);
+
+  // Group completed jobs by month for better organization
+  const groupedCompletedJobs = useMemo(() => {
+    const groups: { month: string; label: string; days: { date: string; label: string; jobs: Reservation[] }[] }[] = [];
+    const jobsByMonth = new Map<string, Map<string, Reservation[]>>();
+    
+    completedJobs.forEach(job => {
+      const date = parseISO(job.pickup_date);
+      const monthKey = format(date, 'yyyy-MM');
+      const dateKey = job.pickup_date;
+      
+      if (!jobsByMonth.has(monthKey)) {
+        jobsByMonth.set(monthKey, new Map());
+      }
+      const monthData = jobsByMonth.get(monthKey)!;
+      
+      if (!monthData.has(dateKey)) {
+        monthData.set(dateKey, []);
+      }
+      monthData.get(dateKey)!.push(job);
+    });
+    
+    // Sort months descending (newest first)
+    const sortedMonths = Array.from(jobsByMonth.keys()).sort().reverse();
+    
+    sortedMonths.forEach(monthKey => {
+      const monthDate = parseISO(`${monthKey}-01`);
+      const monthLabel = format(monthDate, 'MMMM yyyy', { locale });
+      
+      const monthData = jobsByMonth.get(monthKey)!;
+      // Sort days descending within month (newest first)
+      const sortedDays = Array.from(monthData.keys()).sort().reverse();
+      
+      const days = sortedDays.map(dateKey => {
+        const date = parseISO(dateKey);
+        return {
+          date: dateKey,
+          label: format(date, 'dd MMMM', { locale }),
+          jobs: monthData.get(dateKey)!.sort((a, b) => b.pickup_time.localeCompare(a.pickup_time))
+        };
+      });
+      
+      groups.push({
+        month: monthKey,
+        label: monthLabel,
+        days
+      });
+    });
+    
+    return groups;
+  }, [completedJobs, locale]);
 
   const ReservationCard = ({ reservation }: { reservation: Reservation }) => (
     <Card 
@@ -1199,18 +1252,62 @@ const AgencyHome = () => {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden border-t border-green-200 dark:border-green-800"
                       >
-                        <div className="p-3 space-y-3 bg-green-50/30 dark:bg-green-950/20">
-                          {completedJobs.slice(0, 10).map((res) => (
-                            <SwipeableReservationCard 
-                              key={res.id} 
-                              reservation={res}
-                              statusColors={statusColors}
-                              statusLabels={statusLabels}
-                              locale={locale}
-                              onView={() => navigate(`/agency/reservation/${res.id}`)}
-                            />
+                        <div className="p-3 space-y-4 bg-green-50/30 dark:bg-green-950/20">
+                          {/* Grouped by Month and Day */}
+                          {groupedCompletedJobs.slice(0, 3).map((monthGroup) => (
+                            <div key={monthGroup.month} className="space-y-3">
+                              {/* Month Header */}
+                              <div className="flex items-center gap-2 px-2">
+                                <Calendar className="h-4 w-4 text-green-600" />
+                                <span className="text-sm font-bold text-green-700 dark:text-green-300">
+                                  {monthGroup.label}
+                                </span>
+                                <Badge variant="outline" className="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 border-green-300">
+                                  {monthGroup.days.reduce((sum, day) => sum + day.jobs.length, 0)} {t('transfer')}
+                                </Badge>
+                              </div>
+                              
+                              {/* Days within this month */}
+                              <div className="space-y-3">
+                                {monthGroup.days.slice(0, 5).map((dayGroup) => (
+                                  <div key={dayGroup.date} className="space-y-2">
+                                    {/* Day Header */}
+                                    <div className="flex items-center gap-2 px-2 pl-4">
+                                      <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                                      <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                                        {dayGroup.label}
+                                      </span>
+                                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                                        {dayGroup.jobs.length}
+                                      </Badge>
+                                    </div>
+                                    {/* Reservations for this day */}
+                                    <div className="space-y-2 pl-4 border-l-2 border-green-300/50 ml-2">
+                                      {dayGroup.jobs.map((res) => (
+                                        <SwipeableReservationCard 
+                                          key={res.id} 
+                                          reservation={res}
+                                          statusColors={statusColors}
+                                          statusLabels={statusLabels}
+                                          locale={locale}
+                                          onView={() => navigate(`/agency/reservation/${res.id}`)}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                                {/* Show more days in this month */}
+                                {monthGroup.days.length > 5 && (
+                                  <p className="text-xs text-green-600 text-center pl-4">
+                                    +{monthGroup.days.length - 5} {t('moreDays') || 'daha fazla gün'}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
                           ))}
-                          {completedJobs.length > 10 && (
+                          
+                          {/* View all completed */}
+                          {groupedCompletedJobs.length > 3 && (
                             <Card 
                               className="cursor-pointer hover:shadow-md transition-shadow text-center bg-white dark:bg-slate-900"
                               onClick={(e) => {
@@ -1220,7 +1317,7 @@ const AgencyHome = () => {
                             >
                               <CardContent className="py-4">
                                 <p className="text-muted-foreground">
-                                  +{completedJobs.length - 10} {t('moreTransfers') || 'daha fazla transfer'}
+                                  +{groupedCompletedJobs.length - 3} {t('moreMonths') || 'daha fazla ay'}
                                 </p>
                               </CardContent>
                             </Card>

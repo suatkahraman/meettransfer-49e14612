@@ -147,14 +147,16 @@ const AgencyReports = () => {
     );
 
     // Calculate current month balances using shared helper
-    const currentMonthReservationsWithDetails = currentMonthCompleted.map(r => {
+    // YENİ: customer_price kullanılıyor (hem borç hem kâr hesabı için)
+    const currentMonthReservationsWithDetails: import('@/lib/currency').CompletedReservationData[] = currentMonthCompleted.map(r => {
       const detail = currentMonthDetails.find(d => d.reservation_id === r.id);
       return {
-        passenger_cash_amount: r.passenger_cash_amount,
-        passenger_cash_currency: r.passenger_cash_currency,
+        passenger_cash_amount: r.passenger_cash_amount ?? null,
+        passenger_cash_currency: r.passenger_cash_currency ?? null,
         agency_reservation_details: detail ? {
-          company_amount: detail.company_amount,
-          agency_price_currency: detail.agency_price_currency
+          customer_price: detail.customer_price ?? null,
+          company_amount: detail.company_amount ?? null,
+          agency_price_currency: detail.agency_price_currency ?? null
         } : null
       };
     });
@@ -170,20 +172,22 @@ const AgencyReports = () => {
       const prevReservationIds = prevMonthsReservations.map(r => r.id);
       const { data: prevDetailsData } = await supabase
         .from('agency_reservation_details')
-        .select('reservation_id, company_amount, agency_price_currency')
+        .select('reservation_id, customer_price, company_amount, agency_price_currency')
         .in('reservation_id', prevReservationIds);
       
       const prevDetails = prevDetailsData || [];
       
       // Build data for calculateCurrencyBalances
-      const prevReservationsWithDetails = prevMonthsReservations.map(r => {
+      // YENİ: customer_price kullanılıyor
+      const prevReservationsWithDetails: import('@/lib/currency').CompletedReservationData[] = prevMonthsReservations.map(r => {
         const detail = prevDetails.find(d => d.reservation_id === r.id);
         return {
-          passenger_cash_amount: r.passenger_cash_amount,
-          passenger_cash_currency: r.passenger_cash_currency,
+          passenger_cash_amount: r.passenger_cash_amount ?? null,
+          passenger_cash_currency: r.passenger_cash_currency ?? null,
           agency_reservation_details: detail ? {
-            company_amount: detail.company_amount,
-            agency_price_currency: detail.agency_price_currency
+            customer_price: detail.customer_price ?? null,
+            company_amount: detail.company_amount ?? null,
+            agency_price_currency: detail.agency_price_currency ?? null
           } : null
         };
       });
