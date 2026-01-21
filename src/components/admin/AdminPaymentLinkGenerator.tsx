@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { isPaymentsEnabled, isStripeEnabled, isPayPalEnabled, type PaymentProvider } from "@/config/payments";
+import { getCurrencySymbol } from "@/lib/currency";
 import { toast } from "sonner";
 
 interface AdminPaymentLinkGeneratorProps {
@@ -150,18 +151,6 @@ export const AdminPaymentLinkGenerator = ({
       toast.error(error.message || "Failed to send payment link");
     } finally {
       setIsSending(false);
-    }
-  };
-
-  const getCurrencySymbol = (curr: string) => {
-    switch (curr) {
-      case "EUR": return "€";
-      case "USD": return "$";
-      case "GBP": return "£";
-      case "AED": return "د.إ";
-      case "AUD": return "A$";
-      case "TRY": return "₺";
-      default: return curr;
     }
   };
 

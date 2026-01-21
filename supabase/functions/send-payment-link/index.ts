@@ -56,18 +56,22 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Update quick booking request with payment link
-    const { error: updateError } = await supabase
-      .from("quick_booking_requests")
-      .update({ payment_link: paymentLink })
-      .eq("id", quickBookingId);
+    // Update quick booking request with payment link (if quickBookingId is provided and not same as reservationId)
+    if (quickBookingId && quickBookingId !== reservationId) {
+      const { error: updateError } = await supabase
+        .from("quick_booking_requests")
+        .update({ payment_link: paymentLink })
+        .eq("id", quickBookingId);
 
-    if (updateError) {
-      console.error("Error updating quick booking:", updateError);
-      throw updateError;
+      if (updateError) {
+        console.error("Error updating quick booking:", updateError);
+        // Don't throw, continue to update reservation
+      } else {
+        console.log("Quick booking payment link updated:", quickBookingId);
+      }
     }
 
-    // Also update the reservation if reservationId is provided
+    // Update the reservation if reservationId is provided
     if (reservationId) {
       const { error: resUpdateError } = await supabase
         .from("reservations")
@@ -76,7 +80,7 @@ serve(async (req) => {
 
       if (resUpdateError) {
         console.error("Error updating reservation:", resUpdateError);
-        // Don't throw, just log - the quick booking update succeeded
+        throw resUpdateError;
       } else {
         console.log("Reservation payment link updated:", reservationId);
       }

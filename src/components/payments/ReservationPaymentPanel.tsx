@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CreditCard, Wallet, Banknote, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { usePayments } from "@/hooks/usePayments";
 import { useReservationPayment } from "@/hooks/useReservationPayment";
 import { PaymentStatusBadge } from "./PaymentStatusBadge";
 import { cn } from "@/lib/utils";
+import { getCurrencySymbol } from "@/lib/currency";
 import type { PaymentProvider, PaymentStatus, SupportedCurrency } from "@/config/payments";
 
 interface ReservationPaymentPanelProps {
@@ -215,15 +216,3 @@ export const ReservationPaymentPanel = ({
     </Card>
   );
 };
-
-function getCurrencySymbol(currency: string): string {
-  switch (currency) {
-    case "EUR": return "€";
-    case "USD": return "$";
-    case "GBP": return "£";
-    case "AED": return "د.إ";
-    case "AUD": return "A$";
-    case "TRY": return "₺";
-    default: return currency;
-  }
-}
