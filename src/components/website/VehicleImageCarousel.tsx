@@ -2,6 +2,23 @@ import { useState, useEffect, useRef, memo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 
+// Generate srcset for responsive images - optimized for carousel use
+const generateCarouselSrcSet = (src: string): string | undefined => {
+  // Skip for data URLs or already processed URLs
+  if (src.startsWith('data:') || src.includes('?')) return undefined;
+  
+  // For Supabase storage with image transformation
+  if (src.includes('supabase.co/storage')) {
+    const widths = [320, 480, 640, 800];
+    return widths.map(w => `${src}?width=${w}&quality=75 ${w}w`).join(', ');
+  }
+  
+  return undefined;
+};
+
+// Default sizes attribute for carousel images
+const CAROUSEL_SIZES = "(max-width: 480px) 320px, (max-width: 768px) 480px, (max-width: 1024px) 640px, 800px";
+
 interface VehicleImageCarouselProps {
   images: string[];
   alt: string;
@@ -180,6 +197,7 @@ export const VehicleImageCarousel = memo(({
         const index = idx + 1;
         const isActive = index === currentIndex;
         const wasActive = index === prevIndex;
+        const srcSet = generateCarouselSrcSet(src);
         
         // Calculate x position based on slide direction
         let xPosition = 0;
@@ -195,6 +213,8 @@ export const VehicleImageCarousel = memo(({
           <motion.img
             key={src}
             src={src}
+            srcSet={srcSet}
+            sizes={srcSet ? CAROUSEL_SIZES : undefined}
             alt={`${alt} ${index + 1}`}
             initial={false}
             animate={{ 
