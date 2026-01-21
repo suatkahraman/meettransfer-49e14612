@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface PromoCode {
   id: string;
@@ -19,28 +18,41 @@ export const useActivePromoCode = (appliesTo: string = "return_transfer") => {
   useEffect(() => {
     const fetchActivePromoCode = async () => {
       try {
-        const now = new Date().toISOString();
-        
-        const { data, error: fetchError } = await supabase
-          .from("promo_codes")
-          .select("*")
-          .eq("is_active", true)
-          .or(`applies_to.eq.${appliesTo},applies_to.eq.all`)
-          .or(`valid_from.is.null,valid_from.lte.${now}`)
-          .or(`valid_until.is.null,valid_until.gte.${now}`)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
+        // Use edge function for secure access (promo_codes table is not publicly readable)
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-active-promo`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+          }
+        );
 
-        if (fetchError && fetchError.code !== "PGRST116") {
-          throw fetchError;
+        if (!response.ok) {
+          throw new Error("Failed to fetch promo code");
         }
 
-        setPromoCode(data || null);
+        const data = await response.json();
+
+        if (data && data.code) {
+          setPromoCode({
+            id: "server",
+            code: data.code,
+            discount_percentage: data.discountPercentage,
+            description: null,
+            applies_to: appliesTo,
+            is_active: data.isActive,
+            valid_until: data.validUntil,
+          });
+        } else {
+          setPromoCode(null);
+        }
       } catch (err: any) {
         console.error("Error fetching promo code:", err);
         setError(err.message);
-        // Fallback to hardcoded value if DB fetch fails
+        // Fallback to hardcoded value if edge function fails
         setPromoCode({
           id: "fallback",
           code: "MEET25RETURN",
@@ -153,15 +165,21 @@ export const getPromoErrorMessage = (errorCode: string, lang: string = 'en'): st
 
 export const validatePromoCode = async (code: string, lang: string = 'en'): Promise<PromoValidationResult> => {
   try {
-    // First check if code exists at all (including inactive)
-    const { data: anyCode, error: anyError } = await supabase
-      .from("promo_codes")
-      .select("discount_percentage, applies_to, is_active, valid_from, valid_until, max_usage, usage_count")
-      .eq("code", code.toUpperCase().trim())
-      .maybeSingle();
+    // Use edge function for secure validation (promo_codes table is not publicly readable)
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-promo-code`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ code, language: lang }),
+      }
+    );
 
-    if (anyError) {
-      console.error("Error validating promo code:", anyError);
+    if (!response.ok) {
+      console.error("Error validating promo code:", response.statusText);
       return {
         valid: false,
         errorCode: 'error',
@@ -169,58 +187,22 @@ export const validatePromoCode = async (code: string, lang: string = 'en'): Prom
       };
     }
 
-    if (!anyCode) {
+    const result = await response.json();
+
+    if (result.valid) {
+      return {
+        valid: true,
+        discount: result.discount,
+        appliesTo: result.appliesTo,
+        validUntil: result.validUntil,
+      };
+    } else {
       return {
         valid: false,
-        errorCode: 'not_found',
-        errorMessage: getPromoErrorMessage('not_found', lang),
+        errorCode: result.errorCode || 'error',
+        errorMessage: result.errorMessage || getPromoErrorMessage(result.errorCode || 'error', lang),
       };
     }
-
-    // Check if active
-    if (!anyCode.is_active) {
-      return {
-        valid: false,
-        errorCode: 'not_active',
-        errorMessage: getPromoErrorMessage('not_active', lang),
-      };
-    }
-
-    const now = new Date();
-
-    // Check if started
-    if (anyCode.valid_from && new Date(anyCode.valid_from) > now) {
-      return {
-        valid: false,
-        errorCode: 'not_started',
-        errorMessage: getPromoErrorMessage('not_started', lang),
-      };
-    }
-
-    // Check if expired
-    if (anyCode.valid_until && new Date(anyCode.valid_until) < now) {
-      return {
-        valid: false,
-        errorCode: 'expired',
-        errorMessage: getPromoErrorMessage('expired', lang),
-      };
-    }
-
-    // Check max usage
-    if (anyCode.max_usage && anyCode.usage_count >= anyCode.max_usage) {
-      return {
-        valid: false,
-        errorCode: 'max_usage_reached',
-        errorMessage: getPromoErrorMessage('max_usage_reached', lang),
-      };
-    }
-
-    return {
-      valid: true,
-      discount: anyCode.discount_percentage,
-      appliesTo: anyCode.applies_to,
-      validUntil: anyCode.valid_until,
-    };
   } catch (err) {
     console.error("Error validating promo code:", err);
     return {
@@ -233,20 +215,20 @@ export const validatePromoCode = async (code: string, lang: string = 'en'): Prom
 
 export const incrementPromoCodeUsage = async (code: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase
-      .from("promo_codes")
-      .select("id, usage_count")
-      .eq("code", code.toUpperCase().trim())
-      .single();
+    // Use edge function to increment usage (requires server-side access)
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/increment-promo-usage`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({ code }),
+      }
+    );
 
-    if (error || !data) return false;
-
-    const { error: updateError } = await supabase
-      .from("promo_codes")
-      .update({ usage_count: (data.usage_count || 0) + 1 })
-      .eq("id", data.id);
-
-    return !updateError;
+    return response.ok;
   } catch (err) {
     console.error("Error incrementing promo code usage:", err);
     return false;
