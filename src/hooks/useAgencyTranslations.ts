@@ -112,6 +112,26 @@ const agencyTranslations: Record<AgencyLanguage, Record<string, string>> = {
     onlinePayment: 'Online Payment',
     agencyPayment: 'Agency Payment',
     
+    // Online Payment Panel (unique keys to avoid conflicts)
+    paymentTitle: 'Payment',
+    totalAmount: 'Total',
+    paidAmount: 'paid',
+    cashToDriver: 'Cash to Driver',
+    toBePaid: 'to be paid to driver',
+    creditCard: 'Credit/Debit Card',
+    visaMastercard: 'Visa, Mastercard, etc.',
+    fastSecure: 'Fast & secure',
+    payOnTransfer: 'Cash to Driver',
+    payOnTransferDay: 'Pay on transfer day',
+    confirmCashPayment: 'Confirm Cash Payment',
+    payButton: 'Pay',
+    processingPayment: 'Processing...',
+    paymentOptional: 'Payment is optional. You can also pay later or on transfer day.',
+    onlineNotAvailable: 'Online payments are not available. You can pay cash to the driver on transfer day.',
+    paymentComplete: 'Payment Complete',
+    openPaymentLink: 'Open Payment Link',
+    existingPaymentLink: 'Payment link available for customer',
+    
     // Reservation Detail Page
     reservationDetails: 'Reservation Details',
     reservationNotFound: 'Reservation not found',
