@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Globe, Plane, Star, Wifi, Baby, Briefcase, Shield, Clock, Check } from "lucide-react";
 import { CityVideo } from "./types";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
+import { PaymentComingSoonBanner } from "./PaymentComingSoonBanner";
 
 interface HeroVisualSectionProps {
   videosLoaded: boolean;
@@ -190,6 +191,9 @@ export const HeroVisualSection = memo(({
               <span>{t("support24_7")}</span>
             </div>
           </div>
+          
+          {/* Payment Coming Soon Banner - Full version on desktop */}
+          <PaymentComingSoonBanner language={language} className="mt-6" />
         </div>
       </div>
     </>
