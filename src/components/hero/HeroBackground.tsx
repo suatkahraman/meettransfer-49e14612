@@ -1,53 +1,42 @@
-import { memo, useState, useEffect } from "react";
-import { CityVideo } from "./types";
+import { memo } from "react";
+import heroImage from "@/assets/hero-bg-futuristic.webp";
 
 interface HeroBackgroundProps {
-  videosLoaded: boolean;
-  cityVideos: CityVideo[];
-  currentVideoIndex: number;
-  setCurrentVideoIndex: (index: number) => void;
-  language: string;
+  videosLoaded?: boolean;
+  cityVideos?: unknown[];
+  currentVideoIndex?: number;
+  setCurrentVideoIndex?: (index: number) => void;
+  language?: string;
 }
 
-export const HeroBackground = memo(({
-  language
-}: HeroBackgroundProps) => {
-  const [bgLoaded, setBgLoaded] = useState(false);
-
-  // Load background image after 2 seconds (way after LCP) for desktop only
-  useEffect(() => {
-    // Skip on mobile for better performance
-    const isMobile = window.innerWidth < 768;
-    if (isMobile) return;
-
-    const timer = setTimeout(() => {
-      const img = new Image();
-      img.onload = () => setBgLoaded(true);
-      // Dynamic import to avoid bundling the image in critical path
-      img.src = new URL("@/assets/hero-bg-futuristic.webp", import.meta.url).href;
-    }, 2000); // 2s delay - well after LCP
-
-    return () => clearTimeout(timer);
-  }, []);
-
+export const HeroBackground = memo(({}: HeroBackgroundProps) => {
   return (
     <>
       {/* Static background - immediate render */}
       <div className="absolute inset-0 z-0 bg-background" />
       
-      {/* Desktop: Futuristic background image - deferred loading */}
+      {/* Desktop: Hero background image - LCP optimized with high priority */}
       <div className="absolute inset-0 z-0 hidden md:block">
-        {bgLoaded && (
-          <div 
-            className="absolute inset-0 opacity-30"
-            style={{
-              backgroundImage: `url(${new URL("@/assets/hero-bg-futuristic.webp", import.meta.url).href})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center right',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
-        )}
+        {/* 
+          LCP Optimization:
+          - Using img element instead of CSS background for browser prioritization
+          - fetchPriority="high" tells browser to load this first
+          - loading="eager" ensures no lazy loading
+          - Explicit width/height prevent CLS
+          - decoding="async" allows non-blocking decode
+          - WebP format for optimal compression
+        */}
+        <img
+          src={heroImage}
+          alt=""
+          role="presentation"
+          width={1920}
+          height={1080}
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover object-right opacity-30"
+        />
         
         {/* Left fade for form readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
