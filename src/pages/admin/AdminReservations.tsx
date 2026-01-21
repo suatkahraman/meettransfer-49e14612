@@ -22,6 +22,7 @@ import { getCurrencySymbol } from '@/lib/currency';
 import ReservationSearch from '@/components/ReservationSearch';
 import AdminDayCard from '@/components/admin/AdminDayCard';
 import AdminMonthCard from '@/components/admin/AdminMonthCard';
+import { PaymentStatusBadge } from '@/components/payments/PaymentStatusBadge';
 
 interface Reservation {
   id: string;
@@ -1119,23 +1120,10 @@ const AdminReservations = () => {
 
                               <div className="flex items-center gap-3 text-xs flex-wrap">
                                 {reservation.payment_type === 'payment_link' ? (
-                                  <>
-                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs px-1.5 py-0">
-                                      <CreditCard className="h-2.5 w-2.5 mr-0.5" />
-                                      Link
-                                    </Badge>
-                                    {reservation.payment_status === 'paid' ? (
-                                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs px-1.5 py-0">
-                                        <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
-                                        Ödendi
-                                      </Badge>
-                                    ) : (
-                                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs px-1.5 py-0">
-                                        <Clock3 className="h-2.5 w-2.5 mr-0.5" />
-                                        Bekliyor
-                                      </Badge>
-                                    )}
-                                  </>
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs px-1.5 py-0">
+                                    <CreditCard className="h-2.5 w-2.5 mr-0.5" />
+                                    Link
+                                  </Badge>
                                 ) : reservation.payment_type === 'agency_pay' ? (
                                   <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs px-1.5 py-0">
                                     <Building2 className="h-2.5 w-2.5 mr-0.5" />
@@ -1147,6 +1135,7 @@ const AdminReservations = () => {
                                     Nakit
                                   </Badge>
                                 )}
+                                <PaymentStatusBadge status={reservation.payment_status} size="sm" />
                                 <span className={`font-bold ${isPriceModifiedByDriver(reservation) ? 'text-amber-600' : 'text-primary'}`}>
                                   {formatPrice(reservation.price, reservation.price_currency)}
                                   {isPriceModifiedByDriver(reservation) && (

@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X, Car, Briefcase, Baby, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, User, UserCheck, Pencil, Check, X, Car, Briefcase, Baby, Trash2, ChevronDown, ChevronRight, CreditCard } from 'lucide-react';
+import { PaymentStatusBadge } from '@/components/payments/PaymentStatusBadge';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -35,6 +36,7 @@ interface Reservation {
   flight_number: string | null;
   vehicle_type: string;
   payment_type: string;
+  payment_status: string | null;
   price: number | null;
   price_currency: string | null;
   status: string;
@@ -136,7 +138,7 @@ const AdminFilteredReservations = () => {
           id, reservation_code, customer_name, customer_phone, 
           pickup, dropoff, pickup_place_name, dropoff_place_name,
           pickup_date, pickup_time, flight_number, vehicle_type,
-          payment_type, price, price_currency, status, driver_id,
+          payment_type, payment_status, price, price_currency, status, driver_id,
           driver_user_id, agency_user_id, luggage_count, baby_seat_count,
           drivers (id, name)
         `)
@@ -464,6 +466,7 @@ const AdminFilteredReservations = () => {
                                     <Badge className={statusColors[reservation.status] || 'bg-gray-100'}>
                                       {statusLabels[reservation.status] || reservation.status}
                                     </Badge>
+                                    <PaymentStatusBadge status={reservation.payment_status} size="sm" />
                                     {reservation.reservation_code && (
                                       <Badge variant="outline" className="font-mono">
                                         {reservation.reservation_code}
@@ -557,6 +560,7 @@ const AdminFilteredReservations = () => {
                         <Badge className={statusColors[reservation.status] || 'bg-gray-100'}>
                           {statusLabels[reservation.status] || reservation.status}
                         </Badge>
+                        <PaymentStatusBadge status={reservation.payment_status} size="sm" />
                         {reservation.reservation_code && (
                           <Badge variant="outline" className="font-mono">
                             {reservation.reservation_code}
