@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Building2, Loader2, Share2, Copy } from 'lucide-react';
+import { CURRENCY_OPTIONS, CURRENCY_CODES } from '@/lib/currency';
 
 const passwordSchema = z.string()
   .min(8, 'Password must be at least 8 characters')
@@ -25,22 +26,10 @@ const agencySignupSchema = z.object({
   phone: z.string().trim().min(5, 'Phone number is required').max(20),
   email: z.string().trim().email('Invalid email address').max(255),
   password: passwordSchema,
-  currency: z.enum(['EUR', 'USD', 'TRY', 'GBP', 'RUB', 'UAH', 'AED', 'JPY', 'AUD']),
+  currency: z.enum(CURRENCY_CODES),
   city: z.string().trim().min(1, 'City is required'),
   comments: z.string().max(500).optional(),
 });
-
-const CURRENCIES = [
-  { value: 'TRY', label: '₺ TRY - Turkish Lira' },
-  { value: 'EUR', label: '€ EUR - Euro' },
-  { value: 'GBP', label: '£ GBP - British Pound' },
-  { value: 'USD', label: '$ USD - US Dollar' },
-  { value: 'RUB', label: '₽ RUB - Russian Ruble' },
-  { value: 'UAH', label: '₴ UAH - Ukrainian Hryvnia' },
-  { value: 'AED', label: 'د.إ AED - UAE Dirham' },
-  { value: 'JPY', label: '¥ JPY - Japanese Yen' },
-  { value: 'AUD', label: 'A$ AUD - Australian Dollar' },
-];
 
 // City is now a free text input instead of dropdown
 
@@ -342,7 +331,7 @@ export default function AgencySignupScreen() {
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CURRENCIES.map((currency) => (
+                  {CURRENCY_OPTIONS.map((currency) => (
                     <SelectItem key={currency.value} value={currency.value}>
                       {currency.label}
                     </SelectItem>

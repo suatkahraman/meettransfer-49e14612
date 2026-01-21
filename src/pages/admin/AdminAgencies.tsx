@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Key, Mail, Phone, RefreshCw } from 'lucide-react';
-import { getCurrencySymbol } from '@/lib/currency';
+import { getCurrencySymbol, CURRENCY_OPTIONS } from '@/lib/currency';
 
 // Fallback exchange rates
 const FALLBACK_RATES: Record<string, number> = {
@@ -774,15 +774,11 @@ const AdminAgencies = () => {
                     value={formData.currency}
                     onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
                   >
-                    <option value="TRY">₺ Türk Lirası (TRY)</option>
-                    <option value="EUR">€ Euro (EUR)</option>
-                    <option value="GBP">£ Pound (GBP)</option>
-                    <option value="USD">$ Dollar (USD)</option>
-                    <option value="RUB">₽ Russian Ruble (RUB)</option>
-                    <option value="UAH">₴ Ukrainian Hryvnia (UAH)</option>
-                    <option value="AED">د.إ Dirham (AED)</option>
-                    <option value="JPY">¥ Japanese Yen (JPY)</option>
-                    <option value="AUD">A$ Australian Dollar (AUD)</option>
+                    {CURRENCY_OPTIONS.map((currency) => (
+                      <option key={currency.value} value={currency.value}>
+                        {currency.symbol} {currency.label.split(' - ')[1] || currency.value} ({currency.value})
+                      </option>
+                    ))}
                   </select>
                   <p className="text-xs text-muted-foreground">Acenta panelinde kullanılacak para birimi</p>
                 </div>
