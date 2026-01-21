@@ -223,10 +223,20 @@
       .static-trust-badge.blue{background:hsl(210 80% 92%);color:hsl(210 80% 35%);border:1px solid hsl(210 60% 80%)}
       .static-trust-badge svg{width:14px;height:14px;flex-shrink:0}
       
-      /* Skeleton shimmer for form */
-      @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-      .skeleton{background:linear-gradient(90deg,hsl(30 15% 92%) 25%,hsl(30 15% 87%) 50%,hsl(30 15% 92%) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius)}
-      .form-skeleton{width:100%;max-width:28rem;height:340px;border-radius:1rem;box-shadow:0 4px 20px -4px rgba(0,0,0,0.08)}
+      /* Static booking card - real content, not skeleton */
+      .static-booking-card{width:100%;max-width:28rem;background:white;border-radius:1rem;box-shadow:0 4px 24px -4px rgba(0,0,0,0.12);overflow:hidden;border:1px solid hsl(30 20% 90%)}
+      .static-booking-tabs{display:flex;background:hsl(30 20% 96%);border-bottom:1px solid hsl(30 20% 90%)}
+      .static-booking-tab{flex:1;padding:0.875rem 1rem;font-size:0.875rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.5rem;color:hsl(0 0% 45%);background:transparent;border:none;cursor:pointer}
+      .static-booking-tab.active{background:white;color:hsl(var(--primary));box-shadow:0 -2px 0 hsl(var(--primary)) inset}
+      .static-booking-tab svg{width:16px;height:16px}
+      .static-booking-form{padding:1.25rem}
+      .static-input{width:100%;padding:0.875rem 1rem;border:1px solid hsl(30 20% 88%);border-radius:0.75rem;font-size:0.9375rem;color:hsl(0 0% 25%);background:hsl(30 20% 99%);margin-bottom:0.75rem}
+      .static-input::placeholder{color:hsl(0 0% 55%)}
+      .static-input-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.75rem}
+      .static-input-row .static-input{margin-bottom:0}
+      .static-cta{width:100%;padding:1rem;background:hsl(var(--primary));color:white;font-size:1rem;font-weight:700;border:none;border-radius:0.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;text-decoration:none;margin-top:0.5rem}
+      .static-cta:hover{filter:brightness(1.05)}
+      .static-cta svg{width:18px;height:18px}
       
       /* Hide static hero when React mounts */
       .js-loaded .static-hero{display:none}
@@ -494,8 +504,34 @@
             </span>
           </div>
           
-          <!-- Form Skeleton - Shows loading state until React hydrates -->
-          <div class="form-skeleton skeleton" aria-hidden="true"></div>
+          <!-- Static Booking Card - Real content, LCP eligible -->
+          <div class="static-booking-card">
+            <!-- Tabs -->
+            <div class="static-booking-tabs">
+              <button class="static-booking-tab active" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+                Transfer
+              </button>
+              <button class="static-booking-tab" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Hourly
+              </button>
+            </div>
+            <!-- Form -->
+            <div class="static-booking-form">
+              <input type="text" class="static-input" placeholder="📍 Pickup location (airport, hotel...)" readonly />
+              <input type="text" class="static-input" placeholder="📍 Drop-off destination" readonly />
+              <div class="static-input-row">
+                <input type="text" class="static-input" placeholder="📅 Date" readonly />
+                <input type="text" class="static-input" placeholder="🕐 Time" readonly />
+                <input type="text" class="static-input" placeholder="👥 Guests" readonly />
+              </div>
+              <a href="#booking-form" class="static-cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Get Instant Price
+              </a>
+            </div>
+          </div>
         </div>
       </section>
     </div>
