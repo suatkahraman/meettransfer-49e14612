@@ -18,6 +18,8 @@ type NotificationType =
   | 'driver_reminder'
   | 'admin_updated_price'
   | 'payment_method_changed'
+  | 'payment_status_changed'
+  | 'payment_confirmed'
   | 'other';
 
 interface NotificationOptions {
@@ -361,6 +363,49 @@ export const useNotifications = () => {
     });
   }, [sendNotification]);
 
+  // Notify driver when payment status changes
+  const notifyDriverPaymentStatusChanged = useCallback(async (
+    driverUserId: string,
+    reservationId: string,
+    newStatus: string,
+    customerName: string
+  ) => {
+    const statusMessages: Record<string, { emoji: string; title: string; message: string }> = {
+      'paid': {
+        emoji: '✅',
+        title: 'Ödeme Alındı',
+        message: `${customerName} için ödeme onaylandı. Transfer onaylandı.`
+      },
+      'partial': {
+        emoji: '💳',
+        title: 'Kısmi Ödeme Alındı',
+        message: `${customerName} için kısmi ödeme alındı.`
+      },
+      'pending': {
+        emoji: '⏳',
+        title: 'Ödeme Bekleniyor',
+        message: `${customerName} için ödeme bekleniyor.`
+      },
+    };
+
+    const statusInfo = statusMessages[newStatus] || {
+      emoji: '💰',
+      title: 'Ödeme Durumu Güncellendi',
+      message: `${customerName} için ödeme durumu güncellendi.`
+    };
+
+    return sendNotification({
+      user_id: driverUserId,
+      reservation_id: reservationId,
+      title: `${statusInfo.emoji} ${statusInfo.title}`,
+      message: statusInfo.message,
+      type: 'payment_status_changed',
+      send_push: true,
+      send_whatsapp: true,
+      url: `/driver/job/${reservationId}`,
+    });
+  }, [sendNotification]);
+
   return {
     sendNotification,
     // Customer notifications
@@ -374,6 +419,7 @@ export const useNotifications = () => {
     notifyDriverNewJob,
     notifyDriverReservationUpdated,
     notifyDriverReservationCancelled,
+    notifyDriverPaymentStatusChanged,
     // Admin notifications
     notifyAdminsNewReservation,
     notifyAdminsCustomerEdited,

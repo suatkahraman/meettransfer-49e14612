@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useCustomerNotification } from '@/hooks/useCustomerNotification';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -109,6 +110,7 @@ const AdminEditReservation = () => {
   const { logAction } = useAuditLog();
   const { notifyStatusChange } = useCustomerNotification();
   const { thresholdsMap } = usePriceThresholds();
+  const { notifyDriverPaymentStatusChanged } = useNotifications();
   const { emailCustomerPriceSet, emailDriverAssigned, emailDriverReservationUpdated, emailCustomerDriverAssigned, emailPaymentRequest, emailPaymentConfirmed, emailAgencyApproved, emailAgencyRejected, emailAgencyPriceSet } = useEmailNotifications();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -2062,6 +2064,19 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                             send_push: true
                           }
                         });
+                      }
+
+                      // Notify driver about payment confirmation (if driver is assigned)
+                      if (formData.driver_id) {
+                        const selectedDriver = drivers.find(d => d.id === formData.driver_id);
+                        if (selectedDriver?.user_id) {
+                          await notifyDriverPaymentStatusChanged(
+                            selectedDriver.user_id,
+                            id!,
+                            'paid',
+                            passengerNames[0] || 'Müşteri'
+                          );
+                        }
                       }
 
                       toast.success('Ödeme onaylandı ve müşteriye bilgi e-postası gönderildi!');
