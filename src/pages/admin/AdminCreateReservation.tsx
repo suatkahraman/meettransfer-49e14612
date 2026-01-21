@@ -137,6 +137,12 @@ const AdminCreateReservation = () => {
   // Multiple passenger names support (max 15)
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const MAX_PASSENGERS = 15;
+  
+  // Agency pricing details
+  const [agencyDetails, setAgencyDetails] = useState({
+    customer_price: '',
+    agency_price_currency: 'USD',
+  });
 
   const addPassenger = () => {
     if (passengerNames.length < MAX_PASSENGERS) {
@@ -365,6 +371,23 @@ const AdminCreateReservation = () => {
             reservation_id: reservation.id,
             notes: formData.admin_notes,
           });
+      }
+
+      // Save agency pricing details if agency is selected
+      if (formData.agency_id && reservation) {
+        const customerPrice = parseFloat(agencyDetails.customer_price) || null;
+        const driverFee = safeParseFloat(formData.price);
+        
+        if (customerPrice !== null) {
+          await supabase
+            .from('agency_reservation_details')
+            .insert({
+              reservation_id: reservation.id,
+              customer_price: customerPrice,
+              agency_price_currency: agencyDetails.agency_price_currency,
+              company_amount: customerPrice, // company_amount = customer_price (simplified logic)
+            });
+        }
       }
 
       // Audit log
@@ -923,18 +946,68 @@ const AdminCreateReservation = () => {
 
                 {/* Agency Selection - Only show when payment type is agency_pay */}
                 {formData.payment_type === 'agency_pay' && (
-                  <div className="space-y-2">
-                    <Label>Acenta *</Label>
-                    <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v === 'none' ? '' : v})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Acenta seçin" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {agencies.map(a => (
-                          <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Acenta *</Label>
+                      <Select value={formData.agency_id} onValueChange={(v) => setFormData({...formData, agency_id: v === 'none' ? '' : v})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Acenta seçin" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {agencies.map(a => (
+                            <SelectItem key={a.id} value={a.id}>{a.agency_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* Agency Pricing - Müşteri Fiyatı */}
+                    {formData.agency_id && (
+                      <Card className="border-blue-300 bg-blue-50 dark:bg-blue-950/30">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300 text-base">
+                            <Banknote className="h-4 w-4" />
+                            Acenta Fiyatlandırması
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="space-y-2">
+                            <Label className="text-blue-700 dark:text-blue-300">Müşteri Fiyatı</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                value={agencyDetails.customer_price}
+                                onChange={(e) => setAgencyDetails({ ...agencyDetails, customer_price: e.target.value })}
+                                className="flex-1"
+                              />
+                              <Select
+                                value={agencyDetails.agency_price_currency}
+                                onValueChange={(v) => setAgencyDetails({ ...agencyDetails, agency_price_currency: v })}
+                              >
+                                <SelectTrigger className="w-24">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {currencies.map(c => (
+                                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Bu tutar acenta borç bakiyesine eklenir ve aylık kâr hesabında kullanılır.
+                              {agencyDetails.agency_price_currency !== 'TRY' && (
+                                <span className="block text-amber-600 dark:text-amber-400 mt-1">
+                                  Döviz tutarı otomatik kur ile TRY'ye çevrilecektir.
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
                 )}
               </motion.div>
