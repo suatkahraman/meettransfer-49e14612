@@ -458,7 +458,7 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('jspdf')) {
             return 'vendor-pdf';
           }
-          if (id.includes('node_modules/xlsx')) {
+          if (id.includes('node_modules/exceljs')) {
             return 'vendor-excel';
           }
           if (id.includes('react-markdown') || id.includes('remark-gfm')) {
