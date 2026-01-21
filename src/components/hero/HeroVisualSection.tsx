@@ -60,7 +60,7 @@ export const HeroVisualSection = memo(({
                 <Globe className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground">100+</div>
+                <div className="text-sm font-bold text-foreground">32</div>
                 <div className="text-[10px] text-muted-foreground">{t("cities")}</div>
               </div>
             </div>
@@ -70,7 +70,7 @@ export const HeroVisualSection = memo(({
                 <Plane className="h-4 w-4 text-accent-foreground" />
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground">670+</div>
+                <div className="text-sm font-bold text-foreground">12</div>
                 <div className="text-[10px] text-muted-foreground">{t("airports")}</div>
               </div>
             </div>
@@ -144,7 +144,7 @@ export const HeroVisualSection = memo(({
                   <Globe className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-foreground">100+</div>
+                  <div className="text-lg font-bold text-foreground">32</div>
                   <div className="text-xs text-muted-foreground">{t("cities")}</div>
                 </div>
               </div>
@@ -154,7 +154,7 @@ export const HeroVisualSection = memo(({
                   <Plane className="h-5 w-5 text-accent-foreground" />
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-foreground">670+</div>
+                  <div className="text-lg font-bold text-foreground">12</div>
                   <div className="text-xs text-muted-foreground">{t("airports")}</div>
                 </div>
               </div>
