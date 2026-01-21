@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 // Heavy libraries loaded dynamically for better bundle size
 const loadJsPDF = () => import('jspdf');
 const loadAutoTable = () => import('jspdf-autotable');
-const loadXLSX = () => import('xlsx');
+const loadExcelJS = () => import('exceljs');
 
 interface AgencyReservationDetail {
   id: string;
@@ -385,14 +385,17 @@ const AgencyReports = () => {
     try {
       toast.loading('Excel oluşturuluyor...');
       
-      // Dynamically import heavy library
-      const XLSX = await loadXLSX();
+      // Dynamically import ExcelJS (secure alternative to xlsx)
+      const ExcelJS = await loadExcelJS();
       
       const monthName = format(currentMonth, 'MMMM yyyy', { locale: tr });
-      const wb = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Meet Transfer';
+      workbook.created = new Date();
       
       // Summary sheet
-      const summaryData = [
+      const summarySheet = workbook.addWorksheet('Özet');
+      summarySheet.addRows([
         ['Acenta Adı', agency.agency_name],
         ['Rapor Dönemi', monthName],
         ['Oluşturulma Tarihi', format(new Date(), 'dd/MM/yyyy HH:mm')],
@@ -402,62 +405,80 @@ const AgencyReports = () => {
         ['Tamamlanan', completedReservations],
         ['Ödenen', paidCount],
         ['Bekleyen Ödeme', pendingPayments],
-      ];
+      ]);
       
-      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-      XLSX.utils.book_append_sheet(wb, summarySheet, 'Özet');
+      // Style the summary header
+      summarySheet.getColumn(1).width = 25;
+      summarySheet.getColumn(2).width = 25;
       
       // Balance sheet
       if (combinedBalances.length > 0) {
-        const balanceRows = [
-          ['Para Birimi', 'Toplam Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye', 'Durum'],
-          ...combinedBalances.map(cb => [
+        const balanceSheet = workbook.addWorksheet('Bakiye');
+        balanceSheet.addRow(['Para Birimi', 'Toplam Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye', 'Durum']);
+        combinedBalances.forEach(cb => {
+          balanceSheet.addRow([
             cb.currency,
             cb.totalCompanyAmount,
             cb.totalPassengerCash,
             cb.totalPaid,
             cb.netBalance,
             cb.netBalance > 0 ? 'Borç' : cb.netBalance < 0 ? 'Alacak' : 'Hesaplaşıldı',
-          ]),
-        ];
-        const balanceSheet = XLSX.utils.aoa_to_sheet(balanceRows);
-        XLSX.utils.book_append_sheet(wb, balanceSheet, 'Bakiye');
+          ]);
+        });
+        // Style headers
+        balanceSheet.getRow(1).font = { bold: true };
+        balanceSheet.columns.forEach(col => col.width = 15);
       }
       
       // Current month sheet
       if (currentMonthBalances.length > 0) {
-        const monthRows = [
-          ['Para Birimi', 'Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye'],
-          ...currentMonthBalances.map(cb => [
+        const monthSheet = workbook.addWorksheet(monthName);
+        monthSheet.addRow(['Para Birimi', 'Gider', 'Nakit Alınan', 'Ödenen', 'Net Bakiye']);
+        currentMonthBalances.forEach(cb => {
+          monthSheet.addRow([
             cb.currency,
             cb.totalCompanyAmount,
             cb.totalPassengerCash,
             cb.totalPaid,
             cb.netBalance,
-          ]),
-        ];
-        const monthSheet = XLSX.utils.aoa_to_sheet(monthRows);
-        XLSX.utils.book_append_sheet(wb, monthSheet, monthName);
+          ]);
+        });
+        monthSheet.getRow(1).font = { bold: true };
+        monthSheet.columns.forEach(col => col.width = 15);
       }
       
       // Transactions sheet
       if (transactions.length > 0) {
-        const txRows = [
-          ['Tarih', 'Tür', 'Tutar', 'Para Birimi', 'Bakiye Sonrası', 'Açıklama'],
-          ...transactions.map(tx => [
+        const txSheet = workbook.addWorksheet('İşlemler');
+        txSheet.addRow(['Tarih', 'Tür', 'Tutar', 'Para Birimi', 'Bakiye Sonrası', 'Açıklama']);
+        transactions.forEach(tx => {
+          txSheet.addRow([
             format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm'),
             tx.type === 'top_up' ? 'Ödeme' : 'Kesinti',
             tx.type === 'top_up' ? tx.amount : -tx.amount,
             tx.currency,
             tx.balance_after,
             tx.description || '',
-          ]),
-        ];
-        const txSheet = XLSX.utils.aoa_to_sheet(txRows);
-        XLSX.utils.book_append_sheet(wb, txSheet, 'İşlemler');
+          ]);
+        });
+        txSheet.getRow(1).font = { bold: true };
+        txSheet.getColumn(1).width = 18;
+        txSheet.getColumn(2).width = 10;
+        txSheet.getColumn(6).width = 30;
       }
       
-      XLSX.writeFile(wb, `${agency.agency_name.replace(/\s+/g, '_')}_Rapor_${format(currentMonth, 'yyyy_MM')}.xlsx`);
+      // Generate and download the file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${agency.agency_name.replace(/\s+/g, '_')}_Rapor_${format(currentMonth, 'yyyy_MM')}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
       toast.dismiss();
       toast.success('Excel başarıyla oluşturuldu');
     } catch (error) {
