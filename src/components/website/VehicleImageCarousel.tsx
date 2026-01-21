@@ -22,6 +22,8 @@ export const VehicleImageCarousel = memo(({
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
   const [imagesLoaded, setImagesLoaded] = useState<Set<number>>(new Set([0]));
   const [isPaused, setIsPaused] = useState(false);
+  // Track if secondary images should be rendered (deferred after first paint)
+  const [shouldRenderSecondary, setShouldRenderSecondary] = useState(false);
   const preloadedRef = useRef<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -87,12 +89,36 @@ export const VehicleImageCarousel = memo(({
     };
   }, []);
 
-  // Preload images once on mount - avoid repeated DOM manipulation
+  // Defer secondary image rendering until after first paint + idle
   useEffect(() => {
     if (images.length <= 1) return;
+    
+    // Use requestIdleCallback to defer secondary images until browser is idle
+    const scheduleSecondaryRender = () => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          setShouldRenderSecondary(true);
+        }, { timeout: 2000 });
+      } else {
+        // Fallback for Safari
+        setTimeout(() => {
+          setShouldRenderSecondary(true);
+        }, 500);
+      }
+    };
 
-    // Preload all images in memory without adding to DOM
-    images.forEach((src, index) => {
+    // Wait for first image to load or timeout
+    const timeout = setTimeout(scheduleSecondaryRender, 100);
+    return () => clearTimeout(timeout);
+  }, [images.length]);
+
+  // Preload secondary images only after they're rendered
+  useEffect(() => {
+    if (!shouldRenderSecondary || images.length <= 1) return;
+
+    // Preload secondary images in memory with low priority
+    images.slice(1).forEach((src, idx) => {
+      const index = idx + 1;
       if (preloadedRef.current.has(src)) return;
       
       const img = new Image();
@@ -100,13 +126,17 @@ export const VehicleImageCarousel = memo(({
         setImagesLoaded(prev => new Set([...prev, index]));
         preloadedRef.current.add(src);
       };
+      // Use low fetch priority for secondary images
+      if ('fetchPriority' in img) {
+        (img as any).fetchPriority = 'low';
+      }
       img.src = src;
     });
-  }, [images]);
+  }, [shouldRenderSecondary, images]);
 
   // Auto-rotate images (paused when hovered or after swipe)
   useEffect(() => {
-    if (images.length <= 1 || isHovered || isPaused) return;
+    if (images.length <= 1 || isHovered || isPaused || !shouldRenderSecondary) return;
     
     const timer = setInterval(() => {
       setSlideDirection('left');
@@ -115,11 +145,13 @@ export const VehicleImageCarousel = memo(({
     }, interval);
 
     return () => clearInterval(timer);
-  }, [images.length, interval, isHovered, isPaused, currentIndex]);
+  }, [images.length, interval, isHovered, isPaused, currentIndex, shouldRenderSecondary]);
 
   if (images.length === 0) return null;
 
   const isCurrentLoaded = imagesLoaded.has(currentIndex);
+  const firstImage = images[0];
+  const secondaryImages = images.slice(1);
 
   return (
     <div 
@@ -127,19 +159,36 @@ export const VehicleImageCarousel = memo(({
       className={`relative overflow-hidden touch-pan-y ${className}`}
       {...swipeHandlers}
     >
-      {/* Slide animation variants */}
-      {images.map((src, index) => {
+      {/* FIRST IMAGE - Static, no animation, LCP element */}
+      <img
+        src={firstImage}
+        alt={`${alt} 1`}
+        fetchPriority="high"
+        loading="eager"
+        decoding="async"
+        draggable={false}
+        className={`absolute inset-0 w-full h-full object-cover pointer-events-none transition-opacity duration-200 ${
+          currentIndex === 0 ? 'opacity-100 z-10' : 'opacity-0 z-1'
+        }`}
+        onLoad={() => {
+          setImagesLoaded(prev => new Set([...prev, 0]));
+        }}
+      />
+
+      {/* SECONDARY IMAGES - Rendered only after first paint, with animations */}
+      {shouldRenderSecondary && secondaryImages.map((src, idx) => {
+        const index = idx + 1;
         const isActive = index === currentIndex;
         const wasActive = index === prevIndex;
         
         // Calculate x position based on slide direction
         let xPosition = 0;
         if (isActive) {
-          xPosition = 0; // Current slide is centered
+          xPosition = 0;
         } else if (wasActive) {
-          xPosition = slideDirection === 'left' ? -100 : 100; // Previous slide exits
+          xPosition = slideDirection === 'left' ? -100 : 100;
         } else {
-          xPosition = slideDirection === 'left' ? 100 : -100; // Hidden slides
+          xPosition = slideDirection === 'left' ? 100 : -100;
         }
         
         return (
@@ -160,7 +209,8 @@ export const VehicleImageCarousel = memo(({
               scale: { duration: 0.3 }
             }}
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-            loading={index === 0 ? "eager" : "lazy"}
+            loading="lazy"
+            decoding="async"
             draggable={false}
             onLoad={() => {
               setImagesLoaded(prev => new Set([...prev, index]));
@@ -169,7 +219,31 @@ export const VehicleImageCarousel = memo(({
         );
       })}
 
-      {/* Dots indicator - using span instead of button to avoid nesting buttons */}
+      {/* Also animate first image when transitioning FROM it */}
+      {shouldRenderSecondary && currentIndex !== 0 && prevIndex === 0 && (
+        <motion.div
+          initial={false}
+          animate={{ 
+            x: slideDirection === 'left' ? '-100%' : '100%',
+            opacity: 0
+          }}
+          transition={{ 
+            x: { type: "spring", stiffness: 300, damping: 30 },
+            opacity: { duration: 0.2 }
+          }}
+          className="absolute inset-0 w-full h-full z-5 pointer-events-none"
+        >
+          <img
+            src={firstImage}
+            alt={`${alt} 1`}
+            className="w-full h-full object-cover"
+            loading="eager"
+            draggable={false}
+          />
+        </motion.div>
+      )}
+
+      {/* Dots indicator */}
       {images.length > 1 && (
         <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 z-20">
           {images.map((_, index) => (
