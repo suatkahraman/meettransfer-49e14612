@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           agency_name: string
           balance: number | null
+          city: string | null
           comments: string | null
           created_at: string
           currency: string
@@ -28,6 +29,7 @@ export type Database = {
         Insert: {
           agency_name: string
           balance?: number | null
+          city?: string | null
           comments?: string | null
           created_at?: string
           currency?: string
@@ -38,6 +40,7 @@ export type Database = {
         Update: {
           agency_name?: string
           balance?: number | null
+          city?: string | null
           comments?: string | null
           created_at?: string
           currency?: string

@@ -457,6 +457,7 @@ const AdminAgencies = () => {
             agency_name: formData.agency_name.trim(),
             agency_comments: formData.comments.trim() || null,
             agency_currency: formData.currency,
+            agency_city: formData.city.trim() || null,
           },
         });
 
