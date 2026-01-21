@@ -40,26 +40,31 @@ serve(async (req) => {
       throw new Error("Reservation not found");
     }
 
-    // Get customer email from quick booking if available
-    let customerEmail = reservation.customer_phone; // Fallback
-    const { data: quickBooking } = await supabase
-      .from("quick_booking_requests")
-      .select("customer_email")
-      .eq("id", reservationId)
-      .single();
+    // Get customer email - first check if reservation has customer_id
+    let customerEmail: string | null = null;
+    
+    // Try to get email from profiles if customer_id exists
+    if (reservation.customer_id) {
+      const { data: userData } = await supabase.auth.admin.getUserById(reservation.customer_id);
+      if (userData?.user?.email) {
+        customerEmail = userData.user.email;
+      }
+    }
+    
+    // If no email from auth, try quick_booking_requests using original request ID
+    if (!customerEmail) {
+      const { data: quickBookings } = await supabase
+        .from("quick_booking_requests")
+        .select("customer_email")
+        .or(`confirmation_token.eq.${reservation.reservation_code},customer_phone.eq.${reservation.customer_phone}`)
+        .limit(1);
 
-    if (quickBooking?.customer_email) {
-      customerEmail = quickBooking.customer_email;
+      if (quickBookings?.[0]?.customer_email) {
+        customerEmail = quickBookings[0].customer_email;
+      }
     }
 
-    // Try to get email from agency details
-    const { data: agencyDetails } = await supabase
-      .from("agency_reservation_details")
-      .select("*")
-      .eq("reservation_id", reservationId)
-      .single();
-
-    console.log("Sending payment confirmation for reservation:", reservationId);
+    console.log("Sending payment confirmation for reservation:", reservationId, "to:", customerEmail || "no email found");
 
     // Get currency symbol
     const currencySymbol = 
