@@ -34,20 +34,20 @@ export const HeroVisualSection = memo(({
             {/* Content overlay */}
             <div className="relative z-10 h-full flex flex-col justify-center p-4">
               <h3 className="text-base font-bold text-foreground mb-2">
-                {t("premiumFleet") || "Premium Mercedes Fleet"}
+                {t("premiumFleet")}
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-1">
                   <Wifi className="h-3 w-3" />
-                  <span>{t("freeWifi") || "WiFi"}</span>
+                  <span>{t("freeWifi")}</span>
                 </div>
                 <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-1">
                   <Baby className="h-3 w-3" />
-                  <span>{t("babySeatLabel") || "Baby Seat"}</span>
+                  <span>{t("babySeatLabel")}</span>
                 </div>
                 <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-1">
                   <Briefcase className="h-3 w-3" />
-                  <span>{t("meetGreet") || "Meet & Greet"}</span>
+                  <span>{t("meetGreet")}</span>
                 </div>
               </div>
             </div>
@@ -61,7 +61,7 @@ export const HeroVisualSection = memo(({
               </div>
               <div>
                 <div className="text-sm font-bold text-foreground">100+</div>
-                <div className="text-[10px] text-muted-foreground">{t("cities") || "Cities"}</div>
+                <div className="text-[10px] text-muted-foreground">{t("cities")}</div>
               </div>
             </div>
             <div className="w-px h-8 bg-border/50" />
@@ -71,7 +71,7 @@ export const HeroVisualSection = memo(({
               </div>
               <div>
                 <div className="text-sm font-bold text-foreground">670+</div>
-                <div className="text-[10px] text-muted-foreground">{t("airports") || "Airports"}</div>
+                <div className="text-[10px] text-muted-foreground">{t("airports")}</div>
               </div>
             </div>
             <div className="w-px h-8 bg-border/50" />
@@ -81,7 +81,7 @@ export const HeroVisualSection = memo(({
               </div>
               <div>
                 <div className="text-sm font-bold text-foreground">{rating.toFixed(1)}</div>
-                <div className="text-[10px] text-muted-foreground">{t("googleReviews") || "Google"}</div>
+                <div className="text-[10px] text-muted-foreground">{t("googleReviews")}</div>
               </div>
             </div>
           </div>
@@ -108,29 +108,29 @@ export const HeroVisualSection = memo(({
                   <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-xl p-3 border border-border/50">
                     <Shield className="h-5 w-5 text-primary" />
                     <div>
-                      <div className="text-xs font-semibold text-foreground">{t("safetyFirst") || "Safety First"}</div>
-                      <div className="text-[10px] text-muted-foreground">{t("licensedDrivers") || "Licensed"}</div>
+                      <div className="text-xs font-semibold text-foreground">{t("safetyFirst")}</div>
+                      <div className="text-[10px] text-muted-foreground">{t("licensedDrivers")}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-xl p-3 border border-border/50">
                     <Clock className="h-5 w-5 text-primary" />
                     <div>
-                      <div className="text-xs font-semibold text-foreground">{t("onTime") || "On Time"}</div>
-                      <div className="text-[10px] text-muted-foreground">{t("guaranteed") || "Guaranteed"}</div>
+                      <div className="text-xs font-semibold text-foreground">{t("onTime")}</div>
+                      <div className="text-[10px] text-muted-foreground">{t("guaranteed")}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-xl p-3 border border-border/50">
                     <Wifi className="h-5 w-5 text-primary" />
                     <div>
-                      <div className="text-xs font-semibold text-foreground">{t("freeWifi") || "Free WiFi"}</div>
-                      <div className="text-[10px] text-muted-foreground">{t("inAllCars") || "All Cars"}</div>
+                      <div className="text-xs font-semibold text-foreground">{t("freeWifi")}</div>
+                      <div className="text-[10px] text-muted-foreground">{t("inAllCars")}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm rounded-xl p-3 border border-border/50">
                     <Baby className="h-5 w-5 text-primary" />
                     <div>
-                      <div className="text-xs font-semibold text-foreground">{t("babySeatLabel") || "Baby Seat"}</div>
-                      <div className="text-[10px] text-muted-foreground">{t("available") || "Available"}</div>
+                      <div className="text-xs font-semibold text-foreground">{t("babySeatLabel")}</div>
+                      <div className="text-[10px] text-muted-foreground">{t("available")}</div>
                     </div>
                   </div>
                 </div>
@@ -145,7 +145,7 @@ export const HeroVisualSection = memo(({
                 </div>
                 <div>
                   <div className="text-lg font-bold text-foreground">100+</div>
-                  <div className="text-xs text-muted-foreground">{t("cities") || "Cities"}</div>
+                  <div className="text-xs text-muted-foreground">{t("cities")}</div>
                 </div>
               </div>
               <div className="w-px h-10 bg-border/50" />
@@ -155,7 +155,7 @@ export const HeroVisualSection = memo(({
                 </div>
                 <div>
                   <div className="text-lg font-bold text-foreground">670+</div>
-                  <div className="text-xs text-muted-foreground">{t("airports") || "Airports"}</div>
+                  <div className="text-xs text-muted-foreground">{t("airports")}</div>
                 </div>
               </div>
               <div className="w-px h-10 bg-border/50" />
@@ -165,7 +165,7 @@ export const HeroVisualSection = memo(({
                 </div>
                 <div>
                   <div className="text-lg font-bold text-foreground">{rating.toFixed(1)}</div>
-                  <div className="text-xs text-muted-foreground">{t("googleReviews") || "Google"}</div>
+                  <div className="text-xs text-muted-foreground">{t("googleReviews")}</div>
                 </div>
               </div>
             </div>
@@ -175,19 +175,19 @@ export const HeroVisualSection = memo(({
           <div className="mt-4 grid grid-cols-2 gap-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Check className="h-4 w-4 text-primary" />
-              <span>{t("freeCancellation") || "Free Cancellation"}</span>
+              <span>{t("freeCancellation")}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Check className="h-4 w-4 text-primary" />
-              <span>{t("noHiddenFees") || "No Hidden Fees"}</span>
+              <span>{t("noHiddenFees")}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Check className="h-4 w-4 text-primary" />
-              <span>{t("flightTracking") || "Flight Tracking"}</span>
+              <span>{t("flightTracking")}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Check className="h-4 w-4 text-primary" />
-              <span>{t("support24_7") || "24/7 Support"}</span>
+              <span>{t("support24_7")}</span>
             </div>
           </div>
         </div>
