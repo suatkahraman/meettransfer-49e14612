@@ -15,29 +15,25 @@ interface StatItem {
 
 const stats: StatItem[] = [
   {
-    value: 100,
-    suffix: "+",
+    value: 32,
     labelKey: "statsCities",
     labelFallback: "Cities",
     icon: MapPin,
   },
   {
-    value: 670,
-    suffix: "+",
+    value: 12,
     labelKey: "statsAirports",
     labelFallback: "Airports",
     icon: Plane,
   },
   {
-    value: 25000,
-    suffix: "+",
+    value: 13454,
     labelKey: "statsTransfers",
     labelFallback: "Transfers",
     icon: Car,
   },
   {
-    value: 45,
-    suffix: "+",
+    value: 5,
     labelKey: "statsCountries",
     labelFallback: "Countries",
     icon: Globe,
@@ -89,9 +85,15 @@ const StatCard = ({ stat, index, isVisible }: { stat: StatItem; index: number; i
   const count = useCountUp(stat.value, 2000 + index * 200, isVisible);
   const Icon = stat.icon;
 
+  const safeT = (key: string, fallback: string) => {
+    const value = t(key);
+    return value && value !== key ? value : fallback;
+  };
+
   const formatNumber = (num: number) => {
     if (num >= 1000) {
-      return num.toLocaleString();
+      // Use dot as thousand separator (e.g. 13.454)
+      return new Intl.NumberFormat("de-DE").format(num);
     }
     return num.toString();
   };
@@ -119,7 +121,7 @@ const StatCard = ({ stat, index, isVisible }: { stat: StatItem; index: number; i
         
         {/* Label */}
         <div className="text-lg text-white/70 font-medium">
-          {t(stat.labelKey) || stat.labelFallback}
+          {safeT(stat.labelKey, stat.labelFallback)}
         </div>
       </div>
     </motion.div>
@@ -132,6 +134,11 @@ const StatsCounter = () => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const isTR = language.toLowerCase() === "tr";
+
+  const safeT = (key: string, fallback: string) => {
+    const value = t(key);
+    return value && value !== key ? value : fallback;
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -189,10 +196,13 @@ const StatsCounter = () => {
           </motion.div>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white tracking-tight">
-            {t("globalCoverage") || "Global Coverage"}
+            {safeT("globalCoverage", "Global Coverage")}
           </h2>
           <p className="text-lg text-white/60 max-w-2xl mx-auto">
-            {t("statsSubtitle") || "Premium transfers across multiple countries with professional service"}
+            {safeT(
+              "statsSubtitle",
+              "Premium transfers across multiple countries with professional service",
+            )}
           </p>
         </motion.div>
 
