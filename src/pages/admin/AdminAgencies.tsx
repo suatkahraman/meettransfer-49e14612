@@ -79,6 +79,7 @@ const AdminAgencies = () => {
     email: '',
     password: '',
     phone: '',
+    city: '',
     comments: '',
     currency: 'EUR',
   });
@@ -309,7 +310,7 @@ const AdminAgencies = () => {
 
   const openCreateDialog = () => {
     setSelectedAgency(null);
-    setFormData({ agency_name: '', email: '', password: '', phone: '', comments: '', currency: 'EUR' });
+    setFormData({ agency_name: '', email: '', password: '', phone: '', city: '', comments: '', currency: 'EUR' });
     setDialogOpen(true);
   };
 
@@ -320,6 +321,7 @@ const AdminAgencies = () => {
       email: '',
       password: '',
       phone: '',
+      city: '',
       comments: agency.comments || '',
       currency: (agency as any).currency || 'EUR',
     });
@@ -757,17 +759,28 @@ const AdminAgencies = () => {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label>Şehir</Label>
+                  <Input
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    placeholder="Örn: İstanbul, Antalya, İzmir"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label>Para Birimi *</Label>
                   <select
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     value={formData.currency}
                     onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
                   >
-                    <option value="EUR">€ Euro (EUR)</option>
-                    <option value="USD">$ Dollar (USD)</option>
-                    <option value="GBP">£ Pound (GBP)</option>
                     <option value="TRY">₺ Türk Lirası (TRY)</option>
+                    <option value="EUR">€ Euro (EUR)</option>
+                    <option value="GBP">£ Pound (GBP)</option>
+                    <option value="USD">$ Dollar (USD)</option>
+                    <option value="RUB">₽ Russian Ruble (RUB)</option>
+                    <option value="UAH">₴ Ukrainian Hryvnia (UAH)</option>
                     <option value="AED">د.إ Dirham (AED)</option>
+                    <option value="JPY">¥ Japanese Yen (JPY)</option>
                     <option value="AUD">A$ Australian Dollar (AUD)</option>
                   </select>
                   <p className="text-xs text-muted-foreground">Acenta panelinde kullanılacak para birimi</p>
