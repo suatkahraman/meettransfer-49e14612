@@ -21,7 +21,9 @@ import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import PriceHistoryCard from '@/components/admin/PriceHistoryCard';
-
+import { AdminPaymentLinkGenerator } from '@/components/admin/AdminPaymentLinkGenerator';
+import { PaymentStatusBadge } from '@/components/payments/PaymentStatusBadge';
+import type { PaymentStatus } from '@/config/payments';
 // Airports list removed - pickup is now free text
 // Use centralized vehicle types
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
@@ -1960,17 +1962,28 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
               {/* Payment Status Badge */}
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">Ödeme Durumu:</span>
-                {formData.payment_status === 'paid' ? (
-                  <Badge className="bg-green-500/20 text-green-700">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Ödendi
-                  </Badge>
-                ) : (
-                  <Badge className="bg-orange-500/20 text-orange-700">
-                    Bekliyor
-                  </Badge>
-                )}
+                <PaymentStatusBadge status={formData.payment_status as PaymentStatus} />
               </div>
+
+              {/* Auto-generate payment link section */}
+              {formData.payment_status !== 'paid' && (
+                <AdminPaymentLinkGenerator
+                  reservationId={id!}
+                  amount={parseFloat(formData.price) || 0}
+                  currency={formData.price_currency}
+                  customerName={passengerNames[0] || ''}
+                  pickup={formData.pickup}
+                  dropoff={formData.dropoff}
+                  pickupDate={formData.pickup_date}
+                  pickupTime={formData.pickup_time}
+                  onLinkGenerated={(link) => {
+                    setFormData({...formData, payment_link: link});
+                  }}
+                  onLinkSent={() => {
+                    setFormData({...formData, status: 'waiting_for_customer_approval'});
+                  }}
+                />
+              )}
 
               {/* Payment Link Input */}
               <div className="space-y-2">
