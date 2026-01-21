@@ -2631,7 +2631,40 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                 </Card>
               )}
 
-              {/* Customer Notes - Read Only */}
+              {/* Customer Price Section - Show for non-agency reservations (customer direct bookings) */}
+              {(!formData.agency_id || formData.agency_id === 'none') && formData.price && (
+                <Card className="border-green-300 bg-green-50 dark:bg-green-950/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300 text-base">
+                      <DollarSign className="h-4 w-4" />
+                      Müşteri Fiyatı
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border space-y-2">
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">Onaylanan Fiyat:</span>
+                        <span className="font-medium text-green-600 text-lg">
+                          {getCurrencySymbol(formData.price_currency)}{parseFloat(formData.price || '0').toFixed(2)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground border-t pt-2">
+                        {formData.status === 'completed' ? (
+                          <span className="text-green-600">✓ Tamamlanan rezervasyon - Aylık kâr hesabına dahil edildi</span>
+                        ) : (
+                          <span>Bu tutar rezervasyon tamamlandığında aylık kâr hesabına dahil edilecek</span>
+                        )}
+                        {formData.price_currency !== 'TRY' && (
+                          <span className="block text-amber-600 dark:text-amber-400 mt-1">
+                            Döviz tutarı otomatik kur ile TRY'ye çevrilecektir.
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {customerNotes && (
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
