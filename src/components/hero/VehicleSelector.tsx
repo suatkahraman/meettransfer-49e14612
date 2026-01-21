@@ -21,12 +21,12 @@ const featureIcons: Record<string, React.ElementType> = {
   'battery-charging': BatteryCharging,
 };
 
-// Vehicle images - optimized WebP
-import vitoImg from "@/assets/vehicles/vito-hero.webp";
-import vitoVipImg from "@/assets/vehicles/vito-vip-hero.webp";
-import maybachImg from "@/assets/vehicles/maybach-hero.webp";
-import sprinterImg from "@/assets/vehicles/sprinter-hero.webp";
-import sedanImg from "@/assets/vehicles/sedan-hero.webp";
+// Vehicle images - optimized WebP 480x360
+import vitoImg from "@/assets/vehicles/vito-hero-optimized.webp";
+import vitoVipImg from "@/assets/vehicles/vito-vip-hero-optimized.webp";
+import maybachImg from "@/assets/vehicles/maybach-hero-optimized.webp";
+import sprinterImg from "@/assets/vehicles/sprinter-hero-optimized.webp";
+import sedanImg from "@/assets/vehicles/sedan-hero-optimized.webp";
 
 // Dubai vehicle images - WebP optimized
 import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.webp";
