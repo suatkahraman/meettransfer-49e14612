@@ -5,7 +5,9 @@ import {
   generateDriverAssignedEmail,
   generatePaymentRequestEmail,
   generatePaymentConfirmedEmail,
-  generatePriceSetEmail
+  generatePriceSetEmail,
+  generatePaymentSuccessEmail,
+  generateAgencyPaymentSuccessEmail
 } from "../_shared/emailTemplates.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -18,7 +20,7 @@ const corsHeaders = {
 interface TestEmailRequest {
   language?: string;
   adminEmail?: string;
-  template?: 'price_quote' | 'driver_assigned' | 'payment_request' | 'payment_confirmed' | 'price_set';
+  template?: 'price_quote' | 'driver_assigned' | 'payment_request' | 'payment_confirmed' | 'price_set' | 'payment_success' | 'agency_payment_success';
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -100,6 +102,41 @@ const handler = async (req: Request): Promise<Response> => {
       passenger_cash_currency: "EUR",
     };
 
+    // For payment_success (customer)
+    const paymentSuccessData = {
+      reservation_code: "MT-2025-ABC123",
+      reservation_id: "test-reservation-id",
+      pickup: "Sarıgerme, Ortaca, Muğla, Turkey",
+      dropoff: "Dalaman Airport (DLM), Muğla, Turkey",
+      pickup_date: "2025-01-15",
+      pickup_time: "14:30",
+      vehicle_type: "mercedes-vito",
+      price: 85,
+      currency: "EUR",
+      customer_name: "John Doe",
+      customer_phone: "+90 555 123 4567",
+      passenger_names: ["John Doe", "Jane Doe"],
+      customer_notes: "Please bring a baby seat",
+      payment_provider: "stripe" as const,
+    };
+
+    // For agency_payment_success
+    const agencyPaymentSuccessData = {
+      reservation_code: "MT-2025-ABC123",
+      reservation_id: "test-reservation-id",
+      pickup: "Sarıgerme, Ortaca, Muğla, Turkey",
+      dropoff: "Dalaman Airport (DLM), Muğla, Turkey",
+      pickup_date: "2025-01-15",
+      pickup_time: "14:30",
+      vehicle_type: "mercedes-vito",
+      price: 85,
+      currency: "EUR",
+      customer_name: "John Doe",
+      customer_phone: "+90 555 123 4567",
+      agency_name: "Premium Travel Agency",
+      payment_provider: "paypal" as const,
+    };
+
     let emailHtml: string;
     let emailSubject: string;
 
@@ -122,6 +159,16 @@ const handler = async (req: Request): Promise<Response> => {
       case 'price_set':
         emailHtml = generatePriceSetEmail(priceSetData, language);
         emailSubject = getSubjectByTemplate('price_set', language);
+        break;
+      
+      case 'payment_success':
+        emailHtml = generatePaymentSuccessEmail(paymentSuccessData, language);
+        emailSubject = getSubjectByTemplate('payment_success', language);
+        break;
+      
+      case 'agency_payment_success':
+        emailHtml = generateAgencyPaymentSuccessEmail(agencyPaymentSuccessData, language);
+        emailSubject = getSubjectByTemplate('agency_payment_success', language);
         break;
       
       case 'price_quote':
@@ -213,6 +260,20 @@ function getSubjectByTemplate(template: string, lang: string): string {
       de: "Ihr Transferpreis ist bereit - Meet Transfer",
       ru: "Ваша цена трансфера готова - Meet Transfer",
       ar: "سعر النقل جاهز - Meet Transfer",
+    },
+    payment_success: {
+      en: "Payment Successful! Your Transfer is Confirmed - Meet Transfer",
+      tr: "Ödeme Başarılı! Transferiniz Onaylandı - Meet Transfer",
+      de: "Zahlung erfolgreich! Ihr Transfer ist bestätigt - Meet Transfer",
+      ru: "Оплата успешна! Ваш трансфер подтвержден - Meet Transfer",
+      ar: "الدفع ناجح! تم تأكيد النقل الخاص بك - Meet Transfer",
+    },
+    agency_payment_success: {
+      en: "Customer Payment Received - Meet Transfer",
+      tr: "Müşteri Ödemesi Alındı - Meet Transfer",
+      de: "Kundenzahlung erhalten - Meet Transfer",
+      ru: "Получен платеж от клиента - Meet Transfer",
+      ar: "تم استلام دفع العميل - Meet Transfer",
     },
   };
 
