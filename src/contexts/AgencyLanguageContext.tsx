@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { CURRENCY_OPTIONS } from '@/lib/currency';
 
 export type AgencyLanguage = 'EN' | 'TR' | 'DE' | 'FR' | 'RU' | 'IT' | 'ES' | 'AR' | 'UK' | 'JA';
 export type AgencyCurrency = 'TRY' | 'EUR' | 'GBP' | 'USD' | 'RUB' | 'UAH' | 'AED' | 'JPY' | 'AUD';
@@ -28,17 +29,12 @@ export const AGENCY_LANGUAGES: LanguageConfig[] = [
   { code: 'JA', label: '日本語', flag: '🇯🇵' },
 ];
 
-export const AGENCY_CURRENCIES: CurrencyConfig[] = [
-  { code: 'TRY', symbol: '₺', label: 'Turkish Lira' },
-  { code: 'EUR', symbol: '€', label: 'Euro' },
-  { code: 'GBP', symbol: '£', label: 'British Pound' },
-  { code: 'USD', symbol: '$', label: 'US Dollar' },
-  { code: 'RUB', symbol: '₽', label: 'Russian Ruble' },
-  { code: 'UAH', symbol: '₴', label: 'Ukrainian Hryvnia' },
-  { code: 'AED', symbol: 'د.إ', label: 'UAE Dirham' },
-  { code: 'JPY', symbol: '¥', label: 'Japanese Yen' },
-  { code: 'AUD', symbol: 'A$', label: 'Australian Dollar' },
-];
+// Use centralized currency options - derive AGENCY_CURRENCIES from CURRENCY_OPTIONS
+export const AGENCY_CURRENCIES: CurrencyConfig[] = CURRENCY_OPTIONS.map(c => ({
+  code: c.value as AgencyCurrency,
+  symbol: c.symbol,
+  label: c.label.split(' - ')[1] || c.label,
+}));
 
 const BROWSER_LANG_MAP: Record<string, AgencyLanguage> = {
   tr: 'TR',

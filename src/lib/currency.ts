@@ -7,25 +7,26 @@ export interface CurrencyOption {
   flag: string;
 }
 
-// All supported currencies with their symbols and flags
+// All supported currencies with their symbols and flags - SINGLE SOURCE OF TRUTH
 export const CURRENCY_OPTIONS: CurrencyOption[] = [
-  { value: 'EUR', label: '€ EUR', symbol: '€', flag: '🇪🇺' },
-  { value: 'USD', label: '$ USD', symbol: '$', flag: '🇺🇸' },
-  { value: 'GBP', label: '£ GBP', symbol: '£', flag: '🇬🇧' },
-  { value: 'TRY', label: '₺ TRY', symbol: '₺', flag: '🇹🇷' },
-  { value: 'AED', label: 'د.إ AED', symbol: 'د.إ', flag: '🇦🇪' },
-  { value: 'AUD', label: 'A$ AUD', symbol: 'A$', flag: '🇦🇺' },
+  { value: 'TRY', label: '₺ TRY - Turkish Lira', symbol: '₺', flag: '🇹🇷' },
+  { value: 'EUR', label: '€ EUR - Euro', symbol: '€', flag: '🇪🇺' },
+  { value: 'GBP', label: '£ GBP - British Pound', symbol: '£', flag: '🇬🇧' },
+  { value: 'USD', label: '$ USD - US Dollar', symbol: '$', flag: '🇺🇸' },
+  { value: 'RUB', label: '₽ RUB - Russian Ruble', symbol: '₽', flag: '🇷🇺' },
+  { value: 'UAH', label: '₴ UAH - Ukrainian Hryvnia', symbol: '₴', flag: '🇺🇦' },
+  { value: 'AED', label: 'د.إ AED - UAE Dirham', symbol: 'د.إ', flag: '🇦🇪' },
+  { value: 'JPY', label: '¥ JPY - Japanese Yen', symbol: '¥', flag: '🇯🇵' },
+  { value: 'AUD', label: 'A$ AUD - Australian Dollar', symbol: 'A$', flag: '🇦🇺' },
 ];
 
+// Currency codes as a type for validation
+export const CURRENCY_CODES = CURRENCY_OPTIONS.map(c => c.value) as [string, ...string[]];
+
 // Currency symbols map for quick lookup
-export const CURRENCY_SYMBOLS: Record<string, string> = {
-  EUR: '€',
-  USD: '$',
-  GBP: '£',
-  TRY: '₺',
-  AED: 'د.إ',
-  AUD: 'A$',
-};
+export const CURRENCY_SYMBOLS: Record<string, string> = Object.fromEntries(
+  CURRENCY_OPTIONS.map(c => [c.value, c.symbol])
+);
 
 /**
  * Get the symbol for a currency code
