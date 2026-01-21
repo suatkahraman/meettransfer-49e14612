@@ -28,6 +28,14 @@ export {
   type PaymentPanelTranslations,
 } from "./UnifiedPaymentPanel";
 
+// Payment method changer (for post-reservation changes)
+export { 
+  PaymentMethodChanger,
+  PAYMENT_METHOD_CHANGER_TR,
+  type PaymentMethodChangerProps,
+  type PaymentMethodChangerTranslations,
+} from "./PaymentMethodChanger";
+
 // Convenience wrappers
 export { PaymentMethodSelector } from "./PaymentMethodSelector";
 export { PaymentStatusBadge } from "./PaymentStatusBadge";

@@ -19,7 +19,7 @@ import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
 import MissingInfoAlerts from '@/components/customer/MissingInfoAlerts';
 import { ReviewPromptBanner } from '@/components/customer/ReviewPromptBanner';
-import { ReservationPaymentPanel } from '@/components/payments';
+import { ReservationPaymentPanel, PaymentMethodChanger } from '@/components/payments';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
@@ -1186,6 +1186,19 @@ const CustomerReservationDetail = () => {
                         {t('cashToDriver')}
                       </Badge>
                     </div>
+                    
+                    {/* Payment Method Changer for Cash payments - Allow switching to online */}
+                    {reservation.payment_status !== 'paid' && 
+                      ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status) && (
+                      <PaymentMethodChanger
+                        reservationId={reservation.id}
+                        currentPaymentStatus={reservation.payment_status as PaymentStatus}
+                        currentPaymentType={reservation.payment_type}
+                        locale={language === 'TR' ? 'tr' : 'en'}
+                        onMethodChanged={() => fetchReservation()}
+                        variant="compact"
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -1424,15 +1437,28 @@ const CustomerReservationDetail = () => {
             {/* Payment Panel - Show for confirmed reservations with price */}
             {reservation.price && reservation.price_currency && 
               ['customer_approved', 'confirmed', 'sent_to_driver'].includes(reservation.status) && (
-              <ReservationPaymentPanel
-                reservationId={reservation.id}
-                amount={reservation.price}
-                currency={reservation.price_currency as SupportedCurrency}
-                currentStatus={reservation.payment_status as PaymentStatus}
-                partialAmount={reservation.partial_amount}
-                customerName={reservation.customer_name}
-                onPaymentComplete={() => fetchReservation()}
-              />
+              <div className="space-y-4">
+                <ReservationPaymentPanel
+                  reservationId={reservation.id}
+                  amount={reservation.price}
+                  currency={reservation.price_currency as SupportedCurrency}
+                  currentStatus={reservation.payment_status as PaymentStatus}
+                  partialAmount={reservation.partial_amount}
+                  customerName={reservation.customer_name}
+                  onPaymentComplete={() => fetchReservation()}
+                />
+                
+                {/* Payment Method Changer - Allow changing if not yet paid */}
+                {reservation.payment_status !== 'paid' && (
+                  <PaymentMethodChanger
+                    reservationId={reservation.id}
+                    currentPaymentStatus={reservation.payment_status as PaymentStatus}
+                    currentPaymentType={reservation.payment_type}
+                    locale={language === 'TR' ? 'tr' : 'en'}
+                    onMethodChanged={() => fetchReservation()}
+                  />
+                )}
+              </div>
             )}
 
             {/* Completed Message & Review Prompt */}
