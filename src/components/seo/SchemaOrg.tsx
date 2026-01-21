@@ -493,7 +493,7 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
       const existingScripts = document.querySelectorAll('script[data-schema-org]');
       existingScripts.forEach(script => script.remove());
 
-      // Fetch rating once (only if needed)
+      // Fetch rating once (only if needed) - but defer to idle time
       let aggregateRating: AggregateRatingData | undefined;
       const needsRating = schemas.some(
         (s) => s.type === 'LocalBusiness' && (s as LocalBusinessSchema).includeRating
@@ -502,33 +502,69 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
       const fallback: AggregateRatingData = { ratingValue: DEFAULT_RATING.toFixed(1), reviewCount: String(DEFAULT_TOTAL_REVIEWS) };
 
       if (needsRating) {
-        try {
-          const { supabase } = await import('@/integrations/supabase/client');
+        // Use fallback immediately for initial schema injection
+        aggregateRating = fallback;
+        
+        // Defer the actual API call to idle time - don't block initial render
+        const fetchRating = async () => {
+          if (cancelled) return;
+          
+          try {
+            const { supabase } = await import('@/integrations/supabase/client');
 
-          // Request EN to keep rating consistent across locales.
-          const { data, error } = await supabase.functions.invoke('get-google-reviews', {
-            body: { language: 'en' },
-          });
+            // Request EN to keep rating consistent across locales.
+            const { data, error } = await supabase.functions.invoke('get-google-reviews', {
+              body: { language: 'en' },
+            });
 
-          const apiError = (data as any)?.error;
-          if (error || apiError) throw new Error(String(error?.message ?? apiError));
+            const apiError = (data as any)?.error;
+            if (error || apiError) throw new Error(String(error?.message ?? apiError));
 
-          const nextRating = Number((data as any)?.rating);
-          const nextTotal = Number((data as any)?.totalReviews);
+            const nextRating = Number((data as any)?.rating);
+            const nextTotal = Number((data as any)?.totalReviews);
 
-          const ratingValue =
-            Number.isFinite(nextRating) && nextRating > 0
-              ? nextRating.toFixed(1)
-              : fallback.ratingValue;
+            const ratingValue =
+              Number.isFinite(nextRating) && nextRating > 0
+                ? nextRating.toFixed(1)
+                : fallback.ratingValue;
 
-          const reviewCount =
-            Number.isFinite(nextTotal) && nextTotal > 0
-              ? String(Math.round(nextTotal))
-              : fallback.reviewCount;
+            const reviewCount =
+              Number.isFinite(nextTotal) && nextTotal > 0
+                ? String(Math.round(nextTotal))
+                : fallback.reviewCount;
 
-          aggregateRating = { ratingValue, reviewCount };
-        } catch {
-          aggregateRating = fallback;
+            // Only update if values actually changed from fallback
+            if (ratingValue !== fallback.ratingValue || reviewCount !== fallback.reviewCount) {
+              // Update the existing LocalBusiness schema script with fresh data
+              const existingScript = document.querySelector('script[data-schema-org="LocalBusiness"]');
+              if (existingScript && !cancelled) {
+                try {
+                  const schemaData = JSON.parse(existingScript.textContent || '{}');
+                  if (schemaData.aggregateRating) {
+                    schemaData.aggregateRating.ratingValue = ratingValue;
+                    schemaData.aggregateRating.reviewCount = reviewCount;
+                    existingScript.textContent = JSON.stringify(schemaData);
+                  }
+                } catch {
+                  // Ignore parse errors
+                }
+              }
+            }
+          } catch {
+            // Keep fallback values - already injected
+          }
+        };
+
+        // Use requestIdleCallback to defer API call, with 3s timeout fallback
+        if ('requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(fetchRating, { timeout: 3000 });
+        } else {
+          // Fallback: defer after load + 1s delay
+          if (document.readyState === 'complete') {
+            setTimeout(fetchRating, 1000);
+          } else {
+            (window as Window).addEventListener('load', () => setTimeout(fetchRating, 1000), { once: true });
+          }
         }
       }
 
