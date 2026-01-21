@@ -433,7 +433,7 @@ const RelatedArticles = ({
             <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50">
               <OptimizedBlogImage
                 src={post.image}
-                alt={post.title || t(post.titleKey || '')}
+                alt={post.title || (post.titleKey ? t(post.titleKey) : '')}
                 className="aspect-video"
                 priority={false}
               />
@@ -444,12 +444,12 @@ const RelatedArticles = ({
                   </Badge>
                 </div>
                 <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                  {t(post.titleKey)}
+                  {post.title || (post.titleKey ? t(post.titleKey) : post.id)}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="line-clamp-2 mb-3 text-sm">
-                  {t(post.descriptionKey)}
+                  {post.description || (post.descriptionKey ? t(post.descriptionKey) : '')}
                 </CardDescription>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
