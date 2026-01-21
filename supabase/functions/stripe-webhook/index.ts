@@ -79,10 +79,15 @@ serve(async (req) => {
           } else {
             console.log("Reservation payment marked as paid:", reservationId);
             
-            // Send confirmation email
-            await supabase.functions.invoke("send-payment-confirmation", {
-              body: { reservationId, paymentProvider: "stripe" }
-            });
+            // Send confirmation email to customer and agency
+            try {
+              await supabase.functions.invoke("send-payment-confirmation", {
+                body: { reservationId, paymentProvider: "stripe" }
+              });
+              console.log("Payment confirmation emails sent for reservation:", reservationId);
+            } catch (emailError) {
+              console.error("Error sending payment confirmation emails:", emailError);
+            }
           }
         }
 
@@ -96,6 +101,16 @@ serve(async (req) => {
             console.error("Error updating quick booking status:", error);
           } else {
             console.log("Quick booking marked as paid:", quickBookingId);
+            
+            // Send confirmation email to customer and agency for quick booking
+            try {
+              await supabase.functions.invoke("send-payment-confirmation", {
+                body: { quickBookingId, paymentProvider: "stripe" }
+              });
+              console.log("Payment confirmation emails sent for quick booking:", quickBookingId);
+            } catch (emailError) {
+              console.error("Error sending payment confirmation emails:", emailError);
+            }
           }
         }
 

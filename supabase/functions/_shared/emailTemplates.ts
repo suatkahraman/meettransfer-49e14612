@@ -666,6 +666,22 @@ const NOTIFICATION_TRANSLATIONS: Record<SupportedLanguage, {
   cashToDriver: string;
   pleasePayCash: string;
   onlinePayment: string;
+  // Payment success - new
+  paymentSuccessful: string;
+  paymentSuccessfulSubtitle: string;
+  paymentMethod: string;
+  creditCard: string;
+  payPal: string;
+  amountPaid: string;
+  transferConfirmed: string;
+  driverWillBeAssigned: string;
+  passengers: string;
+  customerName: string;
+  customerPhone: string;
+  customerNotes: string;
+  agencyPaymentSuccess: string;
+  agencyPaymentSuccessSubtitle: string;
+  reservationDetails: string;
 }> = {
   en: {
     driverAssigned: "Your Driver is Assigned!",
@@ -695,6 +711,22 @@ const NOTIFICATION_TRANSLATIONS: Record<SupportedLanguage, {
     cashToDriver: "Cash to Driver",
     pleasePayCash: "Please pay this amount in cash to your driver at the end of the transfer.",
     onlinePayment: "Online Payment",
+    // Payment success - new
+    paymentSuccessful: "Payment Successful!",
+    paymentSuccessfulSubtitle: "Your payment has been received",
+    paymentMethod: "Payment Method",
+    creditCard: "Credit Card (Stripe)",
+    payPal: "PayPal",
+    amountPaid: "Amount Paid",
+    transferConfirmed: "Your transfer is now confirmed!",
+    driverWillBeAssigned: "Your driver details will be sent closer to your pickup time.",
+    passengers: "Passengers",
+    customerName: "Customer Name",
+    customerPhone: "Phone",
+    customerNotes: "Notes",
+    agencyPaymentSuccess: "Agency Payment Successful!",
+    agencyPaymentSuccessSubtitle: "Reservation payment has been received",
+    reservationDetails: "Reservation Details",
   },
   tr: {
     driverAssigned: "Şoförünüz Atandı!",
@@ -724,6 +756,22 @@ const NOTIFICATION_TRANSLATIONS: Record<SupportedLanguage, {
     cashToDriver: "Şoföre Nakit",
     pleasePayCash: "Lütfen bu tutarı transfer sonunda şoförünüze nakit olarak ödeyin.",
     onlinePayment: "Online Ödeme",
+    // Payment success - new
+    paymentSuccessful: "Ödeme Başarılı!",
+    paymentSuccessfulSubtitle: "Ödemeniz alındı",
+    paymentMethod: "Ödeme Yöntemi",
+    creditCard: "Kredi Kartı (Stripe)",
+    payPal: "PayPal",
+    amountPaid: "Ödenen Tutar",
+    transferConfirmed: "Transferiniz onaylandı!",
+    driverWillBeAssigned: "Şoför bilgileriniz alış saatinize yakın gönderilecektir.",
+    passengers: "Yolcular",
+    customerName: "Müşteri Adı",
+    customerPhone: "Telefon",
+    customerNotes: "Notlar",
+    agencyPaymentSuccess: "Acenta Ödemesi Başarılı!",
+    agencyPaymentSuccessSubtitle: "Rezervasyon ödemesi alındı",
+    reservationDetails: "Rezervasyon Detayları",
   },
   de: {
     driverAssigned: "Ihr Fahrer wurde zugewiesen!",
@@ -753,6 +801,22 @@ const NOTIFICATION_TRANSLATIONS: Record<SupportedLanguage, {
     cashToDriver: "Bar an den Fahrer",
     pleasePayCash: "Bitte zahlen Sie diesen Betrag am Ende des Transfers bar an Ihren Fahrer.",
     onlinePayment: "Online-Zahlung",
+    // Payment success - new
+    paymentSuccessful: "Zahlung erfolgreich!",
+    paymentSuccessfulSubtitle: "Ihre Zahlung wurde empfangen",
+    paymentMethod: "Zahlungsmethode",
+    creditCard: "Kreditkarte (Stripe)",
+    payPal: "PayPal",
+    amountPaid: "Gezahlter Betrag",
+    transferConfirmed: "Ihr Transfer ist jetzt bestätigt!",
+    driverWillBeAssigned: "Ihre Fahrerdetails werden Ihnen kurz vor der Abholung zugesandt.",
+    passengers: "Passagiere",
+    customerName: "Kundenname",
+    customerPhone: "Telefon",
+    customerNotes: "Notizen",
+    agencyPaymentSuccess: "Agenturzahlung erfolgreich!",
+    agencyPaymentSuccessSubtitle: "Reservierungszahlung wurde empfangen",
+    reservationDetails: "Reservierungsdetails",
   },
   ru: {
     driverAssigned: "Ваш водитель назначен!",
@@ -782,6 +846,22 @@ const NOTIFICATION_TRANSLATIONS: Record<SupportedLanguage, {
     cashToDriver: "Наличные водителю",
     pleasePayCash: "Пожалуйста, оплатите эту сумму наличными вашему водителю в конце трансфера.",
     onlinePayment: "Онлайн-оплата",
+    // Payment success - new
+    paymentSuccessful: "Оплата успешна!",
+    paymentSuccessfulSubtitle: "Ваш платеж получен",
+    paymentMethod: "Способ оплаты",
+    creditCard: "Кредитная карта (Stripe)",
+    payPal: "PayPal",
+    amountPaid: "Оплаченная сумма",
+    transferConfirmed: "Ваш трансфер подтвержден!",
+    driverWillBeAssigned: "Данные вашего водителя будут отправлены ближе ко времени посадки.",
+    passengers: "Пассажиры",
+    customerName: "Имя клиента",
+    customerPhone: "Телефон",
+    customerNotes: "Заметки",
+    agencyPaymentSuccess: "Оплата агентства успешна!",
+    agencyPaymentSuccessSubtitle: "Оплата бронирования получена",
+    reservationDetails: "Детали бронирования",
   },
   ar: {
     driverAssigned: "تم تعيين سائقك!",
@@ -811,6 +891,22 @@ const NOTIFICATION_TRANSLATIONS: Record<SupportedLanguage, {
     cashToDriver: "نقداً للسائق",
     pleasePayCash: "يرجى دفع هذا المبلغ نقداً لسائقك في نهاية النقل.",
     onlinePayment: "الدفع عبر الإنترنت",
+    // Payment success - new
+    paymentSuccessful: "تمت عملية الدفع بنجاح!",
+    paymentSuccessfulSubtitle: "تم استلام الدفع الخاص بك",
+    paymentMethod: "طريقة الدفع",
+    creditCard: "بطاقة ائتمان (Stripe)",
+    payPal: "PayPal",
+    amountPaid: "المبلغ المدفوع",
+    transferConfirmed: "تم تأكيد النقل الخاص بك!",
+    driverWillBeAssigned: "سيتم إرسال تفاصيل السائق قبل موعد الاستلام.",
+    passengers: "الركاب",
+    customerName: "اسم العميل",
+    customerPhone: "الهاتف",
+    customerNotes: "ملاحظات",
+    agencyPaymentSuccess: "تم دفع الوكالة بنجاح!",
+    agencyPaymentSuccessSubtitle: "تم استلام دفع الحجز",
+    reservationDetails: "تفاصيل الحجز",
   },
 };
 
@@ -1175,6 +1271,250 @@ ${getEmailHeader(`💰 ${nt.priceReady}`, nt.priceReadySubtitle, lang)}
     <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:16px 20px;border-radius:10px;margin:20px 0 0;border:2px solid #22c55e;text-align:center;">
       <p style="margin:0;color:#15803d;font-size:14px;font-weight:bold;">🔄 ${t.freeCancellation}</p>
     </div>
+  </td>
+</tr>
+${getEmailFooter(lang)}
+  `;
+}
+
+// Payment Success Email for Customer
+export function generatePaymentSuccessEmail(
+  data: {
+    reservation_code: string;
+    reservation_id: string;
+    pickup: string;
+    dropoff: string;
+    pickup_date: string;
+    pickup_time: string;
+    vehicle_type: string;
+    price: number;
+    currency: string;
+    customer_name: string;
+    customer_phone?: string;
+    customer_notes?: string;
+    payment_provider: 'stripe' | 'paypal';
+    passenger_names?: string[];
+  },
+  lang: string = 'en'
+): string {
+  const t = getTranslation(lang);
+  const nt = getNotificationTranslation(lang);
+  
+  const currencySymbols: Record<string, string> = { 'EUR': '€', 'USD': '$', 'TRY': '₺', 'GBP': '£', 'AED': 'د.إ' };
+  const symbol = currencySymbols[data.currency] || data.currency;
+
+  const vehicleNames: Record<string, string> = {
+    'mercedes-vito': 'Mercedes Vito VIP',
+    'mercedes-sprinter': 'Mercedes Sprinter VIP',
+    'mercedes-maybach': 'Mercedes Maybach Minivan',
+  };
+
+  const paymentMethodText = data.payment_provider === 'stripe' ? nt.creditCard : nt.payPal;
+
+  const passengerSection = data.passenger_names && data.passenger_names.length > 0 
+    ? `<tr>
+        <td style="padding:8px 0;color:#64748b;font-size:13px;width:120px;">${nt.passengers}</td>
+        <td style="padding:8px 0;color:#0f172a;font-size:14px;">${data.passenger_names.join(', ')}</td>
+      </tr>` 
+    : '';
+
+  const notesSection = data.customer_notes 
+    ? `<div style="background:#fff8e1;padding:15px;border-radius:8px;margin-top:15px;border:1px solid #ffb300;">
+        <p style="margin:0;color:#666;font-size:12px;text-transform:uppercase;letter-spacing:1px;">${nt.customerNotes}</p>
+        <p style="margin:5px 0 0;color:#333;font-size:14px;">${data.customer_notes}</p>
+      </div>`
+    : '';
+
+  return `
+${getEmailHeader(`✅ ${nt.paymentSuccessful}`, nt.paymentSuccessfulSubtitle, lang)}
+<tr>
+  <td style="padding:30px 25px;">
+    <!-- Success Animation -->
+    <div style="text-align:center;margin-bottom:25px;">
+      <div style="display:inline-block;width:80px;height:80px;background:linear-gradient(135deg, #22c55e 0%, #16a34a 100%);border-radius:50%;line-height:80px;font-size:40px;">✓</div>
+    </div>
+
+    <!-- Reservation Code -->
+    <div style="background:#111;padding:15px;border-radius:8px;margin-bottom:25px;text-align:center;">
+      <p style="margin:0;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Reservation Code</p>
+      <p style="margin:5px 0 0;font-size:26px;font-weight:bold;color:#22c55e;letter-spacing:3px;">${data.reservation_code}</p>
+    </div>
+
+    <!-- Payment Success Card -->
+    <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:25px;border-radius:12px;text-align:center;margin-bottom:25px;border:2px solid #22c55e;">
+      <p style="margin:0;color:#166534;font-size:16px;font-weight:bold;">✓ ${nt.paymentReceived}</p>
+      <p style="margin:15px 0 10px;font-size:36px;font-weight:bold;color:#15803d;">${symbol}${data.price}</p>
+      <div style="background:rgba(255,255,255,0.7);padding:8px 16px;border-radius:20px;display:inline-block;">
+        <p style="margin:0;color:#166534;font-size:13px;"><strong>${nt.paymentMethod}:</strong> ${paymentMethodText}</p>
+      </div>
+    </div>
+
+    <!-- Transfer Confirmed Message -->
+    <div style="background:#eff6ff;padding:15px;border-radius:8px;text-align:center;margin-bottom:25px;border:1px solid #3b82f6;">
+      <p style="margin:0;color:#1e40af;font-size:15px;font-weight:bold;">🚗 ${nt.transferConfirmed}</p>
+    </div>
+
+    <!-- Customer Info -->
+    <div style="background:#f8fafc;padding:20px;border-radius:12px;margin-bottom:25px;border:1px solid #e2e8f0;">
+      <p style="margin:0 0 15px;color:#1e293b;font-weight:bold;font-size:15px;">👤 ${nt.customerName}: ${data.customer_name}</p>
+      ${data.customer_phone ? `<p style="margin:0;color:#64748b;font-size:14px;">${nt.customerPhone}: ${data.customer_phone}</p>` : ''}
+    </div>
+
+    <!-- Transfer Details -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;margin-bottom:25px;border:1px solid #e2e8f0;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 15px;color:#1e293b;font-weight:bold;font-size:15px;">📍 ${t.transferDetails}</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;width:120px;">${t.date} & ${t.time}</td>
+            <td style="padding:8px 0;color:#d32f2f;font-size:14px;font-weight:bold;">${data.pickup_date} - ${data.pickup_time}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.from}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${data.pickup}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.to}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:500;">${data.dropoff}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.vehicle}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;">${vehicleNames[data.vehicle_type] || data.vehicle_type}</td>
+          </tr>
+          ${passengerSection}
+        </table>
+        ${notesSection}
+      </td></tr>
+    </table>
+
+    <!-- Driver Info Coming -->
+    <div style="background:#fef3c7;padding:15px;border-radius:8px;text-align:center;margin-bottom:20px;border:1px solid #fbbf24;">
+      <p style="margin:0;color:#92400e;font-size:14px;">📲 ${nt.driverWillBeAssigned}</p>
+    </div>
+
+    <!-- CTA Button -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="text-align:center;padding:20px 0;">
+          <a href="https://meettransfer.app/customer/reservation/${data.reservation_id}" style="display:inline-block;background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);color:#1a1a2e;text-decoration:none;padding:14px 30px;border-radius:8px;font-size:16px;font-weight:bold;">${nt.viewReservations}</a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="text-align:center;color:#22c55e;font-size:15px;font-weight:bold;">${nt.thankYouChoosing}</p>
+
+    <!-- Cancellation Policy Banner -->
+    <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:16px 20px;border-radius:10px;margin:20px 0 0;border:2px solid #22c55e;text-align:center;">
+      <p style="margin:0;color:#15803d;font-size:14px;font-weight:bold;">🔄 ${t.freeCancellation}</p>
+    </div>
+  </td>
+</tr>
+${getEmailFooter(lang)}
+  `;
+}
+
+// Payment Success Email for Agency
+export function generateAgencyPaymentSuccessEmail(
+  data: {
+    reservation_code: string;
+    reservation_id: string;
+    pickup: string;
+    dropoff: string;
+    pickup_date: string;
+    pickup_time: string;
+    vehicle_type: string;
+    price: number;
+    currency: string;
+    customer_name: string;
+    customer_phone?: string;
+    agency_name?: string;
+    payment_provider: 'stripe' | 'paypal';
+  },
+  lang: string = 'en'
+): string {
+  const t = getTranslation(lang);
+  const nt = getNotificationTranslation(lang);
+  
+  const currencySymbols: Record<string, string> = { 'EUR': '€', 'USD': '$', 'TRY': '₺', 'GBP': '£', 'AED': 'د.إ' };
+  const symbol = currencySymbols[data.currency] || data.currency;
+
+  const vehicleNames: Record<string, string> = {
+    'mercedes-vito': 'Mercedes Vito VIP',
+    'mercedes-sprinter': 'Mercedes Sprinter VIP',
+    'mercedes-maybach': 'Mercedes Maybach Minivan',
+  };
+
+  const paymentMethodText = data.payment_provider === 'stripe' ? nt.creditCard : nt.payPal;
+
+  return `
+${getEmailHeader(`✅ ${nt.agencyPaymentSuccess}`, nt.agencyPaymentSuccessSubtitle, lang)}
+<tr>
+  <td style="padding:30px 25px;">
+    <!-- Success Animation -->
+    <div style="text-align:center;margin-bottom:25px;">
+      <div style="display:inline-block;width:80px;height:80px;background:linear-gradient(135deg, #22c55e 0%, #16a34a 100%);border-radius:50%;line-height:80px;font-size:40px;">✓</div>
+    </div>
+
+    ${data.agency_name ? `<p style="text-align:center;color:#1e293b;font-size:16px;margin-bottom:20px;">🏢 <strong>${data.agency_name}</strong></p>` : ''}
+
+    <!-- Reservation Code -->
+    <div style="background:#111;padding:15px;border-radius:8px;margin-bottom:25px;text-align:center;">
+      <p style="margin:0;color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Reservation Code</p>
+      <p style="margin:5px 0 0;font-size:26px;font-weight:bold;color:#22c55e;letter-spacing:3px;">${data.reservation_code}</p>
+    </div>
+
+    <!-- Payment Success Card -->
+    <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);padding:25px;border-radius:12px;text-align:center;margin-bottom:25px;border:2px solid #22c55e;">
+      <p style="margin:0;color:#166534;font-size:16px;font-weight:bold;">✓ ${nt.paymentReceived}</p>
+      <p style="margin:15px 0 10px;font-size:36px;font-weight:bold;color:#15803d;">${symbol}${data.price}</p>
+      <div style="background:rgba(255,255,255,0.7);padding:8px 16px;border-radius:20px;display:inline-block;">
+        <p style="margin:0;color:#166534;font-size:13px;"><strong>${nt.paymentMethod}:</strong> ${paymentMethodText}</p>
+      </div>
+    </div>
+
+    <!-- Reservation Details -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;margin-bottom:25px;border:1px solid #e2e8f0;">
+      <tr><td style="padding:20px;">
+        <p style="margin:0 0 15px;color:#1e293b;font-weight:bold;font-size:15px;">📋 ${nt.reservationDetails}</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;width:120px;">${nt.customerName}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;font-weight:bold;">${data.customer_name}</td>
+          </tr>
+          ${data.customer_phone ? `<tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${nt.customerPhone}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;">${data.customer_phone}</td>
+          </tr>` : ''}
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.date} & ${t.time}</td>
+            <td style="padding:8px 0;color:#d32f2f;font-size:14px;font-weight:bold;">${data.pickup_date} - ${data.pickup_time}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.from}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;">${data.pickup}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.to}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;">${data.dropoff}</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;color:#64748b;font-size:13px;">${t.vehicle}</td>
+            <td style="padding:8px 0;color:#0f172a;font-size:14px;">${vehicleNames[data.vehicle_type] || data.vehicle_type}</td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+
+    <!-- CTA Button -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="text-align:center;padding:20px 0;">
+          <a href="https://meettransfer.app/agency/reservations/${data.reservation_id}" style="display:inline-block;background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);color:#1a1a2e;text-decoration:none;padding:14px 30px;border-radius:8px;font-size:16px;font-weight:bold;">${nt.viewReservations}</a>
+        </td>
+      </tr>
+    </table>
+
+    <p style="text-align:center;color:#22c55e;font-size:15px;font-weight:bold;">${nt.thankYouChoosing}</p>
   </td>
 </tr>
 ${getEmailFooter(lang)}
