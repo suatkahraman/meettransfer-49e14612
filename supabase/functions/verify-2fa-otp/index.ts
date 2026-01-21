@@ -18,27 +18,44 @@ const RATE_LIMIT_MAX_ATTEMPTS = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes lockout after exceeding
 
+// IP-based rate limiting (secondary layer)
+const IP_RATE_LIMIT_MAX = 20; // More lenient for shared IPs
+const IP_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+
 // Minimum response time to prevent timing attacks (ms)
 const MIN_RESPONSE_TIME_MS = 200;
 
-// In-memory rate limit store (keyed by email for better security)
-const rateLimitStore = new Map<string, { 
-  count: number; 
-  windowStart: number; 
+interface RateLimitEntry {
+  count: number;
+  windowStart: number;
   lockedUntil: number | null;
-}>();
+}
+
+// In-memory rate limit stores
+const userRateLimitStore = new Map<string, RateLimitEntry>();
+const ipRateLimitStore = new Map<string, RateLimitEntry>();
 
 // Clean up old entries periodically
-function cleanupRateLimitStore(): void {
+function cleanupRateLimitStore(store: Map<string, RateLimitEntry>, windowMs: number): void {
   const now = Date.now();
-  for (const [key, value] of rateLimitStore.entries()) {
-    // Remove entries that are past their lockout and window
-    if (value.lockedUntil && now > value.lockedUntil) {
-      rateLimitStore.delete(key);
-    } else if (!value.lockedUntil && now > value.windowStart + RATE_LIMIT_WINDOW_MS) {
-      rateLimitStore.delete(key);
+  if (store.size > 1000) {
+    for (const [key, value] of store.entries()) {
+      if (value.lockedUntil && now > value.lockedUntil) {
+        store.delete(key);
+      } else if (!value.lockedUntil && now > value.windowStart + windowMs * 2) {
+        store.delete(key);
+      }
     }
   }
+}
+
+function getClientIP(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("cf-connecting-ip") ||
+    "unknown"
+  );
 }
 
 interface RateLimitResult {
@@ -48,20 +65,16 @@ interface RateLimitResult {
   retryAfterSeconds?: number;
 }
 
-function checkRateLimit(email: string): RateLimitResult {
+function checkUserRateLimit(identifier: string): RateLimitResult {
   const now = Date.now();
-  const normalizedEmail = email.toLowerCase().trim();
+  const normalizedId = identifier.toLowerCase().trim();
   
-  // Cleanup if store is getting large
-  if (rateLimitStore.size > 1000) {
-    cleanupRateLimitStore();
-  }
+  cleanupRateLimitStore(userRateLimitStore, RATE_LIMIT_WINDOW_MS);
   
-  const record = rateLimitStore.get(normalizedEmail);
+  const record = userRateLimitStore.get(normalizedId);
   
-  // No record - first attempt
   if (!record) {
-    rateLimitStore.set(normalizedEmail, { 
+    userRateLimitStore.set(normalizedId, { 
       count: 1, 
       windowStart: now, 
       lockedUntil: null 
@@ -73,7 +86,6 @@ function checkRateLimit(email: string): RateLimitResult {
     };
   }
   
-  // Check if currently locked out
   if (record.lockedUntil && now < record.lockedUntil) {
     const retryAfterSeconds = Math.ceil((record.lockedUntil - now) / 1000);
     return { 
@@ -84,9 +96,8 @@ function checkRateLimit(email: string): RateLimitResult {
     };
   }
   
-  // If lock expired, reset
   if (record.lockedUntil && now >= record.lockedUntil) {
-    rateLimitStore.set(normalizedEmail, { 
+    userRateLimitStore.set(normalizedId, { 
       count: 1, 
       windowStart: now, 
       lockedUntil: null 
@@ -98,9 +109,8 @@ function checkRateLimit(email: string): RateLimitResult {
     };
   }
   
-  // Check if window has expired
   if (now > record.windowStart + RATE_LIMIT_WINDOW_MS) {
-    rateLimitStore.set(normalizedEmail, { 
+    userRateLimitStore.set(normalizedId, { 
       count: 1, 
       windowStart: now, 
       lockedUntil: null 
@@ -112,9 +122,7 @@ function checkRateLimit(email: string): RateLimitResult {
     };
   }
   
-  // Within window - check count
   if (record.count >= RATE_LIMIT_MAX_ATTEMPTS) {
-    // Lock the account
     record.lockedUntil = now + LOCKOUT_DURATION_MS;
     const retryAfterSeconds = Math.ceil(LOCKOUT_DURATION_MS / 1000);
     return { 
@@ -125,7 +133,6 @@ function checkRateLimit(email: string): RateLimitResult {
     };
   }
   
-  // Increment count
   record.count++;
   return { 
     allowed: true, 
@@ -134,8 +141,34 @@ function checkRateLimit(email: string): RateLimitResult {
   };
 }
 
-function clearRateLimit(email: string): void {
-  rateLimitStore.delete(email.toLowerCase().trim());
+function checkIPRateLimit(ip: string): { allowed: boolean; retryAfterSeconds?: number } {
+  const now = Date.now();
+  
+  cleanupRateLimitStore(ipRateLimitStore, IP_RATE_LIMIT_WINDOW_MS);
+  
+  const record = ipRateLimitStore.get(ip);
+  
+  if (!record) {
+    ipRateLimitStore.set(ip, { count: 1, windowStart: now, lockedUntil: null });
+    return { allowed: true };
+  }
+  
+  if (now > record.windowStart + IP_RATE_LIMIT_WINDOW_MS) {
+    ipRateLimitStore.set(ip, { count: 1, windowStart: now, lockedUntil: null });
+    return { allowed: true };
+  }
+  
+  if (record.count >= IP_RATE_LIMIT_MAX) {
+    const retryAfterSeconds = Math.ceil((record.windowStart + IP_RATE_LIMIT_WINDOW_MS - now) / 1000);
+    return { allowed: false, retryAfterSeconds };
+  }
+  
+  record.count++;
+  return { allowed: true };
+}
+
+function clearUserRateLimit(identifier: string): void {
+  userRateLimitStore.delete(identifier.toLowerCase().trim());
 }
 
 // Ensure consistent response time to prevent timing attacks
@@ -161,8 +194,33 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   const startTime = Date.now();
+  const clientIP = getClientIP(req);
 
   try {
+    // Check IP rate limit first (before parsing body)
+    const ipRateCheck = checkIPRateLimit(clientIP);
+    if (!ipRateCheck.allowed) {
+      console.warn(`IP rate limit exceeded: ${clientIP}`);
+      await delayResponse(startTime);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "rate_limit", 
+          message: "Çok fazla deneme. Lütfen daha sonra tekrar deneyin.",
+          locked: false,
+          retryAfter: ipRateCheck.retryAfterSeconds
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Retry-After": String(ipRateCheck.retryAfterSeconds)
+          } 
+        }
+      );
+    }
+
     const body = await req.json();
     const { userId, otpCode, email }: VerifyOTPRequest = body;
 
@@ -196,8 +254,9 @@ const handler = async (req: Request): Promise<Response> => {
       userEmail = userData?.user?.email || userId; // Fallback to userId if no email
     }
 
-    // Check rate limit BEFORE attempting verification
-    const rateLimit = checkRateLimit(userEmail);
+    // Check user-based rate limit (combines email + IP for stronger protection)
+    const rateLimitKey = `${userEmail}:${clientIP}`;
+    const rateLimit = checkUserRateLimit(rateLimitKey);
     if (!rateLimit.allowed) {
       const headers: Record<string, string> = {
         ...corsHeaders,
@@ -261,7 +320,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Clear rate limit on successful verification
-    clearRateLimit(userEmail);
+    clearUserRateLimit(rateLimitKey);
 
     // Get user data for session creation
     const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
