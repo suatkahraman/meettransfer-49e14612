@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
 
 interface AuthContextType {
   user: User | null;
@@ -61,14 +62,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 window.history.replaceState(null, '', cleanUrl);
               }
               
-              // Check for pending booking token from AI assistant (Google login flow)
-              const pendingBookingToken = localStorage.getItem('pending_booking_token');
-              const pendingBookingData = localStorage.getItem('pending_booking_data');
+              // Check for pending booking data from sessionStorage (secure storage)
+              const pendingBookingData = PendingBookingStorage.load();
               
-              if (pendingBookingToken || pendingBookingData) {
+              // Also check legacy localStorage (for backward compatibility, then migrate)
+              const legacyToken = localStorage.getItem('pending_booking_token');
+              const legacyData = localStorage.getItem('pending_booking_data');
+              
+              if (pendingBookingData || legacyToken || legacyData) {
                 console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
                 
-                // Keep the token/data in localStorage - CustomerHome will process it
+                // Migrate legacy data to sessionStorage if exists
+                if ((legacyToken || legacyData) && !pendingBookingData) {
+                  try {
+                    const parsed = legacyData ? JSON.parse(legacyData) : {};
+                    PendingBookingStorage.save(parsed);
+                    localStorage.removeItem('pending_booking_token');
+                    localStorage.removeItem('pending_booking_data');
+                    console.log('[Auth] Migrated legacy booking data to sessionStorage');
+                  } catch {
+                    // Ignore parse errors
+                  }
+                }
+                
                 // Redirect to customer panel where they can complete missing info
                 navigate('/customer', { replace: true });
                 return;

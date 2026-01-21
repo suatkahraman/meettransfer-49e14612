@@ -45,62 +45,15 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // ============================================
-    // CREATE QUICK BOOKING REQUEST RECORD
-    // This ensures the request appears in admin panel
+    // SECURITY: Do NOT store booking requests in database before authentication
+    // Admin notifications are still sent, but no customer data is persisted
+    // Customer data will only be stored after login via create-quick-booking-reservation
     // ============================================
     let quickBookingId: string | null = null;
     
-    if (pickup && dropoff && customerSessionId) {
-      // Check if there's already a pending request for this session with same route
-      const { data: existingRequest } = await supabase
-        .from('quick_booking_requests')
-        .select('id')
-        .eq('customer_session_id', customerSessionId)
-        .eq('pickup', pickup)
-        .eq('dropoff', dropoff)
-        .eq('status', 'pending')
-        .maybeSingle();
-
-      if (existingRequest) {
-        console.log("Quick booking request already exists:", existingRequest.id);
-        quickBookingId = existingRequest.id;
-      } else {
-        // Create new quick booking request with status 'pending' (awaiting price)
-        const insertData: Record<string, any> = {
-          pickup,
-          dropoff,
-          pickup_date: pickupDate || new Date().toISOString().split('T')[0], // Default to today if not provided
-          pickup_time: pickupTime || '12:00', // Default time if not provided
-          passengers: passengers || 1,
-          vehicle_type: vehicleType || 'mercedes-vito',
-          customer_session_id: customerSessionId,
-          status: 'pending', // Awaiting admin price input
-          language: language,
-          service_type: serviceType,
-          customer_name: customerName || null,
-          customer_phone: customerPhone || null,
-          customer_email: customerEmail || null,
-          baby_seat_count: babySeatCount || 0,
-          luggage_count: luggageCount || null,
-          created_via_ai: true, // Mark as created via AI assistant price request
-          price: null, // No price yet - admin needs to set it
-          price_currency: 'EUR',
-        };
-
-        const { data: newRequest, error: insertError } = await supabase
-          .from('quick_booking_requests')
-          .insert(insertData)
-          .select('id')
-          .single();
-
-        if (insertError) {
-          console.error("Failed to create quick booking request:", insertError);
-        } else {
-          quickBookingId = newRequest.id;
-          console.log("Created quick booking request:", quickBookingId);
-        }
-      }
-    }
+    // Log the request for admin notification purposes only (no PII stored)
+    console.log("Price request notification - route:", pickup, "->", dropoff);
+    console.log("Customer contact info provided:", { hasPhone: !!customerPhone, hasEmail: !!customerEmail });
 
     // Get admin emails
     const { data: adminRoles } = await supabase
@@ -182,7 +135,7 @@ serve(async (req) => {
               ${isTurkish 
                 ? 'Müşteri için bu güzergahta fiyat bulunamadı. Lütfen hemen fiyat girin.' 
                 : 'No price found for this route. Please enter a price immediately.'}
-              ${quickBookingId ? `<br><br><span class="booking-id">Request ID: ${quickBookingId.substring(0, 8)}...</span>` : ''}
+              
             </div>
             
             <div class="route-box">

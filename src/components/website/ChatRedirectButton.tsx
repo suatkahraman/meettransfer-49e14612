@@ -4,6 +4,7 @@ import { ArrowRight, UserPlus, Shield, Clock, Loader2, CheckCircle, Plane } from
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { PendingBookingStorage, type PendingBookingData } from "@/hooks/usePendingBookingStorage";
 
 // Google icon component
 const GoogleIcon = () => (
@@ -113,17 +114,7 @@ const RedirectOverlay = ({ language }: { language: string }) => {
   );
 };
 
-interface BookingDataForStorage {
-  pickup?: string;
-  dropoff?: string;
-  date?: string;
-  time?: string;
-  passengers?: number;
-  vehicleType?: string;
-  estimatedPrice?: number;
-  currency?: string;
-}
-
+// Extended interface that matches our PendingBookingData
 interface ChatRedirectButtonProps {
   language: string;
   onRedirect: () => void;
@@ -131,7 +122,7 @@ interface ChatRedirectButtonProps {
   isLoading?: boolean;
   className?: string;
   bookingToken?: string;
-  bookingData?: BookingDataForStorage;
+  bookingData?: PendingBookingData;
 }
 
 export const ChatRedirectButton = memo(function ChatRedirectButton({
@@ -164,14 +155,14 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
     setShowRedirectOverlay(true);
     
     try {
-      // Store booking token for after login
-      if (bookingToken) {
-        localStorage.setItem('pending_booking_token', bookingToken);
-      }
-      
-      // Also store booking data for redirect after login (when no token exists)
+      // SECURITY: Store booking data in sessionStorage ONLY (not localStorage or database)
+      // This data will be persisted to database AFTER authentication
       if (bookingData) {
-        localStorage.setItem('pending_booking_data', JSON.stringify(bookingData));
+        PendingBookingStorage.save({
+          ...bookingData,
+          language,
+        });
+        console.log('[Security] Booking data saved to sessionStorage for post-login persistence');
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
