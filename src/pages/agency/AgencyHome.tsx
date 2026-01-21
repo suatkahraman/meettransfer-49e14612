@@ -14,6 +14,7 @@ import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { toast } from 'sonner';
 import { format, startOfMonth, endOfMonth, isToday, isTomorrow, parseISO, compareAsc } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -792,6 +793,49 @@ const AgencyHome = () => {
                     <div className="px-4 pb-4 space-y-3 border-t pt-4">
                       {accountingSummary.currencyBalances.length > 0 ? (
                         <>
+                          {/* Aylık Borç Özeti Kartı */}
+                          <Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border-amber-200 dark:border-amber-800">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Calendar className="h-4 w-4 text-amber-600" />
+                                <p className="font-semibold text-amber-800 dark:text-amber-200">
+                                  {format(new Date(), 'MMMM yyyy', { locale: tr })} - Aylık Borç Özeti
+                                </p>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {accountingSummary.currencyBalances.map((cb) => (
+                                  <div 
+                                    key={`monthly-${cb.currency}`}
+                                    className={cn(
+                                      "p-3 rounded-lg text-center",
+                                      cb.netBalance > 0 
+                                        ? "bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800"
+                                        : cb.netBalance < 0
+                                          ? "bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800"
+                                          : "bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700"
+                                    )}
+                                  >
+                                    <Badge variant="outline" className="font-mono mb-1 text-xs">
+                                      {cb.currency}
+                                    </Badge>
+                                    <p className={cn(
+                                      "text-lg font-bold",
+                                      cb.netBalance > 0 ? "text-destructive" : cb.netBalance < 0 ? "text-green-600" : ""
+                                    )}>
+                                      {cb.netBalance > 0 ? '' : cb.netBalance < 0 ? '+' : ''}{getCurrencySymbol(cb.currency)}{Math.abs(cb.netBalance).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                      {cb.netBalance > 0 ? 'Borç' : cb.netBalance < 0 ? 'Alacak' : 'Dengede'}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-3 text-center">
+                                {accountingSummary.completedReservations} tamamlanmış transfer • {accountingSummary.monthlyReservations} bu ay oluşturulan
+                              </p>
+                            </CardContent>
+                          </Card>
+
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {accountingSummary.currencyBalances.map((cb) => (
                               <Card 
