@@ -2571,9 +2571,9 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Customer Price (Acentadan Alınan Tutar) */}
+                    {/* Customer Price - Tek alan: Hem kâr hesabı hem borç bakiyesi için */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Müşteri Fiyatı (Acenta Müşterisinden Alınan)</Label>
+                      <Label className="text-sm font-medium">Müşteri Fiyatı</Label>
                       <div className="flex gap-2">
                         <div className="relative flex-1">
                           <Input
@@ -2599,73 +2599,13 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-
-                    {/* Company Amount (Şirkete Kalan) */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium flex items-center gap-2">
-                        Şirkete Kalan Tutar
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border-green-300">
-                          {agencyDetails.agency_price_currency}
-                        </Badge>
-                      </Label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={agencyDetails.company_amount}
-                            onChange={(e) => setAgencyDetails({...agencyDetails, company_amount: e.target.value})}
-                            placeholder="0.00"
-                            className="border-green-300 focus:border-green-500"
-                          />
-                        </div>
-                      </div>
                       <p className="text-xs text-muted-foreground">
-                        Acentanın şirkete ödediği tutar (para birimi: {agencyDetails.agency_price_currency})
-                      </p>
-                    </div>
-
-                    {/* Company Amount TRY */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium flex items-center gap-2">
-                        Şirkete Kalan (TRY)
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border-amber-300">
-                          ₺
-                        </Badge>
-                      </Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₺</span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={agencyDetails.company_amount_try}
-                          onChange={(e) => setAgencyDetails({...agencyDetails, company_amount_try: e.target.value})}
-                          placeholder="0.00"
-                          className="pl-8 border-amber-300 focus:border-amber-500"
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Döviz tutarının TRY karşılığı (aylık kâr hesabında kullanılır)
-                      </p>
-                    </div>
-
-                    {/* Agency Profit */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Acenta Kârı ({agencyDetails.agency_price_currency})</Label>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={agencyDetails.agency_profit}
-                          onChange={(e) => setAgencyDetails({...agencyDetails, agency_profit: e.target.value})}
-                          placeholder="0.00"
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Müşteri Fiyatı - Şirkete Kalan = Acenta Kârı
+                        Bu tutar acenta borç bakiyesine eklenir ve aylık kâr hesabında kullanılır.
+                        {agencyDetails.agency_price_currency !== 'TRY' && (
+                          <span className="block text-amber-600 dark:text-amber-400 mt-1">
+                            Döviz tutarı otomatik kur ile TRY'ye çevrilecektir.
+                          </span>
+                        )}
                       </p>
                     </div>
 
@@ -2673,9 +2613,6 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                       type="button"
                       onClick={async () => {
                         const customerPrice = parseFloat(agencyDetails.customer_price) || 0;
-                        const companyAmount = parseFloat(agencyDetails.company_amount) || 0;
-                        const companyAmountTry = parseFloat(agencyDetails.company_amount_try) || 0;
-                        const agencyProfit = parseFloat(agencyDetails.agency_profit) || (customerPrice - companyAmount);
 
                         try {
                           const { data: existingRecord } = await supabase
@@ -2692,11 +2629,12 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                               .update({
                                 customer_price: customerPrice || null,
                                 agency_price_currency: agencyDetails.agency_price_currency,
-                                company_amount: companyAmount || null,
-                                company_amount_try: companyAmountTry || null,
-                                agency_profit: agencyProfit || null,
-                                exchange_rate_used: null, // Clear exchange rate when manually edited
-                                conversion_date: companyAmountTry ? new Date().toISOString().split('T')[0] : null,
+                                // company_amount artık customer_price ile aynı değeri alacak
+                                company_amount: customerPrice || null,
+                                // TRY çevirimi tamamlanma anında yapılacak
+                                company_amount_try: null,
+                                exchange_rate_used: null,
+                                conversion_date: null,
                               })
                               .eq('reservation_id', id);
                             error = result.error;
@@ -2707,9 +2645,7 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                                 reservation_id: id,
                                 customer_price: customerPrice || null,
                                 agency_price_currency: agencyDetails.agency_price_currency,
-                                company_amount: companyAmount || null,
-                                company_amount_try: companyAmountTry || null,
-                                agency_profit: agencyProfit || null,
+                                company_amount: customerPrice || null,
                               });
                             error = result.error;
                           }
@@ -2718,10 +2654,6 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                             console.error('Agency details save error:', error);
                             toast.error(error.message || 'Acenta bilgileri kaydedilemedi');
                           } else {
-                            setAgencyDetails({
-                              ...agencyDetails,
-                              agency_profit: agencyProfit.toString(),
-                            });
                             setAgencyPriceSaved(true);
                             toast.success('Acenta fiyatlandırması kaydedildi');
                           }
@@ -2740,30 +2672,16 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                       <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border space-y-2">
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-muted-foreground">Müşteri Fiyatı:</span>
-                          <span className="font-medium">
+                          <span className="font-medium text-blue-600">
                             {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.customer_price || '0').toFixed(2)}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-muted-foreground">Şirkete Kalan:</span>
-                          <span className="font-medium text-green-600">
-                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.company_amount || '0').toFixed(2)}
-                          </span>
-                        </div>
-                        {agencyDetails.company_amount_try && parseFloat(agencyDetails.company_amount_try) > 0 && (
-                          <div className="flex justify-between items-center text-sm">
-                            <span className="text-muted-foreground">Şirkete Kalan (TRY):</span>
-                            <span className="font-medium text-amber-600">
-                              ₺{parseFloat(agencyDetails.company_amount_try).toFixed(2)}
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex justify-between items-center text-sm border-t pt-2">
-                          <span className="text-muted-foreground">Acenta Kârı:</span>
-                          <span className="font-bold text-blue-600">
-                            {getCurrencySymbol(agencyDetails.agency_price_currency)}{parseFloat(agencyDetails.agency_profit || '0').toFixed(2)}
-                          </span>
-                        </div>
+                        <p className="text-xs text-muted-foreground border-t pt-2">
+                          ✓ Bu tutar acenta borç bakiyesine eklenecek
+                          {agencyDetails.agency_price_currency !== 'TRY' && (
+                            <span className="block">✓ Aylık kâr için TRY'ye otomatik çevrilecek</span>
+                          )}
+                        </p>
                       </div>
                     )}
                   </CardContent>

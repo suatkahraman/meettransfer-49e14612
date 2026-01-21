@@ -73,9 +73,10 @@ Deno.serve(async (req) => {
     )
 
     // Fetch agency reservation details
+    // YENİ SİSTEM: customer_price kullanılıyor (eski company_amount yerine)
     const { data: agencyDetail, error: fetchError } = await supabaseClient
       .from('agency_reservation_details')
-      .select('id, company_amount, agency_price_currency, company_amount_try')
+      .select('id, customer_price, agency_price_currency, company_amount_try')
       .eq('reservation_id', reservation_id)
       .single()
 
@@ -100,11 +101,12 @@ Deno.serve(async (req) => {
     }
 
     const currency = agencyDetail.agency_price_currency || 'TRY'
-    const amount = agencyDetail.company_amount || 0
+    // YENİ: customer_price kullanılıyor (hem borç hem kâr hesabı için)
+    const amount = agencyDetail.customer_price || 0
 
-    // If company_amount is 0 or null, set TRY amount to 0 (no conversion needed)
+    // If customer_price is 0 or null, set TRY amount to 0 (no conversion needed)
     if (!amount || amount === 0) {
-      console.log('Company amount is 0, setting TRY to 0:', reservation_id)
+      console.log('Customer price is 0, setting TRY to 0:', reservation_id)
       
       const { error: updateError } = await supabaseClient
         .from('agency_reservation_details')

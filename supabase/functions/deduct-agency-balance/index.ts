@@ -88,14 +88,15 @@ serve(async (req) => {
     }
 
     // Get agency reservation details with amount and currency
+    // YENİ SİSTEM: customer_price kullanılıyor (eski company_amount yerine)
     const { data: agencyDetail, error: detailError } = await supabase
       .from('agency_reservation_details')
-      .select('company_amount, agency_price_currency')
+      .select('customer_price, agency_price_currency')
       .eq('reservation_id', reservation_id)
       .maybeSingle();
 
-    // Admin fiyatı (company_amount) = Acenta'nın kabul ettiği fiyat
-    const adminPrice = agencyDetail?.company_amount || 0;
+    // Müşteri fiyatı = Acenta'nın borç bakiyesine eklenecek tutar
+    const agencyPrice = agencyDetail?.customer_price || 0;
     const agencyCurrency = agencyDetail?.agency_price_currency || 'EUR';
     
     // Yolcu nakit = Acenta'nın yolcudan aldığı nakit
@@ -103,16 +104,16 @@ serve(async (req) => {
     const passengerCashCurrency = reservation.passenger_cash_currency || agencyCurrency;
 
     // Net amount calculation:
-    // Acenta Fiyatı: 100 USD (adminPrice) - Bu acenta bakiyesine eklenir (borç)
+    // Müşteri Fiyatı: 100 USD (agencyPrice) - Bu acenta bakiyesine eklenir (borç)
     // Nakit Alınacak: 120 USD (passengerCashAmount) - Bu acenta bakiyesinden düşer (gelir)
-    // Net Borç = adminPrice - passengerCashAmount = 100 - 120 = -20 (yani 20 USD acenta lehine)
+    // Net Borç = agencyPrice - passengerCashAmount = 100 - 120 = -20 (yani 20 USD acenta lehine)
     // 
     // Örnek 2:
-    // Acenta Fiyatı: 100 USD, Nakit Alınacak: 80 USD
+    // Müşteri Fiyatı: 100 USD, Nakit Alınacak: 80 USD
     // Net Borç = 100 - 80 = 20 USD (acenta aleyhine, borç olarak eklenir)
-    const netAmount = adminPrice - passengerCashAmount;
+    const netAmount = agencyPrice - passengerCashAmount;
 
-    console.log(`Admin Price (agency expense): ${adminPrice} ${agencyCurrency}, Passenger cash (agency income): ${passengerCashAmount}, Net: ${netAmount}`);
+    console.log(`Agency Price: ${agencyPrice} ${agencyCurrency}, Passenger cash (agency income): ${passengerCashAmount}, Net: ${netAmount}`);
 
     // === DRIVER BALANCE DEDUCTION ===
     // Şoförün topladığı nakit tutarı şoförün alacağından düşülecek
@@ -171,7 +172,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           message: 'No balance change - cash equals price',
-          admin_price: adminPrice,
+          agency_price: agencyPrice,
           passenger_cash: passengerCashAmount,
           net_balance_change: 0,
           driver_cash_deducted: driverCashCollected
@@ -232,7 +233,7 @@ serve(async (req) => {
     const passengerCashSymbol = currencySymbols[passengerCashCurrency] || passengerCashCurrency;
 
     // Create transaction record with detailed description and currency
-    let description = `Transfer tamamlandı - Acenta Fiyatı: ${currencySymbol}${adminPrice.toFixed(2)}`;
+    let description = `Transfer tamamlandı - Müşteri Fiyatı: ${currencySymbol}${agencyPrice.toFixed(2)}`;
     if (passengerCashAmount > 0) {
       description += ` | Nakit Alınan: ${passengerCashSymbol}${passengerCashAmount.toFixed(2)}`;
       if (netAmount > 0) {
@@ -261,12 +262,12 @@ serve(async (req) => {
       console.error('Failed to create transaction:', txError);
     }
 
-    console.log(`Applied net ${currencySymbol}${netAmount} (${agencyCurrency}) to ${agency.agency_name}. Admin price: ${adminPrice}, Passenger cash: ${passengerCashAmount}, New ${agencyCurrency} balance: ${newCurrencyBalance}`);
+    console.log(`Applied net ${currencySymbol}${netAmount} (${agencyCurrency}) to ${agency.agency_name}. Agency price: ${agencyPrice}, Passenger cash: ${passengerCashAmount}, New ${agencyCurrency} balance: ${newCurrencyBalance}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        admin_price: adminPrice,
+        agency_price: agencyPrice,
         passenger_cash_amount: passengerCashAmount,
         net_balance_change: netAmount,
         currency: agencyCurrency,
