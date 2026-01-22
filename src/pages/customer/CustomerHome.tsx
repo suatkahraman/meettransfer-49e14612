@@ -407,21 +407,20 @@ const CustomerHome = () => {
         let quickBooking: any = null;
         let bookingDataFromStorage: any = null;
         
-        // Handle token-based pending booking
+        // Handle token-based pending booking via secure edge function
         if (pendingToken) {
           localStorage.removeItem('pending_booking_token');
           
-          const { data, error } = await supabase
-            .from('quick_booking_requests')
-            .select('*')
-            .eq('confirmation_token', pendingToken)
-            .single();
+          // Use edge function to fetch booking securely (RLS prevents direct access)
+          const { data: result, error } = await supabase.functions.invoke('get-quick-booking-by-token', {
+            body: { token: pendingToken }
+          });
           
-          if (error || !data) {
-            console.error('Failed to load pending booking:', error);
+          if (error || !result?.success || !result?.data) {
+            console.error('Failed to load pending booking:', error || result?.error);
             return;
           }
-          quickBooking = data;
+          quickBooking = result.data;
         }
         
         // Handle data-based pending booking
