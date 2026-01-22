@@ -4,6 +4,23 @@ import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route } from '
 import { cn } from '@/lib/utils';
 import { loadGoogleMapsScript, getGoogleMaps, geocodeAddress as geoCode } from '@/utils/googleMapsLoader';
 
+const withTimeout = async <T,>(
+  promise: Promise<T>,
+  ms: number,
+  timeoutMessage: string
+): Promise<T> => {
+  let timeoutId: number | undefined;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = window.setTimeout(() => reject(new Error(timeoutMessage)), ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  }
+};
+
 interface GoogleRouteMapProps {
   pickup: string;
   dropoff: string;
@@ -48,9 +65,9 @@ const GoogleRouteMapComponent = ({
       setError(null);
 
       try {
-        await loadGoogleMapsScript();
+        await withTimeout(loadGoogleMapsScript(), 15000, 'Google Maps yükleme zaman aşımı');
       } catch (err) {
-        setError('Failed to load Google Maps');
+        setError('Google Maps yüklenemedi. Lütfen bağlantınızı kontrol edip tekrar deneyin.');
         setLoading(false);
         return;
       }
@@ -62,10 +79,24 @@ const GoogleRouteMapComponent = ({
       }
 
       // Geocode both addresses
-      const [pickupResult, dropoffResult] = await Promise.all([
-        geoCode(pickup),
-        geoCode(dropoff)
-      ]);
+      let pickupResult: Coordinates | null = null;
+      let dropoffResult: Coordinates | null = null;
+      try {
+        [pickupResult, dropoffResult] = await Promise.all([
+          withTimeout(geoCode(pickup), 12000, 'Alış noktası çözümlenemedi (zaman aşımı)'),
+          withTimeout(geoCode(dropoff), 12000, 'Bırakış noktası çözümlenemedi (zaman aşımı)'),
+        ]);
+      } catch (err) {
+        if (!isCancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Adresler çözümlenirken bir hata oluştu.'
+          );
+          setLoading(false);
+        }
+        return;
+      }
 
       if (isCancelled) return;
 
@@ -105,36 +136,59 @@ const GoogleRouteMapComponent = ({
           map: mapRef.current,
           suppressMarkers: false,
           polylineOptions: {
+            // Keep theme-safe: color is handled by Google, but we avoid Tailwind color tokens here.
             strokeColor: '#3b82f6',
             strokeWeight: 5,
             strokeOpacity: 0.8,
           },
         });
 
-        directionsService.route(
-          {
-            origin: pickupResult,
-            destination: dropoffResult,
-            travelMode: maps.TravelMode.DRIVING,
-          },
-          (result: any, status: string) => {
-            if (isCancelled) return;
-            
-            if (status === 'OK' && result) {
-              directionsRendererRef.current?.setDirections(result);
-              
-              // Extract trip info
-              const leg = result.routes[0]?.legs[0];
-              if (leg) {
-                setTripInfo({
-                  duration: leg.duration?.text || '',
-                  distance: leg.distance?.text || '',
-                });
-              }
+        try {
+          const { result, status } = await withTimeout(
+            new Promise<{ result: any; status: string }>((resolve) => {
+              directionsService.route(
+                {
+                  origin: pickupResult,
+                  destination: dropoffResult,
+                  travelMode: maps.TravelMode.DRIVING,
+                },
+                (res: any, st: string) => resolve({ result: res, status: st })
+              );
+            }),
+            15000,
+            'Rota hesaplama zaman aşımı'
+          );
+
+          if (isCancelled) return;
+
+          if (status === 'OK' && result) {
+            directionsRendererRef.current?.setDirections(result);
+            const leg = result.routes[0]?.legs[0];
+            if (leg) {
+              setTripInfo({
+                duration: leg.duration?.text || '',
+                distance: leg.distance?.text || '',
+              });
             }
-            setLoading(false);
+          } else {
+            // Common statuses: REQUEST_DENIED, ZERO_RESULTS, OVER_QUERY_LIMIT, NOT_FOUND
+            const message =
+              status === 'REQUEST_DENIED'
+                ? 'Harita servis izni reddedildi (API key/domain kısıtı olabilir).'
+                : status === 'OVER_QUERY_LIMIT'
+                  ? 'Harita sorgu limiti aşıldı. Lütfen biraz sonra tekrar deneyin.'
+                  : status === 'ZERO_RESULTS'
+                    ? 'Bu iki nokta arasında rota bulunamadı.'
+                    : 'Rota oluşturulamadı.';
+            setError(message);
           }
-        );
+        } catch (err) {
+          if (!isCancelled) {
+            setError(err instanceof Error ? err.message : 'Rota oluşturulamadı.');
+          }
+        } finally {
+          if (!isCancelled) setLoading(false);
+        }
       } else {
         // Just show single marker
         if (pickupResult) {
