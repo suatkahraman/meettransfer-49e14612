@@ -3,6 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { registerSW } from "virtual:pwa-register";
 import { toast } from "sonner";
 import { CheckCircle2 } from "lucide-react";
+import { runAfterInteractive } from "@/utils/afterInteractive";
 
 /**
  * Silent PWA update handler.
@@ -313,13 +314,20 @@ export function PWAUpdatePrompt() {
         const interval = window.setInterval(requestUpdateCheck, UPDATE_INTERVAL_MS);
         const versionInterval = window.setInterval(pollVersionJson, UPDATE_INTERVAL_MS);
 
-        // Immediate check on mount (publish sonrası anında)
-        void requestUpdateCheck();
-        void pollVersionJson();
-        
-        // Second check after short delay to catch race conditions
-        setTimeout(requestUpdateCheck, 800);
-        setTimeout(pollVersionJson, 1200);
+        // CRITICAL CHAIN OPT:
+        // Do NOT fetch version.json or call registration.update() during early critical rendering.
+        // Schedule initial checks after interaction OR idle-after-load.
+        runAfterInteractive(
+          () => {
+            void requestUpdateCheck();
+            void pollVersionJson();
+
+            // Second check after short delay to catch publish-time race conditions
+            setTimeout(requestUpdateCheck, 800);
+            setTimeout(pollVersionJson, 1200);
+          },
+          { idleTimeoutMs: 4000 }
+        );
 
         const onFastTrigger = () => {
           void requestUpdateCheck();
