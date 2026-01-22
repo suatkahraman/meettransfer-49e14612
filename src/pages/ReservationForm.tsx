@@ -24,6 +24,7 @@ import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-p
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
+import { AddressMapSection } from '@/components/reservation/AddressMapSection';
 import { trackConversion, CONVERSION_LABELS } from '@/lib/gtag';
 
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
@@ -2069,58 +2070,50 @@ const ReservationForm = () => {
               ) : (
                 /* Editable form for new reservations */
                 <>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      {t('pickupPoint')}
-                    </Label>
-                    <GooglePlacesAutocomplete
-                      onPlaceSelected={(value, details) => setFormData((prev) => ({ 
-                        ...prev, 
-                        pickup: value,
-                        pickup_place_name: details?.placeName || '',
-                        pickup_lat: details?.lat || null,
-                        pickup_lng: details?.lng || null,
-                      }))}
-                      placeholder={t('enterPickupPoint')}
-                      className={errors.pickup ? 'border-destructive' : ''}
-                      maxLength={200}
-                      initialValue={formData.pickup}
-                    />
-                    {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      {t('dropoffLocation')}
-                    </Label>
-                    <GooglePlacesAutocomplete
-                      onPlaceSelected={(value, details) => setFormData((prev) => ({ 
-                        ...prev, 
-                        dropoff: value,
-                        dropoff_place_name: details?.placeName || '',
-                        dropoff_lat: details?.lat || null,
-                        dropoff_lng: details?.lng || null,
-                      }))}
-                      placeholder={t('hotelOrAddress')}
-                      className={errors.dropoff ? 'border-destructive' : ''}
-                      maxLength={200}
-                      initialValue={formData.dropoff}
-                    />
-                    {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
-                  </div>
-
-                  {/* Route Map Preview */}
-                  {formData.pickup && formData.dropoff && (
-                    <div className="pt-4">
-                      <GoogleRouteMap
-                        pickup={formData.pickup}
-                        dropoff={formData.dropoff}
-                        showNavigationButtons={false}
-                      />
-                    </div>
-                  )}
+                  <AddressMapSection
+                    pickup={{
+                      address: formData.pickup,
+                      placeName: formData.pickup_place_name,
+                      lat: formData.pickup_lat,
+                      lng: formData.pickup_lng,
+                    }}
+                    dropoff={{
+                      address: formData.dropoff,
+                      placeName: formData.dropoff_place_name,
+                      lat: formData.dropoff_lat,
+                      lng: formData.dropoff_lng,
+                    }}
+                    onPickupChange={(location) => setFormData((prev) => ({
+                      ...prev,
+                      pickup: location.address,
+                      pickup_place_name: location.placeName,
+                      pickup_lat: location.lat,
+                      pickup_lng: location.lng,
+                    }))}
+                    onDropoffChange={(location) => setFormData((prev) => ({
+                      ...prev,
+                      dropoff: location.address,
+                      dropoff_place_name: location.placeName,
+                      dropoff_lat: location.lat,
+                      dropoff_lng: location.lng,
+                    }))}
+                    labels={{
+                      pickup: t('pickupPoint'),
+                      dropoff: t('dropoffLocation'),
+                      sectionTitle: undefined, // No section title for this form
+                    }}
+                    placeholders={{
+                      pickup: t('enterPickupPoint'),
+                      dropoff: t('hotelOrAddress'),
+                    }}
+                    errors={{
+                      pickup: errors.pickup,
+                      dropoff: errors.dropoff,
+                    }}
+                    showMap={true}
+                    showNavigationButtons={false}
+                    layout="vertical"
+                  />
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">

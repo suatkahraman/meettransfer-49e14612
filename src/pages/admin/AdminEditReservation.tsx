@@ -21,6 +21,7 @@ import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { AddressMapSection } from '@/components/reservation/AddressMapSection';
 import PriceHistoryCard from '@/components/admin/PriceHistoryCard';
 import { AdminPaymentLinkGenerator } from '@/components/admin/AdminPaymentLinkGenerator';
 import { PaymentStatusBadge } from '@/components/payments/PaymentStatusBadge';
@@ -2255,69 +2256,49 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <CriticalFieldLabel label="Alış Noktası" fieldName="pickup" />
-                  {formData.pickup_place_name && (
-                    <div className="mb-2 p-2 bg-muted/50 rounded-lg">
-                      <LocationDisplay
-                        placeName={formData.pickup_place_name}
-                        address={formData.pickup}
-                        type="pickup"
-                        size="sm"
-                        showAddress={true}
-                      />
-                    </div>
-                  )}
-                  <GooglePlacesAutocomplete
-                    initialValue={formData.pickup}
-                    onPlaceSelected={(value, details) => setFormData((prev) => ({ 
-                      ...prev, 
-                      pickup: value,
-                      pickup_place_name: details?.placeName || '',
-                      pickup_lat: details?.lat || null,
-                      pickup_lng: details?.lng || null,
-                    }))}
-                    placeholder="Alış noktasını girin"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <CriticalFieldLabel label="Bırakış Noktası" fieldName="dropoff" />
-                  {formData.dropoff_place_name && (
-                    <div className="mb-2 p-2 bg-muted/50 rounded-lg">
-                      <LocationDisplay
-                        placeName={formData.dropoff_place_name}
-                        address={formData.dropoff}
-                        type="dropoff"
-                        size="sm"
-                        showAddress={true}
-                      />
-                    </div>
-                  )}
-                  <GooglePlacesAutocomplete
-                    initialValue={formData.dropoff}
-                    onPlaceSelected={(value, details) => setFormData((prev) => ({ 
-                      ...prev, 
-                      dropoff: value,
-                      dropoff_place_name: details?.placeName || '',
-                      dropoff_lat: details?.lat || null,
-                      dropoff_lng: details?.lng || null,
-                    }))}
-                    placeholder="Bırakış noktasını girin"
-                  />
-                </div>
-              </div>
-
-              {/* Route Map Preview */}
-              {formData.pickup && formData.dropoff && (
-                <div className="pt-2">
-                  <GoogleRouteMap
-                    pickup={formData.pickup}
-                    dropoff={formData.dropoff}
-                    showNavigationButtons={false}
-                  />
-                </div>
-              )}
+              <AddressMapSection
+                pickup={{
+                  address: formData.pickup,
+                  placeName: formData.pickup_place_name,
+                  lat: formData.pickup_lat,
+                  lng: formData.pickup_lng,
+                }}
+                dropoff={{
+                  address: formData.dropoff,
+                  placeName: formData.dropoff_place_name,
+                  lat: formData.dropoff_lat,
+                  lng: formData.dropoff_lng,
+                }}
+                onPickupChange={(location) => setFormData((prev) => ({
+                  ...prev,
+                  pickup: location.address,
+                  pickup_place_name: location.placeName,
+                  pickup_lat: location.lat,
+                  pickup_lng: location.lng,
+                }))}
+                onDropoffChange={(location) => setFormData((prev) => ({
+                  ...prev,
+                  dropoff: location.address,
+                  dropoff_place_name: location.placeName,
+                  dropoff_lat: location.lat,
+                  dropoff_lng: location.lng,
+                }))}
+                labels={{
+                  pickup: 'Alış Noktası',
+                  dropoff: 'Bırakış Noktası',
+                  sectionTitle: undefined,
+                }}
+                placeholders={{
+                  pickup: 'Alış noktasını girin',
+                  dropoff: 'Bırakış noktasını girin',
+                }}
+                changedFields={{
+                  pickup: getChangedFields.has('pickup'),
+                  dropoff: getChangedFields.has('dropoff'),
+                }}
+                showMap={true}
+                showNavigationButtons={false}
+              />
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">

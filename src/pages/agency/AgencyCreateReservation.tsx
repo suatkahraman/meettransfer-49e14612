@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Save, Plus, X, UserPlus } from 'lucide-react';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import { LocationDisplay } from '@/components/ui/location-display';
+import { AddressMapSection } from '@/components/reservation/AddressMapSection';
 import { PhoneInput } from '@/components/ui/phone-input';
 
 // Use centralized vehicle types
@@ -290,52 +291,46 @@ const AgencyCreateReservation = () => {
 
               {/* Trip Details */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">{t('transferDetails')}</h3>
-                
-                <div>
-                  <Label>{t('pickupPoint')} *</Label>
-                  <GooglePlacesAutocomplete
-                    initialValue={formData.pickup}
-                    onPlaceSelect={handlePickupSelect}
-                    placeholder={t('enterPickupPoint')}
-                  />
-                  {formData.pickup_place_name && formData.pickup_place_name !== formData.pickup && (
-                    <LocationDisplay 
-                      placeName={formData.pickup_place_name}
-                      address={formData.pickup}
-                      type="pickup"
-                      size="sm"
-                      className="mt-1"
-                    />
-                  )}
-                </div>
-                
-                <div>
-                  <Label>{t('dropoffPoint')} *</Label>
-                  <GooglePlacesAutocomplete
-                    initialValue={formData.dropoff}
-                    onPlaceSelect={handleDropoffSelect}
-                    placeholder={t('enterDropoffPoint')}
-                  />
-                  {formData.dropoff_place_name && formData.dropoff_place_name !== formData.dropoff && (
-                    <LocationDisplay 
-                      placeName={formData.dropoff_place_name}
-                      address={formData.dropoff}
-                      type="dropoff"
-                      size="sm"
-                      className="mt-1"
-                    />
-                  )}
-                </div>
-
-                {/* Map info - coordinates available */}
-                {formData.pickup_lat && formData.pickup_lng && formData.dropoff_lat && formData.dropoff_lng && (
-                  <div className="rounded-lg border p-3 bg-muted/50">
-                    <p className="text-sm text-muted-foreground text-center">
-                      📍 {t('locationReceived')}
-                    </p>
-                  </div>
-                )}
+                <AddressMapSection
+                  pickup={{
+                    address: formData.pickup,
+                    placeName: formData.pickup_place_name,
+                    lat: formData.pickup_lat,
+                    lng: formData.pickup_lng,
+                  }}
+                  dropoff={{
+                    address: formData.dropoff,
+                    placeName: formData.dropoff_place_name,
+                    lat: formData.dropoff_lat,
+                    lng: formData.dropoff_lng,
+                  }}
+                  onPickupChange={(location) => setFormData((prev) => ({
+                    ...prev,
+                    pickup: location.address,
+                    pickup_place_name: location.placeName,
+                    pickup_lat: location.lat,
+                    pickup_lng: location.lng,
+                  }))}
+                  onDropoffChange={(location) => setFormData((prev) => ({
+                    ...prev,
+                    dropoff: location.address,
+                    dropoff_place_name: location.placeName,
+                    dropoff_lat: location.lat,
+                    dropoff_lng: location.lng,
+                  }))}
+                  labels={{
+                    pickup: t('pickupPoint'),
+                    dropoff: t('dropoffPoint'),
+                    sectionTitle: t('transferDetails'),
+                  }}
+                  placeholders={{
+                    pickup: t('enterPickupPoint'),
+                    dropoff: t('enterDropoffPoint'),
+                  }}
+                  showMap={true}
+                  showNavigationButtons={false}
+                  layout="vertical"
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
