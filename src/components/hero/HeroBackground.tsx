@@ -32,7 +32,8 @@ export const HeroBackground = memo(({}: HeroBackgroundProps) => {
           role="presentation"
           width={1920}
           height={1080}
-          fetchPriority="high"
+          // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+          fetchpriority="high"
           loading="eager"
           decoding="async"
           className="absolute inset-0 w-full h-full object-cover object-right opacity-30"
