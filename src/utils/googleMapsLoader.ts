@@ -69,21 +69,27 @@ export const loadGoogleMapsScript = (libraries: string[] = ['places']): Promise<
 
     // Create and load script
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=${libraries.join(',')}&loading=async`;
+    // Remove loading=async to ensure Places library is fully available on load
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=${libraries.join(',')}`;
     script.async = true;
     script.defer = true;
 
     script.onload = () => {
-      // Wait for API to be ready
-      const waitForApi = () => {
-        if (getGoogleMaps()) {
+      // Wait for API to be ready including Places
+      const waitForApi = (startTime: number) => {
+        const maps = getGoogleMaps();
+        if (maps?.places?.Autocomplete) {
+          console.log('[Google Maps] Loaded successfully with Places library');
           isLoaded = true;
           resolve();
+        } else if (Date.now() - startTime > 10000) {
+          console.error('[Google Maps] Timeout waiting for Places library');
+          reject(new Error('Timeout waiting for Google Maps Places library'));
         } else {
-          setTimeout(waitForApi, 50);
+          setTimeout(() => waitForApi(startTime), 100);
         }
       };
-      waitForApi();
+      waitForApi(Date.now());
     };
 
     script.onerror = () => {
