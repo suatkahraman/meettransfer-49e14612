@@ -169,6 +169,7 @@ const BookingPage = () => {
   const [hourlyPrices, setHourlyPrices] = useState<HourlyPrice[]>([]);
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [detectedRegion, setDetectedRegion] = useState<string | null>(null);
   
   // Discount state
   const [discountApplied, setDiscountApplied] = useState(false);
@@ -205,9 +206,9 @@ const BookingPage = () => {
   const effectiveCity = tokenBookingData?.city || urlCity;
   const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
 
-  // Check if location is in Dubai or Turkey
-  const isDubai = isDubaiLocation(effectivePickup) || isDubaiLocation(effectiveDropoff);
-  const isTurkey = isTurkeyLocation(effectivePickup) || isTurkeyLocation(effectiveDropoff);
+  // Check if location is in Dubai or Turkey - use edge function's region if available
+  const isDubai = detectedRegion === 'dubai' || (!detectedRegion && (isDubaiLocation(effectivePickup) || isDubaiLocation(effectiveDropoff)));
+  const isTurkey = detectedRegion === 'turkey' || (!detectedRegion && (isTurkeyLocation(effectivePickup) || isTurkeyLocation(effectiveDropoff)));
 
   // Computed values - use Dubai vehicles if location is in Dubai
   const availableVehicles = isDubai 
@@ -379,6 +380,11 @@ const BookingPage = () => {
 
         if (data?.prices) {
           setVehiclePrices(data.prices);
+        }
+        
+        // Use region from edge function - this is the authoritative source
+        if (data?.region) {
+          setDetectedRegion(data.region);
         }
         
         // Wait for remaining time to complete 8 seconds
