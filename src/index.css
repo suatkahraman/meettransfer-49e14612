@@ -266,6 +266,7 @@ All colors MUST be HSL.
 }
 
 /* Google Places Autocomplete Dropdown Styling */
+/* CRITICAL: z-index must beat dialog overlays (typically 50-100) and popovers */
 .pac-container {
   background-color: hsl(var(--background)) !important;
   border: 1px solid hsl(var(--border)) !important;
@@ -274,8 +275,11 @@ All colors MUST be HSL.
   margin-top: 8px !important;
   padding: 8px 0 !important;
   font-family: inherit !important;
-  z-index: 9999 !important;
-  overflow: hidden !important;
+  /* Ultra-high z-index to ensure visibility above dialogs, sheets, popovers */
+  z-index: 2147483647 !important;
+  overflow: visible !important;
+  /* Ensure it's not clipped by overflow:hidden on parent containers */
+  position: fixed !important;
 }
 
 .pac-container::after {

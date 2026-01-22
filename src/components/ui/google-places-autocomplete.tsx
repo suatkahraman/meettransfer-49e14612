@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { loadGoogleMapsScript, preloadGoogleMaps } from '@/utils/googleMapsLoader';
+import { AlertTriangle } from 'lucide-react';
+import { loadGoogleMapsScript, preloadGoogleMaps, isGoogleMapsAuthFailed } from '@/utils/googleMapsLoader';
 
 // Extend Window interface for Google Maps
 declare global {
@@ -101,6 +102,7 @@ export const GooglePlacesAutocomplete = ({
   const hasInitializedRef = useRef(false); // StrictMode + "only once" guard
   const [isFocused, setIsFocused] = useState(false);
   const [hasValue, setHasValue] = useState(!!initialValue || !!value);
+  const [authFailed, setAuthFailed] = useState(isGoogleMapsAuthFailed());
 
   // Keep callback refs up to date (prevents infinite re-initialization)
   useEffect(() => {
@@ -126,6 +128,13 @@ export const GooglePlacesAutocomplete = ({
     }
   }, [value]);
 
+  // Listen for auth failure events
+  useEffect(() => {
+    const handleAuthFailure = () => setAuthFailed(true);
+    window.addEventListener('google-maps-auth-failure', handleAuthFailure);
+    return () => window.removeEventListener('google-maps-auth-failure', handleAuthFailure);
+  }, []);
+
   useEffect(() => {
     let isCancelled = false;
     let retryCount = 0;
@@ -134,6 +143,12 @@ export const GooglePlacesAutocomplete = ({
     const maxPollAttempts = 50; // 50 * 100ms = 5 seconds max waiting for input
 
     const setupAutocomplete = async () => {
+      // If auth already failed, don't bother
+      if (isGoogleMapsAuthFailed()) {
+        setAuthFailed(true);
+        return;
+      }
+
       // Wait until the input ref is actually bound (some panels render inputs conditionally)
       const inputEl = inputRef.current;
       if (!inputEl) {
@@ -158,6 +173,11 @@ export const GooglePlacesAutocomplete = ({
         await loadGoogleMapsScript(['places']);
       } catch (error) {
         console.error('[GooglePlacesAutocomplete] Failed to load Google Maps:', error);
+        // Check if it's auth failure
+        if (isGoogleMapsAuthFailed()) {
+          setAuthFailed(true);
+          return;
+        }
         // Retry loading
         if (retryCount < maxRetries && !isCancelled) {
           retryCount++;
@@ -278,6 +298,31 @@ export const GooglePlacesAutocomplete = ({
   }, []);
 
   const isFloating = isFocused || hasValue;
+
+  // Auth failure warning UI
+  if (authFailed) {
+    return (
+      <div className="relative">
+        <Input
+          ref={inputRef}
+          type="text"
+          placeholder={placeholder}
+          className={cn("pr-10 border-amber-500", className)}
+          disabled={disabled}
+          maxLength={maxLength}
+          autoComplete="off"
+          onInput={(e) => onInputChange?.((e.currentTarget as HTMLInputElement).value)}
+          onBlur={(e) => onBlurValue?.((e.currentTarget as HTMLInputElement).value)}
+        />
+        <div 
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500"
+          title="Google Maps yüklenemedi. Adres önerileri kullanılamıyor, elle yazabilirsiniz."
+        >
+          <AlertTriangle className="h-4 w-4" />
+        </div>
+      </div>
+    );
+  }
 
   if (floatingLabel) {
     return (
