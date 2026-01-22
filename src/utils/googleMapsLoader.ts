@@ -38,6 +38,18 @@ const ensureAuthFailureHandler = () => {
   if (typeof w.gm_authFailure === 'function') return;
 
   w.gm_authFailure = () => {
+    // CRITICAL: Only set authFailed if the API is truly not working
+    // Sometimes gm_authFailure fires but the API is still functional
+    // (e.g., billing warnings, quota warnings that don't block usage)
+    const mapsStillWorking = !!(w.google?.maps?.places?.Autocomplete);
+    
+    if (mapsStillWorking) {
+      console.warn(
+        '[Google Maps] gm_authFailure called but API is still functional. Ignoring failure flag.'
+      );
+      return;
+    }
+    
     authFailed = true;
     authFailedAt = Date.now();
     isLoaded = false;
