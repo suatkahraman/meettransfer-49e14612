@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -101,6 +101,89 @@ interface Agency {
 }
 
 const MAX_PASSENGERS = 15;
+
+// Memoized address section to prevent re-renders when other form fields change
+interface EditMemoizedAddressSectionProps {
+  formData: {
+    pickup: string;
+    pickup_place_name: string;
+    pickup_lat: number | null;
+    pickup_lng: number | null;
+    dropoff: string;
+    dropoff_place_name: string;
+    dropoff_lat: number | null;
+    dropoff_lng: number | null;
+  };
+  setFormData: React.Dispatch<React.SetStateAction<any>>;
+  changedFields: {
+    pickup: boolean;
+    dropoff: boolean;
+  };
+}
+
+const EditMemoizedAddressSection = memo(({ formData, setFormData, changedFields }: EditMemoizedAddressSectionProps) => {
+  const pickup = useMemo(() => ({
+    address: formData.pickup,
+    placeName: formData.pickup_place_name,
+    lat: formData.pickup_lat,
+    lng: formData.pickup_lng,
+  }), [formData.pickup, formData.pickup_place_name, formData.pickup_lat, formData.pickup_lng]);
+
+  const dropoff = useMemo(() => ({
+    address: formData.dropoff,
+    placeName: formData.dropoff_place_name,
+    lat: formData.dropoff_lat,
+    lng: formData.dropoff_lng,
+  }), [formData.dropoff, formData.dropoff_place_name, formData.dropoff_lat, formData.dropoff_lng]);
+
+  const handlePickupChange = useCallback((location: { address: string; placeName: string; lat: number | null; lng: number | null }) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      pickup: location.address,
+      pickup_place_name: location.placeName,
+      pickup_lat: location.lat,
+      pickup_lng: location.lng,
+    }));
+  }, [setFormData]);
+
+  const handleDropoffChange = useCallback((location: { address: string; placeName: string; lat: number | null; lng: number | null }) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      dropoff: location.address,
+      dropoff_place_name: location.placeName,
+      dropoff_lat: location.lat,
+      dropoff_lng: location.lng,
+    }));
+  }, [setFormData]);
+
+  const showMap = formData.pickup_lat != null &&
+    formData.pickup_lng != null &&
+    formData.dropoff_lat != null &&
+    formData.dropoff_lng != null;
+
+  return (
+    <AddressMapSection
+      pickup={pickup}
+      dropoff={dropoff}
+      onPickupChange={handlePickupChange}
+      onDropoffChange={handleDropoffChange}
+      labels={{
+        pickup: 'Alış Noktası',
+        dropoff: 'Bırakış Noktası',
+        sectionTitle: undefined,
+      }}
+      placeholders={{
+        pickup: 'Alış noktasını girin',
+        dropoff: 'Bırakış noktasını girin',
+      }}
+      changedFields={changedFields}
+      showMap={showMap}
+      showNavigationButtons={false}
+    />
+  );
+});
+
+EditMemoizedAddressSection.displayName = 'EditMemoizedAddressSection';
 
 const AdminEditReservation = () => {
   const { id } = useParams();
@@ -2256,55 +2339,13 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                 />
               </div>
 
-              <AddressMapSection
-                pickup={{
-                  address: formData.pickup,
-                  placeName: formData.pickup_place_name,
-                  lat: formData.pickup_lat,
-                  lng: formData.pickup_lng,
-                }}
-                dropoff={{
-                  address: formData.dropoff,
-                  placeName: formData.dropoff_place_name,
-                  lat: formData.dropoff_lat,
-                  lng: formData.dropoff_lng,
-                }}
-                onPickupChange={(location) => setFormData((prev) => ({
-                  ...prev,
-                  pickup: location.address,
-                  pickup_place_name: location.placeName,
-                  pickup_lat: location.lat,
-                  pickup_lng: location.lng,
-                }))}
-                onDropoffChange={(location) => setFormData((prev) => ({
-                  ...prev,
-                  dropoff: location.address,
-                  dropoff_place_name: location.placeName,
-                  dropoff_lat: location.lat,
-                  dropoff_lng: location.lng,
-                }))}
-                labels={{
-                  pickup: 'Alış Noktası',
-                  dropoff: 'Bırakış Noktası',
-                  sectionTitle: undefined,
-                }}
-                placeholders={{
-                  pickup: 'Alış noktasını girin',
-                  dropoff: 'Bırakış noktasını girin',
-                }}
+              <EditMemoizedAddressSection
+                formData={formData}
+                setFormData={setFormData}
                 changedFields={{
                   pickup: getChangedFields.has('pickup'),
                   dropoff: getChangedFields.has('dropoff'),
                 }}
-                // Admin panelde yazarken kilitlenmeyi önlemek için haritayı,
-                // sadece iki lokasyon da Autocomplete üzerinden seçilip koordinatları geldiğinde göster.
-                showMap={
-                  formData.pickup_lat != null &&
-                  formData.pickup_lng != null &&
-                  formData.dropoff_lat != null &&
-                  formData.dropoff_lng != null
-                }
-                showNavigationButtons={false}
               />
 
               <div className="grid grid-cols-3 gap-4">
