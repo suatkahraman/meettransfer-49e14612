@@ -26,7 +26,10 @@ const CompactRouteMapComponent = ({
 }: CompactRouteMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+  const directionsServiceRef = useRef<any>(null);
   const directionsRendererRef = useRef<any>(null);
+  const pickupMarkerRef = useRef<any>(null);
+  const dropoffMarkerRef = useRef<any>(null);
   const [pickupCoords, setPickupCoords] = useState<Coordinates | null>(null);
   const [dropoffCoords, setDropoffCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,6 +51,15 @@ const CompactRouteMapComponent = ({
     }, 600);
     return () => window.clearTimeout(timeoutId);
   }, [pickup, dropoff]);
+
+  // Cleanup ONLY on unmount (avoid teardown/recreate on every address change)
+  useEffect(() => {
+    return () => {
+      directionsRendererRef.current?.setMap(null);
+      pickupMarkerRef.current?.setMap(null);
+      dropoffMarkerRef.current?.setMap(null);
+    };
+  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -110,30 +122,76 @@ const CompactRouteMapComponent = ({
         ? { lat: (coords[0].lat + coords[1].lat) / 2, lng: (coords[0].lng + coords[1].lng) / 2 }
         : coords[0];
 
-      mapRef.current = new maps.Map(mapContainer.current!, {
-        center,
-        zoom: 10,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        zoomControl: false,
-        gestureHandling: 'none',
-        disableDefaultUI: true,
-      });
+      // Initialize the map ONCE; later updates just adjust center/options.
+      if (!mapRef.current) {
+        mapRef.current = new maps.Map(mapContainer.current!, {
+          center,
+          zoom: 10,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          zoomControl: false,
+          gestureHandling: 'none',
+          disableDefaultUI: true,
+        });
+      } else {
+        mapRef.current.setOptions({
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          zoomControl: false,
+          gestureHandling: 'none',
+          disableDefaultUI: true,
+        });
+        mapRef.current.setCenter(center);
+      }
+
+      const upsertMarker = (
+        markerRef: { current: any },
+        position: Coordinates | null,
+        title: string,
+        iconUrl: string
+      ) => {
+        if (!position) {
+          markerRef.current?.setMap(null);
+          return;
+        }
+        if (!markerRef.current) {
+          markerRef.current = new maps.Marker({
+            position,
+            map: mapRef.current,
+            title,
+            icon: { url: iconUrl },
+          });
+          return;
+        }
+        markerRef.current.setMap(mapRef.current);
+        markerRef.current.setPosition(position);
+        markerRef.current.setTitle?.(title);
+        markerRef.current.setIcon?.({ url: iconUrl });
+      };
 
       if (pickupResult && dropoffResult) {
-        const directionsService = new maps.DirectionsService();
-        directionsRendererRef.current = new maps.DirectionsRenderer({
-          map: mapRef.current,
-          suppressMarkers: false,
-          polylineOptions: {
-            strokeColor: '#3b82f6',
-            strokeWeight: 4,
-            strokeOpacity: 0.8,
-          },
-        });
+        // Hide single markers when showing a full route
+        pickupMarkerRef.current?.setMap(null);
+        dropoffMarkerRef.current?.setMap(null);
 
-        directionsService.route(
+        if (!directionsServiceRef.current) {
+          directionsServiceRef.current = new maps.DirectionsService();
+        }
+        if (!directionsRendererRef.current) {
+          directionsRendererRef.current = new maps.DirectionsRenderer({
+            suppressMarkers: false,
+            polylineOptions: {
+              strokeColor: '#3b82f6',
+              strokeWeight: 4,
+              strokeOpacity: 0.8,
+            },
+          });
+        }
+        directionsRendererRef.current.setMap(mapRef.current);
+
+        directionsServiceRef.current.route(
           {
             origin: pickupResult,
             destination: dropoffResult,
@@ -157,22 +215,20 @@ const CompactRouteMapComponent = ({
           }
         );
       } else {
-        if (pickupResult) {
-          new maps.Marker({
-            position: pickupResult,
-            map: mapRef.current,
-            title: 'Pickup',
-            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' },
-          });
-        }
-        if (dropoffResult) {
-          new maps.Marker({
-            position: dropoffResult,
-            map: mapRef.current,
-            title: 'Drop-off',
-            icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' },
-          });
-        }
+        // Hide route renderer and show single markers
+        directionsRendererRef.current?.setMap(null);
+        upsertMarker(
+          pickupMarkerRef,
+          pickupResult,
+          'Pickup',
+          'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+        );
+        upsertMarker(
+          dropoffMarkerRef,
+          dropoffResult,
+          'Drop-off',
+          'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+        );
         setLoading(false);
       }
     };
@@ -185,9 +241,6 @@ const CompactRouteMapComponent = ({
 
     return () => {
       isCancelled = true;
-      if (directionsRendererRef.current) {
-        directionsRendererRef.current.setMap(null);
-      }
     };
   }, [stablePickup, stableDropoff]);
 
