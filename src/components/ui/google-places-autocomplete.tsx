@@ -124,13 +124,19 @@ export const GooglePlacesAutocomplete = ({
   }, [value]);
 
   useEffect(() => {
+    // Skip if no input element yet
+    if (!inputRef.current) {
+      return;
+    }
+
     let isCancelled = false;
     let retryCount = 0;
     const maxRetries = 3;
+    const currentInput = inputRef.current; // Capture for cleanup
 
     const setupAutocomplete = async () => {
       // Skip if already attached to this specific input
-      if (autocompleteRef.current) {
+      if (autocompleteRef.current || hasInitializedRef.current) {
         return;
       }
 
@@ -146,19 +152,20 @@ export const GooglePlacesAutocomplete = ({
         return;
       }
 
-      if (isCancelled || !inputRef.current || !window.google?.maps?.places) {
+      if (isCancelled || !currentInput || !window.google?.maps?.places) {
         return;
       }
 
       // Double check we haven't already attached
-      if (autocompleteRef.current) {
+      if (autocompleteRef.current || hasInitializedRef.current) {
         return;
       }
 
       console.log('Initializing Google Places Autocomplete');
+      hasInitializedRef.current = true;
 
       const autocomplete = new window.google.maps.places.Autocomplete(
-        inputRef.current,
+        currentInput,
         {
           types: ['establishment', 'geocode'],
           fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
@@ -168,7 +175,7 @@ export const GooglePlacesAutocomplete = ({
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        if (place && inputRef.current) {
+        if (place && currentInput) {
           const placeName = place.name || '';
           const formattedAddress = place.formatted_address || '';
           
@@ -196,7 +203,7 @@ export const GooglePlacesAutocomplete = ({
 
           // Let Google / DOM control the input value directly
           // Show place name prominently if available
-          inputRef.current.value = placeName || formattedAddress;
+          currentInput.value = placeName || formattedAddress;
 
           // React state update ONLY here (if parent uses it)
           onPlaceSelectedRef.current?.(displayText, details);
@@ -212,11 +219,10 @@ export const GooglePlacesAutocomplete = ({
       });
 
       autocompleteRef.current = autocomplete;
-      hasInitializedRef.current = true;
     };
 
     // Small delay to ensure DOM is ready
-    const timeoutId = setTimeout(setupAutocomplete, 50);
+    const timeoutId = setTimeout(setupAutocomplete, 100);
 
     return () => {
       isCancelled = true;
