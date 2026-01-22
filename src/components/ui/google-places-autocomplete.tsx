@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { loadGoogleMapsScript, preloadGoogleMaps, getGoogleMaps } from '@/utils/googleMapsLoader';
+import { loadGoogleMapsScript, preloadGoogleMaps } from '@/utils/googleMapsLoader';
 
 // Extend Window interface for Google Maps
 declare global {
@@ -94,14 +94,19 @@ export const GooglePlacesAutocomplete = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
   const onPlaceSelectedRef = useRef(onPlaceSelected);
+  const onPlaceSelectRef = useRef(onPlaceSelect);
   const hasInitializedRef = useRef(false); // StrictMode + "only once" guard
   const [isFocused, setIsFocused] = useState(false);
   const [hasValue, setHasValue] = useState(!!initialValue || !!value);
 
-  // Keep callback ref up to date
+  // Keep callback refs up to date (prevents infinite re-initialization)
   useEffect(() => {
     onPlaceSelectedRef.current = onPlaceSelected;
   }, [onPlaceSelected]);
+
+  useEffect(() => {
+    onPlaceSelectRef.current = onPlaceSelect;
+  }, [onPlaceSelect]);
 
   // Set initial value once
   useEffect(() => {
@@ -196,8 +201,8 @@ export const GooglePlacesAutocomplete = ({
           // React state update ONLY here (if parent uses it)
           onPlaceSelectedRef.current?.(displayText, details);
           
-          // Also call simplified onPlaceSelect if provided
-          onPlaceSelect?.({
+          // Also call simplified onPlaceSelect if provided (use ref to prevent stale closure)
+          onPlaceSelectRef.current?.({
             name: placeName,
             formatted_address: formattedAddress,
             lat,
@@ -222,7 +227,9 @@ export const GooglePlacesAutocomplete = ({
       }
       hasInitializedRef.current = false;
     };
-  }, [onPlaceSelect]);
+  // Empty dependency array - initialize only once per mount
+  // Callbacks are accessed via refs to stay current
+  }, []);
 
   const isFloating = isFocused || hasValue;
 
