@@ -8,6 +8,7 @@ import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
 import TrustBar from "@/components/website/TrustBar";
+import LazyOnView from "@/components/performance/LazyOnView";
 
 
 // Below-the-fold components are lazy loaded with deferred imports
@@ -57,52 +58,74 @@ const Index = () => {
       <TrustBar />
       
       {/* All below-the-fold content - deferred loading */}
-      <Suspense fallback={<SectionPlaceholder />}>
-        <PromoBannerCarousel />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <PromoBannerCarousel />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <CoreServices />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <CoreServices />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <StatsCounter />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <StatsCounter />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <HowItWorks />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <HowItWorks />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <FleetIconsBar />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <FleetIconsBar />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <Destinations />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <Destinations />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <WhyChooseUs />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <WhyChooseUs />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <HomeFAQ />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <HomeFAQ />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <HourlyRentalSection />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <HourlyRentalSection />
+        </Suspense>
+      </LazyOnView>
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <GoogleReviewsCarousel />
-        <ReviewPlatformLogos />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <GoogleReviewsCarousel />
+          <ReviewPlatformLogos />
+        </Suspense>
+      </LazyOnView>
       
       {/* AI Assistant Promo temporarily disabled */}
       
-      <Suspense fallback={<SectionPlaceholder />}>
-        <PWAPromoBanner />
-      </Suspense>
+      <LazyOnView placeholder={<SectionPlaceholder />}>
+        <Suspense fallback={<SectionPlaceholder />}>
+          <PWAPromoBanner />
+        </Suspense>
+      </LazyOnView>
       
       <Footer />
     </WebsiteLayout>

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { runAfterInteractive } from "@/utils/afterInteractive";
 
 // Storage keys
 const VISITOR_ID_KEY = "meet_visitor_id";
@@ -113,7 +114,16 @@ function getFormInfo(element: HTMLElement): { formId: string; fieldName: string 
 
 export function useAdvancedTracking() {
   const location = useLocation();
+  const [enabled, setEnabled] = useState(false);
   const sessionRef = useRef<TrackingSession | null>(null);
+  // Defer heavy event listeners + timers until after first interaction/idle.
+  useEffect(() => {
+    runAfterInteractive(
+      () => setEnabled(true),
+      { requireInteraction: true, idleTimeoutMs: 4500, minDelayMs: 0 }
+    );
+  }, []);
+
   const lastClickRef = useRef<number>(0);
   const lastScrollRef = useRef<number>(0);
   const pageStartTimeRef = useRef<number>(Date.now());
@@ -426,6 +436,7 @@ export function useAdvancedTracking() {
 
   // Setup and cleanup
   useEffect(() => {
+    if (!enabled) return;
     initSession();
 
     // Add event listeners
@@ -456,10 +467,11 @@ export function useAdvancedTracking() {
       // Final flush
       flushEvents();
     };
-  }, []);
+  }, [enabled, initSession, handleScroll, handleClick, handleFocus, handleBlur, handleSubmit, handleVisibilityChange, handleBeforeUnload, flushEvents, checkIdleState]);
 
   // Track page changes
   useEffect(() => {
+    if (!enabled) return;
     if (!sessionRef.current) return;
     
     // Reset page-specific tracking
@@ -474,7 +486,5 @@ export function useAdvancedTracking() {
     });
   }, [location.pathname, addEvent]);
 
-  return {
-    visitorId: sessionRef.current?.visitorId || getVisitorId(),
-  };
+  return { visitorId: sessionRef.current?.visitorId || getVisitorId() };
 }

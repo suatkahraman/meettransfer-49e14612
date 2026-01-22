@@ -24,11 +24,9 @@ import { Button } from "@/components/ui/button";
 import { PWADebugPanel } from "./components/website/PWADebugPanel"; // visible with ?pwa_debug=1
 import CanonicalManager from "./components/seo/CanonicalManager";
 
-// IMPORTANT: Keep homepage and debug page eager-loaded.
-// In installed PWAs, stale SW/cache edge-cases can cause lazy chunks to hang indefinitely,
-// which leaves the app stuck on the Suspense loader. Debug page must always be accessible
-// for troubleshooting such issues.
-import Index from "./pages/Index";
+// IMPORTANT: Keep debug page eager-loaded.
+// Homepage is now split into its own chunk to reduce initial JS.
+const Index = lazy(() => import("./pages/Index"));
 import DebugPage from "./pages/DebugPage";
 
 // Critical pages - NotFound can remain lazy

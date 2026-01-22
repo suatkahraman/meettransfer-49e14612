@@ -116,6 +116,7 @@ function isExcludedDomain(): boolean {
 
 export function useVisitorTracking() {
   const location = useLocation();
+  const [enabled, setEnabled] = useState(false);
   const visitIdRef = useRef<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -133,6 +134,14 @@ export function useVisitorTracking() {
     referrer: string | null;
     geo: { countryCode: string; countryName: string; city: string };
   } | null>(null);
+
+  // Defer auth checks + subscriptions until after first interaction/idle.
+  useEffect(() => {
+    runAfterInteractive(
+      () => setEnabled(true),
+      { requireInteraction: true, idleTimeoutMs: 4500, minDelayMs: 0 }
+    );
+  }, []);
 
   const stopTracking = useCallback(() => {
     if (intervalRef.current) {
@@ -153,6 +162,7 @@ export function useVisitorTracking() {
 
   // Check excluded user status on mount and auth changes
   useEffect(() => {
+    if (!enabled) return;
     let isMounted = true;
     
     const checkExcluded = async () => {
@@ -209,9 +219,10 @@ export function useVisitorTracking() {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [stopTracking]);
+  }, [enabled, stopTracking]);
 
   useEffect(() => {
+    if (!enabled) return;
     if (!isAuthChecked || isExcludedUser || isExcludedDomain() || isBlocked) return;
     
     const isExcluded = EXCLUDED_ROUTES.some((route) => location.pathname.startsWith(route));
@@ -382,7 +393,7 @@ export function useVisitorTracking() {
         debounceRef.current = null;
       }
     };
-  }, [location.pathname, isExcludedUser, isAuthChecked, isBlocked, stopTracking]);
+  }, [enabled, location.pathname, isExcludedUser, isAuthChecked, isBlocked, stopTracking]);
 
   // Cleanup on unmount
   useEffect(() => {
