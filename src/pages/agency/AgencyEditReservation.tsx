@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { AddressMapSection } from '@/components/reservation/AddressMapSection';
 import { getCurrencySymbol } from '@/lib/currency';
 
 // Use centralized vehicle types
@@ -423,72 +424,50 @@ const AgencyEditReservation = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Pick-up Point */}
-              <div className={`space-y-2 p-3 rounded-lg transition-colors ${changedFields.pickup ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}>
-                <CriticalFieldLabel isChanged={changedFields.pickup}>
-                  <Label>{t('pickup')} *</Label>
-                </CriticalFieldLabel>
-                <GooglePlacesAutocomplete
-                  placeholder={t('enterPickupPoint')}
-                  initialValue={formData.pickup_place_name || formData.pickup}
-                  onInputChange={(value) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      pickup: value,
-                      pickup_place_name: '',
-                      pickup_lat: null,
-                      pickup_lng: null,
-                    }));
-                  }}
-                  onPlaceSelect={(place) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      pickup: place.formatted_address,
-                      pickup_place_name: place.name || '',
-                      pickup_lat: place.lat || null,
-                      pickup_lng: place.lng || null,
-                    }));
-                  }}
-                />
-              </div>
-
-              {/* Drop-off */}
-              <div className={`space-y-2 p-3 rounded-lg transition-colors ${changedFields.dropoff ? 'bg-amber-500/10 border border-amber-500/30' : ''}`}>
-                <CriticalFieldLabel isChanged={changedFields.dropoff}>
-                  <Label>{t('dropoff')} *</Label>
-                </CriticalFieldLabel>
-                <GooglePlacesAutocomplete
-                  placeholder={t('enterDestination')}
-                  initialValue={formData.dropoff_place_name || formData.dropoff}
-                  onInputChange={(value) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      dropoff: value,
-                      dropoff_place_name: '',
-                      dropoff_lat: null,
-                      dropoff_lng: null,
-                    }));
-                  }}
-                  onPlaceSelect={(place) => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      dropoff: place.formatted_address,
-                      dropoff_place_name: place.name || '',
-                      dropoff_lat: place.lat || null,
-                      dropoff_lng: place.lng || null,
-                    }));
-                  }}
-                />
-              </div>
-
-              {/* Route Map Preview */}
-              {formData.pickup && formData.dropoff && (
-                <GoogleRouteMap
-                  pickup={formData.pickup}
-                  dropoff={formData.dropoff}
-                  showNavigationButtons={false}
-                />
-              )}
+              <AddressMapSection
+                pickup={{
+                  address: formData.pickup,
+                  placeName: formData.pickup_place_name || '',
+                  lat: formData.pickup_lat,
+                  lng: formData.pickup_lng,
+                }}
+                dropoff={{
+                  address: formData.dropoff,
+                  placeName: formData.dropoff_place_name || '',
+                  lat: formData.dropoff_lat,
+                  lng: formData.dropoff_lng,
+                }}
+                onPickupChange={(location) => setFormData((prev) => ({
+                  ...prev,
+                  pickup: location.address,
+                  pickup_place_name: location.placeName,
+                  pickup_lat: location.lat,
+                  pickup_lng: location.lng,
+                }))}
+                onDropoffChange={(location) => setFormData((prev) => ({
+                  ...prev,
+                  dropoff: location.address,
+                  dropoff_place_name: location.placeName,
+                  dropoff_lat: location.lat,
+                  dropoff_lng: location.lng,
+                }))}
+                labels={{
+                  pickup: t('pickup'),
+                  dropoff: t('dropoff'),
+                  sectionTitle: undefined,
+                }}
+                placeholders={{
+                  pickup: t('enterPickupPoint'),
+                  dropoff: t('enterDestination'),
+                }}
+                changedFields={{
+                  pickup: changedFields.pickup,
+                  dropoff: changedFields.dropoff,
+                }}
+                showMap={true}
+                showNavigationButtons={false}
+                layout="vertical"
+              />
 
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-4">
