@@ -12,14 +12,27 @@ import { runAfterInteractive } from "@/utils/afterInteractive";
  */
 
 // Check if we're in a preview/development environment - skip updates there
+// IMPORTANT: Only skip for actual development environments, NOT production domains
 const isPreviewEnvironment = () => {
   if (typeof window === "undefined") return true;
   const hostname = window.location.hostname;
+  
+  // Production domains - NEVER skip
+  if (
+    hostname === "meettransfer.app" ||
+    hostname === "www.meettransfer.app" ||
+    hostname.endsWith(".lovable.app") // e.g., meettransfer.lovable.app
+  ) {
+    return false;
+  }
+  
+  // Development/preview environments - skip updates
   return (
     hostname === "localhost" ||
-    hostname.includes("preview") ||
-    hostname.includes("lovableproject.com") ||
-    hostname.includes("webcontainer")
+    hostname.includes("127.0.0.1") ||
+    hostname.includes("webcontainer") ||
+    // Preview URLs contain "preview" in subdomain AND end with lovableproject.com
+    (hostname.includes("preview") && hostname.includes("lovableproject.com"))
   );
 };
 
