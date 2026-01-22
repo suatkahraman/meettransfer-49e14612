@@ -55,6 +55,19 @@ const GoogleRouteMapComponent = ({
   const [error, setError] = useState<string | null>(null);
   const [tripInfo, setTripInfo] = useState<TripInfo | null>(null);
 
+  // Debounce pickup/dropoff changes to avoid heavy geocoding + map re-init on every keystroke.
+  // (Some forms update address state while the user is typing.)
+  const [stablePickup, setStablePickup] = useState(pickup);
+  const [stableDropoff, setStableDropoff] = useState(dropoff);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setStablePickup(pickup);
+      setStableDropoff(dropoff);
+    }, 600);
+    return () => window.clearTimeout(timeoutId);
+  }, [pickup, dropoff]);
+
   useEffect(() => {
     let isCancelled = false;
 
@@ -63,6 +76,9 @@ const GoogleRouteMapComponent = ({
       
       setLoading(true);
       setError(null);
+      setTripInfo(null);
+      setPickupCoords(null);
+      setDropoffCoords(null);
 
       try {
         await withTimeout(loadGoogleMapsScript(), 15000, 'Google Maps yükleme zaman aşımı');
@@ -83,8 +99,8 @@ const GoogleRouteMapComponent = ({
       let dropoffResult: Coordinates | null = null;
       try {
         [pickupResult, dropoffResult] = await Promise.all([
-          withTimeout(geoCode(pickup), 12000, 'Alış noktası çözümlenemedi (zaman aşımı)'),
-          withTimeout(geoCode(dropoff), 12000, 'Bırakış noktası çözümlenemedi (zaman aşımı)'),
+          withTimeout(geoCode(stablePickup), 12000, 'Alış noktası çözümlenemedi (zaman aşımı)'),
+          withTimeout(geoCode(stableDropoff), 12000, 'Bırakış noktası çözümlenemedi (zaman aşımı)'),
         ]);
       } catch (err) {
         if (!isCancelled) {
@@ -215,7 +231,7 @@ const GoogleRouteMapComponent = ({
       }
     };
 
-    if (pickup && dropoff) {
+    if (stablePickup && stableDropoff) {
       initMap();
     } else {
       setLoading(false);
@@ -227,7 +243,7 @@ const GoogleRouteMapComponent = ({
         directionsRendererRef.current.setMap(null);
       }
     };
-  }, [pickup, dropoff]);
+  }, [stablePickup, stableDropoff]);
 
   // Open navigation in external app
   const openNavigation = (destination: Coordinates | null) => {
@@ -258,7 +274,7 @@ const GoogleRouteMapComponent = ({
     }
   };
 
-  if (!pickup && !dropoff) {
+  if (!stablePickup && !stableDropoff) {
     return null;
   }
 
