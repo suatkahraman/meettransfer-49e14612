@@ -22,6 +22,48 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     dayTripGuide: "Day Trip Guide",
     updatedForYear: "Updated for {year}",
     technology: "Technology",
+
+    // Common price table (vehicles)
+    blogPriceTableTo: "To",
+    blogVehicleSedan: "Standard Sedan",
+    blogVehicleVito: "Mercedes Vito",
+    blogVehicleMaybachMinivan: "Mercedes Maybach minivan",
+    blogVehicleVipVito: "Mercedes VIP Vito",
+    blogVehicleSprinter: "Mercedes Sprinter",
+    blogNotAvailable: "Not available",
+
+    // Diyarbakir Airport Transfer Guide
+    blogDiyTitle: "Diyarbakır Airport Transfer Prices (DIY) – City Center & Intercity Routes 2025",
+    blogDiyDesc: "Updated 2025 Diyarbakır (DIY) airport transfer prices: city center, Ergani, Mardin, Midyat, Şanlıurfa, Gaziantep, Batman, Siirt, Muş, Elazığ. Fixed prices by vehicle type.",
+    blogDiyH1: "Diyarbakır (DIY) Airport Transfer – Price Guide 2025",
+    blogDiySubtitle: "See fixed transfer prices from Diyarbakır Airport (DIY) to city center and nearby cities, with vehicle-by-vehicle pricing.",
+    blogDiyBreadcrumb: "Diyarbakır Airport Transfer",
+    blogDiyImageAlt: "Luxury Mercedes van for Diyarbakır Airport (DIY) transfers",
+    blogDiySectionPricesTitle: "Diyarbakır Airport Transfer Prices",
+    blogDiySectionPricesDesc: "Below are the latest fixed prices (EUR) for popular routes from Diyarbakır Airport (DIY).",
+    blogDiyTableCaption: "Prices from Diyarbakır Airport (DIY)",
+    blogDiySectionHowToBookTitle: "How to Book",
+    blogDiySectionHowToBookDesc: "Send your pickup & dropoff details and choose your vehicle type to get a fast confirmation.",
+    blogDiyBookingBullet1: "Share your flight number and arrival time",
+    blogDiyBookingBullet2: "Tell us passenger + luggage count",
+    blogDiyBookingBullet3: "Choose vehicle type (Sedan / Vito / VIP Vito / Sprinter)",
+
+    // DIY destinations
+    blogDiyDestCityCenter: "Diyarbakır City Center",
+    blogDiyDestErgani: "Ergani",
+    blogDiyDestMardin: "Mardin",
+    blogDiyDestMidyat: "Midyat",
+    blogDiyDestUrfaAirport: "Şanlıurfa Airport",
+    blogDiyDestUrfaCenter: "Şanlıurfa City Center",
+    blogDiyDestGaziantep: "Gaziantep",
+    blogDiyDestBatman: "Batman",
+    blogDiyDestSiirt: "Siirt",
+    blogDiyDestMus: "Muş",
+    blogDiyDestElazig: "Elazığ",
+
+    // Embedded sections in other guides
+    blogDiyToMardinTitle: "From Diyarbakır Airport (DIY) to Mardin – Prices",
+    blogDiyToMidyatTitle: "From Diyarbakır Airport (DIY) to Midyat – Prices",
     
     // AI Booking Assistant Blog
     blogAIAssistantTitle: "AI Booking Assistant: Book Transfers Instantly with Artificial Intelligence",
@@ -5600,6 +5642,48 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     frequentlyAskedQuestions: "Sıkça Sorulan Sorular",
     relatedArticles: "İlgili Makaleler",
     technology: "Teknoloji",
+
+    // Common price table (vehicles)
+    blogPriceTableTo: "Varış",
+    blogVehicleSedan: "Standart Sedan",
+    blogVehicleVito: "Mercedes Vito",
+    blogVehicleMaybachMinivan: "Mercedes Maybach minivan",
+    blogVehicleVipVito: "Mercedes VIP Vito",
+    blogVehicleSprinter: "Mercedes Sprinter",
+    blogNotAvailable: "Yok",
+
+    // Diyarbakir Airport Transfer Guide
+    blogDiyTitle: "Diyarbakır Havalimanı (DIY) Transfer Fiyatları – Merkez ve Şehirler Arası 2025",
+    blogDiyDesc: "2025 güncel Diyarbakır (DIY) havalimanı transfer fiyatları: şehir merkezi, Ergani, Mardin, Midyat, Şanlıurfa, Gaziantep, Batman, Siirt, Muş, Elazığ. Araç tipine göre sabit fiyatlar.",
+    blogDiyH1: "Diyarbakır (DIY) Havalimanı Transfer – Fiyat Rehberi 2025",
+    blogDiySubtitle: "Diyarbakır Havalimanı (DIY) çıkışlı popüler güzergâhların sabit transfer fiyatlarını araç bazında görün.",
+    blogDiyBreadcrumb: "Diyarbakır Havalimanı Transfer",
+    blogDiyImageAlt: "Diyarbakır Havalimanı (DIY) transferleri için lüks Mercedes araç",
+    blogDiySectionPricesTitle: "Diyarbakır Havalimanı Transfer Fiyatları",
+    blogDiySectionPricesDesc: "Aşağıda Diyarbakır Havalimanı (DIY) çıkışlı popüler rotaların güncel sabit fiyatları (EUR) yer alır.",
+    blogDiyTableCaption: "Diyarbakır Havalimanı (DIY) çıkışlı fiyatlar",
+    blogDiySectionHowToBookTitle: "Nasıl Rezervasyon Yapılır?",
+    blogDiySectionHowToBookDesc: "Alış ve varış bilgisini paylaşın, araç tipini seçin; hızlıca onaylayalım.",
+    blogDiyBookingBullet1: "Uçuş numarası ve iniş saatini paylaşın",
+    blogDiyBookingBullet2: "Yolcu + bagaj sayısını belirtin",
+    blogDiyBookingBullet3: "Araç tipini seçin (Sedan / Vito / VIP Vito / Sprinter)",
+
+    // DIY destinations
+    blogDiyDestCityCenter: "Diyarbakır Şehir Merkezi",
+    blogDiyDestErgani: "Ergani",
+    blogDiyDestMardin: "Mardin",
+    blogDiyDestMidyat: "Midyat",
+    blogDiyDestUrfaAirport: "Şanlıurfa Havalimanı",
+    blogDiyDestUrfaCenter: "Şanlıurfa Merkez",
+    blogDiyDestGaziantep: "Gaziantep",
+    blogDiyDestBatman: "Batman",
+    blogDiyDestSiirt: "Siirt",
+    blogDiyDestMus: "Muş",
+    blogDiyDestElazig: "Elazığ",
+
+    // Embedded sections in other guides
+    blogDiyToMardinTitle: "Diyarbakır Havalimanı (DIY) → Mardin Fiyatları",
+    blogDiyToMidyatTitle: "Diyarbakır Havalimanı (DIY) → Midyat Fiyatları",
     
     // AI Booking Assistant Blog - Turkish
     blogAIAssistantTitle: "AI Rezervasyon Asistanı: Yapay Zeka ile Anında Transfer Rezervasyonu",

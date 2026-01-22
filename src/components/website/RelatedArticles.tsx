@@ -9,6 +9,7 @@ import OptimizedBlogImage from "./OptimizedBlogImage";
 import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
 import midyatHero from "@/assets/blog/midyat-transfer-hero.jpg";
 import adanaHero from "@/assets/blog/adana-transfer-hero.jpg";
+import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 
 // Blog posts data - centralized for reuse
 export const allBlogPosts = [
@@ -89,6 +90,16 @@ export const allBlogPosts = [
     date: "2025-01-17",
     image: adanaHero,
     isStatic: true,
+  },
+  {
+    id: "diyarbakir-airport-transfer-guide",
+    titleKey: "blogDiyTitle",
+    descriptionKey: "blogDiyDesc",
+    category: "Diyarbakır",
+    categoryKey: "diyarbakir",
+    readTime: 8,
+    date: "2025-01-22",
+    image: vitoExteriorBlack,
   },
   {
     id: "safe-night-transfer-turkey",

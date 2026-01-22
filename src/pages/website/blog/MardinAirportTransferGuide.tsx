@@ -15,6 +15,8 @@ import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import VehiclePriceTable from "@/components/website/VehiclePriceTable";
+import { useBlogT } from "@/components/blog/BlogLayout";
 
 // Import images
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
@@ -26,6 +28,7 @@ import daraAncientCity from "@/assets/blog/dara-ancient-city.jpg";
 
 const MardinAirportTransferGuide = () => {
   const { t, getLocalizedPath, language } = useLanguage();
+  const { t: tBlog } = useBlogT();
   const { formatBlogDate } = useBlogDate();
   const formattedDate = formatBlogDate("2025-01-16");
   const faqItems = [
@@ -58,6 +61,17 @@ const MardinAirportTransferGuide = () => {
     { destination: "Kızıltepe", distance: "40 km", duration: "45 min", sedan: "€45", vito: "€65", maybach: "€130" },
     { destination: "Deyrulzafaran Monastery", distance: "25 km", duration: "30 min", sedan: "€40", vito: "€60", maybach: "€125" },
     { destination: "Dara Ancient City", distance: "30 km", duration: "35 min", sedan: "€45", vito: "€65", maybach: "€130" },
+  ];
+
+  const diyToMardin = [
+    {
+      to: tBlog("blogDiyDestMardin"),
+      sedan: "€144",
+      vito: "€148",
+      maybachMinivan: tBlog("blogNotAvailable"),
+      vipVito: "€164",
+      sprinter: "€199",
+    },
   ];
 
   const attractions = [
@@ -387,6 +401,11 @@ const MardinAirportTransferGuide = () => {
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+
+              <div className="not-prose my-10">
+                <h3 className="font-serif text-xl font-bold mb-3">{tBlog("blogDiyToMardinTitle")}</h3>
+                <VehiclePriceTable rows={diyToMardin} />
               </div>
 
               {/* Mobile Cards */}
