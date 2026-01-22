@@ -4,17 +4,20 @@ import { motion } from "framer-motion";
 import { Users, Briefcase, ArrowRight, Star, Shield, ChevronLeft, ChevronRight, Snowflake } from "lucide-react";
 import { useState, useEffect } from "react";
 
-// Import optimized WebP vehicle images for hero carousel
-import vitoHeroImg from "@/assets/vehicles/vito-hero.webp";
-import vitoVipHeroImg from "@/assets/vehicles/vito-vip-hero.webp";
-import maybachHeroImg from "@/assets/vehicles/maybach-hero.webp";
-import sprinterHeroImg from "@/assets/vehicles/sprinter-hero.webp";
+// Dynamic image paths - loaded lazily when fleet section comes into view
+const vehicleImagePaths = {
+  vito: () => import("@/assets/vehicles/vito-hero.webp"),
+  vitoVip: () => import("@/assets/vehicles/vito-vip-hero.webp"),
+  maybach: () => import("@/assets/vehicles/maybach-hero.webp"),
+  sprinter: () => import("@/assets/vehicles/sprinter-hero.webp"),
+  switzerlandSClassExterior: () => import("@/assets/switzerland/switzerland-s-class-exterior.webp"),
+  switzerlandSClassInterior: () => import("@/assets/switzerland/switzerland-s-class-interior.webp"),
+  switzerlandVClassExterior: () => import("@/assets/switzerland/switzerland-v-class-exterior.webp"),
+  switzerlandVClassInterior: () => import("@/assets/switzerland/switzerland-v-class-interior.webp"),
+};
 
-// Switzerland fleet images
-import switzerlandSClassExterior from "@/assets/switzerland/switzerland-s-class-exterior.webp";
-import switzerlandSClassInterior from "@/assets/switzerland/switzerland-s-class-interior.webp";
-import switzerlandVClassExterior from "@/assets/switzerland/switzerland-v-class-exterior.webp";
-import switzerlandVClassInterior from "@/assets/switzerland/switzerland-v-class-interior.webp";
+// Placeholder for lazy-loaded images
+const PLACEHOLDER_GRADIENT = "bg-gradient-to-br from-muted to-muted/50";
 
 const FleetIconsBar = () => {
   const { t, getLocalizedPath, language } = useLanguage();
@@ -27,7 +30,7 @@ const FleetIconsBar = () => {
       passengers: "3",
       luggage: "3",
       description: "Skoda Octavia, Toyota Prius",
-      images: [vitoHeroImg],
+      imagePaths: [vehicleImagePaths.vito],
       features: ["AC", "USB"],
       popular: false,
       badge: null,
@@ -38,7 +41,7 @@ const FleetIconsBar = () => {
       passengers: "3",
       luggage: "3",
       description: "Mercedes E-Class, BMW 5",
-      images: [vitoVipHeroImg],
+      imagePaths: [vehicleImagePaths.vitoVip],
       features: ["AC", "WiFi", "Water"],
       popular: false,
       badge: null,
@@ -49,7 +52,7 @@ const FleetIconsBar = () => {
       passengers: "7",
       luggage: "7",
       description: "Mercedes Vito",
-      images: [vitoHeroImg],
+      imagePaths: [vehicleImagePaths.vito],
       features: ["AC", "USB", "Water"],
       popular: true,
       badge: null,
@@ -60,7 +63,7 @@ const FleetIconsBar = () => {
       passengers: "6",
       luggage: "6",
       description: "VIP Mercedes Vito",
-      images: [vitoVipHeroImg],
+      imagePaths: [vehicleImagePaths.vitoVip],
       features: ["WiFi", "TV", "Bar"],
       popular: true,
       badge: null,
@@ -71,7 +74,7 @@ const FleetIconsBar = () => {
       passengers: "4",
       luggage: "4",
       description: "Mercedes Maybach Minivan",
-      images: [maybachHeroImg],
+      imagePaths: [vehicleImagePaths.maybach],
       features: ["WiFi", "TV", "Bar", "Starlight"],
       popular: false,
       badge: null,
@@ -82,7 +85,7 @@ const FleetIconsBar = () => {
       passengers: "12",
       luggage: "12",
       description: "Mercedes Sprinter VIP",
-      images: [sprinterHeroImg],
+      imagePaths: [vehicleImagePaths.sprinter],
       features: ["AC", "WiFi", "TV"],
       popular: false,
       badge: null,
@@ -97,7 +100,7 @@ const FleetIconsBar = () => {
       passengers: "3",
       luggage: "3",
       description: isTR ? "İsviçre Kayak Transferi" : "Swiss Ski Transfer",
-      images: [switzerlandSClassExterior, switzerlandSClassInterior],
+      imagePaths: [vehicleImagePaths.switzerlandSClassExterior, vehicleImagePaths.switzerlandSClassInterior],
       features: ["Massage", "WiFi", "Climate"],
       popular: false,
       badge: "switzerland",
@@ -108,7 +111,7 @@ const FleetIconsBar = () => {
       passengers: "7",
       luggage: "7",
       description: isTR ? "İsviçre Grup Transferi" : "Swiss Group Transfer",
-      images: [switzerlandVClassExterior, switzerlandVClassInterior],
+      imagePaths: [vehicleImagePaths.switzerlandVClassExterior, vehicleImagePaths.switzerlandVClassInterior],
       features: ["Ski Storage", "WiFi", "Panoramic"],
       popular: false,
       badge: "switzerland",
@@ -203,7 +206,7 @@ interface VehicleCardProps {
     passengers: string;
     luggage: string;
     description: string;
-    images: string[];
+    imagePaths: (() => Promise<{ default: string }>)[];
     features: string[];
     popular: boolean;
     badge: string | null;
@@ -220,22 +223,40 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [loadedImages, setLoadedImages] = useState<string[]>([]);
+
+  // Dynamic image loading - only load images when component mounts
+  useEffect(() => {
+    let mounted = true;
+    
+    Promise.all(
+      item.imagePaths.map(loader => loader().then(m => m.default))
+    ).then(images => {
+      if (mounted) {
+        setLoadedImages(images);
+      }
+    }).catch(() => {
+      // Silent fail - gradient fallback will show
+    });
+
+    return () => { mounted = false; };
+  }, [item.imagePaths]);
 
   // Auto-rotate images
   useEffect(() => {
-    if (item.images.length <= 1 || isPaused) return;
+    if (loadedImages.length <= 1 || isPaused) return;
     
     const timer = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % item.images.length);
+      setCurrentImageIndex((prev) => (prev + 1) % loadedImages.length);
     }, CAROUSEL_INTERVAL + index * 300); // Stagger timing
 
     return () => clearInterval(timer);
-  }, [item.images.length, index, isPaused]);
+  }, [loadedImages.length, index, isPaused]);
 
   const goToPrevious = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev - 1 + item.images.length) % item.images.length);
+    setCurrentImageIndex((prev) => (prev - 1 + loadedImages.length) % loadedImages.length);
     setIsPaused(true);
     setTimeout(() => setIsPaused(false), 5000); // Resume auto-play after 5s
   };
@@ -243,7 +264,7 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
   const goToNext = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentImageIndex((prev) => (prev + 1) % item.images.length);
+    setCurrentImageIndex((prev) => (prev + 1) % loadedImages.length);
     setIsPaused(true);
     setTimeout(() => setIsPaused(false), 5000);
   };
@@ -281,14 +302,17 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
           </div>
         )}
 
-        {/* Vehicle Image - Carousel Style */}
+        {/* Vehicle Image - Carousel Style with Dynamic Loading */}
         <div className="relative h-28 md:h-32 bg-gradient-to-br from-muted/50 to-muted overflow-hidden">
-          {item.images.map((image, imgIndex) => (
+          {loadedImages.map((image, imgIndex) => (
             <img
               key={imgIndex}
               src={image}
               alt={`${item.name} ${imgIndex + 1}`}
               loading="lazy"
+              decoding="async"
+              width={224}
+              height={128}
               onLoad={() => imgIndex === 0 && setImageLoaded(true)}
               className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${
                 imgIndex === currentImageIndex 
@@ -302,12 +326,12 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
           <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
           
           {/* Loading skeleton */}
-          {!imageLoaded && (
+          {(!imageLoaded || loadedImages.length === 0) && (
             <div className="absolute inset-0 bg-muted animate-pulse" />
           )}
 
           {/* Arrow Navigation - Show on hover */}
-          {item.images.length > 1 && (
+          {loadedImages.length > 1 && (
             <>
               <button
                 onClick={goToPrevious}
@@ -329,9 +353,9 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
           )}
 
           {/* Carousel Dots */}
-          {item.images.length > 1 && (
+          {loadedImages.length > 1 && (
             <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10">
-              {item.images.map((_, imgIndex) => (
+              {loadedImages.map((_, imgIndex) => (
                 <button
                   key={imgIndex}
                   onClick={(e) => {

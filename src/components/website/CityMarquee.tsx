@@ -2,43 +2,15 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
 import { ArrowRight, Plane, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
 
-// Import optimized WebP city images
-import istanbulImg from "@/assets/destinations/istanbul-city.webp";
-import antalyaImg from "@/assets/destinations/antalya-city.webp";
-import bodrumImg from "@/assets/destinations/bodrum-city.webp";
-import dalamanImg from "@/assets/destinations/dalaman-city.webp";
-import izmirImg from "@/assets/destinations/izmir-city.webp";
-import cappadociaImg from "@/assets/destinations/cappadocia-city.webp";
-import dubaiImg from "@/assets/destinations/dubai-city.webp";
-import cyprusImg from "@/assets/destinations/cyprus-city.webp";
-import fethiyeImg from "@/assets/destinations/fethiye-city.webp";
-import marmarisImg from "@/assets/destinations/marmaris-city.webp";
-import frankfurtImg from "@/assets/destinations/frankfurt-city.webp";
-import athensImg from "@/assets/destinations/athens-city.webp";
-import adanaImg from "@/assets/destinations/adana-city.webp";
-// Preload only first 2 visible images during idle time
-const preloadCriticalImages = () => {
-  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-    requestIdleCallback(() => {
-      [istanbulImg, antalyaImg].forEach((src) => {
-        const img = new Image();
-        img.src = src;
-      });
-    }, { timeout: 2000 });
-  }
-};
-
-// Trigger preload on module load
-preloadCriticalImages();
-
-// City data with images and starting prices
+// City data with lazy-loaded image paths
+// Images are dynamically imported only when component mounts
 const cities = [
   {
     name: "Istanbul",
     nameTR: "İstanbul",
-    image: istanbulImg,
+    imagePath: () => import("@/assets/destinations/istanbul-city.webp"),
     fromPrice: 45,
     airports: ["IST", "SAW"],
     rating: 4.7,
@@ -48,7 +20,7 @@ const cities = [
   {
     name: "Antalya",
     nameTR: "Antalya",
-    image: antalyaImg,
+    imagePath: () => import("@/assets/destinations/antalya-city.webp"),
     fromPrice: 35,
     airports: ["AYT"],
     rating: 4.7,
@@ -58,7 +30,7 @@ const cities = [
   {
     name: "Bodrum",
     nameTR: "Bodrum",
-    image: bodrumImg,
+    imagePath: () => import("@/assets/destinations/bodrum-city.webp"),
     fromPrice: 40,
     airports: ["BJV"],
     rating: 4.8,
@@ -68,7 +40,7 @@ const cities = [
   {
     name: "Dalaman",
     nameTR: "Dalaman",
-    image: dalamanImg,
+    imagePath: () => import("@/assets/destinations/dalaman-city.webp"),
     fromPrice: 38,
     airports: ["DLM"],
     rating: 4.8,
@@ -78,7 +50,7 @@ const cities = [
   {
     name: "Izmir",
     nameTR: "İzmir",
-    image: izmirImg,
+    imagePath: () => import("@/assets/destinations/izmir-city.webp"),
     fromPrice: 42,
     airports: ["ADB"],
     rating: 4.7,
@@ -88,7 +60,7 @@ const cities = [
   {
     name: "Cappadocia",
     nameTR: "Kapadokya",
-    image: cappadociaImg,
+    imagePath: () => import("@/assets/destinations/cappadocia-city.webp"),
     fromPrice: 55,
     airports: ["NAV", "ASR"],
     rating: 4.7,
@@ -98,7 +70,7 @@ const cities = [
   {
     name: "Dubai",
     nameTR: "Dubai",
-    image: dubaiImg,
+    imagePath: () => import("@/assets/destinations/dubai-city.webp"),
     fromPrice: 65,
     airports: ["DXB"],
     rating: 4.7,
@@ -108,7 +80,7 @@ const cities = [
   {
     name: "Cyprus",
     nameTR: "Kıbrıs",
-    image: cyprusImg,
+    imagePath: () => import("@/assets/destinations/cyprus-city.webp"),
     fromPrice: 50,
     airports: ["LCA", "ECN"],
     rating: 4.8,
@@ -118,7 +90,7 @@ const cities = [
   {
     name: "Fethiye",
     nameTR: "Fethiye",
-    image: fethiyeImg,
+    imagePath: () => import("@/assets/destinations/fethiye-city.webp"),
     fromPrice: 45,
     airports: ["DLM"],
     rating: 4.8,
@@ -128,7 +100,7 @@ const cities = [
   {
     name: "Marmaris",
     nameTR: "Marmaris",
-    image: marmarisImg,
+    imagePath: () => import("@/assets/destinations/marmaris-city.webp"),
     fromPrice: 48,
     airports: ["DLM"],
     rating: 4.7,
@@ -138,7 +110,7 @@ const cities = [
   {
     name: "Frankfurt",
     nameTR: "Frankfurt",
-    image: frankfurtImg,
+    imagePath: () => import("@/assets/destinations/frankfurt-city.webp"),
     fromPrice: 55,
     airports: ["FRA"],
     rating: 4.7,
@@ -148,7 +120,7 @@ const cities = [
   {
     name: "Athens",
     nameTR: "Atina",
-    image: athensImg,
+    imagePath: () => import("@/assets/destinations/athens-city.webp"),
     fromPrice: 45,
     airports: ["ATH"],
     rating: 4.7,
@@ -158,7 +130,7 @@ const cities = [
   {
     name: "Adana",
     nameTR: "Adana",
-    image: adanaImg,
+    imagePath: () => import("@/assets/destinations/adana-city.webp"),
     fromPrice: 40,
     airports: ["ADA"],
     rating: 4.7,
@@ -167,11 +139,13 @@ const cities = [
   },
 ];
 
+type CityType = typeof cities[0];
+
 const CityMarquee = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
 
-  const handleCityClick = (city: typeof cities[0]) => {
+  const handleCityClick = (city: CityType) => {
     navigate(`/destinations/${city.name.toLowerCase()}`);
   };
 
@@ -235,6 +209,7 @@ const CityMarquee = () => {
                 city={city} 
                 language={language}
                 onClick={() => handleCityClick(city)}
+                priority={index < 3} // First 3 visible cards get priority
               />
             ))}
             {/* Duplicate set for seamless loop */}
@@ -244,6 +219,7 @@ const CityMarquee = () => {
                 city={city} 
                 language={language}
                 onClick={() => handleCityClick(city)}
+                priority={false}
               />
             ))}
           </motion.div>
@@ -266,16 +242,35 @@ const CityMarquee = () => {
   );
 };
 
-// City Card Component with Real Images
+// City Card Component with Dynamic Image Loading
 interface CityCardProps {
-  city: typeof cities[0];
+  city: CityType;
   language: string;
   onClick: () => void;
+  priority?: boolean;
 }
 
-const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
+const CityCard = memo(({ city, language, onClick, priority = false }: CityCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+
+  // Dynamic import for image - only load when component mounts
+  useEffect(() => {
+    let mounted = true;
+    
+    city.imagePath().then((module) => {
+      if (mounted) {
+        setImageSrc(module.default);
+      }
+    }).catch(() => {
+      if (mounted) {
+        setImageError(true);
+      }
+    });
+
+    return () => { mounted = false; };
+  }, [city]);
 
   return (
     <motion.div
@@ -294,15 +289,17 @@ const CityCard = memo(({ city, language, onClick }: CityCardProps) => {
           <div className="absolute inset-0 w-full h-full z-10 bg-gradient-to-r from-muted via-muted/80 to-muted animate-pulse" />
         )}
         
-        {/* Real Image - Lazy loaded with native browser support */}
-        {city.image && !imageError && (
+        {/* Real Image - Dynamically loaded with srcset */}
+        {imageSrc && !imageError && (
           <img
-            src={city.image}
+            src={imageSrc}
             alt={city.name}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
             decoding="async"
+            fetchPriority={priority ? "high" : "auto"}
             width={224}
             height={288}
+            sizes="(max-width: 768px) 192px, 224px"
             className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 z-20 ${
               imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             } group-hover:scale-110`}
