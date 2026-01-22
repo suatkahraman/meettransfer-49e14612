@@ -41,6 +41,12 @@ export interface AddressMapSectionProps {
   };
   /** Whether to show the route map preview */
   showMap?: boolean;
+  /**
+   * How to commit manual typing to parent state.
+   * - 'debounce' (default): commit after user pauses typing (legacy behavior)
+   * - 'blur': commit only on input blur (recommended for heavy parent forms like Admin)
+   */
+  manualCommitMode?: 'debounce' | 'blur';
   /** Whether to show navigation buttons on the map */
   showNavigationButtons?: boolean;
   /** Customer phone for map navigation (optional) */
@@ -83,6 +89,7 @@ const AddressMapSectionComponent = ({
   labels = {},
   placeholders = {},
   showMap = true,
+  manualCommitMode = 'debounce',
   showNavigationButtons = false,
   customerPhone,
   className,
@@ -171,18 +178,46 @@ const AddressMapSectionComponent = ({
 
   const handlePickupInputChange = useCallback(
     (val: string) => {
+      // In heavy parent forms (Admin), avoid committing on every typing pause.
+      // We'll commit on blur instead to prevent large re-renders / perceived freezing.
+      if (manualCommitMode !== 'debounce') return;
+
       if (pickupTypingTimerRef.current) window.clearTimeout(pickupTypingTimerRef.current);
       pickupTypingTimerRef.current = window.setTimeout(() => commitManualPickup(val), 600);
     },
-    [commitManualPickup]
+    [commitManualPickup, manualCommitMode]
   );
 
   const handleDropoffInputChange = useCallback(
     (val: string) => {
+      if (manualCommitMode !== 'debounce') return;
+
       if (dropoffTypingTimerRef.current) window.clearTimeout(dropoffTypingTimerRef.current);
       dropoffTypingTimerRef.current = window.setTimeout(() => commitManualDropoff(val), 600);
     },
-    [commitManualDropoff]
+    [commitManualDropoff, manualCommitMode]
+  );
+
+  const handlePickupBlur = useCallback(
+    (val: string) => {
+      if (pickupTypingTimerRef.current) {
+        window.clearTimeout(pickupTypingTimerRef.current);
+        pickupTypingTimerRef.current = undefined;
+      }
+      if (manualCommitMode === 'blur') commitManualPickup(val);
+    },
+    [commitManualPickup, manualCommitMode]
+  );
+
+  const handleDropoffBlur = useCallback(
+    (val: string) => {
+      if (dropoffTypingTimerRef.current) {
+        window.clearTimeout(dropoffTypingTimerRef.current);
+        dropoffTypingTimerRef.current = undefined;
+      }
+      if (manualCommitMode === 'blur') commitManualDropoff(val);
+    },
+    [commitManualDropoff, manualCommitMode]
   );
 
   // Default label renderer
@@ -242,6 +277,7 @@ const AddressMapSectionComponent = ({
           <GooglePlacesAutocomplete
             onPlaceSelected={handlePickupSelect}
             onInputChange={handlePickupInputChange}
+            onBlurValue={handlePickupBlur}
             placeholder={pickupPlaceholder}
             initialValue={pickup.placeName || pickup.address}
             disabled={disabled}
@@ -278,6 +314,7 @@ const AddressMapSectionComponent = ({
           <GooglePlacesAutocomplete
             onPlaceSelected={handleDropoffSelect}
             onInputChange={handleDropoffInputChange}
+            onBlurValue={handleDropoffBlur}
             placeholder={dropoffPlaceholder}
             initialValue={dropoff.placeName || dropoff.address}
             disabled={disabled}
