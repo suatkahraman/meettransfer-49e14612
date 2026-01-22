@@ -273,24 +273,32 @@ export const LazyGooglePlacesAutocomplete = memo(({
 
     setIsScriptLoading(true);
 
+    const inputEl = inputRef.current;
+
     try {
       await loadGoogleMapsScript(['places']);
 
       const maps = getGoogleMaps();
-      if (!inputRef.current || !maps?.places) {
+      if (!inputEl || !maps?.places) {
+        return;
+      }
+
+      let autocomplete: GoogleMapsAutocomplete;
+      try {
+        autocomplete = new maps.places.Autocomplete(
+          inputEl,
+          {
+            types: ['establishment', 'geocode'],
+            fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
+            componentRestrictions: { country: ['tr', 'ae', 'cy', 'de', 'gr', 'ch', 'it'] },
+          }
+        );
+      } catch (error) {
+        console.error('Failed to create Google Autocomplete instance:', error);
         return;
       }
 
       hasInitializedRef.current = true;
-
-      const autocomplete = new maps.places.Autocomplete(
-        inputRef.current,
-        {
-          types: ['establishment', 'geocode'],
-          fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
-          componentRestrictions: { country: ['tr', 'ae', 'cy', 'de', 'gr', 'ch', 'it'] },
-        }
-      );
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();

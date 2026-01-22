@@ -124,17 +124,25 @@ export const GooglePlacesAutocomplete = ({
   }, [value]);
 
   useEffect(() => {
-    // Skip if no input element yet
-    if (!inputRef.current) {
-      return;
-    }
-
     let isCancelled = false;
     let retryCount = 0;
     const maxRetries = 3;
-    const currentInput = inputRef.current; // Capture for cleanup
+    let currentInput: HTMLInputElement | null = null;
+
+    const getInputEl = () => currentInput ?? inputRef.current;
 
     const setupAutocomplete = async () => {
+      // Wait until the input ref is actually bound (some panels render inputs conditionally)
+      const inputEl = getInputEl();
+      if (!inputEl) {
+        if (!isCancelled) {
+          setTimeout(setupAutocomplete, 50);
+        }
+        return;
+      }
+
+      currentInput = inputEl;
+
       // Skip if already attached to this specific input
       if (autocompleteRef.current || hasInitializedRef.current) {
         return;
@@ -162,16 +170,21 @@ export const GooglePlacesAutocomplete = ({
       }
 
       console.log('Initializing Google Places Autocomplete');
-      hasInitializedRef.current = true;
 
-      const autocomplete = new window.google.maps.places.Autocomplete(
-        currentInput,
-        {
-          types: ['establishment', 'geocode'],
-          fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
-          componentRestrictions: { country: ['tr', 'ae', 'cy', 'de', 'gr', 'ch', 'it'] },
-        }
-      );
+      let autocomplete: GoogleMapsAutocomplete;
+      try {
+        autocomplete = new window.google.maps.places.Autocomplete(
+          currentInput,
+          {
+            types: ['establishment', 'geocode'],
+            fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
+            componentRestrictions: { country: ['tr', 'ae', 'cy', 'de', 'gr', 'ch', 'it'] },
+          }
+        );
+      } catch (error) {
+        console.error('Failed to create Google Autocomplete instance:', error);
+        return;
+      }
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
@@ -219,10 +232,11 @@ export const GooglePlacesAutocomplete = ({
       });
 
       autocompleteRef.current = autocomplete;
+      hasInitializedRef.current = true;
     };
 
     // Small delay to ensure DOM is ready
-    const timeoutId = setTimeout(setupAutocomplete, 100);
+    const timeoutId = setTimeout(setupAutocomplete, 50);
 
     return () => {
       isCancelled = true;
