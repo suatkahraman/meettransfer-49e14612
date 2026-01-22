@@ -23,7 +23,8 @@ export const HeroVisualSection = memo(({
     <>
       {/* Mobile Visual Section - Stats & Features Only (No Images) */}
       <div className="order-2 md:hidden">
-        <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border/50">
+        {/* CLS: lock initial height on mobile so late data (e.g., rating) can't expand the card */}
+        <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border/50 h-[236px]">
           {/* Feature highlights - gradient background instead of image */}
           <div className="relative h-32 bg-gradient-to-br from-primary/10 via-accent/5 to-background overflow-hidden">
             {/* Decorative elements */}
@@ -62,7 +63,7 @@ export const HeroVisualSection = memo(({
               </div>
               <div>
                 <div className="text-sm font-bold text-foreground">32</div>
-                <div className="text-[10px] text-muted-foreground">{t("cities")}</div>
+                <div className="text-[10px] text-muted-foreground whitespace-nowrap">{t("cities")}</div>
               </div>
             </div>
             <div className="w-px h-8 bg-border/50" />
@@ -72,7 +73,7 @@ export const HeroVisualSection = memo(({
               </div>
               <div>
                 <div className="text-sm font-bold text-foreground">12</div>
-                <div className="text-[10px] text-muted-foreground">{t("airports")}</div>
+                <div className="text-[10px] text-muted-foreground whitespace-nowrap">{t("airports")}</div>
               </div>
             </div>
             <div className="w-px h-8 bg-border/50" />
@@ -81,8 +82,8 @@ export const HeroVisualSection = memo(({
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
               </div>
               <div>
-                <div className="text-sm font-bold text-foreground">{rating.toFixed(1)}</div>
-                <div className="text-[10px] text-muted-foreground">{t("googleReviews")}</div>
+                <div className="text-sm font-bold text-foreground tabular-nums min-w-[3ch]">{rating.toFixed(1)}</div>
+                <div className="text-[10px] text-muted-foreground whitespace-nowrap">{t("googleReviews")}</div>
               </div>
             </div>
           </div>

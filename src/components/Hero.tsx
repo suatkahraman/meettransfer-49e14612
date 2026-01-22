@@ -32,7 +32,7 @@ const PaymentComingSoonBanner = lazy(() => import("@/components/hero/PaymentComi
 
 // Skeleton for booking card - shows during hydration
 const BookingCardSkeleton = () => (
-  <div className="bg-card rounded-2xl border border-border/50 shadow-xl overflow-hidden">
+  <div className="bg-card rounded-2xl border border-border/50 shadow-xl overflow-hidden min-h-[430px] md:min-h-[460px]">
     {/* Tab skeleton */}
     <div className="flex bg-muted/50">
       <div className="flex-1 py-3.5 px-4 flex items-center justify-center gap-1.5">
@@ -60,7 +60,7 @@ const BookingCardSkeleton = () => (
 
 // Minimal skeleton for form content inside card
 const FormSkeleton = () => (
-  <div className="space-y-3 animate-pulse">
+  <div className="space-y-3 animate-pulse min-h-[300px]">
     <div className="h-14 bg-muted rounded-xl" />
     <div className="h-14 bg-muted rounded-xl" />
     <div className="grid grid-cols-3 gap-2">
