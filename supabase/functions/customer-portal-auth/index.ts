@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { hashToken } from "../_shared/token-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,15 +32,37 @@ serve(async (req) => {
       );
     }
 
-    // Find magic link
-    const { data: magicLink, error: linkError } = await supabase
+    // Hash the incoming token to compare with stored hash
+    const tokenHash = await hashToken(token);
+
+    // Find magic link by hashed token (secure method)
+    let magicLink = null;
+    const { data: hashedLink, error: hashError } = await supabase
       .from("customer_magic_links")
       .select("*")
-      .eq("token", token)
+      .eq("token_hash", tokenHash)
       .is("used_at", null)
       .single();
 
-    if (linkError || !magicLink) {
+    if (hashedLink) {
+      magicLink = hashedLink;
+    } else {
+      // Fallback: Check legacy plaintext token for backwards compatibility
+      // This allows existing unused magic links to still work
+      const { data: legacyLink, error: legacyError } = await supabase
+        .from("customer_magic_links")
+        .select("*")
+        .eq("token", token)
+        .is("used_at", null)
+        .single();
+
+      if (legacyLink) {
+        magicLink = legacyLink;
+        console.log("Using legacy plaintext token - will be migrated to hashed on use");
+      }
+    }
+
+    if (!magicLink) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired token" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }

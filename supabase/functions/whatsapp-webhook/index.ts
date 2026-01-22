@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { generateMagicLinkToken } from "../_shared/token-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -263,15 +264,16 @@ serve(async (req) => {
             .eq("id", pendingConfirmation.reservation_id);
         }
 
-        // Generate customer account link
-        const token = crypto.randomUUID();
+        // Generate customer account link with hashed token for security
+        const { token, tokenHash } = await generateMagicLinkToken();
         const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
         await supabase
           .from("customer_magic_links")
           .insert({
             customer_phone: customerPhone,
-            token,
+            token, // Keep for legacy compatibility, will be removed later
+            token_hash: tokenHash, // Secure hashed token for validation
             expires_at: expiresAt.toISOString(),
           });
 

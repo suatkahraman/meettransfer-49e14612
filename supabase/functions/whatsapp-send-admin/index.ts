@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { generateMagicLinkToken } from "../_shared/token-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -128,8 +129,8 @@ serve(async (req) => {
 
 Please confirm your booking by replying "Confirm".`;
     } else if (message_type === "magic_link") {
-      // Generate magic link for customer account
-      const token = crypto.randomUUID();
+      // Generate magic link for customer account with hashed token for security
+      const { token, tokenHash } = await generateMagicLinkToken();
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
       const appUrl = "https://meettransfer.app";
 
@@ -137,7 +138,8 @@ Please confirm your booking by replying "Confirm".`;
         .from("customer_magic_links")
         .insert({
           customer_phone: conversation.customer_phone,
-          token,
+          token, // Keep for legacy compatibility, will be removed later
+          token_hash: tokenHash, // Secure hashed token for validation
           expires_at: expiresAt.toISOString(),
           created_by: user.id,
         });
