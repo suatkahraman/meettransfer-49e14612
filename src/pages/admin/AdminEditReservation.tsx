@@ -179,6 +179,7 @@ const EditMemoizedAddressSection = memo(({ formData, setFormData, changedFields 
       changedFields={changedFields}
       showMap={showMap}
       showNavigationButtons={false}
+      manualCommitMode="blur"
     />
   );
 });
