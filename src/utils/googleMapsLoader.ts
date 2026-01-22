@@ -3,9 +3,10 @@
  * Prevents duplicate script loading and provides unified API across all components
  */
 
-// Use environment variable for the API key
+// Use environment variable for the API key with fallback
 // Note: Client-side Maps API keys are inherently public - security comes from domain restrictions
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+// The fallback key should have domain restrictions configured in Google Cloud Console
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
 
 // Global state for script loading
 let loadPromise: Promise<void> | null = null;
