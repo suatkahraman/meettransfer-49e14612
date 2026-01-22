@@ -3,7 +3,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { registerSW } from "virtual:pwa-register";
 import { toast } from "sonner";
 import { CheckCircle2 } from "lucide-react";
-import { runAfterInteractive } from "@/utils/afterInteractive";
 
 /**
  * Silent PWA update handler.
@@ -158,7 +157,7 @@ export function PWAUpdatePrompt() {
     const applyUpdateAutomatically = async () => {
       const registration = registrationRef.current;
       const waitingUrl = registration?.waiting?.scriptURL ?? null;
-      console.log("[PWA Update] 🚀 Auto-applying update!", { waitingUrl });
+      console.log("[PWA Update] 🚀 Auto-applying update IMMEDIATELY!", { waitingUrl });
 
       // If the same waiting SW was already processed, skip
       if (waitingUrl && lastPromptedSwUrlRef.current === waitingUrl) {
@@ -169,49 +168,34 @@ export function PWAUpdatePrompt() {
       lastPromptedSwUrlRef.current = waitingUrl;
 
       try {
-        // Force update check to get the absolute latest SW
-        await registration?.update();
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        await registration?.update();
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        const latestWaiting = registration?.waiting;
-        console.log("[PWA Update] ✅ Auto-applying LATEST update:", {
-          scriptURL: latestWaiting?.scriptURL,
-          state: latestWaiting?.state,
-        });
-
         // Set flag before reload so we can show toast after
         sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
+        sessionStorage.setItem(PWA_RELOAD_SCHEDULED_AT_KEY, String(Date.now()));
 
-        // Use vite-plugin-pwa helper if available (it can reload itself)
+        // Use vite-plugin-pwa helper immediately (it handles skipWaiting internally)
         if (updateSWRef.current) {
-          try {
-            sessionStorage.setItem(PWA_RELOAD_SCHEDULED_AT_KEY, String(Date.now()));
-          } catch {
-            // ignore
-          }
-          console.log("[PWA Update] Using updateSW helper for auto-update");
+          console.log("[PWA Update] ⚡ Using updateSW helper for INSTANT update");
           void updateSWRef.current(true);
           return;
         }
 
-        // Fallback - tell the waiting SW to take over; controllerchange listener will reload once.
+        // Fallback - tell the waiting SW to take over
+        const latestWaiting = registration?.waiting;
         if (latestWaiting) {
-          console.log("[PWA Update] Using SKIP_WAITING message for auto-update");
+          console.log("[PWA Update] Using SKIP_WAITING message for update");
           latestWaiting.postMessage({ type: "SKIP_WAITING" });
           return;
+        }
+
+        // Last resort - force registration update and retry
+        await registration?.update();
+        if (registration?.waiting) {
+          registration.waiting.postMessage({ type: "SKIP_WAITING" });
         }
       } catch (error) {
         console.error("[PWA Update] Auto-update error:", error);
         // Even on error, try to apply
         if (updateSWRef.current) {
-          sessionStorage.setItem(PWA_UPDATE_FLAG, "1");
-          try {
-            sessionStorage.setItem(PWA_RELOAD_SCHEDULED_AT_KEY, String(Date.now()));
-          } catch {
-            // ignore
-          }
           void updateSWRef.current(true);
         }
       }
@@ -322,25 +306,19 @@ export function PWAUpdatePrompt() {
           }
         };
 
-        // More aggressive update checks (30s) but still loop-safe
-        const UPDATE_INTERVAL_MS = 30 * 1000; // 30 seconds
+        // Aggressive update checks (10s) for faster updates
+        const UPDATE_INTERVAL_MS = 10 * 1000; // 10 seconds
         const interval = window.setInterval(requestUpdateCheck, UPDATE_INTERVAL_MS);
         const versionInterval = window.setInterval(pollVersionJson, UPDATE_INTERVAL_MS);
 
-        // CRITICAL CHAIN OPT:
-        // Do NOT fetch version.json or call registration.update() during early critical rendering.
-        // Schedule initial checks after interaction OR idle-after-load.
-        runAfterInteractive(
-          () => {
-            void requestUpdateCheck();
-            void pollVersionJson();
-
-            // Second check after short delay to catch publish-time race conditions
-            setTimeout(requestUpdateCheck, 800);
-            setTimeout(pollVersionJson, 1200);
-          },
-          { idleTimeoutMs: 4000 }
-        );
+        // Start checking immediately - no delay for production
+        // First check right away
+        void requestUpdateCheck();
+        void pollVersionJson();
+        
+        // Second check after 500ms to catch race conditions
+        setTimeout(requestUpdateCheck, 500);
+        setTimeout(pollVersionJson, 800);
 
         const onFastTrigger = () => {
           void requestUpdateCheck();
@@ -414,10 +392,9 @@ export function PWAUpdatePrompt() {
         return;
       }
 
-      // Extra safety: avoid reloading during the very first seconds of navigation.
-      // Reduced from 8s to 5s for faster updates while still preventing boot loops.
+      // Extra safety: avoid reloading during the very first 2 seconds only
       try {
-        if (typeof performance !== "undefined" && performance.now() < 5000 && document.readyState !== "complete") {
+        if (typeof performance !== "undefined" && performance.now() < 2000 && document.readyState !== "complete") {
           console.log("[PWA Update] controllerchange during early boot; skipping reload");
           return;
         }
