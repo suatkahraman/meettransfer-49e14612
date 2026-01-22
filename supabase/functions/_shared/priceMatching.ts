@@ -103,6 +103,35 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
       'bursa yenisehir', 'yenisehir havalimani'
     ]
   },
+  // Switzerland Airports
+  'Zurich Airport (ZRH)': {
+    priority: 1,
+    keywords: [
+      'zurich airport', 'zrh', 'zürich airport', 'zurich flughafen', 'flughafen zürich',
+      'zurich international', 'kloten', 'zurich zrh', 'zrh airport', 'zurich schweiz'
+    ]
+  },
+  'Geneva Airport (GVA)': {
+    priority: 1,
+    keywords: [
+      'geneva airport', 'gva', 'geneve airport', 'genève aéroport', 'genf flughafen',
+      'geneva international', 'cointrin', 'geneva gva', 'gva airport', 'aeroport geneve'
+    ]
+  },
+  'Basel Airport (BSL)': {
+    priority: 1,
+    keywords: [
+      'basel airport', 'bsl', 'euroairport', 'basel mulhouse', 'mlh', 'basel flughafen',
+      'euro airport', 'basel mulhouse freiburg', 'bsl airport', 'basel euroairport'
+    ]
+  },
+  'Milan Malpensa Airport (MXP)': {
+    priority: 2,
+    keywords: [
+      'malpensa', 'mxp', 'milan malpensa', 'milano malpensa', 'malpensa airport',
+      'malpensa terminal', 'mxp airport'
+    ]
+  },
 };
 
 // ==================== CITY KEYWORDS ====================
@@ -237,6 +266,19 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
   'Nevsehir': {
     priority: 2,
     keywords: ['nevsehir', 'nevşehir']
+  },
+  // Switzerland
+  'Switzerland': {
+    priority: 1,
+    keywords: [
+      'switzerland', 'schweiz', 'suisse', 'svizzera', 'swiss',
+      'zurich', 'zürich', 'geneva', 'geneve', 'genève', 'genf',
+      'basel', 'bern', 'lausanne', 'lucerne', 'luzern', 'interlaken',
+      'zermatt', 'st. moritz', 'st moritz', 'davos', 'verbier', 'gstaad',
+      'arosa', 'crans-montana', 'crans montana', 'grindelwald', 'wengen',
+      'saas-fee', 'saas fee', 'klosters', 'andermatt', 'engelberg',
+      'montreux', 'vevey', 'locarno', 'lugano'
+    ]
   },
 };
 
@@ -404,6 +446,28 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Kyrenia': { priority: 1, keywords: ['kyrenia', 'girne', 'bellapais', 'kyrenia harbor', 'girne limani', 'girne limanı', 'alsancak', 'lapta'], city: 'Cyprus' },
   'Protaras': { priority: 1, keywords: ['protaras', 'fig tree bay', 'paralimni', 'cape greco', 'kapparis'], city: 'Cyprus' },
   'Famagusta': { priority: 2, keywords: ['famagusta', 'gazimagusa', 'gazimağusa', 'magosa', 'mağosa', 'salamis'], city: 'Cyprus' },
+  
+  // Switzerland - Ski Resorts and Cities
+  'Zermatt': { priority: 1, keywords: ['zermatt', 'matterhorn', 'gornergrat', 'klein matterhorn', 'zermatt village'], city: 'Switzerland' },
+  'St. Moritz': { priority: 1, keywords: ['st. moritz', 'st moritz', 'saint moritz', 'san maurizio', 'engadin', 'engadine'], city: 'Switzerland' },
+  'Davos': { priority: 1, keywords: ['davos', 'davos platz', 'davos dorf', 'klosters', 'davos klosters'], city: 'Switzerland' },
+  'Verbier': { priority: 1, keywords: ['verbier', '4 vallees', 'quatre vallees', 'mont fort', 'verbier village'], city: 'Switzerland' },
+  'Gstaad': { priority: 1, keywords: ['gstaad', 'gstaad palace', 'saanen', 'schonried', 'schönried'], city: 'Switzerland' },
+  'Arosa': { priority: 1, keywords: ['arosa', 'arosa lenzerheide', 'lenzerheide'], city: 'Switzerland' },
+  'Crans-Montana': { priority: 1, keywords: ['crans-montana', 'crans montana', 'montana', 'aminona'], city: 'Switzerland' },
+  'Grindelwald': { priority: 1, keywords: ['grindelwald', 'jungfrau', 'first', 'grindelwald first', 'eiger'], city: 'Switzerland' },
+  'Wengen': { priority: 1, keywords: ['wengen', 'lauberhorn', 'mannlichen', 'männlichen'], city: 'Switzerland' },
+  'Saas-Fee': { priority: 1, keywords: ['saas-fee', 'saas fee', 'saas valley', 'saastal'], city: 'Switzerland' },
+  'Andermatt': { priority: 1, keywords: ['andermatt', 'gemsstock', 'oberalp', 'andermatt swiss alps'], city: 'Switzerland' },
+  'Engelberg': { priority: 1, keywords: ['engelberg', 'titlis', 'mount titlis', 'engelberg titlis'], city: 'Switzerland' },
+  'Interlaken': { priority: 1, keywords: ['interlaken', 'interlaken ost', 'interlaken west', 'unterseen', 'harder kulm'], city: 'Switzerland' },
+  'Zurich City': { priority: 1, keywords: ['zurich city', 'zürich city', 'zurich center', 'zurich zentrum', 'bahnhofstrasse', 'altstadt zurich', 'zurich old town'], city: 'Switzerland' },
+  'Geneva City': { priority: 1, keywords: ['geneva city', 'geneve city', 'genf city', 'geneva center', 'jet deau', 'old town geneva', 'vieille ville'], city: 'Switzerland' },
+  'Basel City': { priority: 1, keywords: ['basel city', 'basel center', 'basel altstadt', 'grossbasel', 'kleinbasel'], city: 'Switzerland' },
+  'Bern': { priority: 1, keywords: ['bern', 'berne', 'bundesplatz', 'bern altstadt', 'bern old town'], city: 'Switzerland' },
+  'Lausanne': { priority: 1, keywords: ['lausanne', 'ouchy', 'lausanne center', 'lausanne gare'], city: 'Switzerland' },
+  'Lucerne': { priority: 1, keywords: ['lucerne', 'luzern', 'lucerne city', 'kapellbrücke', 'chapel bridge', 'lucerne old town'], city: 'Switzerland' },
+  'Montreux': { priority: 1, keywords: ['montreux', 'montreux palace', 'chillon', 'chateau de chillon', 'vevey'], city: 'Switzerland' },
 };
 
 // ==================== VEHICLE TYPE MAPPING ====================
