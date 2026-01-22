@@ -20,12 +20,8 @@ export default defineConfig(({ mode }) => ({
       // Auto-update: keep users on the latest published version (no manual prompt).
       registerType: "autoUpdate",
       injectRegister: null,
-      // Enable SW in preview/dev builds so /debug can accurately show SW + update flow.
-      // (Production builds are unaffected.)
-      devOptions: {
-        enabled: mode === "development",
-        type: "module",
-      },
+      // Enable SW in dev builds for /debug page to accurately show SW status.
+      devOptions: { enabled: mode === "development", type: "module" },
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "robots.txt", "sitemap.xml"],
       manifest: {
         id: "/",
