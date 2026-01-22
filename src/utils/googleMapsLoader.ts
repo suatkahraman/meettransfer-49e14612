@@ -11,6 +11,8 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyC
 // Global state for script loading
 let loadPromise: Promise<void> | null = null;
 let isLoaded = false;
+let authFailed = false;
+let authFailedAt: number | null = null;
 
 // Access Google Maps API
 export const getGoogleMaps = (): any => {
@@ -22,11 +24,47 @@ export const isGoogleMapsLoaded = (): boolean => {
   return isLoaded && !!getGoogleMaps();
 };
 
+// Google Maps auth failures are reported asynchronously via window.gm_authFailure
+export const isGoogleMapsAuthFailed = (): boolean => {
+  return authFailed;
+};
+
+export const getGoogleMapsAuthFailureInfo = (): { failed: boolean; failedAt: number | null } => {
+  return { failed: authFailed, failedAt: authFailedAt };
+};
+
+const ensureAuthFailureHandler = () => {
+  const w = window as any;
+  if (typeof w.gm_authFailure === 'function') return;
+
+  w.gm_authFailure = () => {
+    authFailed = true;
+    authFailedAt = Date.now();
+    isLoaded = false;
+    loadPromise = null;
+    console.error(
+      '[Google Maps] gm_authFailure: API key authorization failed. Likely causes: Referer not allowed, Billing disabled, or required APIs not enabled.'
+    );
+
+    // Notify listeners (map components) to gracefully fallback.
+    try {
+      window.dispatchEvent(new CustomEvent('google-maps-auth-failure'));
+    } catch {
+      // ignore
+    }
+  };
+};
+
 /**
  * Load Google Maps script with specified libraries
  * Uses singleton pattern to prevent duplicate loading
  */
 export const loadGoogleMapsScript = (libraries: string[] = ['places']): Promise<void> => {
+  // If authentication already failed, do not keep retrying.
+  if (authFailed) {
+    return Promise.reject(new Error('Google Maps authentication failed'));
+  }
+
   // Already loaded
   if (isLoaded && getGoogleMaps()) {
     return Promise.resolve();
@@ -38,6 +76,8 @@ export const loadGoogleMapsScript = (libraries: string[] = ['places']): Promise<
   }
 
   loadPromise = new Promise((resolve, reject) => {
+    ensureAuthFailureHandler();
+
     // Check if script already exists (may have been loaded by another component)
     const existingScript = document.querySelector<HTMLScriptElement>(
       'script[src*="maps.googleapis.com/maps/api/js"]'
@@ -52,6 +92,10 @@ export const loadGoogleMapsScript = (libraries: string[] = ['places']): Promise<
     if (existingScript) {
       // Script exists but not yet loaded, poll for it
       const poll = (startTime: number) => {
+        if (authFailed) {
+          reject(new Error('Google Maps authentication failed'));
+          return;
+        }
         if (getGoogleMaps()) {
           isLoaded = true;
           resolve();
@@ -69,14 +113,20 @@ export const loadGoogleMapsScript = (libraries: string[] = ['places']): Promise<
 
     // Create and load script
     const script = document.createElement('script');
-    // Remove loading=async to ensure Places library is fully available on load
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=${libraries.join(',')}`;
+    // Use Google's recommended loading=async query parameter (not the DOM attribute)
+    // Keep our own readiness checks to ensure Places is available before resolving.
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=${libraries.join(',')}&v=weekly&loading=async`;
     script.async = true;
     script.defer = true;
 
     script.onload = () => {
       // Wait for API to be ready including Places
       const waitForApi = (startTime: number) => {
+        if (authFailed) {
+          console.error('[Google Maps] Auth failure detected during load');
+          reject(new Error('Google Maps authentication failed'));
+          return;
+        }
         const maps = getGoogleMaps();
         if (maps?.places?.Autocomplete) {
           console.log('[Google Maps] Loaded successfully with Places library');
