@@ -241,19 +241,19 @@ const BookingPage = () => {
     
     const loadTokenBooking = async () => {
       try {
-        const { data, error } = await supabase
-          .from("quick_booking_requests")
-          .select("*")
-          .eq("confirmation_token", urlToken)
-          .single();
+        // Use edge function to fetch booking securely (RLS prevents direct access)
+        const { data: result, error } = await supabase.functions.invoke('get-quick-booking-by-token', {
+          body: { token: urlToken }
+        });
         
-        if (error || !data) {
-          console.error("Failed to load booking:", error);
+        if (error || !result?.success || !result?.data) {
+          console.error("Failed to load booking:", error || result?.error);
           toast.error(t("bookingNotFound") || "Booking not found");
           navigate(getLocalizedPath("/"));
           return;
         }
         
+        const data = result.data;
         setTokenBookingData(data);
         
         // Pre-fill form with booking data
