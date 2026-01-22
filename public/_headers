@@ -1,0 +1,31 @@
+# Long-term immutable cache for hashed build assets (safe)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Long-term cache for static images (safe when filenames are versioned/hashed)
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Common static image formats served from root/public
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
+/*.ico
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML should not be long-term cached
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Service worker + version marker should update quickly
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+/version.json
+  Cache-Control: public, max-age=0, must-revalidate
