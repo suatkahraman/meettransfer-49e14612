@@ -33,14 +33,40 @@ const CompactRouteMapComponent = ({
   const [error, setError] = useState<string | null>(null);
   const [tripInfo, setTripInfo] = useState<TripInfo | null>(null);
 
+  // Debounce address changes to prevent geocode + map init on each keystroke.
+  // This component is rendered in the Hero and some forms where address may be updated while typing.
+  const [stablePickup, setStablePickup] = useState(pickup);
+  const [stableDropoff, setStableDropoff] = useState(dropoff);
+
+  // Prevent redoing the same work (e.g., re-renders with same values).
+  const lastKeyRef = useRef<string>('');
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setStablePickup(pickup);
+      setStableDropoff(dropoff);
+    }, 600);
+    return () => window.clearTimeout(timeoutId);
+  }, [pickup, dropoff]);
+
   useEffect(() => {
     let isCancelled = false;
 
     const initMap = async () => {
       if (!mapContainer.current) return;
+
+      const workKey = `${stablePickup}__${stableDropoff}`;
+      if (lastKeyRef.current === workKey) {
+        setLoading(false);
+        return;
+      }
+      lastKeyRef.current = workKey;
       
       setLoading(true);
       setError(null);
+      setTripInfo(null);
+      setPickupCoords(null);
+      setDropoffCoords(null);
 
       try {
         await loadGoogleMapsScript();
@@ -56,10 +82,17 @@ const CompactRouteMapComponent = ({
         return;
       }
 
-      const [pickupResult, dropoffResult] = await Promise.all([
-        geoCode(pickup),
-        geoCode(dropoff)
-      ]);
+      let pickupResult: Coordinates | null = null;
+      let dropoffResult: Coordinates | null = null;
+      try {
+        [pickupResult, dropoffResult] = await Promise.all([
+          geoCode(stablePickup),
+          geoCode(stableDropoff),
+        ]);
+      } catch {
+        pickupResult = null;
+        dropoffResult = null;
+      }
 
       if (isCancelled) return;
 
@@ -144,7 +177,7 @@ const CompactRouteMapComponent = ({
       }
     };
 
-    if (pickup && dropoff) {
+    if (stablePickup && stableDropoff) {
       initMap();
     } else {
       setLoading(false);
@@ -156,7 +189,7 @@ const CompactRouteMapComponent = ({
         directionsRendererRef.current.setMap(null);
       }
     };
-  }, [pickup, dropoff]);
+  }, [stablePickup, stableDropoff]);
 
   const openGoogleMaps = () => {
     if (pickupCoords && dropoffCoords) {
@@ -167,7 +200,7 @@ const CompactRouteMapComponent = ({
     }
   };
 
-  if (!pickup || !dropoff) {
+  if (!stablePickup || !stableDropoff) {
     return null;
   }
 
