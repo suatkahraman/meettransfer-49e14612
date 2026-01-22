@@ -22,15 +22,18 @@ import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogImageGallery from "@/components/website/BlogImageGallery";
 import BlogCTA from "@/components/website/BlogCTA";
+import DayTourPromoCard from "@/components/website/DayTourPromoCard";
 import vitoFamilyInterior from "@/assets/vito-family-interior.jpg";
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
 import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
 import { useBlogDate } from "@/hooks/useBlogDate";
 import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
+import { useBlogT } from "@/components/blog/BlogLayout";
 
 const OludenizAirportTransferGuide = () => {
-  const { getLocalizedPath, t } = useLanguage();
+  const { getLocalizedPath } = useLanguage();
+  const { t } = useBlogT();
   const { formatBlogDate } = useBlogDate();
 
   const faqItems = [
@@ -299,6 +302,15 @@ const OludenizAirportTransferGuide = () => {
             className="h-[200px]"
           />
         </div>
+
+        <section className="not-prose my-8">
+          <DayTourPromoCard
+            title={t("blogDayTourPromoTitle")}
+            description={t("blogDayTourPromoDesc")}
+            ctaLabel={t("blogDayTourPromoCta")}
+            whatsappMessage={t("blogDayTourPromoWhatsAppMessage")}
+          />
+        </section>
 
         <BlogCTA destination="Ölüdeniz" />
 

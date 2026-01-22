@@ -20,11 +20,14 @@ import RelatedArticles from "@/components/website/RelatedArticles";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import BlogCTA from "@/components/website/BlogCTA";
+import DayTourPromoCard from "@/components/website/DayTourPromoCard";
 import { useBlogDate } from "@/hooks/useBlogDate";
 import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
+import { useBlogT } from "@/components/blog/BlogLayout";
 
 const CyprusAirportTransferGuide = () => {
-  const { getLocalizedPath, t } = useLanguage();
+  const { getLocalizedPath } = useLanguage();
+  const { t } = useBlogT();
   const { formatBlogDate } = useBlogDate();
 
   const faqItems = [
@@ -398,6 +401,15 @@ const CyprusAirportTransferGuide = () => {
           <p>{t("blogCyprusConclusionP1")}</p>
           <p>{t("blogCyprusConclusionP2")}</p>
         </div>
+
+        <section className="not-prose my-8">
+          <DayTourPromoCard
+            title={t("blogDayTourPromoTitle")}
+            description={t("blogDayTourPromoDesc")}
+            ctaLabel={t("blogDayTourPromoCta")}
+            whatsappMessage={t("blogDayTourPromoWhatsAppMessage")}
+          />
+        </section>
 
         {/* CTA Section */}
         <BlogCTA destination="Cyprus" />
