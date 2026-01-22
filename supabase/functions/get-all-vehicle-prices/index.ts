@@ -196,6 +196,7 @@ const handler = async (req: Request): Promise<Response> => {
       airport.includes('Nevsehir') ? 'Cappadocia' :
       airport.includes('Dubai') ? 'Dubai' :
       airport.includes('Larnaca') || airport.includes('Paphos') || airport.includes('Ercan') ? 'Cyprus' :
+      airport.includes('Mardin') || airport.includes('MQM') ? 'Mardin' :
       airport.includes('Bursa') ? 'Bursa' :
       airport.includes('Zurich') || airport.includes('ZRH') ? 'Switzerland' :
       airport.includes('Geneva') || airport.includes('GVA') ? 'Switzerland' :
@@ -209,6 +210,10 @@ const handler = async (req: Request): Promise<Response> => {
     
     const nonAirportCity = direction === 'to_airport' ? pickupCity : 
                            direction === 'from_airport' ? dropoffCity : null;
+
+    // Business rule: For same-city airport transfers, NEVER fall back to intercity prices.
+    // If we can't find a regional price, we should mark as unavailable (manual pricing).
+    const strictRegionalOnly = Boolean(airport && airportCity && nonAirportCity && nonAirportCity === airportCity);
     
     // Intercity conditions:
     // 1. city_to_city with different cities
@@ -350,8 +355,8 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
-      // Try city only match
-      if (!foundPrice && city) {
+      // Try city only match (DISABLED for strict airport transfers to avoid wrong cross-region pricing)
+      if (!strictRegionalOnly && !foundPrice && city) {
         const { data } = await supabase
           .from("region_prices")
           .select("price, price_currency")
@@ -366,8 +371,8 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }
 
-      // Try airport only match
-      if (!foundPrice && airport) {
+      // Try airport only match (DISABLED for strict airport transfers to avoid wrong cross-region pricing)
+      if (!strictRegionalOnly && !foundPrice && airport) {
         const { data } = await supabase
           .from("region_prices")
           .select("price, price_currency")

@@ -7,7 +7,9 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
     priority: 1,
     keywords: [
       'istanbul airport', 'ist airport', 'istanbul havalimanı', 'istanbul havalimani', 
-      'new istanbul airport', 'yeni istanbul havalimanı', 'arnavutköy', 'arnavutkoy',
+      // IMPORTANT: Do NOT include generic district names like "arnavutköy" here.
+      // They cause false airport detection for regular addresses in that district.
+      'new istanbul airport', 'yeni istanbul havalimanı',
       'istanbul new airport', 'istanbul uluslararasi havalimani', 'istanbul international',
       'istanbul havaalani', 'iğa', 'iga', 'istanbul ist', 'ist istanbul'
       // Note: Removed 'ist' - too short, matches any Istanbul address
@@ -101,6 +103,14 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
     keywords: [
       'bursa airport', 'yenisehir airport', 'yei', 'bursa havalimanı', 'yenişehir',
       'bursa yenisehir', 'yenisehir havalimani'
+    ]
+  },
+  'Mardin Airport (MQM)': {
+    priority: 1,
+    keywords: [
+      'mardin airport', 'mqm', 'mardin havalimanı', 'mardin havalimani',
+      'prof. dr. aziz sancar havalimanı', 'prof dr aziz sancar havalimani',
+      'mardin prof. dr. aziz sancar havalimanı'
     ]
   },
   // Switzerland Airports
@@ -258,6 +268,13 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'coral bay', 'latchi', 'troodos', 'platres', 'bafra', 'iskele', 'karpaz'
     ]
   },
+  'Mardin': {
+    priority: 1,
+    keywords: [
+      'mardin', 'midyat', 'kiziltepe', 'kızıltepe', 'nusaybin', 'savur', 'derik',
+      'deyrulzafaran', 'mor gabriel'
+    ]
+  },
   // Kayseri and Nevsehir redirect to Cappadocia
   'Kayseri': {
     priority: 2,
@@ -328,6 +345,14 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Sultanbeyli': { priority: 2, keywords: ['sultanbeyli', 'hasanpasa', 'hasanpaşa', 'mecidiye'], city: 'Istanbul' },
   'Beykoz': { priority: 2, keywords: ['beykoz', 'pasabahce', 'paşabahçe', 'kavacik', 'kavacık', 'riva', 'anadolu kavagi', 'anadolu kavağı', 'acarlar'], city: 'Istanbul' },
   'Sile': { priority: 2, keywords: ['sile', 'şile', 'agva', 'ağva', 'kumbaba', 'sahilkoy', 'sahilköy'], city: 'Istanbul' },
+
+  // Mardin region (for MQM airport transfers)
+  'Midyat': { priority: 1, keywords: ['midyat'], city: 'Mardin' },
+  'Kiziltepe': { priority: 1, keywords: ['kiziltepe', 'kızıltepe'], city: 'Mardin' },
+  'Nusaybin': { priority: 2, keywords: ['nusaybin'], city: 'Mardin' },
+  'Savur': { priority: 2, keywords: ['savur'], city: 'Mardin' },
+  'Derik': { priority: 2, keywords: ['derik'], city: 'Mardin' },
+  'Deyrulzafaran Manastırı': { priority: 2, keywords: ['deyrulzafaran', 'deyrulzafaran manastiri', 'deyrulzafaran manastırı', 'mor gabriel'], city: 'Mardin' },
   
   // Antalya - Each district matches DB exactly (Beldibi, Goynuk, Tekirova, Cirali, Olympos are separate from Kemer)
   'Kaleici': { priority: 1, keywords: ['kaleici', 'kaleiçi', 'old town antalya', 'old city antalya', 'antalya old town', 'antalya marina', 'yat limani'], city: 'Antalya' },
@@ -614,6 +639,7 @@ export const AIRPORT_TO_CITY: Record<string, string> = {
   'Paphos Airport (PFO)': 'Cyprus',
   'Ercan Airport (ECN)': 'Cyprus',
   'Bursa Yenisehir Airport (YEI)': 'Bursa',
+  'Mardin Airport (MQM)': 'Mardin',
 };
 
 // ==================== MATCHING FUNCTIONS ====================
@@ -628,11 +654,31 @@ export interface MatchResult {
 const AIRPORT_INDICATOR_WORDS = [
   'airport', 'havalimanı', 'havalimani', 'havaalani', 'havaalanı',
   'terminal', 'arrivals', 'departures', 'gelen', 'giden',
-  'ist', 'saw', 'ayt', 'bjv', 'dlm', 'adb', 'asr', 'nav', 'dxb', 'dwc', 'lca', 'pfo', 'ecn', 'yei'
+  'ist', 'saw', 'ayt', 'bjv', 'dlm', 'adb', 'asr', 'nav', 'dxb', 'dwc', 'lca', 'pfo', 'ecn', 'yei', 'mqm'
 ];
 
 function hasAirportIndicator(normalized: string): boolean {
   return AIRPORT_INDICATOR_WORDS.some(indicator => normalized.includes(indicator));
+}
+
+// Prevent fuzzy airport matches that only align on generic words like "airport"/"havalimanı".
+// Example bug: "Mardin ... Havalimanı" incorrectly matching "Baf Havalimanı" (Paphos) via fuzzy.
+function hasDistinctiveAirportToken(normalizedLocation: string, keywordNorm: string): boolean {
+  const GENERIC = new Set([
+    'airport', 'havalimani', 'havalimanı', 'havaalani', 'havaalanı',
+    'terminal', 'international', 'domestic', 'arrivals', 'departures',
+    'gelen', 'giden', 'aeroport', 'flughafen'
+  ]);
+
+  const tokens = keywordNorm
+    .split(/\s+/)
+    .map(t => t.trim())
+    .filter(Boolean)
+    // keep short codes like "ist", "pfo", "mqm" as distinctive
+    .filter(t => !GENERIC.has(t));
+
+  // Require at least one distinctive token present in the location.
+  return tokens.length > 0 && tokens.some(t => normalizedLocation.includes(t));
 }
 
 export function findAirport(location: string): MatchResult | null {
@@ -663,7 +709,12 @@ export function findAirport(location: string): MatchResult | null {
       }
       // Fuzzy match for longer keywords - ONLY if location has airport indicator
       // This prevents false positives like "baf havalimanı" matching random addresses
-      else if (hasIndicator && keywordNorm.length >= 6 && fuzzyMatch(normalized, keywordNorm, 0.85)) {
+      else if (
+        hasIndicator &&
+        keywordNorm.length >= 6 &&
+        hasDistinctiveAirportToken(normalized, keywordNorm) &&
+        fuzzyMatch(normalized, keywordNorm, 0.9)
+      ) {
         const confidence = Math.min(0.8, 0.5 + (keywordNorm.length / 40));
         
         if (!bestMatch || confidence > bestMatch.confidence) {

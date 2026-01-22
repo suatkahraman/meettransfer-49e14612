@@ -128,12 +128,17 @@ const handler = async (req: Request): Promise<Response> => {
       airport.includes('Nevsehir') ? 'Cappadocia' :
       airport.includes('Dubai') ? 'Dubai' :
       airport.includes('Larnaca') || airport.includes('Paphos') || airport.includes('Ercan') ? 'Cyprus' :
+      airport.includes('Mardin') || airport.includes('MQM') ? 'Mardin' :
       airport.includes('Bursa') ? 'Bursa' :
       null
     ) : null;
     
     const nonAirportCity = direction === 'to_airport' ? pickupCity : 
                            direction === 'from_airport' ? dropoffCity : null;
+
+    // Business rule: Same-city airport transfers must ONLY use regional prices.
+    // If we can't find a regional price, we should request manual pricing (never fall back to intercity).
+    const strictRegionalOnly = Boolean(airport && airportCity && nonAirportCity && nonAirportCity === airportCity);
     
     // Intercity conditions:
     // 1. city_to_city with different cities
@@ -170,11 +175,16 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("🔍 Route type:", isIntercity ? (isSameCityDifferentDistricts ? "same-city different districts" : "intercity") : "airport transfer", { 
       pickupCity, pickupDistrict, dropoffCity, dropoffDistrict, 
       airportCity, nonAirportCity, intercityFromCity, intercityToCity,
-      isSameCityDifferentDistricts
+      isSameCityDifferentDistricts,
+      strictRegionalOnly
     });
 
     // Get vehicle fallback list for flexible matching
-    const vehicleFallbacks = getVehicleFallbackList(booking.vehicle_type);
+    // Business rule: For strict regional airport transfers, do NOT fall back to other vehicle types.
+    // If the requested vehicle has no regional price, request manual pricing.
+    const vehicleFallbacks = strictRegionalOnly
+      ? [booking.vehicle_type]
+      : getVehicleFallbackList(booking.vehicle_type);
     console.log(`🚗 Vehicle requested: ${booking.vehicle_type}, Fallbacks: ${vehicleFallbacks.join(', ')}`);
 
     // Query for matching price - bidirectional (airport->address OR address->airport same price)
