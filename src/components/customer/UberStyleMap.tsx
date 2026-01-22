@@ -4,6 +4,7 @@ import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route, Car, Us
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { loadGoogleMapsScript, getGoogleMaps } from '@/utils/googleMapsLoader';
 
 interface UberStyleMapProps {
   pickup: string;
@@ -35,68 +36,6 @@ interface TripInfo {
   distance: string;
   durationSeconds: number;
 }
-
-const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
-
-let isScriptLoading = false;
-let isScriptLoaded = false;
-const loadCallbacks: (() => void)[] = [];
-
-const getGoogleMaps = (): any => {
-  return (window as any).google?.maps;
-};
-
-const loadGoogleMapsScript = (): Promise<void> => {
-  return new Promise((resolve) => {
-    const maps = getGoogleMaps();
-    if (isScriptLoaded && maps) {
-      resolve();
-      return;
-    }
-
-    if (isScriptLoading) {
-      loadCallbacks.push(resolve);
-      return;
-    }
-
-    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
-    if (existingScript && getGoogleMaps()) {
-      isScriptLoaded = true;
-      resolve();
-      return;
-    }
-
-    if (existingScript) {
-      existingScript.addEventListener('load', () => {
-        isScriptLoaded = true;
-        resolve();
-      });
-      return;
-    }
-
-    isScriptLoading = true;
-
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry&loading=async`;
-    script.async = true;
-    script.defer = true;
-
-    script.onload = () => {
-      isScriptLoaded = true;
-      isScriptLoading = false;
-      resolve();
-      loadCallbacks.forEach((cb) => cb());
-      loadCallbacks.length = 0;
-    };
-
-    script.onerror = () => {
-      isScriptLoading = false;
-      console.error('Failed to load Google Maps script');
-    };
-
-    document.head.appendChild(script);
-  });
-};
 
 export const UberStyleMap = ({
   pickup,

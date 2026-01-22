@@ -3,7 +3,9 @@
  * Prevents duplicate script loading and provides unified API across all components
  */
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyCk_A1D5LOqb2TuIFuOiVVjGDSAprap38M';
+// Use environment variable for the API key
+// Note: Client-side Maps API keys are inherently public - security comes from domain restrictions
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 // Global state for script loading
 let loadPromise: Promise<void> | null = null;
