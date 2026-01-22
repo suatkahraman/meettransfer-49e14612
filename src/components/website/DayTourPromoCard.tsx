@@ -6,7 +6,11 @@ interface DayTourPromoCardProps {
   title: string;
   description: string;
   ctaLabel: string;
-  whatsappMessage: string;
+  whatsappMessage?: string;
+  /** Optional: used to dynamically build a city-specific WhatsApp message */
+  city?: string;
+  /** Optional template (supports {city}). If not provided, whatsappMessage will be used. */
+  whatsappMessageTemplate?: string;
 }
 
 export default function DayTourPromoCard({
@@ -14,7 +18,14 @@ export default function DayTourPromoCard({
   description,
   ctaLabel,
   whatsappMessage,
+  city,
+  whatsappMessageTemplate,
 }: DayTourPromoCardProps) {
+  const resolvedMessage =
+    whatsappMessageTemplate && city
+      ? whatsappMessageTemplate.split("{city}").join(city)
+      : whatsappMessage || "";
+
   return (
     <Card>
       <CardContent className="p-5 md:p-6">
@@ -24,7 +35,7 @@ export default function DayTourPromoCard({
             <p className="text-sm text-muted-foreground mt-1">{description}</p>
           </div>
           <div className="shrink-0">
-            <Button variant="accent" onClick={() => openWhatsApp(whatsappMessage)}>
+            <Button variant="accent" onClick={() => openWhatsApp(resolvedMessage)}>
               {ctaLabel}
             </Button>
           </div>
