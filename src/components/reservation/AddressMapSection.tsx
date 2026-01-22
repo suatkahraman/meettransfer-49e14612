@@ -1,7 +1,8 @@
 import { memo, useCallback } from 'react';
 import { MapPin, Navigation } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { LazyGooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/lazy-google-places-autocomplete';
+// Use the stable GooglePlacesAutocomplete that auto-loads on mount (same as Hero section)
+import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import { GoogleRouteMap } from '@/components/ui/google-route-map';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { cn } from '@/lib/utils';
@@ -177,7 +178,7 @@ const AddressMapSectionComponent = ({
             </div>
           )}
           
-          <LazyGooglePlacesAutocomplete
+          <GooglePlacesAutocomplete
             onPlaceSelected={handlePickupSelect}
             placeholder={pickupPlaceholder}
             value={pickup.address || pickup.placeName}
@@ -218,7 +219,7 @@ const AddressMapSectionComponent = ({
             </div>
           )}
           
-          <LazyGooglePlacesAutocomplete
+          <GooglePlacesAutocomplete
             onPlaceSelected={handleDropoffSelect}
             placeholder={dropoffPlaceholder}
             value={dropoff.address || dropoff.placeName}
