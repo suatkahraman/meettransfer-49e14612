@@ -36,31 +36,12 @@ serve(async (req) => {
     const tokenHash = await hashToken(token);
 
     // Find magic link by hashed token (secure method)
-    let magicLink = null;
-    const { data: hashedLink, error: hashError } = await supabase
+    const { data: magicLink, error: hashError } = await supabase
       .from("customer_magic_links")
       .select("*")
       .eq("token_hash", tokenHash)
       .is("used_at", null)
       .single();
-
-    if (hashedLink) {
-      magicLink = hashedLink;
-    } else {
-      // Fallback: Check legacy plaintext token for backwards compatibility
-      // This allows existing unused magic links to still work
-      const { data: legacyLink, error: legacyError } = await supabase
-        .from("customer_magic_links")
-        .select("*")
-        .eq("token", token)
-        .is("used_at", null)
-        .single();
-
-      if (legacyLink) {
-        magicLink = legacyLink;
-        console.log("Using legacy plaintext token - will be migrated to hashed on use");
-      }
-    }
 
     if (!magicLink) {
       return new Response(

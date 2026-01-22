@@ -138,8 +138,7 @@ Please confirm your booking by replying "Confirm".`;
         .from("customer_magic_links")
         .insert({
           customer_phone: conversation.customer_phone,
-          token, // Keep for legacy compatibility, will be removed later
-          token_hash: tokenHash, // Secure hashed token for validation
+          token_hash: tokenHash,
           expires_at: expiresAt.toISOString(),
           created_by: user.id,
         });
