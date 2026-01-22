@@ -222,6 +222,7 @@ export const LazyGooglePlacesAutocomplete = memo(({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
   const onPlaceSelectedRef = useRef(onPlaceSelected);
+  const onPlaceSelectRef = useRef(onPlaceSelect);
   const hasInitializedRef = useRef(false);
   
   const [isFocused, setIsFocused] = useState(false);
@@ -232,10 +233,14 @@ export const LazyGooglePlacesAutocomplete = memo(({
   // Debounce input changes
   const debouncedInputValue = useDebounce(inputValue, debounceMs);
 
-  // Keep callback ref up to date
+  // Keep callback refs up to date (prevents stale closures)
   useEffect(() => {
     onPlaceSelectedRef.current = onPlaceSelected;
   }, [onPlaceSelected]);
+
+  useEffect(() => {
+    onPlaceSelectRef.current = onPlaceSelect;
+  }, [onPlaceSelect]);
 
   // Notify parent of debounced input changes
   useEffect(() => {
@@ -316,7 +321,8 @@ export const LazyGooglePlacesAutocomplete = memo(({
 
           onPlaceSelectedRef.current?.(displayText, details);
           
-          onPlaceSelect?.({
+          // Use ref to access current callback (prevents stale closure)
+          onPlaceSelectRef.current?.({
             name: placeName,
             formatted_address: formattedAddress,
             lat,
@@ -331,7 +337,8 @@ export const LazyGooglePlacesAutocomplete = memo(({
     } finally {
       setIsScriptLoading(false);
     }
-  }, [onPlaceSelect]);
+  // Empty dependency - initialize only once, callbacks accessed via refs
+  }, []);
 
   // Initialize on focus (lazy loading)
   const handleFocus = useCallback(() => {
