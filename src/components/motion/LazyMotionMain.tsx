@@ -24,43 +24,23 @@ const pageTransition = {
  * - After first interaction/idle: upgrades to <motion.main>
  */
 export default function LazyMotionMain({ children, className, style }: LazyMotionMainProps) {
-  const [motion, setMotion] = React.useState<null | typeof import("framer-motion")>(null);
+  const [enabled, setEnabled] = React.useState(false);
 
   React.useEffect(() => {
     runAfterInteractive(
       () => {
-        import("framer-motion").then(setMotion).catch(() => {
-          // If motion chunk fails, keep plain <main>
-        });
+        setEnabled(true);
       },
       { requireInteraction: true, idleTimeoutMs: 4500, minDelayMs: 0 }
     );
   }, []);
 
-  if (!motion) {
-    return (
-      <main className={className} style={style}>
-        {children}
-      </main>
-    );
-  }
-
-  const { motion: m } = motion;
-  // TS note: framer-motion's HTMLMotionProps defines onDrag differently than React's DragEvent.
-  // In this lazy-loaded pattern, TS may surface an incompatibility at the JSX call site.
-  // Casting avoids a type-only conflict; runtime behavior is unaffected.
-  const MotionMain = m.main as any;
+  // CSS-only transition: initial render has no animation; after interaction we add fade.
+  // Keeps framer-motion out of the critical path and avoids TS prop conflicts.
+  const animateClass = enabled ? "animate-fade-in" : "";
   return (
-    <MotionMain
-      className={className}
-      style={style}
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      transition={pageTransition}
-    >
+    <main className={[className, animateClass].filter(Boolean).join(" ")} style={style}>
       {children}
-    </MotionMain>
+    </main>
   );
 }
