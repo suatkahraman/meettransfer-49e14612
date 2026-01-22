@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck } from "../_shared/priceMatching.ts";
 import { corsHeaders, dynamicCacheHeaders } from "../_shared/cacheHeaders.ts";
 import { detectRegion, getVehicleTypesForRegion, VehicleRegion, VEHICLE_TYPES, isValidSwitzerlandRoute } from "../_shared/vehicleConfig.ts";
-
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse, addRateLimitHeaders, RATE_LIMIT_CONFIGS } from "../_shared/rateLimiter.ts";
 interface GetPricesRequest {
   pickup: string;
   dropoff: string;
@@ -85,6 +85,15 @@ function buildVehicleConfig(vehicleTypes: typeof VEHICLE_TYPES): Record<string, 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Apply rate limiting to prevent scraping
+  const clientId = getClientIdentifier(req);
+  const rateLimitResult = checkRateLimit(clientId, RATE_LIMIT_CONFIGS.pricing);
+  
+  if (!rateLimitResult.allowed) {
+    console.log(`🚫 Rate limited: ${clientId}`);
+    return createRateLimitResponse(rateLimitResult, RATE_LIMIT_CONFIGS.pricing, corsHeaders);
   }
 
   try {
@@ -466,7 +475,13 @@ const handler = async (req: Request): Promise<Response> => {
         region,
         isDubai, // Keep for backward compatibility
       }),
-      { headers: { "Content-Type": "application/json", ...dynamicCacheHeaders } }
+      { 
+        headers: addRateLimitHeaders(
+          { "Content-Type": "application/json", ...dynamicCacheHeaders },
+          rateLimitResult,
+          RATE_LIMIT_CONFIGS.pricing
+        )
+      }
     );
 
   } catch (error: unknown) {
