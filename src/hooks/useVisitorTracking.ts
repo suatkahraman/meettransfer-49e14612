@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { runAfterInteractive } from '@/utils/afterInteractive';
 
 const VISITOR_ID_KEY = 'mt_visitor_id';
 const GEO_CACHE_KEY = 'mt_geo_cache';
@@ -48,6 +49,24 @@ function setCachedGeo(data: GeoCache['data']): void {
     localStorage.setItem(GEO_CACHE_KEY, JSON.stringify(cache));
   } catch {
     // Ignore storage errors
+  }
+}
+
+async function fetchGeoIpApiCo(timeoutMs = 3000): Promise<GeoCache['data'] | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const geoResponse = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!geoResponse.ok) return null;
+    const geoData = await geoResponse.json();
+    return {
+      countryCode: geoData.country_code || '',
+      countryName: geoData.country_name || '',
+      city: geoData.city || '',
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -211,28 +230,23 @@ export function useVisitorTracking() {
 
       // Use cached geo or fetch new
       let geo = getCachedGeo();
+
+      // CRITICAL CHAIN OPT: Never block initial context creation on geo network calls.
+      // If geo isn't cached, we start with empty geo and fill it in the background.
       if (!geo) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000);
-          
-          const geoResponse = await fetch('https://ipapi.co/json/', {
-            signal: controller.signal
-          });
-          clearTimeout(timeoutId);
-          
-          if (geoResponse.ok) {
-            const geoData = await geoResponse.json();
-            geo = {
-              countryCode: geoData.country_code || '',
-              countryName: geoData.country_name || '',
-              city: geoData.city || ''
-            };
-            setCachedGeo(geo);
-          }
-        } catch {
-          geo = { countryCode: '', countryName: '', city: '' };
-        }
+        geo = { countryCode: '', countryName: '', city: '' };
+
+        runAfterInteractive(() => {
+          void (async () => {
+            const fresh = await fetchGeoIpApiCo(3000);
+            if (!fresh) return;
+            setCachedGeo(fresh);
+            // Update existing context so subsequent heartbeats include geo
+            if (ctxRef.current) {
+              ctxRef.current.geo = fresh;
+            }
+          })();
+        });
       }
 
       ctxRef.current = {

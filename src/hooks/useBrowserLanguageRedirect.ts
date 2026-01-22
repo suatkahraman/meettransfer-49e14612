@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Language, SUPPORTED_LANGUAGES } from "./useLanguageFromUrl";
+import { runAfterInteractive } from "@/utils/afterInteractive";
 
 const LANGUAGE_DETECTED_KEY = "meet_transfer_lang_detected";
 const GEO_LANG_VALUE_KEY = "meet_transfer_detected_lang";
@@ -230,8 +231,13 @@ export const useBrowserLanguageRedirect = () => {
       }
     };
 
-    detectAndRedirect();
+    // IMPORTANT: Defer geo detection so it doesn't compete with LCP/critical chain.
+    // Runs on first interaction OR idle-after-load (whichever comes first).
+    runAfterInteractive(() => {
+      void detectAndRedirect();
+    });
   }, [location.pathname, navigate]);
 
   return { isDetecting };
 };
+
