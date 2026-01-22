@@ -26,6 +26,8 @@ import SwipeableReservationCard from '@/components/agency/SwipeableReservationCa
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import PullToRefreshIndicator from '@/components/agency/PullToRefreshIndicator';
 import AgencyHomeSkeleton, { ReservationCardSkeleton, SectionSkeleton } from '@/components/agency/AgencyHomeSkeleton';
+import { usePayments } from '@/hooks/usePayments';
+import { AgencyPaymentDialog } from '@/components/agency/AgencyPaymentDialog';
 
 interface Driver {
   id: string;
@@ -107,6 +109,7 @@ const AgencyHome = () => {
   const { t, locale } = useAgencyTranslations();
   const { language: agencyLang } = useAgencyLanguage();
   const { isSupported, isSubscribed, isLoading: pushLoading, permission, subscribe, unsubscribe } = usePushNotifications();
+  const { isPaymentsEnabled } = usePayments();
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,6 +130,10 @@ const AgencyHome = () => {
     notificationSettings: false,
     notificationHistory: false
   });
+  
+  // Payment dialog state
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [selectedCurrencyForPayment, setSelectedCurrencyForPayment] = useState<CurrencyBalance | null>(null);
 
   // Listen for bottom nav notification toggle
   useEffect(() => {
@@ -827,6 +834,22 @@ const AgencyHome = () => {
                                     <p className="text-[10px] text-muted-foreground mt-1">
                                       {cb.netBalance > 0 ? 'Borç' : cb.netBalance < 0 ? 'Alacak' : 'Dengede'}
                                     </p>
+                                    {/* Ödeme Butonu - sadece borç varsa ve ödemeler aktifse göster */}
+                                    {cb.netBalance > 0 && isPaymentsEnabled && (
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        className="w-full mt-2 text-xs h-7"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedCurrencyForPayment(cb);
+                                          setPaymentDialogOpen(true);
+                                        }}
+                                      >
+                                        <CreditCard className="h-3 w-3 mr-1" />
+                                        Öde
+                                      </Button>
+                                    )}
                                   </div>
                                 ))}
                               </div>
@@ -1384,6 +1407,22 @@ const AgencyHome = () => {
       
       {/* Spacer for bottom nav on mobile */}
       <div className="h-14 sm:hidden" />
+      
+      {/* Payment Dialog */}
+      {agencyId && selectedCurrencyForPayment && (
+        <AgencyPaymentDialog
+          open={paymentDialogOpen}
+          onOpenChange={setPaymentDialogOpen}
+          amount={selectedCurrencyForPayment.netBalance}
+          currency={selectedCurrencyForPayment.currency}
+          agencyId={agencyId}
+          onPaymentComplete={() => {
+            setPaymentDialogOpen(false);
+            setSelectedCurrencyForPayment(null);
+            fetchData(true);
+          }}
+        />
+      )}
     </div>
   );
 };
