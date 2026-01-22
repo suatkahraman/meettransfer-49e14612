@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useRef } from 'react';
 import { MapPin, Navigation } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
@@ -103,8 +103,43 @@ const AddressMapSectionComponent = ({
     dropoff: dropoffPlaceholder = 'Bırakış noktası / otel',
   } = placeholders;
 
+  // IMPORTANT:
+  // Some panels allow manual typing (without selecting a suggestion).
+  // If we push every keystroke to parent state, the whole form re-renders and may freeze.
+  // So we debounce manual typing updates and only commit after the user pauses.
+  const pickupTypingTimerRef = useRef<number | undefined>(undefined);
+  const dropoffTypingTimerRef = useRef<number | undefined>(undefined);
+
+  const commitManualPickup = useCallback(
+    (val: string) => {
+      onPickupChange({
+        address: val,
+        placeName: '',
+        lat: null,
+        lng: null,
+      });
+    },
+    [onPickupChange]
+  );
+
+  const commitManualDropoff = useCallback(
+    (val: string) => {
+      onDropoffChange({
+        address: val,
+        placeName: '',
+        lat: null,
+        lng: null,
+      });
+    },
+    [onDropoffChange]
+  );
+
   // Handle pickup place selection
   const handlePickupSelect = useCallback((value: string, details?: PlaceDetails) => {
+    if (pickupTypingTimerRef.current) {
+      window.clearTimeout(pickupTypingTimerRef.current);
+      pickupTypingTimerRef.current = undefined;
+    }
     onPickupChange({
       address: details?.formattedAddress || value,
       placeName: details?.placeName || '',
@@ -115,6 +150,10 @@ const AddressMapSectionComponent = ({
 
   // Handle dropoff place selection
   const handleDropoffSelect = useCallback((value: string, details?: PlaceDetails) => {
+    if (dropoffTypingTimerRef.current) {
+      window.clearTimeout(dropoffTypingTimerRef.current);
+      dropoffTypingTimerRef.current = undefined;
+    }
     onDropoffChange({
       address: details?.formattedAddress || value,
       placeName: details?.placeName || '',
@@ -122,6 +161,22 @@ const AddressMapSectionComponent = ({
       lng: details?.lng || null,
     });
   }, [onDropoffChange]);
+
+  const handlePickupInputChange = useCallback(
+    (val: string) => {
+      if (pickupTypingTimerRef.current) window.clearTimeout(pickupTypingTimerRef.current);
+      pickupTypingTimerRef.current = window.setTimeout(() => commitManualPickup(val), 600);
+    },
+    [commitManualPickup]
+  );
+
+  const handleDropoffInputChange = useCallback(
+    (val: string) => {
+      if (dropoffTypingTimerRef.current) window.clearTimeout(dropoffTypingTimerRef.current);
+      dropoffTypingTimerRef.current = window.setTimeout(() => commitManualDropoff(val), 600);
+    },
+    [commitManualDropoff]
+  );
 
   // Default label renderer
   const defaultRenderLabel = (label: string, isChanged?: boolean) => (
@@ -179,6 +234,7 @@ const AddressMapSectionComponent = ({
           
           <GooglePlacesAutocomplete
             onPlaceSelected={handlePickupSelect}
+            onInputChange={handlePickupInputChange}
             placeholder={pickupPlaceholder}
             initialValue={pickup.placeName || pickup.address}
             disabled={disabled}
@@ -214,6 +270,7 @@ const AddressMapSectionComponent = ({
           
           <GooglePlacesAutocomplete
             onPlaceSelected={handleDropoffSelect}
+            onInputChange={handleDropoffInputChange}
             placeholder={dropoffPlaceholder}
             initialValue={dropoff.placeName || dropoff.address}
             disabled={disabled}
