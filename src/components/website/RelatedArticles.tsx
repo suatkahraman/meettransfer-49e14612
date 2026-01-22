@@ -10,6 +10,7 @@ import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
 import midyatHero from "@/assets/blog/midyat-transfer-hero.jpg";
 import adanaHero from "@/assets/blog/adana-transfer-hero.jpg";
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
+import maybachInteriorHero from "@/assets/mercedes-maybach-interior.jpg";
 
 // Blog posts data - centralized for reuse
 export const allBlogPosts = [
@@ -33,7 +34,7 @@ export const allBlogPosts = [
     categoryKey: "vipService",
     readTime: 10,
     date: "2025-01-16",
-    image: "/images/mercedes-maybach.jpg",
+    image: maybachInteriorHero,
     isStatic: true,
   },
   {
@@ -55,7 +56,7 @@ export const allBlogPosts = [
     categoryKey: "ultraLuxury",
     readTime: 8,
     date: "2025-01-16",
-    image: "/images/maybach-interior.jpg",
+    image: maybachInteriorHero,
     isStatic: true,
   },
   {
@@ -131,7 +132,7 @@ export const allBlogPosts = [
     categoryKey: "istanbul",
     readTime: 6,
     date: "2025-01-14",
-    image: "/images/mercedes-maybach.jpg",
+    image: maybachInteriorHero,
     isStatic: true,
   },
   {
