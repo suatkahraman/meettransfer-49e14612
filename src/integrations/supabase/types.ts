@@ -1249,6 +1249,7 @@ export type Database = {
           return_time: string | null
           service_type: string
           status: string
+          token_hash: string | null
           updated_at: string | null
           vehicle_type: string
         }
@@ -1292,6 +1293,7 @@ export type Database = {
           return_time?: string | null
           service_type?: string
           status?: string
+          token_hash?: string | null
           updated_at?: string | null
           vehicle_type: string
         }
@@ -1335,6 +1337,7 @@ export type Database = {
           return_time?: string | null
           service_type?: string
           status?: string
+          token_hash?: string | null
           updated_at?: string | null
           vehicle_type?: string
         }
