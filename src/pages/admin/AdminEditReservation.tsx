@@ -2296,7 +2296,14 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                   pickup: getChangedFields.has('pickup'),
                   dropoff: getChangedFields.has('dropoff'),
                 }}
-                showMap={true}
+                // Admin panelde yazarken kilitlenmeyi önlemek için haritayı,
+                // sadece iki lokasyon da Autocomplete üzerinden seçilip koordinatları geldiğinde göster.
+                showMap={
+                  formData.pickup_lat != null &&
+                  formData.pickup_lng != null &&
+                  formData.dropoff_lat != null &&
+                  formData.dropoff_lng != null
+                }
                 showNavigationButtons={false}
               />
 
