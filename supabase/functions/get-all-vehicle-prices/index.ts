@@ -57,6 +57,24 @@ async function convertCurrency(
   return { amount: Math.round(amount * rate), rate };
 }
 
+// Extract airport code from full airport name (e.g., "Zurich Airport (ZRH)" -> "ZRH")
+function extractAirportCode(airportName: string): string {
+  // Try to extract code from parentheses first (e.g., "Zurich Airport (ZRH)")
+  const parenMatch = airportName.match(/\(([A-Z]{3})\)/);
+  if (parenMatch) {
+    return parenMatch[1];
+  }
+  
+  // Try to find a 3-letter uppercase code anywhere
+  const codeMatch = airportName.match(/\b([A-Z]{3})\b/);
+  if (codeMatch) {
+    return codeMatch[1];
+  }
+  
+  // Fallback: return the original name (for backwards compatibility)
+  return airportName;
+}
+
 // Build vehicle config from dynamic types
 function buildVehicleConfig(vehicleTypes: typeof VEHICLE_TYPES): Record<string, { label: string; passengers: number; luggage: number }> {
   return Object.fromEntries(
@@ -170,8 +188,15 @@ const handler = async (req: Request): Promise<Response> => {
       airport.includes('Dubai') ? 'Dubai' :
       airport.includes('Larnaca') || airport.includes('Paphos') || airport.includes('Ercan') ? 'Cyprus' :
       airport.includes('Bursa') ? 'Bursa' :
+      airport.includes('Zurich') || airport.includes('ZRH') ? 'Switzerland' :
+      airport.includes('Geneva') || airport.includes('GVA') ? 'Switzerland' :
+      airport.includes('Basel') || airport.includes('BSL') ? 'Switzerland' :
+      airport.includes('Malpensa') || airport.includes('MXP') ? 'Switzerland' :
       null
     ) : null;
+    
+    // Extract airport code for database queries (e.g., "Zurich Airport (ZRH)" -> "ZRH")
+    const airportCode = airport ? extractAirportCode(airport) : null;
     
     const nonAirportCity = direction === 'to_airport' ? pickupCity : 
                            direction === 'from_airport' ? dropoffCity : null;
@@ -266,36 +291,53 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       // Try exact match (airport + city + district + vehicle)
+      // Try both full airport name and airport code (e.g., "Zurich Airport (ZRH)" and "ZRH")
       if (!foundPrice && airport && city && district) {
-        const { data } = await supabase
-          .from("region_prices")
-          .select("price, price_currency")
-          .eq("city", city)
-          .eq("airport", airport)
-          .eq("district", district)
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .limit(1);
+        const airportQueries = airportCode && airportCode !== airport 
+          ? [airport, airportCode] 
+          : [airport];
+        
+        for (const airportQuery of airportQueries) {
+          if (foundPrice) break;
+          const { data } = await supabase
+            .from("region_prices")
+            .select("price, price_currency")
+            .eq("city", city)
+            .eq("airport", airportQuery)
+            .eq("district", district)
+            .eq("vehicle_type", vehicleType)
+            .eq("is_active", true)
+            .limit(1);
 
-        if (data && data.length > 0) {
-          foundPrice = { price: data[0].price, currency: data[0].price_currency };
+          if (data && data.length > 0) {
+            foundPrice = { price: data[0].price, currency: data[0].price_currency };
+            console.log(`✅ Exact match found for ${vehicleType} with airport ${airportQuery}: ${foundPrice.price} ${foundPrice.currency}`);
+          }
         }
       }
 
       // Try airport + city match
       if (!foundPrice && airport && city) {
-        const { data } = await supabase
-          .from("region_prices")
-          .select("price, price_currency")
-          .eq("city", city)
-          .eq("airport", airport)
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .order("price", { ascending: true })
-          .limit(1);
+        const airportQueries = airportCode && airportCode !== airport 
+          ? [airport, airportCode] 
+          : [airport];
+        
+        for (const airportQuery of airportQueries) {
+          if (foundPrice) break;
+          const { data } = await supabase
+            .from("region_prices")
+            .select("price, price_currency")
+            .eq("city", city)
+            .eq("airport", airportQuery)
+            .eq("vehicle_type", vehicleType)
+            .eq("is_active", true)
+            .order("price", { ascending: true })
+            .limit(1);
 
-        if (data && data.length > 0) {
-          foundPrice = { price: data[0].price, currency: data[0].price_currency };
+          if (data && data.length > 0) {
+            foundPrice = { price: data[0].price, currency: data[0].price_currency };
+            console.log(`✅ Airport+city match found for ${vehicleType} with airport ${airportQuery}: ${foundPrice.price} ${foundPrice.currency}`);
+          }
         }
       }
 
