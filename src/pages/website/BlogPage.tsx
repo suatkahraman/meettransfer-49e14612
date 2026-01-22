@@ -347,6 +347,17 @@ const BlogPage = () => {
       image: switzerlandHero,
       isStatic: true,
     },
+    {
+      id: "diyarbakir-airport-transfer-guide",
+      titleKey: "blogDiyTitle",
+      descriptionKey: "blogDiyDesc",
+      category: "Diyarbakır",
+      categoryKey: "diyarbakir",
+      readTime: 8,
+      date: "2025-01-22",
+      image: vitoExteriorBlack,
+      isStatic: false,
+    },
   ], []);
 
   // Get unique categories

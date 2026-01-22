@@ -15,6 +15,8 @@ import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import { useBlogDate } from "@/hooks/useBlogDate";
+import VehiclePriceTable from "@/components/website/VehiclePriceTable";
+import { useBlogT } from "@/components/blog/BlogLayout";
 
 // Import images
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
@@ -27,6 +29,7 @@ import daraAncientCity from "@/assets/blog/dara-ancient-city.jpg";
 
 const MidyatAirportTransferGuide = () => {
   const { t, getLocalizedPath, language } = useLanguage();
+  const { t: tBlog } = useBlogT();
   const { formatBlogDate } = useBlogDate();
   const formattedDate = formatBlogDate("2025-01-16");
   const faqItems = [
@@ -59,6 +62,17 @@ const MidyatAirportTransferGuide = () => {
     { destination: "Hasankeyf (Batman)", distance: "120 km", duration: "2 hours", sedan: "€95", vito: "€120", maybach: "€200" },
     { destination: "Mardin City", distance: "65 km", duration: "1 hour", sedan: "€55", vito: "€75", maybach: "€140" },
     { destination: "Dara Ancient City", distance: "45 km", duration: "50 min", sedan: "€50", vito: "€70", maybach: "€130" },
+  ];
+
+  const diyToMidyat = [
+    {
+      to: tBlog("blogDiyDestMidyat"),
+      sedan: "€184",
+      vito: "€188",
+      maybachMinivan: tBlog("blogNotAvailable"),
+      vipVito: "€199",
+      sprinter: "€260",
+    },
   ];
 
   const attractions = [
@@ -402,6 +416,11 @@ const MidyatAirportTransferGuide = () => {
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+
+              <div className="not-prose my-10">
+                <h3 className="font-serif text-xl font-bold mb-3">{tBlog("blogDiyToMidyatTitle")}</h3>
+                <VehiclePriceTable rows={diyToMidyat} />
               </div>
 
               {/* Mobile Cards */}
