@@ -64,6 +64,8 @@ export interface GooglePlacesAutocompleteProps {
   onPlaceSelect?: (place: { name?: string; formatted_address: string; lat?: number | null; lng?: number | null }) => void;
   /** Called whenever the user types (manual input). */
   onInputChange?: (value: string) => void;
+  /** Called when input loses focus (useful to commit manual typing without re-rendering on each keystroke). */
+  onBlurValue?: (value: string) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -82,6 +84,7 @@ export const GooglePlacesAutocomplete = ({
   onPlaceSelected,
   onPlaceSelect,
   onInputChange,
+  onBlurValue,
   placeholder = 'Enter location',
   className,
   disabled = false,
@@ -311,7 +314,10 @@ export const GooglePlacesAutocomplete = ({
           autoComplete="off"
           placeholder=""
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={(e) => {
+            setIsFocused(false);
+            onBlurValue?.((e.currentTarget as HTMLInputElement).value);
+          }}
           onInput={(e) => {
             const val = (e.currentTarget as HTMLInputElement).value;
             setHasValue(!!val);
@@ -364,6 +370,7 @@ export const GooglePlacesAutocomplete = ({
       maxLength={maxLength}
       autoComplete="off"
       onInput={(e) => onInputChange?.((e.currentTarget as HTMLInputElement).value)}
+      onBlur={(e) => onBlurValue?.((e.currentTarget as HTMLInputElement).value)}
       // CRITICAL: NO value, defaultValue, or onChange here
     />
   );
