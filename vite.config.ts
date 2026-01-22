@@ -20,6 +20,12 @@ export default defineConfig(({ mode }) => ({
       // Auto-update: keep users on the latest published version (no manual prompt).
       registerType: "autoUpdate",
       injectRegister: null,
+      // Enable SW in preview/dev builds so /debug can accurately show SW + update flow.
+      // (Production builds are unaffected.)
+      devOptions: {
+        enabled: mode === "development",
+        type: "module",
+      },
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "robots.txt", "sitemap.xml"],
       manifest: {
         id: "/",
@@ -364,9 +370,6 @@ export default defineConfig(({ mode }) => ({
             handler: "NetworkOnly"
           }
         ]
-      },
-      devOptions: {
-        enabled: false
       }
     }),
     // Bundle analyzer - generates stats.html in project root
