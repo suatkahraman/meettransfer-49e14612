@@ -9,6 +9,8 @@ import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import { useBlogDate } from "@/hooks/useBlogDate";
 import VehiclePriceTable from "@/components/website/VehiclePriceTable";
 import { useBlogT } from "@/components/blog/BlogLayout";
+import FAQSection from "@/components/website/FAQSection";
+import DayTourPromoCard from "@/components/website/DayTourPromoCard";
 
 import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
 
@@ -19,6 +21,14 @@ const DiyarbakirAirportTransferGuide = () => {
   const formattedDate = formatBlogDate("2025-01-22");
 
   const na = t("blogNotAvailable");
+
+  const faqItems = [
+    { question: t("blogDiyFaq1Q"), answer: t("blogDiyFaq1A") },
+    { question: t("blogDiyFaq2Q"), answer: t("blogDiyFaq2A") },
+    { question: t("blogDiyFaq3Q"), answer: t("blogDiyFaq3A") },
+    { question: t("blogDiyFaq4Q"), answer: t("blogDiyFaq4A") },
+    { question: t("blogDiyFaq5Q"), answer: t("blogDiyFaq5A") },
+  ];
 
   const diyRoutes = [
     { to: t("blogDiyDestCityCenter"), sedan: "€56", vito: "€60", maybachMinivan: na, vipVito: "€66", sprinter: "€80" },
@@ -70,6 +80,7 @@ const DiyarbakirAirportTransferGuide = () => {
               { name: t("blogDiyBreadcrumb"), url: "/blog/diyarbakir-airport-transfer-guide" },
             ],
           },
+          { type: "FAQPage", questions: faqItems },
         ]}
       />
       <ReadingProgressBar />
@@ -126,6 +137,19 @@ const DiyarbakirAirportTransferGuide = () => {
               <li>{t("blogDiyBookingBullet2")}</li>
               <li>{t("blogDiyBookingBullet3")}</li>
             </ul>
+          </section>
+
+          <section className="not-prose my-8">
+            <DayTourPromoCard
+              title={t("blogDayTourPromoTitle")}
+              description={t("blogDayTourPromoDesc")}
+              ctaLabel={t("blogDayTourPromoCta")}
+              whatsappMessage={t("blogDayTourPromoWhatsAppMessage")}
+            />
+          </section>
+
+          <section className="not-prose my-8">
+            <FAQSection items={faqItems} title={t("frequentlyAskedQuestions")} />
           </section>
         </div>
 
