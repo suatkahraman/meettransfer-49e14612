@@ -278,8 +278,10 @@ All colors MUST be HSL.
   /* Ultra-high z-index to ensure visibility above dialogs, sheets, popovers */
   z-index: 2147483647 !important;
   overflow: visible !important;
-  /* Ensure it's not clipped by overflow:hidden on parent containers */
-  position: fixed !important;
+  /* IMPORTANT: Don't force `position: fixed`.
+     Google positions this dropdown using page coordinates; forcing fixed can push it off-screen
+     on long/scrollable admin panels, making it look like suggestions “never appear”. */
+  position: absolute !important;
 }
 
 .pac-container::after {
