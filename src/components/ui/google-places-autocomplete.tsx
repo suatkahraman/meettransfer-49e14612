@@ -240,9 +240,10 @@ export const GooglePlacesAutocomplete = ({
             lng,
           };
 
-          // Let Google / DOM control the input value directly
-          // Show place name prominently if available
-          input.value = placeName || formattedAddress;
+           // Let Google / DOM control the input value directly.
+           // IMPORTANT: Admin panel expects the full address to appear in the field.
+           // Prefer formatted address; fall back to displayText; then placeName.
+           input.value = formattedAddress || displayText || placeName;
 
           console.log('[GooglePlacesAutocomplete] Place selected:', placeName || formattedAddress);
 

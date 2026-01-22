@@ -279,7 +279,8 @@ const AddressMapSectionComponent = ({
             onInputChange={handlePickupInputChange}
             onBlurValue={handlePickupBlur}
             placeholder={pickupPlaceholder}
-            initialValue={pickup.placeName || pickup.address}
+             // Prefer full address in the field (admin expects address, not only venue name)
+             initialValue={pickup.address || pickup.placeName}
             disabled={disabled}
             className={errors.pickup ? 'border-destructive' : ''}
           />
@@ -316,7 +317,8 @@ const AddressMapSectionComponent = ({
             onInputChange={handleDropoffInputChange}
             onBlurValue={handleDropoffBlur}
             placeholder={dropoffPlaceholder}
-            initialValue={dropoff.placeName || dropoff.address}
+             // Prefer full address in the field (admin expects address, not only venue name)
+             initialValue={dropoff.address || dropoff.placeName}
             disabled={disabled}
             className={errors.dropoff ? 'border-destructive' : ''}
           />
