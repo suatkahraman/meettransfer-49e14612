@@ -1,8 +1,9 @@
 import { memo, useCallback } from 'react';
 import { MapPin, Navigation } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-// Use the stable GooglePlacesAutocomplete that auto-loads on mount (same as Hero section)
-import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
+// Use the SAME LazyGooglePlacesAutocomplete as Quick Booking (Hero section)
+// This ensures consistent behavior across all panels
+import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/lazy-google-places-autocomplete';
 import { GoogleRouteMap } from '@/components/ui/google-route-map';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { cn } from '@/lib/utils';
