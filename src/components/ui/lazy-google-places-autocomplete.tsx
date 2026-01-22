@@ -181,14 +181,26 @@ const AutocompleteInput = memo(({
 
   return (
     <div className="relative">
+      {/* Icon for non-floating label mode */}
+      {icon && (
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 text-muted-foreground">
+          {icon}
+        </div>
+      )}
       <Input
         ref={inputRef}
         type="text"
         placeholder={placeholder}
-        className={cn(isLoading && "pr-10", className)}
+        className={cn(
+          icon && "pl-10",
+          isLoading && "pr-10", 
+          className
+        )}
         disabled={disabled}
         maxLength={maxLength}
         autoComplete="off"
+        onFocus={onFocus}
+        onBlur={onBlur}
         onInput={(e) => onInput((e.currentTarget as HTMLInputElement).value)}
       />
       <div
