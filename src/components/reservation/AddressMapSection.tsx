@@ -1,5 +1,5 @@
-import { memo, useCallback, useRef } from 'react';
-import { MapPin, Navigation } from 'lucide-react';
+import { memo, useCallback, useRef, useEffect } from 'react';
+import { MapPin } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import { GoogleRouteMap } from '@/components/ui/google-route-map';
@@ -107,60 +107,67 @@ const AddressMapSectionComponent = ({
   // Some panels allow manual typing (without selecting a suggestion).
   // If we push every keystroke to parent state, the whole form re-renders and may freeze.
   // So we debounce manual typing updates and only commit after the user pauses.
+  // We also use latest refs for callbacks to avoid stale closures and unnecessary re-renders.
   const pickupTypingTimerRef = useRef<number | undefined>(undefined);
   const dropoffTypingTimerRef = useRef<number | undefined>(undefined);
 
+  // Keep callback refs up-to-date (avoids re-creating child callbacks on every parent render)
+  const onPickupChangeRef = useRef(onPickupChange);
+  const onDropoffChangeRef = useRef(onDropoffChange);
+  useEffect(() => { onPickupChangeRef.current = onPickupChange; }, [onPickupChange]);
+  useEffect(() => { onDropoffChangeRef.current = onDropoffChange; }, [onDropoffChange]);
+
   const commitManualPickup = useCallback(
     (val: string) => {
-      onPickupChange({
+      onPickupChangeRef.current({
         address: val,
         placeName: '',
         lat: null,
         lng: null,
       });
     },
-    [onPickupChange]
+    []
   );
 
   const commitManualDropoff = useCallback(
     (val: string) => {
-      onDropoffChange({
+      onDropoffChangeRef.current({
         address: val,
         placeName: '',
         lat: null,
         lng: null,
       });
     },
-    [onDropoffChange]
+    []
   );
 
-  // Handle pickup place selection
+  // Handle pickup place selection (use ref to avoid stale closure)
   const handlePickupSelect = useCallback((value: string, details?: PlaceDetails) => {
     if (pickupTypingTimerRef.current) {
       window.clearTimeout(pickupTypingTimerRef.current);
       pickupTypingTimerRef.current = undefined;
     }
-    onPickupChange({
+    onPickupChangeRef.current({
       address: details?.formattedAddress || value,
       placeName: details?.placeName || '',
       lat: details?.lat || null,
       lng: details?.lng || null,
     });
-  }, [onPickupChange]);
+  }, []);
 
-  // Handle dropoff place selection
+  // Handle dropoff place selection (use ref to avoid stale closure)
   const handleDropoffSelect = useCallback((value: string, details?: PlaceDetails) => {
     if (dropoffTypingTimerRef.current) {
       window.clearTimeout(dropoffTypingTimerRef.current);
       dropoffTypingTimerRef.current = undefined;
     }
-    onDropoffChange({
+    onDropoffChangeRef.current({
       address: details?.formattedAddress || value,
       placeName: details?.placeName || '',
       lat: details?.lat || null,
       lng: details?.lng || null,
     });
-  }, [onDropoffChange]);
+  }, []);
 
   const handlePickupInputChange = useCallback(
     (val: string) => {

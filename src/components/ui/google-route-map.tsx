@@ -86,6 +86,15 @@ const GoogleRouteMapComponent = ({
   useEffect(() => {
     let isCancelled = false;
 
+    // Use requestIdleCallback to avoid blocking main thread during heavy geocoding/map init
+    const scheduleWork = (fn: () => void) => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(fn, { timeout: 2000 });
+      } else {
+        setTimeout(fn, 100);
+      }
+    };
+
     const initMap = async () => {
       if (!mapContainer.current) return;
 
@@ -219,7 +228,6 @@ const GoogleRouteMapComponent = ({
           directionsRendererRef.current = new maps.DirectionsRenderer({
             suppressMarkers: false,
             polylineOptions: {
-              // Keep theme-safe: color is handled by Google, but we avoid Tailwind color tokens here.
               strokeColor: '#3b82f6',
               strokeWeight: 5,
               strokeOpacity: 0.8,
@@ -256,7 +264,6 @@ const GoogleRouteMapComponent = ({
               });
             }
           } else {
-            // Common statuses: REQUEST_DENIED, ZERO_RESULTS, OVER_QUERY_LIMIT, NOT_FOUND
             const message =
               status === 'REQUEST_DENIED'
                 ? 'Harita servis izni reddedildi (API key/domain kısıtı olabilir).'
@@ -294,7 +301,7 @@ const GoogleRouteMapComponent = ({
     };
 
     if (stablePickup && stableDropoff) {
-      initMap();
+      scheduleWork(initMap);
     } else {
       setLoading(false);
     }
