@@ -1,7 +1,7 @@
-import { memo, useCallback, useRef, useEffect } from 'react';
-import { MapPin } from 'lucide-react';
+import { memo, useCallback } from 'react';
+import { MapPin, Navigation } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
+import { LazyGooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/lazy-google-places-autocomplete';
 import { GoogleRouteMap } from '@/components/ui/google-route-map';
 import { LocationDisplay } from '@/components/ui/location-display';
 import { cn } from '@/lib/utils';
@@ -41,12 +41,6 @@ export interface AddressMapSectionProps {
   };
   /** Whether to show the route map preview */
   showMap?: boolean;
-  /**
-   * How to commit manual typing to parent state.
-   * - 'debounce' (default): commit after user pauses typing (legacy behavior)
-   * - 'blur': commit only on input blur (recommended for heavy parent forms like Admin)
-   */
-  manualCommitMode?: 'debounce' | 'blur';
   /** Whether to show navigation buttons on the map */
   showNavigationButtons?: boolean;
   /** Customer phone for map navigation (optional) */
@@ -89,7 +83,6 @@ const AddressMapSectionComponent = ({
   labels = {},
   placeholders = {},
   showMap = true,
-  manualCommitMode = 'debounce',
   showNavigationButtons = false,
   customerPhone,
   className,
@@ -110,115 +103,25 @@ const AddressMapSectionComponent = ({
     dropoff: dropoffPlaceholder = 'Bırakış noktası / otel',
   } = placeholders;
 
-  // IMPORTANT:
-  // Some panels allow manual typing (without selecting a suggestion).
-  // If we push every keystroke to parent state, the whole form re-renders and may freeze.
-  // So we debounce manual typing updates and only commit after the user pauses.
-  // We also use latest refs for callbacks to avoid stale closures and unnecessary re-renders.
-  const pickupTypingTimerRef = useRef<number | undefined>(undefined);
-  const dropoffTypingTimerRef = useRef<number | undefined>(undefined);
-
-  // Keep callback refs up-to-date (avoids re-creating child callbacks on every parent render)
-  const onPickupChangeRef = useRef(onPickupChange);
-  const onDropoffChangeRef = useRef(onDropoffChange);
-  useEffect(() => { onPickupChangeRef.current = onPickupChange; }, [onPickupChange]);
-  useEffect(() => { onDropoffChangeRef.current = onDropoffChange; }, [onDropoffChange]);
-
-  const commitManualPickup = useCallback(
-    (val: string) => {
-      onPickupChangeRef.current({
-        address: val,
-        placeName: '',
-        lat: null,
-        lng: null,
-      });
-    },
-    []
-  );
-
-  const commitManualDropoff = useCallback(
-    (val: string) => {
-      onDropoffChangeRef.current({
-        address: val,
-        placeName: '',
-        lat: null,
-        lng: null,
-      });
-    },
-    []
-  );
-
-  // Handle pickup place selection (use ref to avoid stale closure)
+  // Handle pickup place selection - exactly like hero section
   const handlePickupSelect = useCallback((value: string, details?: PlaceDetails) => {
-    if (pickupTypingTimerRef.current) {
-      window.clearTimeout(pickupTypingTimerRef.current);
-      pickupTypingTimerRef.current = undefined;
-    }
-    onPickupChangeRef.current({
+    onPickupChange({
       address: details?.formattedAddress || value,
       placeName: details?.placeName || '',
       lat: details?.lat || null,
       lng: details?.lng || null,
     });
-  }, []);
+  }, [onPickupChange]);
 
-  // Handle dropoff place selection (use ref to avoid stale closure)
+  // Handle dropoff place selection - exactly like hero section
   const handleDropoffSelect = useCallback((value: string, details?: PlaceDetails) => {
-    if (dropoffTypingTimerRef.current) {
-      window.clearTimeout(dropoffTypingTimerRef.current);
-      dropoffTypingTimerRef.current = undefined;
-    }
-    onDropoffChangeRef.current({
+    onDropoffChange({
       address: details?.formattedAddress || value,
       placeName: details?.placeName || '',
       lat: details?.lat || null,
       lng: details?.lng || null,
     });
-  }, []);
-
-  const handlePickupInputChange = useCallback(
-    (val: string) => {
-      // In heavy parent forms (Admin), avoid committing on every typing pause.
-      // We'll commit on blur instead to prevent large re-renders / perceived freezing.
-      if (manualCommitMode !== 'debounce') return;
-
-      if (pickupTypingTimerRef.current) window.clearTimeout(pickupTypingTimerRef.current);
-      pickupTypingTimerRef.current = window.setTimeout(() => commitManualPickup(val), 600);
-    },
-    [commitManualPickup, manualCommitMode]
-  );
-
-  const handleDropoffInputChange = useCallback(
-    (val: string) => {
-      if (manualCommitMode !== 'debounce') return;
-
-      if (dropoffTypingTimerRef.current) window.clearTimeout(dropoffTypingTimerRef.current);
-      dropoffTypingTimerRef.current = window.setTimeout(() => commitManualDropoff(val), 600);
-    },
-    [commitManualDropoff, manualCommitMode]
-  );
-
-  const handlePickupBlur = useCallback(
-    (val: string) => {
-      if (pickupTypingTimerRef.current) {
-        window.clearTimeout(pickupTypingTimerRef.current);
-        pickupTypingTimerRef.current = undefined;
-      }
-      if (manualCommitMode === 'blur') commitManualPickup(val);
-    },
-    [commitManualPickup, manualCommitMode]
-  );
-
-  const handleDropoffBlur = useCallback(
-    (val: string) => {
-      if (dropoffTypingTimerRef.current) {
-        window.clearTimeout(dropoffTypingTimerRef.current);
-        dropoffTypingTimerRef.current = undefined;
-      }
-      if (manualCommitMode === 'blur') commitManualDropoff(val);
-    },
-    [commitManualDropoff, manualCommitMode]
-  );
+  }, [onDropoffChange]);
 
   // Default label renderer
   const defaultRenderLabel = (label: string, isChanged?: boolean) => (
@@ -274,15 +177,18 @@ const AddressMapSectionComponent = ({
             </div>
           )}
           
-          <GooglePlacesAutocomplete
+          <LazyGooglePlacesAutocomplete
             onPlaceSelected={handlePickupSelect}
-            onInputChange={handlePickupInputChange}
-            onBlurValue={handlePickupBlur}
             placeholder={pickupPlaceholder}
-             // Prefer full address in the field (admin expects address, not only venue name)
-             initialValue={pickup.address || pickup.placeName}
+            value={pickup.address || pickup.placeName}
             disabled={disabled}
-            className={errors.pickup ? 'border-destructive' : ''}
+            className={cn(
+              "h-12 border-2 rounded-xl",
+              errors.pickup 
+                ? 'border-destructive' 
+                : 'border-primary/30 hover:border-primary/50 focus-within:border-primary'
+            )}
+            icon={<MapPin className="h-4 w-4 text-primary" />}
           />
           
           {errors.pickup && (
@@ -312,15 +218,18 @@ const AddressMapSectionComponent = ({
             </div>
           )}
           
-          <GooglePlacesAutocomplete
+          <LazyGooglePlacesAutocomplete
             onPlaceSelected={handleDropoffSelect}
-            onInputChange={handleDropoffInputChange}
-            onBlurValue={handleDropoffBlur}
             placeholder={dropoffPlaceholder}
-             // Prefer full address in the field (admin expects address, not only venue name)
-             initialValue={dropoff.address || dropoff.placeName}
+            value={dropoff.address || dropoff.placeName}
             disabled={disabled}
-            className={errors.dropoff ? 'border-destructive' : ''}
+            className={cn(
+              "h-12 border-2 rounded-xl",
+              errors.dropoff 
+                ? 'border-destructive' 
+                : 'border-accent/30 hover:border-accent/50 focus-within:border-accent'
+            )}
+            icon={<Navigation className="h-4 w-4 text-accent" />}
           />
           
           {errors.dropoff && (

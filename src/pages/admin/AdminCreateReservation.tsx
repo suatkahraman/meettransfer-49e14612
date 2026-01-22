@@ -142,7 +142,6 @@ const MemoizedAddressSection = memo(({ formData, setFormData }: MemoizedAddressS
       onDropoffChange={handleDropoffChange}
       showMap={showMap}
       showNavigationButtons={false}
-      manualCommitMode="blur"
     />
   );
 });
