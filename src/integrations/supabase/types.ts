@@ -460,8 +460,7 @@ export type Database = {
           customer_user_id: string | null
           expires_at: string
           id: string
-          token: string
-          token_hash: string | null
+          token_hash: string
           used_at: string | null
         }
         Insert: {
@@ -471,8 +470,7 @@ export type Database = {
           customer_user_id?: string | null
           expires_at: string
           id?: string
-          token: string
-          token_hash?: string | null
+          token_hash: string
           used_at?: string | null
         }
         Update: {
@@ -482,8 +480,7 @@ export type Database = {
           customer_user_id?: string | null
           expires_at?: string
           id?: string
-          token?: string
-          token_hash?: string | null
+          token_hash?: string
           used_at?: string | null
         }
         Relationships: []

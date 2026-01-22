@@ -107,8 +107,7 @@ serve(async (req) => {
         .from("customer_magic_links")
         .insert({
           customer_phone: customerPhone,
-          token: magicToken, // Keep for legacy compatibility, will be removed later
-          token_hash: tokenHash, // Secure hashed token for validation
+          token_hash: tokenHash,
           expires_at: expiresAt.toISOString(),
         });
 
