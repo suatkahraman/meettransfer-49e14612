@@ -130,7 +130,13 @@ export const GooglePlacesAutocomplete = ({
 
   // Listen for auth failure events
   useEffect(() => {
-    const handleAuthFailure = () => setAuthFailed(true);
+    const handleAuthFailure = () => {
+      // Only set authFailed if Google Maps API is truly not available
+      // If it's already loaded and working, ignore the failure event
+      if (!window.google?.maps?.places?.Autocomplete) {
+        setAuthFailed(true);
+      }
+    };
     window.addEventListener('google-maps-auth-failure', handleAuthFailure);
     return () => window.removeEventListener('google-maps-auth-failure', handleAuthFailure);
   }, []);
@@ -143,8 +149,18 @@ export const GooglePlacesAutocomplete = ({
     const maxPollAttempts = 50; // 50 * 100ms = 5 seconds max waiting for input
 
     const setupAutocomplete = async () => {
-      // If auth already failed, don't bother
-      if (isGoogleMapsAuthFailed()) {
+      // CRITICAL FIX: Check if Google Maps is ACTUALLY available first
+      // Even if authFailed flag is set, the API might already be loaded and working
+      // (e.g., Quick Booking loaded it successfully before some later auth check failed)
+      const mapsAlreadyLoaded = !!window.google?.maps?.places?.Autocomplete;
+      
+      if (mapsAlreadyLoaded) {
+        console.log('[GooglePlacesAutocomplete] Google Maps already loaded, proceeding...');
+        // Clear any previous auth failure state since API is working
+        setAuthFailed(false);
+      } else if (isGoogleMapsAuthFailed()) {
+        // Only show auth failure if Maps is NOT already loaded
+        console.warn('[GooglePlacesAutocomplete] Auth failed and Maps not loaded, showing warning');
         setAuthFailed(true);
         return;
       }
@@ -169,22 +185,29 @@ export const GooglePlacesAutocomplete = ({
 
       console.log('[GooglePlacesAutocomplete] Starting initialization...');
 
-      try {
-        await loadGoogleMapsScript(['places']);
-      } catch (error) {
-        console.error('[GooglePlacesAutocomplete] Failed to load Google Maps:', error);
-        // Check if it's auth failure
-        if (isGoogleMapsAuthFailed()) {
-          setAuthFailed(true);
-          return;
+      // Only load script if not already available
+      if (!window.google?.maps?.places?.Autocomplete) {
+        try {
+          await loadGoogleMapsScript(['places']);
+        } catch (error) {
+          console.error('[GooglePlacesAutocomplete] Failed to load Google Maps:', error);
+          // Check if it's auth failure AND maps still not available
+          if (!window.google?.maps?.places?.Autocomplete) {
+            if (isGoogleMapsAuthFailed()) {
+              setAuthFailed(true);
+              return;
+            }
+            // Retry loading
+            if (retryCount < maxRetries && !isCancelled) {
+              retryCount++;
+              console.log(`[GooglePlacesAutocomplete] Retrying... (${retryCount}/${maxRetries})`);
+              setTimeout(setupAutocomplete, 1000);
+            }
+            return;
+          }
+          // Maps loaded despite error (race condition), continue
+          console.log('[GooglePlacesAutocomplete] Maps available despite load error, continuing...');
         }
-        // Retry loading
-        if (retryCount < maxRetries && !isCancelled) {
-          retryCount++;
-          console.log(`[GooglePlacesAutocomplete] Retrying... (${retryCount}/${maxRetries})`);
-          setTimeout(setupAutocomplete, 1000);
-        }
-        return;
       }
 
       if (isCancelled) {
@@ -299,8 +322,11 @@ export const GooglePlacesAutocomplete = ({
 
   const isFloating = isFocused || hasValue;
 
-  // Auth failure warning UI
-  if (authFailed) {
+  // Auth failure warning UI - but ONLY if Maps is truly not available
+  // Double-check at render time in case Maps loaded after initial check
+  const showAuthWarning = authFailed && !window.google?.maps?.places?.Autocomplete;
+  
+  if (showAuthWarning) {
     return (
       <div className="relative">
         <Input
