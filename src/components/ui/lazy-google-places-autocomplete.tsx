@@ -267,42 +267,60 @@ export const LazyGooglePlacesAutocomplete = memo(({
 
   // Lazy load Google Maps only when input is focused
   const initializeAutocomplete = useCallback(async () => {
-    if (hasInitializedRef.current || autocompleteRef.current || !inputRef.current) {
+    if (hasInitializedRef.current || autocompleteRef.current) {
+      console.log('[LazyGooglePlacesAutocomplete] Already initialized, skipping');
+      return;
+    }
+    
+    const inputEl = inputRef.current;
+    if (!inputEl) {
+      console.warn('[LazyGooglePlacesAutocomplete] Input ref not available');
       return;
     }
 
     setIsScriptLoading(true);
-
-    const inputEl = inputRef.current;
+    console.log('[LazyGooglePlacesAutocomplete] Starting initialization...');
 
     try {
       await loadGoogleMapsScript(['places']);
 
       const maps = getGoogleMaps();
-      if (!inputEl || !maps?.places) {
+      if (!maps?.places?.Autocomplete) {
+        console.error('[LazyGooglePlacesAutocomplete] Google Places API not available');
+        return;
+      }
+
+      // Re-check input ref after async operation
+      const currentInput = inputRef.current;
+      if (!currentInput) {
+        console.warn('[LazyGooglePlacesAutocomplete] Input ref lost after script load');
         return;
       }
 
       let autocomplete: GoogleMapsAutocomplete;
       try {
         autocomplete = new maps.places.Autocomplete(
-          inputEl,
+          currentInput,
           {
             types: ['establishment', 'geocode'],
             fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
             componentRestrictions: { country: ['tr', 'ae', 'cy', 'de', 'gr', 'ch', 'it'] },
           }
         );
+        console.log('[LazyGooglePlacesAutocomplete] Autocomplete instance created successfully');
       } catch (error) {
-        console.error('Failed to create Google Autocomplete instance:', error);
+        console.error('[LazyGooglePlacesAutocomplete] Failed to create instance:', error);
         return;
       }
 
+      // Mark as initialized BEFORE adding listener
       hasInitializedRef.current = true;
+      autocompleteRef.current = autocomplete;
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        if (place && inputRef.current) {
+        const input = inputRef.current;
+        if (place && input) {
           const placeName = place.name || '';
           const formattedAddress = place.formatted_address || '';
           
@@ -324,8 +342,10 @@ export const LazyGooglePlacesAutocomplete = memo(({
             lng,
           };
 
-          inputRef.current.value = placeName || formattedAddress;
+          input.value = placeName || formattedAddress;
           setHasValue(true);
+
+          console.log('[LazyGooglePlacesAutocomplete] Place selected:', placeName || formattedAddress);
 
           onPlaceSelectedRef.current?.(displayText, details);
           
@@ -338,10 +358,8 @@ export const LazyGooglePlacesAutocomplete = memo(({
           });
         }
       });
-
-      autocompleteRef.current = autocomplete;
     } catch (error) {
-      console.error('Failed to initialize Google Places Autocomplete:', error);
+      console.error('[LazyGooglePlacesAutocomplete] Failed to initialize:', error);
     } finally {
       setIsScriptLoading(false);
     }

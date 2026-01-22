@@ -126,41 +126,58 @@ export const GooglePlacesAutocomplete = ({
   useEffect(() => {
     let isCancelled = false;
     let retryCount = 0;
-    const maxRetries = 3;
-    let currentInput: HTMLInputElement | null = null;
-
-    const getInputEl = () => currentInput ?? inputRef.current;
+    const maxRetries = 5;
+    let pollAttempts = 0;
+    const maxPollAttempts = 50; // 50 * 100ms = 5 seconds max waiting for input
 
     const setupAutocomplete = async () => {
       // Wait until the input ref is actually bound (some panels render inputs conditionally)
-      const inputEl = getInputEl();
+      const inputEl = inputRef.current;
       if (!inputEl) {
-        if (!isCancelled) {
-          setTimeout(setupAutocomplete, 50);
+        pollAttempts++;
+        if (!isCancelled && pollAttempts < maxPollAttempts) {
+          setTimeout(setupAutocomplete, 100);
+        } else {
+          console.warn('[GooglePlacesAutocomplete] Input ref never bound after max attempts');
         }
         return;
       }
 
-      currentInput = inputEl;
-
       // Skip if already attached to this specific input
       if (autocompleteRef.current || hasInitializedRef.current) {
+        console.log('[GooglePlacesAutocomplete] Already initialized, skipping');
         return;
       }
 
+      console.log('[GooglePlacesAutocomplete] Starting initialization...');
+
       try {
-        await loadGoogleMapsScript();
+        await loadGoogleMapsScript(['places']);
       } catch (error) {
-        console.error('Failed to load Google Maps:', error);
+        console.error('[GooglePlacesAutocomplete] Failed to load Google Maps:', error);
         // Retry loading
         if (retryCount < maxRetries && !isCancelled) {
           retryCount++;
+          console.log(`[GooglePlacesAutocomplete] Retrying... (${retryCount}/${maxRetries})`);
           setTimeout(setupAutocomplete, 1000);
         }
         return;
       }
 
-      if (isCancelled || !currentInput || !window.google?.maps?.places) {
+      if (isCancelled) {
+        console.log('[GooglePlacesAutocomplete] Cancelled before completion');
+        return;
+      }
+      
+      // Re-check input ref after async operation
+      const currentInput = inputRef.current;
+      if (!currentInput) {
+        console.warn('[GooglePlacesAutocomplete] Input ref lost after script load');
+        return;
+      }
+      
+      if (!window.google?.maps?.places?.Autocomplete) {
+        console.error('[GooglePlacesAutocomplete] Google Places API not available');
         return;
       }
 
@@ -169,7 +186,7 @@ export const GooglePlacesAutocomplete = ({
         return;
       }
 
-      console.log('Initializing Google Places Autocomplete');
+      console.log('[GooglePlacesAutocomplete] Creating Autocomplete instance...');
 
       let autocomplete: GoogleMapsAutocomplete;
       try {
@@ -181,14 +198,20 @@ export const GooglePlacesAutocomplete = ({
             componentRestrictions: { country: ['tr', 'ae', 'cy', 'de', 'gr', 'ch', 'it'] },
           }
         );
+        console.log('[GooglePlacesAutocomplete] Autocomplete instance created successfully');
       } catch (error) {
-        console.error('Failed to create Google Autocomplete instance:', error);
+        console.error('[GooglePlacesAutocomplete] Failed to create instance:', error);
         return;
       }
 
+      // Mark as initialized BEFORE adding listener to prevent race conditions
+      hasInitializedRef.current = true;
+      autocompleteRef.current = autocomplete;
+
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
-        if (place && currentInput) {
+        const input = inputRef.current;
+        if (place && input) {
           const placeName = place.name || '';
           const formattedAddress = place.formatted_address || '';
           
@@ -216,7 +239,9 @@ export const GooglePlacesAutocomplete = ({
 
           // Let Google / DOM control the input value directly
           // Show place name prominently if available
-          currentInput.value = placeName || formattedAddress;
+          input.value = placeName || formattedAddress;
+
+          console.log('[GooglePlacesAutocomplete] Place selected:', placeName || formattedAddress);
 
           // React state update ONLY here (if parent uses it)
           onPlaceSelectedRef.current?.(displayText, details);
@@ -230,9 +255,6 @@ export const GooglePlacesAutocomplete = ({
           });
         }
       });
-
-      autocompleteRef.current = autocomplete;
-      hasInitializedRef.current = true;
     };
 
     // Small delay to ensure DOM is ready
