@@ -48,7 +48,12 @@ const GoogleRouteMapComponent = ({
 }: GoogleRouteMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+  const directionsServiceRef = useRef<any>(null);
   const directionsRendererRef = useRef<any>(null);
+  const trafficLayerRef = useRef<any>(null);
+  const pickupMarkerRef = useRef<any>(null);
+  const dropoffMarkerRef = useRef<any>(null);
+  const lastKeyRef = useRef<string>('');
   const [pickupCoords, setPickupCoords] = useState<Coordinates | null>(null);
   const [dropoffCoords, setDropoffCoords] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,11 +73,28 @@ const GoogleRouteMapComponent = ({
     return () => window.clearTimeout(timeoutId);
   }, [pickup, dropoff]);
 
+  // Cleanup ONLY on unmount (do not teardown map on every address change)
+  useEffect(() => {
+    return () => {
+      directionsRendererRef.current?.setMap(null);
+      trafficLayerRef.current?.setMap(null);
+      pickupMarkerRef.current?.setMap(null);
+      dropoffMarkerRef.current?.setMap(null);
+    };
+  }, []);
+
   useEffect(() => {
     let isCancelled = false;
 
     const initMap = async () => {
       if (!mapContainer.current) return;
+
+      const workKey = `${stablePickup}__${stableDropoff}`;
+      if (lastKeyRef.current === workKey) {
+        setLoading(false);
+        return;
+      }
+      lastKeyRef.current = workKey;
       
       setLoading(true);
       setError(null);
@@ -131,38 +153,85 @@ const GoogleRouteMapComponent = ({
         ? { lat: (coords[0].lat + coords[1].lat) / 2, lng: (coords[0].lng + coords[1].lng) / 2 }
         : coords[0];
 
-      // Initialize map
-      mapRef.current = new maps.Map(mapContainer.current!, {
-        center,
-        zoom: 10,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-        zoomControl: true,
-      });
+      // Initialize the map ONCE; later updates just adjust center/options.
+      if (!mapRef.current) {
+        mapRef.current = new maps.Map(mapContainer.current!, {
+          center,
+          zoom: 10,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+          zoomControl: true,
+        });
+      } else {
+        mapRef.current.setOptions({
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+          zoomControl: true,
+        });
+        mapRef.current.setCenter(center);
+      }
 
-      // Add traffic layer
-      const trafficLayer = new maps.TrafficLayer();
-      trafficLayer.setMap(mapRef.current);
+      // Add traffic layer (create once)
+      if (!trafficLayerRef.current) {
+        trafficLayerRef.current = new maps.TrafficLayer();
+      }
+      trafficLayerRef.current.setMap(mapRef.current);
+
+      const upsertMarker = (
+        markerRef: React.MutableRefObject<any>,
+        position: Coordinates | null,
+        title: string,
+        iconUrl: string
+      ) => {
+        if (!position) {
+          markerRef.current?.setMap(null);
+          return;
+        }
+
+        if (!markerRef.current) {
+          markerRef.current = new maps.Marker({
+            position,
+            map: mapRef.current,
+            title,
+            icon: { url: iconUrl },
+          });
+          return;
+        }
+
+        markerRef.current.setMap(mapRef.current);
+        markerRef.current.setPosition(position);
+        markerRef.current.setTitle?.(title);
+        markerRef.current.setIcon?.({ url: iconUrl });
+      };
 
       // If we have both coordinates, draw the route
       if (pickupResult && dropoffResult) {
-        const directionsService = new maps.DirectionsService();
-        directionsRendererRef.current = new maps.DirectionsRenderer({
-          map: mapRef.current,
-          suppressMarkers: false,
-          polylineOptions: {
-            // Keep theme-safe: color is handled by Google, but we avoid Tailwind color tokens here.
-            strokeColor: '#3b82f6',
-            strokeWeight: 5,
-            strokeOpacity: 0.8,
-          },
-        });
+        // Hide single markers when we show a full route
+        pickupMarkerRef.current?.setMap(null);
+        dropoffMarkerRef.current?.setMap(null);
+
+        if (!directionsServiceRef.current) {
+          directionsServiceRef.current = new maps.DirectionsService();
+        }
+        if (!directionsRendererRef.current) {
+          directionsRendererRef.current = new maps.DirectionsRenderer({
+            suppressMarkers: false,
+            polylineOptions: {
+              // Keep theme-safe: color is handled by Google, but we avoid Tailwind color tokens here.
+              strokeColor: '#3b82f6',
+              strokeWeight: 5,
+              strokeOpacity: 0.8,
+            },
+          });
+        }
+        directionsRendererRef.current.setMap(mapRef.current);
 
         try {
           const { result, status } = await withTimeout(
             new Promise<{ result: any; status: string }>((resolve) => {
-              directionsService.route(
+              directionsServiceRef.current.route(
                 {
                   origin: pickupResult,
                   destination: dropoffResult,
@@ -206,27 +275,20 @@ const GoogleRouteMapComponent = ({
           if (!isCancelled) setLoading(false);
         }
       } else {
-        // Just show single marker
-        if (pickupResult) {
-          new maps.Marker({
-            position: pickupResult,
-            map: mapRef.current,
-            title: 'Pickup',
-            icon: {
-              url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-            },
-          });
-        }
-        if (dropoffResult) {
-          new maps.Marker({
-            position: dropoffResult,
-            map: mapRef.current,
-            title: 'Drop-off',
-            icon: {
-              url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-            },
-          });
-        }
+        // Hide route renderer and show single markers
+        directionsRendererRef.current?.setMap(null);
+        upsertMarker(
+          pickupMarkerRef,
+          pickupResult,
+          'Pickup',
+          'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+        );
+        upsertMarker(
+          dropoffMarkerRef,
+          dropoffResult,
+          'Drop-off',
+          'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+        );
         setLoading(false);
       }
     };
@@ -239,9 +301,6 @@ const GoogleRouteMapComponent = ({
 
     return () => {
       isCancelled = true;
-      if (directionsRendererRef.current) {
-        directionsRendererRef.current.setMap(null);
-      }
     };
   }, [stablePickup, stableDropoff]);
 
