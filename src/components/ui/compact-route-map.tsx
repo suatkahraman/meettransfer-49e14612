@@ -64,6 +64,15 @@ const CompactRouteMapComponent = ({
   useEffect(() => {
     let isCancelled = false;
 
+    // Use requestIdleCallback to avoid blocking main thread during heavy geocoding/map init
+    const scheduleWork = (fn: () => void) => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(fn, { timeout: 2000 });
+      } else {
+        setTimeout(fn, 100);
+      }
+    };
+
     const initMap = async () => {
       if (!mapContainer.current) return;
 
@@ -234,7 +243,7 @@ const CompactRouteMapComponent = ({
     };
 
     if (stablePickup && stableDropoff) {
-      initMap();
+      scheduleWork(initMap);
     } else {
       setLoading(false);
     }
