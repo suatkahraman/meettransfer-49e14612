@@ -85,6 +85,15 @@ const DURATION_OPTIONS = [
   { value: "12h", label: "12 Hours" },
 ];
 
+// Helper function to format camelCase to readable text (e.g., "customerInformation" -> "Customer Information")
+const formatCamelCase = (text: string): string => {
+  if (!text) return text;
+  return text
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (str) => str.toUpperCase())
+    .trim();
+};
+
 const BookingPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -1501,9 +1510,9 @@ const BookingPage = () => {
               {/* Currency Selection - Below Vehicle List */}
               <Card>
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
-                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
                     <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                    {t("preferredCurrency") || "Preferred Currency"}
+                    {formatCamelCase(t("preferredCurrency")) || "Preferred Currency"}
                   </CardTitle>
                   <CardDescription className="text-xs sm:text-sm">
                     {t("currencyHint") || "Select your preferred currency for the price quote"}
@@ -1702,9 +1711,9 @@ const BookingPage = () => {
               {/* Customer Information - For both guests and logged-in users */}
               <Card>
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
-                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
                     <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                    {t("customerInformation") || "Your Information"}
+                    {formatCamelCase(t("customerInformation")) || "Your Information"}
                   </CardTitle>
                   {user && (
                     <CardDescription className="flex items-center gap-2 text-green-600 text-xs sm:text-sm">
@@ -1716,8 +1725,8 @@ const BookingPage = () => {
                 <CardContent className="p-4 sm:p-6 pt-0 space-y-3 sm:space-y-4">
                   {/* Name field */}
                   <div>
-                    <Label className="text-sm text-muted-foreground mb-2 block">
-                      {t("fullName") || "Full Name"} <span className="text-red-500">*</span>
+                    <Label className="text-sm text-foreground font-medium mb-2 block">
+                      {formatCamelCase(t("fullName")) || "Full Name"} <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       value={customerName}
@@ -1730,8 +1739,8 @@ const BookingPage = () => {
 
                   {/* Phone field */}
                   <div>
-                    <Label className="text-sm text-muted-foreground mb-2 block">
-                      {t("phoneNumber") || "Phone"} <span className="text-red-500">*</span>
+                    <Label className="text-sm text-foreground font-medium mb-2 block">
+                      {formatCamelCase(t("phoneNumber")) || "Phone"} <span className="text-red-500">*</span>
                     </Label>
                     <PhoneInput
                       value={customerPhone}
@@ -1744,9 +1753,9 @@ const BookingPage = () => {
 
                   {/* Email field */}
                   <div>
-                    <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                    <Label className="text-sm text-foreground font-medium mb-2 block flex items-center gap-2">
                       <Mail className="h-4 w-4" />
-                      {t("email") || "Email"} <span className="text-red-500">*</span>
+                      {formatCamelCase(t("email")) || "Email"} <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       type="email"
@@ -1762,9 +1771,9 @@ const BookingPage = () => {
                   {/* Password field - Only for guests (non-logged-in, non-Google users) */}
                   {!user && !isGoogleUser && (
                     <div>
-                      <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                      <Label className="text-sm text-foreground font-medium mb-2 block flex items-center gap-2">
                         <Lock className="h-4 w-4" />
-                        {t("password") || "Create Password"} <span className="text-red-500">*</span>
+                        {formatCamelCase(t("password")) || "Create Password"} <span className="text-red-500">*</span>
                       </Label>
                       <div className="relative">
                         <Input
@@ -1794,9 +1803,9 @@ const BookingPage = () => {
                   {/* Flight Number - Only for airport transfers */}
                   {!isHourlyBooking && (urlPickup.toLowerCase().includes('airport') || urlPickup.toLowerCase().includes('havalimanı') || urlPickup.toLowerCase().includes('havaalanı')) && (
                     <div>
-                      <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                      <Label className="text-sm text-foreground font-medium mb-2 block flex items-center gap-2">
                         <Plane className="h-4 w-4" />
-                        {t("flightNumber") || "Flight Number"}
+                        {formatCamelCase(t("flightNumber")) || "Flight Number"}
                       </Label>
                       <Input
                         value={flightNumber}
@@ -1815,9 +1824,9 @@ const BookingPage = () => {
 
                   {/* Passenger Names */}
                   <div>
-                    <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                    <Label className="text-sm text-foreground font-medium mb-2 block flex items-center gap-2">
                       <UserPlus className="h-4 w-4" />
-                      {t("passengerNames") || "Passenger Names"} 
+                      {formatCamelCase(t("passengerNames")) || "Passenger Names"} 
                       <span className="text-xs text-muted-foreground">({t("optional") || "optional"})</span>
                     </Label>
                     <Textarea
@@ -1834,9 +1843,9 @@ const BookingPage = () => {
 
                   {/* Notes field */}
                   <div>
-                    <Label className="text-sm text-muted-foreground mb-2 block flex items-center gap-2">
+                    <Label className="text-sm text-foreground font-medium mb-2 block flex items-center gap-2">
                       <MessageSquare className="h-4 w-4" />
-                      {t("specialRequests") || "Notes"}
+                      {formatCamelCase(t("specialRequests")) || "Notes"}
                     </Label>
                     <Textarea
                       value={customerNotes}
