@@ -95,27 +95,28 @@ const DriverMonthlyAccounting = () => {
         .from('driver_payments')
         .select('*')
         .eq('driver_id', driverId)
+        .lte('payment_date', monthEnd) // Only payments up to end of selected month
         .order('payment_date', { ascending: false });
 
       if (allPaymentsData) {
         setAllPayments(allPaymentsData);
       }
 
-      // Fetch all completed reservations BEFORE current month for carry-over
+      // Fetch all completed reservations UP TO AND INCLUDING current month for carry-over
       // Exclude cancelled and deleted
-      const { data: previousReservations } = await supabase
+      const { data: allCompletedReservations } = await supabase
         .from('reservations')
         .select('driver_earning, driver_cash_amount, pickup_date, status')
         .eq('driver_id', driverId)
-        .lt('pickup_date', monthStart)
+        .lte('pickup_date', monthEnd) // Include all up to end of selected month
         .eq('status', 'completed');
 
-      // Calculate previous months earnings (driver_earning - cash collected) - TL bazlı
-      let prevEarnings = 0;
-      previousReservations?.forEach(r => {
-        prevEarnings += (r.driver_earning || 0) - (r.driver_cash_amount || 0);
+      // Calculate all-time earnings up to selected month (driver_earning - cash collected) - TL bazlı
+      let allTimeEarnings = 0;
+      allCompletedReservations?.forEach(r => {
+        allTimeEarnings += (r.driver_earning || 0) - (r.driver_cash_amount || 0);
       });
-      setPreviousMonthsEarnings(prevEarnings);
+      setPreviousMonthsEarnings(allTimeEarnings);
 
       setLoading(false);
     };
@@ -178,11 +179,12 @@ const DriverMonthlyAccounting = () => {
     .filter(p => p.payment_type === 'from_driver')
     .reduce((sum, p) => sum + Number(p.amount), 0);
   
-  // Monthly earnings = price - cash (what driver should receive)
+  // Monthly earnings = price - cash (what driver should receive for this month only)
   const monthlyEarnings = totalPrice - totalCash;
   
-  // Total all-time earnings
-  const totalAllTimeEarnings = previousMonthsEarnings + monthlyEarnings;
+  // Total all-time earnings up to and including selected month
+  // previousMonthsEarnings now includes ALL completed reservations up to selected month
+  const totalAllTimeEarnings = previousMonthsEarnings;
   
   // Net balance = Total earnings - payments received + payments given
   // If positive = company owes driver (alacak)
