@@ -1078,28 +1078,16 @@ const BookingPage = () => {
     );
   }
 
-  // Booking Success Screen
-  // Auto-redirect to customer home after booking is completed
-  const [redirectCountdown, setRedirectCountdown] = useState(5);
-  
+  // Booking Success Screen - Immediate redirect for logged-in users
   useEffect(() => {
     if (bookingCompleted && user) {
-      const timer = setInterval(() => {
-        setRedirectCountdown(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            navigate('/customer', { replace: true });
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      
-      return () => clearInterval(timer);
+      // Immediate redirect without animation
+      navigate('/customer', { replace: true });
     }
   }, [bookingCompleted, user, navigate]);
 
-  if (bookingCompleted) {
+  // Only show success screen for guests (not logged in)
+  if (bookingCompleted && !user) {
     return (
       <WebsiteLayout>
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
@@ -1116,18 +1104,8 @@ const BookingPage = () => {
                 {t("whatsappConfirmation") || "You will receive a WhatsApp message with your reservation details."}
               </p>
               
-              {/* Auto-redirect countdown for logged-in users */}
-              {user && (
-                <p className="text-sm text-primary mb-4 animate-pulse">
-                  {language === 'TR' 
-                    ? `${redirectCountdown} saniye içinde panele yönlendiriliyorsunuz...`
-                    : `Redirecting to your panel in ${redirectCountdown} seconds...`
-                  }
-                </p>
-              )}
-              
-              <Button onClick={() => navigate("/customer")} className="w-full" size="lg">
-                {t("viewMyReservations") || "View My Reservations"}
+              <Button onClick={() => navigate("/")} className="w-full" size="lg">
+                {t("backToHome") || "Back to Home"}
               </Button>
             </CardContent>
           </Card>
