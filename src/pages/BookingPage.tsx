@@ -357,6 +357,13 @@ const BookingPage = () => {
           console.log('[GoogleAuth] User authenticated, preparing redirect to customer home');
           
           // Step 1: Restore cached form data from sessionStorage (saved before OAuth)
+          // CRITICAL: These values come from cache, NOT from URL params (which may be empty after OAuth)
+          let cachedPickup = urlPickup;
+          let cachedDropoff = urlDropoff;
+          let cachedDate = urlDate;
+          let cachedTime = urlTime;
+          let cachedCity = urlCity;
+          let cachedIsHourly = isHourlyBooking;
           let cachedVehicleType = vehicleType;
           let cachedHasReturnTrip = hasReturnTrip;
           let cachedReturnDate = returnDate;
@@ -368,6 +375,9 @@ const BookingPage = () => {
           let cachedPrice: number | undefined;
           let cachedPriceCurrency: string | undefined;
           let cachedReturnPrice: number | undefined;
+          let cachedCustomerNotes = '';
+          let cachedFlightNumber = '';
+          let cachedPaymentType: 'cash' | 'credit_card' | 'online' = 'cash';
           
           try {
             const cachedData = sessionStorage.getItem(GOOGLE_AUTH_CACHE_KEY);
@@ -375,7 +385,15 @@ const BookingPage = () => {
               const parsed = JSON.parse(cachedData);
               console.log('[GoogleAuth] Found cached booking data:', parsed);
               
-              // Use cached values
+              // CRITICAL: Restore route data from cache (URL params are lost after OAuth redirect)
+              if (parsed.pickup) cachedPickup = parsed.pickup;
+              if (parsed.dropoff) cachedDropoff = parsed.dropoff;
+              if (parsed.date) cachedDate = parsed.date;
+              if (parsed.time) cachedTime = parsed.time;
+              if (parsed.city) cachedCity = parsed.city;
+              if (parsed.isHourly !== undefined) cachedIsHourly = parsed.isHourly;
+              
+              // Use cached form values
               if (parsed.vehicleType) cachedVehicleType = parsed.vehicleType;
               if (parsed.passengers) cachedPassengers = parsed.passengers;
               if (parsed.hasReturnTrip !== undefined) cachedHasReturnTrip = parsed.hasReturnTrip;
@@ -384,6 +402,9 @@ const BookingPage = () => {
               if (parsed.babySeatCount !== undefined) cachedBabySeatCount = parsed.babySeatCount;
               if (parsed.luggageCount !== undefined) cachedLuggageCount = parsed.luggageCount;
               if (parsed.promoCode) cachedPromoCode = parsed.promoCode;
+              if (parsed.customerNotes) cachedCustomerNotes = parsed.customerNotes;
+              if (parsed.flightNumber) cachedFlightNumber = parsed.flightNumber;
+              if (parsed.paymentType) cachedPaymentType = parsed.paymentType;
               
               // Get price from cached vehicle prices
               if (parsed.vehiclePrices?.length > 0) {
@@ -403,7 +424,7 @@ const BookingPage = () => {
                 }
               }
               
-              // Clear the cache
+              // Clear the cache after restoring
               sessionStorage.removeItem(GOOGLE_AUTH_CACHE_KEY);
             }
           } catch (e) {
@@ -411,11 +432,12 @@ const BookingPage = () => {
           }
           
           // Step 2: Save complete booking data to PendingBookingStorage for customer home
-          PendingBookingStorage.save({
-            pickup: urlPickup,
-            dropoff: urlDropoff,
-            date: urlDate,
-            time: urlTime,
+          // CRITICAL: Use cached values, NOT URL params (which may be empty)
+          const bookingDataToSave = {
+            pickup: cachedPickup,
+            dropoff: cachedDropoff,
+            date: cachedDate,
+            time: cachedTime,
             passengers: cachedPassengers,
             vehicleType: cachedVehicleType,
             estimatedPrice: cachedPrice,
@@ -427,14 +449,19 @@ const BookingPage = () => {
             babySeatCount: cachedBabySeatCount,
             luggageCount: cachedLuggageCount,
             promoCode: cachedPromoCode,
-            serviceType: isHourlyBooking ? 'hourly' : 'transfer',
+            serviceType: cachedIsHourly ? 'hourly' : 'transfer',
             language,
+            customerNotes: cachedCustomerNotes,
+            flightNumber: cachedFlightNumber,
+            paymentMethod: cachedPaymentType,
             // Customer info from Google
             customerName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
             customerEmail: session.user.email || '',
-          });
+          };
           
-          console.log('[GoogleAuth] Saved booking data to PendingBookingStorage, redirecting to customer home');
+          PendingBookingStorage.save(bookingDataToSave);
+          
+          console.log('[GoogleAuth] Saved COMPLETE booking data to PendingBookingStorage:', bookingDataToSave);
           
           // Step 3: Redirect to customer home where form will be auto-filled
           navigate('/customer', { replace: true });
@@ -443,7 +470,7 @@ const BookingPage = () => {
     };
     
     checkGoogleAuth();
-  }, [searchParams, navigate, urlPickup, urlDropoff, urlDate, urlTime, urlPassengers, vehicleType, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount, promoCode, isHourlyBooking, language]);
+  }, [searchParams, navigate, urlPickup, urlDropoff, urlDate, urlTime, urlCity, urlPassengers, vehicleType, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount, promoCode, isHourlyBooking, language]);
 
   // Fetch vehicle prices for transfer bookings with minimum 8 second loading animation
   useEffect(() => {
@@ -639,9 +666,19 @@ const BookingPage = () => {
     try {
       // Save current form state to sessionStorage BEFORE OAuth redirect
       // This ensures all form data (prices, return trip, etc.) is preserved
+      // CRITICAL: Include pickup, dropoff, date, time - these get lost after OAuth redirect
       const cacheData = {
+        // Route data - MUST be saved explicitly
+        pickup: effectivePickup,
+        dropoff: effectiveDropoff,
+        date: effectiveDate,
+        time: effectiveTime,
+        city: effectiveCity,
+        isHourly: effectiveIsHourly,
+        // Prices
         vehiclePrices,
         hourlyPrices,
+        // Form state
         vehicleType,
         passengers,
         hasReturnTrip,
@@ -661,7 +698,7 @@ const BookingPage = () => {
         preferredCurrency,
       };
       sessionStorage.setItem(GOOGLE_AUTH_CACHE_KEY, JSON.stringify(cacheData));
-      console.log('[GoogleAuth] Saved form cache before OAuth redirect:', cacheData);
+      console.log('[GoogleAuth] Saved COMPLETE form cache before OAuth redirect:', cacheData);
       
       // Build current URL with all params for redirect
       const currentUrl = new URL(window.location.href);

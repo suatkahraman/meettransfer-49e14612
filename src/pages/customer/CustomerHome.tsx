@@ -432,6 +432,9 @@ const CustomerHome = () => {
         // Set prices if available
         if (sessionBookingData.allVehiclePrices) {
           setVehiclePrices(sessionBookingData.allVehiclePrices);
+        } else if (sessionBookingData.estimatedPrice && sessionBookingData.vehicleType) {
+          // Set the single vehicle price from Google OAuth flow
+          setVehiclePrices({ [sessionBookingData.vehicleType]: sessionBookingData.estimatedPrice });
         }
         if (sessionBookingData.currency) {
           setPriceCurrency(sessionBookingData.currency);
