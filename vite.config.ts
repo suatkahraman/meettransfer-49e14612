@@ -531,6 +531,8 @@ export default defineConfig(({ mode }) => ({
     target: "es2020",
     // Enable CSS code splitting
     cssCodeSplit: true,
+    // Enable CSS minification (uses esbuild by default in Vite 5+)
+    cssMinify: "esbuild",
     // Reduce asset inline limit for better caching
     assetsInlineLimit: 2048
   }
