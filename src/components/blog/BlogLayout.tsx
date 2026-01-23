@@ -84,8 +84,17 @@ export function BlogLayout({ children }: { children: ReactNode }) {
     return () => { cancelled = true; };
   }, [language]);
 
+  // Helper function to format camelCase to readable text (e.g., "blogAntalyaTitle" -> "Blog Antalya Title")
+  const formatCamelCase = (text: string): string => {
+    if (!text) return text;
+    return text
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  };
+
   const tBlog = (key: string): string => {
-    if (!translations) return key;
+    if (!translations) return formatCamelCase(key);
     const val = translations[key];
     if (val) return val;
     
@@ -95,7 +104,8 @@ export function BlogLayout({ children }: { children: ReactNode }) {
       if (enVal) return enVal;
     }
     
-    return key;
+    // If no translation found, format the key as readable text
+    return formatCamelCase(key);
   };
 
   return (
