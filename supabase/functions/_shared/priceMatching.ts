@@ -1318,10 +1318,197 @@ export function logAnalysis(
   console.log(`${'='.repeat(60)}\n`);
 }
 
+// ==================== DISTANCE-BASED VALIDATION ====================
+// Airport to district distances for price consistency validation
+// These distances help detect wrong district matches (e.g., Lara matched as Alanya)
+
+export interface DistanceInfo {
+  distanceKm: number;
+  minPriceVito: number;
+  maxPriceVito: number;
+}
+
+// Antalya Airport (AYT) to district distances
+const ANTALYA_AIRPORT_DISTANCES: Record<string, DistanceInfo> = {
+  'Lara': { distanceKm: 12, minPriceVito: 35, maxPriceVito: 60 },
+  'Kundu': { distanceKm: 15, minPriceVito: 35, maxPriceVito: 65 },
+  'Konyaalti': { distanceKm: 25, minPriceVito: 40, maxPriceVito: 70 },
+  'Kaleici': { distanceKm: 18, minPriceVito: 38, maxPriceVito: 65 },
+  'Belek': { distanceKm: 35, minPriceVito: 45, maxPriceVito: 80 },
+  'Kadriye': { distanceKm: 40, minPriceVito: 45, maxPriceVito: 80 },
+  'Bogazkent': { distanceKm: 45, minPriceVito: 45, maxPriceVito: 80 },
+  'Side': { distanceKm: 65, minPriceVito: 55, maxPriceVito: 100 },
+  'Manavgat': { distanceKm: 75, minPriceVito: 60, maxPriceVito: 110 },
+  'Alanya': { distanceKm: 130, minPriceVito: 80, maxPriceVito: 150 },
+  'Kemer': { distanceKm: 45, minPriceVito: 50, maxPriceVito: 85 },
+  'Beldibi': { distanceKm: 35, minPriceVito: 45, maxPriceVito: 80 },
+  'Goynuk': { distanceKm: 50, minPriceVito: 50, maxPriceVito: 85 },
+  'Tekirova': { distanceKm: 65, minPriceVito: 55, maxPriceVito: 95 },
+  'Cirali': { distanceKm: 80, minPriceVito: 55, maxPriceVito: 100 },
+  'Olympos': { distanceKm: 90, minPriceVito: 60, maxPriceVito: 110 },
+  'Kas': { distanceKm: 190, minPriceVito: 120, maxPriceVito: 200 },
+  'Kalkan': { distanceKm: 170, minPriceVito: 110, maxPriceVito: 180 },
+  'Fethiye': { distanceKm: 220, minPriceVito: 160, maxPriceVito: 250 },
+  'Gazipasa': { distanceKm: 180, minPriceVito: 130, maxPriceVito: 200 },
+};
+
+// Istanbul Airport (IST) to district distances
+const ISTANBUL_AIRPORT_DISTANCES: Record<string, DistanceInfo> = {
+  'Taksim': { distanceKm: 40, minPriceVito: 45, maxPriceVito: 80 },
+  'Sultanahmet': { distanceKm: 45, minPriceVito: 45, maxPriceVito: 85 },
+  'Besiktas': { distanceKm: 38, minPriceVito: 45, maxPriceVito: 80 },
+  'Sisli': { distanceKm: 35, minPriceVito: 45, maxPriceVito: 75 },
+  'Levent': { distanceKm: 30, minPriceVito: 40, maxPriceVito: 70 },
+  'Bakirkoy': { distanceKm: 25, minPriceVito: 38, maxPriceVito: 65 },
+  'Kadikoy': { distanceKm: 60, minPriceVito: 55, maxPriceVito: 100 },
+  'Uskudar': { distanceKm: 55, minPriceVito: 50, maxPriceVito: 95 },
+};
+
+// Sabiha Gokcen Airport (SAW) to district distances
+const SAW_AIRPORT_DISTANCES: Record<string, DistanceInfo> = {
+  'Kadikoy': { distanceKm: 30, minPriceVito: 40, maxPriceVito: 70 },
+  'Uskudar': { distanceKm: 35, minPriceVito: 42, maxPriceVito: 75 },
+  'Taksim': { distanceKm: 50, minPriceVito: 50, maxPriceVito: 90 },
+  'Sultanahmet': { distanceKm: 45, minPriceVito: 48, maxPriceVito: 85 },
+  'Besiktas': { distanceKm: 55, minPriceVito: 52, maxPriceVito: 95 },
+};
+
+// Bodrum Airport (BJV) to district distances
+const BODRUM_AIRPORT_DISTANCES: Record<string, DistanceInfo> = {
+  'Bodrum Center': { distanceKm: 35, minPriceVito: 45, maxPriceVito: 80 },
+  'Yalikavak': { distanceKm: 55, minPriceVito: 55, maxPriceVito: 95 },
+  'Turgutreis': { distanceKm: 45, minPriceVito: 50, maxPriceVito: 85 },
+  'Gumbet': { distanceKm: 38, minPriceVito: 48, maxPriceVito: 82 },
+  'Turkbuku': { distanceKm: 50, minPriceVito: 55, maxPriceVito: 95 },
+  'Bitez': { distanceKm: 40, minPriceVito: 48, maxPriceVito: 85 },
+};
+
+// Dalaman Airport (DLM) to district distances
+const DALAMAN_AIRPORT_DISTANCES: Record<string, DistanceInfo> = {
+  'Fethiye': { distanceKm: 50, minPriceVito: 55, maxPriceVito: 90 },
+  'Oludeniz': { distanceKm: 65, minPriceVito: 60, maxPriceVito: 100 },
+  'Marmaris': { distanceKm: 95, minPriceVito: 80, maxPriceVito: 130 },
+  'Gocek': { distanceKm: 25, minPriceVito: 42, maxPriceVito: 70 },
+  'Dalyan': { distanceKm: 20, minPriceVito: 40, maxPriceVito: 65 },
+  'Icmeler': { distanceKm: 100, minPriceVito: 85, maxPriceVito: 140 },
+  'Hisaronu': { distanceKm: 60, minPriceVito: 58, maxPriceVito: 95 },
+  'Calis': { distanceKm: 55, minPriceVito: 55, maxPriceVito: 92 },
+};
+
+// Map airports to their distance tables
+const AIRPORT_DISTANCE_MAPS: Record<string, Record<string, DistanceInfo>> = {
+  'Antalya Airport (AYT)': ANTALYA_AIRPORT_DISTANCES,
+  'Istanbul Airport (IST)': ISTANBUL_AIRPORT_DISTANCES,
+  'Sabiha Gokcen Airport (SAW)': SAW_AIRPORT_DISTANCES,
+  'Bodrum-Milas Airport (BJV)': BODRUM_AIRPORT_DISTANCES,
+  'Dalaman Airport (DLM)': DALAMAN_AIRPORT_DISTANCES,
+};
+
+// Validate that a matched district makes sense given the price
+export function validateDistrictByDistance(
+  airport: string | null,
+  matchedDistrict: string | null,
+  priceEur: number,
+  vehicleType?: string
+): { isValid: boolean; expectedDistrict?: string; reason?: string } {
+  if (!airport || !matchedDistrict) {
+    return { isValid: true };
+  }
+
+  const distanceMap = AIRPORT_DISTANCE_MAPS[airport];
+  if (!distanceMap) {
+    return { isValid: true }; // No distance data for this airport
+  }
+
+  const districtInfo = distanceMap[matchedDistrict];
+  if (!districtInfo) {
+    return { isValid: true }; // District not in our distance map
+  }
+
+  // Adjust price range based on vehicle type
+  let priceMultiplier = 1;
+  const normalizedVehicle = (vehicleType || 'vito').toLowerCase().replace(/[_\s]/g, '-');
+  if (normalizedVehicle.includes('vip')) {
+    priceMultiplier = 1.15;
+  } else if (normalizedVehicle.includes('sprinter') || normalizedVehicle.includes('minibus')) {
+    priceMultiplier = 1.65;
+  } else if (normalizedVehicle.includes('maybach')) {
+    priceMultiplier = 1.35;
+  } else if (normalizedVehicle.includes('sedan')) {
+    priceMultiplier = 0.92;
+  }
+
+  const expectedMin = districtInfo.minPriceVito * priceMultiplier;
+  const expectedMax = districtInfo.maxPriceVito * priceMultiplier;
+
+  // If price is way outside expected range, flag it
+  // Allow 20% tolerance for edge cases
+  const toleranceMin = expectedMin * 0.8;
+  const toleranceMax = expectedMax * 1.2;
+
+  if (priceEur < toleranceMin || priceEur > toleranceMax) {
+    // Price doesn't match the expected range for this district
+    // Try to find which district this price actually belongs to
+    let bestMatchDistrict: string | null = null;
+    let bestMatchScore = Infinity;
+
+    for (const [district, info] of Object.entries(distanceMap)) {
+      const districtMin = info.minPriceVito * priceMultiplier;
+      const districtMax = info.maxPriceVito * priceMultiplier;
+      const midpoint = (districtMin + districtMax) / 2;
+      const score = Math.abs(priceEur - midpoint);
+      
+      if (priceEur >= districtMin * 0.8 && priceEur <= districtMax * 1.2 && score < bestMatchScore) {
+        bestMatchScore = score;
+        bestMatchDistrict = district;
+      }
+    }
+
+    return {
+      isValid: false,
+      expectedDistrict: bestMatchDistrict || undefined,
+      reason: `Fiyat ${priceEur.toFixed(0)}€, ${matchedDistrict} için beklenen aralık dışında (${expectedMin.toFixed(0)}-${expectedMax.toFixed(0)}€). ${bestMatchDistrict ? `Muhtemelen ${bestMatchDistrict} olmalı.` : ''}`,
+    };
+  }
+
+  return { isValid: true };
+}
+
+// Get expected price range for a district from an airport
+export function getExpectedPriceRange(
+  airport: string | null,
+  district: string | null,
+  vehicleType?: string
+): { minPrice: number; maxPrice: number; distanceKm: number } | null {
+  if (!airport || !district) return null;
+
+  const distanceMap = AIRPORT_DISTANCE_MAPS[airport];
+  if (!distanceMap) return null;
+
+  const districtInfo = distanceMap[district];
+  if (!districtInfo) return null;
+
+  let priceMultiplier = 1;
+  const normalizedVehicle = (vehicleType || 'vito').toLowerCase().replace(/[_\s]/g, '-');
+  if (normalizedVehicle.includes('vip')) {
+    priceMultiplier = 1.15;
+  } else if (normalizedVehicle.includes('sprinter') || normalizedVehicle.includes('minibus')) {
+    priceMultiplier = 1.65;
+  } else if (normalizedVehicle.includes('maybach')) {
+    priceMultiplier = 1.35;
+  } else if (normalizedVehicle.includes('sedan')) {
+    priceMultiplier = 0.92;
+  }
+
+  return {
+    minPrice: Math.round(districtInfo.minPriceVito * priceMultiplier),
+    maxPrice: Math.round(districtInfo.maxPriceVito * priceMultiplier),
+    distanceKm: districtInfo.distanceKm,
+  };
+}
+
 // ==================== PRICE SANITY CHECK ====================
 // Dynamic price validation system based on route type and vehicle
-
-// City pairs with approximate distances and minimum prices (EUR, for Vito base)
 interface CityDistanceInfo {
   distanceKm: number;
   minPriceVito: number;

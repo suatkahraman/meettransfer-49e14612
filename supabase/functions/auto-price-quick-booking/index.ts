@@ -8,6 +8,7 @@ import {
   logAnalysis,
   checkPriceSanity,
   logPriceSanityCheck,
+  validateDistrictByDistance,
 } from "../_shared/priceMatching.ts";
 import { getVehicleFallbackList, getVehicleLabel } from "../_shared/vehicleConfig.ts";
 import { convertCurrency, getCurrencySymbol } from "../_shared/currencyUtils.ts";
@@ -359,20 +360,14 @@ const handler = async (req: Request): Promise<Response> => {
       dropoffCityForCheck,
       bestPrice.price,
       bestPrice.price_currency || 'EUR',
-      booking.vehicle_type, // Vehicle type for accurate minimums
-      airport // Airport for airport-city route checks
+      booking.vehicle_type,
+      airport
     );
 
-    // Log sanity check result
     logPriceSanityCheck('quick_booking', quick_booking_id, sanityCheck);
 
     if (!sanityCheck.isValid) {
       console.log(`⚠️ Price sanity check FAILED: ${sanityCheck.reason}`);
-      console.log(`   Route: ${sanityCheck.routeKey || 'N/A'}`);
-      console.log(`   Price: ${sanityCheck.actualPrice}€, Min Expected: ${sanityCheck.minimumExpected}€`);
-      console.log(`   Vehicle: ${sanityCheck.vehicleType}, Confidence: ${sanityCheck.confidence}`);
-      
-      // Send email to admin for manual pricing with reason
       await sendManualPriceRequestEmail(booking, transferInfo, sanityCheck.reason);
       
       return new Response(JSON.stringify({ 
