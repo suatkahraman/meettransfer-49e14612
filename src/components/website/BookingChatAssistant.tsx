@@ -3304,7 +3304,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                                     {(() => {
                                       const basePrice = msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice || 0;
                                       if (msg.bookingData.hasReturnTrip) {
-                                        const returnPrice = Math.round(basePrice * 0.75);
+                                        const returnPrice = Math.ceil(basePrice * 0.75);
                                         return basePrice + returnPrice;
                                       }
                                       return basePrice;
@@ -4179,7 +4179,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                           {(() => {
                             const basePrice = msg.vehiclePrices?.[msg.bookingData.vehicleType!] || msg.bookingData.estimatedPrice || 0;
                             if (msg.bookingData.hasReturnTrip) {
-                              const returnPrice = Math.round(basePrice * 0.75);
+                              const returnPrice = Math.ceil(basePrice * 0.75);
                               return basePrice + returnPrice;
                             }
                             return basePrice;
