@@ -35,9 +35,9 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-foreground leading-tight whitespace-nowrap">
+            <div className="text-lg md:text-2xl lg:text-3xl font-bold text-foreground leading-tight whitespace-nowrap" role="heading" aria-level={1}>
               <span className="text-primary">Meet</span> Transfer
-            </h1>
+            </div>
             {/* Inline badges on mobile */}
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2.5 py-1 text-[13px] md:text-sm font-medium">
