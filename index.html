@@ -238,6 +238,11 @@
       .static-cta:hover{filter:brightness(1.05)}
       .static-cta svg{width:18px;height:18px}
       
+      /* Internal links for SEO - visible to crawlers, subtle styling */
+      .static-internal-links{display:flex;flex-wrap:wrap;gap:0.5rem 1rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid hsl(30 20% 88%)}
+      .static-internal-links a{font-size:0.8125rem;color:hsl(var(--primary));text-decoration:none;font-weight:500;transition:opacity 0.2s}
+      .static-internal-links a:hover{opacity:0.7;text-decoration:underline}
+      
       /* Hide static hero when React mounts */
       .js-loaded .static-hero{display:none}
       
@@ -531,6 +536,22 @@
                 Get Instant Price
               </a>
             </div>
+            
+            <!-- Internal Links for SEO - visible to crawlers -->
+            <nav class="static-internal-links" aria-label="Quick navigation">
+              <a href="/destinations">All Destinations</a>
+              <a href="/istanbul-airport-transfer">Istanbul Transfer</a>
+              <a href="/antalya-airport-transfer">Antalya Transfer</a>
+              <a href="/bodrum-airport-transfer">Bodrum Transfer</a>
+              <a href="/cappadocia-airport-transfer">Cappadocia Transfer</a>
+              <a href="/dubai-transfer">Dubai Transfer</a>
+              <a href="/cyprus-transfer">Cyprus Transfer</a>
+              <a href="/fleet">Our Fleet</a>
+              <a href="/services">Services</a>
+              <a href="/about">About Us</a>
+              <a href="/contact">Contact</a>
+              <a href="/blog">Travel Blog</a>
+            </nav>
           </div>
         </div>
       </section>
