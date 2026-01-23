@@ -52,11 +52,20 @@ export function useBlogTranslations() {
     };
   }, [language]);
 
+  // Helper function to format camelCase to readable text
+  const formatCamelCase = useCallback((text: string): string => {
+    if (!text) return text;
+    return text
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase())
+      .trim();
+  }, []);
+
   const tBlog = useCallback(
     (key: string): string => {
       if (!translations) {
-        // During loading, return key as placeholder
-        return key;
+        // During loading, return formatted key as placeholder
+        return formatCamelCase(key);
       }
       const value = translations[key];
       if (value) return value;
@@ -67,9 +76,10 @@ export function useBlogTranslations() {
         if (enValue) return enValue;
       }
 
-      return key;
+      // If no translation found, format the key as readable text
+      return formatCamelCase(key);
     },
-    [translations]
+    [translations, formatCamelCase]
   );
 
   return { tBlog, isLoading };
