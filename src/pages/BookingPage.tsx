@@ -1088,7 +1088,7 @@ const BookingPage = () => {
         setRedirectCountdown(prev => {
           if (prev <= 1) {
             clearInterval(timer);
-            navigate('/customer/home', { replace: true });
+            navigate('/customer', { replace: true });
             return 0;
           }
           return prev - 1;
@@ -1126,7 +1126,7 @@ const BookingPage = () => {
                 </p>
               )}
               
-              <Button onClick={() => navigate("/customer/home")} className="w-full" size="lg">
+              <Button onClick={() => navigate("/customer")} className="w-full" size="lg">
                 {t("viewMyReservations") || "View My Reservations"}
               </Button>
             </CardContent>

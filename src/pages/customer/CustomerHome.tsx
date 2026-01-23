@@ -39,6 +39,7 @@ import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from '@/lib/contact';
 import UniversalLanguageSelector from '@/components/UniversalLanguageSelector';
+import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
 
 // Validation schema - memoized outside component
 const reservationSchema = z.object({
@@ -396,8 +397,57 @@ const CustomerHome = () => {
     const checkPendingBooking = async () => {
       if (!user?.id) return;
       
+      // Check sessionStorage via PendingBookingStorage first (Google OAuth flow)
+      const sessionBookingData = PendingBookingStorage.load();
+      
+      // Also check legacy localStorage
       const pendingToken = localStorage.getItem('pending_booking_token');
       const pendingData = localStorage.getItem('pending_booking_data');
+      
+      // If we have session booking data from Google OAuth, auto-fill the form
+      if (sessionBookingData && (sessionBookingData.pickup || sessionBookingData.dropoff)) {
+        console.log('[CustomerHome] Found pending booking from sessionStorage, auto-filling form...', sessionBookingData);
+        
+        // Auto-fill form with pending booking data
+        setFormData(prev => ({
+          ...prev,
+          pickup: sessionBookingData.pickup || prev.pickup,
+          dropoff: sessionBookingData.dropoff || prev.dropoff,
+          date: sessionBookingData.date || prev.date,
+          time: sessionBookingData.time || prev.time,
+          vehicleType: sessionBookingData.vehicleType || prev.vehicleType,
+          paymentType: sessionBookingData.paymentMethod || prev.paymentType,
+          luggageCount: sessionBookingData.luggageCount?.toString() || prev.luggageCount,
+          babySeatCount: sessionBookingData.babySeatCount?.toString() || prev.babySeatCount,
+          customerNotes: sessionBookingData.customerNotes || prev.customerNotes,
+          flightNumber: sessionBookingData.flightNumber || prev.flightNumber,
+          passengerPhone: sessionBookingData.customerPhone || prev.passengerPhone,
+        }));
+        
+        // Set passenger names if available
+        if (sessionBookingData.passengerNames && sessionBookingData.passengerNames.length > 0) {
+          setPassengerNames(sessionBookingData.passengerNames);
+        }
+        
+        // Set prices if available
+        if (sessionBookingData.allVehiclePrices) {
+          setVehiclePrices(sessionBookingData.allVehiclePrices);
+        }
+        if (sessionBookingData.currency) {
+          setPriceCurrency(sessionBookingData.currency);
+        }
+        
+        // Open the booking form
+        setIsBookingFormOpen(true);
+        
+        // Clear the pending booking data
+        PendingBookingStorage.clear();
+        
+        toast.success(language === 'TR' 
+          ? 'Rezervasyon bilgileriniz yüklendi. Lütfen kontrol edip onaylayın.'
+          : 'Your booking details have been loaded. Please review and confirm.');
+        return;
+      }
       
       if (!pendingToken && !pendingData) return;
       
