@@ -267,21 +267,19 @@ All colors MUST be HSL.
 
 /* Google Places Autocomplete Dropdown Styling */
 /* CRITICAL: z-index must beat dialog overlays (typically 50-100) and popovers */
+/* Position is controlled by JavaScript hook for scroll-container compatibility */
 .pac-container {
   background-color: hsl(var(--background)) !important;
   border: 1px solid hsl(var(--border)) !important;
   border-radius: 12px !important;
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3), 0 4px 12px -2px rgba(0, 0, 0, 0.15) !important;
-  margin-top: 8px !important;
+  margin-top: 0 !important;
   padding: 8px 0 !important;
   font-family: inherit !important;
   /* Ultra-high z-index to ensure visibility above dialogs, sheets, popovers */
   z-index: 2147483647 !important;
   overflow: visible !important;
-  /* IMPORTANT: Don't force `position: fixed`.
-     Google positions this dropdown using page coordinates; forcing fixed can push it off-screen
-     on long/scrollable admin panels, making it look like suggestions “never appear”. */
-  position: absolute !important;
+  /* Position controlled by JS for scroll-container compatibility */
 }
 
 .pac-container::after {
