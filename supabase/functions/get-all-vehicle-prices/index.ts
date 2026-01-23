@@ -391,13 +391,14 @@ const handler = async (req: Request): Promise<Response> => {
       
       if (foundPrice) {
         baseCurrency = foundPrice.currency;
-        let finalPrice = foundPrice.price;
+        // ALWAYS round up to nearest integer for clean "net" pricing
+        let finalPrice = Math.ceil(foundPrice.price);
         let finalCurrency = foundPrice.currency;
 
         // Convert to customer's preferred currency if different
         if (customerCurrency && customerCurrency !== foundPrice.currency) {
           const conversion = await convertCurrency(foundPrice.price, foundPrice.currency, customerCurrency);
-          finalPrice = conversion.amount;
+          finalPrice = Math.ceil(conversion.amount); // Ensure rounding after conversion too
           finalCurrency = customerCurrency;
           exchangeRate = conversion.rate;
         }
