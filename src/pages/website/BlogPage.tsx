@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Clock, Search, X } from "lucide-react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBlogT } from "@/components/blog/BlogLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,9 +39,21 @@ import adanaHero from "@/assets/blog/adana-transfer-hero.jpg";
 import switzerlandHero from "@/assets/blog/switzerland-transfer-hero.jpg";
 
 const BlogPage = () => {
-  const { t, getLocalizedPath, language } = useLanguage();
+  const { t: tGeneral, getLocalizedPath, language } = useLanguage();
+  const { t: tBlog } = useBlogT();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Use blog translations with fallback to general translations
+  const t = useCallback((key: string) => {
+    const blogResult = tBlog(key);
+    // If blog translation returns the key itself, try general translations
+    if (blogResult === key || blogResult.includes(' ')) {
+      const generalResult = tGeneral(key);
+      return generalResult !== key ? generalResult : blogResult;
+    }
+    return blogResult;
+  }, [tBlog, tGeneral]);
 
   // Blog posts with translation keys - Updated for 2025 SEO
   const blogPosts = useMemo(() => [

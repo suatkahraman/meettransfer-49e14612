@@ -3,7 +3,9 @@ import { ArrowRight, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBlogT } from "@/components/blog/BlogLayout";
 import OptimizedBlogImage from "./OptimizedBlogImage";
+import { useCallback } from "react";
 
 // Import hero images for Mardin, Midyat and Adana
 import mardinHero from "@/assets/blog/mardin-transfer-hero.jpg";
@@ -402,7 +404,19 @@ const RelatedArticles = ({
   maxArticles = 3,
   className = ""
 }: RelatedArticlesProps) => {
-  const { t, getLocalizedPath, language } = useLanguage();
+  const { t: tGeneral, getLocalizedPath, language } = useLanguage();
+  const { t: tBlog } = useBlogT();
+
+  // Use blog translations with fallback to general translations
+  const t = useCallback((key: string) => {
+    const blogResult = tBlog(key);
+    // If blog translation returns the key itself, try general translations
+    if (blogResult === key || blogResult.includes(' ')) {
+      const generalResult = tGeneral(key);
+      return generalResult !== key ? generalResult : blogResult;
+    }
+    return blogResult;
+  }, [tBlog, tGeneral]);
 
   // Get current article's category
   const currentArticle = allBlogPosts.find(post => post.id === currentArticleId);
