@@ -185,6 +185,7 @@ const MidyatAirportTransferGuide = lazy(() => import("./pages/website/blog/Midya
 const DiyarbakirAirportTransferGuide = lazy(() => import("./pages/website/blog/DiyarbakirAirportTransferGuide"));
 const AgencyPartnershipGuide = lazy(() => import("./pages/website/blog/AgencyPartnershipGuide"));
 const SwitzerlandAirportTransferGuide = lazy(() => import("./pages/website/blog/SwitzerlandAirportTransferGuide"));
+const AdanaAirportTransferGuide = lazy(() => import("./pages/website/blog/AdanaAirportTransferGuide"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 // DebugPage is now eager-loaded at the top of the file for PWA troubleshooting
@@ -350,6 +351,7 @@ const App = () => (
               {localizedBlogRoutes("/blog/diyarbakir-airport-transfer-guide", <DiyarbakirAirportTransferGuide />)}
               {localizedBlogRoutes("/blog/agency-partnership-b2b-turkey", <AgencyPartnershipGuide />)}
               {localizedBlogRoutes("/blog/switzerland-airport-transfer-guide", <SwitzerlandAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/adana-airport-transfer-guide", <AdanaAirportTransferGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Auth routes - Not localized (use common language) */}
