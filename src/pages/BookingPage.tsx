@@ -437,7 +437,7 @@ const BookingPage = () => {
           console.log('[GoogleAuth] Saved booking data to PendingBookingStorage, redirecting to customer home');
           
           // Step 3: Redirect to customer home where form will be auto-filled
-          navigate('/customer/home', { replace: true });
+          navigate('/customer', { replace: true });
         }
       }
     };
