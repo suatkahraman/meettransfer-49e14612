@@ -915,7 +915,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - International VIP Airport Transfer & Chauffeur Service | Turkey, Dubai, Cyprus",
-    seoHomeDesc: "Luxury VIP airport transfer and private chauffeur service worldwide. Professional drivers, Mercedes fleet, 24/7 service. Istanbul, Antalya, Dubai, Cyprus, Cappadocia and more.",
+    seoHomeDesc: "Luxury VIP airport transfer and private chauffeur service in Turkey, Dubai, Cyprus. Professional drivers, Mercedes fleet, 24/7 service.",
     seoHomeKeywords: "international airport transfer, VIP airport transfer, private chauffeur service, luxury airport transfer, Istanbul transfer, Antalya transfer, Dubai transfer, Cyprus transfer, Mercedes transfer",
     seoServicesTitle: "International VIP Airport & Chauffeur Services | Turkey, Dubai, Cyprus | Meet Transfer",
     seoServicesDesc: "Professional VIP airport transfer and chauffeur services across Turkey, Dubai and Cyprus. Istanbul, Antalya, Bodrum, Dubai, Larnaca, Cappadocia. Mercedes fleet, 24/7 service.",
