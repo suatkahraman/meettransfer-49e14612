@@ -802,9 +802,9 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
         allVehiclePrices = {
           'sedan': basePrice,
           'mercedes-vito': basePrice,
-          'vip-mercedes': Math.round(basePrice * 1.3),
-          'maybach-minibus': Math.round(basePrice * 1.6),
-          'minibus': Math.round(basePrice * 1.5)
+          'vip-mercedes': Math.ceil(basePrice * 1.3),
+          'maybach-minibus': Math.ceil(basePrice * 1.6),
+          'minibus': Math.ceil(basePrice * 1.5)
         };
       }
 
@@ -877,9 +877,9 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
       const basePrice = bookingData.estimatedPrice;
       vehiclePrices = {
         'mercedes-vito': basePrice,
-        'vip-mercedes': Math.round(basePrice * 1.3),
-        'maybach-minibus': Math.round(basePrice * 1.6),
-        'minibus': Math.round(basePrice * 1.5)
+        'vip-mercedes': Math.ceil(basePrice * 1.3),
+        'maybach-minibus': Math.ceil(basePrice * 1.6),
+        'minibus': Math.ceil(basePrice * 1.5)
       };
     }
 

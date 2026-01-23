@@ -431,7 +431,7 @@ const handler = async (req: Request): Promise<Response> => {
       finalCurrency = customerRequestedCurrency;
       
       if (discountInfo.returnPrice) {
-        finalReturnPrice = Math.round(discountInfo.returnPrice * exchangeRate);
+        finalReturnPrice = Math.ceil(discountInfo.returnPrice * exchangeRate);
       }
       finalTotalPrice = finalPrice + (finalReturnPrice || 0);
       

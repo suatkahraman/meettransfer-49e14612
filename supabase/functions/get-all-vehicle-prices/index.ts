@@ -39,7 +39,7 @@ async function convertCurrency(
     if (response.ok) {
       const data = await response.json();
       const rate = data.rates[toCurrency];
-      return { amount: Math.round(amount * rate), rate };
+      return { amount: Math.ceil(amount * rate), rate };
     }
   } catch (e) {
     console.error("Currency conversion error:", e);
@@ -54,7 +54,7 @@ async function convertCurrency(
   };
 
   const rate = fallbackRates[fromCurrency]?.[toCurrency] || 1;
-  return { amount: Math.round(amount * rate), rate };
+  return { amount: Math.ceil(amount * rate), rate };
 }
 
 // Extract airport code from full airport name (e.g., "Zurich Airport (ZRH)" -> "ZRH")
