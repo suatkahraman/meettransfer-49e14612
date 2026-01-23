@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { validatePromoCode } from "@/hooks/useActivePromoCode";
 import { useAuth } from "@/contexts/AuthContext";
+import { PendingBookingStorage } from "@/hooks/usePendingBookingStorage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +40,9 @@ import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
 import { z } from "zod";
+
+// Session storage key for caching booking form state during Google OAuth
+const GOOGLE_AUTH_CACHE_KEY = 'google_auth_booking_cache';
 
 interface VehiclePrice {
   vehicleType: string;
@@ -341,7 +345,10 @@ const BookingPage = () => {
     }
   }, [urlHasReturnTrip, urlPromoCode, isTurkey, activePromo.code, tokenLoading, urlToken]);
 
-  // Check for Google OAuth return
+  // Track if we restored from cache to skip price fetching
+  const restoredFromCache = useRef(false);
+
+  // Check for Google OAuth return and restore cached form data
   useEffect(() => {
     const checkGoogleAuth = async () => {
       const googleAuth = searchParams.get("googleAuth");
@@ -353,17 +360,108 @@ const BookingPage = () => {
           setIsGoogleUser(true);
           setCustomerEmail(session.user.email || "");
           setCustomerName(session.user.user_metadata?.full_name || session.user.user_metadata?.name || "");
+          
+          // Restore cached booking data from sessionStorage (saved before OAuth)
+          try {
+            const cachedData = sessionStorage.getItem(GOOGLE_AUTH_CACHE_KEY);
+            if (cachedData) {
+              const parsed = JSON.parse(cachedData);
+              console.log('[GoogleAuth] Restoring cached booking data:', parsed);
+              
+              // Restore form state
+              if (parsed.vehiclePrices?.length > 0) {
+                setVehiclePrices(parsed.vehiclePrices);
+                restoredFromCache.current = true;
+              }
+              if (parsed.hourlyPrices?.length > 0) {
+                setHourlyPrices(parsed.hourlyPrices);
+                restoredFromCache.current = true;
+              }
+              if (parsed.vehicleType) setVehicleType(parsed.vehicleType);
+              if (parsed.passengers) setPassengers(parsed.passengers);
+              if (parsed.hasReturnTrip !== undefined) setHasReturnTrip(parsed.hasReturnTrip);
+              if (parsed.returnDate) setReturnDate(parsed.returnDate);
+              if (parsed.returnTime) setReturnTime(parsed.returnTime);
+              if (parsed.babySeatCount !== undefined) setBabySeatCount(parsed.babySeatCount);
+              if (parsed.luggageCount !== undefined) setLuggageCount(parsed.luggageCount);
+              if (parsed.promoCode) setPromoCode(parsed.promoCode);
+              if (parsed.isPromoCodeValid !== undefined) setIsPromoCodeValid(parsed.isPromoCodeValid);
+              if (parsed.promoDiscountPercent !== undefined) setPromoDiscountPercent(parsed.promoDiscountPercent);
+              if (parsed.detectedRegion) setDetectedRegion(parsed.detectedRegion);
+              if (parsed.selectedDuration) setSelectedDuration(parsed.selectedDuration);
+              if (parsed.customerNotes) setCustomerNotes(parsed.customerNotes);
+              if (parsed.flightNumber) setFlightNumber(parsed.flightNumber);
+              if (parsed.passengerNames) setPassengerNames(parsed.passengerNames);
+              if (parsed.paymentType) setPaymentType(parsed.paymentType);
+              if (parsed.preferredCurrency) setPreferredCurrency(parsed.preferredCurrency);
+              
+              // Clear the cache after restoring
+              sessionStorage.removeItem(GOOGLE_AUTH_CACHE_KEY);
+              console.log('[GoogleAuth] Cleared cache after restoration');
+            }
+          } catch (e) {
+            console.error('[GoogleAuth] Error restoring cached data:', e);
+          }
+          
+          // Save booking data to PendingBookingStorage for customer home redirect
+          PendingBookingStorage.save({
+            pickup: urlPickup,
+            dropoff: urlDropoff,
+            date: urlDate,
+            time: urlTime,
+            passengers: urlPassengers ? parseInt(urlPassengers) : 1,
+            vehicleType: vehicleType,
+            hasReturnTrip,
+            returnDate,
+            returnTime,
+            babySeatCount,
+            luggageCount,
+            promoCode,
+            serviceType: isHourlyBooking ? 'hourly' : 'transfer',
+            language,
+          });
+          
+          // Redirect to customer home after successful Google auth
+          // The booking form will be auto-filled there
+          console.log('[GoogleAuth] Redirecting to customer home with booking data');
+          navigate('/customer/home', { replace: true });
         }
       }
     };
     
     checkGoogleAuth();
-  }, [searchParams]);
+  }, [searchParams, navigate, urlPickup, urlDropoff, urlDate, urlTime, urlPassengers, vehicleType, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount, promoCode, isHourlyBooking, language]);
 
   // Fetch vehicle prices for transfer bookings with minimum 8 second loading animation
+  // Skip if returning from Google OAuth with cached prices
   useEffect(() => {
     const fetchPrices = async () => {
       if (isHourlyBooking || !urlPickup || !urlDropoff) return;
+      
+      // Skip fetching if we already restored prices from cache (Google OAuth return)
+      if (restoredFromCache.current && vehiclePrices.length > 0) {
+        console.log('[Prices] Skipping fetch - restored from Google OAuth cache');
+        return;
+      }
+      
+      // Check if returning from Google auth - if cache exists, restore immediately
+      const googleAuth = searchParams.get("googleAuth");
+      if (googleAuth === "true") {
+        try {
+          const cachedData = sessionStorage.getItem(GOOGLE_AUTH_CACHE_KEY);
+          if (cachedData) {
+            const parsed = JSON.parse(cachedData);
+            if (parsed.vehiclePrices?.length > 0) {
+              console.log('[Prices] Using cached prices from Google OAuth');
+              setVehiclePrices(parsed.vehiclePrices);
+              if (parsed.detectedRegion) setDetectedRegion(parsed.detectedRegion);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error('[Prices] Error reading cache:', e);
+        }
+      }
       
       setIsPricesLoading(true);
       const startTime = Date.now();
@@ -402,7 +500,7 @@ const BookingPage = () => {
     };
 
     fetchPrices();
-  }, [urlPickup, urlDropoff, preferredCurrency, isHourlyBooking]);
+  }, [urlPickup, urlDropoff, preferredCurrency, isHourlyBooking, searchParams, vehiclePrices.length]);
 
   // Fetch hourly rental prices with minimum 8 second loading animation
   useEffect(() => {
@@ -545,6 +643,32 @@ const BookingPage = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
+      // Save current form state to sessionStorage BEFORE OAuth redirect
+      // This ensures all form data (prices, return trip, etc.) is preserved
+      const cacheData = {
+        vehiclePrices,
+        hourlyPrices,
+        vehicleType,
+        passengers,
+        hasReturnTrip,
+        returnDate,
+        returnTime,
+        babySeatCount,
+        luggageCount,
+        promoCode,
+        isPromoCodeValid,
+        promoDiscountPercent,
+        detectedRegion,
+        selectedDuration,
+        customerNotes,
+        flightNumber,
+        passengerNames,
+        paymentType,
+        preferredCurrency,
+      };
+      sessionStorage.setItem(GOOGLE_AUTH_CACHE_KEY, JSON.stringify(cacheData));
+      console.log('[GoogleAuth] Saved form cache before OAuth redirect:', cacheData);
+      
       // Build current URL with all params for redirect
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('googleAuth', 'true');
