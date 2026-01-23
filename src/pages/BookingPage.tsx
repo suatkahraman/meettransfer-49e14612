@@ -785,15 +785,18 @@ const BookingPage = () => {
       if (fnError) throw fnError;
       if (!result?.success) throw new Error(result?.error || "Failed to create reservation");
 
-      // Sign in the user (for non-Google users)
+      // Sign in the user (for non-Google users) and wait for session
+      let signedInSuccessfully = false;
       if (!isGoogleUser && guestPassword) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
           email: customerEmail.trim(),
           password: guestPassword,
         });
 
         if (signInError) {
           console.error("Auto sign-in error:", signInError);
+        } else if (signInData.session) {
+          signedInSuccessfully = true;
         }
       }
 
@@ -807,6 +810,14 @@ const BookingPage = () => {
       setBookingCompleted(true);
       setCompletedReservationId(result.reservationId);
       toast.success(t("bookingConfirmed") || "Booking confirmed!");
+      
+      // If signed in successfully, redirect immediately (don't wait for useEffect)
+      if (signedInSuccessfully) {
+        // Small delay to allow auth state to propagate
+        setTimeout(() => {
+          navigate('/customer', { replace: true });
+        }, 100);
+      }
     } catch (error: unknown) {
       console.error("Error submitting:", error);
       toast.error((error as Error).message || "Failed to submit request");
