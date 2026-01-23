@@ -8,6 +8,96 @@ import {
   getGoogleMaps 
 } from '@/utils/googleMapsLoader';
 
+/**
+ * Hook to reposition the Google Places .pac-container dropdown
+ * so it stays anchored to the input even in scrollable admin panels.
+ * Uses MutationObserver to detect when Google injects the dropdown.
+ */
+function usePacContainerPositioning(inputRef: React.RefObject<HTMLInputElement | null>, isFocused: boolean) {
+  useEffect(() => {
+    if (!isFocused) return;
+    
+    const inputEl = inputRef.current;
+    if (!inputEl) return;
+
+    let pacContainer: HTMLElement | null = null;
+    let rafId: number | null = null;
+    let scrollParents: HTMLElement[] = [];
+
+    const positionDropdown = () => {
+      if (!pacContainer || !inputEl) return;
+      
+      const rect = inputEl.getBoundingClientRect();
+      
+      // Apply fixed positioning to lock it to the input
+      pacContainer.style.position = 'fixed';
+      pacContainer.style.top = `${rect.bottom + 4}px`;
+      pacContainer.style.left = `${rect.left}px`;
+      pacContainer.style.width = `${rect.width}px`;
+      pacContainer.style.zIndex = '2147483647';
+    };
+
+    const onScrollOrResize = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(positionDropdown);
+    };
+
+    // Find all scrollable parents to attach scroll listeners
+    const findScrollParents = (el: HTMLElement): HTMLElement[] => {
+      const parents: HTMLElement[] = [];
+      let current: HTMLElement | null = el.parentElement;
+      while (current) {
+        const style = getComputedStyle(current);
+        if (/(auto|scroll)/.test(style.overflow + style.overflowY + style.overflowX)) {
+          parents.push(current);
+        }
+        current = current.parentElement;
+      }
+      return parents;
+    };
+
+    // Observer to detect when Google adds the .pac-container
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node instanceof HTMLElement && node.classList.contains('pac-container')) {
+            pacContainer = node;
+            scrollParents = findScrollParents(inputEl);
+            
+            // Attach scroll/resize listeners
+            scrollParents.forEach(p => p.addEventListener('scroll', onScrollOrResize, { passive: true }));
+            window.addEventListener('resize', onScrollOrResize, { passive: true });
+            window.addEventListener('scroll', onScrollOrResize, { passive: true });
+            
+            positionDropdown();
+          }
+        }
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: false });
+
+    // Also check if pac-container already exists
+    const existing = document.querySelector('.pac-container') as HTMLElement | null;
+    if (existing) {
+      pacContainer = existing;
+      scrollParents = findScrollParents(inputEl);
+      scrollParents.forEach(p => p.addEventListener('scroll', onScrollOrResize, { passive: true }));
+      window.addEventListener('resize', onScrollOrResize, { passive: true });
+      window.addEventListener('scroll', onScrollOrResize, { passive: true });
+      positionDropdown();
+    }
+
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+      scrollParents.forEach(p => p.removeEventListener('scroll', onScrollOrResize));
+      window.removeEventListener('resize', onScrollOrResize);
+      window.removeEventListener('scroll', onScrollOrResize);
+    };
+  }, [inputRef, isFocused]);
+}
+
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -404,6 +494,9 @@ export const LazyGooglePlacesAutocomplete = memo(({
       }
     };
   }, []);
+
+  // Use the positioning hook to keep dropdown anchored in scroll containers
+  usePacContainerPositioning(inputRef, isFocused);
 
   const isFloating = isFocused || hasValue;
 
