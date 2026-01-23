@@ -1199,6 +1199,61 @@ const BookingPage = () => {
                 </Card>
               )}
 
+              {/* Currency Selection */}
+              <Card>
+                <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                    {t("preferredCurrency") || "Preferred Currency"}
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    {t("currencyHint") || "Select your preferred currency for the price quote"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="flex flex-wrap gap-2">
+                    {CURRENCY_OPTIONS.map((currency) => (
+                      <button
+                        key={currency.value}
+                        type="button"
+                        onClick={() => {
+                          setPreferredCurrency(currency.value);
+                          // Refetch prices with new currency
+                          if (isHourlyBooking) {
+                            // For hourly, prices are in DB currency, just update display
+                          } else if (urlPickup && urlDropoff) {
+                            setIsPricesLoading(true);
+                            supabase.functions.invoke("get-all-vehicle-prices", {
+                              body: {
+                                pickup: urlPickup,
+                                dropoff: urlDropoff,
+                                customerCurrency: currency.value,
+                              },
+                            }).then(({ data }) => {
+                              if (data?.prices) {
+                                setVehiclePrices(data.prices);
+                              }
+                              setIsPricesLoading(false);
+                            }).catch(() => {
+                              setIsPricesLoading(false);
+                            });
+                          }
+                        }}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-medium transition-all duration-200 text-sm border",
+                          preferredCurrency === currency.value
+                            ? "bg-primary text-primary-foreground shadow-md scale-105 border-primary"
+                            : "bg-background text-foreground hover:bg-muted border-border"
+                        )}
+                      >
+                        <span>{currency.flag}</span>
+                        <span>{currency.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Vehicle Selection */}
               <Card>
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
