@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck } from "../_shared/priceMatching.ts";
+import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck, validateDistrictByDistance, getExpectedPriceRange } from "../_shared/priceMatching.ts";
 import { corsHeaders, dynamicCacheHeaders } from "../_shared/cacheHeaders.ts";
 import { detectRegion, getVehicleTypesForRegion, VehicleRegion, VEHICLE_TYPES, isValidSwitzerlandRoute } from "../_shared/vehicleConfig.ts";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse, addRateLimitHeaders, RATE_LIMIT_CONFIGS } from "../_shared/rateLimiter.ts";
@@ -152,9 +152,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Analyze transfer using shared module
     const transferInfo = analyzeTransfer(pickup, dropoff);
-    const { airport, city, district, direction, confidence } = transferInfo;
+    const { airport, city, direction, confidence } = transferInfo;
+    // Use mutable variable for district as it may be corrected by distance validation
+    let matchedDistrict = transferInfo.district;
 
-    console.log("📍 Transfer analysis:", { airport, city, district, direction, confidence });
+    console.log("📍 Transfer analysis:", { airport, city, district: matchedDistrict, direction, confidence });
 
     if (!city && !airport) {
       console.log("❌ No location match - returning empty prices");
@@ -306,7 +308,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       // Try exact match (airport + city + district + vehicle)
       // Try both full airport name and airport code (e.g., "Zurich Airport (ZRH)" and "ZRH")
-      if (!foundPrice && airport && city && district) {
+      if (!foundPrice && airport && city && matchedDistrict) {
         const airportQueries = airportCode && airportCode !== airport 
           ? [airport, airportCode] 
           : [airport];
@@ -318,7 +320,7 @@ const handler = async (req: Request): Promise<Response> => {
             .select("price, price_currency")
             .eq("city", city)
             .eq("airport", airportQuery)
-            .eq("district", district)
+            .eq("district", matchedDistrict)
             .eq("vehicle_type", vehicleType)
             .eq("is_active", true)
             .limit(1);
@@ -391,6 +393,51 @@ const handler = async (req: Request): Promise<Response> => {
       
       if (foundPrice) {
         baseCurrency = foundPrice.currency;
+        
+        // Convert price to EUR for distance validation
+        let priceInEur = foundPrice.price;
+        if (foundPrice.currency === 'TRY') {
+          priceInEur = foundPrice.price / 38;
+        } else if (foundPrice.currency === 'USD') {
+          priceInEur = foundPrice.price / 1.08;
+        } else if (foundPrice.currency === 'GBP') {
+          priceInEur = foundPrice.price * 1.17;
+        }
+
+        // DISTANCE-BASED VALIDATION: Check if the matched district makes sense for this price
+        // This catches cases where "güzeloba" wrongly matched "oba" keyword in Alanya
+        if (!isDubai && airport && matchedDistrict) {
+          const distanceValidation = validateDistrictByDistance(airport, matchedDistrict, priceInEur, vehicleType);
+          
+          if (!distanceValidation.isValid) {
+            console.log(`⚠️ Distance validation FAILED for ${vehicleType}:`);
+            console.log(`   Matched district: ${matchedDistrict}`);
+            console.log(`   Price: ${priceInEur.toFixed(0)}€`);
+            console.log(`   Reason: ${distanceValidation.reason}`);
+            console.log(`   Suggested district: ${distanceValidation.expectedDistrict || 'unknown'}`);
+            
+            // Try to find price for the suggested district instead
+            if (distanceValidation.expectedDistrict) {
+              const { data: correctedData } = await supabase
+                .from("region_prices")
+                .select("price, price_currency")
+                .eq("city", city)
+                .eq("airport", airport)
+                .eq("district", distanceValidation.expectedDistrict)
+                .eq("vehicle_type", vehicleType)
+                .eq("is_active", true)
+                .limit(1);
+
+              if (correctedData && correctedData.length > 0) {
+                foundPrice = { price: correctedData[0].price, currency: correctedData[0].price_currency };
+                console.log(`✅ Corrected to ${distanceValidation.expectedDistrict}: ${foundPrice.price} ${foundPrice.currency}`);
+                // Update district for logging
+                matchedDistrict = distanceValidation.expectedDistrict;
+              }
+            }
+          }
+        }
+
         // ALWAYS round up to nearest integer for clean "net" pricing
         let finalPrice = Math.ceil(foundPrice.price);
         let finalCurrency = foundPrice.currency;
@@ -469,7 +516,7 @@ const handler = async (req: Request): Promise<Response> => {
         prices: vehiclePrices,
         matched: vehiclePrices.some(v => v.available),
         matchedCity: city,
-        matchedDistrict: district,
+        matchedDistrict,
         matchedAirport: airport,
         direction,
         confidence,
