@@ -357,7 +357,7 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   // Antalya - Each district matches DB exactly (Beldibi, Goynuk, Tekirova, Cirali, Olympos are separate from Kemer)
   'Kaleici': { priority: 1, keywords: ['kaleici', 'kaleiçi', 'old town antalya', 'old city antalya', 'antalya old town', 'antalya marina', 'yat limani'], city: 'Antalya' },
   'Konyaalti': { priority: 1, keywords: ['konyaalti', 'konyaaltı', 'konyaalti beach', 'konyaaltı plajı', 'konyaalti plaji', 'hurma', 'liman'], city: 'Antalya' },
-  'Lara': { priority: 1, keywords: ['lara', 'lara beach', 'lara plaji', 'lara plajı', 'lower lara', 'upper lara'], city: 'Antalya' },
+  'Lara': { priority: 1, keywords: ['lara', 'lara beach', 'lara plaji', 'lara plajı', 'lower lara', 'upper lara', 'guzeloba', 'güzeloba', 'lara barut', 'kundu lara'], city: 'Antalya' },
   'Kundu': { priority: 1, keywords: ['kundu'], city: 'Antalya' },
   'Belek': { priority: 1, keywords: ['belek', 'belek golf', 'the land of legends', 'land of legends'], city: 'Antalya' },
   'Kadriye': { priority: 1, keywords: ['kadriye', 'bogazkent', 'boğazkent'], city: 'Antalya' },
@@ -784,6 +784,11 @@ export interface DistrictMatchResult extends MatchResult {
 
 // Turkish postal code to district mapping for precise location detection
 const POSTAL_CODE_TO_DISTRICT: Record<string, { district: string; city: string }> = {
+  // Antalya - Lara/Kundu district (Muratpaşa)
+  '07235': { district: 'Lara', city: 'Antalya' },
+  '07230': { district: 'Lara', city: 'Antalya' }, // Includes airport area but hotels here are Lara
+  '07100': { district: 'Konyaalti', city: 'Antalya' },
+  '07050': { district: 'Kaleici', city: 'Antalya' },
   // Antalya - Kaş district
   '07580': { district: 'Kas', city: 'Antalya' },
   '07960': { district: 'Kas', city: 'Antalya' },
@@ -920,8 +925,19 @@ export function findDistrict(location: string, cityHint?: string | null): Distri
         continue;
       }
 
-      // Only do exact substring match
-      if (normalized.includes(keywordNorm)) {
+      // For short keywords (<=4 chars), require word boundary to prevent false matches
+      // e.g., "oba" should NOT match "güzeloba" but SHOULD match "oba district"
+      let isMatch = false;
+      if (keywordNorm.length <= 4) {
+        // Use word boundary check for short keywords
+        const wordBoundaryRegex = new RegExp(`(^|\\s)${keywordNorm}(\\s|$)`, 'i');
+        isMatch = wordBoundaryRegex.test(normalized);
+      } else {
+        // Longer keywords can use substring match
+        isMatch = normalized.includes(keywordNorm);
+      }
+
+      if (isMatch) {
         // ENHANCEMENT: Check position in address string
         const isInEndPortion = isKeywordInEndPortion(normalized, keywordNorm);
         const positionBonus = isInEndPortion ? 0.15 : 0;
