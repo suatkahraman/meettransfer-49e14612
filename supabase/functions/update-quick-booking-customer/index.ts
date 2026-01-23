@@ -404,16 +404,34 @@ serve(async (req) => {
         returnUpdateData.price = requestData.newPrice;
       }
 
-      const { error: returnUpdateError } = await supabase
+      const { data: updatedReturnReservation, error: returnUpdateError } = await supabase
         .from("reservations")
         .update(returnUpdateData)
-        .eq("reservation_code", requestData.returnReservationCode);
+        .eq("reservation_code", requestData.returnReservationCode)
+        .select()
+        .single();
 
       if (returnUpdateError) {
         console.error("Error updating return reservation:", returnUpdateError);
         // Don't fail the whole operation
       } else {
         console.log("Return reservation updated:", requestData.returnReservationCode, "Status:", returnUpdateData.status);
+        
+        // Send notification to driver for return trip
+        if (returnDriver && updatedReturnReservation) {
+          try {
+            await supabase.functions.invoke("notify-driver-new-reservation", {
+              body: {
+                reservationId: updatedReturnReservation.id,
+                driverUserId: returnDriver.user_id,
+                driverPhone: returnDriver.phone,
+              },
+            });
+            console.log(`✅ Return trip driver notification sent to ${returnDriver.name}`);
+          } catch (returnDriverNotifyError) {
+            console.error("Failed to notify driver for return trip:", returnDriverNotifyError);
+          }
+        }
       }
     }
 
