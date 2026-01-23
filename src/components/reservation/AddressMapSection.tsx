@@ -106,22 +106,34 @@ const AddressMapSectionComponent = ({
   } = placeholders;
 
   // Handle pickup place selection - exactly like hero section
+  // Uses formattedAddress if available, otherwise falls back to displayText or raw value
   const handlePickupSelect = useCallback((value: string, details?: PlaceDetails) => {
+    const address = details?.formattedAddress || details?.displayText || value;
+    const placeName = details?.placeName || '';
+    
+    console.log('[AddressMapSection] Pickup selected:', { value, address, placeName, lat: details?.lat, lng: details?.lng });
+    
     onPickupChange({
-      address: details?.formattedAddress || value,
-      placeName: details?.placeName || '',
-      lat: details?.lat || null,
-      lng: details?.lng || null,
+      address,
+      placeName,
+      lat: details?.lat ?? null,
+      lng: details?.lng ?? null,
     });
   }, [onPickupChange]);
 
   // Handle dropoff place selection - exactly like hero section
+  // Uses formattedAddress if available, otherwise falls back to displayText or raw value
   const handleDropoffSelect = useCallback((value: string, details?: PlaceDetails) => {
+    const address = details?.formattedAddress || details?.displayText || value;
+    const placeName = details?.placeName || '';
+    
+    console.log('[AddressMapSection] Dropoff selected:', { value, address, placeName, lat: details?.lat, lng: details?.lng });
+    
     onDropoffChange({
-      address: details?.formattedAddress || value,
-      placeName: details?.placeName || '',
-      lat: details?.lat || null,
-      lng: details?.lng || null,
+      address,
+      placeName,
+      lat: details?.lat ?? null,
+      lng: details?.lng ?? null,
     });
   }, [onDropoffChange]);
 
