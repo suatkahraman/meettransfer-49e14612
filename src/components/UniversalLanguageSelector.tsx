@@ -66,8 +66,12 @@ const UniversalLanguageSelector = ({
     // Always save to localStorage
     setLanguage(newLang);
 
-    // For internal routes, just update the context (no URL change)
+    // For internal routes (customer/driver/admin panels), reload to apply translations
     if (isInternalRoute) {
+      // Small delay to ensure localStorage is updated before reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 50);
       return;
     }
 
