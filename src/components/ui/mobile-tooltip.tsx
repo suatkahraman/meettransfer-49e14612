@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface MobileTooltipProps {
   children: React.ReactNode;
@@ -16,6 +15,7 @@ interface MobileTooltipProps {
 /**
  * A tooltip component that works on both desktop (hover) and mobile (long-press).
  * On mobile, users can long-press to show the tooltip, which auto-hides after a delay.
+ * Uses CSS transitions instead of framer-motion for better performance.
  */
 export function MobileTooltip({
   children,
@@ -127,23 +127,20 @@ export function MobileTooltip({
       onMouseLeave={handleMouseLeave}
     >
       {children}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className={cn(
-              "absolute z-[10000] whitespace-nowrap rounded-md px-3 py-1.5 text-sm shadow-md pointer-events-none",
-              positionStyles[side],
-              contentClassName
-            )}
-          >
-            {content}
-          </motion.div>
+      <div
+        className={cn(
+          "absolute z-[10000] whitespace-nowrap rounded-md px-3 py-1.5 text-sm shadow-md pointer-events-none",
+          "transition-all duration-150 ease-out",
+          positionStyles[side],
+          isOpen 
+            ? "opacity-100 scale-100" 
+            : "opacity-0 scale-95 pointer-events-none",
+          contentClassName
         )}
-      </AnimatePresence>
+        aria-hidden={!isOpen}
+      >
+        {content}
+      </div>
     </div>
   );
 }

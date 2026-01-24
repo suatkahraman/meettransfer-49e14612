@@ -1,5 +1,4 @@
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export interface FloatingLabelInputProps
@@ -26,25 +25,22 @@ const FloatingLabelInput = React.forwardRef<HTMLInputElement, FloatingLabelInput
     };
 
     return (
-      <motion.div 
-        className="relative"
-        animate={{
-          scale: isFocused ? 1.01 : 1,
-        }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      <div 
+        className={cn(
+          "relative transition-transform duration-200 ease-out",
+          isFocused && "scale-[1.01]"
+        )}
       >
         {/* Icon */}
         {icon && (
-          <motion.div 
-            className="absolute left-3 top-1/2 -translate-y-1/2 z-10"
-            animate={{
-              color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-              scale: isFocused ? 1.1 : 1,
-            }}
-            transition={{ duration: 0.15 }}
+          <div 
+            className={cn(
+              "absolute left-3 top-1/2 -translate-y-1/2 z-10 transition-all duration-150",
+              isFocused ? "text-primary scale-110" : "text-muted-foreground"
+            )}
           >
             {icon}
-          </motion.div>
+          </div>
         )}
 
         {/* Input */}
@@ -68,52 +64,42 @@ const FloatingLabelInput = React.forwardRef<HTMLInputElement, FloatingLabelInput
           {...props}
         />
 
-        {/* Floating Label */}
-        <motion.label
+        {/* Floating Label - CSS transitions */}
+        <label
           className={cn(
-            "absolute pointer-events-none transition-all duration-200 text-muted-foreground",
-            icon ? "left-10" : "left-3"
+            "absolute pointer-events-none transition-all duration-200 ease-out origin-left",
+            icon ? "left-10" : "left-3",
+            isFloating 
+              ? "top-1 text-[10px] font-medium" 
+              : "top-1/2 -translate-y-1/2 text-sm font-normal",
+            isFocused ? "text-primary" : "text-muted-foreground"
           )}
-          initial={false}
-          animate={{
-            top: isFloating ? "4px" : "50%",
-            y: isFloating ? 0 : "-50%",
-            fontSize: isFloating ? "10px" : "14px",
-            color: isFocused ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-            fontWeight: isFloating ? 500 : 400,
-          }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
           {label}
-        </motion.label>
+        </label>
 
-        {/* Focus glow effect */}
-        <AnimatePresence>
-          {isFocused && (
-            <motion.div
-              className="absolute inset-0 rounded-xl pointer-events-none"
-              initial={{ opacity: 0, boxShadow: "0 0 0 0 hsl(var(--primary) / 0)" }}
-              animate={{ opacity: 1, boxShadow: "0 0 0 3px hsl(var(--primary) / 0.1)" }}
-              exit={{ opacity: 0, boxShadow: "0 0 0 0 hsl(var(--primary) / 0)" }}
-              transition={{ duration: 0.2 }}
-            />
+        {/* Focus glow effect - CSS */}
+        <div
+          className={cn(
+            "absolute inset-0 rounded-xl pointer-events-none transition-all duration-200",
+            isFocused 
+              ? "opacity-100 shadow-[0_0_0_3px_hsl(var(--primary)/0.1)]" 
+              : "opacity-0"
           )}
-        </AnimatePresence>
+        />
 
-        {/* Error message */}
-        <AnimatePresence>
-          {error && (
-            <motion.p
-              className="text-xs text-destructive mt-1"
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-            >
-              {error}
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </motion.div>
+        {/* Error message - CSS transitions */}
+        {error && (
+          <p
+            className={cn(
+              "text-xs text-destructive mt-1 transition-all duration-200",
+              error ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
+            )}
+          >
+            {error}
+          </p>
+        )}
+      </div>
     );
   }
 );
