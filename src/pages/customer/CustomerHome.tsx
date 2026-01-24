@@ -1044,9 +1044,11 @@ const CustomerHome = () => {
           discount_amount: selectedVehiclePrice ? (selectedVehiclePrice - (returnPrice || 0)) : null,
         };
 
-        const { error: returnError } = await supabase
+        const { data: returnReservation, error: returnError } = await supabase
           .from('reservations')
-          .insert([returnReservationData]);
+          .insert([returnReservationData])
+          .select()
+          .single();
 
         if (returnError) {
           console.error('Failed to create return reservation:', returnError);
@@ -1054,7 +1056,29 @@ const CustomerHome = () => {
           toast.warning(language === 'TR' 
             ? 'Ana rezervasyon oluşturuldu ancak dönüş transferi eklenemedi.'
             : 'Main reservation created but return trip could not be added.');
+        } else if (returnReservation?.id) {
+          // Auto-assign driver for return reservation
+          try {
+            await supabase.functions.invoke('auto-price-reservation', {
+              body: { reservation_id: returnReservation.id }
+            });
+          } catch (autoPriceError) {
+            console.log('Auto-pricing for return reservation skipped:', autoPriceError);
+          }
         }
+      }
+
+      // Auto-assign driver for main reservation
+      try {
+        const { data: autoPriceResult } = await supabase.functions.invoke('auto-price-reservation', {
+          body: { reservation_id: reservation.id }
+        });
+        
+        if (autoPriceResult?.driverAssigned) {
+          console.log('Driver auto-assigned:', autoPriceResult.driverName);
+        }
+      } catch (autoPriceError) {
+        console.log('Auto-pricing/assignment skipped:', autoPriceError);
       }
 
       // Success - show confirmation
