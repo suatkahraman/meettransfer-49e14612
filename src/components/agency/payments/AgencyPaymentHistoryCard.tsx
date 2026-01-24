@@ -1,22 +1,28 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   CheckCircle, 
   Clock, 
   Banknote,
   ChevronRight,
-  MapPin
+  MapPin,
+  Download
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { tr, enUS } from 'date-fns/locale';
 import { formatCurrency } from '@/lib/currency';
 import { AgencyPaymentHistoryItem } from '@/hooks/useAgencyPayments';
 import { motion } from 'framer-motion';
+import { generatePaymentReceipt } from '@/utils/generatePaymentReceipt';
+import { toast } from 'sonner';
 
 interface AgencyPaymentHistoryCardProps {
   reservation: AgencyPaymentHistoryItem;
   index: number;
   onClick: () => void;
   language: 'TR' | 'EN';
+  agencyName?: string;
 }
 
 const translations = {
@@ -26,6 +32,8 @@ const translations = {
     cashToDriver: 'Cash to Driver',
     customer: 'Customer',
     paidAt: 'Paid at',
+    downloadReceipt: 'Download Receipt',
+    receiptDownloaded: 'Receipt downloaded successfully',
   },
   TR: {
     paid: 'Ödendi',
@@ -33,6 +41,8 @@ const translations = {
     cashToDriver: 'Şoföre Nakit',
     customer: 'Müşteri',
     paidAt: 'Ödeme',
+    downloadReceipt: 'Makbuz İndir',
+    receiptDownloaded: 'Makbuz başarıyla indirildi',
   }
 };
 
@@ -40,9 +50,11 @@ export const AgencyPaymentHistoryCard = ({
   reservation, 
   index, 
   onClick,
-  language 
+  language,
+  agencyName
 }: AgencyPaymentHistoryCardProps) => {
   const t = translations[language];
+  const dateLocale = language === 'TR' ? tr : enUS;
 
   const getCompanyAmount = (): number => {
     return reservation.agency_reservation_details?.company_amount || reservation.price || 0;
@@ -87,6 +99,34 @@ export const AgencyPaymentHistoryCard = ({
   const displayPickup = reservation.pickup_place_name || reservation.pickup;
   const displayDropoff = reservation.dropoff_place_name || reservation.dropoff;
 
+  const handleDownloadReceipt = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      generatePaymentReceipt({
+        reservationCode: reservation.reservation_code || 'N/A',
+        customerName: reservation.customer_name,
+        pickup: displayPickup,
+        dropoff: displayDropoff,
+        pickupDate: reservation.pickup_date,
+        pickupTime: reservation.pickup_time,
+        amount: getCompanyAmount(),
+        currency: getCurrency(),
+        paymentMethod: reservation.payment_provider,
+        paymentDate: reservation.payment_completed_at,
+        paymentStatus: status || 'pending',
+        language,
+        isAgency: true,
+        agencyName: agencyName,
+      });
+      toast.success(t.receiptDownloaded);
+    } catch (error) {
+      console.error('Failed to generate receipt:', error);
+    }
+  };
+
+  const canDownloadReceipt = status === 'paid' || status === 'pay_on_transfer' || reservation.payment_status === 'pay_on_transfer';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -108,7 +148,7 @@ export const AgencyPaymentHistoryCard = ({
                   </Badge>
                 )}
                 <span className="text-xs text-muted-foreground">
-                  {format(new Date(reservation.pickup_date), 'dd MMM yyyy')}
+                  {format(new Date(reservation.pickup_date), 'dd MMM yyyy', { locale: dateLocale })}
                 </span>
               </div>
               
@@ -136,8 +176,21 @@ export const AgencyPaymentHistoryCard = ({
               {/* Payment Date */}
               {reservation.payment_completed_at && (
                 <p className="text-xs text-muted-foreground">
-                  {t.paidAt}: {format(new Date(reservation.payment_completed_at), 'dd MMM yyyy HH:mm')}
+                  {t.paidAt}: {format(new Date(reservation.payment_completed_at), 'dd MMM yyyy HH:mm', { locale: dateLocale })}
                 </p>
+              )}
+
+              {/* Download Receipt Button */}
+              {canDownloadReceipt && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-1 text-xs h-7"
+                  onClick={handleDownloadReceipt}
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  {t.downloadReceipt}
+                </Button>
               )}
             </div>
             

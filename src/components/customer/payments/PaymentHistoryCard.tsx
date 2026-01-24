@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, Banknote, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, Clock, Banknote, ChevronRight, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '@/lib/currency';
 import { PaymentHistoryItem } from '@/hooks/useCustomerPayments';
+import { generatePaymentReceipt } from '@/utils/generatePaymentReceipt';
+import { toast } from 'sonner';
 
 interface PaymentHistoryCardProps {
   reservation: PaymentHistoryItem;
@@ -19,11 +22,15 @@ const translations = {
     paid: 'Paid',
     pending: 'Pending',
     cashToDriver: 'Cash to Driver',
+    downloadReceipt: 'Download Receipt',
+    receiptDownloaded: 'Receipt downloaded successfully',
   },
   TR: {
     paid: 'Ödendi',
     pending: 'Bekliyor',
     cashToDriver: 'Şoföre Nakit',
+    downloadReceipt: 'Makbuz İndir',
+    receiptDownloaded: 'Makbuz başarıyla indirildi',
   }
 };
 
@@ -56,6 +63,32 @@ export const PaymentHistoryCard = ({ reservation, index, language }: PaymentHist
   const navigate = useNavigate();
   const t = translations[language];
   const dateLocale = language === 'TR' ? tr : enUS;
+
+  const handleDownloadReceipt = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      generatePaymentReceipt({
+        reservationCode: reservation.reservation_code || 'N/A',
+        customerName: 'Customer', // Customer name not available in this context
+        pickup: reservation.pickup_place_name || reservation.pickup,
+        dropoff: reservation.dropoff_place_name || reservation.dropoff,
+        pickupDate: reservation.pickup_date,
+        pickupTime: reservation.pickup_time,
+        amount: reservation.price || 0,
+        currency: reservation.price_currency || 'EUR',
+        paymentMethod: reservation.payment_provider,
+        paymentDate: reservation.payment_completed_at,
+        paymentStatus: reservation.payment_status || 'pending',
+        language,
+      });
+      toast.success(t.receiptDownloaded);
+    } catch (error) {
+      console.error('Failed to generate receipt:', error);
+    }
+  };
+
+  const canDownloadReceipt = reservation.payment_status === 'paid' || reservation.payment_status === 'pay_on_transfer';
 
   return (
     <motion.div
@@ -93,6 +126,19 @@ export const PaymentHistoryCard = ({ reservation, index, language }: PaymentHist
                 <p className="text-xs text-muted-foreground">
                   {format(new Date(reservation.payment_completed_at), 'dd MMM yyyy HH:mm', { locale: dateLocale })}
                 </p>
+              )}
+              
+              {/* Download Receipt Button */}
+              {canDownloadReceipt && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 text-xs h-7"
+                  onClick={handleDownloadReceipt}
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  {t.downloadReceipt}
+                </Button>
               )}
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
