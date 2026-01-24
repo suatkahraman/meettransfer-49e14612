@@ -884,6 +884,7 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Hello, I need support.",
     whatsAppSupportTooltip: "WhatsApp Support",
     myBookingsTooltip: "My Bookings",
+    newReservation: "New Reservation",
     
     // Customer Bookings Page
     failedToLoadReservations: "Failed to load reservations",
@@ -892,6 +893,8 @@ const translations: Record<Language, Record<string, string>> = {
     pendingLabel: "Pending",
     newLabel: "New",
     historyLabel: "History",
+    payLabel: "Pay",
+    pastLabel: "Past",
     helloReservationInfoMsg: "Hello, I would like to get information about my reservation.",
     settingsLabel: "Settings",
     transferStatus: "Transfer Status",
@@ -11873,6 +11876,7 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Merhaba, destek almak istiyorum.",
     whatsAppSupportTooltip: "WhatsApp Destek",
     myBookingsTooltip: "Rezervasyonlarım",
+    newReservation: "Yeni Rezervasyon",
     
     // Customer Bookings Page
     failedToLoadReservations: "Rezervasyonlar yüklenemedi",
@@ -11881,6 +11885,8 @@ const translations: Record<Language, Record<string, string>> = {
     pendingLabel: "Bekleyen",
     newLabel: "Yeni",
     historyLabel: "Geçmiş",
+    payLabel: "Öde",
+    pastLabel: "Geçmiş",
     helloReservationInfoMsg: "Merhaba, rezervasyonum hakkında bilgi almak istiyorum.",
     settingsLabel: "Ayarlar",
     transferStatus: "Transfer Durumu",
