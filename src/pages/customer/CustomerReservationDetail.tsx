@@ -1034,98 +1034,229 @@ const CustomerReservationDetail = () => {
               </div>
             )}
 
-            {/* Price Section - only show if price is set */}
+            {/* Price Section - Detailed Breakdown */}
             {priceDisplay && (
               <div className="bg-muted p-4 rounded-lg space-y-3">
-                {/* Check if this is part of a return trip with discount */}
-                {linkedReservation && reservation.promo_code ? (
-                  <>
-                    {/* Outbound & Return Trip Price Breakdown */}
-                    <div className="space-y-3">
-                      {/* Determine which is outbound and which is return */}
-                      {(() => {
-                        const isThisReturn = reservation.is_return_transfer;
-                        const outbound = isThisReturn ? linkedReservation : reservation;
-                        const returnTrip = isThisReturn ? reservation : linkedReservation;
-                        const outboundPrice = outbound.price || 0;
-                        const returnOriginalPrice = returnTrip.price || 0;
-                        // Return trip gets 25% discount with promo code
-                        const returnDiscountedPrice = Math.round(returnOriginalPrice * 0.75);
-                        const discountAmount = returnOriginalPrice - returnDiscountedPrice;
-                        const totalPrice = outboundPrice + returnDiscountedPrice;
-                        const currency = reservation.price_currency;
-                        
-                        return (
-                          <>
-                            {/* Outbound Price */}
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-muted-foreground">{t('outbound') || 'Outbound'}</span>
-                              <span className="font-medium">{formatPrice(outboundPrice, currency)}</span>
-                            </div>
-                            
-                            {/* Return Price with Discount */}
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-muted-foreground">{t('returnTrip') || 'Return'}</span>
-                              <div className="text-right">
-                                <span className="text-muted-foreground line-through text-sm mr-2">
-                                  {formatPrice(returnOriginalPrice, currency)}
-                                </span>
-                                <span className="font-medium text-green-600 dark:text-green-400">
-                                  {formatPrice(returnDiscountedPrice, currency)}
-                                </span>
+                {/* Section Header */}
+                <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                  <CreditCard className="h-4 w-4 text-primary" />
+                  <span className="font-semibold text-sm uppercase tracking-wide">
+                    {language === 'TR' ? 'Fiyat Detayları' : 'Price Breakdown'}
+                  </span>
+                </div>
+
+                {/* Check if this is part of a return trip with linked reservation */}
+                {linkedReservation ? (
+                  <div className="space-y-3">
+                    {(() => {
+                      const isThisReturn = reservation.is_return_transfer;
+                      const outbound = isThisReturn ? linkedReservation : reservation;
+                      const returnTrip = isThisReturn ? reservation : linkedReservation;
+                      const outboundPrice = outbound.price || 0;
+                      const returnOriginalPrice = returnTrip.price || 0;
+                      const currency = reservation.price_currency;
+                      
+                      // Check if return has discount (promo code)
+                      const hasReturnDiscount = returnTrip.promo_code || returnTrip.discount_percentage;
+                      const discountPercentage = returnTrip.discount_percentage || 25;
+                      const returnDiscountedPrice = hasReturnDiscount 
+                        ? Math.round(returnOriginalPrice * (1 - discountPercentage / 100))
+                        : returnOriginalPrice;
+                      const discountAmount = hasReturnDiscount ? returnOriginalPrice - returnDiscountedPrice : 0;
+                      const totalPrice = outboundPrice + returnDiscountedPrice;
+                      
+                      return (
+                        <>
+                          {/* Outbound Transfer */}
+                          <div className="flex justify-between items-center py-2">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                <MapPin className="h-3 w-3 text-blue-600" />
                               </div>
+                              <span className="text-sm">
+                                {language === 'TR' ? 'Gidiş Transferi' : 'Outbound Transfer'}
+                              </span>
                             </div>
-                            
-                            {/* Discount Line */}
-                            <div className="flex justify-between items-center text-green-600 dark:text-green-400">
-                              <div className="flex items-center gap-1">
-                                <Tag className="h-3 w-3" />
-                                <span className="text-sm">
-                                  {t('discount') || 'Discount'} ({reservation.promo_code})
-                                </span>
+                            <span className="font-medium">{formatPrice(outboundPrice, currency)}</span>
+                          </div>
+                          
+                          {/* Return Transfer */}
+                          <div className="flex justify-between items-center py-2">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                <RefreshCw className="h-3 w-3 text-purple-600" />
                               </div>
-                              <span className="font-medium">-{formatPrice(discountAmount, currency)}</span>
+                              <span className="text-sm">
+                                {language === 'TR' ? 'Dönüş Transferi' : 'Return Transfer'}
+                              </span>
                             </div>
-                            
-                            {/* Total */}
-                            <div className="flex justify-between items-center pt-3 border-t">
-                              <span className="font-medium">{t('total') || 'Total'}</span>
-                              <span className="font-bold text-primary text-2xl">{formatPrice(totalPrice, currency)}</span>
+                            <div className="text-right">
+                              {hasReturnDiscount ? (
+                                <>
+                                  <span className="text-muted-foreground line-through text-sm mr-2">
+                                    {formatPrice(returnOriginalPrice, currency)}
+                                  </span>
+                                  <span className="font-medium text-green-600 dark:text-green-400">
+                                    {formatPrice(returnDiscountedPrice, currency)}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="font-medium">{formatPrice(returnOriginalPrice, currency)}</span>
+                              )}
                             </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </>
-                ) : reservation.promo_code && reservation.price && reservation.is_return_transfer ? (
+                          </div>
+                          
+                          {/* Discount Line - if applicable */}
+                          {hasReturnDiscount && discountAmount > 0 && (
+                            <div className="flex justify-between items-center py-2 bg-green-50 dark:bg-green-950/30 -mx-4 px-4 border-y border-green-200 dark:border-green-800">
+                              <div className="flex items-center gap-2">
+                                <div className="h-6 w-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                                  <Tag className="h-3 w-3 text-green-600" />
+                                </div>
+                                <div>
+                                  <span className="text-sm text-green-700 dark:text-green-300">
+                                    {language === 'TR' ? 'İndirim' : 'Discount'} ({discountPercentage}%)
+                                  </span>
+                                  {returnTrip.promo_code && (
+                                    <span className="text-xs text-green-600 dark:text-green-400 ml-1">
+                                      ({returnTrip.promo_code})
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="font-medium text-green-600 dark:text-green-400">
+                                -{formatPrice(discountAmount, currency)}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {/* Total */}
+                          <div className="flex justify-between items-center pt-3 border-t border-border">
+                            <span className="font-semibold">{language === 'TR' ? 'Toplam' : 'Total'}</span>
+                            <span className="font-bold text-primary text-2xl">{formatPrice(totalPrice, currency)}</span>
+                          </div>
+                          
+                          {/* Savings Summary */}
+                          {hasReturnDiscount && discountAmount > 0 && (
+                            <div className="flex items-center justify-center gap-2 bg-green-100 dark:bg-green-900/30 rounded-lg py-2 mt-2">
+                              <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                                {language === 'TR' 
+                                  ? `${formatPrice(discountAmount, currency)} tasarruf ettiniz!` 
+                                  : `You saved ${formatPrice(discountAmount, currency)}!`}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                ) : reservation.is_return_transfer && (reservation.promo_code || reservation.discount_percentage) ? (
                   // Single return trip with discount (no linked outbound visible)
-                  <>
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{t('price')}</span>
-                      <div className="text-right">
-                        {/* Original price with strikethrough */}
-                        <span className="text-muted-foreground line-through text-lg mr-2">
-                          {priceDisplay}
+                  <div className="space-y-3">
+                    {(() => {
+                      const originalPrice = reservation.price || 0;
+                      const discountPercentage = reservation.discount_percentage || 25;
+                      const discountedPrice = Math.round(originalPrice * (1 - discountPercentage / 100));
+                      const discountAmount = originalPrice - discountedPrice;
+                      const currency = reservation.price_currency;
+                      
+                      return (
+                        <>
+                          {/* Return Transfer */}
+                          <div className="flex justify-between items-center py-2">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                <RefreshCw className="h-3 w-3 text-purple-600" />
+                              </div>
+                              <span className="text-sm">
+                                {language === 'TR' ? 'Dönüş Transferi' : 'Return Transfer'}
+                              </span>
+                            </div>
+                            <span className="text-muted-foreground line-through text-sm">
+                              {formatPrice(originalPrice, currency)}
+                            </span>
+                          </div>
+                          
+                          {/* Discount Line */}
+                          <div className="flex justify-between items-center py-2 bg-green-50 dark:bg-green-950/30 -mx-4 px-4 border-y border-green-200 dark:border-green-800">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                                <Tag className="h-3 w-3 text-green-600" />
+                              </div>
+                              <div>
+                                <span className="text-sm text-green-700 dark:text-green-300">
+                                  {language === 'TR' ? 'İndirim' : 'Discount'} ({discountPercentage}%)
+                                </span>
+                                {reservation.promo_code && (
+                                  <span className="text-xs text-green-600 dark:text-green-400 ml-1">
+                                    ({reservation.promo_code})
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <span className="font-medium text-green-600 dark:text-green-400">
+                              -{formatPrice(discountAmount, currency)}
+                            </span>
+                          </div>
+                          
+                          {/* Total */}
+                          <div className="flex justify-between items-center pt-3 border-t border-border">
+                            <span className="font-semibold">{language === 'TR' ? 'Toplam' : 'Total'}</span>
+                            <span className="font-bold text-primary text-2xl">{formatPrice(discountedPrice, currency)}</span>
+                          </div>
+                          
+                          {/* Savings */}
+                          <div className="flex items-center justify-center gap-2 bg-green-100 dark:bg-green-900/30 rounded-lg py-2 mt-2">
+                            <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                              {language === 'TR' 
+                                ? `${formatPrice(discountAmount, currency)} tasarruf ettiniz!` 
+                                : `You saved ${formatPrice(discountAmount, currency)}!`}
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  // Regular single trip price display
+                  <div className="space-y-3">
+                    {/* Transfer */}
+                    <div className="flex justify-between items-center py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-6 w-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                          <MapPin className="h-3 w-3 text-blue-600" />
+                        </div>
+                        <span className="text-sm">
+                          {language === 'TR' ? 'Transfer Ücreti' : 'Transfer Fee'}
                         </span>
-                        {/* Discounted price - 25% off */}
-                        <span className="font-bold text-green-600 dark:text-green-400 text-2xl">
-                          {formatPrice(Math.round(reservation.price * 0.75), reservation.price_currency)}
-                        </span>
-                        {/* Discount badge */}
-                        <div className="flex items-center justify-end gap-1 mt-1">
-                          <Tag className="h-3 w-3 text-green-600 dark:text-green-400" />
-                          <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                            25% {t('discount') || 'discount'} ({reservation.promo_code})
+                      </div>
+                      <span className="font-medium">{priceDisplay}</span>
+                    </div>
+                    
+                    {/* Show discount if any (from admin discount) */}
+                    {reservation.discount_amount && reservation.discount_amount > 0 && (
+                      <div className="flex justify-between items-center py-2 bg-green-50 dark:bg-green-950/30 -mx-4 px-4 border-y border-green-200 dark:border-green-800">
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                            <Tag className="h-3 w-3 text-green-600" />
+                          </div>
+                          <span className="text-sm text-green-700 dark:text-green-300">
+                            {language === 'TR' ? 'Uygulanan İndirim' : 'Applied Discount'}
                           </span>
                         </div>
+                        <span className="font-medium text-green-600 dark:text-green-400">
+                          -{formatPrice(reservation.discount_amount, reservation.price_currency)}
+                        </span>
                       </div>
+                    )}
+                    
+                    {/* Total */}
+                    <div className="flex justify-between items-center pt-3 border-t border-border">
+                      <span className="font-semibold">{language === 'TR' ? 'Toplam' : 'Total'}</span>
+                      <span className="font-bold text-primary text-2xl">{priceDisplay}</span>
                     </div>
-                  </>
-                ) : (
-                  // Regular price display without discount
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{t('price')}</span>
-                    <span className="font-bold text-primary text-2xl">{priceDisplay}</span>
                   </div>
                 )}
                 
