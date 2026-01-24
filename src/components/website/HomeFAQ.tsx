@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo } from "@/contexts/PromoContext";
-import { HelpCircle, Sparkles, ChevronDown, MessageCircle, Tag, ArrowLeftRight } from "lucide-react";
+import { HelpCircle, MessageCircle } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -392,22 +392,11 @@ const HomeFAQ = () => {
 
       <div className="container max-w-5xl mx-auto px-4 relative z-10">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold mb-6"
-          >
+        <div className="text-center mb-12 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold mb-6">
             <HelpCircle className="h-4 w-4" />
             {t.badge}
-          </motion.div>
+          </div>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
             {t.title}{" "}
@@ -416,16 +405,10 @@ const HomeFAQ = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {t.subtitle}
           </p>
-        </motion.div>
+        </div>
 
         {/* FAQ Accordion */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="bg-card rounded-2xl border p-6 md:p-8 shadow-lg"
-        >
+        <div className="bg-card rounded-2xl border p-6 md:p-8 shadow-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
           <Accordion type="single" collapsible className="w-full space-y-4">
             {t.faqs.map((faq, index) => (
               <AccordionItem 
@@ -449,16 +432,10 @@ const HomeFAQ = () => {
               </AccordionItem>
             ))}
           </Accordion>
-        </motion.div>
+        </div>
 
         {/* CTA Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="mt-8 text-center"
-        >
+        <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
           <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 bg-card rounded-2xl border">
             <div className="text-center sm:text-left">
               <h3 className="font-bold text-lg">{t.cta}</h3>
@@ -471,7 +448,7 @@ const HomeFAQ = () => {
               </Button>
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

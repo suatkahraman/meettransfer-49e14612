@@ -3,11 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface Review {
   name: string;
@@ -60,6 +59,8 @@ const GoogleReviewsCarousel = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
   const [translatingIndex, setTranslatingIndex] = useState<number | null>(null);
+  const [isGridVisible, setIsGridVisible] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
   
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: "start", slidesToScroll: 1 },
@@ -93,6 +94,18 @@ const GoogleReviewsCarousel = () => {
 
     fetchReviews();
   }, [language]);
+
+  // Animate grid when showAll changes
+  useEffect(() => {
+    if (showAll) {
+      // Small delay to allow DOM update before animation
+      requestAnimationFrame(() => {
+        setIsGridVisible(true);
+      });
+    } else {
+      setIsGridVisible(false);
+    }
+  }, [showAll]);
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -159,8 +172,13 @@ const GoogleReviewsCarousel = () => {
   const displayedReviews = showAll ? reviews : reviews.slice(0, 5);
   const hasMoreReviews = reviews.length > 5;
 
-  const ReviewCard = ({ review, index }: { review: Review; index: number }) => (
-    <Card className="h-full bg-card hover:shadow-lg transition-shadow">
+  const ReviewCard = ({ review, index, animationDelay = 0 }: { review: Review; index: number; animationDelay?: number }) => (
+    <Card 
+      className="h-full bg-card hover:shadow-lg transition-shadow"
+      style={{ 
+        animationDelay: `${animationDelay}ms`,
+      }}
+    >
       <CardContent className="p-6 space-y-4">
         <div className="flex items-start justify-between">
           <Quote className="h-8 w-8 text-primary/20" />
@@ -295,29 +313,25 @@ const GoogleReviewsCarousel = () => {
           </>
         )}
 
-        {/* Grid View (when expanded) */}
-        <AnimatePresence>
-          {showAll && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            >
-              {reviews.map((review, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <ReviewCard review={review} index={index} />
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Grid View (when expanded) - CSS animation */}
+        {showAll && (
+          <div 
+            ref={gridRef}
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-300 ${
+              isGridVisible ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {reviews.map((review, index) => (
+              <div
+                key={index}
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <ReviewCard review={review} index={index} />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Show More/Less Button */}
         {hasMoreReviews && (

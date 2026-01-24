@@ -1,5 +1,4 @@
 import { memo, useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Plane, Users, Briefcase } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
@@ -129,6 +128,7 @@ const PromoBannerCarousel = memo(() => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const t = (key: string) => {
     const lang = language.toLowerCase();
@@ -159,19 +159,40 @@ const PromoBannerCarousel = memo(() => {
   useEffect(() => {
     if (!isAutoPlaying) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % PROMO_BANNERS.length);
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % PROMO_BANNERS.length);
+        setTimeout(() => setIsTransitioning(false), 50);
+      }, 300);
     }, 6000);
     return () => clearInterval(interval);
   }, [isAutoPlaying]);
 
   const goToPrevious = () => {
     setIsAutoPlaying(false);
-    setCurrentIndex((prev) => (prev - 1 + PROMO_BANNERS.length) % PROMO_BANNERS.length);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev - 1 + PROMO_BANNERS.length) % PROMO_BANNERS.length);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 300);
   };
 
   const goToNext = () => {
     setIsAutoPlaying(false);
-    setCurrentIndex((prev) => (prev + 1) % PROMO_BANNERS.length);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % PROMO_BANNERS.length);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 300);
+  };
+
+  const goToSlide = (index: number) => {
+    setIsAutoPlaying(false);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex(index);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 300);
   };
 
   const currentBanner = PROMO_BANNERS[currentIndex];
@@ -182,63 +203,55 @@ const PromoBannerCarousel = memo(() => {
         <div className="relative overflow-hidden rounded-2xl md:rounded-3xl shadow-2xl">
           {/* Banner Image */}
           <div className="relative h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
-                className="absolute inset-0"
-              >
-                <img
-                  src={currentBanner.image}
-                  alt={t(currentBanner.titleKey)}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                {/* Gradient Overlay */}
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-r",
-                  currentBanner.gradient
-                )} />
-              </motion.div>
-            </AnimatePresence>
+            <div
+              className={cn(
+                "absolute inset-0 transition-all duration-500 ease-out",
+                isTransitioning ? "opacity-0 scale-105" : "opacity-100 scale-100"
+              )}
+            >
+              <img
+                src={currentBanner.image}
+                alt={t(currentBanner.titleKey)}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              {/* Gradient Overlay */}
+              <div className={cn(
+                "absolute inset-0 bg-gradient-to-r",
+                currentBanner.gradient
+              )} />
+            </div>
 
             {/* Content */}
             <div className="absolute inset-0 flex items-center">
               <div className="container mx-auto px-6 md:px-12">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`content-${currentIndex}`}
-                    initial={{ opacity: 0, x: -30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 30 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="max-w-lg text-white"
-                  >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
-                        {currentBanner.icon}
-                      </div>
-                      <span className="text-sm font-medium uppercase tracking-wider opacity-90">
-                        Meet Transfer
-                      </span>
+                <div
+                  className={cn(
+                    "max-w-lg text-white transition-all duration-500 ease-out",
+                    isTransitioning ? "opacity-0 -translate-x-8" : "opacity-100 translate-x-0"
+                  )}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
+                      {currentBanner.icon}
                     </div>
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
-                      {t(currentBanner.titleKey)}
-                    </h2>
-                    <p className="text-base sm:text-lg opacity-90 mb-6 leading-relaxed">
-                      {t(currentBanner.descKey)}
-                    </p>
-                    <button 
-                      onClick={() => handleCTAClick(currentBanner.action)}
-                      className="px-6 py-3 bg-white text-foreground font-semibold rounded-full hover:bg-white/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                    >
-                      {t(currentBanner.ctaKey)}
-                    </button>
-                  </motion.div>
-                </AnimatePresence>
+                    <span className="text-sm font-medium uppercase tracking-wider opacity-90">
+                      Meet Transfer
+                    </span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                    {t(currentBanner.titleKey)}
+                  </h2>
+                  <p className="text-base sm:text-lg opacity-90 mb-6 leading-relaxed">
+                    {t(currentBanner.descKey)}
+                  </p>
+                  <button 
+                    onClick={() => handleCTAClick(currentBanner.action)}
+                    className="px-6 py-3 bg-white text-foreground font-semibold rounded-full hover:bg-white/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    {t(currentBanner.ctaKey)}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -263,10 +276,7 @@ const PromoBannerCarousel = memo(() => {
               {PROMO_BANNERS.map((_, index) => (
                 <button
                   key={index}
-                  onClick={() => {
-                    setIsAutoPlaying(false);
-                    setCurrentIndex(index);
-                  }}
+                  onClick={() => goToSlide(index)}
                   className={cn(
                     "w-2.5 h-2.5 rounded-full transition-all duration-300",
                     currentIndex === index
