@@ -7897,7 +7897,6 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogCyprusLimassol: "Лімасол",
     blogCyprusNicosia: "Нікосія",
     blogCyprusKyrenia: "Кіренія",
-    blogCyprusConclusionP1: "Почніть відпустку на Кіпрі з комфортом.",
     blogCyprusConclusionCta: "Забронювати трансфер на Кіпрі →",
     
     // Bursa Day Tour Details - Ukrainian
@@ -8514,7 +8513,6 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogCyprusLimassol: "リマソール",
     blogCyprusNicosia: "ニコシア",
     blogCyprusKyrenia: "キレニア",
-    blogCyprusConclusionP1: "キプロスでの休暇を快適なスタートで。",
     blogCyprusConclusionCta: "今すぐキプロス送迎を予約 →",
     
     // Bursa Day Tour Details - Japanese
