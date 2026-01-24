@@ -18,6 +18,12 @@ interface ReceiptData {
   language: 'TR' | 'EN';
   isAgency?: boolean;
   agencyName?: string;
+  // New optional fields for enhanced details
+  passengerCount?: number;
+  vehicleType?: string;
+  flightNumber?: string;
+  luggageCount?: number;
+  babySeatCount?: number;
 }
 
 const translations = {
@@ -33,6 +39,11 @@ const translations = {
     route: 'Güzergah',
     transferDate: 'Transfer Tarihi',
     transferTime: 'Saat',
+    passengerCount: 'Yolcu Sayısı',
+    vehicleType: 'Araç Tipi',
+    flightNumber: 'Uçuş No',
+    luggage: 'Bagaj',
+    babySeat: 'Bebek Koltuğu',
     paymentDetails: 'ÖDEME BİLGİLERİ',
     amount: 'Tutar',
     paymentMethod: 'Ödeme Yöntemi',
@@ -48,6 +59,14 @@ const translations = {
     footer: 'Bu belge elektronik olarak oluşturulmuştur.',
     companyName: 'Meet Transfer',
     companyInfo: 'VIP Transfer Hizmetleri',
+    person: 'kişi',
+    pieces: 'adet',
+    // Vehicle types
+    'sedan': 'Sedan',
+    'mercedes-vito': 'Mercedes Vito',
+    'vip-mercedes-vito': 'VIP Mercedes Vito',
+    'mercedes-maybach-minivan': 'Mercedes Maybach Minivan',
+    'mercedes-sprinter': 'Mercedes Sprinter',
   },
   EN: {
     title: 'PAYMENT RECEIPT',
@@ -61,6 +80,11 @@ const translations = {
     route: 'Route',
     transferDate: 'Transfer Date',
     transferTime: 'Time',
+    passengerCount: 'Passengers',
+    vehicleType: 'Vehicle Type',
+    flightNumber: 'Flight No',
+    luggage: 'Luggage',
+    babySeat: 'Baby Seat',
     paymentDetails: 'PAYMENT DETAILS',
     amount: 'Amount',
     paymentMethod: 'Payment Method',
@@ -76,7 +100,21 @@ const translations = {
     footer: 'This document was generated electronically.',
     companyName: 'Meet Transfer',
     companyInfo: 'VIP Transfer Services',
+    person: 'person(s)',
+    pieces: 'pcs',
+    // Vehicle types
+    'sedan': 'Sedan',
+    'mercedes-vito': 'Mercedes Vito',
+    'vip-mercedes-vito': 'VIP Mercedes Vito',
+    'mercedes-maybach-minivan': 'Mercedes Maybach Minivan',
+    'mercedes-sprinter': 'Mercedes Sprinter',
   }
+};
+
+const getVehicleLabel = (vehicleType: string, language: 'TR' | 'EN'): string => {
+  const t = translations[language];
+  const key = vehicleType as keyof typeof t;
+  return (t[key] as string) || vehicleType;
 };
 
 export const generatePaymentReceipt = async (data: ReceiptData): Promise<void> => {
@@ -191,6 +229,35 @@ export const generatePaymentReceipt = async (data: ReceiptData): Promise<void> =
     return y + 14;
   };
 
+  // Helper function to draw two fields side by side
+  const drawFieldRow = (label1: string, value1: string, label2: string, value2: string, y: number, isLast: boolean = false): number => {
+    const halfWidth = contentWidth / 2;
+    
+    // First field
+    doc.setTextColor(...lightGray);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(label1, margin + 4, y);
+    doc.setTextColor(...darkColor);
+    doc.setFontSize(10);
+    doc.text(value1, margin + 4, y + 5);
+    
+    // Second field
+    doc.setTextColor(...lightGray);
+    doc.setFontSize(9);
+    doc.text(label2, margin + halfWidth + 4, y);
+    doc.setTextColor(...darkColor);
+    doc.setFontSize(10);
+    doc.text(value2, margin + halfWidth + 4, y + 5);
+    
+    if (!isLast) {
+      doc.setDrawColor(229, 231, 235);
+      doc.line(margin, y + 9, pageWidth - margin, y + 9);
+    }
+    
+    return y + 14;
+  };
+
   // Customer Information Section
   yPos = drawSection(t.customerInfo, yPos);
   if (data.isAgency && data.agencyName) {
@@ -206,8 +273,29 @@ export const generatePaymentReceipt = async (data: ReceiptData): Promise<void> =
   yPos = drawField(t.route, `${data.pickup} → ${data.dropoff}`, yPos);
   
   const formattedDate = format(new Date(data.pickupDate), 'dd MMMM yyyy', { locale: dateLocale });
-  yPos = drawField(t.transferDate, formattedDate, yPos);
-  yPos = drawField(t.transferTime, data.pickupTime, yPos, true);
+  yPos = drawFieldRow(t.transferDate, formattedDate, t.transferTime, data.pickupTime, yPos);
+  
+  // Enhanced details: Passenger count and Vehicle type
+  if (data.passengerCount || data.vehicleType) {
+    const passengerText = data.passengerCount ? `${data.passengerCount} ${t.person}` : '-';
+    const vehicleText = data.vehicleType ? getVehicleLabel(data.vehicleType, data.language) : '-';
+    yPos = drawFieldRow(t.passengerCount, passengerText, t.vehicleType, vehicleText, yPos);
+  }
+  
+  // Flight number
+  if (data.flightNumber) {
+    yPos = drawField(t.flightNumber, data.flightNumber, yPos);
+  }
+  
+  // Luggage and Baby seat
+  if (data.luggageCount || data.babySeatCount) {
+    const luggageText = data.luggageCount ? `${data.luggageCount} ${t.pieces}` : '-';
+    const babySeatText = data.babySeatCount ? `${data.babySeatCount} ${t.pieces}` : '-';
+    yPos = drawFieldRow(t.luggage, luggageText, t.babySeat, babySeatText, yPos, true);
+  } else {
+    // Remove the last line if no luggage/baby seat
+    yPos -= 4;
+  }
 
   yPos += 8;
 

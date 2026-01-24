@@ -67,10 +67,15 @@ export const PaymentHistoryCard = ({ reservation, index, language }: PaymentHist
   const handleDownloadReceipt = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Only allow receipt download for paid online payments
+    if (reservation.payment_status !== 'paid' || !['stripe', 'paypal'].includes(reservation.payment_provider || '')) {
+      return;
+    }
+    
     try {
       await generatePaymentReceipt({
         reservationCode: reservation.reservation_code || 'N/A',
-        customerName: 'Customer', // Customer name not available in this context
+        customerName: reservation.customer_name || 'Customer',
         pickup: reservation.pickup_place_name || reservation.pickup,
         dropoff: reservation.dropoff_place_name || reservation.dropoff,
         pickupDate: reservation.pickup_date,
@@ -81,6 +86,11 @@ export const PaymentHistoryCard = ({ reservation, index, language }: PaymentHist
         paymentDate: reservation.payment_completed_at,
         paymentStatus: reservation.payment_status || 'pending',
         language,
+        // Enhanced details
+        vehicleType: reservation.vehicle_type,
+        flightNumber: reservation.flight_number,
+        luggageCount: reservation.luggage_count,
+        babySeatCount: reservation.baby_seat_count,
       });
       toast.success(t.receiptDownloaded);
     } catch (error) {
@@ -88,7 +98,9 @@ export const PaymentHistoryCard = ({ reservation, index, language }: PaymentHist
     }
   };
 
-  const canDownloadReceipt = reservation.payment_status === 'paid' || reservation.payment_status === 'pay_on_transfer';
+  // Only show receipt button for paid online payments (Stripe/PayPal)
+  const canDownloadReceipt = reservation.payment_status === 'paid' && 
+    ['stripe', 'paypal'].includes(reservation.payment_provider || '');
 
   return (
     <motion.div
