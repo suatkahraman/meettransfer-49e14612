@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle, ArrowRight, ChevronLeft, ChevronRight, Users, Briefcase } from "lucide-react";
+import { MessageCircle, ArrowRight, MapPin, Navigation, Users, Briefcase } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
+import { LazyGooglePlacesAutocomplete } from "@/components/ui/lazy-google-places-autocomplete";
 
 // Vehicle images - premium collection (WebP optimized where possible)
 import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
@@ -143,8 +144,8 @@ const vehicleData = {
 const vehicleTypes = Object.keys(vehicleData);
 
 const WhatsAppBooking = () => {
-  const { t } = useLanguage();
-const [formData, setFormData] = useState({
+  const { t, language } = useLanguage();
+  const [formData, setFormData] = useState({
     pickup: "",
     destination: "",
     date: "",
@@ -152,6 +153,17 @@ const [formData, setFormData] = useState({
     vehicleType: "",
     passengers: "",
   });
+
+  // Google Places handlers - using the correct callback signature
+  const handlePickupSelected = useCallback((value: string, details?: { name?: string; address?: string; lat?: number; lng?: number }) => {
+    const locationText = details?.address || details?.name || value || "";
+    setFormData(prev => ({ ...prev, pickup: locationText }));
+  }, []);
+
+  const handleDestinationSelected = useCallback((value: string, details?: { name?: string; address?: string; lat?: number; lng?: number }) => {
+    const locationText = details?.address || details?.name || value || "";
+    setFormData(prev => ({ ...prev, destination: locationText }));
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,26 +213,44 @@ Please confirm availability and price.`;
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Pick-up Point</Label>
-                <Input
-                  value={formData.pickup}
-                  onChange={(e) =>
-                    setFormData({ ...formData, pickup: e.target.value })
+                <Label className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  {language === 'TR' ? 'Alış Noktası' : 'Pick-up Point'}
+                </Label>
+                <LazyGooglePlacesAutocomplete
+                  onPlaceSelected={handlePickupSelected}
+                  placeholder={
+                    language === 'TR' ? 'Havalimanı, otel veya adres girin...' :
+                    language === 'DE' ? 'Flughafen, Hotel oder Adresse eingeben...' :
+                    language === 'FR' ? 'Aéroport, hôtel ou adresse...' :
+                    language === 'RU' ? 'Аэропорт, отель или адрес...' :
+                    'Airport, hotel or address...'
                   }
-                  placeholder="Enter Pick-up Point"
-                  required
+                  className="bg-background border-2 border-primary/30 rounded-xl text-base shadow-sm transition-all h-12 hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
+                  value={formData.pickup}
+                  floatingLabel
+                  icon={<MapPin className="h-4 w-4 text-primary" />}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>{t("selectDestination")}</Label>
-                <Input
-                  value={formData.destination}
-                  onChange={(e) =>
-                    setFormData({ ...formData, destination: e.target.value })
+                <Label className="flex items-center gap-2">
+                  <Navigation className="h-4 w-4 text-accent" />
+                  {language === 'TR' ? 'Bırakış Noktası' : t("selectDestination")}
+                </Label>
+                <LazyGooglePlacesAutocomplete
+                  onPlaceSelected={handleDestinationSelected}
+                  placeholder={
+                    language === 'TR' ? 'Otel adı veya adres girin...' :
+                    language === 'DE' ? 'Hotelname oder Adresse eingeben...' :
+                    language === 'FR' ? 'Nom de l\'hôtel ou adresse...' :
+                    language === 'RU' ? 'Название отеля или адрес...' :
+                    'Hotel name or address...'
                   }
-                  placeholder="Hotel name or address"
-                  required
+                  className="bg-background border-2 border-accent/30 rounded-xl text-base shadow-sm transition-all h-12 hover:border-accent/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20"
+                  value={formData.destination}
+                  floatingLabel
+                  icon={<Navigation className="h-4 w-4 text-accent" />}
                 />
               </div>
 
