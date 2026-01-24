@@ -92,7 +92,6 @@ const CustomerHome = () => {
   const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showPricePreparation, setShowPricePreparation] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passengerNames, setPassengerNames] = useState<string[]>(['']);
   const [activeBookingsCount, setActiveBookingsCount] = useState(0);
@@ -162,6 +161,10 @@ const CustomerHome = () => {
     luggageCount: '1',
     babySeatCount: '0',
     customerNotes: '',
+    // Dönüş transferi alanları
+    hasReturnTrip: false,
+    returnDate: '',
+    returnTime: '',
   });
 
   // Price fetching state
@@ -909,6 +912,22 @@ const CustomerHome = () => {
       return;
     }
 
+    // Validate return trip if selected
+    if (formData.hasReturnTrip) {
+      if (!formData.returnDate) {
+        setErrors(prev => ({ ...prev, returnDate: t('returnDateRequired') || 'Return date is required' }));
+        toast.error(t('returnDateRequired') || 'Please select return date');
+        setIsLoading(false);
+        return;
+      }
+      if (!formData.returnTime) {
+        setErrors(prev => ({ ...prev, returnTime: t('returnTimeRequired') || 'Return time is required' }));
+        toast.error(t('returnTimeRequired') || 'Please select return time');
+        setIsLoading(false);
+        return;
+      }
+    }
+
     // Save to recent searches
     if (user?.id) {
       const newSearch = { pickup: result.data.pickup, dropoff: result.data.dropoff.trim() };
@@ -920,231 +939,129 @@ const CustomerHome = () => {
       localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
     }
 
-    // Close the booking form and show price preparation animation
-    setIsBookingFormOpen(false);
-    setShowPricePreparation(true);
+    // Determine initial status based on whether we have a price
+    const selectedVehiclePrice = vehiclePrices[formData.vehicleType];
+    const hasPrice = selectedVehiclePrice && selectedVehiclePrice > 0;
+    const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
 
-    // Store passenger names in sessionStorage for the reservation form to pick up
-    sessionStorage.setItem('customerPassengerNames', JSON.stringify(validPassengerNames));
-    sessionStorage.setItem('customerPhone', result.data.passengerPhone.trim());
-
-    // Fetch prices DURING the animation (not after navigation)
     try {
-      const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
-        body: {
-          pickup: result.data.pickup,
-          dropoff: result.data.dropoff.trim(),
-          customerCurrency: 'EUR',
-        },
-      });
-
-      // Build URL params with all form data
-      const params = new URLSearchParams({
-        pickup: result.data.pickup,
+      // Create main reservation directly in database
+      const reservationData = {
+        customer_id: user?.id,
+        customer_name: validPassengerNames[0],
+        customer_phone: result.data.passengerPhone.trim(),
+        pickup: result.data.pickup.trim(),
         dropoff: result.data.dropoff.trim(),
-        date: result.data.date,
-        time: result.data.time,
-        vehicleType: result.data.vehicleType,
-        passengers: String(validPassengerNames.length),
-        paymentMethod: result.data.paymentType,
-        luggageCount: formData.luggageCount,
-        babySeatCount: formData.babySeatCount,
-        pricesPreFetched: 'true', // Flag to skip price animation on ReservationForm
+        pickup_date: result.data.date,
+        pickup_time: result.data.time,
+        vehicle_type: formData.vehicleType,
+        price: selectedVehiclePrice || null,
+        price_currency: priceCurrency || 'EUR',
+        status: initialStatus,
+        payment_type: result.data.paymentType,
+        luggage_count: parseInt(formData.luggageCount) || 1,
+        baby_seat_count: parseInt(formData.babySeatCount) || 0,
+        customer_notes: formData.customerNotes.trim() || null,
+        flight_number: result.data.flightNumber?.trim() || null,
+        passenger_names: validPassengerNames,
+      };
+
+      const { data: reservation, error: reservationError } = await supabase
+        .from('reservations')
+        .insert([reservationData])
+        .select()
+        .single();
+
+      if (reservationError) {
+        console.error('Failed to create reservation:', reservationError);
+        toast.error(language === 'TR' 
+          ? 'Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.'
+          : 'Failed to create reservation. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Create return trip if requested
+      if (formData.hasReturnTrip && formData.returnDate && formData.returnTime) {
+        const returnReservationData = {
+          customer_id: user?.id,
+          customer_name: validPassengerNames[0],
+          customer_phone: result.data.passengerPhone.trim(),
+          pickup: result.data.dropoff.trim(), // Swap
+          dropoff: result.data.pickup.trim(), // Swap
+          pickup_date: formData.returnDate,
+          pickup_time: formData.returnTime,
+          vehicle_type: formData.vehicleType,
+          price: selectedVehiclePrice || null, // Same price for return
+          price_currency: priceCurrency || 'EUR',
+          status: initialStatus,
+          payment_type: result.data.paymentType,
+          luggage_count: parseInt(formData.luggageCount) || 1,
+          baby_seat_count: parseInt(formData.babySeatCount) || 0,
+          customer_notes: formData.customerNotes.trim() || null,
+          passenger_names: validPassengerNames,
+          is_return_transfer: true,
+          original_reservation_id: reservation?.id,
+        };
+
+        const { error: returnError } = await supabase
+          .from('reservations')
+          .insert([returnReservationData]);
+
+        if (returnError) {
+          console.error('Failed to create return reservation:', returnError);
+          // Main reservation was created, just notify about return
+          toast.warning(language === 'TR' 
+            ? 'Ana rezervasyon oluşturuldu ancak dönüş transferi eklenemedi.'
+            : 'Main reservation created but return trip could not be added.');
+        }
+      }
+
+      // Success - show confirmation
+      toast.success(language === 'TR' 
+        ? `Rezervasyonunuz oluşturuldu! Kod: ${reservation?.reservation_code}`
+        : `Your reservation has been created! Code: ${reservation?.reservation_code}`);
+
+      // Reset form
+      setFormData({
+        pickup: '',
+        dropoff: '',
+        date: '',
+        time: '',
+        flightNumber: '',
+        passengerPhone: profileData.phone || '',
+        vehicleType: 'mercedes-vito',
+        paymentType: 'cash',
+        luggageCount: '1',
+        babySeatCount: '0',
+        customerNotes: '',
+        hasReturnTrip: false,
+        returnDate: '',
+        returnTime: '',
       });
-      
-      if (result.data.flightNumber) {
-        params.set('flightNumber', result.data.flightNumber.trim());
-      }
-      
-      if (formData.customerNotes.trim()) {
-        params.set('customerNotes', formData.customerNotes.trim());
-      }
+      setPassengerNames(['']);
+      setVehiclePrices({});
+      setIsBookingFormOpen(false);
 
-      // Add pre-fetched vehicle prices to URL
-      if (data?.prices && data.prices.length > 0) {
-        const pricesMap: Record<string, number> = {};
-        data.prices.forEach((p: any) => {
-          if (p.price) {
-            pricesMap[p.vehicleType] = p.price;
-          }
-        });
-        params.set('allVehiclePrices', encodeURIComponent(JSON.stringify(pricesMap)));
-        // Store full price data for vehicle selection
-        sessionStorage.setItem('preFetchedVehiclePrices', JSON.stringify(data.prices));
+      // Refresh data to show the new reservation
+      fetchData();
+
+      // Navigate to reservation detail
+      if (reservation?.id) {
+        navigate(`/customer/reservation/${reservation.id}`);
       }
 
-      // Minimum 2.5 seconds for animation visibility
-      await new Promise(resolve => setTimeout(resolve, 2500));
-
-      navigate(`/book?${params.toString()}`);
     } catch (error) {
-      console.error("Error fetching prices:", error);
-      // Even if price fetch fails, proceed with navigation
-      const params = new URLSearchParams({
-        pickup: result.data.pickup,
-        dropoff: result.data.dropoff.trim(),
-        date: result.data.date,
-        time: result.data.time,
-        vehicleType: result.data.vehicleType,
-        passengers: String(validPassengerNames.length),
-        paymentMethod: result.data.paymentType,
-        luggageCount: formData.luggageCount,
-        babySeatCount: formData.babySeatCount,
-      });
-      
-      if (result.data.flightNumber) {
-        params.set('flightNumber', result.data.flightNumber.trim());
-      }
-      
-      if (formData.customerNotes.trim()) {
-        params.set('customerNotes', formData.customerNotes.trim());
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      navigate(`/book?${params.toString()}`);
+      console.error('Error creating reservation:', error);
+      toast.error(language === 'TR' 
+        ? 'Bir hata oluştu. Lütfen tekrar deneyin.'
+        : 'An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Price preparation animation screen
-  if (showPricePreparation) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
-        <Card className="max-w-lg w-full shadow-2xl border-primary/20">
-          <CardContent className="pt-8 pb-8">
-            <div className="text-center">
-              {/* Animated car icon with pulsing rings */}
-              <div className="relative mb-8">
-                <motion.div 
-                  className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <Car className="h-12 w-12 text-white" />
-                </motion.div>
-                <motion.div 
-                  className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-green-400/30"
-                  animate={{ scale: [1, 1.5], opacity: [0.6, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
-                <motion.div 
-                  className="absolute inset-0 w-24 h-24 mx-auto rounded-full bg-emerald-400/20"
-                  animate={{ scale: [1, 1.8], opacity: [0.4, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
-                />
-              </div>
-              
-              {/* Main title with gradient */}
-              <motion.h1 
-                className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                {language === 'TR' ? 'Fiyatınız Hazırlanıyor' : 'Your Price is Being Prepared'}
-              </motion.h1>
-              
-              {/* Animated subtitle */}
-              <motion.p 
-                className="text-muted-foreground mb-8 text-sm"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                {language === 'TR' 
-                  ? 'En iyi fiyatı sizin için hesaplıyoruz...' 
-                  : 'Calculating the best price for you...'}
-              </motion.p>
-              
-              {/* Animated progress bar */}
-              <div className="w-full max-w-xs mx-auto mb-8">
-                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-full"
-                    initial={{ width: '0%' }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 2.3, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
-              
-              {/* Loading steps animation */}
-              <div className="space-y-3 mb-6">
-                <motion.div 
-                  className="flex items-center justify-center gap-2 text-sm"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  >
-                    <Loader2 className="h-4 w-4 text-green-500" />
-                  </motion.div>
-                  <span className="text-muted-foreground">
-                    {language === 'TR' ? 'Rotanız analiz ediliyor...' : 'Analyzing your route...'}
-                  </span>
-                </motion.div>
-                <motion.div 
-                  className="flex items-center justify-center gap-2 text-sm"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.7 }}
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  >
-                    <Loader2 className="h-4 w-4 text-emerald-500" />
-                  </motion.div>
-                  <span className="text-muted-foreground">
-                    {language === 'TR' ? 'Araç seçenekleri kontrol ediliyor...' : 'Checking vehicle options...'}
-                  </span>
-                </motion.div>
-                <motion.div 
-                  className="flex items-center justify-center gap-2 text-sm"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.2 }}
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  >
-                    <Loader2 className="h-4 w-4 text-teal-500" />
-                  </motion.div>
-                  <span className="text-muted-foreground">
-                    {language === 'TR' ? 'En iyi fiyat hesaplanıyor...' : 'Calculating best price...'}
-                  </span>
-                </motion.div>
-              </div>
-              
-              {/* Feature badges */}
-              <div className="flex flex-wrap justify-center gap-2">
-                <motion.span 
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-sm font-medium shadow-sm"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.5 }}
-                >
-                  <CheckCircle className="h-4 w-4" />
-                  {language === 'TR' ? 'En İyi Fiyat Garantisi' : 'Best Price Guarantee'}
-                </motion.span>
-                <motion.span 
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-sm font-medium shadow-sm"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.8 }}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {language === 'TR' ? 'Gizli Ücret Yok' : 'No Hidden Fees'}
-                </motion.span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Removed showPricePreparation animation - now reservations are created directly
 
   // Show loading screen while auth or data is loading
   if (authLoading || (isLoading && !recentReservations.length && !completedReservations.length)) {
@@ -2470,6 +2387,87 @@ const CustomerHome = () => {
                 </div>
               </div>
 
+              {/* Return Trip Toggle */}
+              <div className="space-y-3">
+                <div 
+                  className={cn(
+                    "flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all",
+                    formData.hasReturnTrip 
+                      ? "border-primary bg-primary/5 shadow-md" 
+                      : "border-border hover:border-primary/40 hover:bg-muted/30"
+                  )}
+                  onClick={() => setFormData({...formData, hasReturnTrip: !formData.hasReturnTrip})}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center",
+                      formData.hasReturnTrip ? "bg-primary text-primary-foreground" : "bg-muted"
+                    )}>
+                      <RefreshCw className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">
+                        {language === 'TR' ? 'Dönüş Transferi Ekle' : 'Add Return Trip'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {language === 'TR' ? 'Aynı fiyata gidiş-dönüş' : 'Round trip at same price'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={cn(
+                    "w-12 h-7 rounded-full transition-all relative",
+                    formData.hasReturnTrip ? "bg-primary" : "bg-muted"
+                  )}>
+                    <div className={cn(
+                      "absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all",
+                      formData.hasReturnTrip ? "left-6" : "left-1"
+                    )} />
+                  </div>
+                </div>
+
+                {/* Return Trip Date & Time */}
+                <AnimatePresence>
+                  {formData.hasReturnTrip && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="grid grid-cols-2 gap-3 overflow-hidden"
+                    >
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4" />
+                          {language === 'TR' ? 'Dönüş Tarihi' : 'Return Date'}
+                        </Label>
+                        <Input
+                          type="date"
+                          value={formData.returnDate}
+                          onChange={(e) => setFormData({...formData, returnDate: e.target.value})}
+                          min={formData.date || new Date().toISOString().split('T')[0]}
+                          className={errors.returnDate ? 'border-destructive' : ''}
+                          disabled={isLoading}
+                        />
+                        {errors.returnDate && <p className="text-sm text-destructive">{errors.returnDate}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2 text-sm">
+                          <Clock className="h-4 w-4" />
+                          {language === 'TR' ? 'Dönüş Saati' : 'Return Time'}
+                        </Label>
+                        <Input
+                          type="time"
+                          value={formData.returnTime}
+                          onChange={(e) => setFormData({...formData, returnTime: e.target.value})}
+                          className={errors.returnTime ? 'border-destructive' : ''}
+                          disabled={isLoading}
+                        />
+                        {errors.returnTime && <p className="text-sm text-destructive">{errors.returnTime}</p>}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               {/* Flight Number */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
@@ -2628,12 +2626,31 @@ const CustomerHome = () => {
                           loading="lazy"
                         />
                       </div>
-                      <h3 className={cn(
-                        "font-semibold text-sm mb-1",
-                        formData.vehicleType === v.value ? "text-primary" : "text-foreground"
-                      )}>
-                        {v.label}
-                      </h3>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className={cn(
+                          "font-semibold text-sm",
+                          formData.vehicleType === v.value ? "text-primary" : "text-foreground"
+                        )}>
+                          {v.label}
+                        </h3>
+                        {/* Price badge on vehicle card */}
+                        {vehiclePrices[v.value] ? (
+                          <span className={cn(
+                            "text-sm font-bold px-2 py-0.5 rounded-full",
+                            formData.vehicleType === v.value 
+                              ? "bg-primary text-primary-foreground" 
+                              : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                          )}>
+                            {vehiclePrices[v.value]} {priceCurrency}
+                          </span>
+                        ) : isPricesLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">
+                            {t('priceOnRequest') || 'Fiyat talebi'}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
