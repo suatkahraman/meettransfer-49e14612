@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Plus, BarChart3, Receipt, Bell } from 'lucide-react';
+import { Home, Plus, BarChart3, Receipt, Bell, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 import { Badge } from '@/components/ui/badge';
@@ -81,15 +81,15 @@ export const AgencyBottomNav = () => {
       path: '/agency/create-reservation',
     },
     {
+      icon: CreditCard,
+      label: t('payments') || 'Ödemeler',
+      path: '/agency/payments',
+    },
+    {
       icon: Bell,
       label: t('notifications') || 'Bildirimler',
       path: '/agency?section=notifications',
       badge: unreadCount,
-    },
-    {
-      icon: Receipt,
-      label: t('transactions') || 'İşlemler',
-      path: '/agency/transactions',
     },
     {
       icon: BarChart3,
