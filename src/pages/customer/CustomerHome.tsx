@@ -184,9 +184,12 @@ const CustomerHome = () => {
 
   // Price fetching state
   const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
-  const [priceCurrency, setPriceCurrency] = useState<string>('EUR');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('EUR');
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [pricesError, setPricesError] = useState<string | null>(null);
+
+  // Supported currencies
+  const SUPPORTED_CURRENCIES = ['EUR', 'USD', 'GBP', 'TRY', 'AED', 'AUD'] as const;
 
   // Calculate return trip discounted price
   const returnDiscountPercentage = returnPromoCode?.discount_percentage || 25;
@@ -210,7 +213,7 @@ const CustomerHome = () => {
     }
   }, [minibusRequired, formData.vehicleType]);
 
-  // Get currency based on language
+  // Get currency based on language (used for initial value)
   const getCurrencyByLanguage = useCallback(() => {
     switch (language) {
       case 'TR': return 'TRY';
@@ -219,6 +222,11 @@ const CustomerHome = () => {
       default: return 'EUR';
     }
   }, [language]);
+
+  // Set initial currency based on language once
+  useEffect(() => {
+    setSelectedCurrency(getCurrencyByLanguage());
+  }, []);
 
   // Fetch prices when pickup and dropoff are filled
   useEffect(() => {
@@ -242,7 +250,7 @@ const CustomerHome = () => {
           body: {
             pickup: formData.pickup,
             dropoff: formData.dropoff,
-            customerCurrency: getCurrencyByLanguage(),
+            customerCurrency: selectedCurrency,
           },
         });
 
@@ -256,7 +264,6 @@ const CustomerHome = () => {
             }
           });
           setVehiclePrices(pricesMap);
-          setPriceCurrency(data.currency || getCurrencyByLanguage());
         } else {
           setVehiclePrices({});
           setPricesError(t('noPriceFound') || 'Bu güzergah için fiyat bulunamadı');
@@ -273,7 +280,7 @@ const CustomerHome = () => {
     // Debounce the fetch
     const timeoutId = setTimeout(fetchVehiclePrices, 500);
     return () => clearTimeout(timeoutId);
-  }, [formData.pickup, formData.dropoff, getCurrencyByLanguage, t]);
+  }, [formData.pickup, formData.dropoff, selectedCurrency, t]);
 
   // Memoized greeting
   const greeting = useMemo(() => getGreeting(t), [t]);
@@ -979,7 +986,7 @@ const CustomerHome = () => {
         pickup_time: result.data.time,
         vehicle_type: formData.vehicleType,
         price: selectedVehiclePrice || null,
-        price_currency: priceCurrency || 'EUR',
+        price_currency: selectedCurrency || 'EUR',
         status: initialStatus,
         payment_type: result.data.paymentType,
         luggage_count: parseInt(formData.luggageCount) || 1,
@@ -1019,7 +1026,7 @@ const CustomerHome = () => {
           pickup_time: formData.returnTime,
           vehicle_type: formData.vehicleType,
           price: returnPrice, // Discounted price for return
-          price_currency: priceCurrency || 'EUR',
+          price_currency: selectedCurrency || 'EUR',
           status: initialStatus,
           payment_type: result.data.paymentType,
           luggage_count: parseInt(formData.luggageCount) || 1,
@@ -1465,23 +1472,6 @@ const CustomerHome = () => {
           </Card>
         </motion.div>
 
-        {/* Quick Book Button */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          className="mb-4"
-        >
-          <Button
-            size="lg"
-            className="w-full h-14 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary text-lg font-semibold shadow-lg group"
-            onClick={() => navigate('/')}
-          >
-            <Plus className="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform" />
-            {t('bookNewTransfer') || 'Book New Transfer'}
-            <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </motion.div>
 
         {/* Missing Phone Warning */}
         {!profileData.phone && (
@@ -2372,19 +2362,58 @@ const CustomerHome = () => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="space-y-2"
+                  className="space-y-2 relative z-0"
                 >
                   <Label className="flex items-center gap-2 text-muted-foreground">
                     <Route className="h-4 w-4" />
                     {t('routePreview') || 'Güzergah Önizlemesi'}
                   </Label>
-                  <GoogleRouteMap
-                    pickup={formData.pickup}
-                    dropoff={formData.dropoff}
-                    className="h-[200px] rounded-lg"
-                  />
+                  <div className="relative overflow-hidden rounded-lg">
+                    <GoogleRouteMap
+                      pickup={formData.pickup}
+                      dropoff={formData.dropoff}
+                      className="h-[200px] rounded-lg"
+                    />
+                  </div>
                 </motion.div>
               )}
+
+              {/* Currency Selector */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-primary" />
+                  {language === 'TR' ? 'Para Birimi' : 'Currency'}
+                </Label>
+                <Select
+                  value={selectedCurrency}
+                  onValueChange={(value) => setSelectedCurrency(value)}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder={language === 'TR' ? 'Para birimi seçin' : 'Select currency'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUPPORTED_CURRENCIES.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        <span className="flex items-center gap-2">
+                          {currency === 'EUR' && '€'}
+                          {currency === 'USD' && '$'}
+                          {currency === 'GBP' && '£'}
+                          {currency === 'TRY' && '₺'}
+                          {currency === 'AED' && 'د.إ'}
+                          {currency === 'AUD' && 'A$'}
+                          <span className="ml-1">{currency}</span>
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {language === 'TR' 
+                    ? 'Fiyatlar seçilen para biriminde gösterilir' 
+                    : 'Prices will be shown in selected currency'}
+                </p>
+              </div>
 
               {/* Date & Time - Enhanced Pickers */}
               <div className="grid grid-cols-2 gap-3">
@@ -2513,10 +2542,10 @@ const CustomerHome = () => {
                       {formData.hasReturnTrip && vehiclePrices[formData.vehicleType] && (
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs line-through text-muted-foreground">
-                            {vehiclePrices[formData.vehicleType]} {priceCurrency}
+                            {vehiclePrices[formData.vehicleType]} {selectedCurrency}
                           </span>
                           <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                            {getReturnPrice(vehiclePrices[formData.vehicleType])} {priceCurrency}
+                            {getReturnPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
                           </span>
                           <span className="text-[10px] text-green-600 dark:text-green-400">
                             ({language === 'TR' ? 'Dönüş fiyatı' : 'Return price'})
@@ -2797,7 +2826,7 @@ const CustomerHome = () => {
                               ? "bg-primary text-primary-foreground" 
                               : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                           )}>
-                            {vehiclePrices[v.value]} {priceCurrency}
+                            {vehiclePrices[v.value]} {selectedCurrency}
                           </span>
                         ) : isPricesLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -2906,7 +2935,7 @@ const CustomerHome = () => {
                           </span>
                         </div>
                         <span className="font-bold text-lg text-foreground">
-                          {vehiclePrices[formData.vehicleType]} {priceCurrency}
+                          {vehiclePrices[formData.vehicleType]} {selectedCurrency}
                         </span>
                       </div>
 
@@ -2933,10 +2962,10 @@ const CustomerHome = () => {
                             </div>
                             <div className="text-right">
                               <span className="text-xs line-through text-muted-foreground mr-2">
-                                {vehiclePrices[formData.vehicleType]} {priceCurrency}
+                                {vehiclePrices[formData.vehicleType]} {selectedCurrency}
                               </span>
                               <span className="font-bold text-lg text-green-600 dark:text-green-400">
-                                {getReturnPrice(vehiclePrices[formData.vehicleType])} {priceCurrency}
+                                {getReturnPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
                               </span>
                             </div>
                           </div>
@@ -2957,13 +2986,13 @@ const CustomerHome = () => {
                               {formData.hasReturnTrip 
                                 ? (vehiclePrices[formData.vehicleType] + getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)
                                 : vehiclePrices[formData.vehicleType]
-                              } {priceCurrency}
+                              } {selectedCurrency}
                             </span>
                             {formData.hasReturnTrip && (
                               <p className="text-xs text-green-600 dark:text-green-400">
                                 {language === 'TR' 
-                                  ? `${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${priceCurrency} tasarruf!`
-                                  : `Save ${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${priceCurrency}!`
+                                  ? `${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${selectedCurrency} tasarruf!`
+                                  : `Save ${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${selectedCurrency}!`
                                 }
                               </p>
                             )}
