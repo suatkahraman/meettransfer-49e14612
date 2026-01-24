@@ -23,7 +23,7 @@ import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
-import { CompactRouteMap } from '@/components/ui/compact-route-map';
+import { GoogleRouteMap } from '@/components/ui/google-route-map';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -404,51 +404,131 @@ const CustomerHome = () => {
       const pendingToken = localStorage.getItem('pending_booking_token');
       const pendingData = localStorage.getItem('pending_booking_data');
       
-      // If we have session booking data from Google OAuth, auto-fill the form
-      if (sessionBookingData && (sessionBookingData.pickup || sessionBookingData.dropoff)) {
-        console.log('[CustomerHome] Found pending booking from sessionStorage, auto-filling form...', sessionBookingData);
+      // If we have session booking data from Google OAuth, AUTO-CREATE reservation
+      if (sessionBookingData && sessionBookingData.pickup && sessionBookingData.dropoff) {
+        console.log('[CustomerHome] Found pending booking from sessionStorage, creating reservation...', sessionBookingData);
         
-        // Auto-fill form with pending booking data
-        setFormData(prev => ({
-          ...prev,
-          pickup: sessionBookingData.pickup || prev.pickup,
-          dropoff: sessionBookingData.dropoff || prev.dropoff,
-          date: sessionBookingData.date || prev.date,
-          time: sessionBookingData.time || prev.time,
-          vehicleType: sessionBookingData.vehicleType || prev.vehicleType,
-          paymentType: sessionBookingData.paymentMethod || prev.paymentType,
-          luggageCount: sessionBookingData.luggageCount?.toString() || prev.luggageCount,
-          babySeatCount: sessionBookingData.babySeatCount?.toString() || prev.babySeatCount,
-          customerNotes: sessionBookingData.customerNotes || prev.customerNotes,
-          flightNumber: sessionBookingData.flightNumber || prev.flightNumber,
-          passengerPhone: sessionBookingData.customerPhone || prev.passengerPhone,
-        }));
-        
-        // Set passenger names if available
-        if (sessionBookingData.passengerNames && sessionBookingData.passengerNames.length > 0) {
-          setPassengerNames(sessionBookingData.passengerNames);
-        }
-        
-        // Set prices if available
-        if (sessionBookingData.allVehiclePrices) {
-          setVehiclePrices(sessionBookingData.allVehiclePrices);
-        } else if (sessionBookingData.estimatedPrice && sessionBookingData.vehicleType) {
-          // Set the single vehicle price from Google OAuth flow
-          setVehiclePrices({ [sessionBookingData.vehicleType]: sessionBookingData.estimatedPrice });
-        }
-        if (sessionBookingData.currency) {
-          setPriceCurrency(sessionBookingData.currency);
-        }
-        
-        // Open the booking form
-        setIsBookingFormOpen(true);
-        
-        // Clear the pending booking data
+        // Clear the pending booking data immediately to prevent duplicate processing
         PendingBookingStorage.clear();
         
-        toast.success(language === 'TR' 
-          ? 'Rezervasyon bilgileriniz yüklendi. Lütfen kontrol edip onaylayın.'
-          : 'Your booking details have been loaded. Please review and confirm.');
+        setIsCreatingReservation(true);
+        
+        try {
+          // Get user profile info
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, phone')
+            .eq('id', user.id)
+            .single();
+          
+          const customerName = sessionBookingData.customerName || profile?.full_name || user.user_metadata?.full_name || 'Customer';
+          const customerPhone = sessionBookingData.customerPhone || profile?.phone || '';
+          const customerEmail = user.email || '';
+          
+          // Determine initial status based on whether we have a price
+          const hasPrice = sessionBookingData.estimatedPrice && sessionBookingData.estimatedPrice > 0;
+          const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
+          
+          // Build passenger names array
+          let passengerNamesArray = sessionBookingData.passengerNames;
+          if (!passengerNamesArray || passengerNamesArray.length === 0) {
+            passengerNamesArray = [customerName];
+          }
+          
+          // Create main reservation directly
+          const reservationData = {
+            customer_id: user.id,
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            pickup: sessionBookingData.pickup!,
+            dropoff: sessionBookingData.dropoff!,
+            pickup_date: sessionBookingData.date || new Date().toISOString().split('T')[0],
+            pickup_time: sessionBookingData.time || '10:00',
+            vehicle_type: sessionBookingData.vehicleType || 'Mercedes Vito',
+            passengers: sessionBookingData.passengers || 1,
+            price: sessionBookingData.estimatedPrice || null,
+            price_currency: sessionBookingData.currency || 'EUR',
+            status: initialStatus,
+            payment_method: sessionBookingData.paymentMethod || 'cash',
+            payment_type: sessionBookingData.paymentMethod || 'cash',
+            luggage_count: sessionBookingData.luggageCount || 1,
+            baby_seat_count: sessionBookingData.babySeatCount || 0,
+            customer_notes: sessionBookingData.customerNotes || null,
+            flight_number: sessionBookingData.flightNumber || null,
+            passenger_names: passengerNamesArray,
+            promo_code: sessionBookingData.promoCode || null,
+          };
+          
+          const { data: reservation, error: reservationError } = await supabase
+            .from('reservations')
+            .insert([reservationData])
+            .select()
+            .single();
+          
+          if (reservationError) {
+            console.error('[CustomerHome] Failed to create reservation:', reservationError);
+            toast.error(language === 'TR' 
+              ? 'Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.'
+              : 'Failed to create reservation. Please try again.');
+            setIsCreatingReservation(false);
+            return;
+          }
+          
+          console.log('[CustomerHome] Reservation created successfully:', reservation?.reservation_code);
+          
+          // Create return trip if requested
+          if (sessionBookingData.hasReturnTrip && sessionBookingData.returnDate && sessionBookingData.returnTime) {
+            const returnData = {
+              customer_id: user.id,
+              customer_name: customerName,
+              customer_phone: customerPhone,
+              pickup: sessionBookingData.dropoff!, // Swap
+              dropoff: sessionBookingData.pickup!, // Swap
+              pickup_date: sessionBookingData.returnDate,
+              pickup_time: sessionBookingData.returnTime,
+              vehicle_type: sessionBookingData.vehicleType || 'Mercedes Vito',
+              passengers: sessionBookingData.passengers || 1,
+              price: sessionBookingData.returnPrice || sessionBookingData.estimatedPrice || null,
+              price_currency: sessionBookingData.currency || 'EUR',
+              status: initialStatus,
+              payment_method: sessionBookingData.paymentMethod || 'cash',
+              payment_type: sessionBookingData.paymentMethod || 'cash',
+              luggage_count: sessionBookingData.luggageCount || 1,
+              baby_seat_count: sessionBookingData.babySeatCount || 0,
+              customer_notes: sessionBookingData.customerNotes || null,
+              passenger_names: passengerNamesArray,
+              promo_code: sessionBookingData.promoCode || null,
+              is_return_trip: true,
+              original_reservation_id: reservation?.id,
+            };
+            
+            const { error: returnError } = await supabase
+              .from('reservations')
+              .insert([returnData]);
+            
+            if (returnError) {
+              console.error('[CustomerHome] Failed to create return reservation:', returnError);
+            } else {
+              console.log('[CustomerHome] Return reservation created successfully');
+            }
+          }
+          
+          toast.success(language === 'TR' 
+            ? `Rezervasyonunuz oluşturuldu! Kod: ${reservation?.reservation_code}`
+            : `Your reservation has been created! Code: ${reservation?.reservation_code}`);
+          
+          // Refresh data to show the new reservation
+          fetchData();
+          
+        } catch (err) {
+          console.error('[CustomerHome] Error creating reservation from sessionStorage:', err);
+          toast.error(language === 'TR' 
+            ? 'Bir hata oluştu. Lütfen tekrar deneyin.'
+            : 'An error occurred. Please try again.');
+        } finally {
+          setIsCreatingReservation(false);
+        }
+        
         return;
       }
       
@@ -2338,10 +2418,10 @@ const CustomerHome = () => {
                     <Route className="h-4 w-4" />
                     {t('routePreview') || 'Güzergah Önizlemesi'}
                   </Label>
-                  <CompactRouteMap
+                  <GoogleRouteMap
                     pickup={formData.pickup}
                     dropoff={formData.dropoff}
-                    className="h-[160px]"
+                    className="h-[200px] rounded-lg"
                   />
                 </motion.div>
               )}
