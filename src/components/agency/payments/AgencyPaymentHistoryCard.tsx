@@ -99,11 +99,11 @@ export const AgencyPaymentHistoryCard = ({
   const displayPickup = reservation.pickup_place_name || reservation.pickup;
   const displayDropoff = reservation.dropoff_place_name || reservation.dropoff;
 
-  const handleDownloadReceipt = (e: React.MouseEvent) => {
+  const handleDownloadReceipt = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
     try {
-      generatePaymentReceipt({
+      await generatePaymentReceipt({
         reservationCode: reservation.reservation_code || 'N/A',
         customerName: reservation.customer_name,
         pickup: displayPickup,

@@ -79,7 +79,7 @@ const translations = {
   }
 };
 
-export const generatePaymentReceipt = (data: ReceiptData): void => {
+export const generatePaymentReceipt = async (data: ReceiptData): Promise<void> => {
   const t = translations[data.language];
   const dateLocale = data.language === 'TR' ? tr : enUS;
   
@@ -101,25 +101,51 @@ export const generatePaymentReceipt = (data: ReceiptData): void => {
 
   // Header background
   doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, pageWidth, 45, 'F');
+  doc.rect(0, 0, pageWidth, 50, 'F');
 
-  // Company name
+  // Load and add company logo
+  try {
+    const logoUrl = 'https://meettransfer.app/images/meet-transfer-logo.png';
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => {
+        // Create canvas to convert image to base64
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          const imgData = canvas.toDataURL('image/png');
+          // Add logo to PDF (positioned in header, left side)
+          doc.addImage(imgData, 'PNG', margin, yPos, 35, 15);
+        }
+        resolve();
+      };
+      img.onerror = () => {
+        console.warn('Could not load logo, continuing without it');
+        resolve();
+      };
+      img.src = logoUrl;
+    });
+  } catch (error) {
+    console.warn('Error loading logo:', error);
+  }
+
+  // Company info (next to logo)
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(24);
-  doc.setFont('helvetica', 'bold');
-  doc.text(t.companyName, margin, yPos + 10);
-
-  // Company info
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.text(t.companyInfo, margin, yPos + 18);
+  doc.text(t.companyInfo, margin, yPos + 22);
 
-  // Title
+  // Title (right side)
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text(t.title, pageWidth - margin, yPos + 14, { align: 'right' });
 
-  yPos = 55;
+  yPos = 60;
 
   // Receipt info row
   doc.setTextColor(...darkColor);

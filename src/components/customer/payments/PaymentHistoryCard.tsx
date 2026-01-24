@@ -64,11 +64,11 @@ export const PaymentHistoryCard = ({ reservation, index, language }: PaymentHist
   const t = translations[language];
   const dateLocale = language === 'TR' ? tr : enUS;
 
-  const handleDownloadReceipt = (e: React.MouseEvent) => {
+  const handleDownloadReceipt = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
     try {
-      generatePaymentReceipt({
+      await generatePaymentReceipt({
         reservationCode: reservation.reservation_code || 'N/A',
         customerName: 'Customer', // Customer name not available in this context
         pickup: reservation.pickup_place_name || reservation.pickup,
