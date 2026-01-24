@@ -40,6 +40,17 @@ import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicat
 import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from '@/lib/contact';
 import UniversalLanguageSelector from '@/components/UniversalLanguageSelector';
 import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as DayPickerCalendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { tr, enUS } from 'date-fns/locale';
+
+// Time options for 30-minute intervals
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
+  const hours = Math.floor(i / 2).toString().padStart(2, '0');
+  const minutes = (i % 2 === 0) ? '00' : '30';
+  return `${hours}:${minutes}`;
+});
 
 // Validation schema - memoized outside component
 const reservationSchema = z.object({
@@ -2357,32 +2368,80 @@ const CustomerHome = () => {
                 </motion.div>
               )}
 
-              {/* Date & Time */}
+              {/* Date & Time - Enhanced Pickers */}
               <div className="grid grid-cols-2 gap-3">
+                {/* Date Picker */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-4 w-4 text-primary" />
                     {t('date')}
                   </Label>
-                  <Input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({...formData, date: e.target.value})}
-                    min={new Date().toISOString().split('T')[0]}
-                    className={errors.date ? 'border-destructive' : ''}
-                    disabled={isLoading}
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        disabled={isLoading}
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-11",
+                          !formData.date && "text-muted-foreground",
+                          errors.date && "border-destructive"
+                        )}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {formData.date ? (
+                          format(new Date(formData.date), 'dd MMM yyyy', { locale: language === 'TR' ? tr : enUS })
+                        ) : (
+                          <span>{language === 'TR' ? 'Tarih Seçin' : 'Pick a date'}</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <DayPickerCalendar
+                        mode="single"
+                        selected={formData.date ? new Date(formData.date) : undefined}
+                        onSelect={(date) => {
+                          if (date) {
+                            setFormData({...formData, date: format(date, 'yyyy-MM-dd')});
+                          }
+                        }}
+                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+                        initialFocus
+                        locale={language === 'TR' ? tr : enUS}
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                   {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
                 </div>
+                
+                {/* Time Picker */}
                 <div className="space-y-2">
-                  <Label>{t('time')}</Label>
-                  <Input
-                    type="time"
+                  <Label className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    {t('time')}
+                  </Label>
+                  <Select
                     value={formData.time}
-                    onChange={(e) => setFormData({...formData, time: e.target.value})}
-                    className={errors.time ? 'border-destructive' : ''}
+                    onValueChange={(value) => setFormData({...formData, time: value})}
                     disabled={isLoading}
-                  />
+                  >
+                    <SelectTrigger className={cn(
+                      "h-11",
+                      errors.time && "border-destructive"
+                    )}>
+                      <SelectValue placeholder={language === 'TR' ? 'Saat Seçin' : 'Pick a time'} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {TIME_OPTIONS.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          <span className="flex items-center gap-2">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            {time}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
                 </div>
               </div>
@@ -2436,31 +2495,76 @@ const CustomerHome = () => {
                     >
                       <div className="space-y-2">
                         <Label className="flex items-center gap-2 text-sm">
-                          <Calendar className="h-4 w-4" />
+                          <Calendar className="h-4 w-4 text-primary" />
                           {language === 'TR' ? 'Dönüş Tarihi' : 'Return Date'}
                         </Label>
-                        <Input
-                          type="date"
-                          value={formData.returnDate}
-                          onChange={(e) => setFormData({...formData, returnDate: e.target.value})}
-                          min={formData.date || new Date().toISOString().split('T')[0]}
-                          className={errors.returnDate ? 'border-destructive' : ''}
-                          disabled={isLoading}
-                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              disabled={isLoading}
+                              className={cn(
+                                "w-full justify-start text-left font-normal h-10",
+                                !formData.returnDate && "text-muted-foreground",
+                                errors.returnDate && "border-destructive"
+                              )}
+                            >
+                              <Calendar className="mr-2 h-4 w-4" />
+                              {formData.returnDate ? (
+                                format(new Date(formData.returnDate), 'dd MMM yyyy', { locale: language === 'TR' ? tr : enUS })
+                              ) : (
+                                <span>{language === 'TR' ? 'Tarih Seçin' : 'Pick a date'}</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 z-50" align="start">
+                            <DayPickerCalendar
+                              mode="single"
+                              selected={formData.returnDate ? new Date(formData.returnDate) : undefined}
+                              onSelect={(date) => {
+                                if (date) {
+                                  setFormData({...formData, returnDate: format(date, 'yyyy-MM-dd')});
+                                }
+                              }}
+                              disabled={(date) => {
+                                const minDate = formData.date ? new Date(formData.date) : new Date();
+                                return date < minDate;
+                              }}
+                              initialFocus
+                              locale={language === 'TR' ? tr : enUS}
+                              className="p-3 pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
                         {errors.returnDate && <p className="text-sm text-destructive">{errors.returnDate}</p>}
                       </div>
                       <div className="space-y-2">
                         <Label className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4" />
+                          <Clock className="h-4 w-4 text-primary" />
                           {language === 'TR' ? 'Dönüş Saati' : 'Return Time'}
                         </Label>
-                        <Input
-                          type="time"
+                        <Select
                           value={formData.returnTime}
-                          onChange={(e) => setFormData({...formData, returnTime: e.target.value})}
-                          className={errors.returnTime ? 'border-destructive' : ''}
+                          onValueChange={(value) => setFormData({...formData, returnTime: value})}
                           disabled={isLoading}
-                        />
+                        >
+                          <SelectTrigger className={cn(
+                            "h-10",
+                            errors.returnTime && "border-destructive"
+                          )}>
+                            <SelectValue placeholder={language === 'TR' ? 'Saat Seçin' : 'Pick a time'} />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-60">
+                            {TIME_OPTIONS.map((time) => (
+                              <SelectItem key={time} value={time}>
+                                <span className="flex items-center gap-2">
+                                  <Clock className="h-3 w-3 text-muted-foreground" />
+                                  {time}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         {errors.returnTime && <p className="text-sm text-destructive">{errors.returnTime}</p>}
                       </div>
                     </motion.div>
