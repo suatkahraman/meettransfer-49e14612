@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { AgencyPayableReservation } from '@/components/agency/AgencyBulkPaymentPanel';
@@ -29,8 +28,8 @@ interface UseAgencyPaymentsOptions {
 }
 
 export const useAgencyPayments = (options: UseAgencyPaymentsOptions = {}) => {
-  const { language: agencyLang } = useAgencyTranslations();
-  const language = options.language || (agencyLang === 'TR' ? 'TR' : 'EN');
+  // Use provided language or default to TR
+  const language = options.language || 'TR';
   
   const { user, loading: authLoading } = useAuth();
   const { agencyId } = useUserRole();
