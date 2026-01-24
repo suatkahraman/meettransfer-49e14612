@@ -48,7 +48,7 @@ const translations = {
 
 const CustomerPayments = () => {
   const { signOut } = useAuth();
-  const { language } = useLanguage();
+  const { language, t: i18nT } = useLanguage();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('pay');
 
@@ -157,7 +157,7 @@ const CustomerPayments = () => {
             <TabsTrigger value="pay" className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
               <span className="hidden sm:inline">{t.payNow}</span>
-              <span className="sm:hidden">Öde</span>
+              <span className="sm:hidden">{i18nT('payLabel')}</span>
               {unpaidReservations.length > 0 && (
                 <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1.5 flex items-center justify-center text-xs">
                   {unpaidReservations.length}
@@ -167,7 +167,7 @@ const CustomerPayments = () => {
             <TabsTrigger value="history" className="flex items-center gap-2">
               <History className="h-4 w-4" />
               <span className="hidden sm:inline">{t.paymentHistory}</span>
-              <span className="sm:hidden">Geçmiş</span>
+              <span className="sm:hidden">{i18nT('historyLabel')}</span>
               {paidReservations.length > 0 && (
                 <Badge variant="secondary" className="ml-1">
                   {paidReservations.length}
