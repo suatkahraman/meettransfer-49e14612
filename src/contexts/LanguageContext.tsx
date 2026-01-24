@@ -895,6 +895,11 @@ const translations: Record<Language, Record<string, string>> = {
     historyLabel: "History",
     payLabel: "Pay",
     pastLabel: "Past",
+    paymentsTitle: "Payments",
+    paymentsSubtitle: "Manage your transfer payments",
+    payNowTab: "Pay Now",
+    noPaymentHistory: "No payment history yet",
+    loadingPayments: "Loading...",
     helloReservationInfoMsg: "Hello, I would like to get information about my reservation.",
     settingsLabel: "Settings",
     transferStatus: "Transfer Status",
@@ -2616,6 +2621,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "Neue Reservierung",
     payLabel: "Bezahlen",
     pastLabel: "Vergangen",
+    paymentsTitle: "Zahlungen",
+    paymentsSubtitle: "Verwalten Sie Ihre Transferzahlungen",
+    payNowTab: "Jetzt bezahlen",
+    noPaymentHistory: "Noch keine Zahlungshistorie",
+    loadingPayments: "Laden...",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Internationaler VIP Flughafentransfer & Chauffeurservice | Türkei, Dubai, Zypern",
@@ -4462,6 +4472,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "Nouvelle Réservation",
     payLabel: "Payer",
     pastLabel: "Passé",
+    paymentsTitle: "Paiements",
+    paymentsSubtitle: "Gérer vos paiements de transfert",
+    payNowTab: "Payer maintenant",
+    noPaymentHistory: "Pas encore d'historique de paiement",
+    loadingPayments: "Chargement...",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Service VIP International de Transfert Aéroport & Chauffeur | Turquie, Dubaï, Chypre",
@@ -6023,6 +6038,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "Новое бронирование",
     payLabel: "Оплатить",
     pastLabel: "Прошлое",
+    paymentsTitle: "Платежи",
+    paymentsSubtitle: "Управление платежами за трансферы",
+    payNowTab: "Оплатить сейчас",
+    noPaymentHistory: "История платежей пока пуста",
+    loadingPayments: "Загрузка...",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Международный VIP Трансфер из Аэропорта и Услуги Шофера | Турция, Дубай, Кипр",
@@ -7448,6 +7468,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "Nuova Prenotazione",
     payLabel: "Paga",
     pastLabel: "Passato",
+    paymentsTitle: "Pagamenti",
+    paymentsSubtitle: "Gestisci i tuoi pagamenti di trasferimento",
+    payNowTab: "Paga ora",
+    noPaymentHistory: "Nessuna cronologia pagamenti",
+    loadingPayments: "Caricamento...",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Servizio VIP Internazionale Trasferimento Aeroporto & Autista | Turchia, Dubai, Cipro",
@@ -8920,6 +8945,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "Nueva Reserva",
     payLabel: "Pagar",
     pastLabel: "Pasado",
+    paymentsTitle: "Pagos",
+    paymentsSubtitle: "Gestiona tus pagos de transferencia",
+    payNowTab: "Pagar ahora",
+    noPaymentHistory: "Aún no hay historial de pagos",
+    loadingPayments: "Cargando...",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Servicio VIP Internacional de Traslado Aeropuerto y Chófer | Turquía, Dubái, Chipre",
@@ -10392,6 +10422,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "حجز جديد",
     payLabel: "ادفع",
     pastLabel: "السابق",
+    paymentsTitle: "المدفوعات",
+    paymentsSubtitle: "إدارة مدفوعات النقل الخاصة بك",
+    payNowTab: "ادفع الآن",
+    noPaymentHistory: "لا يوجد سجل دفع بعد",
+    loadingPayments: "جاري التحميل...",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - خدمة نقل VIP دولية من المطار وسائق خاص | تركيا، دبي، قبرص",
@@ -11905,6 +11940,11 @@ const translations: Record<Language, Record<string, string>> = {
     historyLabel: "Geçmiş",
     payLabel: "Öde",
     pastLabel: "Geçmiş",
+    paymentsTitle: "Ödemeler",
+    paymentsSubtitle: "Transfer ödemelerinizi yönetin",
+    payNowTab: "Şimdi Öde",
+    noPaymentHistory: "Henüz ödeme geçmişi yok",
+    loadingPayments: "Yükleniyor...",
     helloReservationInfoMsg: "Merhaba, rezervasyonum hakkında bilgi almak istiyorum.",
     settingsLabel: "Ayarlar",
     transferStatus: "Transfer Durumu",
@@ -13431,6 +13471,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "Нове бронювання",
     payLabel: "Оплатити",
     pastLabel: "Минуле",
+    paymentsTitle: "Платежі",
+    paymentsSubtitle: "Керуйте вашими платежами за трансфери",
+    payNowTab: "Оплатити зараз",
+    noPaymentHistory: "Історія платежів поки порожня",
+    loadingPayments: "Завантаження...",
     
     // Transfer Page Common
     transferSubtitle: "Mercedes Vito, V-Class, Maybach | Цілодобовий сервіс зустрічі",
@@ -14888,6 +14933,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "新規予約",
     payLabel: "支払い",
     pastLabel: "過去",
+    paymentsTitle: "支払い",
+    paymentsSubtitle: "送迎の支払いを管理",
+    payNowTab: "今すぐ支払う",
+    noPaymentHistory: "支払い履歴はありません",
+    loadingPayments: "読み込み中...",
     
     // SEO Meta Tags
     seoHomeTitle: "ミートトランスファー - 国際プレミアムVIP空港送迎・シャトルサービス | トルコ、ドバイ、キプロス",
@@ -15391,6 +15441,11 @@ const translations: Record<Language, Record<string, string>> = {
     newReservation: "Nova Reserva",
     payLabel: "Pagar",
     pastLabel: "Passado",
+    paymentsTitle: "Pagamentos",
+    paymentsSubtitle: "Gerir os seus pagamentos de transferência",
+    payNowTab: "Pagar agora",
+    noPaymentHistory: "Ainda não há histórico de pagamentos",
+    loadingPayments: "Carregando...",
     support: "Suporte",
     // All other keys will use English as fallback through the t() function
   },
