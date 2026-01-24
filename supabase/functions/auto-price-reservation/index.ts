@@ -140,6 +140,70 @@ const handler = async (req: Request): Promise<Response> => {
       
       const driverMatchCity = city || pickupCity || dropoffCity || airportCity;
       
+      // =====================================================
+      // AUTO-FILL: passenger_cash_amount & customer_price for cash payments
+      // =====================================================
+      if (reservation.payment_type === 'cash' && reservation.price && reservation.price > 0) {
+        console.log(`💵 Cash payment detected for agency reservation - auto-filling amounts`);
+        
+        // Update reservation with passenger_cash_amount
+        const { error: cashUpdateError } = await supabase
+          .from("reservations")
+          .update({
+            passenger_cash_amount: reservation.price,
+            passenger_cash_currency: reservation.price_currency || 'TRY'
+          })
+          .eq("id", reservation_id);
+        
+        if (cashUpdateError) {
+          console.error("❌ Failed to update passenger_cash_amount:", cashUpdateError);
+        } else {
+          console.log(`✅ passenger_cash_amount set to ${reservation.price} ${reservation.price_currency}`);
+        }
+        
+        // Check if agency_reservation_details exists
+        const { data: existingDetails } = await supabase
+          .from("agency_reservation_details")
+          .select("id")
+          .eq("reservation_id", reservation_id)
+          .single();
+        
+        if (existingDetails) {
+          // Update existing record
+          const { error: detailsError } = await supabase
+            .from("agency_reservation_details")
+            .update({
+              customer_price: reservation.price,
+              agency_price_currency: reservation.price_currency || 'USD',
+              updated_at: new Date().toISOString()
+            })
+            .eq("reservation_id", reservation_id);
+          
+          if (detailsError) {
+            console.error("❌ Failed to update agency_reservation_details:", detailsError);
+          } else {
+            console.log(`✅ customer_price set to ${reservation.price} ${reservation.price_currency}`);
+          }
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase
+            .from("agency_reservation_details")
+            .insert({
+              reservation_id: reservation_id,
+              customer_price: reservation.price,
+              agency_price_currency: reservation.price_currency || 'USD',
+              agency_user_id: reservation.agency_user_id
+            });
+          
+          if (insertError) {
+            console.error("❌ Failed to insert agency_reservation_details:", insertError);
+          } else {
+            console.log(`✅ agency_reservation_details created with customer_price ${reservation.price}`);
+          }
+        }
+      }
+      // =====================================================
+      
       if (driverMatchCity) {
         console.log(`🚗 Agency reservation - attempting driver matching for: ${driverMatchCity}`);
         
@@ -240,7 +304,8 @@ const handler = async (req: Request): Promise<Response> => {
             driverName: driver.name,
             driverRegion: driver.region,
             adminNotified: true,
-            customerEmailSent: true
+            customerEmailSent: true,
+            cashAmountSet: reservation.payment_type === 'cash'
           }), {
             headers: { "Content-Type": "application/json", ...corsHeaders },
           });
@@ -284,7 +349,8 @@ const handler = async (req: Request): Promise<Response> => {
         matched: false, 
         reason: "agency_no_driver_match",
         adminNotified: true,
-        customerEmailSent: true
+        customerEmailSent: true,
+        cashAmountSet: reservation.payment_type === 'cash'
       }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
