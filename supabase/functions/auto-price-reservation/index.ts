@@ -67,7 +67,25 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { reservation_id }: AutoPriceRequest = await req.json();
+    // Parse request body
+    let reservation_id: string;
+    try {
+      const body = await req.json();
+      reservation_id = body.reservation_id;
+      if (!reservation_id) {
+        console.error("❌ Missing reservation_id in request body");
+        return new Response(JSON.stringify({ error: "reservation_id is required", matched: false }), {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    } catch (parseError) {
+      console.error("❌ Failed to parse request body:", parseError);
+      return new Response(JSON.stringify({ error: "Invalid request body", matched: false }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     console.log("🚗 Auto-pricing started for reservation:", reservation_id);
 

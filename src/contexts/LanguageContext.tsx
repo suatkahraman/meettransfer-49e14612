@@ -15387,6 +15387,11 @@ const translations: Record<Language, Record<string, string>> = {
     next: "Próximo",
     submit: "Enviar",
     search: "Pesquisar",
+    // Customer Bookings Page
+    newReservation: "Nova Reserva",
+    payLabel: "Pagar",
+    pastLabel: "Passado",
+    support: "Suporte",
     // All other keys will use English as fallback through the t() function
   },
 };
