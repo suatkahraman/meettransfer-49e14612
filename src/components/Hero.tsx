@@ -13,16 +13,15 @@ import { useHeroFormStorage } from "@/hooks/useHeroFormStorage";
 import { HeroHeader } from "@/components/hero/HeroHeader";
 import { HeroTrustBadges } from "@/components/hero/HeroTrustBadges";
 import { HeroBackground } from "@/components/hero/HeroBackground";
+// SwipeableBookingCard is critical for LCP - eagerly loaded
+import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
 
-// Lazy load booking form components - hydrate after first paint
+// Lazy load form content components - hydrate after first paint
 const RideFormContent = lazy(() => 
   import("@/components/hero/RideFormContent").then(m => ({ default: m.RideFormContent }))
 );
 const HourlyFormContent = lazy(() => 
   import("@/components/hero/HourlyFormContent").then(m => ({ default: m.HourlyFormContent }))
-);
-const SwipeableBookingCard = lazy(() => 
-  import("@/components/hero/SwipeableBookingCard").then(m => ({ default: m.SwipeableBookingCard }))
 );
 
 // Lazy load non-critical visual components
@@ -146,13 +145,12 @@ export const Hero = () => {
               </Suspense>
             </SilentSectionErrorBoundary>
 
-            {/* Booking Form Card - Lazy loaded after first paint */}
-            <Suspense fallback={<BookingCardSkeleton />}>
-              <SwipeableBookingCard 
-                activeTab={activeTab} 
-                setActiveTab={setActiveTab}
-                language={language}
-                t={t}
+            {/* Booking Form Card - Critical for LCP, no Suspense wrapper */}
+            <SwipeableBookingCard 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab}
+              language={language}
+              t={t}
               >
                 {/* Tabs */}
                 <div className="flex bg-muted/50 relative">
@@ -248,10 +246,9 @@ export const Hero = () => {
                         handleHourlyContinue={hourlyForm.handleHourlyContinue}
                       />
                     )}
-                  </Suspense>
-                </div>
-              </SwipeableBookingCard>
-            </Suspense>
+              </Suspense>
+            </div>
+          </SwipeableBookingCard>
 
             <HeroTrustBadges />
             

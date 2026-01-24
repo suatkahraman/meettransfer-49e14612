@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { motion } from "framer-motion";
 import { Globe, Plane, Car, MapPin, Award, Shield } from "lucide-react";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 
@@ -81,7 +80,6 @@ const useCountUp = (end: number, duration: number = 2000, startCounting: boolean
 
 const StatCard = ({ stat, index, isVisible }: { stat: StatItem; index: number; isVisible: boolean }) => {
   const { t } = useLanguage();
-  const { rating } = useGoogleReviewStats();
   const count = useCountUp(stat.value, 2000 + index * 200, isVisible);
   const Icon = stat.icon;
 
@@ -92,19 +90,15 @@ const StatCard = ({ stat, index, isVisible }: { stat: StatItem; index: number; i
 
   const formatNumber = (num: number) => {
     if (num >= 1000) {
-      // Use dot as thousand separator (e.g. 13.454)
       return new Intl.NumberFormat("de-DE").format(num);
     }
     return num.toString();
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="relative group"
+    <div 
+      className="relative group animate-fade-in"
+      style={{ animationDelay: `${index * 100}ms` }}
     >
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 md:p-8 hover:bg-white/10 transition-all duration-300 hover:border-white/20">
         {/* Icon */}
@@ -124,7 +118,7 @@ const StatCard = ({ stat, index, isVisible }: { stat: StatItem; index: number; i
           {safeT(stat.labelKey, stat.labelFallback)}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -178,22 +172,14 @@ const StatsCounter = () => {
 
       <div className="container max-w-6xl mx-auto px-4 relative z-10">
         {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-4"
+        <div className={`text-center mb-12 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}>
+          <div
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-sm font-medium mb-4 ${isVisible ? 'animate-scale-in' : 'opacity-0'}`}
+            style={{ animationDelay: '100ms' }}
           >
             <Globe className="h-4 w-4 text-primary" />
             {isTR ? "Dünya Genelinde" : "Worldwide Service"}
-          </motion.div>
+          </div>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white tracking-tight">
             {safeT("globalCoverage", "Global Coverage")}
@@ -204,7 +190,7 @@ const StatsCounter = () => {
               "Premium transfers across multiple countries with professional service",
             )}
           </p>
-        </motion.div>
+        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -219,11 +205,9 @@ const StatsCounter = () => {
         </div>
 
         {/* Trust Badges */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-wrap justify-center gap-6 mt-12"
+        <div
+          className={`flex flex-wrap justify-center gap-6 mt-12 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
+          style={{ animationDelay: '400ms' }}
         >
           <div className="flex items-center gap-2 text-white/60">
             <Award className="h-5 w-5 text-primary" />
@@ -237,7 +221,7 @@ const StatsCounter = () => {
             <Car className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium">{isTR ? "Premium Araçlar" : "Premium Vehicles"}</span>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
