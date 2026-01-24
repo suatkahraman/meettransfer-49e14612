@@ -33,26 +33,11 @@ const MidyatAirportTransferGuide = () => {
   const { formatBlogDate } = useBlogDate();
   const formattedDate = formatBlogDate("2025-01-16");
   const faqItems = [
-    {
-      question: "What is the nearest airport to Midyat?",
-      answer: "Mardin Airport (MQM) is the nearest airport to Midyat, located approximately 65 km away. Private transfer from Mardin Airport to Midyat takes about 1.5 hours through scenic Mesopotamian landscape."
-    },
-    {
-      question: "How much does airport transfer to Midyat cost?",
-      answer: "Private transfer from Mardin Airport to Midyat starts from €65 for sedan vehicles and €85 for VIP Mercedes Vito. Prices include meet & greet, flight tracking, and door-to-door service to your hotel."
-    },
-    {
-      question: "Can I visit Mor Gabriel Monastery with airport transfer?",
-      answer: "Yes, we offer combined transfers that include stops at Mor Gabriel Monastery, one of the oldest surviving Christian monasteries in the world. Additional stops can be arranged during booking."
-    },
-    {
-      question: "Is Midyat worth visiting?",
-      answer: "Absolutely! Midyat is famous for its unique stone architecture, ancient Syriac monasteries, silver filigree craftsmanship (telkari), and rich multicultural heritage where Assyrians, Kurds, and Arabs coexist."
-    },
-    {
-      question: "What is special about Midyat architecture?",
-      answer: "Midyat's honey-colored limestone buildings feature intricate carvings and traditional Mesopotamian architecture. The old town has been used as a filming location for Turkish TV series, making it a popular destination."
-    }
+    { question: tBlog("blogMidyatFaq1Q"), answer: tBlog("blogMidyatFaq1A") },
+    { question: tBlog("blogMidyatFaq2Q"), answer: tBlog("blogMidyatFaq2A") },
+    { question: tBlog("blogMidyatFaq3Q"), answer: tBlog("blogMidyatFaq3A") },
+    { question: tBlog("blogMidyatFaq4Q"), answer: tBlog("blogMidyatFaq4A") },
+    { question: tBlog("blogMidyatFaq5Q"), answer: tBlog("blogMidyatFaq5A") },
   ];
 
   const transferPrices = [

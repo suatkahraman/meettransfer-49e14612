@@ -32,26 +32,11 @@ const MardinAirportTransferGuide = () => {
   const { formatBlogDate } = useBlogDate();
   const formattedDate = formatBlogDate("2025-01-16");
   const faqItems = [
-    {
-      question: "How do I get from Mardin Airport to city center?",
-      answer: "The best way is private airport transfer. Mardin Airport (MQM) is located 20 km from city center. Private transfer takes about 25 minutes with door-to-door service, meet & greet, and fixed prices."
-    },
-    {
-      question: "What is the cost of airport transfer to Mardin?",
-      answer: "Private transfer from Mardin Airport to city center starts from €35 for sedan vehicles. VIP Mercedes Vito transfers start from €55. All prices include meet & greet service and free waiting time."
-    },
-    {
-      question: "Can I book a transfer to Midyat from Mardin Airport?",
-      answer: "Yes, we offer direct transfers from Mardin Airport to Midyat. The journey takes approximately 1.5 hours covering 65 km. Perfect for visiting the ancient Syriac monasteries and stone houses."
-    },
-    {
-      question: "Is there public transport from Mardin Airport?",
-      answer: "Public transport options are very limited from Mardin Airport. Private transfer is the most reliable and comfortable option, especially for tourists visiting historical sites."
-    },
-    {
-      question: "What attractions can I visit in Mardin?",
-      answer: "Mardin offers incredible historical sites including Zinciriye Medrese, Kasımiye Medrese, Deyrulzafaran Monastery, Mardin Museum, and the stunning old town with its honey-colored stone architecture."
-    }
+    { question: tBlog("blogMardinFaq1Q"), answer: tBlog("blogMardinFaq1A") },
+    { question: tBlog("blogMardinFaq2Q"), answer: tBlog("blogMardinFaq2A") },
+    { question: tBlog("blogMardinFaq3Q"), answer: tBlog("blogMardinFaq3A") },
+    { question: tBlog("blogMardinFaq4Q"), answer: tBlog("blogMardinFaq4A") },
+    { question: tBlog("blogMardinFaq5Q"), answer: tBlog("blogMardinFaq5A") },
   ];
 
   const transferPrices = [
