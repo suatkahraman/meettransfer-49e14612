@@ -2613,6 +2613,9 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Hallo, ich benötige Unterstützung.",
     whatsAppSupportTooltip: "WhatsApp Support",
     myBookingsTooltip: "Meine Buchungen",
+    newReservation: "Neue Reservierung",
+    payLabel: "Bezahlen",
+    pastLabel: "Vergangen",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Internationaler VIP Flughafentransfer & Chauffeurservice | Türkei, Dubai, Zypern",
@@ -4456,6 +4459,9 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Bonjour, j'ai besoin d'aide.",
     whatsAppSupportTooltip: "Support WhatsApp",
     myBookingsTooltip: "Mes réservations",
+    newReservation: "Nouvelle Réservation",
+    payLabel: "Payer",
+    pastLabel: "Passé",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Service VIP International de Transfert Aéroport & Chauffeur | Turquie, Dubaï, Chypre",
@@ -6014,6 +6020,9 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Здравствуйте, мне нужна помощь.",
     whatsAppSupportTooltip: "Поддержка WhatsApp",
     myBookingsTooltip: "Мои бронирования",
+    newReservation: "Новое бронирование",
+    payLabel: "Оплатить",
+    pastLabel: "Прошлое",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Международный VIP Трансфер из Аэропорта и Услуги Шофера | Турция, Дубай, Кипр",
@@ -7436,6 +7445,9 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Ciao, ho bisogno di supporto.",
     whatsAppSupportTooltip: "Supporto WhatsApp",
     myBookingsTooltip: "Le mie prenotazioni",
+    newReservation: "Nuova Prenotazione",
+    payLabel: "Paga",
+    pastLabel: "Passato",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Servizio VIP Internazionale Trasferimento Aeroporto & Autista | Turchia, Dubai, Cipro",
@@ -8905,6 +8917,9 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Hola, necesito ayuda.",
     whatsAppSupportTooltip: "Soporte WhatsApp",
     myBookingsTooltip: "Mis reservas",
+    newReservation: "Nueva Reserva",
+    payLabel: "Pagar",
+    pastLabel: "Pasado",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - Servicio VIP Internacional de Traslado Aeropuerto y Chófer | Turquía, Dubái, Chipre",
@@ -10374,6 +10389,9 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "مرحباً، أحتاج إلى المساعدة.",
     whatsAppSupportTooltip: "دعم واتساب",
     myBookingsTooltip: "حجوزاتي",
+    newReservation: "حجز جديد",
+    payLabel: "ادفع",
+    pastLabel: "السابق",
     
     // SEO Meta Tags
     seoHomeTitle: "Meet Transfer - خدمة نقل VIP دولية من المطار وسائق خاص | تركيا، دبي، قبرص",
@@ -13410,6 +13428,9 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "Привіт, мені потрібна допомога.",
     whatsAppSupportTooltip: "Підтримка WhatsApp",
     myBookingsTooltip: "Мої бронювання",
+    newReservation: "Нове бронювання",
+    payLabel: "Оплатити",
+    pastLabel: "Минуле",
     
     // Transfer Page Common
     transferSubtitle: "Mercedes Vito, V-Class, Maybach | Цілодобовий сервіс зустрічі",
@@ -14864,6 +14885,9 @@ const translations: Record<Language, Record<string, string>> = {
     helloSupportMsg: "こんにちは、サポートが必要です。",
     whatsAppSupportTooltip: "WhatsAppサポート",
     myBookingsTooltip: "予約一覧",
+    newReservation: "新規予約",
+    payLabel: "支払い",
+    pastLabel: "過去",
     
     // SEO Meta Tags
     seoHomeTitle: "ミートトランスファー - 国際プレミアムVIP空港送迎・シャトルサービス | トルコ、ドバイ、キプロス",
