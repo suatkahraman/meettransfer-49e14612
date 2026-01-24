@@ -1,7 +1,6 @@
 import { memo, useState, useEffect } from "react";
 import { Clock } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO } from "date-fns";
 import { enUS } from "date-fns/locale";
 import type { Locale } from "date-fns";
@@ -81,24 +80,30 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
   useEffect(() => {
     const fetchPromoCode = async () => {
       try {
-        const now = new Date().toISOString();
-        const { data, error } = await supabase
-          .from('promo_codes')
-          .select('code, discount_percentage, valid_until, description')
-          .eq('is_active', true)
-          .eq('applies_to', 'return_transfer')
-          .or(`valid_until.is.null,valid_until.gte.${now}`)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+        // Promo codes are not publicly readable; fetch via backend function
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-active-promo`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+          }
+        );
 
-        if (error) {
-          console.error('Error fetching promo code:', error);
-          return;
+        if (!response.ok) {
+          throw new Error(`Failed to fetch promo (${response.status})`);
         }
 
-        if (data) {
-          setPromoData(data);
+        const data = await response.json();
+        if (data?.code && data?.isActive) {
+          setPromoData({
+            code: data.code,
+            discount_percentage: Number(data.discountPercentage ?? 0),
+            valid_until: data.validUntil ?? null,
+            description: null,
+          });
         }
       } catch (err) {
         console.error('Failed to fetch promo code:', err);
