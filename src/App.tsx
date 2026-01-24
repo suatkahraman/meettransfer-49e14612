@@ -111,6 +111,7 @@ const AgencyCreateReservation = lazy(() => import("./pages/agency/AgencyCreateRe
 const AgencyTransactionHistory = lazy(() => import("./pages/agency/AgencyTransactionHistory"));
 const AgencyCurrencyDetail = lazy(() => import("./pages/agency/AgencyCurrencyDetail"));
 const AgencyPaymentSuccess = lazy(() => import("./pages/agency/AgencyPaymentSuccess"));
+const AgencyPayments = lazy(() => import("./pages/agency/AgencyPayments"));
 
 // Website Pages - lazy loaded
 const IstanbulTransfer = lazy(() => import("./pages/website/IstanbulTransfer"));
@@ -424,6 +425,7 @@ const App = () => (
               <Route path="/agency/payment-success" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyPaymentSuccess /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/reservation/:id" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/reservation/:id/edit" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyEditReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
+              <Route path="/agency/payments" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyPayments /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               
               {/* Customer Portal & Booking Confirmation - Public */}
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
