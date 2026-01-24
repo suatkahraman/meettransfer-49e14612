@@ -182,11 +182,15 @@ const CustomerHome = () => {
     returnTime: '',
   });
 
-  // Price fetching state
+   // Price fetching state
   const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
   const [selectedCurrency, setSelectedCurrency] = useState<string>('EUR');
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [pricesError, setPricesError] = useState<string | null>(null);
+
+  // Date picker popover state
+  const [isPickupDateOpen, setIsPickupDateOpen] = useState(false);
+  const [isReturnDateOpen, setIsReturnDateOpen] = useState(false);
 
   // Supported currencies
   const SUPPORTED_CURRENCIES = ['EUR', 'USD', 'GBP', 'TRY', 'AED', 'AUD'] as const;
@@ -2423,7 +2427,7 @@ const CustomerHome = () => {
                     <Calendar className="h-4 w-4 text-primary" />
                     {t('date')}
                   </Label>
-                  <Popover>
+                  <Popover open={isPickupDateOpen} onOpenChange={setIsPickupDateOpen}>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
@@ -2460,6 +2464,7 @@ const CustomerHome = () => {
                               );
                             }
                           }
+                          setIsPickupDateOpen(false);
                         }}
                         disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                         initialFocus
@@ -2589,7 +2594,7 @@ const CustomerHome = () => {
                           <Calendar className="h-4 w-4 text-primary" />
                           {language === 'TR' ? 'Dönüş Tarihi' : 'Return Date'}
                         </Label>
-                        <Popover>
+                        <Popover open={isReturnDateOpen} onOpenChange={setIsReturnDateOpen}>
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
@@ -2626,6 +2631,7 @@ const CustomerHome = () => {
                                   const formattedDate = format(date, 'yyyy-MM-dd');
                                   setFormData(prev => ({ ...prev, returnDate: formattedDate }));
                                 }
+                                setIsReturnDateOpen(false);
                               }}
                               disabled={(date) => {
                                 const today = new Date(new Date().setHours(0,0,0,0));
