@@ -610,7 +610,7 @@ const CustomerBookings = () => {
             </motion.div>
             <p className="text-muted-foreground mb-4">{t('noReservationsYet')}</p>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button onClick={() => navigate('/book')} className="shadow-lg">
+              <Button onClick={() => navigate('/customer')} className="shadow-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 {t('bookATransfer')}
               </Button>
