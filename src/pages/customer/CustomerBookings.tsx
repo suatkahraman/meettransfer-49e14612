@@ -983,7 +983,7 @@ const CustomerBookings = () => {
         </div>
       </main>
 
-      {/* Sticky FABs - Mobile Optimized */}
+      {/* Sticky FABs - Mobile Optimized with Labels */}
       <div className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 flex flex-col gap-2 sm:gap-3">
         {/* WhatsApp Support Button */}
         <motion.div
@@ -991,7 +991,7 @@ const CustomerBookings = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
         >
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               type="button"
               onClick={() => {
@@ -1001,10 +1001,11 @@ const CustomerBookings = () => {
                 window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
               }}
               size="lg"
-              className="h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white"
+              className="h-auto px-4 py-2.5 sm:px-5 sm:py-3 rounded-full shadow-lg bg-[#25D366] hover:bg-[#22c55e] text-white flex items-center gap-2"
               title={t('whatsAppSupportTooltip') || 'WhatsApp Support'}
             >
               <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="text-xs sm:text-sm font-medium">{t('support') || 'Support'}</span>
             </Button>
           </motion.div>
         </motion.div>
@@ -1015,14 +1016,15 @@ const CustomerBookings = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
         >
-          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               type="button"
               onClick={() => navigate('/customer#booking-form')}
               size="lg"
-              className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+              className="h-auto px-4 py-2.5 sm:px-5 sm:py-3 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground flex items-center gap-2"
             >
-              <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="text-xs sm:text-sm font-medium">{t('newReservation') || 'New Reservation'}</span>
             </Button>
           </motion.div>
         </motion.div>

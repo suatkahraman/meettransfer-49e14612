@@ -606,10 +606,14 @@ const CustomerReservationDetail = () => {
         }
       }
 
-      toast.success('Reservation cancelled successfully.');
-      setReservation({ ...reservation, status: 'cancelled_by_customer', driver_id: null });
+      toast.success(t('reservationCancelledSuccess') || 'Reservation cancelled successfully.');
+      
+      // Navigate to customer bookings page after cancellation
+      setTimeout(() => {
+        navigate('/customer/bookings');
+      }, 1500);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to cancel reservation');
+      toast.error(error.message || t('failedToCancelReservation') || 'Failed to cancel reservation');
     } finally {
       setCancelLoading(false);
     }
