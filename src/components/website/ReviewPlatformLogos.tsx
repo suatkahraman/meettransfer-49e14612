@@ -1,6 +1,5 @@
 import { Star } from "lucide-react";
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 import { PLATFORM_RATINGS } from "@/constants/ratings";
 
@@ -83,6 +82,27 @@ const staticPlatforms: Omit<Platform, "rating" | "reviews">[] = [
 
 const ReviewPlatformLogos = () => {
   const { rating, totalReviews } = useGoogleReviewStats();
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // IntersectionObserver for viewport animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const platforms: Platform[] = useMemo(
     () => [
@@ -139,16 +159,18 @@ const ReviewPlatformLogos = () => {
   );
 
   return (
-    <section className="py-8 bg-gradient-to-b from-muted/30 to-background">
+    <section ref={sectionRef} className="py-8 bg-gradient-to-b from-muted/30 to-background">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
           {platforms.map((platform, index) => (
-            <motion.div
+            <div
               key={platform.name}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
+              className={`transition-all duration-500 ${
+                isVisible 
+                  ? "opacity-100 translate-y-0" 
+                  : "opacity-0 translate-y-4"
+              }`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
               {platform.url ? (
                 <a
@@ -166,7 +188,7 @@ const ReviewPlatformLogos = () => {
                   {renderPlatformContent(platform)}
                 </div>
               )}
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -175,4 +197,3 @@ const ReviewPlatformLogos = () => {
 };
 
 export default ReviewPlatformLogos;
-
