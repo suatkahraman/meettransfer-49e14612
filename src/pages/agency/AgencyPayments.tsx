@@ -22,6 +22,7 @@ import { AgencyBottomNav } from '@/components/agency/AgencyBottomNav';
 import { useAgencyPayments } from '@/hooks/useAgencyPayments';
 import { AgencyPaymentStatsCard } from '@/components/agency/payments/AgencyPaymentStatsCard';
 import { AgencyPaymentHistoryCard } from '@/components/agency/payments/AgencyPaymentHistoryCard';
+import { AgencyMonthlyStatementButton } from '@/components/agency/payments/AgencyMonthlyStatementButton';
 
 const translations = {
   TR: {
@@ -58,6 +59,8 @@ const AgencyPayments = () => {
     loading,
     refreshing,
     handleRefresh,
+    getCompanyAmount,
+    getCurrency,
   } = useAgencyPayments();
 
   const t = useMemo(() => translations[language], [language]);
@@ -177,7 +180,15 @@ const AgencyPayments = () => {
           </TabsContent>
 
           {/* Payment History Tab */}
-          <TabsContent value="history" className="space-y-3">
+          <TabsContent value="history" className="space-y-4">
+            {/* Monthly Statement Download */}
+            <AgencyMonthlyStatementButton
+              agencyName={agencyName}
+              paidReservations={paidReservations}
+              language={language}
+              getCompanyAmount={getCompanyAmount}
+              getCurrency={getCurrency}
+            />
             <AnimatePresence>
               {paidReservations.length === 0 ? (
                 <motion.div

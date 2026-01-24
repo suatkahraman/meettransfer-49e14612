@@ -20,6 +20,11 @@ export interface PaymentHistoryItem {
   payment_provider: string | null;
   payment_completed_at: string | null;
   status: string;
+  customer_name?: string;
+  vehicle_type?: string;
+  flight_number?: string;
+  luggage_count?: number;
+  baby_seat_count?: number;
 }
 
 export interface CustomerPaymentStats {

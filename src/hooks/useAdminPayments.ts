@@ -60,7 +60,7 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
 
   const fetchData = useCallback(async () => {
     try {
-      // Fetch customer payments (reservations with online payment)
+      // Fetch customer payments (only Stripe/PayPal online payments)
       const { data: customerData, error: customerError } = await supabase
         .from('reservations')
         .select(`
@@ -78,8 +78,8 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
           payment_completed_at,
           status
         `)
-        .in('payment_status', ['paid', 'pay_on_transfer', 'pending', 'partial'])
-        .not('payment_provider', 'is', null)
+        .in('payment_status', ['paid', 'pending', 'partial'])
+        .in('payment_provider', ['stripe', 'paypal'])
         .order('payment_completed_at', { ascending: false, nullsFirst: false });
 
       if (customerError) {

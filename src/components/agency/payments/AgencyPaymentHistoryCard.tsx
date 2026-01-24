@@ -102,6 +102,11 @@ export const AgencyPaymentHistoryCard = ({
   const handleDownloadReceipt = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // Only allow receipt download for paid online payments (Stripe/PayPal)
+    if (status !== 'paid' || !['stripe', 'paypal'].includes(reservation.payment_provider || '')) {
+      return;
+    }
+    
     try {
       await generatePaymentReceipt({
         reservationCode: reservation.reservation_code || 'N/A',
@@ -125,7 +130,9 @@ export const AgencyPaymentHistoryCard = ({
     }
   };
 
-  const canDownloadReceipt = status === 'paid' || status === 'pay_on_transfer' || reservation.payment_status === 'pay_on_transfer';
+  // Only show receipt button for paid online payments (Stripe/PayPal)
+  const canDownloadReceipt = status === 'paid' && 
+    ['stripe', 'paypal'].includes(reservation.payment_provider || '');
 
   return (
     <motion.div
