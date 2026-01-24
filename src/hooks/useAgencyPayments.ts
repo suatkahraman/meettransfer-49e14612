@@ -37,6 +37,7 @@ export const useAgencyPayments = (options: UseAgencyPaymentsOptions = {}) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [reservations, setReservations] = useState<AgencyPaymentHistoryItem[]>([]);
+  const [agencyName, setAgencyName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -64,6 +65,17 @@ export const useAgencyPayments = (options: UseAgencyPaymentsOptions = {}) => {
     if (!agencyId) return;
 
     try {
+      // Fetch agency name
+      const { data: agencyData } = await supabase
+        .from('agencies')
+        .select('agency_name')
+        .eq('id', agencyId)
+        .single();
+      
+      if (agencyData) {
+        setAgencyName(agencyData.agency_name);
+      }
+
       const { data, error } = await supabase
         .from('reservations')
         .select(`
@@ -217,6 +229,7 @@ export const useAgencyPayments = (options: UseAgencyPaymentsOptions = {}) => {
     paidReservations,
     stats,
     agencyId,
+    agencyName,
     language,
     loading: authLoading || loading,
     refreshing,

@@ -53,6 +53,7 @@ const AgencyPayments = () => {
     paidReservations,
     stats,
     agencyId,
+    agencyName,
     language,
     loading,
     refreshing,
@@ -198,6 +199,7 @@ const AgencyPayments = () => {
                     index={index}
                     onClick={() => navigate(`/agency/reservation/${reservation.id}`)}
                     language={language}
+                    agencyName={agencyName}
                   />
                 ))
               )}
