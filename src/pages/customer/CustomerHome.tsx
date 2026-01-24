@@ -2445,10 +2445,20 @@ const CustomerHome = () => {
                     <PopoverContent className="w-auto p-0 z-50" align="start">
                       <DayPickerCalendar
                         mode="single"
-                        selected={formData.date ? new Date(formData.date) : undefined}
-                        onSelect={(date) => {
+                        selected={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
+                        onSelect={(date: Date | undefined) => {
                           if (date) {
-                            setFormData({...formData, date: format(date, 'yyyy-MM-dd')});
+                            const formattedDate = format(date, 'yyyy-MM-dd');
+                            setFormData(prev => ({ ...prev, date: formattedDate }));
+                            // Clear return date if it's before the new pickup date
+                            if (formData.returnDate && new Date(formData.returnDate) < date) {
+                              setFormData(prev => ({ ...prev, returnDate: '' }));
+                              toast.warning(
+                                language === 'TR' 
+                                  ? 'Dönüş tarihi gidiş tarihinden önce olamaz. Lütfen yeni bir dönüş tarihi seçin.' 
+                                  : 'Return date cannot be before departure date. Please select a new return date.'
+                              );
+                            }
                           }
                         }}
                         disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
@@ -2601,14 +2611,25 @@ const CustomerHome = () => {
                           <PopoverContent className="w-auto p-0 z-50" align="start">
                             <DayPickerCalendar
                               mode="single"
-                              selected={formData.returnDate ? new Date(formData.returnDate) : undefined}
-                              onSelect={(date) => {
+                              selected={formData.returnDate ? new Date(formData.returnDate + 'T00:00:00') : undefined}
+                              onSelect={(date: Date | undefined) => {
                                 if (date) {
-                                  setFormData({...formData, returnDate: format(date, 'yyyy-MM-dd')});
+                                  const pickupDate = formData.date ? new Date(formData.date + 'T00:00:00') : new Date();
+                                  if (date < pickupDate) {
+                                    toast.error(
+                                      language === 'TR' 
+                                        ? 'Dönüş tarihi gidiş tarihinden önce olamaz!' 
+                                        : 'Return date cannot be before departure date!'
+                                    );
+                                    return;
+                                  }
+                                  const formattedDate = format(date, 'yyyy-MM-dd');
+                                  setFormData(prev => ({ ...prev, returnDate: formattedDate }));
                                 }
                               }}
                               disabled={(date) => {
-                                const minDate = formData.date ? new Date(formData.date) : new Date();
+                                const today = new Date(new Date().setHours(0,0,0,0));
+                                const minDate = formData.date ? new Date(formData.date + 'T00:00:00') : today;
                                 return date < minDate;
                               }}
                               initialFocus
@@ -2616,6 +2637,14 @@ const CustomerHome = () => {
                               className="p-3 pointer-events-auto"
                             />
                           </PopoverContent>
+                          {/* Return date validation warning */}
+                          {formData.date && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {language === 'TR' 
+                                ? `En erken: ${format(new Date(formData.date + 'T00:00:00'), 'dd MMM yyyy', { locale: tr })}` 
+                                : `Earliest: ${format(new Date(formData.date + 'T00:00:00'), 'dd MMM yyyy', { locale: enUS })}`}
+                            </p>
+                          )}
                         </Popover>
                         {errors.returnDate && <p className="text-sm text-destructive">{errors.returnDate}</p>}
                       </div>
