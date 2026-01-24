@@ -2,7 +2,22 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  // Strict content paths - only scan files that actually use Tailwind classes
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx}",
+  ],
+  // Safelist only critical classes that might be generated dynamically
+  safelist: [
+    // Animation classes used in IntersectionObserver callbacks
+    "animate-fade-in",
+    "animate-scale-in",
+    "opacity-0",
+    "opacity-100",
+    // Dynamic vehicle type colors
+    { pattern: /^bg-(primary|secondary|muted|accent)/ },
+    { pattern: /^text-(primary|secondary|muted|accent)/ },
+  ],
   prefix: "",
   theme: {
     container: {
