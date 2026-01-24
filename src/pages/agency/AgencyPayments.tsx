@@ -1,12 +1,8 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserRole } from '@/hooks/useUserRole';
-import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, 
@@ -14,25 +10,18 @@ import {
   Loader2, 
   Home, 
   LogOut, 
-  CheckCircle,
-  Clock,
-  Banknote,
   History,
   ShoppingCart,
   RefreshCw
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import meetTransferLogo from '@/assets/meet-transfer-logo.webp';
-import { AgencyBulkPaymentPanel, type AgencyPayableReservation } from '@/components/agency/AgencyBulkPaymentPanel';
-import { formatCurrency } from '@/lib/currency';
+import { AgencyBulkPaymentPanel } from '@/components/agency/AgencyBulkPaymentPanel';
 import { AgencyBottomNav } from '@/components/agency/AgencyBottomNav';
-
-interface PaymentHistoryItem extends AgencyPayableReservation {
-  payment_provider: string | null;
-  payment_completed_at: string | null;
-}
+import { useAgencyPayments } from '@/hooks/useAgencyPayments';
+import { AgencyPaymentStatsCard } from '@/components/agency/payments/AgencyPaymentStatsCard';
+import { AgencyPaymentHistoryCard } from '@/components/agency/payments/AgencyPaymentHistoryCard';
 
 const translations = {
   TR: {
@@ -41,15 +30,8 @@ const translations = {
     payNow: 'Şimdi Öde',
     paymentHistory: 'Ödeme Geçmişi',
     noPayments: 'Henüz ödeme geçmişi yok',
-    paid: 'Ödendi',
-    pending: 'Bekliyor',
-    cashToDriver: 'Şoföre Nakit',
-    paymentSuccess: 'Ödeme başarılı!',
-    paymentCancelled: 'Ödeme iptal edildi',
     loading: 'Yükleniyor...',
     refresh: 'Yenile',
-    companyAmount: 'Şirket Tutarı',
-    customer: 'Müşteri',
   },
   EN: {
     title: 'Payments',
@@ -57,170 +39,29 @@ const translations = {
     payNow: 'Pay Now',
     paymentHistory: 'Payment History',
     noPayments: 'No payment history yet',
-    paid: 'Paid',
-    pending: 'Pending',
-    cashToDriver: 'Cash to Driver',
-    paymentSuccess: 'Payment successful!',
-    paymentCancelled: 'Payment was cancelled',
     loading: 'Loading...',
     refresh: 'Refresh',
-    companyAmount: 'Company Amount',
-    customer: 'Customer',
   },
 };
 
 const AgencyPayments = () => {
-  const { user, signOut, loading: authLoading } = useAuth();
-  const { agencyId } = useUserRole();
-  const { language: agencyLang } = useAgencyTranslations();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [reservations, setReservations] = useState<PaymentHistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState('pay');
+  
+  const {
+    unpaidReservations,
+    paidReservations,
+    stats,
+    agencyId,
+    language,
+    loading,
+    refreshing,
+    handleRefresh,
+  } = useAgencyPayments();
 
-  const language = agencyLang === 'TR' ? 'TR' : 'EN';
   const t = useMemo(() => translations[language], [language]);
 
-  // Check for payment result from redirect
-  useEffect(() => {
-    const success = searchParams.get('success');
-    const cancelled = searchParams.get('cancelled');
-
-    if (success === 'true') {
-      toast.success(t.paymentSuccess);
-      navigate('/agency/payments', { replace: true });
-    } else if (cancelled === 'true') {
-      toast.info(t.paymentCancelled);
-      navigate('/agency/payments', { replace: true });
-    }
-  }, [searchParams, navigate, t]);
-
-  const fetchReservations = useCallback(async () => {
-    if (!agencyId) return;
-
-    try {
-      // Fetch agency reservations with agency_reservation_details
-      const { data, error } = await supabase
-        .from('reservations')
-        .select(`
-          id,
-          reservation_code,
-          pickup,
-          dropoff,
-          pickup_place_name,
-          dropoff_place_name,
-          pickup_date,
-          pickup_time,
-          customer_name,
-          price,
-          price_currency,
-          payment_status,
-          payment_provider,
-          payment_completed_at,
-          status,
-          agency_reservation_details (
-            customer_price,
-            company_amount,
-            agency_price_currency,
-            payment_status
-          )
-        `)
-        .eq('agency_id', agencyId)
-        .not('status', 'in', '("cancelled","cancelled_by_customer")')
-        .order('pickup_date', { ascending: false });
-
-      if (error) {
-        console.error('Failed to fetch agency reservations:', error);
-        toast.error('Failed to load reservations');
-        return;
-      }
-
-      if (data) {
-        setReservations(data as PaymentHistoryItem[]);
-      }
-    } catch (err) {
-      console.error('Error fetching reservations:', err);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [agencyId]);
-
-  useEffect(() => {
-    if (!authLoading && agencyId) {
-      fetchReservations();
-    } else if (!authLoading && !agencyId) {
-      setLoading(false);
-    }
-  }, [authLoading, agencyId, fetchReservations]);
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchReservations();
-  };
-
-  // Split reservations into unpaid and paid
-  const { unpaidReservations, paidReservations } = useMemo(() => {
-    const unpaid: AgencyPayableReservation[] = [];
-    const paid: PaymentHistoryItem[] = [];
-
-    reservations.forEach(r => {
-      const agencyPaymentStatus = r.agency_reservation_details?.payment_status;
-      const companyAmount = r.agency_reservation_details?.company_amount;
-
-      if (agencyPaymentStatus === 'paid' || r.payment_status === 'paid' || r.payment_status === 'pay_on_transfer') {
-        paid.push(r);
-      } else if (
-        companyAmount && 
-        companyAmount > 0 && 
-        !['cancelled', 'cancelled_by_customer', 'customer_rejected', 'completed'].includes(r.status)
-      ) {
-        unpaid.push(r);
-      }
-    });
-
-    // Sort paid by payment date (most recent first)
-    paid.sort((a, b) => {
-      if (a.payment_completed_at && b.payment_completed_at) {
-        return new Date(b.payment_completed_at).getTime() - new Date(a.payment_completed_at).getTime();
-      }
-      return new Date(b.pickup_date).getTime() - new Date(a.pickup_date).getTime();
-    });
-
-    return { unpaidReservations: unpaid, paidReservations: paid };
-  }, [reservations]);
-
-  const getPaymentStatusBadge = (reservation: PaymentHistoryItem) => {
-    const status = reservation.agency_reservation_details?.payment_status || reservation.payment_status;
-    const provider = reservation.payment_provider;
-
-    if (status === 'paid') {
-      return (
-        <Badge className="bg-green-500/20 text-green-700 dark:text-green-300">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          {t.paid} {provider && `(${provider})`}
-        </Badge>
-      );
-    }
-    if (status === 'pay_on_transfer') {
-      return (
-        <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-300">
-          <Banknote className="h-3 w-3 mr-1" />
-          {t.cashToDriver}
-        </Badge>
-      );
-    }
-    return (
-      <Badge className="bg-yellow-500/20 text-yellow-700 dark:text-yellow-300">
-        <Clock className="h-3 w-3 mr-1" />
-        {t.pending}
-      </Badge>
-    );
-  };
-
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -301,8 +142,11 @@ const AgencyPayments = () => {
           <p className="text-sm text-muted-foreground">{t.subtitle}</p>
         </motion.div>
 
+        {/* Stats Card */}
+        <AgencyPaymentStatsCard stats={stats} language={language} />
+
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs defaultValue="pay" className="space-y-4 mt-4">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="pay" className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
@@ -325,7 +169,7 @@ const AgencyPayments = () => {
               <AgencyBulkPaymentPanel
                 reservations={unpaidReservations}
                 agencyId={agencyId}
-                onPaymentComplete={fetchReservations}
+                onPaymentComplete={handleRefresh}
                 language={language}
               />
             )}
@@ -348,54 +192,13 @@ const AgencyPayments = () => {
                 </motion.div>
               ) : (
                 paidReservations.map((reservation, index) => (
-                  <motion.div
+                  <AgencyPaymentHistoryCard
                     key={reservation.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <Card 
-                      className="cursor-pointer hover:shadow-md transition-all"
-                      onClick={() => navigate(`/agency/reservation/${reservation.id}`)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {reservation.reservation_code && (
-                                <Badge variant="outline" className="text-xs">
-                                  #{reservation.reservation_code}
-                                </Badge>
-                              )}
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(reservation.pickup_date), 'dd MMM yyyy')}
-                              </span>
-                            </div>
-                            <p className="text-sm font-medium truncate">
-                              {reservation.pickup_place_name || reservation.pickup} → {reservation.dropoff_place_name || reservation.dropoff}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {t.customer}: {reservation.customer_name}
-                            </p>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-bold text-primary">
-                                {formatCurrency(
-                                  reservation.agency_reservation_details?.company_amount || reservation.price,
-                                  reservation.agency_reservation_details?.agency_price_currency || reservation.price_currency
-                                )}
-                              </span>
-                              {getPaymentStatusBadge(reservation)}
-                            </div>
-                            {reservation.payment_completed_at && (
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(reservation.payment_completed_at), 'dd MMM yyyy HH:mm')}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
+                    reservation={reservation}
+                    index={index}
+                    onClick={() => navigate(`/agency/reservation/${reservation.id}`)}
+                    language={language}
+                  />
                 ))
               )}
             </AnimatePresence>
