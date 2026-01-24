@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -48,6 +49,10 @@ const translations = {
 const AgencyPayments = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const { language: agencyLanguage } = useAgencyLanguage();
+  
+  // Convert agency language to TR/EN for the hook
+  const language = agencyLanguage === 'TR' ? 'TR' : 'EN';
   
   const {
     unpaidReservations,
@@ -55,13 +60,12 @@ const AgencyPayments = () => {
     stats,
     agencyId,
     agencyName,
-    language,
     loading,
     refreshing,
     handleRefresh,
     getCompanyAmount,
     getCurrency,
-  } = useAgencyPayments();
+  } = useAgencyPayments({ language });
 
   const t = useMemo(() => translations[language], [language]);
 
