@@ -61,6 +61,18 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogDiyDestMus: "Muş",
     blogDiyDestElazig: "Elazığ",
 
+    // Diyarbakır FAQ
+    blogDiyFaq1Q: "How far is Diyarbakır Airport from the city center?",
+    blogDiyFaq1A: "Diyarbakır Airport (DIY) is approximately 7 km from the city center. The transfer takes about 15-20 minutes depending on traffic.",
+    blogDiyFaq2Q: "What is the price for Diyarbakır Airport to Mardin transfer?",
+    blogDiyFaq2A: "Transfer prices from Diyarbakır Airport to Mardin vary by vehicle type. Please check our price table above for current fixed rates.",
+    blogDiyFaq3Q: "Do you offer transfers to Midyat from Diyarbakır Airport?",
+    blogDiyFaq3A: "Yes, we provide private transfers from Diyarbakır Airport to Midyat. The journey takes approximately 2 hours.",
+    blogDiyFaq4Q: "Can I book a transfer from Diyarbakır Airport to Şanlıurfa?",
+    blogDiyFaq4A: "Yes, we offer transfers from Diyarbakır Airport to both Şanlıurfa city center and Şanlıurfa Airport (GAP).",
+    blogDiyFaq5Q: "What vehicles are available for Diyarbakır Airport transfers?",
+    blogDiyFaq5A: "We offer Sedan (up to 3 passengers), Vito (up to 6), VIP Vito (up to 6), and Sprinter (up to 12) vehicles for airport transfers.",
+
     // Embedded sections in other guides
     blogDiyToMardinTitle: "From Diyarbakır Airport (DIY) to Mardin – Prices",
     blogDiyToMidyatTitle: "From Diyarbakır Airport (DIY) to Midyat – Prices",
@@ -5803,6 +5815,18 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogDiyDestSiirt: "Siirt",
     blogDiyDestMus: "Muş",
     blogDiyDestElazig: "Elazığ",
+
+    // Diyarbakır FAQ
+    blogDiyFaq1Q: "Diyarbakır Havalimanı şehir merkezine ne kadar uzaklıkta?",
+    blogDiyFaq1A: "Diyarbakır Havalimanı (DIY) şehir merkezine yaklaşık 7 km uzaklıktadır. Transfer, trafiğe bağlı olarak 15-20 dakika sürmektedir.",
+    blogDiyFaq2Q: "Diyarbakır Havalimanı'ndan Mardin'e transfer ücreti nedir?",
+    blogDiyFaq2A: "Diyarbakır Havalimanı'ndan Mardin'e transfer fiyatları araç tipine göre değişmektedir. Güncel sabit fiyatlar için yukarıdaki tabloya bakabilirsiniz.",
+    blogDiyFaq3Q: "Diyarbakır Havalimanı'ndan Midyat'a transfer var mı?",
+    blogDiyFaq3A: "Evet, Diyarbakır Havalimanı'ndan Midyat'a özel transfer hizmeti sunuyoruz. Yolculuk yaklaşık 2 saat sürmektedir.",
+    blogDiyFaq4Q: "Diyarbakır Havalimanı'ndan Şanlıurfa'ya transfer yapabilir miyim?",
+    blogDiyFaq4A: "Evet, Diyarbakır Havalimanı'ndan hem Şanlıurfa şehir merkezine hem de Şanlıurfa Havalimanı'na (GAP) transfer hizmeti sunuyoruz.",
+    blogDiyFaq5Q: "Diyarbakır Havalimanı transferleri için hangi araçlar mevcut?",
+    blogDiyFaq5A: "Havalimanı transferleri için Sedan (3 yolcuya kadar), Vito (6 yolcuya kadar), VIP Vito (6 yolcuya kadar) ve Sprinter (12 yolcuya kadar) araçlar sunuyoruz.",
 
     // Embedded sections in other guides
     blogDiyToMardinTitle: "Diyarbakır Havalimanı (DIY) → Mardin Fiyatları",
