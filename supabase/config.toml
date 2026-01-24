@@ -130,7 +130,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.auto-price-reservation]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-all-vehicle-prices]
 verify_jwt = false
