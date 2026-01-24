@@ -1706,7 +1706,7 @@ const CustomerHome = () => {
           initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
-          className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6"
+          className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-4 sm:mb-6"
         >
           {/* Home */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -1716,8 +1716,22 @@ const CustomerHome = () => {
               onClick={() => navigate('/')}
             >
               <Home className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span className="text-[10px] sm:text-xs font-medium">
+              <span className="text-[9px] sm:text-xs font-medium">
                 {t('homeBtn')}
+              </span>
+            </Button>
+          </motion.div>
+          
+          {/* Payments */}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button 
+              variant="outline" 
+              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 hover:border-blue-500/40"
+              onClick={() => navigate('/customer/payments')}
+            >
+              <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
+                {language === 'TR' ? 'Ödemeler' : 'Payments'}
               </span>
             </Button>
           </motion.div>
@@ -1730,7 +1744,7 @@ const CustomerHome = () => {
               onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank')}
             >
               <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-              <span className="text-[10px] sm:text-xs font-medium truncate max-w-full">
+              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
                 WhatsApp
               </span>
             </Button>
@@ -1744,7 +1758,7 @@ const CustomerHome = () => {
               onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
             >
               <PhoneCall className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
-              <span className="text-[10px] sm:text-xs font-medium truncate max-w-full">
+              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
                 {t('emergencyBtn')}
               </span>
             </Button>
@@ -1758,7 +1772,7 @@ const CustomerHome = () => {
               onClick={() => navigate('/security-settings')}
             >
               <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
-              <span className="text-[10px] sm:text-xs font-medium truncate max-w-full">
+              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
                 {t('securityBtn')}
               </span>
             </Button>
