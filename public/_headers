@@ -1,10 +1,40 @@
-# Long-term immutable cache for hashed build assets (safe)
+# Long-term immutable cache for hashed build assets (JS, CSS, images)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Long-term cache for static images (safe when filenames are versioned/hashed)
+# Explicit rules for common asset types in /assets/
+/assets/*.js
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*.css
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# Long-term cache for static images folder
 /images/*
   Cache-Control: public, max-age=31536000, immutable
+
+# PWA icons and manifest (root level)
+/pwa-192x192.png
+  Cache-Control: public, max-age=31536000, immutable
+/pwa-512x512.png
+  Cache-Control: public, max-age=31536000, immutable
+/pwa-maskable-192x192.png
+  Cache-Control: public, max-age=31536000, immutable
+/pwa-maskable-512x512.png
+  Cache-Control: public, max-age=31536000, immutable
+/apple-touch-icon.png
+  Cache-Control: public, max-age=31536000, immutable
+/favicon.ico
+  Cache-Control: public, max-age=31536000, immutable
+/manifest.webmanifest
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
 # Common static image formats served from root/public
 /*.webp
