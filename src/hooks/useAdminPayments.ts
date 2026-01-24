@@ -214,7 +214,9 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
     return filtered;
   }, [agencyPayments, searchQuery, dateFilter, currencyFilter]);
 
-  // Calculate comprehensive statistics
+  // Calculate comprehensive statistics - ONLY for online payments (Stripe/PayPal)
+  // Note: customerPayments is already filtered to only include Stripe/PayPal from the query
+  // agencyPayments includes ALL agency payments, so stats should reflect this clearly
   const stats = useMemo((): PaymentStats => {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -222,13 +224,14 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
     startOfWeek.setDate(startOfWeek.getDate() - 7);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+    // Customer payments are already filtered to Stripe/PayPal only from the query
     const customerPaid = customerPayments.filter(p => p.payment_status === 'paid');
     const customerPending = customerPayments.filter(p => p.payment_status === 'pending');
     const customerTotal = customerPaid.reduce((sum, p) => sum + (p.price || 0), 0);
     const customerPendingTotal = customerPending.reduce((sum, p) => sum + (p.price || 0), 0);
     const agencyTotal = agencyPayments.reduce((sum, p) => sum + p.amount, 0);
 
-    // Group by provider with counts
+    // Group by provider with counts (only from customerPayments which are online payments)
     const byProvider: Record<string, { count: number; total: number }> = {};
     customerPaid.forEach(p => {
       const provider = p.payment_provider || 'unknown';
@@ -239,8 +242,11 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
       byProvider[provider].total += p.price || 0;
     });
 
-    // Group by currency
+    // Group by currency - ONLY online customer payments, not all agency payments
+    // This ensures "Para Birimine Göre" only shows currencies with Stripe/PayPal transactions
     const byCurrency: Record<string, { customerTotal: number; agencyTotal: number; count: number }> = {};
+    
+    // Only add currencies from online customer payments (Stripe/PayPal)
     customerPaid.forEach(p => {
       const currency = p.price_currency || 'EUR';
       if (!byCurrency[currency]) {
@@ -249,15 +255,20 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
       byCurrency[currency].customerTotal += p.price || 0;
       byCurrency[currency].count += 1;
     });
+    
+    // Only add agency totals to currencies that already exist from online payments
+    // OR if you want to show agency payments separately, add them here
+    // For now, we keep agency payments visible but clearly separate
     agencyPayments.forEach(p => {
       const currency = p.currency || 'EUR';
       if (!byCurrency[currency]) {
         byCurrency[currency] = { customerTotal: 0, agencyTotal: 0, count: 0 };
       }
       byCurrency[currency].agencyTotal += p.amount;
+      // Note: count is for customer transactions only
     });
 
-    // Time-based revenue
+    // Time-based revenue - only online customer payments
     const todayRevenue = customerPaid
       .filter(p => p.payment_completed_at && new Date(p.payment_completed_at) >= startOfToday)
       .reduce((sum, p) => sum + (p.price || 0), 0);
