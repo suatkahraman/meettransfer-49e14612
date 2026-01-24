@@ -229,13 +229,15 @@ export interface PaymentMethodChangerProps {
 type PaymentMethod = 'stripe' | 'paypal' | 'cash';
 
 const getMethodFromPaymentType = (paymentType: string | null): PaymentMethod => {
-  if (paymentType === 'payment_link') return 'stripe';
+  // Handle all online payment type variations
+  if (paymentType === 'payment_link' || paymentType === 'online' || paymentType === 'stripe') return 'stripe';
   if (paymentType === 'paypal') return 'paypal';
   return 'cash';
 };
 
 const getPaymentTypeFromMethod = (method: PaymentMethod): string => {
-  if (method === 'stripe' || method === 'paypal') return 'payment_link';
+  if (method === 'stripe') return 'online';
+  if (method === 'paypal') return 'paypal';
   return 'cash';
 };
 

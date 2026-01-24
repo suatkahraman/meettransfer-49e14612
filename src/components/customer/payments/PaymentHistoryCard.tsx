@@ -1,8 +1,9 @@
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Clock, Banknote, ChevronRight, Download } from 'lucide-react';
+import { CheckCircle, Clock, Banknote, ChevronRight, Download, CreditCard, RefreshCw, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
 import { motion } from 'framer-motion';
@@ -10,11 +11,14 @@ import { formatCurrency } from '@/lib/currency';
 import { PaymentHistoryItem } from '@/hooks/useCustomerPayments';
 import { generatePaymentReceipt } from '@/utils/generatePaymentReceipt';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { usePayments } from '@/hooks/usePayments';
 
 interface PaymentHistoryCardProps {
   reservation: PaymentHistoryItem;
   index: number;
   language: 'TR' | 'EN';
+  onRefresh?: () => void;
 }
 
 const translations = {
@@ -24,6 +28,11 @@ const translations = {
     cashToDriver: 'Cash to Driver',
     downloadReceipt: 'Download Receipt',
     receiptDownloaded: 'Receipt downloaded successfully',
+    payNow: 'Pay Now',
+    switchToOnline: 'Pay with Card',
+    switching: 'Switching...',
+    switchSuccess: 'Payment method updated',
+    switchError: 'Failed to update',
   },
   TR: {
     paid: 'Ödendi',
@@ -31,6 +40,11 @@ const translations = {
     cashToDriver: 'Şoföre Nakit',
     downloadReceipt: 'Makbuz İndir',
     receiptDownloaded: 'Makbuz başarıyla indirildi',
+    payNow: 'Şimdi Öde',
+    switchToOnline: 'Kartla Öde',
+    switching: 'Değiştiriliyor...',
+    switchSuccess: 'Ödeme yöntemi güncellendi',
+    switchError: 'Güncelleme başarısız',
   }
 };
 
@@ -59,10 +73,81 @@ export const getPaymentStatusBadge = (status: string | null, provider: string | 
   );
 };
 
-export const PaymentHistoryCard = ({ reservation, index, language }: PaymentHistoryCardProps) => {
+export const PaymentHistoryCard = ({ reservation, index, language, onRefresh }: PaymentHistoryCardProps) => {
   const navigate = useNavigate();
   const t = translations[language];
   const dateLocale = language === 'TR' ? tr : enUS;
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
+  
+  const { isStripeEnabled } = usePayments();
+
+  // Check if can switch to online payment (cash reservations that aren't paid)
+  const canSwitchToOnline = isStripeEnabled && 
+    reservation.payment_status !== 'paid' &&
+    (reservation.payment_type === 'cash' || reservation.payment_status === 'pay_on_transfer');
+
+  // Check if can pay now (online payment type but not yet paid)
+  const canPayNow = isStripeEnabled &&
+    reservation.payment_status !== 'paid' &&
+    reservation.payment_status !== 'pay_on_transfer' &&
+    (reservation.payment_type === 'online' || reservation.payment_type === 'payment_link' || reservation.payment_type === 'stripe') &&
+    reservation.price && reservation.price > 0;
+
+  const handleSwitchToOnline = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsSwitching(true);
+
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({
+          payment_type: 'online',
+          payment_status: 'pending',
+          payment_provider: 'stripe',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', reservation.id);
+
+      if (error) throw error;
+      
+      toast.success(t.switchSuccess);
+      onRefresh?.();
+    } catch (error) {
+      console.error('Failed to switch payment method:', error);
+      toast.error(t.switchError);
+    } finally {
+      setIsSwitching(false);
+    }
+  }, [reservation.id, t, onRefresh]);
+
+  const handlePayNow = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsPaymentProcessing(true);
+
+    try {
+      const result = await supabase.functions.invoke("create-stripe-checkout", {
+        body: {
+          reservationId: reservation.id,
+          amount: reservation.price,
+          currency: reservation.price_currency || 'EUR',
+          description: `Transfer reservation #${reservation.reservation_code || reservation.id.slice(0, 8)}`,
+          successUrl: `${window.location.origin}/customer/payments?success=true`,
+          cancelUrl: `${window.location.origin}/customer/payments?cancelled=true`,
+        },
+      });
+
+      if (result.data?.url) {
+        window.location.href = result.data.url;
+      } else {
+        throw new Error(result.data?.error || 'Payment failed');
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      toast.error(t.switchError);
+      setIsPaymentProcessing(false);
+    }
+  }, [reservation, t]);
 
   const handleDownloadReceipt = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -140,18 +225,57 @@ export const PaymentHistoryCard = ({ reservation, index, language }: PaymentHist
                 </p>
               )}
               
-              {/* Download Receipt Button */}
-              {canDownloadReceipt && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-2 text-xs h-7"
-                  onClick={handleDownloadReceipt}
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  {t.downloadReceipt}
-                </Button>
-              )}
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {/* Pay Now Button for online payment reservations */}
+                {canPayNow && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={handlePayNow}
+                    disabled={isPaymentProcessing}
+                  >
+                    {isPaymentProcessing ? (
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    ) : (
+                      <CreditCard className="h-3 w-3 mr-1" />
+                    )}
+                    {isPaymentProcessing ? t.switching : t.payNow}
+                  </Button>
+                )}
+
+                {/* Switch to Online Payment Button for cash reservations */}
+                {canSwitchToOnline && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={handleSwitchToOnline}
+                    disabled={isSwitching}
+                  >
+                    {isSwitching ? (
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    ) : (
+                      <CreditCard className="h-3 w-3 mr-1" />
+                    )}
+                    {isSwitching ? t.switching : t.switchToOnline}
+                  </Button>
+                )}
+
+                {/* Download Receipt Button */}
+                {canDownloadReceipt && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={handleDownloadReceipt}
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    {t.downloadReceipt}
+                  </Button>
+                )}
+              </div>
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
           </div>

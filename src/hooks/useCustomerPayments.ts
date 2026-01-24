@@ -17,6 +17,7 @@ export interface PaymentHistoryItem {
   price: number | null;
   price_currency: string | null;
   payment_status: string | null;
+  payment_type: string | null;
   payment_provider: string | null;
   payment_completed_at: string | null;
   status: string;

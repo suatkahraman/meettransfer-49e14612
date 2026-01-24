@@ -208,6 +208,7 @@ const CustomerPayments = () => {
                       reservation={reservation}
                       index={index}
                       language={lang}
+                      onRefresh={handleRefresh}
                     />
                   ))}
                 </div>
