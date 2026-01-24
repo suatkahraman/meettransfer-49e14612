@@ -17,7 +17,7 @@ import {
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
   Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle,
   Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv,
-  Award, Zap, Tag, Heart, HeartOff, Route
+  Award, Zap, Tag, Heart, HeartOff, Route, Percent
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,6 +44,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as DayPickerCalendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
+import { useActivePromoCode } from '@/hooks/useActivePromoCode';
 
 // Time options for 30-minute intervals
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
@@ -98,6 +99,9 @@ const CustomerHome = () => {
   const { t, language, setLanguage } = useLanguage();
   const { promoCode: activePromo } = usePromo();
   const navigate = useNavigate();
+  
+  // Return transfer promo code hook
+  const { promoCode: returnPromoCode, loading: promoLoading } = useActivePromoCode('return_transfer');
   
   // State - organized by purpose
   const [isLoading, setIsLoading] = useState(true); // Start with loading true
@@ -183,6 +187,14 @@ const CustomerHome = () => {
   const [priceCurrency, setPriceCurrency] = useState<string>('EUR');
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [pricesError, setPricesError] = useState<string | null>(null);
+
+  // Calculate return trip discounted price
+  const returnDiscountPercentage = returnPromoCode?.discount_percentage || 25;
+  const getReturnPrice = useCallback((originalPrice: number) => {
+    if (!originalPrice) return 0;
+    const discountAmount = originalPrice * (returnDiscountPercentage / 100);
+    return Math.round((originalPrice - discountAmount) * 100) / 100;
+  }, [returnDiscountPercentage]);
 
   // Computed: available vehicles based on passengers and luggage
   const passengerNum = passengerNames.filter(n => n.trim()).length || 1;
@@ -992,8 +1004,11 @@ const CustomerHome = () => {
         return;
       }
 
-      // Create return trip if requested
+      // Create return trip if requested (with discount applied)
       if (formData.hasReturnTrip && formData.returnDate && formData.returnTime) {
+        // Calculate discounted return price
+        const returnPrice = selectedVehiclePrice ? getReturnPrice(selectedVehiclePrice) : null;
+        
         const returnReservationData = {
           customer_id: user?.id,
           customer_name: validPassengerNames[0],
@@ -1003,7 +1018,7 @@ const CustomerHome = () => {
           pickup_date: formData.returnDate,
           pickup_time: formData.returnTime,
           vehicle_type: formData.vehicleType,
-          price: selectedVehiclePrice || null, // Same price for return
+          price: returnPrice, // Discounted price for return
           price_currency: priceCurrency || 'EUR',
           status: initialStatus,
           payment_type: result.data.paymentType,
@@ -1013,6 +1028,9 @@ const CustomerHome = () => {
           passenger_names: validPassengerNames,
           is_return_transfer: true,
           original_reservation_id: reservation?.id,
+          promo_code: returnPromoCode?.code || null, // Track promo code used
+          discount_percentage: returnDiscountPercentage,
+          discount_amount: selectedVehiclePrice ? (selectedVehiclePrice - (returnPrice || 0)) : null,
         };
 
         const { error: returnError } = await supabase
@@ -2446,36 +2464,70 @@ const CustomerHome = () => {
                 </div>
               </div>
 
-              {/* Return Trip Toggle */}
+              {/* Return Trip Toggle with Discount */}
               <div className="space-y-3">
                 <div 
                   className={cn(
-                    "flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all",
+                    "flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all relative overflow-hidden",
                     formData.hasReturnTrip 
-                      ? "border-primary bg-primary/5 shadow-md" 
-                      : "border-border hover:border-primary/40 hover:bg-muted/30"
+                      ? "border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 shadow-md" 
+                      : "border-border hover:border-green-400 hover:bg-green-50/50 dark:hover:bg-green-950/20"
                   )}
                   onClick={() => setFormData({...formData, hasReturnTrip: !formData.hasReturnTrip})}
                 >
+                  {/* Discount badge */}
+                  {returnPromoCode && (
+                    <div className="absolute -top-1 -right-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg rounded-tr-lg shadow-md">
+                      -{returnDiscountPercentage}%
+                    </div>
+                  )}
+                  
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "w-10 h-10 rounded-full flex items-center justify-center",
-                      formData.hasReturnTrip ? "bg-primary text-primary-foreground" : "bg-muted"
+                      formData.hasReturnTrip ? "bg-green-500 text-white" : "bg-muted"
                     )}>
                       <RefreshCw className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm">
-                        {language === 'TR' ? 'Dönüş Transferi Ekle' : 'Add Return Trip'}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm">
+                          {language === 'TR' ? 'Dönüş Transferi Ekle' : 'Add Return Trip'}
+                        </p>
+                        {returnPromoCode && (
+                          <Badge className="bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0">
+                            <Percent className="h-2.5 w-2.5 mr-0.5" />
+                            {language === 'TR' ? 'İNDİRİMLİ' : 'DISCOUNT'}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground">
-                        {language === 'TR' ? 'Aynı fiyata gidiş-dönüş' : 'Round trip at same price'}
+                        {returnPromoCode 
+                          ? (language === 'TR' 
+                              ? `Dönüş için %${returnDiscountPercentage} indirim!` 
+                              : `${returnDiscountPercentage}% off on return!`)
+                          : (language === 'TR' ? 'Gidiş-dönüş fiyat avantajı' : 'Round trip price advantage')
+                        }
                       </p>
+                      {/* Show calculated prices when return is enabled and we have prices */}
+                      {formData.hasReturnTrip && vehiclePrices[formData.vehicleType] && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs line-through text-muted-foreground">
+                            {vehiclePrices[formData.vehicleType]} {priceCurrency}
+                          </span>
+                          <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                            {getReturnPrice(vehiclePrices[formData.vehicleType])} {priceCurrency}
+                          </span>
+                          <span className="text-[10px] text-green-600 dark:text-green-400">
+                            ({language === 'TR' ? 'Dönüş fiyatı' : 'Return price'})
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className={cn(
                     "w-12 h-7 rounded-full transition-all relative",
-                    formData.hasReturnTrip ? "bg-primary" : "bg-muted"
+                    formData.hasReturnTrip ? "bg-green-500" : "bg-muted"
                   )}>
                     <div className={cn(
                       "absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all",
@@ -2842,14 +2894,84 @@ const CustomerHome = () => {
                       </div>
                     </div>
                   ) : vehiclePrices[formData.vehicleType] ? (
-                    <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-4 rounded-lg text-center border border-green-500/30">
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <span className="font-semibold text-green-700 dark:text-green-400 text-lg">
-                          {t('priceLabel') || 'Fiyat'}: {vehiclePrices[formData.vehicleType]} {priceCurrency}
+                    <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-4 rounded-xl border border-green-500/30">
+                      {/* Outbound Price */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <ArrowRight className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            {language === 'TR' ? 'Gidiş' : 'Outbound'}
+                          </span>
+                        </div>
+                        <span className="font-bold text-lg text-foreground">
+                          {vehiclePrices[formData.vehicleType]} {priceCurrency}
                         </span>
                       </div>
-                      <p className="text-muted-foreground text-xs">
+
+                      {/* Return Trip Price with Discount */}
+                      {formData.hasReturnTrip && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="border-t border-green-500/20 pt-2 mt-2"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                                <RefreshCw className="h-4 w-4 text-green-600" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-muted-foreground">
+                                  {language === 'TR' ? 'Dönüş' : 'Return'}
+                                </span>
+                                <Badge className="bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-[10px] px-1.5 py-0">
+                                  -{returnDiscountPercentage}%
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-xs line-through text-muted-foreground mr-2">
+                                {vehiclePrices[formData.vehicleType]} {priceCurrency}
+                              </span>
+                              <span className="font-bold text-lg text-green-600 dark:text-green-400">
+                                {getReturnPrice(vehiclePrices[formData.vehicleType])} {priceCurrency}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Total Price */}
+                      <div className="border-t border-green-500/20 pt-3 mt-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <span className="font-semibold text-green-700 dark:text-green-400">
+                              {language === 'TR' ? 'Toplam' : 'Total'}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-bold text-xl text-green-700 dark:text-green-400">
+                              {formData.hasReturnTrip 
+                                ? (vehiclePrices[formData.vehicleType] + getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)
+                                : vehiclePrices[formData.vehicleType]
+                              } {priceCurrency}
+                            </span>
+                            {formData.hasReturnTrip && (
+                              <p className="text-xs text-green-600 dark:text-green-400">
+                                {language === 'TR' 
+                                  ? `${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${priceCurrency} tasarruf!`
+                                  : `Save ${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${priceCurrency}!`
+                                }
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-muted-foreground text-xs text-center mt-2">
                         {VEHICLE_TYPE_MAP[formData.vehicleType]?.label || formData.vehicleType} - {t('bestPriceGuaranteeLabel')}
                       </p>
                     </div>
