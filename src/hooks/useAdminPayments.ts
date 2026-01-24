@@ -97,6 +97,10 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
       const { data: agencyData, error: agencyError } = await supabase
         .from('agency_payments')
         .select('*')
+        // Online Ödemeler sayfası sadece Stripe/PayPal işlemlerini göstermeli.
+        // Online işlemler (backend) created_by NULL bırakır ve/veya notlarda Stripe/PayPal ibaresi olur.
+        // Admin panelinden manuel eklenen (offline) kayıtlar genelde created_by doludur ve not boş olabilir.
+        .or('created_by.is.null,notes.ilike.%stripe%,notes.ilike.%paypal%')
         .order('payment_date', { ascending: false });
 
       if (agencyError) {
@@ -214,9 +218,9 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
     return filtered;
   }, [agencyPayments, searchQuery, dateFilter, currencyFilter]);
 
-  // Calculate comprehensive statistics - ONLY for online payments (Stripe/PayPal)
-  // Note: customerPayments is already filtered to only include Stripe/PayPal from the query
-  // agencyPayments includes ALL agency payments, so stats should reflect this clearly
+  // Calculate statistics - ONLY for online payments (Stripe/PayPal)
+  // Note: customerPayments is already filtered to Stripe/PayPal from the query.
+  // agencyPayments is also filtered above to only include Stripe/PayPal-originated entries.
   const stats = useMemo((): PaymentStats => {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -242,8 +246,7 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
       byProvider[provider].total += p.price || 0;
     });
 
-    // Group by currency - ONLY online customer payments, not all agency payments
-    // This ensures "Para Birimine Göre" only shows currencies with Stripe/PayPal transactions
+    // Group by currency (online customer + online agency payments)
     const byCurrency: Record<string, { customerTotal: number; agencyTotal: number; count: number }> = {};
     
     // Only add currencies from online customer payments (Stripe/PayPal)
@@ -256,9 +259,7 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
       byCurrency[currency].count += 1;
     });
     
-    // Only add agency totals to currencies that already exist from online payments
-    // OR if you want to show agency payments separately, add them here
-    // For now, we keep agency payments visible but clearly separate
+    // Add online agency totals
     agencyPayments.forEach(p => {
       const currency = p.currency || 'EUR';
       if (!byCurrency[currency]) {
