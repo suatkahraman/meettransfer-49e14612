@@ -102,6 +102,13 @@ serve(async (req) => {
 
     // Update payment status
     if (reservationId) {
+      // Fetch reservation details for notification
+      const { data: reservation } = await supabase
+        .from("reservations")
+        .select("reservation_code, customer_name, price, price_currency")
+        .eq("id", reservationId)
+        .single();
+
       await supabase
         .from("reservations")
         .update({ 
@@ -122,9 +129,38 @@ serve(async (req) => {
       } catch (emailError) {
         console.error("Error sending payment confirmation emails:", emailError);
       }
+
+      // Send push notification to admins
+      try {
+        const amount = reservation?.price || 0;
+        const currency = reservation?.price_currency || "TRY";
+        const customerName = reservation?.customer_name || "Müşteri";
+        const code = reservation?.reservation_code || reservationId.slice(0, 8);
+        
+        await supabase.functions.invoke("create-notification", {
+          body: {
+            notify_admins: true,
+            send_push: true,
+            title: "💳 Ödeme Alındı (PayPal)",
+            message: `${customerName} - #${code} için ${amount} ${currency} ödeme alındı.`,
+            type: "payment",
+            reservation_id: reservationId,
+          }
+        });
+        console.log("Admin push notification sent for payment:", reservationId);
+      } catch (notifError) {
+        console.error("Error sending admin notification:", notifError);
+      }
     }
 
     if (quickBookingId) {
+      // Fetch quick booking details for notification
+      const { data: quickBooking } = await supabase
+        .from("quick_booking_requests")
+        .select("customer_name, price, price_currency")
+        .eq("id", quickBookingId)
+        .single();
+
       await supabase
         .from("quick_booking_requests")
         .update({ status: "paid" })
@@ -141,11 +177,38 @@ serve(async (req) => {
       } catch (emailError) {
         console.error("Error sending payment confirmation emails:", emailError);
       }
+
+      // Send push notification to admins
+      try {
+        const amount = quickBooking?.price || 0;
+        const currency = quickBooking?.price_currency || "EUR";
+        const customerName = quickBooking?.customer_name || "Müşteri";
+        
+        await supabase.functions.invoke("create-notification", {
+          body: {
+            notify_admins: true,
+            send_push: true,
+            title: "💳 Hızlı Rezervasyon Ödemesi (PayPal)",
+            message: `${customerName} için ${amount} ${currency} ödeme alındı.`,
+            type: "payment",
+          }
+        });
+        console.log("Admin push notification sent for quick booking payment:", quickBookingId);
+      } catch (notifError) {
+        console.error("Error sending admin notification:", notifError);
+      }
     }
 
     // Handle agency payment
     if (agencyId && agencyAmount) {
       const currency = agencyCurrency || "EUR";
+      
+      // Fetch agency name for notification
+      const { data: agencyData } = await supabase
+        .from("agencies")
+        .select("agency_name, balance")
+        .eq("id", agencyId)
+        .single();
       
       console.log("Recording agency PayPal payment:", { agencyId, agencyAmount, currency });
       
@@ -209,20 +272,33 @@ serve(async (req) => {
         }
         
         // Update agency balance (deduct the paid amount)
-        const { data: agency, error: agencyError } = await supabase
-          .from("agencies")
-          .select("balance")
-          .eq("id", agencyId)
-          .single();
-
-        if (!agencyError && agency) {
-          const updatedBalance = (agency.balance || 0) - agencyAmount;
+        if (agencyData) {
+          const updatedBalance = (agencyData.balance || 0) - agencyAmount;
           await supabase
             .from("agencies")
             .update({ balance: updatedBalance })
             .eq("id", agencyId);
           
-          console.log("Agency balance updated:", { agencyId, oldBalance: agency.balance, updatedBalance });
+          console.log("Agency balance updated:", { agencyId, oldBalance: agencyData.balance, updatedBalance });
+        }
+
+        // Send push notification to admins for agency payment
+        try {
+          const agencyName = agencyData?.agency_name || "Acenta";
+          
+          await supabase.functions.invoke("create-notification", {
+            body: {
+              notify_admins: true,
+              send_push: true,
+              title: "🏢 Acenta Ödemesi (PayPal)",
+              message: `${agencyName} - ${agencyAmount} ${currency} online ödeme yaptı.`,
+              type: "payment",
+              reservation_id: reservationId || null,
+            }
+          });
+          console.log("Admin push notification sent for agency payment:", agencyId);
+        } catch (notifError) {
+          console.error("Error sending admin notification for agency payment:", notifError);
         }
       }
     }
