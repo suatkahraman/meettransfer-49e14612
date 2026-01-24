@@ -121,6 +121,30 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogAdanaFaq5Q: "Do you provide child seats?",
     blogAdanaFaq5A: "Yes, child seats (infant, toddler, or booster) are available free of charge. Please request them when booking so we can install them before your arrival.",
     
+    // Mardin Airport Transfer FAQ
+    blogMardinFaq1Q: "How do I get from Mardin Airport to city center?",
+    blogMardinFaq1A: "The best way is private airport transfer. Mardin Airport (MQM) is located 20 km from city center. Private transfer takes about 25 minutes with door-to-door service, meet & greet, and fixed prices.",
+    blogMardinFaq2Q: "What is the cost of airport transfer to Mardin?",
+    blogMardinFaq2A: "Private transfer from Mardin Airport to city center starts from €35 for sedan vehicles. VIP Mercedes Vito transfers start from €55. All prices include meet & greet service and free waiting time.",
+    blogMardinFaq3Q: "Can I book a transfer to Midyat from Mardin Airport?",
+    blogMardinFaq3A: "Yes, we offer direct transfers from Mardin Airport to Midyat. The journey takes approximately 1.5 hours covering 65 km. Perfect for visiting the ancient Syriac monasteries and stone houses.",
+    blogMardinFaq4Q: "Is there public transport from Mardin Airport?",
+    blogMardinFaq4A: "Public transport options are very limited from Mardin Airport. Private transfer is the most reliable and comfortable option, especially for tourists visiting historical sites.",
+    blogMardinFaq5Q: "What attractions can I visit in Mardin?",
+    blogMardinFaq5A: "Mardin offers incredible historical sites including Zinciriye Medrese, Kasımiye Medrese, Deyrulzafaran Monastery, Mardin Museum, and the stunning old town with its honey-colored stone architecture.",
+
+    // Midyat Airport Transfer FAQ
+    blogMidyatFaq1Q: "What is the nearest airport to Midyat?",
+    blogMidyatFaq1A: "Mardin Airport (MQM) is the nearest airport to Midyat, located approximately 65 km away. Private transfer from Mardin Airport to Midyat takes about 1.5 hours through scenic Mesopotamian landscape.",
+    blogMidyatFaq2Q: "How much does airport transfer to Midyat cost?",
+    blogMidyatFaq2A: "Private transfer from Mardin Airport to Midyat starts from €65 for sedan vehicles and €85 for VIP Mercedes Vito. Prices include meet & greet, flight tracking, and door-to-door service to your hotel.",
+    blogMidyatFaq3Q: "Can I visit Mor Gabriel Monastery with airport transfer?",
+    blogMidyatFaq3A: "Yes, we offer combined transfers that include stops at Mor Gabriel Monastery, one of the oldest surviving Christian monasteries in the world. Additional stops can be arranged during booking.",
+    blogMidyatFaq4Q: "Is Midyat worth visiting?",
+    blogMidyatFaq4A: "Absolutely! Midyat is famous for its unique stone architecture, ancient Syriac monasteries, silver filigree craftsmanship (telkari), and rich multicultural heritage where Assyrians, Kurds, and Arabs coexist.",
+    blogMidyatFaq5Q: "What is special about Midyat architecture?",
+    blogMidyatFaq5A: "Midyat's honey-colored limestone buildings feature intricate carvings and traditional Mesopotamian architecture. The old town has been used as a filming location for Turkish TV series, making it a popular destination.",
+    
     // AI Booking Assistant Blog
     blogAIAssistantTitle: "AI Booking Assistant: Book Transfers Instantly with Artificial Intelligence",
     blogAIAssistantDesc: "Discover how Meet Transfer's AI booking assistant helps you get instant price quotes, book transfers in seconds, and enjoy 24/7 multilingual support.",
@@ -5902,6 +5926,31 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogAIAssistantFaq5A: "Teklif almak için hesap gerekmez. Daha hızlı rezervasyon ve seyahatlerinizi kaydetmek için isteğe bağlı olarak Google ile giriş yapabilirsiniz.",
     blogAIAssistantFaq6Q: "AI tam fiyatı nasıl biliyor?",
     blogAIAssistantFaq6A: "AI'mız anında doğru teklifler sağlamak için gerçek zamanlı mesafe hesaplamaları, araç müsaitliği ve sabit fiyatlandırma veritabanımızı kullanır.",
+
+    // Mardin Havalimanı Transfer FAQ
+    blogMardinFaq1Q: "Mardin Havalimanı'ndan şehir merkezine nasıl ulaşırım?",
+    blogMardinFaq1A: "En iyi yol özel havalimanı transferidir. Mardin Havalimanı (MQM) şehir merkezinden 20 km uzaklıktadır. Özel transfer kapıdan kapıya hizmet, karşılama ve sabit fiyatlarla yaklaşık 25 dakika sürer.",
+    blogMardinFaq2Q: "Mardin'e havalimanı transferi ne kadar?",
+    blogMardinFaq2A: "Mardin Havalimanı'ndan şehir merkezine özel transfer, sedan araçlar için €35'ten başlar. VIP Mercedes Vito transferleri €55'ten başlar. Tüm fiyatlara karşılama hizmeti ve ücretsiz bekleme süresi dahildir.",
+    blogMardinFaq3Q: "Mardin Havalimanı'ndan Midyat'a transfer rezervasyonu yapabilir miyim?",
+    blogMardinFaq3A: "Evet, Mardin Havalimanı'ndan Midyat'a doğrudan transfer hizmeti sunuyoruz. Yolculuk 65 km'yi kapsayarak yaklaşık 1,5 saat sürer. Kadim Süryani manastırları ve taş evleri ziyaret etmek için mükemmel.",
+    blogMardinFaq4Q: "Mardin Havalimanı'ndan toplu taşıma var mı?",
+    blogMardinFaq4A: "Mardin Havalimanı'ndan toplu taşıma seçenekleri çok sınırlıdır. Özellikle tarihi mekânları ziyaret eden turistler için özel transfer en güvenilir ve konforlu seçenektir.",
+    blogMardinFaq5Q: "Mardin'de hangi turistik yerleri ziyaret edebilirim?",
+    blogMardinFaq5A: "Mardin; Zinciriye Medresesi, Kasımiye Medresesi, Deyrulzafaran Manastırı, Mardin Müzesi ve bal rengi taş mimarisiyle etkileyici tarihi mahalleler gibi inanılmaz tarihi mekânlar sunar.",
+
+    // Midyat Havalimanı Transfer FAQ
+    blogMidyatFaq1Q: "Midyat'a en yakın havalimanı hangisi?",
+    blogMidyatFaq1A: "Mardin Havalimanı (MQM), Midyat'a en yakın havalimanı olup yaklaşık 65 km uzaklıktadır. Mardin Havalimanı'ndan Midyat'a özel transfer, pitoresk Mezopotamya manzarası boyunca yaklaşık 1,5 saat sürer.",
+    blogMidyatFaq2Q: "Midyat'a havalimanı transferi ne kadar?",
+    blogMidyatFaq2A: "Mardin Havalimanı'ndan Midyat'a özel transfer, sedan araçlar için €65'ten, VIP Mercedes Vito için €85'ten başlar. Fiyatlara karşılama, uçuş takibi ve otelinize kapıdan kapıya hizmet dahildir.",
+    blogMidyatFaq3Q: "Havalimanı transferi sırasında Mor Gabriel Manastırı'nı ziyaret edebilir miyim?",
+    blogMidyatFaq3A: "Evet, dünyanın hayatta kalan en eski Hristiyan manastırlarından biri olan Mor Gabriel Manastırı'nda duruş içeren kombine transferler sunuyoruz. Ek duraklar rezervasyon sırasında ayarlanabilir.",
+    blogMidyatFaq4Q: "Midyat ziyaret etmeye değer mi?",
+    blogMidyatFaq4A: "Kesinlikle! Midyat; eşsiz taş mimarisi, kadim Süryani manastırları, gümüş telkâri işçiliği ve Süryanilerin, Kürtlerin ve Arapların bir arada yaşadığı zengin çok kültürlü mirasıyla ünlüdür.",
+    blogMidyatFaq5Q: "Midyat mimarisini özel kılan nedir?",
+    blogMidyatFaq5A: "Midyat'ın bal rengi kireçtaşı binaları, karmaşık oymalar ve geleneksel Mezopotamya mimarisine sahiptir. Tarihi mahalle, Türk dizilerinde çekim lokasyonu olarak kullanılmış olup popüler bir destinasyondur.",
+
     viewAllArticles: "Tüm Makaleleri Gör",
     tableOfContents: "İçindekiler",
     readMore: "Devamını Oku",
