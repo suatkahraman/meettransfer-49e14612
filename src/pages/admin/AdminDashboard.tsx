@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { endOfDay, endOfMonth, format, startOfDay, startOfMonth } from 'date-fns';
-import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, Clock, DollarSign, FileText, Inbox, LogOut, MapPin, MessageCircle, Plane, Receipt, Settings, Tag, Users } from 'lucide-react';
+import { AlertCircle, Banknote, BarChart3, Building2, Calculator, Calendar, CalendarDays, Car, CheckCircle, ClipboardList, Clock, CreditCard, DollarSign, FileText, Inbox, LogOut, MapPin, MessageCircle, Plane, Receipt, Settings, Tag, Users } from 'lucide-react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import NotificationBell from '@/components/NotificationBell';
@@ -273,6 +273,7 @@ const AdminDashboard = () => {
     { icon: Users, label: 'Şoförler', path: '/admin/drivers' },
     { icon: Building2, label: 'Acenteler', path: '/admin/agencies' },
     { icon: ClipboardList, label: 'Acenta Başvuruları', path: '/admin/agency-applications', badge: pendingAgencyApps },
+    { icon: CreditCard, label: 'Online Ödemeler', path: '/admin/payments' },
     { icon: FileText, label: 'Şablonlar', path: '/admin/templates' },
     { icon: DollarSign, label: 'Aylık Muhasebe', path: '/admin/monthly-accounting' },
     { icon: Calculator, label: 'Aylık Kâr', path: '/admin/monthly-profit' },
