@@ -81,14 +81,16 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
   useEffect(() => {
     const fetchPromoCode = async () => {
       try {
+        const now = new Date().toISOString();
         const { data, error } = await supabase
           .from('promo_codes')
           .select('code, discount_percentage, valid_until, description')
           .eq('is_active', true)
           .eq('applies_to', 'return_transfer')
+          .or(`valid_until.is.null,valid_until.gte.${now}`)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching promo code:', error);
