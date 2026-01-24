@@ -5,6 +5,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBlogT } from "@/components/blog/BlogLayout";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ShareButtons from "@/components/website/ShareButtons";
@@ -16,7 +17,8 @@ import { useBlogDate } from "@/hooks/useBlogDate";
 import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 
 const IsPrivateTransferWorthIt = () => {
-  const { t, getLocalizedPath } = useLanguage();
+  const { getLocalizedPath } = useLanguage();
+  const { t } = useBlogT();
   const { formatBlogDate } = useBlogDate();
 
   const faqItems = [
