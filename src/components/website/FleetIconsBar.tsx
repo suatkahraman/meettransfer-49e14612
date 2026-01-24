@@ -1,8 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Users, Briefcase, ArrowRight, Star, Shield, ChevronLeft, ChevronRight, Snowflake } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Dynamic image paths - loaded lazily when fleet section comes into view
 const vehicleImagePaths = {
@@ -16,12 +15,29 @@ const vehicleImagePaths = {
   switzerlandVClassInterior: () => import("@/assets/switzerland/switzerland-v-class-interior.webp"),
 };
 
-// Placeholder for lazy-loaded images
-const PLACEHOLDER_GRADIENT = "bg-gradient-to-br from-muted to-muted/50";
-
 const FleetIconsBar = () => {
   const { t, getLocalizedPath, language } = useLanguage();
   const isTR = language?.toLowerCase() === "tr";
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const fleetItems = [
     {
@@ -119,25 +135,17 @@ const FleetIconsBar = () => {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
+    <section ref={sectionRef} className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
       <div className="container max-w-7xl mx-auto px-4">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
+        <div className={`text-center mb-12 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}>
+          <div
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4 ${isVisible ? 'animate-scale-in' : 'opacity-0'}`}
+            style={{ animationDelay: '100ms' }}
           >
             <Shield className="h-4 w-4" />
             {isTR ? "Lisanslı & Sigortalı" : "Licensed & Insured"}
-          </motion.div>
+          </div>
           
           <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
             {t("maximumComfort") || "Maximum Comfort & Safety"}
@@ -145,22 +153,17 @@ const FleetIconsBar = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {t("licensedVehicles") || "Premium vehicles, professional chauffeurs for your journey"}
           </p>
-        </motion.div>
+        </div>
 
         {/* Fleet Grid - Main Fleet */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {fleetItems.map((item, index) => (
-            <VehicleCard key={index} item={item} index={index} isTR={isTR} getLocalizedPath={getLocalizedPath} />
+            <VehicleCard key={index} item={item} index={index} isTR={isTR} getLocalizedPath={getLocalizedPath} isVisible={isVisible} />
           ))}
         </div>
 
         {/* Switzerland Fleet Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-10"
-        >
+        <div className={`mt-10 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '300ms' }}>
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-sky-500/30 to-transparent" />
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-sky-500/10 to-blue-500/10 border border-sky-500/20">
@@ -174,18 +177,13 @@ const FleetIconsBar = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4 max-w-2xl mx-auto">
             {switzerlandFleetItems.map((item, index) => (
-              <VehicleCard key={`ch-${index}`} item={item} index={index + 6} isTR={isTR} getLocalizedPath={getLocalizedPath} />
+              <VehicleCard key={`ch-${index}`} item={item} index={index + 6} isTR={isTR} getLocalizedPath={getLocalizedPath} isVisible={isVisible} />
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* View Fleet CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mt-10"
-        >
+        <div className={`text-center mt-10 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '400ms' }}>
           <Link 
             to={getLocalizedPath("/fleet")}
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl hover:scale-105"
@@ -193,7 +191,7 @@ const FleetIconsBar = () => {
             {t("viewFullFleet") || "View Full Fleet"}
             <ArrowRight className="h-4 w-4" />
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
@@ -214,11 +212,12 @@ interface VehicleCardProps {
   index: number;
   isTR: boolean;
   getLocalizedPath: (path: string) => string;
+  isVisible: boolean;
 }
 
-const CAROUSEL_INTERVAL = 4000; // 4 seconds - adjustable
+const CAROUSEL_INTERVAL = 4000;
 
-const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) => {
+const VehicleCard = ({ item, index, isTR, getLocalizedPath, isVisible }: VehicleCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -248,7 +247,7 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
     
     const timer = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % loadedImages.length);
-    }, CAROUSEL_INTERVAL + index * 300); // Stagger timing
+    }, CAROUSEL_INTERVAL + index * 300);
 
     return () => clearInterval(timer);
   }, [loadedImages.length, index, isPaused]);
@@ -258,7 +257,7 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
     e.stopPropagation();
     setCurrentImageIndex((prev) => (prev - 1 + loadedImages.length) % loadedImages.length);
     setIsPaused(true);
-    setTimeout(() => setIsPaused(false), 5000); // Resume auto-play after 5s
+    setTimeout(() => setIsPaused(false), 5000);
   };
 
   const goToNext = (e: React.MouseEvent) => {
@@ -270,11 +269,9 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.05 }}
+    <div
+      className={`${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
+      style={{ animationDelay: `${index * 50}ms` }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -412,7 +409,7 @@ const VehicleCard = ({ item, index, isTR, getLocalizedPath }: VehicleCardProps) 
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 };
 

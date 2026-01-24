@@ -1,7 +1,5 @@
-import { useCallback } from "react";
-import { motion } from "framer-motion";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { usePromo } from "@/contexts/PromoContext";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 import { 
   MapPin, 
@@ -331,61 +329,80 @@ const translations: Record<string, {
     badge: "1-2-3のように簡単",
     title: "送迎を予約",
     titleHighlight: "数分で完了",
-    subtitle: "シンプルな3ステップの予約プロセスで、シームレスな空港送迎をご体験ください。隠れた料金なし、サプライズなし—最初から最後までプレミアムサービス。",
-    cta: "送迎を予約する",
-    ctaSecondary: "車両一覧を見る",
+    subtitle: "シンプルな3ステップの予約プロセスでシームレスな空港送迎をご体験ください。隠れた料金やサプライズはなく、最初から最後までプレミアムサービスをお届けします。",
+    cta: "送迎を予約",
+    ctaSecondary: "車両一覧",
     trustBadges: ["無料キャンセル", "24時間サポート", "固定料金"],
     steps: [
       {
         number: "01",
         title: "ルートを選択",
-        desc: "乗車場所（空港、ホテル、または任意の住所）と目的地を入力。日時を選択し、すべての車両の即時料金を確認できます。",
-        features: ["リアルタイム見積もり", "全空港対応", "ドア・ツー・ドア"],
-        highlight: "即時料金表示",
+        desc: "ピックアップ場所（空港、ホテル、または任意の住所）と目的地を入力。日時を選択し、すべての車両の即時料金を確認。",
+        features: ["リアルタイム見積もり", "全空港対応", "ドアツードア"],
+        highlight: "即時料金",
       },
       {
         number: "02",
         title: "確認して安全に支払い",
-        desc: "乗客情報と特別リクエスト（チャイルドシート、追加荷物、お出迎え）を追加。安全な支払いシステムで予約を完了し、即座に確認を受け取ります。",
+        desc: "乗客情報と特別リクエスト（チャイルドシート、追加荷物、お出迎え）を追加。安全な決済システムで予約を完了し、即座に確認を受け取ります。",
         features: ["256ビットSSL暗号化", "複数の支払いオプション", "即時eバウチャー"],
         highlight: "100%安全",
       },
       {
         number: "03",
         title: "リラックスしてお楽しみください",
-        desc: "プロのドライバーがネームボードでお待ちしています。フライトをリアルタイムで追跡し、遅延があれば自動的にピックアップ時間を調整します。",
-        features: ["フライト追跡込み", "お出迎えサービス", "免許を持つドライバー"],
+        desc: "プロのドライバーがネームボードを持ってお待ちしています。フライトをリアルタイムで監視し、遅延があれば自動的にピックアップ時間を調整します。",
+        features: ["フライト追跡込み", "お出迎えサービス", "認定ドライバー"],
         highlight: "ストレスフリーな旅",
       },
     ],
   },
 };
 
-const stepIcons = [MapPin, CreditCard, Car];
+// Step icons mapping
+const stepIcons = [MapPin, CreditCard, Plane];
+
+// Accent colors for each step
 const stepAccents = [
-  { bg: "bg-blue-500", ring: "ring-blue-500/20", text: "text-blue-500" },
-  { bg: "bg-emerald-500", ring: "ring-emerald-500/20", text: "text-emerald-500" },
-  { bg: "bg-amber-500", ring: "ring-amber-500/20", text: "text-amber-500" },
+  { bg: "bg-blue-500", text: "text-blue-500", ring: "ring-blue-500/20" },
+  { bg: "bg-emerald-500", text: "text-emerald-500", ring: "ring-emerald-500/20" },
+  { bg: "bg-primary", text: "text-primary", ring: "ring-primary/20" },
 ];
 
 const HowItWorks = () => {
-  const { getLocalizedPath, language } = useLanguage();
-  const { promoCode: activePromo } = usePromo();
+  const { language, getLocalizedPath } = useLanguage();
   const { rating } = useGoogleReviewStats();
   const navigate = useNavigate();
   const location = useLocation();
-  const lang = language.toLowerCase();
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
   
-  // Get translations for current language, fallback to English
+  const lang = language?.toLowerCase() || "en";
   const t = translations[lang] || translations.en;
-  const discountPercent = activePromo?.discountPercentage || 25;
 
   const scrollToBookingForm = useCallback(() => {
     const bookingForm = document.getElementById("booking-form");
     if (bookingForm) {
       bookingForm.scrollIntoView({ behavior: "smooth" });
     } else if (location.pathname !== "/" && location.pathname !== getLocalizedPath("/")) {
-      // Navigate to homepage first, then scroll
       navigate(getLocalizedPath("/"));
       setTimeout(() => {
         const form = document.getElementById("booking-form");
@@ -395,7 +412,7 @@ const HowItWorks = () => {
   }, [navigate, getLocalizedPath, location.pathname]);
 
   return (
-    <section className="py-20 md:py-32 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
+    <section ref={sectionRef} className="py-20 md:py-32 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -408,24 +425,15 @@ const HowItWorks = () => {
 
       <div className="container max-w-7xl mx-auto px-4 relative z-10">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16 md:mb-20"
-        >
+        <div className={`text-center mb-16 md:mb-20 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}>
           {/* Badge */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold mb-6"
+          <div
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold mb-6 ${isVisible ? 'animate-scale-in' : 'opacity-0'}`}
+            style={{ animationDelay: '100ms' }}
           >
             <Sparkles className="h-4 w-4" />
             {t.badge}
-          </motion.div>
+          </div>
           
           {/* Title */}
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
@@ -446,20 +454,17 @@ const HowItWorks = () => {
           {/* Trust badges */}
           <div className="flex flex-wrap justify-center gap-4 mt-8">
             {t.trustBadges.map((badge, idx) => (
-              <motion.div
+              <div
                 key={badge}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 + idx * 0.1 }}
-                className="flex items-center gap-2 px-4 py-2 bg-card border rounded-full text-sm"
+                className={`flex items-center gap-2 px-4 py-2 bg-card border rounded-full text-sm ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
+                style={{ animationDelay: `${200 + idx * 100}ms` }}
               >
                 <CheckCircle2 className="h-4 w-4 text-primary" />
                 <span className="font-medium">{badge}</span>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* Steps */}
         <div className="relative">
@@ -472,13 +477,10 @@ const HowItWorks = () => {
               const accent = stepAccents[index];
               
               return (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: index * 0.15 }}
-                  className="relative group"
+                  className={`relative group ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
+                  style={{ animationDelay: `${300 + index * 150}ms` }}
                 >
                   {/* Card */}
                   <div className="relative bg-card border rounded-3xl p-8 h-full hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:border-primary/30 hover:-translate-y-2">
@@ -537,19 +539,16 @@ const HowItWorks = () => {
                       </div>
                     </div>
                   )}
-                </motion.div>
+                </div>
               );
             })}
           </div>
         </div>
 
         {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-center mt-8 md:mt-12"
+        <div
+          className={`text-center mt-8 md:mt-12 ${isVisible ? 'animate-fade-in' : 'opacity-0'}`}
+          style={{ animationDelay: '600ms' }}
         >
           <div className="inline-flex flex-col sm:flex-row gap-4 items-center">
             <Button 
@@ -583,7 +582,7 @@ const HowItWorks = () => {
               <span>24/7 Support</span>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
