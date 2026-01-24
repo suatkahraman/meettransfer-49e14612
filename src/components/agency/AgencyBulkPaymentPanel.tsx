@@ -320,17 +320,12 @@ export const AgencyBulkPaymentPanel = memo(({
         const result = await supabase.functions.invoke("create-stripe-checkout", {
           body: {
             reservationId: primaryReservation.id,
+            agencyId: agencyId,
             amount: totalAmount,
             currency: currency,
-            description: `Agency payment for ${selectedCount} transfer reservations`,
-            successUrl: `${window.location.origin}/agency/payments?success=true`,
+            description: `Acenta ödemesi - ${selectedCount} transfer rezervasyonu`,
+            successUrl: `${window.location.origin}/agency/payments?success=true&amount=${totalAmount}&currency=${currency}&agency_id=${agencyId}`,
             cancelUrl: `${window.location.origin}/agency/payments?cancelled=true`,
-            metadata: {
-              bulk_payment: true,
-              agency_payment: true,
-              agency_id: agencyId,
-              reservation_ids: selectedReservations.map(r => r.id).join(','),
-            }
           },
         });
 
