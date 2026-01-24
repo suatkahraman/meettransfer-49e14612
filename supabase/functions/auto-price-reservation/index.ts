@@ -197,8 +197,40 @@ const handler = async (req: Request): Promise<Response> => {
             await supabase.functions.invoke('notify-driver-new-reservation', {
               body: { reservation_id, driver_id: driver.id }
             });
+            console.log("✅ Driver notification sent");
           } catch (notifyErr) {
             console.log("Driver notification skipped:", notifyErr);
+          }
+          
+          // Send admin notification for agency reservation
+          try {
+            await supabase.functions.invoke('notify-admin-new-reservation', {
+              body: { 
+                reservation_id,
+                customer_name: reservation.customer_name,
+                pickup: reservation.pickup,
+                dropoff: reservation.dropoff,
+                pickup_date: reservation.pickup_date,
+                pickup_time: reservation.pickup_time,
+                vehicle_type: reservation.vehicle_type,
+                customer_phone: reservation.customer_phone
+              }
+            });
+            console.log("✅ Admin notification sent for agency reservation");
+          } catch (adminNotifyErr) {
+            console.log("Admin notification skipped:", adminNotifyErr);
+          }
+          
+          // Send confirmation email to customer if they have an email
+          try {
+            if (reservation.customer_id) {
+              await supabase.functions.invoke('send-confirmation-email', {
+                body: { reservation_id, lang: 'tr' }
+              });
+              console.log("✅ Customer confirmation email sent");
+            }
+          } catch (emailErr) {
+            console.log("Customer email skipped:", emailErr);
           }
           
           return new Response(JSON.stringify({ 
@@ -206,7 +238,9 @@ const handler = async (req: Request): Promise<Response> => {
             reason: "agency_driver_assigned",
             driverAssigned: true,
             driverName: driver.name,
-            driverRegion: driver.region
+            driverRegion: driver.region,
+            adminNotified: true,
+            customerEmailSent: true
           }), {
             headers: { "Content-Type": "application/json", ...corsHeaders },
           });
@@ -214,7 +248,44 @@ const handler = async (req: Request): Promise<Response> => {
       }
       
       console.log("🏢 Agency reservation - no driver matched, manual assignment required");
-      return new Response(JSON.stringify({ matched: false, reason: "agency_no_driver_match" }), {
+      
+      // Even without driver match, still send admin notification for agency reservation
+      try {
+        await supabase.functions.invoke('notify-admin-new-reservation', {
+          body: { 
+            reservation_id,
+            customer_name: reservation.customer_name,
+            pickup: reservation.pickup,
+            dropoff: reservation.dropoff,
+            pickup_date: reservation.pickup_date,
+            pickup_time: reservation.pickup_time,
+            vehicle_type: reservation.vehicle_type,
+            customer_phone: reservation.customer_phone
+          }
+        });
+        console.log("✅ Admin notification sent (no driver match)");
+      } catch (adminNotifyErr) {
+        console.log("Admin notification skipped:", adminNotifyErr);
+      }
+      
+      // Send confirmation email to customer
+      try {
+        if (reservation.customer_id) {
+          await supabase.functions.invoke('send-confirmation-email', {
+            body: { reservation_id, lang: 'tr' }
+          });
+          console.log("✅ Customer confirmation email sent (no driver match)");
+        }
+      } catch (emailErr) {
+        console.log("Customer email skipped:", emailErr);
+      }
+      
+      return new Response(JSON.stringify({ 
+        matched: false, 
+        reason: "agency_no_driver_match",
+        adminNotified: true,
+        customerEmailSent: true
+      }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
