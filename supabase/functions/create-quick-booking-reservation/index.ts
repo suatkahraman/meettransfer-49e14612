@@ -72,7 +72,12 @@ serve(async (req) => {
 
     // Use request data if provided, otherwise fall back to quick booking data
     const customerNotes = requestData.customerNotes || quickBooking?.customer_notes || null;
-    const agencyId = quickBooking?.agency_id || null;
+    
+    // MEET TRANSFER ONLİNE agency ID - auto-assign for all quick bookings without agency
+    const MEET_TRANSFER_ONLINE_AGENCY_ID = "1ea14d07-f734-4fcd-b651-df2304de3d03";
+    
+    // If no agency set in quick booking, use Meet Transfer Online as default
+    const agencyId = quickBooking?.agency_id || MEET_TRANSFER_ONLINE_AGENCY_ID;
     const agencyUserId = quickBooking?.agency_user_id || null;
     const luggageCount = requestData.luggageCount ?? quickBooking?.luggage_count ?? 1;
     const babySeatCount = requestData.babySeatCount ?? quickBooking?.baby_seat_count ?? 0;
@@ -222,6 +227,28 @@ serve(async (req) => {
 
     console.log("Main reservation created:", reservation.id, reservation.reservation_code);
 
+    // Create agency_reservation_details for Meet Transfer Online agency pricing
+    // customer_price = reservation price, company_amount = same (agency profit = 0 for direct customers)
+    if (reservation.id && agencyId) {
+      const { error: agencyDetailError } = await supabase
+        .from("agency_reservation_details")
+        .insert({
+          reservation_id: reservation.id,
+          customer_price: requestData.price || 0,
+          company_amount: requestData.price || 0, // Same as customer price for direct bookings
+          agency_price_currency: requestData.priceCurrency || "EUR",
+          agency_notes: "Quick Booking - Direct Customer",
+          payment_status: "not_paid",
+        });
+
+      if (agencyDetailError) {
+        console.error("Error creating agency reservation details:", agencyDetailError);
+        // Don't fail - reservation is already created
+      } else {
+        console.log("Agency reservation details created for main reservation");
+      }
+    }
+
     // Create return trip reservation if enabled
     // IMPORTANT: Use exact returnPrice from frontend - no automatic calculation
     let returnReservation = null;
@@ -267,6 +294,26 @@ serve(async (req) => {
       } else {
         returnReservation = returnRes;
         console.log("Return reservation created:", returnRes.id, returnRes.reservation_code, "with price:", finalReturnPrice);
+
+        // Create agency_reservation_details for return reservation
+        if (returnRes.id && agencyId) {
+          const { error: returnAgencyDetailError } = await supabase
+            .from("agency_reservation_details")
+            .insert({
+              reservation_id: returnRes.id,
+              customer_price: finalReturnPrice || 0,
+              company_amount: finalReturnPrice || 0,
+              agency_price_currency: requestData.priceCurrency || "EUR",
+              agency_notes: "Quick Booking - Return Trip",
+              payment_status: "not_paid",
+            });
+
+          if (returnAgencyDetailError) {
+            console.error("Error creating agency reservation details for return:", returnAgencyDetailError);
+          } else {
+            console.log("Agency reservation details created for return reservation");
+          }
+        }
       }
     }
 

@@ -980,6 +980,9 @@ const CustomerHome = () => {
 
     try {
       // Create main reservation directly in database
+      // MEET TRANSFER ONLİNE agency ID - auto-assign for all customer panel reservations
+      const MEET_TRANSFER_ONLINE_AGENCY_ID = "1ea14d07-f734-4fcd-b651-df2304de3d03";
+      
       const reservationData = {
         customer_id: user?.id,
         customer_name: validPassengerNames[0],
@@ -998,6 +1001,7 @@ const CustomerHome = () => {
         customer_notes: formData.customerNotes.trim() || null,
         flight_number: result.data.flightNumber?.trim() || null,
         passenger_names: validPassengerNames,
+        agency_id: MEET_TRANSFER_ONLINE_AGENCY_ID, // Auto-assign Meet Transfer Online
       };
 
       const { data: reservation, error: reservationError } = await supabase
@@ -1013,6 +1017,25 @@ const CustomerHome = () => {
           : 'Failed to create reservation. Please try again.');
         setIsLoading(false);
         return;
+      }
+
+      // Create agency_reservation_details for Meet Transfer Online agency pricing
+      if (reservation?.id) {
+        try {
+          await supabase
+            .from('agency_reservation_details')
+            .insert({
+              reservation_id: reservation.id,
+              customer_price: selectedVehiclePrice || 0,
+              company_amount: selectedVehiclePrice || 0,
+              agency_price_currency: selectedCurrency || 'EUR',
+              agency_notes: 'Customer Panel - Direct Booking',
+              payment_status: 'not_paid',
+            });
+          console.log('Agency reservation details created for main reservation');
+        } catch (agencyDetailError) {
+          console.log('Agency detail creation skipped:', agencyDetailError);
+        }
       }
 
       // Create return trip if requested (with discount applied)
@@ -1042,6 +1065,7 @@ const CustomerHome = () => {
           promo_code: returnPromoCode?.code || null, // Track promo code used
           discount_percentage: returnDiscountPercentage,
           discount_amount: selectedVehiclePrice ? (selectedVehiclePrice - (returnPrice || 0)) : null,
+          agency_id: MEET_TRANSFER_ONLINE_AGENCY_ID, // Auto-assign Meet Transfer Online
         };
 
         const { data: returnReservation, error: returnError } = await supabase
@@ -1057,6 +1081,23 @@ const CustomerHome = () => {
             ? 'Ana rezervasyon oluşturuldu ancak dönüş transferi eklenemedi.'
             : 'Main reservation created but return trip could not be added.');
         } else if (returnReservation?.id) {
+          // Create agency_reservation_details for return reservation
+          try {
+            await supabase
+              .from('agency_reservation_details')
+              .insert({
+                reservation_id: returnReservation.id,
+                customer_price: returnPrice || 0,
+                company_amount: returnPrice || 0,
+                agency_price_currency: selectedCurrency || 'EUR',
+                agency_notes: 'Customer Panel - Return Trip',
+                payment_status: 'not_paid',
+              });
+            console.log('Agency reservation details created for return reservation');
+          } catch (agencyDetailError) {
+            console.log('Agency detail creation for return skipped:', agencyDetailError);
+          }
+          
           // Auto-assign driver for return reservation
           try {
             await supabase.functions.invoke('auto-price-reservation', {
