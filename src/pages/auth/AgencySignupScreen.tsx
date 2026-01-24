@@ -52,6 +52,45 @@ export default function AgencySignupScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // NOTE: Hooks must be declared unconditionally.
+  // These callbacks were previously declared after an early return,
+  // which caused "Rendered more hooks than during the previous render" crashes.
+  const handleShare = useCallback(async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: 'Join Meet Transfer as an Agency Partner',
+      text: 'Register your travel agency and start earning with Meet Transfer!',
+      url: shareUrl,
+    };
+
+    try {
+      // Some browsers support navigator.share but not navigator.canShare.
+      // Guard against calling an undefined function.
+      const canShare = typeof (navigator as any).canShare === 'function'
+        ? (navigator as any).canShare(shareData)
+        : false;
+
+      if (typeof navigator.share === 'function' && canShare) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copied to clipboard!');
+      }
+    } catch (error) {
+      // User cancelled or error
+      console.log('Share cancelled or failed', error);
+    }
+  }, []);
+
+  const handleCopyLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    } catch (error) {
+      toast.error('Failed to copy link');
+    }
+  }, []);
+
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && !roleLoading && user && role) {
@@ -82,36 +121,6 @@ export default function AgencySignupScreen() {
       </div>
     );
   }
-
-  const handleShare = useCallback(async () => {
-    const shareUrl = window.location.href;
-    const shareData = {
-      title: 'Join Meet Transfer as an Agency Partner',
-      text: 'Register your travel agency and start earning with Meet Transfer!',
-      url: shareUrl,
-    };
-
-    try {
-      if (navigator.share && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success('Link copied to clipboard!');
-      }
-    } catch (error) {
-      // User cancelled or error
-      console.log('Share cancelled or failed', error);
-    }
-  }, []);
-
-  const handleCopyLink = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard!');
-    } catch (error) {
-      toast.error('Failed to copy link');
-    }
-  }, []);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
