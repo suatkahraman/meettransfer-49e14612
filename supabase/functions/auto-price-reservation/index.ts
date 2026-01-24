@@ -104,18 +104,117 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Skip if agency reservation (agencies get manual pricing)
-    if (reservation.agency_id || reservation.agency_user_id) {
-      console.log("🏢 Agency reservation - skipping auto-price");
-      return new Response(JSON.stringify({ matched: false, reason: "agency_reservation" }), {
+    // For agency reservations: skip pricing but still do driver matching
+    const isAgencyReservation = reservation.agency_id || reservation.agency_user_id;
+    if (isAgencyReservation) {
+      console.log("🏢 Agency reservation - skip pricing, attempt driver matching only");
+    }
+
+    // Skip if already has a price (but not for agency - they don't use auto-pricing)
+    if (!isAgencyReservation && reservation.price && reservation.price > 0) {
+      console.log("💰 Reservation already has price - skipping");
+      return new Response(JSON.stringify({ matched: false, reason: "already_priced" }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    // Skip if already has a price
-    if (reservation.price && reservation.price > 0) {
-      console.log("💰 Reservation already has price - skipping");
-      return new Response(JSON.stringify({ matched: false, reason: "already_priced" }), {
+    // For agency reservations: only do driver matching, skip pricing logic
+    if (isAgencyReservation) {
+      // Analyze transfer for driver matching only
+      const transferInfo = analyzeTransfer(reservation.pickup, reservation.dropoff);
+      const { city, airport } = transferInfo;
+      
+      const pickupCity = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
+      const dropoffCity = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
+      const airportCity = airport ? (
+        airport.includes('Istanbul') || airport.includes('Sabiha') ? 'Istanbul' :
+        airport.includes('Antalya') ? 'Antalya' :
+        airport.includes('Bodrum') ? 'Bodrum' :
+        airport.includes('Dalaman') ? 'Dalaman' :
+        airport.includes('Izmir') ? 'Izmir' :
+        airport.includes('Kayseri') || airport.includes('Nevsehir') ? 'Cappadocia' :
+        airport.includes('Dubai') ? 'Dubai' :
+        airport.includes('Larnaca') || airport.includes('Paphos') || airport.includes('Ercan') ? 'Cyprus' :
+        airport.includes('Bursa') ? 'Bursa' : null
+      ) : null;
+      
+      const driverMatchCity = city || pickupCity || dropoffCity || airportCity;
+      
+      if (driverMatchCity) {
+        console.log(`🚗 Agency reservation - attempting driver matching for: ${driverMatchCity}`);
+        
+        const cityToRegionMap: Record<string, string[]> = {
+          'Istanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
+          'İstanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
+          'Antalya': ['Antalya', 'antalya', 'ANTALYA'],
+          'Alanya': ['Antalya', 'antalya', 'ANTALYA'],
+          'Kemer': ['Antalya', 'antalya', 'ANTALYA'],
+          'Belek': ['Antalya', 'antalya', 'ANTALYA'],
+          'Side': ['Antalya', 'antalya', 'ANTALYA'],
+          'Manavgat': ['Antalya', 'antalya', 'ANTALYA'],
+          'Izmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
+          'İzmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
+          'Bodrum': ['Bodrum', 'bodrum', 'BODRUM', 'Mugla', 'Muğla'],
+          'Dalaman': ['Dalaman', 'dalaman', 'DALAMAN', 'Mugla', 'Muğla'],
+          'Fethiye': ['Fethiye', 'fethiye', 'FETHIYE', 'Dalaman'],
+          'Marmaris': ['Dalaman', 'dalaman', 'DALAMAN'],
+          'Cappadocia': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'],
+          'Dubai': ['Dubai', 'dubai', 'DUBAI', 'UAE'],
+          'Cyprus': ['Cyprus', 'Kıbrıs', 'KKTC', 'Larnaca', 'Paphos', 'Ercan'],
+          'Bursa': ['Bursa', 'bursa', 'BURSA'],
+        };
+        
+        const possibleRegions = cityToRegionMap[driverMatchCity] || [driverMatchCity];
+        
+        const { data: matchingDrivers } = await supabase
+          .from('drivers')
+          .select('id, name, user_id, phone, plate_number, region')
+          .eq('active', true)
+          .in('region', possibleRegions)
+          .limit(5);
+        
+        if (matchingDrivers && matchingDrivers.length > 0) {
+          const driver = matchingDrivers[0];
+          console.log(`✅ Agency reservation - auto-assigning driver: ${driver.name}`);
+          
+          // Update only driver fields, keep status as is (confirmed for agency)
+          const { error: updateError } = await supabase
+            .from("reservations")
+            .update({
+              driver_id: driver.id,
+              driver_user_id: driver.user_id,
+              status: 'sent_to_driver'
+            })
+            .eq("id", reservation_id);
+          
+          if (updateError) {
+            console.error("❌ Failed to assign driver:", updateError);
+            throw updateError;
+          }
+          
+          // Notify driver
+          try {
+            await supabase.functions.invoke('notify-driver-new-reservation', {
+              body: { reservation_id, driver_id: driver.id }
+            });
+          } catch (notifyErr) {
+            console.log("Driver notification skipped:", notifyErr);
+          }
+          
+          return new Response(JSON.stringify({ 
+            matched: true, 
+            reason: "agency_driver_assigned",
+            driverAssigned: true,
+            driverName: driver.name,
+            driverRegion: driver.region
+          }), {
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          });
+        }
+      }
+      
+      console.log("🏢 Agency reservation - no driver matched, manual assignment required");
+      return new Response(JSON.stringify({ matched: false, reason: "agency_no_driver_match" }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }

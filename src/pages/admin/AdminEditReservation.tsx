@@ -1507,21 +1507,24 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Bütçe</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      placeholder="Fiyat girin"
-                      className="text-lg pl-8"
-                    />
+                {/* Bütçe - Only show for non-agency reservations */}
+                {(!formData.agency_id || formData.agency_id === 'none') && (
+                  <div className="space-y-2">
+                    <Label>Bütçe</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.price}
+                        onChange={(e) => setFormData({...formData, price: e.target.value})}
+                        placeholder="Fiyat girin"
+                        className="text-lg pl-8"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               <Button 
                 onClick={handleSendPriceToCustomer} 
@@ -2457,29 +2460,32 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Bütçe</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) => setFormData({...formData, price: e.target.value})}
-                      className={`pl-8 ${formData.price && validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).isLow ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30' : ''}`}
-                    />
-                  </div>
-                  {/* Low Price Warning */}
-                  {formData.price && parseFloat(formData.price) > 0 && validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).isLow && (
-                    <div className="flex items-center gap-2 p-2 bg-amber-100 dark:bg-amber-900/40 rounded-md border border-amber-300">
-                      <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
-                      <span className="text-xs text-amber-700 dark:text-amber-300">
-                        {validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).warningMessage}
-                      </span>
+                {/* Bütçe - Only show for non-agency reservations */}
+                {(!formData.agency_id || formData.agency_id === 'none') && (
+                  <div className="space-y-2">
+                    <Label>Bütçe</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{currencySymbol}</span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.price}
+                        onChange={(e) => setFormData({...formData, price: e.target.value})}
+                        className={`pl-8 ${formData.price && validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).isLow ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30' : ''}`}
+                      />
                     </div>
-                  )}
-                </div>
+                    {/* Low Price Warning */}
+                    {formData.price && parseFloat(formData.price) > 0 && validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).isLow && (
+                      <div className="flex items-center gap-2 p-2 bg-amber-100 dark:bg-amber-900/40 rounded-md border border-amber-300">
+                        <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+                        <span className="text-xs text-amber-700 dark:text-amber-300">
+                          {validatePrice(parseFloat(formData.price), formData.price_currency, formData.vehicle_type, thresholdsMap).warningMessage}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1.5">
                     <span>Şoför Maliyeti</span>
