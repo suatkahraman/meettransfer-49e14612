@@ -27,33 +27,14 @@ import { PaymentHistoryCard } from '@/components/customer/payments/PaymentHistor
 // Hooks
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 
-const translations = {
-  EN: {
-    title: 'Payments',
-    subtitle: 'Manage your transfer payments',
-    payNow: 'Pay Now',
-    paymentHistory: 'History',
-    noPayments: 'No payment history yet',
-    loading: 'Loading...',
-  },
-  TR: {
-    title: 'Ödemeler',
-    subtitle: 'Transfer ödemelerinizi yönetin',
-    payNow: 'Şimdi Öde',
-    paymentHistory: 'Geçmiş',
-    noPayments: 'Henüz ödeme geçmişi yok',
-    loading: 'Yükleniyor...',
-  },
-};
-
 const CustomerPayments = () => {
   const { signOut } = useAuth();
-  const { language, t: i18nT } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('pay');
 
+  // Map language to 'TR' or 'EN' for hooks that need simplified language
   const lang = language === 'TR' ? 'TR' : 'EN';
-  const t = translations[lang];
 
   const {
     unpaidReservations,
@@ -80,7 +61,7 @@ const CustomerPayments = () => {
             />
             <Loader2 className="h-6 w-6 animate-spin text-primary absolute -bottom-1 -right-1" />
           </div>
-          <p className="text-muted-foreground text-sm">{t.loading}</p>
+          <p className="text-muted-foreground text-sm">{t('loadingPayments')}</p>
         </motion.div>
       </div>
     );
@@ -143,9 +124,9 @@ const CustomerPayments = () => {
         >
           <h1 className="text-xl font-bold flex items-center gap-2">
             <CreditCard className="h-6 w-6 text-primary" />
-            {t.title}
+            {t('paymentsTitle')}
           </h1>
-          <p className="text-sm text-muted-foreground">{t.subtitle}</p>
+          <p className="text-sm text-muted-foreground">{t('paymentsSubtitle')}</p>
         </motion.div>
 
         {/* Stats Card */}
@@ -156,8 +137,8 @@ const CustomerPayments = () => {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="pay" className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
-              <span className="hidden sm:inline">{t.payNow}</span>
-              <span className="sm:hidden">{i18nT('payLabel')}</span>
+              <span className="hidden sm:inline">{t('payNowTab')}</span>
+              <span className="sm:hidden">{t('payLabel')}</span>
               {unpaidReservations.length > 0 && (
                 <Badge variant="destructive" className="ml-1 h-5 min-w-5 px-1.5 flex items-center justify-center text-xs">
                   {unpaidReservations.length}
@@ -166,8 +147,8 @@ const CustomerPayments = () => {
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <History className="h-4 w-4" />
-              <span className="hidden sm:inline">{t.paymentHistory}</span>
-              <span className="sm:hidden">{i18nT('historyLabel')}</span>
+              <span className="hidden sm:inline">{t('historyLabel')}</span>
+              <span className="sm:hidden">{t('historyLabel')}</span>
               {paidReservations.length > 0 && (
                 <Badge variant="secondary" className="ml-1">
                   {paidReservations.length}
@@ -196,7 +177,7 @@ const CustomerPayments = () => {
                   <Card className="border-dashed">
                     <CardContent className="pt-6 text-center">
                       <History className="h-12 w-12 mx-auto text-muted-foreground/50 mb-2" />
-                      <p className="text-muted-foreground">{t.noPayments}</p>
+                      <p className="text-muted-foreground">{t('noPaymentHistory')}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
