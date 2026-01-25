@@ -143,13 +143,7 @@ const DubaiTransfer = () => {
           },
           { type: 'FAQPage', questions: faqItems },
           { type: 'LocalBusiness' },
-          {
-            type: 'Product',
-            name: 'Dubai Airport VIP Transfer Service',
-            description: 'Premium VIP airport transfer from Dubai International Airport (DXB) and Al Maktoum Airport (DWC) to Palm Jumeirah, Downtown Dubai, Marina, and all destinations',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
-            offers: { price: '50', priceCurrency: 'USD' },
-          },
+          { type: 'TransportationService', areaServed: ['Dubai', 'Dubai International Airport', 'DXB', 'Al Maktoum Airport', 'DWC', 'Palm Jumeirah', 'Downtown Dubai'] },
         ]}
       />
 

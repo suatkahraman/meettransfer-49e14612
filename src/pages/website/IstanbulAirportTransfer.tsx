@@ -98,13 +98,7 @@ const IstanbulAirportTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Istanbul Airport Transfer Service',
-            description: 'Premium private transfer from Istanbul Airport (IST) to city center with meet & greet',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '50', priceCurrency: 'EUR' },
-          },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Istanbul Airport', 'IST'] },
         ]}
       />
 

@@ -95,13 +95,7 @@ const DalamanAirportTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Dalaman Airport Transfer Service',
-            description: 'Private transfer from Dalaman Airport to Fethiye, Marmaris, Ölüdeniz, and the Turquoise Coast',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '35', priceCurrency: 'USD' },
-          },
+          { type: 'TransportationService', areaServed: ['Dalaman', 'Dalaman Airport', 'DLM', 'Fethiye', 'Marmaris', 'Oludeniz'] },
         ]}
       />
 

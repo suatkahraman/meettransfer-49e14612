@@ -95,13 +95,7 @@ const BodrumAirportTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Bodrum Airport Transfer Service',
-            description: 'Private transfer from Bodrum Airport to hotels and marinas across the Bodrum Peninsula',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '50', priceCurrency: 'EUR' },
-          },
+          { type: 'TransportationService', areaServed: ['Bodrum', 'Bodrum Airport', 'BJV', 'Yalikavak', 'Turkbuku', 'Gumbet'] },
         ]}
       />
 

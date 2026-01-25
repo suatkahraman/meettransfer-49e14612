@@ -88,12 +88,7 @@ const EphesusPamukkale = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Ephesus & Pamukkale Transfer Service',
-            description: 'Private transfers and guided tours to ancient Ephesus and Pamukkale cotton castle',
-            offers: { price: '30', priceCurrency: 'EUR' },
-          },
+          { type: 'TransportationService', areaServed: ['Ephesus', 'Pamukkale', 'Izmir', 'Kusadasi'] },
         ]}
       />
 
