@@ -159,7 +159,7 @@ export const VehicleDetailModal = ({
                   {currencySymbol}{price}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {isTurkish ? "Toplam fiyat" : "Total price"}
+                  {isTurkish ? "Araç Toplam Fiyat" : "Vehicle Total Price"}
                 </div>
               </div>
             )}
