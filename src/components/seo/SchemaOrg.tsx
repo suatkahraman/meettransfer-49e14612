@@ -9,6 +9,7 @@ interface LocalBusinessSchema {
 interface TransportationServiceSchema {
   type: 'TransportationService';
   areaServed?: string[];
+  isGlobal?: boolean; // Use the comprehensive global schema for homepage
 }
 
 interface FAQSchema {
@@ -80,7 +81,7 @@ interface SchemaOrgProps {
   schemas: SchemaType[];
 }
 
-const baseUrl = 'https://meettransfer.lovable.app';
+const baseUrl = 'https://meettransfer.app';
 
 const companyInfo = {
   name: 'Meet Transfer',
@@ -199,37 +200,57 @@ const generateLocalBusinessSchema = (
   return baseSchema;
 };
 
-const generateTransportationServiceSchema = (areaServed?: string[]) => ({
-  '@context': 'https://schema.org',
-  '@type': 'TransportationService',
-  name: 'Meet Transfer',
-  description: 'Premium VIP airport transfer and private chauffeur service worldwide',
-  provider: {
-    '@type': 'Organization',
+const generateTransportationServiceSchema = (areaServed?: string[], isGlobal?: boolean) => {
+  // Global schema for homepage - comprehensive TransportationService
+  if (isGlobal) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'TransportationService',
+      name: 'Meet Transfer Airport Transfer Service',
+      description: 'Meet Transfer provides private airport transfer and chauffeur services in Turkey, Dubai, Cyprus and Germany. This is a transportation service, not a physical product store.',
+      url: baseUrl,
+      provider: {
+        '@type': 'Organization',
+        name: 'Meet Transfer',
+        url: baseUrl,
+      },
+      serviceType: 'Airport Transfer Service',
+      areaServed: [
+        { '@type': 'Country', name: 'Turkey' },
+        { '@type': 'Country', name: 'United Arab Emirates' },
+        { '@type': 'Country', name: 'Cyprus' },
+        { '@type': 'Country', name: 'Germany' },
+      ],
+      availableChannel: {
+        '@type': 'ServiceChannel',
+        serviceLocation: {
+          '@type': 'Place',
+          name: 'Airport',
+        },
+      },
+    };
+  }
+  
+  // Existing schema for other pages
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'TransportationService',
     name: 'Meet Transfer',
-    url: baseUrl,
-  },
-  serviceType: ['Airport Transfer', 'VIP Transfer', 'Private Chauffeur', 'Luxury Transportation'],
-  areaServed: areaServed?.map(area => ({ '@type': 'City', name: area })) || companyInfo.areaServed,
-  availableChannel: {
-    '@type': 'ServiceChannel',
-    serviceUrl: baseUrl,
-    servicePhone: companyInfo.telephone,
-  },
-  offers: {
-    '@type': 'Offer',
-    url: baseUrl,
-    priceCurrency: 'EUR',
-    price: '50',
-    priceValidUntil: '2026-12-31',
-    availability: 'https://schema.org/InStock',
-    hasMerchantReturnPolicy: {
-      '@type': 'MerchantReturnPolicy',
-      applicableCountry: 'US',
-      returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+    description: 'Premium VIP airport transfer and private chauffeur service worldwide',
+    provider: {
+      '@type': 'Organization',
+      name: 'Meet Transfer',
+      url: baseUrl,
     },
-  },
-});
+    serviceType: ['Airport Transfer', 'VIP Transfer', 'Private Chauffeur', 'Luxury Transportation'],
+    areaServed: areaServed?.map(area => ({ '@type': 'City', name: area })) || companyInfo.areaServed,
+    availableChannel: {
+      '@type': 'ServiceChannel',
+      serviceUrl: baseUrl,
+      servicePhone: companyInfo.telephone,
+    },
+  };
+};
 
 const generateFAQSchema = (questions: { question: string; answer: string }[]) => ({
   '@context': 'https://schema.org',
@@ -582,7 +603,7 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
             );
             break;
           case 'TransportationService':
-            schemaData = generateTransportationServiceSchema((schema as TransportationServiceSchema).areaServed);
+            schemaData = generateTransportationServiceSchema((schema as TransportationServiceSchema).areaServed, (schema as TransportationServiceSchema).isGlobal);
             break;
           case 'FAQPage':
             schemaData = generateFAQSchema((schema as FAQSchema).questions);
