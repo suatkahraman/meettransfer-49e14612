@@ -18,6 +18,7 @@ const PrivacyPage = () => {
       />
       <SchemaOrg
         schemas={[
+          { type: 'TransportationService', isGlobal: true },
           {
             type: 'BreadcrumbList',
             items: [
