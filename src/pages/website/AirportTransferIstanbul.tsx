@@ -87,25 +87,7 @@ const vehicles = [
 const AirportTransferIstanbul = () => {
   const { rating, totalReviews } = useGoogleReviewStats();
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "@id": "https://meettransfer.app/airporttransfer/istanbul#product",
-    "name": "İstanbul Havalimanı Transfer Hizmeti",
-    "description": "İstanbul Havalimanından şehir merkezine VIP transfer. Sabit fiyat, lüks Mercedes araçlar.",
-    "brand": {
-      "@type": "Brand",
-      "name": "Meet Transfer"
-    },
-    "offers": {
-      "@type": "AggregateOffer",
-      "lowPrice": "40",
-      "highPrice": "120",
-      "priceCurrency": "EUR",
-      "offerCount": "8"
-    }
-    // aggregateRating removed - using organization-level rating only to avoid Google warning
-  };
+  // Removed Product schema - using TransportationService instead
 
   return (
     <WebsiteLayout>
@@ -128,7 +110,7 @@ const AirportTransferIstanbul = () => {
           { type: 'FAQPage', questions: faqItems },
         ]}
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      
 
       <PageHeader
         title="İstanbul Havalimanı Transfer"

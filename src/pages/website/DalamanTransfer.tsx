@@ -99,13 +99,7 @@ const DalamanTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Dalaman Airport Transfer Service',
-            description: 'Premium VIP airport transfer from Dalaman Airport (DLM) to Turquoise Coast destinations',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
-            offers: { price: '35', priceCurrency: 'USD' },
-          },
+          { type: 'TransportationService', areaServed: ['Dalaman', 'Dalaman Airport', 'DLM'] },
         ]}
       />
 

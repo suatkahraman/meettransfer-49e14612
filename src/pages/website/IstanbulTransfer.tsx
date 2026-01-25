@@ -123,13 +123,7 @@ const IstanbulTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Istanbul Airport Transfer Service',
-            description: 'Premium VIP airport transfer from Istanbul Airport (IST) and Sabiha Gökçen (SAW)',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
-            offers: { price: '50', priceCurrency: 'EUR' },
-          },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Istanbul Airport', 'IST', 'Sabiha Gokcen', 'SAW'] },
         ]}
       />
 

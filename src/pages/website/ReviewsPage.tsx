@@ -143,11 +143,7 @@ const ReviewsPage = () => {
               { name: 'Customer Reviews', url: '/reviews' },
             ],
           },
-          {
-            type: 'Product',
-            name: 'Meet Transfer VIP Airport Transfer Service',
-            description: 'Premium airport transfer service with Mercedes vehicles across Turkey, Dubai, and Cyprus',
-          },
+          { type: 'TransportationService', areaServed: ['Turkey', 'Dubai', 'Cyprus'] },
         ]}
       />
 

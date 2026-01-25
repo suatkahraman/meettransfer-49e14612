@@ -95,13 +95,7 @@ const IzmirAirportTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Izmir Airport Transfer Service',
-            description: 'Private transfer from Izmir Airport to Çeşme, Kuşadası, Ephesus, and the Aegean coast',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '35', priceCurrency: 'USD' },
-          },
+          { type: 'TransportationService', areaServed: ['Izmir', 'Izmir Airport', 'ADB', 'Cesme', 'Kusadasi', 'Ephesus'] },
         ]}
       />
 

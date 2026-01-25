@@ -196,11 +196,7 @@ const FleetPage = () => {
               { name: 'Our Fleet', url: '/fleet' },
             ],
           },
-          {
-            type: 'Product',
-            name: 'Mercedes VIP Transfer Fleet',
-            description: 'Premium Mercedes vehicles for luxury airport transfers including Vito VIP, V-Class, Maybach, and Sprinter Minibus',
-          },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dubai', 'Cyprus'] },
         ]}
       />
 

@@ -95,13 +95,7 @@ const CappadociaAirportTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Cappadocia Airport Transfer Service',
-            description: 'Private transfer from Kayseri and Nevşehir airports to Cappadocia hotels',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '35', priceCurrency: 'USD' },
-          },
+          { type: 'TransportationService', areaServed: ['Cappadocia', 'Kayseri Airport', 'ASR', 'Nevsehir Airport', 'NAV', 'Goreme', 'Urgup'] },
         ]}
       />
 

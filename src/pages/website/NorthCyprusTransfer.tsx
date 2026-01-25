@@ -213,13 +213,7 @@ const NorthCyprusTransfer = () => {
           },
           { type: 'FAQPage', questions: faqItems },
           { type: 'LocalBusiness' },
-          {
-            type: 'Product',
-            name: 'North Cyprus Ercan Airport VIP Transfer',
-            description: 'Premium VIP airport transfer from Ercan Airport to Girne, Lefkoşa, Mağusa, and all North Cyprus destinations. Fixed prices, meet & greet, flight tracking.',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '62', priceCurrency: 'EUR' },
-          },
+          { type: 'TransportationService', areaServed: ['North Cyprus', 'Ercan Airport', 'ECN', 'Girne', 'Lefkosa', 'Magusa'] },
         ]}
       />
 

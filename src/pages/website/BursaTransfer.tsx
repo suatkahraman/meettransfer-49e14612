@@ -145,13 +145,7 @@ const BursaTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Istanbul to Bursa Transfer & Tour Service',
-            description: 'Premium VIP private transfer and day tours from Istanbul to Bursa, Uludağ, and historic villages',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '225', priceCurrency: 'EUR' },
-          },
+          { type: 'TransportationService', areaServed: ['Bursa', 'Istanbul', 'Uludag'] },
         ]}
       />
 

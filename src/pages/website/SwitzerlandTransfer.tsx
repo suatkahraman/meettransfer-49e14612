@@ -214,13 +214,7 @@ const SwitzerlandTransfer = () => {
           },
           { type: 'FAQPage', questions: faqItems },
           { type: 'LocalBusiness' },
-          {
-            type: 'Product',
-            name: 'Switzerland Zurich Airport VIP Transfer',
-            description: 'Premium VIP airport transfer from Zurich Airport to St. Moritz, Gstaad, Davos, Zermatt, and all Swiss ski resorts. Mercedes S-Class and V-Class, fixed prices.',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '900', priceCurrency: 'EUR' },
-          },
+          { type: 'TransportationService', areaServed: ['Switzerland', 'Zurich Airport', 'ZRH', 'St. Moritz', 'Gstaad', 'Davos', 'Zermatt'] },
         ]}
       />
 

@@ -138,13 +138,7 @@ const FrankfurtTransfer = () => {
           },
           { type: 'FAQPage', questions: faqItems },
           { type: 'LocalBusiness' },
-          {
-            type: 'Product',
-            name: 'Frankfurt Airport VIP Transfer Service',
-            description: 'Premium VIP airport transfer from Frankfurt Airport (FRA) to city center, Messe Frankfurt, and all destinations',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg', 'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg'],
-            offers: { price: '50', priceCurrency: 'EUR' },
-          },
+          { type: 'TransportationService', areaServed: ['Frankfurt', 'Frankfurt Airport', 'FRA', 'Messe Frankfurt'] },
         ]}
       />
 

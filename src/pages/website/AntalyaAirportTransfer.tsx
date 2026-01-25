@@ -95,13 +95,7 @@ const AntalyaAirportTransfer = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          {
-            type: 'Product',
-            name: 'Antalya Airport Transfer Service',
-            description: 'Private transfer from Antalya Airport to hotels in Belek, Lara, Side, and Alanya',
-            image: ['https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg'],
-            offers: { price: '25', priceCurrency: 'USD' },
-          },
+          { type: 'TransportationService', areaServed: ['Antalya', 'Antalya Airport', 'AYT', 'Belek', 'Lara', 'Side', 'Alanya'] },
         ]}
       />
 
