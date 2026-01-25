@@ -60,7 +60,7 @@ const LuxuryChauffeur = () => {
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Izmir'] },
+          { type: 'TransportationService', isGlobal: true },
           {
             type: 'BreadcrumbList',
             items: [
