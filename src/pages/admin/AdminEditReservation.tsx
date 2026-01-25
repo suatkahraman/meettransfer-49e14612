@@ -1360,7 +1360,7 @@ const AdminEditReservation = () => {
       ? validPassengers.map((name, index) => `  ${index + 1}. ${name}`).join('\n')
       : '  —';
 
-    const symbol = getCurrencySymbol(formData.price_currency);
+    const currencyCode = formData.price_currency || 'TRY';
     const driverInfo = drivers.find(d => d.id === formData.driver_id);
     const vehicleLabel = vehicleTypes.find(v => v.value === formData.vehicle_type)?.label || formData.vehicle_type;
     
@@ -1426,8 +1426,8 @@ ${pickupFormatted}
 ${dropoffFormatted}
 
 ${formData.flight_number ? `✈️ *${l.flight}:* ${formData.flight_number}\n` : ''}🚗 *${l.vehicle}:* ${vehicleLabel}
-💰 *${l.price}:* ${formData.price ? `${symbol}${formData.price}` : '—'}
-${formData.passenger_cash_amount ? `💵 *${l.passengerCash}:* ${getCurrencySymbol(formData.passenger_cash_currency)}${formData.passenger_cash_amount}\n` : ''}💳 *${l.paymentType}:* ${paymentLabel}
+💰 *${l.price}:* ${formData.price ? `${formData.price} ${currencyCode}` : '—'}
+${formData.passenger_cash_amount ? `💵 *${l.passengerCash}:* ${formData.passenger_cash_amount} ${formData.passenger_cash_currency || 'TRY'}\n` : ''}💳 *${l.paymentType}:* ${paymentLabel}
 ${driverInfo ? `\n👨‍✈️ *${l.driver}:* ${driverInfo.name} (${driverInfo.plate_number || '—'})` : ''}
 ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
 

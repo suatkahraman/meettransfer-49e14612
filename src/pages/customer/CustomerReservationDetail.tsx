@@ -93,6 +93,7 @@ interface Reservation {
     plate_number: string | null;
     vehicle_model: string | null;
     vehicle_color: string | null;
+    phone: string | null;
   } | null;
 }
 
@@ -155,7 +156,7 @@ const CustomerReservationDetail = () => {
       .from('reservations')
       .select(`
         *,
-        drivers (name, plate_number, vehicle_model, vehicle_color)
+        drivers (name, plate_number, vehicle_model, vehicle_color, phone)
       `)
       .eq('id', id)
       .eq('customer_id', user.id)
@@ -353,6 +354,7 @@ const CustomerReservationDetail = () => {
       reservation.baby_seat_count ? `👶 *${language === 'TR' ? 'Bebek Koltuğu' : 'Baby Seat'}:* ${reservation.baby_seat_count}` : null,
       reservation.drivers ? `\n👤 *${language === 'TR' ? 'Şoför' : 'Driver'}:* ${reservation.drivers.name}` : null,
       reservation.drivers?.plate_number ? `🚙 *${language === 'TR' ? 'Plaka' : 'Plate'}:* ${reservation.drivers.plate_number}` : null,
+      reservation.drivers?.phone ? `📞 *${language === 'TR' ? 'Şoför Tel' : 'Driver Phone'}:* ${reservation.drivers.phone}` : null,
       ``,
       `━━━━━━━━━━━━━━━━━`,
     ].filter(Boolean).join('\n');
@@ -1045,7 +1047,7 @@ const CustomerReservationDetail = () => {
                 <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                   <CreditCard className="h-4 w-4 text-primary" />
                   <span className="font-semibold text-sm uppercase tracking-wide">
-                    {language === 'TR' ? 'Fiyat Detayları' : 'Price Breakdown'}
+                    {language === 'TR' ? 'Araç Toplam Fiyat' : 'Vehicle Total Price'}
                   </span>
                 </div>
 
@@ -1534,6 +1536,25 @@ const CustomerReservationDetail = () => {
                         <span className="text-xs text-muted-foreground">{language === 'TR' ? 'Araç' : 'Vehicle'}</span>
                       </div>
                       <div className="font-semibold text-base">{reservation.drivers.vehicle_model}</div>
+                    </div>
+                  )}
+                  
+                  {/* Driver Phone Number */}
+                  {reservation.drivers.phone && (
+                    <div className="bg-background/80 backdrop-blur-sm rounded-xl p-4 border border-primary/10 shadow-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="h-6 w-6 rounded-full bg-green-500/10 flex items-center justify-center">
+                          <Phone className="h-3 w-3 text-green-600" />
+                        </div>
+                        <span className="text-xs text-muted-foreground">{language === 'TR' ? 'Şoför Telefon' : 'Driver Phone'}</span>
+                      </div>
+                      <a 
+                        href={`tel:${reservation.drivers.phone}`} 
+                        className="font-semibold text-base text-primary hover:underline flex items-center gap-2"
+                      >
+                        <Phone className="h-4 w-4" />
+                        {reservation.drivers.phone}
+                      </a>
                     </div>
                   )}
                   

@@ -1897,7 +1897,7 @@ const BookingPage = () => {
               <div className="sticky top-24">
                 <Card className="shadow-xl border-primary/20">
                   <CardHeader className="bg-primary text-white rounded-t-xl p-4 sm:p-6">
-                    <CardTitle className="text-base sm:text-lg">{t("priceSummary") || "Price Summary"}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg">{t("vehicleTotalPrice") || "Vehicle Total Price"}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     {VEHICLE_TYPE_MAP[vehicleType]?.images && VEHICLE_TYPE_MAP[vehicleType].images.length > 0 && (
