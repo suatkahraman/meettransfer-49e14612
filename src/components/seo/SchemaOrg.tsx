@@ -22,20 +22,6 @@ interface BreadcrumbSchema {
   items: { name: string; url: string }[];
 }
 
-interface ProductSchema {
-  type: 'Product';
-  name: string;
-  description: string;
-  image?: string[];
-  offers?: {
-    price: string;
-    priceCurrency: string;
-  };
-}
-
-interface MerchantProductSchema {
-  type: 'MerchantProduct';
-}
 
 interface ArticleSchema {
   type: 'Article';
@@ -75,7 +61,7 @@ interface AIBookingAssistantSchema {
   type: 'AIBookingAssistant';
 }
 
-type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ProductSchema | MerchantProductSchema | ArticleSchema | WebPageSchema | ServiceSchema | AIBookingAssistantSchema;
+type SchemaType = LocalBusinessSchema | TransportationServiceSchema | FAQSchema | BreadcrumbSchema | ArticleSchema | WebPageSchema | ServiceSchema | AIBookingAssistantSchema;
 
 interface SchemaOrgProps {
   schemas: SchemaType[];
@@ -276,67 +262,6 @@ const generateBreadcrumbSchema = (items: { name: string; url: string }[]) => ({
   })),
 });
 
-const generateProductSchema = (product: ProductSchema) => ({
-  '@context': 'https://schema.org',
-  '@type': 'Product',
-  name: product.name,
-  description: product.description,
-  brand: {
-    '@type': 'Brand',
-    name: 'Meet Transfer',
-  },
-  ...(product.image && { image: product.image }),
-  ...(product.offers && {
-    offers: {
-      '@type': 'Offer',
-      price: product.offers.price,
-      priceCurrency: product.offers.priceCurrency,
-      availability: 'https://schema.org/InStock',
-      seller: {
-        '@type': 'Organization',
-        name: 'Meet Transfer',
-      },
-    },
-  }),
-});
-
-const generateMerchantProductSchema = () => ({
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: 'Meet Transfer – VIP Airport Transfer Service',
-  description: 'Luxury private airport transfer service worldwide with fixed prices, professional chauffeurs and VIP Mercedes Vito vehicles.',
-  provider: {
-    '@type': 'Organization',
-    name: 'Meet Transfer',
-    url: baseUrl,
-    logo: companyInfo.logo,
-  },
-  serviceType: 'Airport Transfer',
-  areaServed: [
-    { '@type': 'Country', name: 'Turkey' },
-    { '@type': 'Country', name: 'United Arab Emirates' },
-    { '@type': 'Country', name: 'Cyprus' },
-    { '@type': 'Country', name: 'Germany' },
-    { '@type': 'Country', name: 'Greece' },
-  ],
-  image: [
-    'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
-    'https://meettransfer.app/images/meet-transfer-vclass-interior.jpg',
-  ],
-  offers: {
-    '@type': 'Offer',
-    url: 'https://meettransfer.app/',
-    priceCurrency: 'EUR',
-    price: '50',
-    priceValidUntil: '2026-12-31',
-    availability: 'https://schema.org/InStock',
-    hasMerchantReturnPolicy: {
-      '@type': 'MerchantReturnPolicy',
-      applicableCountry: 'US',
-      returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
-    },
-  },
-});
 
 const generateArticleSchema = (article: ArticleSchema) => ({
   '@context': 'https://schema.org',
@@ -610,12 +535,6 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
             break;
           case 'BreadcrumbList':
             schemaData = generateBreadcrumbSchema((schema as BreadcrumbSchema).items);
-            break;
-          case 'Product':
-            schemaData = generateProductSchema(schema as ProductSchema);
-            break;
-          case 'MerchantProduct':
-            schemaData = generateMerchantProductSchema();
             break;
           case 'Article':
             schemaData = generateArticleSchema(schema as ArticleSchema);
