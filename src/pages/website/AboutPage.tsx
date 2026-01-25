@@ -68,6 +68,7 @@ const AboutPage = () => {
       <SchemaOrg
         schemas={[
           { type: 'LocalBusiness' },
+          { type: 'TransportationService', isGlobal: true },
           {
             type: 'BreadcrumbList',
             items: [
