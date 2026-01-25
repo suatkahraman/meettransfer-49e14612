@@ -147,7 +147,7 @@ const ServicesPage = () => {
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Frankfurt', 'Athens', 'Greece'] },
+          { type: 'TransportationService', isGlobal: true },
           {
             type: 'BreadcrumbList',
             items: [
