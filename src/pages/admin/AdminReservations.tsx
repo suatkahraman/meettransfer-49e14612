@@ -1182,42 +1182,20 @@ const AdminReservations = () => {
                               <Button 
                                 variant="outline" 
                                 size="icon"
-                                className="h-7 w-7"
-                                onClick={() => {
-                                  const params = new URLSearchParams({
-                                    customer_name: reservation.customer_name,
-                                    customer_phone: reservation.customer_phone,
-                                    pickup: reservation.pickup,
-                                    dropoff: reservation.dropoff,
-                                    vehicle_type: reservation.vehicle_type,
-                                    payment_type: reservation.payment_type,
-                                    price: reservation.price?.toString() || '',
-                                    price_currency: reservation.price_currency || 'TRY',
-                                    flight_number: reservation.flight_number || '',
-                                  });
-                                  navigate(`/admin/reservations/create?${params.toString()}`);
-                                }}
-                                title="Kopyala"
-                              >
-                                <Copy className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="icon"
-                                className="h-7 w-7"
+                                className="h-10 w-10"
                                 onClick={() => navigate(`/admin/reservations/${reservation.id}`)}
                                 title="Düzenle"
                               >
-                                <Pencil className="h-3.5 w-3.5" />
+                                <Pencil className="h-5 w-5" />
                               </Button>
                               <Button 
                                 variant="outline" 
                                 size="icon"
-                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                className="h-10 w-10 text-destructive hover:text-destructive"
                                 onClick={() => openDeleteDialog(reservation.id, reservation.customer_name)}
                                 title="Sil"
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="h-5 w-5" />
                               </Button>
                             </div>
                           </div>
