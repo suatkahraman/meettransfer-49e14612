@@ -26,6 +26,8 @@ export interface AgencyPayment {
   payment_date: string;
   notes: string | null;
   created_at: string;
+  agency_balance: number | null;
+  agency_currency: string;
 }
 
 export interface PaymentStats {
@@ -88,10 +90,10 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
         setCustomerPayments(customerData || []);
       }
 
-      // Fetch agencies first
+      // Fetch agencies first (with balance and currency)
       const { data: agenciesData } = await supabase
         .from('agencies')
-        .select('id, agency_name');
+        .select('id, agency_name, balance, currency');
 
       // Fetch agency payments
       const { data: agencyData, error: agencyError } = await supabase
@@ -106,11 +108,16 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
       if (agencyError) {
         console.error('Error fetching agency payments:', agencyError);
       } else {
-        // Map agency names
-        const paymentsWithNames = (agencyData || []).map(p => ({
-          ...p,
-          agency_name: agenciesData?.find(a => a.id === p.agency_id)?.agency_name || 'Bilinmiyor'
-        }));
+        // Map agency names and balances
+        const paymentsWithNames = (agencyData || []).map(p => {
+          const agency = agenciesData?.find(a => a.id === p.agency_id);
+          return {
+            ...p,
+            agency_name: agency?.agency_name || 'Bilinmiyor',
+            agency_balance: agency?.balance ?? null,
+            agency_currency: agency?.currency || 'TRY'
+          };
+        });
         setAgencyPayments(paymentsWithNames);
       }
     } catch (err) {
