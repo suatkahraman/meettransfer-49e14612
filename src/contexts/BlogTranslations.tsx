@@ -1689,8 +1689,6 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBursaSeoDesc: "Kompletter Guide für Ihren Bursa-Besuch von Istanbul. Top-Attraktionen, beste Reisezeit, Transferoptionen nach Uludağ und osmanische Geschichte.",
     blogCyprusSeoTitle: "Zypern Flughafen Transfer Guide 2025 | Larnaca, Paphos nach Ayia Napa",
     blogCyprusSeoDesc: "Kompletter Guide zu Zypern Flughafentransfers. Privater VIP ab Larnaca & Paphos ab €35. Festpreise nach Ayia Napa, Limassol, Protaras.",
-    blogDubaiSeoTitle: "Dubai Flughafen Transfer Guide 2025 | DXB nach Downtown, Palm Jumeirah",
-    blogDubaiSeoDesc: "Kompletter Guide zu Dubai Flughafentransfers. Privater VIP ab DXB nach Downtown, Palm Jumeirah, Marina ab $45. 24/7 Meet & Greet.",
     
     // Blog CTA Component
     blogCtaDiscountBadge: "25% RABATT auf Rücktransfers",
@@ -2854,8 +2852,6 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBursaSeoDesc: "Guide complet pour visiter Bursa depuis Istanbul. Meilleures attractions, options de transport, itinéraires et conseils pour une journée parfaite.",
     blogCyprusSeoTitle: "Guide Transfert Aéroport Chypre 2025 | Larnaca, Paphos vers Ayia Napa",
     blogCyprusSeoDesc: "Guide complet des transferts aéroport Chypre. VIP privé depuis Larnaca & Paphos dès 35€. Prix fixes vers Ayia Napa, Limassol, Protaras.",
-    blogDubaiSeoTitle: "Guide Transfert Aéroport Dubaï 2025 | DXB vers Downtown, Palm Jumeirah",
-    blogDubaiSeoDesc: "Guide complet des transferts aéroport Dubaï. VIP privé depuis DXB vers Downtown, Palm Jumeirah, Marina dès 45$. Accueil 24/7.",
     
     blogPriceGalleryCaption1: "Mercedes Vito VIP - Transfert Aéroport de Luxe",
     blogPriceGalleryCaption2: "Intérieur cuir premium avec plafond étoilé",
@@ -3844,8 +3840,6 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogBursaSeoDesc: "Полный гид по посещению Бурсы из Стамбула. Лучшие достопримечательности, транспорт, маршруты и советы для идеальной поездки.",
     blogCyprusSeoTitle: "Гид по трансферу из аэропорта Кипра 2025 | Ларнака, Пафос — Айя-Напа",
     blogCyprusSeoDesc: "Полный гид по трансферам с Кипра. Частные VIP-трансферы из Ларнаки и Пафоса от €35. Фиксированные цены в Айя-Напу, Лимассол, Протарас.",
-    blogDubaiSeoTitle: "Гид по трансферу из аэропорта Дубая 2025 | DXB — Downtown, Palm Jumeirah",
-    blogDubaiSeoDesc: "Полный гид по трансферам из аэропорта Дубая. Частный VIP из DXB в Downtown, Palm Jumeirah, Marina от $45. Встреча 24/7.",
     
     blogPriceGalleryCaption1: "Mercedes Vito VIP — Люксовый трансфер",
     blogPriceGalleryCaption2: "Премиум кожаный салон со звездным потолком",
