@@ -105,7 +105,8 @@ const OptimizedImage = memo(({
             height={height}
             loading={priority ? "eager" : "lazy"}
             decoding={priority ? "sync" : "async"}
-            fetchPriority={priority ? "high" : fetchPriority}
+            // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+            fetchpriority={priority ? "high" : fetchPriority}
             sizes={sizes}
             onLoad={() => setIsLoaded(true)}
             onError={handleError}
