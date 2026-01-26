@@ -944,7 +944,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
                 
                 <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
-                  Sorularınız için: +90 541 317 3017
+                  Sorularınız için WhatsApp: +1 (555) 805-1101
                 </p>
               </div>
             </div>
