@@ -41,7 +41,7 @@ const BestVIPTransferIstanbul = () => {
     },
     {
       question: "How do I book a VIP transfer with Meet Transfer?",
-      answer: "Book instantly through our website, WhatsApp (+90 552 898 88 55), or our AI booking assistant. Select your VIP vehicle, enter your details, and receive instant confirmation with driver information. Free cancellation up to 24 hours before your trip."
+      answer: "Book instantly through our website, WhatsApp, or our AI booking assistant. Select your VIP vehicle, enter your details, and receive instant confirmation with driver information. Free cancellation up to 24 hours before your trip."
     },
     {
       question: "Best VIP airport transfer in Istanbul - which company?",
@@ -484,7 +484,7 @@ const BestVIPTransferIstanbul = () => {
                       <Zap className="h-6 w-6 text-green-500" />
                     </div>
                     <h3 className="font-semibold mb-2">WhatsApp</h3>
-                    <p className="text-sm text-muted-foreground">+90 552 898 88 55</p>
+                    <p className="text-sm text-muted-foreground">Live Support</p>
                   </CardContent>
                 </Card>
                 <Card className="text-center">

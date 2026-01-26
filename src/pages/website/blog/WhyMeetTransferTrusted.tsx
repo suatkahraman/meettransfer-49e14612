@@ -475,13 +475,9 @@ const WhyMeetTransferTrusted = () => {
               <div className="mt-8 p-6 bg-primary/5 rounded-xl border border-primary/20">
                 <h3 className="font-semibold mb-4">Contact Meet Transfer</h3>
                 <div className="space-y-3 text-sm">
-                  <a href="https://wa.me/905528988855" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                  <a href="https://wa.me/15558051101" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
                     <MessageSquare className="h-4 w-4" />
-                    WhatsApp: +90 552 898 88 55
-                  </a>
-                  <a href="tel:+905528988855" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                    <Phone className="h-4 w-4" />
-                    Phone: +90 552 898 88 55
+                    WhatsApp Live Support
                   </a>
                 </div>
               </div>
