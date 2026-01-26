@@ -193,7 +193,8 @@ export const VehicleImageCarousel = memo(({
         alt={`${alt} 1`}
         width={width}
         height={height}
-        fetchPriority="high"
+        // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+        fetchpriority="high"
         loading="eager"
         decoding="async"
         draggable={false}
