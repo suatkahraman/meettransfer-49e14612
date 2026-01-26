@@ -108,7 +108,6 @@ const AgencyPartnershipGuide = () => {
       
       contactTitle: "Contact Our Partnership Team",
       contactEmail: "info@meettransfer.app",
-      contactWhatsApp: "+90 531 763 26 26",
     },
     TR: {
       badge: "B2B Ortaklık",
@@ -196,7 +195,6 @@ const AgencyPartnershipGuide = () => {
       
       contactTitle: "Ortaklık Ekibimizle İletişim",
       contactEmail: "info@meettransfer.app",
-      contactWhatsApp: "+90 531 763 26 26",
     },
     DE: {
       badge: "B2B Partnerschaft",
@@ -284,7 +282,6 @@ const AgencyPartnershipGuide = () => {
       
       contactTitle: "Kontaktieren Sie unser Partnerschaftsteam",
       contactEmail: "info@meettransfer.app",
-      contactWhatsApp: "+90 531 763 26 26",
     },
     RU: {
       badge: "B2B Партнерство",
@@ -372,7 +369,6 @@ const AgencyPartnershipGuide = () => {
       
       contactTitle: "Свяжитесь с нашей командой по партнерству",
       contactEmail: "info@meettransfer.app",
-      contactWhatsApp: "+90 531 763 26 26",
     },
     FR: {
       badge: "Partenariat B2B",
@@ -460,7 +456,6 @@ const AgencyPartnershipGuide = () => {
       
       contactTitle: "Contactez Notre Équipe Partenariats",
       contactEmail: "info@meettransfer.app",
-      contactWhatsApp: "+90 531 763 26 26",
     },
   };
 
@@ -798,13 +793,13 @@ const AgencyPartnershipGuide = () => {
                       {c.contactEmail}
                     </a>
                     <a 
-                      href={`https://wa.me/${c.contactWhatsApp.replace(/[\s+]/g, '')}`}
+                      href="https://wa.me/15558051101"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-green-600 hover:underline"
                     >
                       <MessageCircle className="h-5 w-5" />
-                      WhatsApp: {c.contactWhatsApp}
+                      WhatsApp
                     </a>
                   </div>
                 </CardContent>

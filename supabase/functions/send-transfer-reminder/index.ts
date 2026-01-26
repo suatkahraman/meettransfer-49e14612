@@ -162,7 +162,7 @@ const sendCustomerReminderEmail = async (reservation: any, customerEmail: string
           </div>
           
           <p style="color: #888888; font-size: 14px; text-align: center; margin: 30px 0 0;">
-            Need help? Contact us at +90 532 174 83 90
+            Need help? Contact us via WhatsApp</p>
           </p>
         </div>
         
@@ -172,7 +172,7 @@ const sendCustomerReminderEmail = async (reservation: any, customerEmail: string
             © ${new Date().getFullYear()} Meet Transfer. All rights reserved.
           </p>
           <p style="color: #666666; font-size: 12px; margin: 10px 0 0;">
-            Istanbul, Turkey | +90 532 174 83 90
+            WhatsApp: +1 (555) 805-1101</p>
           </p>
         </div>
       </div>
@@ -335,7 +335,7 @@ const sendDriverReminderEmail = async (reservation: any, driverEmail: string, dr
             © ${new Date().getFullYear()} Meet Transfer. All rights reserved.
           </p>
           <p style="color: #666666; font-size: 12px; margin: 10px 0 0;">
-            Istanbul, Turkey | +90 532 174 83 90
+            WhatsApp: +1 (555) 805-1101</p>
           </p>
         </div>
       </div>

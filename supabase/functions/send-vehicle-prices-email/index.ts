@@ -549,7 +549,7 @@ ${t.completeBooking}: https://meet-transfer.com
 
 ${t.needHelp}:
 📧 info@meettransfer.app
-📱 +90 532 252 91 27
+📱 WhatsApp: +1 (555) 805-1101
     `.trim();
 
     const { error: emailError } = await resend.emails.send({
