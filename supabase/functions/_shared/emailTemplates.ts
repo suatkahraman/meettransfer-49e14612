@@ -11,6 +11,7 @@ const COMPANY_NAME = "Meet Transfer";
 const COMPANY_EMAIL = "info@meettransfer.app";
 const WHATSAPP_NUMBER = "+15558051101";
 const WHATSAPP_URL = "https://wa.me/15558051101";
+const EMERGENCY_PHONE = "+90 532 174 83 90";
 const WEBSITE_URL = "https://meettransfer.app";
 
 // Social media links
@@ -274,6 +275,9 @@ export function getEmailFooter(lang: string = 'en'): string {
               <a href="${WHATSAPP_URL}" style="display: inline-block; background: #25D366; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin: 5px;">💬 ${t.whatsappChat}</a>
               <a href="mailto:${COMPANY_EMAIL}" style="display: inline-block; background: #fdd835; color: #1a1a2e; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin: 5px;">✉️ ${COMPANY_EMAIL}</a>
             </div>
+            
+            <!-- Emergency Phone -->
+            <p style="margin: 10px 0 15px; color: #94a3b8; font-size: 13px;">📞 Emergency: ${EMERGENCY_PHONE}</p>
             
             <!-- Social Media Icons -->
             <div style="margin: 20px 0;">

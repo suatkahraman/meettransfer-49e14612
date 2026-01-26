@@ -550,6 +550,7 @@ ${t.completeBooking}: https://meet-transfer.com
 ${t.needHelp}:
 📧 info@meettransfer.app
 📱 WhatsApp: +1 (555) 805-1101
+📞 Emergency: +90 532 174 83 90
     `.trim();
 
     const { error: emailError } = await resend.emails.send({

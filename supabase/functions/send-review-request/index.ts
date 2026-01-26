@@ -250,7 +250,7 @@ const handler = async (req: Request): Promise<Response> => {
                   © ${new Date().getFullYear()} Meet Transfer. All rights reserved.
                 </p>
                 <p style="color: #666666; font-size: 12px; margin: 10px 0 0;">
-                  WhatsApp: +1 (555) 805-1101</p>
+                  WhatsApp: +1 (555) 805-1101 | Emergency: +90 532 174 83 90</p>
                 </p>
                 <p style="color: #fdd835; font-size: 11px; margin: 10px 0 0;">
                   <a href="https://meettransfer.app" style="color: #fdd835; text-decoration: none;">meettransfer.app</a>

@@ -551,7 +551,7 @@ function buildCustomerEmailTemplate(params: {
         </div>
         
         <div style="margin-top: 30px; text-align: center; color: #888; font-size: 12px;">
-          <p>Need help? Contact us via WhatsApp: +1 (555) 805-1101</p>
+          <p>Need help? Contact us via WhatsApp: +1 (555) 805-1101 | Emergency: +90 532 174 83 90</p>
           <p>© 2025 Meet Transfer. All rights reserved.</p>
         </div>
       </div>
