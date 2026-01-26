@@ -161,6 +161,42 @@ const seoConfig: Record<string, { title: string; description: string; keywords: 
     keywords: 'contact, customer support, booking inquiry, WhatsApp support, transfer booking',
     ogType: 'website',
   },
+  // Standalone Reservation Page - for Google Business Profile
+  '/reserve': {
+    title: 'Online Reservation | Meet Transfer - VIP Airport Transfer Booking',
+    description: 'Book your VIP airport transfer online. Mercedes vehicles, professional drivers, instant pricing. Complete your reservation in minutes!',
+    keywords: 'online booking, airport transfer reservation, VIP transfer booking, Mercedes transfer, instant booking',
+    ogImage: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+    ogType: 'website',
+  },
+  '/tr/reserve': {
+    title: 'Online Rezervasyon | Meet Transfer - VIP Havalimanı Transfer',
+    description: 'VIP havalimanı transfer rezervasyonunuzu online yapın. Mercedes araçlar, profesyonel şoförler, anında fiyat. Birkaç dakikada rezervasyonunuzu tamamlayın!',
+    keywords: 'online rezervasyon, havalimanı transfer, VIP transfer, Mercedes transfer, hızlı rezervasyon',
+    ogImage: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+    ogType: 'website',
+  },
+  '/de/reserve': {
+    title: 'Online Reservierung | Meet Transfer - VIP Flughafentransfer',
+    description: 'Buchen Sie Ihren VIP Flughafentransfer online. Mercedes Fahrzeuge, professionelle Fahrer, sofortige Preise. Reservierung in wenigen Minuten!',
+    keywords: 'online buchung, flughafentransfer, VIP transfer, Mercedes transfer, schnelle buchung',
+    ogImage: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+    ogType: 'website',
+  },
+  '/ru/reserve': {
+    title: 'Онлайн бронирование | Meet Transfer - VIP трансфер из аэропорта',
+    description: 'Забронируйте VIP трансфер из аэропорта онлайн. Автомобили Mercedes, профессиональные водители, мгновенные цены. Завершите бронирование за минуты!',
+    keywords: 'онлайн бронирование, трансфер аэропорт, VIP трансфер, Mercedes трансфер, быстрое бронирование',
+    ogImage: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+    ogType: 'website',
+  },
+  '/fr/reserve': {
+    title: 'Réservation en Ligne | Meet Transfer - Transfert VIP Aéroport',
+    description: 'Réservez votre transfert VIP aéroport en ligne. Véhicules Mercedes, chauffeurs professionnels, tarifs instantanés. Finalisez votre réservation en quelques minutes!',
+    keywords: 'réservation en ligne, transfert aéroport, transfert VIP, transfert Mercedes, réservation rapide',
+    ogImage: 'https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg',
+    ogType: 'website',
+  },
 };
 
 // Default SEO config
