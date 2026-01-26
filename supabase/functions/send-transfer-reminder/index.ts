@@ -172,7 +172,7 @@ const sendCustomerReminderEmail = async (reservation: any, customerEmail: string
             © ${new Date().getFullYear()} Meet Transfer. All rights reserved.
           </p>
           <p style="color: #666666; font-size: 12px; margin: 10px 0 0;">
-            WhatsApp: +1 (555) 805-1101</p>
+            WhatsApp: +1 (555) 805-1101 | Emergency: +90 532 174 83 90</p>
           </p>
         </div>
       </div>
@@ -335,7 +335,7 @@ const sendDriverReminderEmail = async (reservation: any, driverEmail: string, dr
             © ${new Date().getFullYear()} Meet Transfer. All rights reserved.
           </p>
           <p style="color: #666666; font-size: 12px; margin: 10px 0 0;">
-            WhatsApp: +1 (555) 805-1101</p>
+            WhatsApp: +1 (555) 805-1101 | Emergency: +90 532 174 83 90</p>
           </p>
         </div>
       </div>
