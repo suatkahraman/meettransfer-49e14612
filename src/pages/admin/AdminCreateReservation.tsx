@@ -433,6 +433,34 @@ const AdminCreateReservation = () => {
 
       if (reservationError) throw reservationError;
 
+      // Auto-fill passenger_cash_amount for cash payments if not provided
+      if (reservation && formData.payment_type === 'cash' && safeParseFloat(formData.price) > 0) {
+        const passengerCashAmount = safeParseFloat(formData.passenger_cash_amount);
+        if (!passengerCashAmount || passengerCashAmount === 0) {
+          console.log('💵 Auto-filling passenger_cash_amount for cash payment');
+          await supabase
+            .from('reservations')
+            .update({
+              passenger_cash_amount: safeParseFloat(formData.price),
+              passenger_cash_currency: formData.price_currency || 'TRY'
+            })
+            .eq('id', reservation.id);
+        }
+      }
+
+      // Call auto-price-reservation for driver assignment and notifications
+      if (reservation && formData.agency_id) {
+        try {
+          console.log('🚗 Triggering auto-price-reservation for driver assignment');
+          await supabase.functions.invoke('auto-price-reservation', {
+            body: { reservation_id: reservation.id }
+          });
+        } catch (autoPriceError) {
+          console.error('Auto-price-reservation failed:', autoPriceError);
+          // Don't throw - this is not critical for reservation creation
+        }
+      }
+
       // Save admin notes if provided
       if (formData.admin_notes && reservation) {
         await supabase
