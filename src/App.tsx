@@ -256,7 +256,31 @@ const LazyRoute = ({ children }: { children: React.ReactNode }) => (
   <Suspense fallback={<PageLoader />}>{children}</Suspense>
 );
 
-const App = () => (
+import { isReservationsSubdomain, SubdomainReservationPage } from "@/components/SubdomainRouter";
+
+const App = () => {
+  // Check if accessed via reservations subdomain - render standalone booking page
+  if (isReservationsSubdomain()) {
+    return (
+      <ChunkErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <LanguageProvider>
+                <PromoProvider>
+                  <SubdomainReservationPage />
+                </PromoProvider>
+              </LanguageProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ChunkErrorBoundary>
+    );
+  }
+
+  return (
   <ChunkErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -463,6 +487,7 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
   </ChunkErrorBoundary>
-);
+  );
+};
 
 export default App;
