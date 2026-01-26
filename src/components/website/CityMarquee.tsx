@@ -296,7 +296,8 @@ const CityCard = memo(({ city, language, onClick, priority = false }: CityCardPr
             alt={city.name}
             loading={priority ? "eager" : "lazy"}
             decoding="async"
-            fetchPriority={priority ? "high" : "auto"}
+            // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+            fetchpriority={priority ? "high" : "auto"}
             width={224}
             height={288}
             sizes="(max-width: 768px) 192px, 224px"
