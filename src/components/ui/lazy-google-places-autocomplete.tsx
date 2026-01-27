@@ -623,10 +623,11 @@ export const LazyGooglePlacesAutocomplete = memo(({
           onClick={handleUseMyLocation}
           disabled={disabled || isGettingLocation}
           className={cn(
-            "flex-shrink-0 p-1.5 rounded-lg transition-all",
-            "hover:bg-primary/10 active:scale-95",
-            "text-muted-foreground hover:text-primary",
+            "flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all",
+            "bg-primary/10 hover:bg-primary/20 border border-primary/20",
+            "text-primary font-medium",
             "disabled:opacity-50 disabled:cursor-not-allowed",
+            "active:scale-95",
             isGettingLocation && "animate-pulse"
           )}
           title={myLocationLabel}
@@ -636,6 +637,7 @@ export const LazyGooglePlacesAutocomplete = memo(({
           ) : (
             <LocateFixed className="h-4 w-4" />
           )}
+          <span className="text-xs font-semibold hidden sm:inline whitespace-nowrap">{myLocationLabel}</span>
         </button>
       )}
     </div>
