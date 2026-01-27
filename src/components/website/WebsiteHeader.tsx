@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogIn, LogOut, User, Building2, Briefcase, MapPin, Car, BookOpen, Info, Mail, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { LogIn, LogOut, User, Building2, Briefcase, BookOpen, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UniversalLanguageSelector from "@/components/UniversalLanguageSelector";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
@@ -12,14 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -30,19 +22,7 @@ const WebsiteHeader = () => {
   const { user, signOut } = useAuth();
   const { role } = useUserRole();
   const location = useLocation();
-  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // Scroll detection for header shrink animation
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Check if path matches considering language prefix
   const isActive = (path: string) => {
@@ -50,26 +30,11 @@ const WebsiteHeader = () => {
     return location.pathname === localizedPath;
   };
 
+  // Simplified nav links - removed: cities, fleet, terms, about
   const navLinks = [
     { path: "/services", label: t("services") || "Services", icon: Briefcase },
-    { path: "/destinations", label: t("cities"), icon: MapPin },
-    { path: "/fleet", label: t("fleet"), icon: Car },
     { path: "/blog", label: t("blog") || "Blog", icon: BookOpen },
-    { path: "/about", label: t("about"), icon: Info },
     { path: "/contact", label: t("contact"), icon: Mail },
-    { path: "/terms", label: t("terms") || "Terms", icon: FileText },
-  ];
-
-  const destinationLinks = [
-    { path: "/istanbul-transfer", label: t("footerIstanbul") || "Istanbul Transfer" },
-    { path: "/antalya-transfer", label: t("footerAntalya") || "Antalya Transfer" },
-    { path: "/bodrum-transfer", label: t("footerBodrum") || "Bodrum Transfer" },
-    { path: "/dalaman-transfer", label: t("footerDalaman") || "Dalaman Transfer" },
-    { path: "/izmir-transfer", label: t("footerIzmir") || "Izmir Transfer" },
-    { path: "/cappadocia-transfer", label: t("footerCappadocia") || "Cappadocia Transfer" },
-    { path: "/dubai-transfer", label: t("footerDubai") || "Dubai Transfer" },
-    { path: "/cyprus-transfer", label: t("footerCyprus") || "Cyprus Transfer" },
-    { path: "/switzerland-transfer", label: t("footerSwitzerland") || "Switzerland Transfer" },
   ];
 
   // Get dashboard path based on role
@@ -79,169 +44,56 @@ const WebsiteHeader = () => {
     return '/customer';
   };
 
-  const scrollToBookingForm = useCallback(() => {
-    const home = getLocalizedPath("/");
-
-    // If not on homepage, navigate with hash; HashScroll will handle the actual scroll.
-    if (location.pathname !== home) {
-      navigate(`${home}#booking-form`);
-      return;
-    }
-
-    const bookingForm = document.getElementById("booking-form");
-    if (bookingForm) {
-      bookingForm.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-
-    // Fallback: ensure hash is set so HashScroll can retry after mount.
-    navigate(`${home}#booking-form`);
-  }, [getLocalizedPath, location.pathname, navigate]);
-
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 border-b border-border pt-[env(safe-area-inset-top)] transition-all duration-500 ease-out ${
-        isScrolled 
-          ? "bg-background/98 backdrop-blur-md shadow-xl shadow-primary/15" 
-          : "bg-card/95 backdrop-blur-sm"
-      }`}
-    >
-      <div 
-        className={`max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between transition-all duration-500 ease-out ${
-          isScrolled ? "h-14 sm:h-16" : "h-16 sm:h-[4.5rem]"
-        }`}
-      >
-        {/* Left - Language Selector */}
-        <div className="flex items-center gap-2">
-          <UniversalLanguageSelector variant="compact" />
+    <header className="w-full z-50 border-b border-border bg-card/95 backdrop-blur-sm">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-16 sm:h-[4.5rem]">
+        {/* Left - Logo */}
+        <Link to={getLocalizedPath("/")} className="flex-shrink-0">
+          <img 
+            src={meetTransferLogo} 
+            alt="Meet Transfer" 
+            width={48}
+            height={48}
+            loading="eager"
+            className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl object-cover shadow-lg ring-2 ring-primary/30"
+          />
+        </Link>
+
+        {/* Center - Brand Name */}
+        <div className="absolute left-1/2 -translate-x-1/2">
+          <Link to={getLocalizedPath("/")} className="flex items-center">
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">
+              <span className="text-primary">Meet</span> Transfer
+            </h1>
+          </Link>
         </div>
 
-        {/* Center - Book Button */}
-        {user ? (
-          <Link to={getLocalizedPath("/book")} className="absolute left-1/2 -translate-x-1/2">
-            <Button variant="accent" size="default" className="font-bold text-sm px-6 md:px-8 py-2.5 md:py-3 shadow-lg animate-pulse-subtle">
-              {t("bookNow")}
-            </Button>
-          </Link>
-        ) : (
-          <Button 
-            variant="accent" 
-            size="default" 
-            className="absolute left-1/2 -translate-x-1/2 font-bold text-sm px-6 md:px-8 py-2.5 md:py-3 shadow-lg"
-            onClick={scrollToBookingForm}
-          >
-            {t("bookNow")}
-          </Button>
-        )}
-
-        {/* Right - Navigation & Actions */}
+        {/* Right - Language & Menu */}
         <div className="flex items-center gap-2">
+          <UniversalLanguageSelector variant="compact" />
+          
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-3">
-            <Link
-              to={getLocalizedPath("/services")}
-              className={`text-sm font-medium transition-colors ${
-                isActive("/services") 
-                  ? "text-primary font-semibold" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t("services") || "Services"}
-            </Link>
-            
-            {/* Destinations Dropdown */}
-            <NavigationMenu className="flex-none">
-              <NavigationMenuList className="flex-none">
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger 
-                    className={`text-sm font-medium bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 ${
-                      location.pathname.includes("transfer") || isActive("/destinations")
-                        ? "text-primary font-semibold" 
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {t("cities")}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid gap-1 p-2 w-[200px]">
-                      {destinationLinks.map((dest) => (
-                        <NavigationMenuLink key={dest.path} asChild>
-                          <Link
-                            to={getLocalizedPath(dest.path)}
-                            className={`block px-3 py-2 text-sm rounded-md transition-colors hover:bg-accent ${
-                              isActive(dest.path) ? "bg-primary/10 text-primary font-semibold" : ""
-                            }`}
-                          >
-                            {dest.label}
-                          </Link>
-                        </NavigationMenuLink>
-                      ))}
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to={getLocalizedPath("/destinations")}
-                          className="block px-3 py-2 text-sm rounded-md transition-colors bg-primary/5 hover:bg-primary/10 text-primary font-medium mt-1"
-                        >
-                          {t("viewAllDestinations") || "View All →"}
-                        </Link>
-                      </NavigationMenuLink>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-
-            <Link
-              to={getLocalizedPath("/fleet")}
-              className={`text-sm font-medium transition-colors ${
-                isActive("/fleet") 
-                  ? "text-primary font-semibold" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t("fleet")}
-            </Link>
-            <Link
-              to={getLocalizedPath("/blog")}
-              className={`text-sm font-medium transition-colors ${
-                isActive("/blog") 
-                  ? "text-primary font-semibold" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t("blog") || "Blog"}
-            </Link>
-            <Link
-              to={getLocalizedPath("/about")}
-              className={`text-sm font-medium transition-colors ${
-                isActive("/about") 
-                  ? "text-primary font-semibold" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t("about")}
-            </Link>
-            <Link
-              to={getLocalizedPath("/contact")}
-              className={`text-sm font-medium transition-colors ${
-                isActive("/contact") 
-                  ? "text-primary font-semibold" 
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t("contact")}
-            </Link>
+          <nav className="hidden md:flex items-center gap-3 ml-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={getLocalizedPath(link.path)}
+                className={`text-sm font-medium transition-colors ${
+                  isActive(link.path) 
+                    ? "text-primary font-semibold" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-2 ml-2">
-            <InstallAppButton 
-              variant="prominent" 
-              size="sm"
-              animated
-            />
+            <InstallAppButton variant="prominent" size="sm" animated />
             <PushNotificationToggle />
             
-            {/* Auth Buttons */}
             {user ? (
               <>
                 <Link to={getDashboardPath()}>
@@ -250,12 +102,7 @@ const WebsiteHeader = () => {
                     {t("myAccount")}
                   </Button>
                 </Link>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => signOut()}
-                  className="gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={() => signOut()} className="gap-2">
                   <LogOut className="h-4 w-4" />
                   {t("logout")}
                 </Button>
@@ -278,45 +125,23 @@ const WebsiteHeader = () => {
             )}
           </div>
 
-          {/* Mobile Menu - Optimized Hamburger */}
+          {/* Mobile Menu - Hamburger */}
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" className="relative w-10 h-10 p-0 hover:bg-primary/10 rounded-lg">
                 <span className="sr-only">Toggle menu</span>
-                <span 
-                  className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${
-                    menuOpen ? "rotate-45" : "-translate-y-1.5"
-                  }`}
-                />
-                <span 
-                  className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${
-                    menuOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"
-                  }`}
-                />
-                <span 
-                  className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${
-                    menuOpen ? "-rotate-45" : "translate-y-1.5"
-                  }`}
-                />
+                <span className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${menuOpen ? "rotate-45" : "-translate-y-1.5"}`} />
+                <span className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${menuOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"}`} />
+                <span className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${menuOpen ? "-rotate-45" : "translate-y-1.5"}`} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="end" 
-              className="w-64 bg-card/98 backdrop-blur-lg border border-border shadow-xl z-50 animate-in slide-in-from-top-3 fade-in-0 duration-300"
-            >
+            <DropdownMenuContent align="end" className="w-64 bg-card/98 backdrop-blur-lg border border-border shadow-xl z-50 animate-in slide-in-from-top-3 fade-in-0 duration-300">
               {navLinks.map((link) => {
                 const active = isActive(link.path);
                 const IconComponent = link.icon;
                 return (
-                  <DropdownMenuItem 
-                    key={link.path} 
-                    className={`py-2.5 ${active ? "bg-primary/15 focus:bg-primary/20" : ""}`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <Link
-                      to={getLocalizedPath(link.path)}
-                      className={`w-full flex items-center gap-3 ${active ? "text-primary font-semibold" : ""}`}
-                    >
+                  <DropdownMenuItem key={link.path} className={`py-2.5 ${active ? "bg-primary/15 focus:bg-primary/20" : ""}`} onClick={() => setMenuOpen(false)}>
+                    <Link to={getLocalizedPath(link.path)} className={`w-full flex items-center gap-3 ${active ? "text-primary font-semibold" : ""}`}>
                       <IconComponent className={`h-4 w-4 flex-shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
                       <span>{link.label}</span>
                     </Link>
@@ -324,14 +149,8 @@ const WebsiteHeader = () => {
                 );
               })}
               
-              {/* Install App - Mobile Menu */}
               <div className="p-2">
-                <InstallAppButton 
-                  variant="prominent" 
-                  size="default"
-                  fullWidth
-                  animated
-                />
+                <InstallAppButton variant="prominent" size="default" fullWidth animated />
               </div>
               
               <DropdownMenuSeparator />
@@ -344,10 +163,7 @@ const WebsiteHeader = () => {
                       {t("myAccount")}
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => signOut()}
-                    className="cursor-pointer gap-2"
-                  >
+                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer gap-2">
                     <LogOut className="h-4 w-4" />
                     {t("logout")}
                   </DropdownMenuItem>
@@ -366,28 +182,6 @@ const WebsiteHeader = () => {
                       {t("agencyLogin") || "Agency"}
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <div className="p-2 space-y-2">
-                    <Link to="/signup/customer" className="block">
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={() => setMenuOpen(false)}
-                      >
-                        {t("guestRegistration") || "Guest Registration"}
-                      </Button>
-                    </Link>
-                    <Button 
-                      variant="accent" 
-                      className="w-full"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        scrollToBookingForm();
-                      }}
-                    >
-                      {t("bookNow")}
-                    </Button>
-                  </div>
                 </>
               )}
             </DropdownMenuContent>

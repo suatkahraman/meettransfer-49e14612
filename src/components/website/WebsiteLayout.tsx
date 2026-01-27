@@ -25,13 +25,11 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
       <WebsiteHeader />
       <LazyMotionMain
         key={location.pathname}
-        className={`pt-12 sm:pt-16 ${showBottomNav ? "pb-20 md:pb-0" : ""}`}
-        style={{ paddingTop: `calc(3rem + env(safe-area-inset-top, 0px))` }}
+        className={showBottomNav ? "pb-20 md:pb-0" : ""}
       >
         {children}
       </LazyMotionMain>
       {showBottomNav && <BottomNavigation />}
-      
     </div>
   );
 };
