@@ -1,25 +1,10 @@
-import { memo, lazy, Suspense, useState, useCallback, useRef, useMemo } from "react";
-import { Users, Check, Briefcase, Snowflake, Wifi, Star, Tv, Crown, Armchair, Sparkles, Wine, Droplets, Luggage, BatteryCharging } from "lucide-react";
+import { memo, useState, useCallback, useRef, useMemo } from "react";
+import { Users, Check, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VehicleTypeInfo } from "@/lib/vehicleTypes";
 import { getRegionVehicles, VehicleRegion } from "@/lib/vehicleRegions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VehiclePrice } from "./types";
-
-// Feature icon mapping - extended for Dubai vehicles
-const featureIcons: Record<string, React.ElementType> = {
-  'snowflake': Snowflake,
-  'armchair': Armchair,
-  'wifi': Wifi,
-  'stars': Star,
-  'tv': Tv,
-  'crown': Crown,
-  'sparkles': Sparkles,
-  'wine': Wine,
-  'droplets': Droplets,
-  'luggage': Luggage,
-  'battery-charging': BatteryCharging,
-};
 
 // Vehicle images - optimized WebP 480x360
 import vitoImg from "@/assets/vehicles/vito-hero-optimized.webp";
@@ -31,9 +16,6 @@ import sedanImg from "@/assets/vehicles/sedan-hero-optimized.webp";
 // Dubai vehicle images - WebP optimized
 import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.webp";
 
-// Lazy load heavy components
-const VehicleImageCarousel = lazy(() => import("@/components/website/VehicleImageCarousel").then(m => ({ default: m.VehicleImageCarousel })));
-
 const vehicleImages: Record<string, string> = {
   'sedan': sedanImg,
   'mercedes-vito': vitoImg,
@@ -41,7 +23,7 @@ const vehicleImages: Record<string, string> = {
   'maybach-minibus': maybachImg,
   'sprinter-minibus': sprinterImg,
   'minibus': sprinterImg,
-  // Dubai vehicles - using VIP van as fallback for all Dubai types
+  // Dubai vehicles
   'dubai-private-sedan': sedanImg,
   'dubai-premium-van': vitoVipImg,
   'dubai-suburban-suv': vitoImg,
@@ -57,7 +39,7 @@ interface VehicleSelectorProps {
   hasRoute: boolean;
   language: string;
   currency?: string;
-  region?: VehicleRegion; // Region from edge function determines vehicle list
+  region?: VehicleRegion;
 }
 
 export const VehicleSelector = memo(({
@@ -71,28 +53,16 @@ export const VehicleSelector = memo(({
   currency = "EUR",
   region = 'default'
 }: VehicleSelectorProps) => {
-  const [hoveredVehicle, setHoveredVehicle] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Use region prop from edge function - this is the authoritative source
   const vehicleList: VehicleTypeInfo[] = useMemo(() => {
     return getRegionVehicles(region);
   }, [region]);
 
-  // Simple click handler
   const handleVehicleClick = useCallback((vehicle: VehicleTypeInfo, isDisabled: boolean) => {
     if (isDisabled) return;
     onSelectVehicle(vehicle.value);
   }, [onSelectVehicle]);
-
-  // Hover handlers for desktop carousel
-  const handleMouseEnter = useCallback((vehicleValue: string) => {
-    setHoveredVehicle(vehicleValue);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setHoveredVehicle(null);
-  }, []);
 
   return (
     <div ref={containerRef} className="grid grid-cols-2 gap-2.5 sm:gap-3">
@@ -100,22 +70,19 @@ export const VehicleSelector = memo(({
         const vehiclePrice = prices.find(v => v.vehicleType === vehicle.value);
         const isSelected = selectedVehicle === vehicle.value;
         const isDisabled = vehicle.passengers < parseInt(passengers);
-        const isHovered = hoveredVehicle === vehicle.value;
         
         return (
           <div 
             key={vehicle.value}
             className="relative"
             data-vehicle-card
-            onMouseEnter={() => handleMouseEnter(vehicle.value)}
-            onMouseLeave={handleMouseLeave}
           >
             <button
               type="button"
               onClick={() => handleVehicleClick(vehicle, isDisabled)}
               disabled={isDisabled}
               className={cn(
-                "w-full rounded-xl border-2 p-3 sm:p-2.5 text-center overflow-hidden",
+                "w-full rounded-xl border-2 p-2.5 text-center overflow-hidden",
                 "transition-all duration-200 ease-out select-none",
                 "active:scale-[0.97] active:opacity-90",
                 "shadow-sm hover:shadow-md",
@@ -126,64 +93,39 @@ export const VehicleSelector = memo(({
               )}
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              {/* Vehicle Image - Square aspect ratio with carousel */}
-              <div className="w-full aspect-[4/3] sm:aspect-square rounded-lg overflow-hidden mb-2 sm:mb-2 bg-muted relative">
-                <Suspense fallback={
-                  <img 
-                    src={vehicleImages[vehicle.value]} 
-                    alt={vehicle.label}
-                    className="w-full h-full object-cover"
-                    loading={index === 0 ? "eager" : "lazy"}
-                  />
-                }>
-                  <VehicleImageCarousel
-                    images={vehicle.images.slice(0, 4).map(img => img.src)}
-                    alt={vehicle.label}
-                    className="w-full h-full"
-                    interval={4000}
-                    isHovered={isHovered}
-                  />
-                </Suspense>
+              {/* Vehicle Image - Simple static image */}
+              <div className="w-full aspect-[4/3] rounded-lg overflow-hidden mb-2 bg-muted relative">
+                <img 
+                  src={vehicleImages[vehicle.value]} 
+                  alt={vehicle.label}
+                  className="w-full h-full object-cover"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  draggable={false}
+                />
                 
                 {/* Selected Overlay */}
                 {isSelected && (
                   <div className="absolute inset-0 bg-primary/25 flex items-center justify-center z-10 pointer-events-none">
-                    <div className="w-8 h-8 sm:w-8 sm:h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                      <Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                      <Check className="h-4 w-4 text-primary-foreground" />
                     </div>
                   </div>
                 )}
               </div>
               
-              {/* Vehicle Name - Full label */}
-              <div className="text-sm sm:text-sm font-bold truncate mb-1.5 pointer-events-none text-foreground leading-tight">
+              {/* Vehicle Name */}
+              <div className="text-sm font-bold truncate mb-1 pointer-events-none text-foreground leading-tight">
                 {vehicle.label}
               </div>
               
-              {/* Feature Icons Row */}
-              <div className="flex items-center justify-center gap-1.5 sm:gap-1.5 mb-1.5 pointer-events-none">
-                {vehicle.features.slice(0, 3).map((feature, idx) => {
-                  const IconComponent = featureIcons[feature.icon];
-                  return IconComponent ? (
-                    <div 
-                      key={idx} 
-                      className="w-5 h-5 sm:w-5 sm:h-5 rounded-full bg-muted/80 flex items-center justify-center"
-                      title={language === 'TR' ? feature.labelTr : feature.label}
-                    >
-                      <IconComponent className="h-3 w-3 sm:h-3 sm:w-3 text-primary" />
-                    </div>
-                  ) : null;
-                })}
-              </div>
-              
               {/* Passenger & Luggage Count */}
-              <div className="flex items-center justify-center gap-3 text-xs sm:text-xs text-muted-foreground pointer-events-none">
+              <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground pointer-events-none">
                 <div className="flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5" />
+                  <Users className="h-3.5 w-3.5" />
                   <span className="font-medium">{vehicle.passengers}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Briefcase className="h-3.5 w-3.5 sm:h-3.5 sm:w-3.5" />
+                  <Briefcase className="h-3.5 w-3.5" />
                   <span className="font-medium">{vehicle.luggage}</span>
                 </div>
               </div>
@@ -191,15 +133,15 @@ export const VehicleSelector = memo(({
               {/* Price */}
               <div className="pointer-events-none mt-1.5">
                 {vehiclePrice ? (
-                  <div className="text-sm sm:text-sm font-bold text-primary">
+                  <div className="text-sm font-bold text-primary">
                     {currency === "EUR" ? "€" : currency}{vehiclePrice.price}
                   </div>
                 ) : loadingPrices && hasRoute ? (
-                  <div className="h-5 sm:h-5 flex items-center justify-center">
-                    <Skeleton className="h-4 sm:h-4 w-12 sm:w-10" />
+                  <div className="h-5 flex items-center justify-center">
+                    <Skeleton className="h-4 w-12" />
                   </div>
                 ) : (
-                  <div className="h-5 sm:h-5" />
+                  <div className="h-5" />
                 )}
               </div>
             </button>
