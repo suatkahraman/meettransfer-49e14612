@@ -533,24 +533,87 @@ const BookingPage = () => {
     fetchPrices();
   }, [urlPickup, urlDropoff, urlDate, preferredCurrency, isHourlyBooking, searchParams, vehiclePrices.length]);
 
-  // Fetch hourly rental prices with minimum 8 second loading animation
+  // Extract city from address for hourly pricing
+  const extractCityFromAddress = (address: string): string | null => {
+    if (!address) return null;
+    
+    const addressLower = address.toLowerCase();
+    
+    // Known cities in hourly_rental_prices - check against address
+    const knownCities = [
+      'Antalya', 'Istanbul', 'İstanbul', 'Ankara', 'Izmir', 'İzmir', 
+      'Bodrum', 'Fethiye', 'Marmaris', 'Alanya', 'Kemer', 'Side',
+      'Mardin', 'Adana', 'Mersin', 'Gaziantep', 'Bursa', 'Konya',
+      'Dubai', 'Abu Dhabi', 'Sharjah',
+      'Zurich', 'Zürich', 'Geneva', 'Genève', 'Basel', 'Bern',
+      'Nicosia', 'Lefkoşa', 'Girne', 'Kyrenia', 'Famagusta', 'Gazimağusa'
+    ];
+    
+    for (const city of knownCities) {
+      if (addressLower.includes(city.toLowerCase())) {
+        // Return normalized city name for DB matching
+        if (city.toLowerCase() === 'istanbul' || city.toLowerCase() === 'i̇stanbul') return 'Istanbul';
+        if (city.toLowerCase() === 'izmir' || city.toLowerCase() === 'i̇zmir') return 'Izmir';
+        if (city.toLowerCase() === 'zurich' || city.toLowerCase() === 'zürich') return 'Zurich';
+        if (city.toLowerCase() === 'geneva' || city.toLowerCase() === 'genève') return 'Geneva';
+        if (city.toLowerCase() === 'lefkoşa' || city.toLowerCase() === 'nicosia') return 'Nicosia';
+        if (city.toLowerCase() === 'girne' || city.toLowerCase() === 'kyrenia') return 'Kyrenia';
+        if (city.toLowerCase() === 'gazimağusa' || city.toLowerCase() === 'famagusta') return 'Famagusta';
+        return city;
+      }
+    }
+    
+    return null;
+  };
+
+  // Fetch hourly rental prices with minimum 5 second loading animation
   useEffect(() => {
     const fetchHourlyPrices = async () => {
-      if (!isHourlyBooking || !urlCity) return;
+      // For hourly booking, use pickup address to extract city
+      const pickupAddress = urlPickup || urlCity;
+      if (!isHourlyBooking || !pickupAddress) return;
+      
+      const detectedCity = extractCityFromAddress(pickupAddress);
       
       setIsPricesLoading(true);
       const startTime = Date.now();
       const minLoadingTime = 5000; // 5 seconds minimum
       
       try {
+        // First get all available cities to match
+        const { data: allPrices, error: allError } = await supabase
+          .from("hourly_rental_prices")
+          .select("city")
+          .eq("is_active", true);
+        
+        if (allError) throw allError;
+        
+        const availableCities = [...new Set(allPrices?.map(p => p.city) || [])];
+        
+        // Find matching city from address
+        let matchedCity = detectedCity;
+        if (!matchedCity) {
+          // Try fuzzy matching
+          const addressLower = pickupAddress.toLowerCase();
+          matchedCity = availableCities.find(city => 
+            addressLower.includes(city.toLowerCase())
+          ) || null;
+        }
+        
+        if (!matchedCity) {
+          console.warn("⚠️ No matching city found for hourly prices:", pickupAddress);
+          setHourlyPrices([]);
+          return;
+        }
+        
+        console.log(`🏙️ Matched city for hourly prices: ${matchedCity}`);
+        
         // Build query for hourly prices with seasonal support
-        let query = supabase
+        const { data, error } = await supabase
           .from("hourly_rental_prices")
           .select("*, valid_from, valid_to")
-          .eq("city", urlCity)
+          .eq("city", matchedCity)
           .eq("is_active", true);
-
-        const { data, error } = await query;
 
         if (error) throw error;
         
@@ -594,7 +657,7 @@ const BookingPage = () => {
         
         setHourlyPrices(uniquePrices || []);
         
-        // Wait for remaining time to complete 8 seconds
+        // Wait for remaining time to complete 5 seconds
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
         
@@ -609,7 +672,7 @@ const BookingPage = () => {
     };
 
     fetchHourlyPrices();
-  }, [isHourlyBooking, urlCity, urlDate]);
+  }, [isHourlyBooking, urlPickup, urlCity, urlDate]);
 
   // Get price for a specific vehicle (transfer)
   const getPriceForVehicle = (vType: string) => {
