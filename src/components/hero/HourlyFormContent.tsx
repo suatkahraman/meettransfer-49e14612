@@ -186,7 +186,7 @@ export const HourlyFormContent = memo(({
           <GooglePlacesAutocomplete 
             onPlaceSelected={handleCityChange} 
             placeholder={getPickupPlaceholder()} 
-            className="bg-transparent border-0 p-0 h-auto text-sm font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="bg-transparent border-0 p-0 h-auto text-base font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={hourlyCity}
           />
         </div>
