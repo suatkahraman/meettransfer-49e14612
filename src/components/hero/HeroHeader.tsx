@@ -17,8 +17,8 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   
   return (
     <div className="mb-3 md:mb-5">
-      {/* Compact Header Row - Logo, Title, Badges all in one line on mobile */}
-      <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+      {/* Centered Header Row - Logo, Title, Rating */}
+      <div className="flex flex-col items-center text-center gap-2 mb-3 md:mb-4">
         {/* CLS fix: Explicit width/height to reserve space */}
         <img 
           src={meetTransferLogo} 
@@ -28,27 +28,24 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
           loading="eager"
           decoding="async"
           onError={(e) => {
-            // Never block/blank the hero if the logo fails to load
             e.currentTarget.style.display = "none";
           }}
-          className="h-8 w-8 md:h-12 md:w-12 rounded-lg object-cover shadow-lg ring-1 ring-primary/30 flex-shrink-0"
+          className="h-12 w-12 md:h-14 md:w-14 rounded-xl object-cover shadow-lg ring-1 ring-primary/30"
         />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="text-xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight whitespace-nowrap" role="heading" aria-level={1}>
-              <span className="text-primary">Meet</span> Transfer
-            </div>
-            {/* Rating badge - simple and clean */}
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-sm font-medium">{CACHED_RATING}</span>
-            </div>
+        <div className="flex items-center gap-2">
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight" role="heading" aria-level={1}>
+            <span className="text-primary">Meet</span> Transfer
+          </div>
+          {/* Rating badge */}
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+            <span className="text-sm font-medium">{CACHED_RATING}</span>
           </div>
         </div>
       </div>
       
-      {/* Trust Badges Row - Simplified red/white */}
-      <div className="flex items-center gap-2 flex-wrap">
+      {/* Trust Badges Row - Centered */}
+      <div className="flex items-center justify-center gap-2 flex-wrap">
         <div className="flex items-center gap-1 bg-primary/10 rounded-full px-2.5 py-1">
           <Check className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs md:text-sm font-medium text-primary">{t("fixedPrice")}</span>
