@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Menu, X, MapPin, Car, Phone, FileText, Info } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Menu, X, MapPin, Car, Phone, FileText, Info, LogIn, LogOut, User } from "lucide-react";
 import LanguageSelector from "./LanguageSelector";
 import meetTransferLogo from "@/assets/meet-transfer-logo-new.png";
 
 const WebsiteHeader = () => {
   const { t, getLocalizedPath } = useLanguage();
+  const { user, signOut } = useAuth();
+  const { role: userRole } = useUserRole();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -17,6 +22,18 @@ const WebsiteHeader = () => {
     { path: "/terms", label: t("terms") || "Terms", icon: FileText },
     { path: "/contact", label: t("contact") || "Contact", icon: Phone },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    setMobileMenuOpen(false);
+  };
+
+  const getAccountPath = () => {
+    if (userRole === 'admin') return '/admin';
+    if (userRole === 'driver') return '/driver';
+    if (userRole === 'agency') return '/agency';
+    return '/customer';
+  };
 
   return (
     <header className="sticky top-0 w-full z-50 bg-black border-b border-border/20">
@@ -51,11 +68,49 @@ const WebsiteHeader = () => {
           ))}
         </nav>
 
-        {/* Right - Language + Book Now + Mobile Menu */}
+        {/* Right - Language + Auth + Book Now + Mobile Menu */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Language Selector - Desktop */}
           <div className="hidden sm:block">
             <LanguageSelector />
+          </div>
+
+          {/* Auth Buttons - Desktop */}
+          <div className="hidden sm:flex items-center gap-2">
+            {user ? (
+              <>
+                <Link to={getAccountPath()}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <User className="h-4 w-4 mr-1.5" />
+                    {t("myAccount") || "My Account"}
+                  </Button>
+                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <LogOut className="h-4 w-4 mr-1.5" />
+                  {t("logout") || "Logout"}
+                </Button>
+              </>
+            ) : (
+              <Link to="/login">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  <LogIn className="h-4 w-4 mr-1.5" />
+                  {t("login") || "Login"}
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Book Now Button */}
@@ -96,6 +151,38 @@ const WebsiteHeader = () => {
               </Link>
             ))}
             
+            {/* Mobile Auth Buttons */}
+            <div className="pt-3 mt-2 border-t border-white/10">
+              {user ? (
+                <>
+                  <Link
+                    to={getAccountPath()}
+                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="h-5 w-5" />
+                    <span className="font-medium">{t("myAccount") || "My Account"}</span>
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors w-full text-left"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span className="font-medium">{t("logout") || "Logout"}</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <LogIn className="h-5 w-5" />
+                  <span className="font-medium">{t("login") || "Login"}</span>
+                </Link>
+              )}
+            </div>
+
             {/* Mobile Language Selector */}
             <div className="pt-3 mt-2 border-t border-white/10">
               <div className="flex items-center gap-3 px-3 py-2">
