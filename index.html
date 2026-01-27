@@ -63,8 +63,10 @@
     <link rel="dns-prefetch" href="//api.mapbox.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
-    <!-- LCP Image Preload - Build-safe (public folder) -->
-    <!-- No LCP image preload - using CSS gradients only for performance -->
+    <!-- LCP Image Preload - Critical for desktop hero background -->
+    <link rel="preload" as="image" href="/hero-bg-futuristic.webp" fetchpriority="high" media="(min-width: 768px)" />
+    <!-- LCP Vehicle Image Preload - First visible vehicle in selector -->
+    <link rel="preload" as="image" href="/lcp-sedan.webp" fetchpriority="high" />
     
     <!-- Non-blocking font loading using media swap technique -->
     <!-- Critical hero fonts - async load with media swap (not render-blocking) -->

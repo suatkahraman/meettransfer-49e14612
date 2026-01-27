@@ -1,5 +1,7 @@
 import { memo } from "react";
-import heroImage from "@/assets/hero-bg-futuristic.webp";
+
+// Use public folder path for hero image - enables browser preload matching
+const heroImage = "/hero-bg-futuristic.webp";
 
 interface HeroBackgroundProps {
   videosLoaded?: boolean;
