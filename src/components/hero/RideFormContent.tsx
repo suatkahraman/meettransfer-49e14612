@@ -1,5 +1,5 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, Baby, Briefcase, RotateCcw, Tag, Plus, Minus } from "lucide-react";
+import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, RotateCcw, Tag, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LazyFloatingLabelSelect } from "@/components/ui/lazy-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
@@ -335,68 +335,7 @@ export const RideFormContent = memo(({
         </div>
       </div>
 
-      {/* Baby Seat & Luggage - Compact row */}
-      <div className="grid grid-cols-2 gap-3">
-        {setBabySeatCount && (
-          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50 h-14">
-            <div className="flex items-center gap-2">
-              <Baby className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                {t("babySeat") || "Baby Seat"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setBabySeatCount(Math.max(0, babySeatCount - 1))}
-                className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                disabled={babySeatCount <= 0}
-              >
-                -
-              </button>
-              <span className="w-6 text-center text-sm font-medium">{babySeatCount}</span>
-              <button
-                type="button"
-                onClick={() => setBabySeatCount(Math.min(4, babySeatCount + 1))}
-                className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                disabled={babySeatCount >= 4}
-              >
-                +
-              </button>
-            </div>
-          </div>
-        )}
-        
-        {setLuggageCount && (
-          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50 h-14">
-            <div className="flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm font-medium">
-                {t("largeBag") || "Large Bag"}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setLuggageCount(Math.max(0, luggageCount - 1))}
-                className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                disabled={luggageCount <= 0}
-              >
-                -
-              </button>
-              <span className="w-6 text-center text-sm font-medium">{luggageCount}</span>
-              <button
-                type="button"
-                onClick={() => setLuggageCount(Math.min(10, luggageCount + 1))}
-                className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                disabled={luggageCount >= 10}
-              >
-                +
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Baby Seat & Luggage removed from Hero - now only in Book page */}
 
       {/* Submit Button */}
       <div className="relative">
