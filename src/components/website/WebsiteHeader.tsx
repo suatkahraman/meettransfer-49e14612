@@ -55,7 +55,7 @@ const WebsiteHeader = () => {
             width={72}
             height={72}
             loading="eager"
-            className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-cover shadow-xl ring-2 ring-primary/40"
+            className="h-16 w-16 sm:h-20 sm:w-20 object-contain bg-transparent"
           />
         </Link>
 
