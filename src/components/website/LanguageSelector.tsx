@@ -36,9 +36,6 @@ const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
   const handleLanguageChange = (newLang: Language) => {
     if (newLang === language) return;
 
-    // Close mobile menu first (before navigation)
-    onLanguageChange?.();
-
     // Calculate new path before updating anything
     const pathParts = location.pathname.split("/").filter(Boolean);
     const firstPart = pathParts[0]?.toLowerCase();
@@ -59,8 +56,13 @@ const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
     setLanguage(newLang);
 
     // Navigate to new language path - this triggers context re-resolution
-    console.log('[LanguageSelector] Navigating to:', newPath, 'for language:', newLang);
     navigate(newPath || "/", { replace: true });
+    
+    // Close mobile menu AFTER navigation is triggered
+    // Use setTimeout to ensure the navigation completes first
+    setTimeout(() => {
+      onLanguageChange?.();
+    }, 50);
   };
 
   return (
