@@ -46,23 +46,23 @@ const WebsiteHeader = () => {
 
   return (
     <header className="w-full z-50 border-b border-border bg-card/95 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-16 sm:h-[4.5rem]">
-        {/* Left - Logo */}
-        <Link to={getLocalizedPath("/")} className="flex-shrink-0">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-28 sm:h-32">
+        {/* Left - Logo (links to homepage) */}
+        <Link to={getLocalizedPath("/")} className="flex-shrink-0 hover:scale-105 transition-transform">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer" 
-            width={48}
-            height={48}
+            width={72}
+            height={72}
             loading="eager"
-            className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl object-cover shadow-lg ring-2 ring-primary/30"
+            className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-cover shadow-xl ring-2 ring-primary/40"
           />
         </Link>
 
-        {/* Center - Brand Name */}
+        {/* Center - Brand Name (links to homepage) */}
         <div className="absolute left-1/2 -translate-x-1/2">
-          <Link to={getLocalizedPath("/")} className="flex items-center">
-            <h1 className="text-lg sm:text-xl font-bold text-foreground">
+          <Link to={getLocalizedPath("/")} className="flex items-center hover:opacity-80 transition-opacity">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
               <span className="text-primary">Meet</span> Transfer
             </h1>
           </Link>
