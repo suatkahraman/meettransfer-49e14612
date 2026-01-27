@@ -214,41 +214,41 @@ export const RideFormContent = memo(({
       
       <div className="grid grid-cols-2 gap-3">
         <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700",
           shakeFields.date && "animate-shake",
           errors.date && "ring-2 ring-destructive/30"
         )}>
-          <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
+          <label className="block text-sm font-medium text-foreground/60 mb-1">
             {t("pickupDate") || "Pickup date"}
           </label>
           <div className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
+            <CalendarIcon className="h-5 w-5 text-foreground/50 flex-shrink-0" />
             <FloatingLabelDatePicker 
               label="" 
               date={date} 
               onSelect={handleDateChange} 
               disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
               dateFormat="EEE, dd MMM"
-              triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold hover:bg-transparent focus:ring-0 shadow-none justify-start"
+              triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
             />
           </div>
         </div>
         <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700",
           shakeFields.time && "animate-shake",
           errors.time && "ring-2 ring-destructive/30"
         )}>
-          <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
+          <label className="block text-sm font-medium text-foreground/60 mb-1">
             {t("pickupTime") || "Pickup time"}
           </label>
           <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
+            <Clock className="h-5 w-5 text-foreground/50 flex-shrink-0" />
             <LazyFloatingLabelSelect 
               label="" 
               value={time} 
               onValueChange={handleTimeChange} 
               options={memoizedTimeOptions} 
-              triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold hover:bg-transparent focus:ring-0 shadow-none justify-start min-w-0"
+              triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start min-w-0"
             />
           </div>
         </div>
@@ -263,7 +263,7 @@ export const RideFormContent = memo(({
             "w-full py-4 rounded-xl transition-all text-base font-bold tracking-wide uppercase",
             hasReturnTrip 
               ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 ring-2 ring-green-500" 
-              : "bg-zinc-200 dark:bg-zinc-800 text-foreground hover:bg-zinc-300 dark:hover:bg-zinc-700"
+              : "bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700"
           )}
         >
           {hasReturnTrip ? (
@@ -280,34 +280,34 @@ export const RideFormContent = memo(({
       {/* Return Date/Time - Show when return trip is enabled */}
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
-            <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
+          <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 pb-2">
+            <label className="block text-sm font-medium text-foreground/60 mb-1">
               {t("returnDate") || "Return date"}
             </label>
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
+              <CalendarIcon className="h-5 w-5 text-foreground/50 flex-shrink-0" />
               <FloatingLabelDatePicker 
                 label="" 
                 date={returnDate} 
                 onSelect={setReturnDate} 
                 disabledDates={(d) => d < (date || new Date())} 
                 dateFormat="EEE, dd MMM"
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold hover:bg-transparent focus:ring-0 shadow-none justify-start"
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
               />
             </div>
           </div>
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
-            <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
+          <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 pb-2">
+            <label className="block text-sm font-medium text-foreground/60 mb-1">
               {t("returnTime") || "Return time"}
             </label>
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
+              <Clock className="h-5 w-5 text-foreground/50 flex-shrink-0" />
               <LazyFloatingLabelSelect 
                 label="" 
                 value={returnTime || ""} 
                 onValueChange={setReturnTime} 
                 options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold hover:bg-transparent focus:ring-0 shadow-none justify-start min-w-0"
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start min-w-0"
               />
             </div>
           </div>
@@ -315,10 +315,10 @@ export const RideFormContent = memo(({
       )}
 
       {/* Passengers - Floating label with dark square +/- buttons like reference */}
-      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
+      <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 pb-2">
         <div className="flex items-center gap-2 mb-2">
-          <Users className="h-5 w-5 text-muted-foreground/60" />
-          <span className="text-sm font-medium text-muted-foreground/70">
+          <Users className="h-5 w-5 text-foreground/50" />
+          <span className="text-sm font-medium text-foreground/60">
             {t("passengers") || "Passengers"}
           </span>
         </div>
