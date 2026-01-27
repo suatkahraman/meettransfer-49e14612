@@ -306,7 +306,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     
     // Return trip params
     if (hasReturnTrip && returnDate) {
-      params.set("hasReturnTrip", "true");
+      params.set("hasReturn", "true");
       params.set("returnDate", format(returnDate, "yyyy-MM-dd"));
       if (returnTime) params.set("returnTime", returnTime);
     }
