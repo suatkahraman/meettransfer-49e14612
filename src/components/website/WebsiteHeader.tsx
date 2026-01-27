@@ -45,20 +45,20 @@ const WebsiteHeader = () => {
   };
 
   return (
-    <header className="w-full z-50 border-b border-border bg-card/95 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-20 sm:h-24 relative">
+    <header className="w-full z-50 border-b border-border/20 bg-black">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-14 sm:h-16 relative">
         {/* Left - Logo + Brand Name */}
-        <Link to={getLocalizedPath("/")} className="flex items-center gap-3 hover:opacity-90 transition-opacity z-10">
+        <Link to={getLocalizedPath("/")} className="flex items-center gap-2.5 hover:opacity-90 transition-opacity z-10">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer" 
-            width={96}
-            height={96}
+            width={56}
+            height={56}
             loading="eager"
-            className="h-16 w-16 sm:h-20 sm:w-20 object-contain"
+            className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
           />
-          <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold text-foreground whitespace-nowrap">
-            <span className="text-primary">Meet</span> Transfer
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white whitespace-nowrap tracking-tight">
+            Meet Transfer
           </h1>
         </Link>
 
@@ -76,7 +76,7 @@ const WebsiteHeader = () => {
                 className={`text-sm font-medium transition-colors ${
                   isActive(link.path) 
                     ? "text-primary font-semibold" 
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-white/70 hover:text-white"
                 }`}
               >
                 {link.label}
@@ -123,11 +123,11 @@ const WebsiteHeader = () => {
           {/* Mobile Menu - Hamburger */}
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="relative w-10 h-10 p-0 hover:bg-primary/10 rounded-lg">
+              <Button variant="ghost" size="icon" className="relative w-10 h-10 p-0 hover:bg-white/10 rounded-lg">
                 <span className="sr-only">Toggle menu</span>
-                <span className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${menuOpen ? "rotate-45" : "-translate-y-1.5"}`} />
-                <span className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${menuOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"}`} />
-                <span className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${menuOpen ? "-rotate-45" : "translate-y-1.5"}`} />
+                <span className={`absolute h-0.5 w-5 bg-white rounded-full transition-all duration-400 ease-out ${menuOpen ? "rotate-45" : "-translate-y-1.5"}`} />
+                <span className={`absolute h-0.5 w-5 bg-white rounded-full transition-all duration-400 ease-out ${menuOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"}`} />
+                <span className={`absolute h-0.5 w-5 bg-white rounded-full transition-all duration-400 ease-out ${menuOpen ? "-rotate-45" : "translate-y-1.5"}`} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64 bg-card/98 backdrop-blur-lg border border-border shadow-xl z-50 animate-in slide-in-from-top-3 fade-in-0 duration-300">
