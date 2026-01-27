@@ -190,24 +190,16 @@ const WebsiteHeader = () => {
                   </button>
                 </>
               ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <LogIn className="h-5 w-5" />
-                    <span className="font-medium">{t("login") || "Login"}</span>
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    <span className="font-medium">{t("signUp") || "Sign Up"}</span>
-                  </Link>
-                </>
+              <>
+                <Link
+                  to="/login"
+                  className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <LogIn className="h-5 w-5" />
+                  <span className="font-medium">{t("login") || "Login"}</span>
+                </Link>
+              </>
               )}
             </div>
 
