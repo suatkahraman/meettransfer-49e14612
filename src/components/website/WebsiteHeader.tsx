@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Menu, X, MapPin, Car, Phone, FileText, Info, LogIn, LogOut, User } from "lucide-react";
+import { Menu, X, MapPin, Car, Phone, FileText, Info, LogIn, LogOut, User, UserPlus, Building2 } from "lucide-react";
 import LanguageSelector from "./LanguageSelector";
 import meetTransferLogo from "@/assets/meet-transfer-logo-new.png";
 
@@ -111,29 +111,30 @@ const WebsiteHeader = () => {
                 </Button>
               </>
             ) : (
-              <Link to="/login">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-white/80 hover:text-white hover:bg-white/10"
-                >
-                  <LogIn className="h-4 w-4 mr-1.5" />
-                  {t("login") || "Login"}
-                </Button>
-              </Link>
+              <>
+                <Link to="/login">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <LogIn className="h-4 w-4 mr-1.5" />
+                    {t("login") || "Login"}
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button 
+                    size="sm" 
+                    variant="accent"
+                    className="font-bold px-3 sm:px-6"
+                  >
+                    <UserPlus className="h-4 w-4 mr-1.5" />
+                    {t("signUp") || "Sign Up"}
+                  </Button>
+                </Link>
+              </>
             )}
           </div>
-
-          {/* Book Now Button */}
-          <Link to={getLocalizedPath("/")}>
-            <Button 
-              size="sm" 
-              variant="accent"
-              className="font-bold px-3 sm:px-6"
-            >
-              {t("bookNow") || "Book Now"}
-            </Button>
-          </Link>
 
           {/* Mobile Menu Button */}
           <Button
@@ -184,15 +185,37 @@ const WebsiteHeader = () => {
                   </button>
                 </>
               ) : (
-                <Link
-                  to="/login"
-                  className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <LogIn className="h-5 w-5" />
-                  <span className="font-medium">{t("login") || "Login"}</span>
-                </Link>
+                <>
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn className="h-5 w-5" />
+                    <span className="font-medium">{t("login") || "Login"}</span>
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <UserPlus className="h-5 w-5" />
+                    <span className="font-medium">{t("signUp") || "Sign Up"}</span>
+                  </Link>
+                </>
               )}
+            </div>
+
+            {/* Agency Registration Link */}
+            <div className="pt-3 mt-2 border-t border-white/10">
+              <Link
+                to="/signup/agency"
+                className="flex items-center gap-3 text-accent hover:text-accent/80 hover:bg-accent/10 py-3 px-3 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Building2 className="h-5 w-5" />
+                <span className="font-medium">{t("agencyRegistration") || "Agency Registration"}</span>
+              </Link>
             </div>
 
             {/* Mobile Language Selector */}
