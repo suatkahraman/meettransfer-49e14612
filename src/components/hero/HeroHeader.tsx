@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Shield, Zap, Star, Check } from "lucide-react";
+import { Shield, Zap, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // Logo - inline for LCP optimization
@@ -8,9 +8,6 @@ import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
 interface HeroHeaderProps {
   language: string;
 }
-
-// Hardcoded rating to avoid API call blocking LCP - update periodically
-const CACHED_RATING = 4.7;
 
 export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   const { t } = useLanguage();
@@ -34,23 +31,19 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
           className="h-8 w-8 md:h-12 md:w-12 rounded-lg object-cover shadow-lg ring-1 ring-primary/30 flex-shrink-0"
         />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <div className="text-lg md:text-2xl lg:text-3xl font-bold text-foreground leading-tight whitespace-nowrap" role="heading" aria-level={1}>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="text-xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight whitespace-nowrap" role="heading" aria-level={1}>
               <span className="text-primary">Meet</span> Transfer
             </div>
-            {/* Inline badges on mobile */}
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2.5 py-1 text-[13px] md:text-sm font-medium">
-                <Shield className="h-5 w-5 md:h-6 md:w-6" />
-                <span className="hidden xs:inline">{t("safe")}</span>
+            {/* Compact badges */}
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs md:text-sm font-medium">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("safe")}</span>
               </span>
-              <span className="inline-flex items-center gap-1 bg-accent/10 text-accent rounded-full px-2.5 py-1 text-[13px] md:text-sm font-medium">
-                <Zap className="h-5 w-5 md:h-6 md:w-6" />
-                <span className="hidden xs:inline">{t("fast")}</span>
-              </span>
-              <span className="inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-600 rounded-full px-2.5 py-1 text-[13px] md:text-sm font-medium">
-                <Star className="h-5 w-5 md:h-6 md:w-6 fill-current" />
-                {CACHED_RATING}
+              <span className="inline-flex items-center gap-1 bg-accent/10 text-accent rounded-full px-2 py-0.5 text-xs md:text-sm font-medium">
+                <Zap className="h-4 w-4" />
+                <span className="hidden sm:inline">{t("fast")}</span>
               </span>
             </div>
           </div>
