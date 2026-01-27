@@ -194,6 +194,17 @@ const BursaDayTourGuide = () => {
                       </div>
                     </div>
                     <p className="text-lg font-bold text-primary mt-4">{t("blogBursaPrice")}</p>
+                    
+                    {/* Internal Link to Service Page */}
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <Link 
+                        to={getLocalizedPath("/istanbul-to-bursa-transfer")} 
+                        className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
+                      >
+                        <Car className="h-4 w-4" />
+                        Book Istanbul to Bursa Private Transfer →
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -430,6 +441,20 @@ const BursaDayTourGuide = () => {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Service Page Link */}
+        <section className="mb-12 p-6 bg-card border border-border rounded-xl">
+          <h2 className="text-xl font-bold mb-3">Ready to Book Your Istanbul to Bursa Transfer?</h2>
+          <p className="text-muted-foreground mb-4">
+            Our professional team provides comfortable private transfers and day tours from Istanbul to Bursa via the scenic Osmangazi Bridge route.
+          </p>
+          <Link 
+            to={getLocalizedPath("/istanbul-to-bursa-transfer")} 
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+          >
+            Book Istanbul to Bursa Transfer Now →
+          </Link>
         </section>
 
         {/* CTA Section */}
