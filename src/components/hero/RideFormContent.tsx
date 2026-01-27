@@ -199,7 +199,7 @@ export const RideFormContent = memo(({
       
       <div className="grid grid-cols-2 gap-3">
         <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
           shakeFields.date && "animate-shake",
           errors.date && "ring-2 ring-destructive/30"
         )}>
@@ -220,7 +220,7 @@ export const RideFormContent = memo(({
           </div>
         </div>
         <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
           shakeFields.time && "animate-shake",
           errors.time && "ring-2 ring-destructive/30"
         )}>
@@ -244,7 +244,7 @@ export const RideFormContent = memo(({
           type="button"
           onClick={() => setHasReturnTrip(!hasReturnTrip)}
           className={cn(
-            "w-full h-[60px] rounded-xl transition-all text-sm font-bold tracking-wide uppercase flex items-center justify-center",
+            "w-full h-[75px] rounded-xl transition-all text-sm font-bold tracking-wide uppercase flex items-center justify-center",
             hasReturnTrip 
               ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 ring-2 ring-green-500" 
               : "bg-zinc-200 dark:bg-zinc-800 text-foreground hover:bg-zinc-300 dark:hover:bg-zinc-700"
@@ -264,7 +264,7 @@ export const RideFormContent = memo(({
       {/* Return Date/Time - Show when return trip is enabled */}
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center">
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center">
             <label className="block text-xs font-medium text-foreground/70 mb-0.5">
               {t("returnDate") || "Return date"}
             </label>
@@ -281,7 +281,7 @@ export const RideFormContent = memo(({
               />
             </div>
           </div>
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center">
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center">
             <label className="block text-xs font-medium text-foreground/70 mb-0.5">
               {t("returnTime") || "Return time"}
             </label>
@@ -298,7 +298,7 @@ export const RideFormContent = memo(({
       )}
 
       {/* Passengers - Compact like other fields */}
-      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex items-center justify-between">
+      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-foreground" />
           <div className="flex flex-col">
@@ -334,7 +334,7 @@ export const RideFormContent = memo(({
       <Button 
         onClick={validateAndContinue} 
         disabled={submitting} 
-        className="w-full h-[60px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
+        className="w-full h-[75px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
       >
         {submitting ? (
           <Loader2 className="h-5 w-5 animate-spin" />
