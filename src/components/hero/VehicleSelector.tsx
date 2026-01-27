@@ -180,6 +180,9 @@ const VehicleCard = memo(({
               isHovered && "scale-110"
             )}
             loading={index === 0 ? "eager" : "lazy"}
+            // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+            fetchpriority={index === 0 ? "high" : "auto"}
+            decoding={index === 0 ? "sync" : "async"}
             draggable={false}
           />
           

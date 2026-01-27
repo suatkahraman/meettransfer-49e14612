@@ -121,19 +121,8 @@ const SEOHead = ({
     // Update title
     document.title = title;
 
-    // Add preload for LCP image on homepage (mobile hero image)
-    if (canonicalPath === '/' || location.pathname === '/') {
-      let preloadLink = document.querySelector('link[rel="preload"][as="image"][data-lcp="true"]');
-      if (!preloadLink) {
-        preloadLink = document.createElement('link');
-        preloadLink.setAttribute('rel', 'preload');
-        preloadLink.setAttribute('as', 'image');
-        preloadLink.setAttribute('href', '/src/assets/hero-mercedes-vito.jpg');
-        preloadLink.setAttribute('fetchpriority', 'high');
-        preloadLink.setAttribute('data-lcp', 'true');
-        document.head.insertBefore(preloadLink, document.head.firstChild);
-      }
-    }
+    // LCP image preload is now handled in index.html for faster loading
+    // No dynamic injection needed - preload tags are in <head> for immediate browser discovery
 
     // Helper to update or create meta tag
     const updateMeta = (name: string, content: string, property = false) => {
