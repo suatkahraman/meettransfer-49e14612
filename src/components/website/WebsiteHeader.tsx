@@ -100,15 +100,15 @@ const WebsiteHeader = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 border-b border-border pt-[env(safe-area-inset-top)] transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 border-b border-border pt-[env(safe-area-inset-top)] transition-all duration-500 ease-out ${
         isScrolled 
-          ? "bg-background/98 backdrop-blur-md shadow-lg shadow-primary/10" 
+          ? "bg-background/98 backdrop-blur-md shadow-xl shadow-primary/15" 
           : "bg-card/95 backdrop-blur-sm"
       }`}
     >
       <div 
-        className={`max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between transition-all duration-300 ${
-          isScrolled ? "h-10 sm:h-11" : "h-11 sm:h-12"
+        className={`max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between transition-all duration-500 ease-out ${
+          isScrolled ? "h-14 sm:h-16" : "h-16 sm:h-[4.5rem]"
         }`}
       >
         {/* Left - Language Selector */}
@@ -278,31 +278,31 @@ const WebsiteHeader = () => {
             )}
           </div>
 
-          {/* Mobile Menu - Dropdown - Compact */}
+          {/* Mobile Menu - Optimized Hamburger */}
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="relative w-8 h-8 p-0">
+              <Button variant="ghost" size="icon" className="relative w-10 h-10 p-0 hover:bg-primary/10 rounded-lg">
                 <span className="sr-only">Toggle menu</span>
                 <span 
-                  className={`absolute h-0.5 w-4 bg-foreground transition-all duration-300 ease-in-out ${
-                    menuOpen ? "rotate-45" : "-translate-y-1"
+                  className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${
+                    menuOpen ? "rotate-45" : "-translate-y-1.5"
                   }`}
                 />
                 <span 
-                  className={`absolute h-0.5 w-4 bg-foreground transition-all duration-300 ease-in-out ${
-                    menuOpen ? "opacity-0" : "opacity-100"
+                  className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${
+                    menuOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"
                   }`}
                 />
                 <span 
-                  className={`absolute h-0.5 w-4 bg-foreground transition-all duration-300 ease-in-out ${
-                    menuOpen ? "-rotate-45" : "translate-y-1"
+                  className={`absolute h-0.5 w-5 bg-foreground rounded-full transition-all duration-400 ease-out ${
+                    menuOpen ? "-rotate-45" : "translate-y-1.5"
                   }`}
                 />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent 
               align="end" 
-              className="w-56 bg-card border border-border z-50 animate-in slide-in-from-top-2 fade-in-0 duration-200"
+              className="w-64 bg-card/98 backdrop-blur-lg border border-border shadow-xl z-50 animate-in slide-in-from-top-3 fade-in-0 duration-300"
             >
               {navLinks.map((link) => {
                 const active = isActive(link.path);
