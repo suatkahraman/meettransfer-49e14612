@@ -15,7 +15,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import meetTransferLogo from "@/assets/meet-transfer-logo-v2.png";
+import meetTransferLogo from "@/assets/meet-transfer-logo-v3.png";
 
 const WebsiteHeader = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -46,27 +46,21 @@ const WebsiteHeader = () => {
 
   return (
     <header className="w-full z-50 border-b border-border bg-card/95 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-28 sm:h-32 relative">
-        {/* Left - Logo */}
-        <Link to={getLocalizedPath("/")} className="flex-shrink-0 hover:opacity-90 transition-opacity z-10">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-20 sm:h-24 relative">
+        {/* Left - Logo + Brand Name */}
+        <Link to={getLocalizedPath("/")} className="flex items-center gap-3 hover:opacity-90 transition-opacity z-10">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer" 
-            width={64}
-            height={64}
+            width={96}
+            height={96}
             loading="eager"
-            className="h-14 w-14 sm:h-16 sm:w-16 object-contain"
+            className="h-16 w-16 sm:h-20 sm:w-20 object-contain"
           />
+          <h1 className="text-lg sm:text-xl md:text-2xl font-extrabold text-foreground whitespace-nowrap">
+            <span className="text-primary">Meet</span> Transfer
+          </h1>
         </Link>
-
-        {/* Center - Brand Name (visible on all screens) */}
-        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
-          <Link to={getLocalizedPath("/")} className="flex items-center hover:opacity-80 transition-opacity">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground whitespace-nowrap text-center">
-              <span className="text-primary">Meet</span> Transfer
-            </h1>
-          </Link>
-        </div>
 
 
         {/* Right - Language & Menu */}
