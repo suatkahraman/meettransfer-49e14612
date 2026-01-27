@@ -39,16 +39,10 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   const discount = translations.discount[lang] || translations.discount.EN;
 
   return (
-    <div className="text-center md:text-left">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-foreground mb-2 leading-tight tracking-tight">
+    <div className="text-left">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] font-black text-foreground leading-tight tracking-tight italic">
         {title}
       </h1>
-      <div className="flex items-center justify-center md:justify-start gap-2">
-        <span className="text-xl">🇹🇷</span>
-        <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
-          {discount}
-        </span>
-      </div>
     </div>
   );
 });
