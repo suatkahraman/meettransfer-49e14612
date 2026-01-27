@@ -91,13 +91,15 @@ const WebsiteHeader = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 h-12 sm:h-16 flex items-center justify-between">
         {/* Left - Logo */}
-        <Link to={getLocalizedPath("/")} className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <Link to={getLocalizedPath("/")} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer Logo" 
-            className="h-7 w-7 sm:h-9 sm:w-9 rounded-full object-cover"
+            className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl object-cover shadow-md ring-1 ring-primary/20"
           />
-          <span className="font-serif text-base sm:text-lg font-bold hidden sm:block">Meet Transfer</span>
+          <span className="font-serif text-lg sm:text-xl font-bold hidden sm:block">
+            <span className="text-primary">Meet</span> Transfer
+          </span>
         </Link>
 
         {/* Center - Desktop Navigation */}
