@@ -1,6 +1,12 @@
 import { memo } from "react";
-import { Shield, Zap, Check } from "lucide-react";
+import { Shield, Zap, Check, Star } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Logo - inline for LCP optimization
 import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
@@ -8,6 +14,9 @@ import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
 interface HeroHeaderProps {
   language: string;
 }
+
+// Hardcoded rating to avoid API call blocking LCP
+const CACHED_RATING = 4.7;
 
 export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   const { t } = useLanguage();
@@ -35,17 +44,28 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
             <div className="text-xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight whitespace-nowrap" role="heading" aria-level={1}>
               <span className="text-primary">Meet</span> Transfer
             </div>
-            {/* Compact badges */}
-            <div className="flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs md:text-sm font-medium">
-                <Shield className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("safe")}</span>
-              </span>
-              <span className="inline-flex items-center gap-1 bg-accent/10 text-accent rounded-full px-2 py-0.5 text-xs md:text-sm font-medium">
-                <Zap className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("fast")}</span>
-              </span>
-            </div>
+            {/* Compact badges with rating on hover */}
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5 cursor-default">
+                    <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs md:text-sm font-medium">
+                      <Shield className="h-4 w-4" />
+                      <span className="hidden sm:inline">{t("safe")}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 bg-accent/10 text-accent rounded-full px-2 py-0.5 text-xs md:text-sm font-medium">
+                      <Zap className="h-4 w-4" />
+                      <span className="hidden sm:inline">{t("fast")}</span>
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="flex items-center gap-1.5 bg-card border-border">
+                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                  <span className="font-semibold text-foreground">{CACHED_RATING}</span>
+                  <span className="text-muted-foreground text-xs">Google</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </div>
