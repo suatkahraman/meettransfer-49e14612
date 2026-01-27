@@ -1,5 +1,5 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, RotateCcw, Tag, Plus, Minus } from "lucide-react";
+import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, RotateCcw, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LazyFloatingLabelSelect } from "@/components/ui/lazy-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
@@ -8,7 +8,6 @@ import { VehiclePrice } from "./types";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Switch } from "@/components/ui/switch";
 import { usePromo } from "@/contexts/PromoContext";
 import { VehicleRegion } from "@/lib/vehicleRegions";
 import { format } from "date-fns";
@@ -213,125 +212,137 @@ export const RideFormContent = memo(({
         />
       </div>
       
-      {/* Date and Time - Same size as location fields */}
+      {/* Date and Time - Floating label style like reference */}
       <div className="grid grid-cols-2 gap-3">
-        <div className={cn(shakeFields.date && "animate-shake")}>
-          <FloatingLabelDatePicker 
-            label={t("date") || "Date"} 
-            date={date} 
-            onSelect={handleDateChange} 
-            icon={<CalendarIcon className="h-6 w-6 md:h-5 md:w-5" />} 
-            disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-            dateFormat="dd MMM yyyy"
-            triggerClassName={cn(
-              "h-16 md:h-14 min-h-[64px] md:min-h-[56px] text-lg md:text-base bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors rounded-xl",
-              errors.date && "border-destructive ring-2 ring-destructive/20"
-            )}
-          />
+        <div className={cn(
+          "bg-muted/60 rounded-xl p-3 pb-2 transition-all hover:bg-muted/80",
+          shakeFields.date && "animate-shake",
+          errors.date && "ring-2 ring-destructive/30"
+        )}>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            {t("pickupDate") || "Pickup date"}
+          </label>
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <FloatingLabelDatePicker 
+              label="" 
+              date={date} 
+              onSelect={handleDateChange} 
+              disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+              dateFormat="EEE, dd MMM"
+              triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold hover:bg-transparent focus:ring-0 shadow-none justify-start"
+            />
+          </div>
         </div>
-        <div className={cn(shakeFields.time && "animate-shake")}>
-          <LazyFloatingLabelSelect 
-            label={t("time") || "Time"} 
-            value={time} 
-            onValueChange={handleTimeChange} 
-            options={memoizedTimeOptions} 
-            icon={<Clock className="h-6 w-6 md:h-5 md:w-5" />} 
-            triggerClassName={cn(
-              "h-16 md:h-14 min-h-[64px] md:min-h-[56px] text-lg md:text-base bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors rounded-xl",
-              errors.time && "border-destructive ring-2 ring-destructive/20"
-            )}
-          />
+        <div className={cn(
+          "bg-muted/60 rounded-xl p-3 pb-2 transition-all hover:bg-muted/80",
+          shakeFields.time && "animate-shake",
+          errors.time && "ring-2 ring-destructive/30"
+        )}>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            {t("pickupTime") || "Pickup time"}
+          </label>
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <LazyFloatingLabelSelect 
+              label="" 
+              value={time} 
+              onValueChange={handleTimeChange} 
+              options={memoizedTimeOptions} 
+              triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold hover:bg-transparent focus:ring-0 shadow-none justify-start min-w-0"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Return Trip Button - Same size as other fields */}
+      {/* Return Trip Button - Uppercase centered like reference */}
       {setHasReturnTrip && !isDiscountDisabledRegion && (
         <button
           type="button"
           onClick={() => setHasReturnTrip(!hasReturnTrip)}
           className={cn(
-            "w-full h-16 md:h-14 min-h-[64px] md:min-h-[56px] flex items-center justify-between px-4 rounded-xl border-2 transition-all text-lg md:text-base",
+            "w-full py-4 rounded-xl transition-all text-base font-bold tracking-wide uppercase",
             hasReturnTrip 
-              ? "bg-green-50 dark:bg-green-950/30 border-green-500 text-green-700 dark:text-green-400" 
-              : "bg-card border-border hover:border-primary/50"
+              ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 ring-2 ring-green-500" 
+              : "bg-muted/60 text-foreground hover:bg-muted/80"
           )}
         >
-          <div className="flex items-center gap-3">
-            <RotateCcw className={cn(
-              "h-6 w-6 md:h-5 md:w-5",
-              hasReturnTrip ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
-            )} />
-            <span className="font-medium">
-              {t("addReturn") || "Add Return"}
+          {hasReturnTrip ? (
+            <span className="flex items-center justify-center gap-2">
+              <RotateCcw className="h-5 w-5" />
+              {t("returnAdded") || "RETURN ADDED"} • {discountPercent}% OFF
             </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={cn(
-              "inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-semibold",
-              hasReturnTrip 
-                ? "bg-green-500 text-white" 
-                : "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"
-            )}>
-              <Tag className="h-3 w-3" />
-              {discountPercent}% OFF
-            </span>
-            <Switch
-              checked={hasReturnTrip}
-              onCheckedChange={setHasReturnTrip}
-            />
-          </div>
+          ) : (
+            <span>{t("addReturn")?.toUpperCase() || "ADD RETURN"}</span>
+          )}
         </button>
       )}
 
       {/* Return Date/Time - Show when return trip is enabled */}
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
-          <FloatingLabelDatePicker 
-            label={t("returnDate") || "Return Date"} 
-            date={returnDate} 
-            onSelect={setReturnDate} 
-            icon={<CalendarIcon className="h-6 w-6 md:h-5 md:w-5" />} 
-            disabledDates={(d) => d < (date || new Date())} 
-            dateFormat="dd MMM yyyy"
-            triggerClassName="h-16 md:h-14 min-h-[64px] md:min-h-[56px] text-lg md:text-base rounded-xl"
-          />
-          <LazyFloatingLabelSelect 
-            label={t("returnTime") || "Return Time"} 
-            value={returnTime || ""} 
-            onValueChange={setReturnTime} 
-            options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
-            icon={<Clock className="h-6 w-6 md:h-5 md:w-5" />} 
-            triggerClassName="h-16 md:h-14 min-h-[64px] md:min-h-[56px] text-lg md:text-base rounded-xl"
-          />
+          <div className="bg-muted/60 rounded-xl p-3 pb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
+              {t("returnDate") || "Return date"}
+            </label>
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <FloatingLabelDatePicker 
+                label="" 
+                date={returnDate} 
+                onSelect={setReturnDate} 
+                disabledDates={(d) => d < (date || new Date())} 
+                dateFormat="EEE, dd MMM"
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold hover:bg-transparent focus:ring-0 shadow-none justify-start"
+              />
+            </div>
+          </div>
+          <div className="bg-muted/60 rounded-xl p-3 pb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
+              {t("returnTime") || "Return time"}
+            </label>
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <LazyFloatingLabelSelect 
+                label="" 
+                value={returnTime || ""} 
+                onValueChange={setReturnTime} 
+                options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold hover:bg-transparent focus:ring-0 shadow-none justify-start min-w-0"
+              />
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Passengers - Same size as other fields, with +/- buttons */}
-      <div className="w-full h-16 md:h-14 min-h-[64px] md:min-h-[56px] flex items-center justify-between px-4 rounded-xl border-2 border-border bg-card shadow-sm">
-        <div className="flex items-center gap-3">
-          <Users className="h-6 w-6 md:h-5 md:w-5 text-primary" />
-          <span className="font-medium text-lg md:text-base">
+      {/* Passengers - Floating label with dark square +/- buttons like reference */}
+      <div className="bg-muted/60 rounded-xl p-3 pb-2">
+        <div className="flex items-center gap-2 mb-2">
+          <Users className="h-5 w-5 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">
             {t("passengers") || "Passengers"}
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handlePassengerDecrement}
-            disabled={parseInt(passengers) <= 1}
-            className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-foreground hover:bg-muted-foreground/20 hover:border-primary/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <Minus className="h-5 w-5" />
-          </button>
-          <span className="w-8 text-center text-xl font-bold">{passengers}</span>
-          <button
-            type="button"
-            onClick={handlePassengerIncrement}
-            disabled={parseInt(passengers) >= 18}
-            className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-foreground hover:bg-muted-foreground/20 hover:border-primary/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <Plus className="h-5 w-5" />
-          </button>
+        <div className="flex items-center justify-between">
+          <span className="text-2xl font-bold">{passengers}</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePassengerDecrement}
+              disabled={parseInt(passengers) <= 1}
+              className="w-11 h-11 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-xl hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Minus className="h-5 w-5" strokeWidth={3} />
+            </button>
+            <button
+              type="button"
+              onClick={handlePassengerIncrement}
+              disabled={parseInt(passengers) >= 18}
+              className="w-11 h-11 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-xl hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <Plus className="h-5 w-5" strokeWidth={3} />
+            </button>
+          </div>
         </div>
       </div>
 
