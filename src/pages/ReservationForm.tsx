@@ -2469,7 +2469,7 @@ const ReservationForm = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        className="w-full bg-zinc-100 hover:bg-zinc-200 border-zinc-200"
+                        className="w-full bg-amber-50 hover:bg-amber-100 border-amber-200"
                         onClick={async () => {
                           const { error } = await supabase.auth.signInWithOAuth({
                             provider: 'google',

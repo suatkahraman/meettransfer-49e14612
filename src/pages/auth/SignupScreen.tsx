@@ -289,7 +289,7 @@ const SignupScreen = () => {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 rounded-xl text-base font-medium bg-zinc-100 hover:bg-zinc-200 border-zinc-200"
+              className="w-full h-12 rounded-xl text-base font-medium bg-amber-50 hover:bg-amber-100 border-amber-200"
               onClick={async () => {
                 setIsGoogleLoading(true);
                 setGoogleError(null);
