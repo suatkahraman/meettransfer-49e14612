@@ -213,7 +213,7 @@ export const RideFormContent = memo(({
               date={date} 
               onSelect={handleDateChange} 
               disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-              dateFormat="EEE, dd MMM"
+              dateFormat="EEE, dd MMM yyyy"
               triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
               icon={<span />}
             />
@@ -275,7 +275,7 @@ export const RideFormContent = memo(({
                 date={returnDate} 
                 onSelect={setReturnDate} 
                 disabledDates={(d) => d < (date || new Date())} 
-                dateFormat="EEE, dd MMM"
+                dateFormat="EEE, dd MMM yyyy"
                 triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
                 icon={<span />}
               />

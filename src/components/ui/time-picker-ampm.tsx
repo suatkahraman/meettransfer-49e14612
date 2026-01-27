@@ -76,8 +76,8 @@ export const TimePickerAMPM = React.memo(({
 
   // All 12 hours (1-12) for scrollable list
   const hours = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  // 5 minute options
-  const minutes = [0, 15, 30, 45, 55];
+  // All minute options (every 5 minutes)
+  const minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
   const handleSave = React.useCallback(() => {
     onValueChange(formatTime(tempHour, tempMinute, tempPeriod));
@@ -128,27 +128,29 @@ export const TimePickerAMPM = React.memo(({
               </ScrollArea>
             </div>
 
-            {/* Minutes Column */}
+            {/* Minutes Column - Scrollable */}
             <div className="flex flex-col border-l border-zinc-700">
               <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
                 Dakika
               </div>
-              <div className="flex flex-col p-1 h-[200px] justify-start">
-                {minutes.map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setTempMinute(m)}
-                    className={cn(
-                      "w-12 h-10 rounded-lg text-base font-semibold transition-all",
-                      tempMinute === m
-                        ? "bg-yellow-500 text-black"
-                        : "text-white hover:bg-zinc-700"
-                    )}
-                  >
-                    {m.toString().padStart(2, "0")}
-                  </button>
-                ))}
-              </div>
+              <ScrollArea className="h-[200px]">
+                <div className="flex flex-col p-1">
+                  {minutes.map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setTempMinute(m)}
+                      className={cn(
+                        "w-12 h-10 rounded-lg text-base font-semibold transition-all",
+                        tempMinute === m
+                          ? "bg-yellow-500 text-black"
+                          : "text-white hover:bg-zinc-700"
+                      )}
+                    >
+                      {m.toString().padStart(2, "0")}
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
 
             {/* AM/PM Column */}

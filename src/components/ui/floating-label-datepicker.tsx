@@ -89,7 +89,7 @@ export const FloatingLabelDatePicker = React.forwardRef<
               {icon || <CalendarIcon className="h-5 w-5 md:h-4 md:w-4" />}
             </span>
             <span className={cn("truncate text-base md:text-sm", !hasValue && "text-muted-foreground")}>
-              {hasValue ? format(date, dateFormat) : label}
+              {hasValue ? format(date, dateFormat) : (label || "Select date")}
             </span>
           </Button>
         </PopoverTrigger>
