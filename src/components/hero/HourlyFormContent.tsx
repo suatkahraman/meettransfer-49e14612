@@ -9,6 +9,14 @@ import { VehiclePrice } from "./types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+// Standard duration options
+const DURATION_OPTIONS = [
+  { value: "4", label: "4h" },
+  { value: "6", label: "6h" },
+  { value: "8", label: "8h" },
+  { value: "custom", label: "9+" },
+];
+
 const hourlyDurationOptions = [
   { value: "4", labelKey: "halfDay", defaultLabel: "4 Hours (Half Day)" },
   { value: "6", labelKey: "sixHours", defaultLabel: "6 Hours" },
@@ -79,12 +87,13 @@ export const HourlyFormContent = memo(({
     [t]
   );
   
+  // Use fixed duration options instead of city-dependent ones
   const durationOptions = useMemo(() => 
-    availableDurations.map(d => { 
-      const opt = hourlyDurationOptions.find(o => o.value === d); 
-      return { value: d, label: opt ? (t(opt.labelKey) || opt.defaultLabel) : `${d}h` }; 
+    DURATION_OPTIONS.map(d => {
+      const opt = hourlyDurationOptions.find(o => o.value === d.value);
+      return { value: d.value, label: opt ? (t(opt.labelKey) || d.label) : d.label };
     }),
-    [availableDurations, t]
+    [t]
   );
 
   const validateAndContinue = useCallback(() => {
@@ -248,35 +257,74 @@ export const HourlyFormContent = memo(({
             </div>
           </div>
         ) : (
-          <div className="bg-zinc-200/50 dark:bg-zinc-800/50 rounded-xl p-3 h-[75px] flex items-center justify-center">
-            <span className="text-xs text-foreground/40">{t("selectDuration") || "Select duration first"}</span>
+          <div className={cn(
+            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+            shakeFields.date && "animate-shake",
+            errors.date && "ring-2 ring-destructive/30"
+          )}>
+            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+              {t("pickupDate") || "Pickup date"}
+            </label>
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
+              <FloatingLabelDatePicker 
+                label="" 
+                date={hourlyDate} 
+                onSelect={handleDateChange} 
+                disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+                dateFormat="EEE, dd MMM"
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+                icon={<span />}
+              />
+            </div>
           </div>
         )}
       </div>
 
-      {/* Date and Time Row */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
-          shakeFields.date && "animate-shake",
-          errors.date && "ring-2 ring-destructive/30"
-        )}>
-          <label className="block text-xs font-medium text-foreground/70 mb-0.5">
-            {t("pickupDate") || "Pickup date"}
-          </label>
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
-            <FloatingLabelDatePicker 
-              label="" 
-              date={hourlyDate} 
-              onSelect={handleDateChange} 
-              disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-              dateFormat="EEE, dd MMM"
-              triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
-              icon={<span />}
-            />
+      {/* Date and Time Row - Show conditionally based on custom duration */}
+      {hourlyDuration === "custom" ? (
+        <div className="grid grid-cols-2 gap-3">
+          <div className={cn(
+            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+            shakeFields.date && "animate-shake",
+            errors.date && "ring-2 ring-destructive/30"
+          )}>
+            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+              {t("pickupDate") || "Pickup date"}
+            </label>
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
+              <FloatingLabelDatePicker 
+                label="" 
+                date={hourlyDate} 
+                onSelect={handleDateChange} 
+                disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+                dateFormat="EEE, dd MMM"
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+                icon={<span />}
+              />
+            </div>
+          </div>
+          <div className={cn(
+            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+            shakeFields.time && "animate-shake",
+            errors.time && "ring-2 ring-destructive/30"
+          )}>
+            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+              {t("pickupTime") || "Pickup time"}
+            </label>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
+              <TimePickerAMPM 
+                value={hourlyTime} 
+                onValueChange={handleTimeChange} 
+                triggerClassName="text-sm font-semibold text-foreground"
+              />
+            </div>
           </div>
         </div>
+      ) : (
+        /* Time only row when date is shown in duration row */
         <div className={cn(
           "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
           shakeFields.time && "animate-shake",
@@ -294,7 +342,7 @@ export const HourlyFormContent = memo(({
             />
           </div>
         </div>
-      </div>
+      )}
 
       {/* Passengers Row */}
       <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between">

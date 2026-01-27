@@ -52,7 +52,7 @@ export function useHourlyForm(
     parseSavedDate(loadSavedFormData()?.hourlyDate)
   );
   const [hourlyTime, setHourlyTime] = useState(() => loadSavedFormData()?.hourlyTime || "");
-  const [hourlyDuration, setHourlyDuration] = useState(() => loadSavedFormData()?.hourlyDuration || "");
+  const [hourlyDuration, setHourlyDuration] = useState(() => loadSavedFormData()?.hourlyDuration || "4");
   const [hourlyPassengers, setHourlyPassengers] = useState(() => loadSavedFormData()?.hourlyPassengers || "2");
   const [hourlyVehicleType, setHourlyVehicleType] = useState(() => loadSavedFormData()?.hourlyVehicleType || "mercedes-vito");
   const [customHours, setCustomHours] = useState(() => loadSavedFormData()?.customHours || "9");
@@ -248,7 +248,7 @@ export function useHourlyForm(
 
   const handleHourlyContinue = useCallback(() => {
     const missing: string[] = [];
-    if (!hourlyCity) missing.push(t("city") || "City");
+    if (!hourlyCity) missing.push(t("pickupPoint") || "Pickup Location");
     if (!hourlyDate) missing.push(t("pickupDate") || "Date");
     if (!hourlyTime) missing.push(t("pickupTime") || "Time");
     
@@ -259,7 +259,8 @@ export function useHourlyForm(
     
     setSubmitting(true);
     const params = new URLSearchParams();
-    params.set("city", hourlyCity);
+    // Send full pickup address - BookingPage will extract city for pricing
+    params.set("pickup", hourlyCity);
     params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
     params.set("time", hourlyTime);
     params.set("duration", hourlyDuration === "custom" ? `${customHours}h` : `${hourlyDuration}h`);
