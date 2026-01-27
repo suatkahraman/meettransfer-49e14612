@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LocateFixed } from 'lucide-react';
 import { 
   loadGoogleMapsScript, 
   preloadGoogleMaps, 
   getGoogleMaps 
 } from '@/utils/googleMapsLoader';
+import { toast } from 'sonner';
 
 /**
  * Hook to reposition the Google Places .pac-container dropdown
@@ -153,6 +154,8 @@ export interface LazyGooglePlacesAutocompleteProps {
   floatingLabel?: boolean;
   icon?: React.ReactNode;
   debounceMs?: number;
+  showMyLocation?: boolean;
+  myLocationLabel?: string;
 }
 
 // Preload Google Maps script during idle time
@@ -320,6 +323,8 @@ export const LazyGooglePlacesAutocomplete = memo(({
   floatingLabel = false,
   icon,
   debounceMs = 300,
+  showMyLocation = true,
+  myLocationLabel = 'Use my location',
 }: LazyGooglePlacesAutocompleteProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
@@ -331,6 +336,7 @@ export const LazyGooglePlacesAutocomplete = memo(({
   const [hasValue, setHasValue] = useState(!!initialValue || !!value);
   const [inputValue, setInputValue] = useState('');
   const [isScriptLoading, setIsScriptLoading] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   
   // Debounce input changes
   const debouncedInputValue = useDebounce(inputValue, debounceMs);
@@ -483,6 +489,94 @@ export const LazyGooglePlacesAutocomplete = memo(({
     setHasValue(!!val);
   }, []);
 
+  // Use my location feature
+  const handleUseMyLocation = useCallback(async () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setIsGettingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          
+          // Load Google Maps if not already loaded
+          await loadGoogleMapsScript(['places']);
+          const maps = getGoogleMaps();
+          
+          if (!maps) {
+            toast.error('Could not load maps');
+            setIsGettingLocation(false);
+            return;
+          }
+
+          // Use Geocoder to get address from coordinates
+          const geocoder = new maps.Geocoder();
+          geocoder.geocode(
+            { location: { lat: latitude, lng: longitude } },
+            (results: any[], status: string) => {
+              setIsGettingLocation(false);
+              
+              if (status === 'OK' && results[0]) {
+                const place = results[0];
+                const formattedAddress = place.formatted_address || '';
+                
+                // Update input value
+                if (inputRef.current) {
+                  inputRef.current.value = formattedAddress;
+                  setHasValue(true);
+                }
+
+                const details: PlaceDetails = {
+                  placeName: '',
+                  formattedAddress,
+                  displayText: formattedAddress,
+                  lat: latitude,
+                  lng: longitude,
+                };
+
+                onPlaceSelectedRef.current?.(formattedAddress, details);
+                onPlaceSelectRef.current?.({
+                  name: '',
+                  formatted_address: formattedAddress,
+                  lat: latitude,
+                  lng: longitude,
+                });
+
+                toast.success('Location found!');
+              } else {
+                toast.error('Could not find address for your location');
+              }
+            }
+          );
+        } catch (error) {
+          setIsGettingLocation(false);
+          toast.error('Failed to get your location');
+        }
+      },
+      (error) => {
+        setIsGettingLocation(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            toast.error('Location access denied. Please enable location permissions.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            toast.error('Location information is unavailable');
+            break;
+          case error.TIMEOUT:
+            toast.error('Location request timed out');
+            break;
+          default:
+            toast.error('An error occurred getting your location');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  }, []);
+
   // Cleanup
   useEffect(() => {
     return () => {
@@ -501,21 +595,46 @@ export const LazyGooglePlacesAutocomplete = memo(({
   const isFloating = isFocused || hasValue;
 
   return (
-    <AutocompleteInput
-      inputRef={inputRef}
-      className={className}
-      disabled={disabled}
-      maxLength={maxLength}
-      isFocused={isFocused}
-      isFloating={isFloating}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onInput={handleInput}
-      icon={icon}
-      placeholder={placeholder}
-      floatingLabel={floatingLabel}
-      isLoading={isScriptLoading}
-    />
+    <div className="relative flex items-center gap-1 flex-1 min-w-0">
+      <div className="flex-1 min-w-0">
+        <AutocompleteInput
+          inputRef={inputRef}
+          className={className}
+          disabled={disabled}
+          maxLength={maxLength}
+          isFocused={isFocused}
+          isFloating={isFloating}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onInput={handleInput}
+          icon={icon}
+          placeholder={placeholder}
+          floatingLabel={floatingLabel}
+          isLoading={isScriptLoading}
+        />
+      </div>
+      {showMyLocation && !floatingLabel && (
+        <button
+          type="button"
+          onClick={handleUseMyLocation}
+          disabled={disabled || isGettingLocation}
+          className={cn(
+            "flex-shrink-0 p-1.5 rounded-lg transition-all",
+            "hover:bg-primary/10 active:scale-95",
+            "text-muted-foreground hover:text-primary",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
+            isGettingLocation && "animate-pulse"
+          )}
+          title={myLocationLabel}
+        >
+          {isGettingLocation ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <LocateFixed className="h-4 w-4" />
+          )}
+        </button>
+      )}
+    </div>
   );
 });
 

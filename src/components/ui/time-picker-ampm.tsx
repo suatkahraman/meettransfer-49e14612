@@ -13,6 +13,7 @@ interface TimePickerAMPMProps {
   disabled?: boolean;
   className?: string;
   triggerClassName?: string;
+  dataTrigger?: string;
 }
 
 // Convert 24h to 12h format
@@ -57,6 +58,7 @@ export const TimePickerAMPM = React.memo(({
   disabled,
   className,
   triggerClassName,
+  dataTrigger,
 }: TimePickerAMPMProps) => {
   const [open, setOpen] = React.useState(false);
   
@@ -89,6 +91,7 @@ export const TimePickerAMPM = React.memo(({
       <PopoverTrigger asChild>
         <button
           disabled={disabled}
+          data-time-trigger={dataTrigger}
           className={cn(
             "text-base font-semibold text-foreground bg-transparent border-0 p-0 cursor-pointer hover:opacity-80 transition-opacity",
             triggerClassName
