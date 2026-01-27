@@ -267,7 +267,7 @@ export const RideFormContent = memo(({
             "w-full h-[75px] rounded-xl transition-all text-sm font-bold tracking-wide uppercase flex items-center justify-center",
             hasReturnTrip 
               ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 ring-2 ring-green-500" 
-              : "bg-zinc-200 dark:bg-zinc-800 text-foreground hover:bg-zinc-300 dark:hover:bg-zinc-700"
+              : "bg-white dark:bg-zinc-800 text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
           )}
         >
           {hasReturnTrip ? (
