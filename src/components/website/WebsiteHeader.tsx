@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -14,6 +14,17 @@ const WebsiteHeader = () => {
   const { role: userRole } = useUserRole();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Make header sticky after scrolling 100px
+      setIsSticky(window.scrollY > 100);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { path: "/destinations", label: t("cities") || "Cities", icon: MapPin },
@@ -36,7 +47,7 @@ const WebsiteHeader = () => {
   };
 
   return (
-    <header className="w-full z-50 bg-black border-b border-border/20">
+    <header className={`w-full z-50 bg-black border-b border-border/20 transition-all duration-300 ${isSticky ? 'fixed top-0 left-0 right-0 shadow-lg animate-in slide-in-from-top-2' : ''}`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-14 sm:h-16">
         {/* Left - Logo + Brand Name */}
         <Link to={getLocalizedPath("/")} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
