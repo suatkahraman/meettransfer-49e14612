@@ -46,9 +46,9 @@ const WebsiteHeader = () => {
 
   return (
     <header className="w-full z-50 border-b border-border bg-card/95 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-28 sm:h-32">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-28 sm:h-32 relative">
         {/* Left - Logo (links to homepage) */}
-        <Link to={getLocalizedPath("/")} className="flex-shrink-0 hover:scale-105 transition-transform">
+        <Link to={getLocalizedPath("/")} className="flex-shrink-0 hover:scale-105 transition-transform z-10">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer" 
@@ -59,17 +59,17 @@ const WebsiteHeader = () => {
           />
         </Link>
 
-        {/* Center - Brand Name (links to homepage) */}
-        <div className="absolute left-1/2 -translate-x-1/2">
+        {/* Center - Brand Name (links to homepage) - hidden on small screens to prevent overlap */}
+        <div className="hidden sm:block absolute left-1/2 -translate-x-1/2 pointer-events-auto">
           <Link to={getLocalizedPath("/")} className="flex items-center hover:opacity-80 transition-opacity">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground whitespace-nowrap">
               <span className="text-primary">Meet</span> Transfer
             </h1>
           </Link>
         </div>
 
         {/* Right - Language & Menu */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 z-10">
           <UniversalLanguageSelector variant="compact" />
           
           {/* Desktop Navigation */}
