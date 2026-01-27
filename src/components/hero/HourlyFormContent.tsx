@@ -9,19 +9,23 @@ import { VehiclePrice } from "./types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-// Standard duration options
+// Standard duration options (4-9 hours)
 const DURATION_OPTIONS = [
   { value: "4", label: "4h" },
+  { value: "5", label: "5h" },
   { value: "6", label: "6h" },
+  { value: "7", label: "7h" },
   { value: "8", label: "8h" },
-  { value: "custom", label: "9+" },
+  { value: "9", label: "9h" },
 ];
 
 const hourlyDurationOptions = [
-  { value: "4", labelKey: "halfDay", defaultLabel: "4 Hours (Half Day)" },
+  { value: "4", labelKey: "fourHours", defaultLabel: "4 Hours" },
+  { value: "5", labelKey: "fiveHours", defaultLabel: "5 Hours" },
   { value: "6", labelKey: "sixHours", defaultLabel: "6 Hours" },
-  { value: "8", labelKey: "fullDay", defaultLabel: "8 Hours (Full Day)" },
-  { value: "custom", labelKey: "customHourly", defaultLabel: "9+ Hours (Custom)" },
+  { value: "7", labelKey: "sevenHours", defaultLabel: "7 Hours" },
+  { value: "8", labelKey: "eightHours", defaultLabel: "8 Hours" },
+  { value: "9", labelKey: "nineHours", defaultLabel: "9 Hours" },
 ];
 
 interface HourlyFormContentProps {
@@ -219,7 +223,7 @@ export const HourlyFormContent = memo(({
         </div>
       </div>
 
-      {/* Duration Row */}
+      {/* Duration and Date Row */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700">
           <label className="block text-xs font-medium text-foreground/70 mb-0.5">
@@ -238,111 +242,47 @@ export const HourlyFormContent = memo(({
           </div>
         </div>
         
-        {/* Custom Hours or empty slot */}
-        {hourlyDuration === "custom" ? (
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700">
-            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
-              {t("customHours") || "Custom Hours"}
-            </label>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
-              <LazyFloatingLabelSelect 
-                label="" 
-                value={customHours} 
-                onValueChange={setCustomHours} 
-                options={customHoursOptions} 
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-bold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
-                icon={<span />}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className={cn(
-            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
-            shakeFields.date && "animate-shake",
-            errors.date && "ring-2 ring-destructive/30"
-          )}>
-            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
-              {t("pickupDate") || "Pickup date"}
-            </label>
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
-              <FloatingLabelDatePicker 
-                label="" 
-                date={hourlyDate} 
-                onSelect={handleDateChange} 
-                disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                dateFormat="EEE, dd MMM"
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
-                icon={<span />}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Date and Time Row - Show conditionally based on custom duration */}
-      {hourlyDuration === "custom" ? (
-        <div className="grid grid-cols-2 gap-3">
-          <div className={cn(
-            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
-            shakeFields.date && "animate-shake",
-            errors.date && "ring-2 ring-destructive/30"
-          )}>
-            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
-              {t("pickupDate") || "Pickup date"}
-            </label>
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
-              <FloatingLabelDatePicker 
-                label="" 
-                date={hourlyDate} 
-                onSelect={handleDateChange} 
-                disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-                dateFormat="EEE, dd MMM"
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
-                icon={<span />}
-              />
-            </div>
-          </div>
-          <div className={cn(
-            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
-            shakeFields.time && "animate-shake",
-            errors.time && "ring-2 ring-destructive/30"
-          )}>
-            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
-              {t("pickupTime") || "Pickup time"}
-            </label>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
-              <TimePickerAMPM 
-                value={hourlyTime} 
-                onValueChange={handleTimeChange} 
-                triggerClassName="text-sm font-semibold text-foreground"
-              />
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* Time only row when date is shown in duration row */
         <div className={cn(
           "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
-          shakeFields.time && "animate-shake",
-          errors.time && "ring-2 ring-destructive/30"
+          shakeFields.date && "animate-shake",
+          errors.date && "ring-2 ring-destructive/30"
         )}>
           <label className="block text-xs font-medium text-foreground/70 mb-0.5">
-            {t("pickupTime") || "Pickup time"}
+            {t("pickupDate") || "Pickup date"}
           </label>
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
-            <TimePickerAMPM 
-              value={hourlyTime} 
-              onValueChange={handleTimeChange} 
-              triggerClassName="text-sm font-semibold text-foreground"
+            <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
+            <FloatingLabelDatePicker 
+              label="" 
+              date={hourlyDate} 
+              onSelect={handleDateChange} 
+              disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+              dateFormat="EEE, dd MMM yyyy"
+              triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+              icon={<span />}
             />
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Time Row */}
+      <div className={cn(
+        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+        shakeFields.time && "animate-shake",
+        errors.time && "ring-2 ring-destructive/30"
+      )}>
+        <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+          {t("pickupTime") || "Pickup time"}
+        </label>
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
+          <TimePickerAMPM 
+            value={hourlyTime} 
+            onValueChange={handleTimeChange} 
+            triggerClassName="text-sm font-semibold text-foreground"
+          />
+        </div>
+      </div>
 
       {/* Passengers Row */}
       <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between">

@@ -88,11 +88,14 @@ export function useHourlyForm(
         data.forEach(item => {
           if (!durationsMap[item.city]) durationsMap[item.city] = [];
           const d = item.duration_type.replace("_hours", "").replace("h", "");
-          const mapped = d === "4" ? "4" : d === "6" ? "6" : d === "8" ? "8" : (d === "custom" || parseInt(d) >= 9) ? "custom" : null;
-          if (mapped && !durationsMap[item.city].includes(mapped)) durationsMap[item.city].push(mapped);
+          // Map to 4-9 hour options
+          const durationNum = parseInt(d);
+          if (durationNum >= 4 && durationNum <= 9 && !durationsMap[item.city].includes(d)) {
+            durationsMap[item.city].push(d);
+          }
         });
         Object.keys(durationsMap).forEach(city =>
-          durationsMap[city].sort((a, b) => ["4", "6", "8", "custom"].indexOf(a) - ["4", "6", "8", "custom"].indexOf(b))
+          durationsMap[city].sort((a, b) => parseInt(a) - parseInt(b))
         );
         setCityDurations(durationsMap);
       }
@@ -263,7 +266,7 @@ export function useHourlyForm(
     params.set("pickup", hourlyCity);
     params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
     params.set("time", hourlyTime);
-    params.set("duration", hourlyDuration === "custom" ? `${customHours}h` : `${hourlyDuration}h`);
+    params.set("duration", `${hourlyDuration}h`);
     params.set("passengers", hourlyPassengers);
     params.set("vehicleType", hourlyVehicleType);
     params.set("type", "hourly");
