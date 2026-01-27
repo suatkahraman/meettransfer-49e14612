@@ -1188,6 +1188,27 @@ const AdminEditReservation = () => {
             });
           }
 
+          // Auto-assign driver if not already assigned (via auto-price-reservation)
+          if (!newDriverId) {
+            try {
+              console.log('🚗 Triggering auto-price-reservation for agency driver matching');
+              const { data: autoPriceResult, error: autoPriceError } = await supabase.functions.invoke('auto-price-reservation', {
+                body: { reservation_id: id }
+              });
+              
+              if (autoPriceError) {
+                console.error('Auto-price-reservation error:', autoPriceError);
+              } else if (autoPriceResult?.driverAssigned) {
+                console.log('✅ Driver auto-assigned:', autoPriceResult.driverName);
+                toast.success(`Şoför otomatik atandı: ${autoPriceResult.driverName}`);
+              } else {
+                console.log('ℹ️ No driver auto-assigned:', autoPriceResult?.reason || 'unknown');
+              }
+            } catch (autoPriceErr) {
+              console.error('Failed to trigger auto-price-reservation:', autoPriceErr);
+            }
+          }
+
           // Send push notification to driver if assigned
           if (newDriverId) {
             const { data: driver } = await supabase
@@ -1202,7 +1223,7 @@ const AdminEditReservation = () => {
                   user_id: driver.user_id,
                   reservation_id: id,
                   title: 'Rezervasyon Güncellendi',
-                  message: `Acenta rezervasyonu güncelledi ve admin onayladı. Detayları kontrol edin.`,
+                  message: `Acenta rezervasyonu güncellendi ve admin onayladı. Detayları kontrol edin.`,
                   type: 'reservation_updated_approved',
                   send_push: true,
                 }
