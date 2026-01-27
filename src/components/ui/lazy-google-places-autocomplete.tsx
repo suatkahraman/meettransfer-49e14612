@@ -559,18 +559,22 @@ export const LazyGooglePlacesAutocomplete = memo(({
       },
       (error) => {
         setIsGettingLocation(false);
+        // Focus input for manual entry on any error
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            toast.error('Location access denied. Please enable location permissions.');
+            toast.info('Please enter your address manually');
             break;
           case error.POSITION_UNAVAILABLE:
-            toast.error('Location information is unavailable');
+            toast.info('Location unavailable - please enter manually');
             break;
           case error.TIMEOUT:
-            toast.error('Location request timed out');
+            toast.info('Location timed out - please enter manually');
             break;
           default:
-            toast.error('An error occurred getting your location');
+            toast.info('Please enter your address manually');
         }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
