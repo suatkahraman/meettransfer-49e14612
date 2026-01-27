@@ -205,7 +205,25 @@ const BookingPage = () => {
   
   // Flight and passenger details
   const [flightNumber, setFlightNumber] = useState("");
-  const [passengerNames, setPassengerNames] = useState("");
+  const [passengerNames, setPassengerNames] = useState<string[]>([]);
+  const MAX_PASSENGERS = 15;
+  
+  // Passenger name management functions
+  const addPassenger = () => {
+    if (passengerNames.length < MAX_PASSENGERS) {
+      setPassengerNames([...passengerNames, ""]);
+    }
+  };
+  
+  const updatePassenger = (index: number, value: string) => {
+    const updated = [...passengerNames];
+    updated[index] = value;
+    setPassengerNames(updated);
+  };
+  
+  const removePassenger = (index: number) => {
+    setPassengerNames(passengerNames.filter((_, i) => i !== index));
+  };
   
   // Booking success state
   const [bookingCompleted, setBookingCompleted] = useState(false);
@@ -940,7 +958,7 @@ const BookingPage = () => {
             luggageCount,
             customerNotes: customerNotes.trim() || null,
             flightNumber: flightNumber.trim() || null,
-            passengerNames: passengerNames.trim() ? passengerNames.trim().split('\n').filter(n => n.trim()) : null,
+            passengerNames: passengerNames.filter(n => n.trim()).length > 0 ? passengerNames.filter(n => n.trim()) : null,
             // Customer info
             customerName: customerName.trim(),
             customerPhone: customerPhone.trim(),
@@ -1027,7 +1045,7 @@ const BookingPage = () => {
             price_currency: preferredCurrency,
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
-            passenger_names: passengerNames.trim() ? passengerNames.trim().split('\n').filter(n => n.trim()) : null,
+            passenger_names: passengerNames.filter(n => n.trim()).length > 0 ? passengerNames.filter(n => n.trim()) : null,
             status: getHourlyPrice(vehicleType, selectedDuration) ? "confirmed" : "awaiting-price",
           }
         : {
@@ -1046,7 +1064,7 @@ const BookingPage = () => {
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
             flight_number: flightNumber.trim() || null,
-            passenger_names: passengerNames.trim() ? passengerNames.trim().split('\n').filter(n => n.trim()) : null,
+            passenger_names: passengerNames.filter(n => n.trim()).length > 0 ? passengerNames.filter(n => n.trim()) : null,
             status: selectedPrice ? "confirmed" : "awaiting-price",
           };
 
@@ -1086,7 +1104,7 @@ const BookingPage = () => {
             price_currency: preferredCurrency,
             luggage_count: luggageCount,
             baby_seat_count: babySeatCount,
-            passenger_names: passengerNames.trim() ? passengerNames.trim().split('\n').filter(n => n.trim()) : null,
+            passenger_names: passengerNames.filter(n => n.trim()).length > 0 ? passengerNames.filter(n => n.trim()) : null,
             status: "pending",
             is_return_transfer: true,
             original_reservation_id: reservation.id,
@@ -1983,22 +2001,66 @@ const BookingPage = () => {
                   )}
 
                   {/* Passenger Names */}
-                  <div>
-                    <Label className="text-sm text-foreground font-medium mb-2 block flex items-center gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      {formatCamelCase(t("passengerNames")) || "Passenger Names"} 
-                      <span className="text-xs text-muted-foreground">({t("optional") || "optional"})</span>
-                    </Label>
-                    <Textarea
-                      value={passengerNames}
-                      onChange={(e) => setPassengerNames(e.target.value)}
-                      placeholder={language === 'TR' 
-                        ? "Her satıra bir yolcu ismi yazın\nÖrn: John Smith\nJane Doe"
-                        : "Enter one passenger name per line\nE.g: John Smith\nJane Doe"
-                      }
-                      className="resize-none min-h-[80px]"
-                      maxLength={500}
-                    />
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm text-foreground font-medium flex items-center gap-2">
+                        <UserPlus className="h-4 w-4" />
+                        {formatCamelCase(t("passengerNames")) || "Passenger Names"} 
+                        <span className="text-xs text-muted-foreground">({t("optional") || "optional"})</span>
+                      </Label>
+                      {passengerNames.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          {passengerNames.length}/{MAX_PASSENGERS}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Passenger name inputs */}
+                    {passengerNames.map((name, index) => (
+                      <div key={index} className="flex gap-2 items-center">
+                        <div className="flex-1 relative">
+                          <Input
+                            value={name}
+                            onChange={(e) => updatePassenger(index, e.target.value)}
+                            placeholder={index === 0 
+                              ? (language === 'TR' ? 'Ana yolcu adı' : 'Main passenger name')
+                              : `${t('passenger') || 'Passenger'} ${index + 1}`
+                            }
+                            className="pr-12"
+                            maxLength={100}
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                            #{index + 1}
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 text-muted-foreground hover:text-destructive"
+                          onClick={() => removePassenger(index)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 6 6 18"/>
+                            <path d="m6 6 12 12"/>
+                          </svg>
+                        </Button>
+                      </div>
+                    ))}
+                    
+                    {/* Add passenger button */}
+                    {passengerNames.length < MAX_PASSENGERS && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-dashed"
+                        onClick={addPassenger}
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        {language === 'TR' ? 'Yolcu Ekle' : 'Add Passenger'}
+                      </Button>
+                    )}
                   </div>
 
                   {/* Notes field */}
