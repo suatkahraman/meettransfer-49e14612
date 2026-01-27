@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogIn, LogOut, User, Download, Building2, ChevronDown } from "lucide-react";
+import { LogIn, LogOut, User, Building2, Briefcase, MapPin, Car, BookOpen, Info, Mail, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UniversalLanguageSelector from "@/components/UniversalLanguageSelector";
 import { PushNotificationToggle } from "@/components/PushNotificationToggle";
@@ -51,13 +51,13 @@ const WebsiteHeader = () => {
   };
 
   const navLinks = [
-    { path: "/services", label: t("services") || "Services" },
-    { path: "/destinations", label: t("cities") },
-    { path: "/fleet", label: t("fleet") },
-    { path: "/blog", label: t("blog") || "Blog" },
-    { path: "/about", label: t("about") },
-    { path: "/contact", label: t("contact") },
-    { path: "/terms", label: t("terms") || "Terms" },
+    { path: "/services", label: t("services") || "Services", icon: Briefcase },
+    { path: "/destinations", label: t("cities"), icon: MapPin },
+    { path: "/fleet", label: t("fleet"), icon: Car },
+    { path: "/blog", label: t("blog") || "Blog", icon: BookOpen },
+    { path: "/about", label: t("about"), icon: Info },
+    { path: "/contact", label: t("contact"), icon: Mail },
+    { path: "/terms", label: t("terms") || "Terms", icon: FileText },
   ];
 
   const destinationLinks = [
@@ -306,19 +306,18 @@ const WebsiteHeader = () => {
             >
               {navLinks.map((link) => {
                 const active = isActive(link.path);
+                const IconComponent = link.icon;
                 return (
                   <DropdownMenuItem 
                     key={link.path} 
-                    className={active ? "bg-primary/15 focus:bg-primary/20" : ""}
+                    className={`py-2.5 ${active ? "bg-primary/15 focus:bg-primary/20" : ""}`}
                     onClick={() => setMenuOpen(false)}
                   >
                     <Link
                       to={getLocalizedPath(link.path)}
-                      className={`w-full flex items-center gap-2 ${active ? "text-primary font-semibold" : ""}`}
+                      className={`w-full flex items-center gap-3 ${active ? "text-primary font-semibold" : ""}`}
                     >
-                      {active && (
-                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                      )}
+                      <IconComponent className={`h-4 w-4 flex-shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
                       <span>{link.label}</span>
                     </Link>
                   </DropdownMenuItem>
