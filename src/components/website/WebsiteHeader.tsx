@@ -173,80 +173,112 @@ const WebsiteHeader = () => {
         </div>
       </div>
 
-      {/* Mobile Menu - Dropdown style */}
+      {/* Mobile Menu - Slide-in Panel from Left */}
       {mobileMenuOpen && (
-        <div 
-          ref={menuRef}
-          className="lg:hidden absolute right-3 top-full mt-2 w-72 bg-black/95 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50"
-        >
-          <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={getLocalizedPath(link.path)}
-                className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+        <>
+          {/* Overlay */}
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          
+          {/* Slide Panel */}
+          <div 
+            ref={menuRef}
+            className="lg:hidden fixed left-0 top-0 h-full w-72 bg-black border-r border-white/10 shadow-2xl z-50 animate-in slide-in-from-left duration-300"
+          >
+            {/* Panel Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <Link 
+                to={getLocalizedPath("/")} 
+                className="flex items-center gap-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <link.icon className="h-5 w-5" />
-                <span className="font-medium">{link.label}</span>
+                <img 
+                  src={meetTransferLogo} 
+                  alt="Meet Transfer" 
+                  className="h-10 w-10 object-contain"
+                />
+                <span className="text-white font-bold text-lg">Meet Transfer</span>
               </Link>
-            ))}
-            
-            {/* Mobile Auth Buttons */}
-            <div className="pt-3 mt-2 border-t border-white/10">
-              {user ? (
-                <>
-                  <Link
-                    to={getAccountPath()}
-                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <User className="h-5 w-5" />
-                    <span className="font-medium">{t("myAccount") || "My Account"}</span>
-                  </Link>
-                  <button
-                    onClick={handleSignOut}
-                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors w-full text-left"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    <span className="font-medium">{t("logout") || "Logout"}</span>
-                  </button>
-                </>
-              ) : (
-              <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Navigation Links */}
+            <nav className="p-4 flex flex-col gap-1 overflow-y-auto h-[calc(100%-80px)]">
+              {navLinks.map((link) => (
                 <Link
-                  to="/login"
+                  key={link.path}
+                  to={getLocalizedPath(link.path)}
                   className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <LogIn className="h-5 w-5" />
-                  <span className="font-medium">{t("login") || "Login"}</span>
+                  <link.icon className="h-5 w-5" />
+                  <span className="font-medium">{link.label}</span>
                 </Link>
-              </>
-              )}
-            </div>
-
-            {/* Agency Registration Link */}
-            <div className="pt-3 mt-2 border-t border-white/10">
-              <Link
-                to="/signup/agency"
-                className="flex items-center gap-3 text-accent hover:text-accent/80 hover:bg-accent/10 py-3 px-3 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Building2 className="h-5 w-5" />
-                <span className="font-medium">{t("agencyRegistration") || "Agency Registration"}</span>
-              </Link>
-            </div>
-
-            {/* Mobile Language Selector */}
-            <div className="pt-3 mt-2 border-t border-white/10">
-              <div className="flex items-center gap-3 px-3 py-2">
-                <span className="text-white/60 text-sm">Language:</span>
-                <LanguageSelector onLanguageChange={() => setMobileMenuOpen(false)} />
+              ))}
+              
+              {/* Mobile Auth Buttons */}
+              <div className="pt-3 mt-2 border-t border-white/10">
+                {user ? (
+                  <>
+                    <Link
+                      to={getAccountPath()}
+                      className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <User className="h-5 w-5" />
+                      <span className="font-medium">{t("myAccount") || "My Account"}</span>
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors w-full text-left"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span className="font-medium">{t("logout") || "Logout"}</span>
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn className="h-5 w-5" />
+                    <span className="font-medium">{t("login") || "Login"}</span>
+                  </Link>
+                )}
               </div>
-            </div>
-          </nav>
-        </div>
+
+              {/* Agency Registration Link */}
+              <div className="pt-3 mt-2 border-t border-white/10">
+                <Link
+                  to="/signup/agency"
+                  className="flex items-center gap-3 text-accent hover:text-accent/80 hover:bg-accent/10 py-3 px-3 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Building2 className="h-5 w-5" />
+                  <span className="font-medium">{t("agencyRegistration") || "Agency Registration"}</span>
+                </Link>
+              </div>
+
+              {/* Mobile Language Selector */}
+              <div className="pt-3 mt-2 border-t border-white/10">
+                <div className="flex items-center gap-3 px-3 py-2">
+                  <span className="text-white/60 text-sm">Language:</span>
+                  <LanguageSelector onLanguageChange={() => setMobileMenuOpen(false)} />
+                </div>
+              </div>
+            </nav>
+          </div>
+        </>
       )}
     </header>
   );
