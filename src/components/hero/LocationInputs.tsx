@@ -30,65 +30,87 @@ const LocationInputsComponent = ({
 
   return (
     <div className="space-y-3">
-      {/* Pickup - 2x bigger */}
-      <GooglePlacesAutocomplete 
-        onPlaceSelected={onPickupSelected} 
-        placeholder={
-          language === 'TR' ? 'Nereden alınacak?' :
-          language === 'DE' ? 'Wo sollen wir Sie abholen?' :
-          language === 'FR' ? 'Où vous récupérer ?' :
-          language === 'RU' ? 'Откуда вас забрать?' :
-          language === 'IT' ? 'Dove prelevarvi?' :
-          language === 'ES' ? '¿Dónde le recogemos?' :
-          language === 'AR' ? 'من أين نأخذك؟' :
-          language === 'UK' ? 'Звідки вас забрати?' :
-          language === 'JA' ? 'お迎え場所は？' :
-          'Where to pick you up?'
-        } 
-        className={cn(
-          "bg-background border-2 rounded-xl text-lg md:text-base shadow-sm transition-all h-16 md:h-14 min-h-[64px] md:min-h-[56px]",
-          pickupError 
-            ? "border-destructive ring-2 ring-destructive/20" 
-            : "border-primary/30 hover:border-primary/50 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
-        )}
-        value={pickup}
-        floatingLabel
-        icon={
-          <div className="transition-transform duration-200 hover:scale-110">
-            <MapPin className={cn("h-6 w-6 md:h-5 md:w-5", pickupError ? "text-destructive" : "text-primary")} />
-          </div>
-        }
-      />
+      {/* Pickup - Floating label structure like reference */}
+      <div className={cn(
+        "bg-muted/60 rounded-xl p-3 pb-2 transition-all",
+        pickupError 
+          ? "ring-2 ring-destructive/30" 
+          : "hover:bg-muted/80"
+      )}>
+        <label className="block text-sm font-medium text-muted-foreground mb-1">
+          {language === 'TR' ? 'Nereden' :
+           language === 'DE' ? 'Von' :
+           language === 'FR' ? 'De' :
+           language === 'RU' ? 'Откуда' :
+           language === 'IT' ? 'Da' :
+           language === 'ES' ? 'Desde' :
+           language === 'AR' ? 'من' :
+           language === 'UK' ? 'Звідки' :
+           language === 'JA' ? '乗車地' :
+           'From'}
+        </label>
+        <div className="flex items-center gap-2">
+          <MapPin className={cn("h-5 w-5 flex-shrink-0", pickupError ? "text-destructive" : "text-primary")} />
+          <GooglePlacesAutocomplete 
+            onPlaceSelected={onPickupSelected} 
+            placeholder={
+              language === 'TR' ? 'Adres, havalimanı, otel...' :
+              language === 'DE' ? 'Adresse, Flughafen, Hotel...' :
+              language === 'FR' ? 'Adresse, aéroport, hôtel...' :
+              language === 'RU' ? 'Адрес, аэропорт, отель...' :
+              language === 'IT' ? 'Indirizzo, aeroporto, hotel...' :
+              language === 'ES' ? 'Dirección, aeropuerto, hotel...' :
+              language === 'AR' ? 'عنوان، مطار، فندق...' :
+              language === 'UK' ? 'Адреса, аеропорт, готель...' :
+              language === 'JA' ? '住所、空港、ホテル...' :
+              'Address, airport, hotel...'
+            } 
+            className="bg-transparent border-0 p-0 h-auto text-base font-medium placeholder:text-muted-foreground/60 focus:ring-0 focus-visible:ring-0"
+            value={pickup}
+          />
+        </div>
+      </div>
       
-      {/* Dropoff - 2x bigger, no swap button between */}
-      <GooglePlacesAutocomplete 
-        onPlaceSelected={onDropoffSelected} 
-        placeholder={
-          language === 'TR' ? 'Nereye gideceksiniz?' :
-          language === 'DE' ? 'Wohin möchten Sie?' :
-          language === 'FR' ? 'Où allez-vous ?' :
-          language === 'RU' ? 'Куда вас отвезти?' :
-          language === 'IT' ? 'Dove andate?' :
-          language === 'ES' ? '¿A dónde va?' :
-          language === 'AR' ? 'إلى أين تريد الذهاب؟' :
-          language === 'UK' ? 'Куди вас відвезти?' :
-          language === 'JA' ? '行き先は？' :
-          'Where to drop you off?'
-        } 
-        className={cn(
-          "bg-background border-2 rounded-xl text-lg md:text-base shadow-sm transition-all h-16 md:h-14 min-h-[64px] md:min-h-[56px]",
-          dropoffError
-            ? "border-destructive ring-2 ring-destructive/20"
-            : "border-accent/30 hover:border-accent/50 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20"
-        )}
-        value={dropoff}
-        floatingLabel
-        icon={
-          <div className="transition-transform duration-200 hover:scale-110">
-            <Navigation className={cn("h-6 w-6 md:h-5 md:w-5", dropoffError ? "text-destructive" : "text-accent")} />
-          </div>
-        }
-      />
+      {/* Dropoff - Floating label structure like reference */}
+      <div className={cn(
+        "bg-muted/60 rounded-xl p-3 pb-2 transition-all",
+        dropoffError
+          ? "ring-2 ring-destructive/30"
+          : "hover:bg-muted/80"
+      )}>
+        <label className="block text-sm font-medium text-muted-foreground mb-1">
+          {language === 'TR' ? 'Nereye' :
+           language === 'DE' ? 'Nach' :
+           language === 'FR' ? 'À' :
+           language === 'RU' ? 'Куда' :
+           language === 'IT' ? 'A' :
+           language === 'ES' ? 'Hasta' :
+           language === 'AR' ? 'إلى' :
+           language === 'UK' ? 'Куди' :
+           language === 'JA' ? '降車地' :
+           'To'}
+        </label>
+        <div className="flex items-center gap-2">
+          <Navigation className={cn("h-5 w-5 flex-shrink-0", dropoffError ? "text-destructive" : "text-primary")} />
+          <GooglePlacesAutocomplete 
+            onPlaceSelected={onDropoffSelected} 
+            placeholder={
+              language === 'TR' ? 'Adres, havalimanı, otel...' :
+              language === 'DE' ? 'Adresse, Flughafen, Hotel...' :
+              language === 'FR' ? 'Adresse, aéroport, hôtel...' :
+              language === 'RU' ? 'Адрес, аэропорт, отель...' :
+              language === 'IT' ? 'Indirizzo, aeroporto, hotel...' :
+              language === 'ES' ? 'Dirección, aeropuerto, hotel...' :
+              language === 'AR' ? 'عنوان، مطار، فندق...' :
+              language === 'UK' ? 'Адреса, аеропорт, готель...' :
+              language === 'JA' ? '住所、空港、ホテル...' :
+              'Address, airport, hotel...'
+            } 
+            className="bg-transparent border-0 p-0 h-auto text-base font-medium placeholder:text-muted-foreground/60 focus:ring-0 focus-visible:ring-0"
+            value={dropoff}
+          />
+        </div>
+      </div>
       
       {pickup && dropoff && (
         <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg mt-2" />}>
