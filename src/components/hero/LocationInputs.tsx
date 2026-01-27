@@ -32,10 +32,10 @@ const LocationInputsComponent = ({
     <div className="space-y-3">
       {/* Pickup - Floating label structure like reference */}
       <div className={cn(
-        "bg-muted/60 rounded-xl p-3 pb-2 transition-all",
+        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all",
         pickupError 
           ? "ring-2 ring-destructive/30" 
-          : "hover:bg-muted/80"
+          : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
       )}>
         <label className="block text-sm font-medium text-muted-foreground mb-1">
           {language === 'TR' ? 'Nereden' :
@@ -73,10 +73,10 @@ const LocationInputsComponent = ({
       
       {/* Dropoff - Floating label structure like reference */}
       <div className={cn(
-        "bg-muted/60 rounded-xl p-3 pb-2 transition-all",
+        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all",
         dropoffError
           ? "ring-2 ring-destructive/30"
-          : "hover:bg-muted/80"
+          : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
       )}>
         <label className="block text-sm font-medium text-muted-foreground mb-1">
           {language === 'TR' ? 'Nereye' :
