@@ -107,14 +107,19 @@ const WebsiteHeader = () => {
       }`}
     >
       <div 
-        className={`max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-end transition-all duration-300 ${
+        className={`max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between transition-all duration-300 ${
           isScrolled ? "h-12 sm:h-14" : "h-14 sm:h-[4.5rem]"
         }`}
       >
-        {/* Center - Book Button (Mobile) - Larger and Centered */}
+        {/* Left - Language Selector */}
+        <div className="flex items-center gap-2">
+          <UniversalLanguageSelector variant="compact" />
+        </div>
+
+        {/* Center - Book Button */}
         {user ? (
-          <Link to={getLocalizedPath("/book")} className="md:hidden absolute left-1/2 -translate-x-1/2">
-            <Button variant="accent" size="default" className="font-bold text-sm px-8 py-3 shadow-lg animate-pulse-subtle">
+          <Link to={getLocalizedPath("/book")} className="absolute left-1/2 -translate-x-1/2">
+            <Button variant="accent" size="default" className="font-bold text-sm px-6 md:px-8 py-2.5 md:py-3 shadow-lg animate-pulse-subtle">
               {t("bookNow")}
             </Button>
           </Link>
@@ -122,7 +127,7 @@ const WebsiteHeader = () => {
           <Button 
             variant="accent" 
             size="default" 
-            className="md:hidden absolute left-1/2 -translate-x-1/2 font-bold text-sm px-8 py-3 shadow-lg"
+            className="absolute left-1/2 -translate-x-1/2 font-bold text-sm px-6 md:px-8 py-2.5 md:py-3 shadow-lg"
             onClick={scrollToBookingForm}
           >
             {t("bookNow")}
@@ -130,8 +135,9 @@ const WebsiteHeader = () => {
         )}
 
         {/* Right - Navigation & Actions */}
-        <div className="hidden md:flex items-center gap-4">
-          <nav className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-3">
             <Link
               to={getLocalizedPath("/services")}
               className={`text-sm font-medium transition-colors ${
@@ -225,75 +231,52 @@ const WebsiteHeader = () => {
               {t("contact")}
             </Link>
           </nav>
-        </div>
 
-        {/* Right - Actions */}
-        <div className="flex items-center gap-2">
-          {/* Book Button (Desktop) */}
-          {user ? (
-            <Link to={getLocalizedPath("/book")} className="hidden md:block">
-              <Button variant="accent" size="sm" className="font-semibold">
-                {t("bookNow")}
-              </Button>
-            </Link>
-          ) : (
-            <Button 
-              variant="accent" 
-              size="sm" 
-              className="hidden md:block font-semibold"
-              onClick={scrollToBookingForm}
-            >
-              {t("bookNow")}
-            </Button>
-          )}
-          {/* Install App Button (Desktop) - More prominent */}
-          <div className="hidden md:block">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-2 ml-2">
             <InstallAppButton 
               variant="prominent" 
               size="sm"
               animated
             />
-          </div>
-          <div className="hidden md:block">
             <PushNotificationToggle />
+            
+            {/* Auth Buttons */}
+            {user ? (
+              <>
+                <Link to={getDashboardPath()}>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    {t("myAccount")}
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => signOut()}
+                  className="gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  {t("logout")}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <LogIn className="h-4 w-4" />
+                    {t("guestLogin") || "Guest Login"}
+                  </Button>
+                </Link>
+                <Link to="/login/agency">
+                  <Button variant="secondary" size="sm" className="gap-2">
+                    <Building2 className="h-4 w-4" />
+                    {t("agencyLogin") || "Agency"}
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
-          <UniversalLanguageSelector variant="compact" />
-          
-          {/* Auth Buttons - Desktop */}
-          {user ? (
-            <div className="hidden md:flex items-center gap-2">
-              <Link to={getDashboardPath()}>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <User className="h-4 w-4" />
-                  {t("myAccount")}
-                </Button>
-              </Link>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => signOut()}
-                className="gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                {t("logout")}
-              </Button>
-            </div>
-          ) : (
-            <div className="hidden md:flex items-center gap-2">
-              <Link to="/login">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <LogIn className="h-4 w-4" />
-                  {t("guestLogin") || "Guest Login"}
-                </Button>
-              </Link>
-              <Link to="/login/agency">
-                <Button variant="secondary" size="sm" className="gap-2">
-                  <Building2 className="h-4 w-4" />
-                  {t("agencyLogin") || "Agency"}
-                </Button>
-              </Link>
-            </div>
-          )}
 
           {/* Mobile Menu - Dropdown - Compact */}
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
