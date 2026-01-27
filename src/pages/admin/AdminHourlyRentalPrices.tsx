@@ -32,8 +32,11 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Pencil, Trash2, Clock, Car, MapPin, Euro, DollarSign, PoundSterling, Percent } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Clock, Car, MapPin, Euro, DollarSign, PoundSterling, Percent, Calendar, CalendarRange } from "lucide-react";
 import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
+import MonthlyPriceUpdateDialog from "@/components/admin/MonthlyPriceUpdateDialog";
+import SeasonalPricesManager from "@/components/admin/SeasonalPricesManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface HourlyRentalPrice {
   id: string;
@@ -92,6 +95,8 @@ const AdminHourlyRentalPrices = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
+  const [isMonthlyDialogOpen, setIsMonthlyDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("prices");
   const [editingPrice, setEditingPrice] = useState<HourlyRentalPrice | null>(null);
   const [filterCity, setFilterCity] = useState<string>("all");
   const [filterVehicle, setFilterVehicle] = useState<string>("all");
@@ -421,6 +426,11 @@ const AdminHourlyRentalPrices = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            {/* Monthly Price Update */}
+            <Button variant="outline" className="gap-2" onClick={() => setIsMonthlyDialogOpen(true)}>
+              <Calendar className="h-4 w-4" />
+              Aylık Fiyat
+            </Button>
             {/* Bulk Update Dialog */}
             <Button variant="outline" className="gap-2" onClick={() => setIsBulkUpdateDialogOpen(true)}>
               <Percent className="h-4 w-4" />
@@ -727,186 +737,222 @@ const AdminHourlyRentalPrices = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{uniqueCities.length}</p>
-                  <p className="text-sm text-muted-foreground">Şehir</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-accent/10">
-                  <Car className="h-5 w-5 text-accent" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{prices.length}</p>
-                  <p className="text-sm text-muted-foreground">Fiyat Kaydı</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <Clock className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{prices.filter(p => p.is_active).length}</p>
-                  <p className="text-sm text-muted-foreground">Aktif</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-orange-500/10">
-                  <Euro className="h-5 w-5 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">
-                    {prices.length > 0 ? Math.min(...prices.filter(p => p.price > 0).map(p => p.price)) : 0}€
-                  </p>
-                  <p className="text-sm text-muted-foreground">Min Fiyat</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 md:w-auto md:inline-flex">
+            <TabsTrigger value="prices" className="gap-2">
+              <Clock className="h-4 w-4" />
+              Temel Fiyatlar
+            </TabsTrigger>
+            <TabsTrigger value="seasonal" className="gap-2">
+              <CalendarRange className="h-4 w-4" />
+              Sezonluk Fiyatlar
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Filtreler</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4">
-              <div className="w-48">
-                <Label className="text-sm mb-2 block">Şehir</Label>
-                <Select value={filterCity} onValueChange={setFilterCity}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tüm Şehirler</SelectItem>
-                    {uniqueCities.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="w-48">
-                <Label className="text-sm mb-2 block">Araç Tipi</Label>
-                <Select value={filterVehicle} onValueChange={setFilterVehicle}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tüm Araçlar</SelectItem>
-                    {vehicleTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          <TabsContent value="prices" className="space-y-6 mt-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <MapPin className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{uniqueCities.length}</p>
+                      <p className="text-sm text-muted-foreground">Şehir</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-accent/10">
+                      <Car className="h-5 w-5 text-accent" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{prices.length}</p>
+                      <p className="text-sm text-muted-foreground">Fiyat Kaydı</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-green-500/10">
+                      <Clock className="h-5 w-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{prices.filter(p => p.is_active).length}</p>
+                      <p className="text-sm text-muted-foreground">Aktif</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-orange-500/10">
+                      <Euro className="h-5 w-5 text-orange-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {prices.length > 0 ? Math.min(...prices.filter(p => p.price > 0).map(p => p.price)) : 0}€
+                      </p>
+                      <p className="text-sm text-muted-foreground">Min Fiyat</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Prices Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Fiyat Listesi</CardTitle>
-            <CardDescription>
-              {filteredPrices.length} kayıt gösteriliyor
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Şehir</TableHead>
-                    <TableHead>Araç</TableHead>
-                    <TableHead>Süre</TableHead>
-                    <TableHead className="text-right">Fiyat</TableHead>
-                    <TableHead className="text-right">Saatlik</TableHead>
-                    <TableHead className="text-center">Durum</TableHead>
-                    <TableHead className="text-right">İşlemler</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPrices.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        Henüz fiyat kaydı bulunmuyor
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredPrices.map((price) => (
-                      <TableRow key={price.id} className={!price.is_active ? "opacity-50" : ""}>
-                        <TableCell className="font-medium">{price.city}</TableCell>
-                        <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
-                        <TableCell>{getDurationLabel(price.duration_type)}</TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {price.price > 0 ? `${getCurrencySymbol(price.price_currency)}${price.price}` : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {price.hourly_rate ? `${getCurrencySymbol(price.price_currency)}${price.hourly_rate}/saat` : "-"}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Switch
-                            checked={price.is_active}
-                            onCheckedChange={() => toggleActive(price.id, price.is_active)}
-                          />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEdit(price)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => handleDelete(price.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
+            {/* Filters */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Filtreler</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-4">
+                  <div className="w-48">
+                    <Label className="text-sm mb-2 block">Şehir</Label>
+                    <Select value={filterCity} onValueChange={setFilterCity}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tüm Şehirler</SelectItem>
+                        {uniqueCities.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-48">
+                    <Label className="text-sm mb-2 block">Araç Tipi</Label>
+                    <Select value={filterVehicle} onValueChange={setFilterVehicle}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tüm Araçlar</SelectItem>
+                        {vehicleTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Prices Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Fiyat Listesi</CardTitle>
+                <CardDescription>
+                  {filteredPrices.length} kayıt gösteriliyor
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Şehir</TableHead>
+                        <TableHead>Araç</TableHead>
+                        <TableHead>Süre</TableHead>
+                        <TableHead className="text-right">Fiyat</TableHead>
+                        <TableHead className="text-right">Saatlik</TableHead>
+                        <TableHead className="text-center">Aktif</TableHead>
+                        <TableHead className="text-right">İşlemler</TableHead>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {loading ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8">
+                            Yükleniyor...
+                          </TableCell>
+                        </TableRow>
+                      ) : filteredPrices.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                            Kayıt bulunamadı
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredPrices.map((price) => (
+                          <TableRow key={price.id} className={!price.is_active ? "opacity-50" : ""}>
+                            <TableCell className="font-medium">{price.city}</TableCell>
+                            <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
+                            <TableCell>{getDurationLabel(price.duration_type)}</TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {price.price > 0 ? `${getCurrencySymbol(price.price_currency)}${price.price}` : "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {price.hourly_rate ? `${getCurrencySymbol(price.price_currency)}${price.hourly_rate}/saat` : "-"}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Switch
+                                checked={price.is_active}
+                                onCheckedChange={() => toggleActive(price.id, price.is_active)}
+                              />
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEdit(price)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive"
+                                  onClick={() => handleDelete(price.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="seasonal" className="space-y-6 mt-6">
+            <SeasonalPricesManager priceType="hourly" />
+          </TabsContent>
+        </Tabs>
 
         {/* Bulk Price Update Dialog */}
         <BulkPriceUpdateDialog
           open={isBulkUpdateDialogOpen}
           onOpenChange={setIsBulkUpdateDialogOpen}
+          priceType="hourly"
+          onSuccess={fetchPrices}
+          cities={uniqueCities}
+          vehicleTypes={vehicleTypes}
+        />
+
+        {/* Monthly Price Update Dialog */}
+        <MonthlyPriceUpdateDialog
+          open={isMonthlyDialogOpen}
+          onOpenChange={setIsMonthlyDialogOpen}
           priceType="hourly"
           onSuccess={fetchPrices}
           cities={uniqueCities}
