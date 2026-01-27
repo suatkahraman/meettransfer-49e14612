@@ -107,106 +107,10 @@ const WebsiteHeader = () => {
       }`}
     >
       <div 
-        className={`max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between transition-all duration-300 ${
+        className={`max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-end transition-all duration-300 ${
           isScrolled ? "h-12 sm:h-14" : "h-14 sm:h-[4.5rem]"
         }`}
       >
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4">
-          <Link
-            to={getLocalizedPath("/services")}
-            className={`text-sm font-medium transition-colors ${
-              isActive("/services") 
-                ? "text-primary font-semibold" 
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t("services") || "Services"}
-          </Link>
-          
-          {/* Destinations Dropdown */}
-          <NavigationMenu className="flex-none">
-            <NavigationMenuList className="flex-none">
-              <NavigationMenuItem>
-                <NavigationMenuTrigger 
-                  className={`text-sm font-medium bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 ${
-                    location.pathname.includes("transfer") || isActive("/destinations")
-                      ? "text-primary font-semibold" 
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t("cities")}
-                </NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <div className="grid gap-1 p-2 w-[200px]">
-                    {destinationLinks.map((dest) => (
-                      <NavigationMenuLink key={dest.path} asChild>
-                        <Link
-                          to={getLocalizedPath(dest.path)}
-                          className={`block px-3 py-2 text-sm rounded-md transition-colors hover:bg-accent ${
-                            isActive(dest.path) ? "bg-primary/10 text-primary font-semibold" : ""
-                          }`}
-                        >
-                          {dest.label}
-                        </Link>
-                      </NavigationMenuLink>
-                    ))}
-                    <NavigationMenuLink asChild>
-                      <Link
-                        to={getLocalizedPath("/destinations")}
-                        className="block px-3 py-2 text-sm rounded-md transition-colors bg-primary/5 hover:bg-primary/10 text-primary font-medium mt-1"
-                      >
-                        {t("viewAllDestinations") || "View All →"}
-                      </Link>
-                    </NavigationMenuLink>
-                  </div>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-
-          <Link
-            to={getLocalizedPath("/fleet")}
-            className={`text-sm font-medium transition-colors ${
-              isActive("/fleet") 
-                ? "text-primary font-semibold" 
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t("fleet")}
-          </Link>
-          <Link
-            to={getLocalizedPath("/blog")}
-            className={`text-sm font-medium transition-colors ${
-              isActive("/blog") 
-                ? "text-primary font-semibold" 
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t("blog") || "Blog"}
-          </Link>
-          <Link
-            to={getLocalizedPath("/about")}
-            className={`text-sm font-medium transition-colors ${
-              isActive("/about") 
-                ? "text-primary font-semibold" 
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t("about")}
-          </Link>
-          <Link
-            to={getLocalizedPath("/contact")}
-            className={`text-sm font-medium transition-colors ${
-              isActive("/contact") 
-                ? "text-primary font-semibold" 
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t("contact")}
-          </Link>
-        </nav>
-
         {/* Center - Book Button (Mobile) - Larger and Centered */}
         {user ? (
           <Link to={getLocalizedPath("/book")} className="md:hidden absolute left-1/2 -translate-x-1/2">
@@ -224,6 +128,104 @@ const WebsiteHeader = () => {
             {t("bookNow")}
           </Button>
         )}
+
+        {/* Right - Navigation & Actions */}
+        <div className="hidden md:flex items-center gap-4">
+          <nav className="flex items-center gap-4">
+            <Link
+              to={getLocalizedPath("/services")}
+              className={`text-sm font-medium transition-colors ${
+                isActive("/services") 
+                  ? "text-primary font-semibold" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("services") || "Services"}
+            </Link>
+            
+            {/* Destinations Dropdown */}
+            <NavigationMenu className="flex-none">
+              <NavigationMenuList className="flex-none">
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger 
+                    className={`text-sm font-medium bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent px-0 ${
+                      location.pathname.includes("transfer") || isActive("/destinations")
+                        ? "text-primary font-semibold" 
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {t("cities")}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid gap-1 p-2 w-[200px]">
+                      {destinationLinks.map((dest) => (
+                        <NavigationMenuLink key={dest.path} asChild>
+                          <Link
+                            to={getLocalizedPath(dest.path)}
+                            className={`block px-3 py-2 text-sm rounded-md transition-colors hover:bg-accent ${
+                              isActive(dest.path) ? "bg-primary/10 text-primary font-semibold" : ""
+                            }`}
+                          >
+                            {dest.label}
+                          </Link>
+                        </NavigationMenuLink>
+                      ))}
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to={getLocalizedPath("/destinations")}
+                          className="block px-3 py-2 text-sm rounded-md transition-colors bg-primary/5 hover:bg-primary/10 text-primary font-medium mt-1"
+                        >
+                          {t("viewAllDestinations") || "View All →"}
+                        </Link>
+                      </NavigationMenuLink>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+
+            <Link
+              to={getLocalizedPath("/fleet")}
+              className={`text-sm font-medium transition-colors ${
+                isActive("/fleet") 
+                  ? "text-primary font-semibold" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("fleet")}
+            </Link>
+            <Link
+              to={getLocalizedPath("/blog")}
+              className={`text-sm font-medium transition-colors ${
+                isActive("/blog") 
+                  ? "text-primary font-semibold" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("blog") || "Blog"}
+            </Link>
+            <Link
+              to={getLocalizedPath("/about")}
+              className={`text-sm font-medium transition-colors ${
+                isActive("/about") 
+                  ? "text-primary font-semibold" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("about")}
+            </Link>
+            <Link
+              to={getLocalizedPath("/contact")}
+              className={`text-sm font-medium transition-colors ${
+                isActive("/contact") 
+                  ? "text-primary font-semibold" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t("contact")}
+            </Link>
+          </nav>
+        </div>
 
         {/* Right - Actions */}
         <div className="flex items-center gap-2">
