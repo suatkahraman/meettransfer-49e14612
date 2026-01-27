@@ -198,16 +198,25 @@ export const RideFormContent = memo(({
       </div>
       
       <div className="grid grid-cols-2 gap-3">
-        <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden",
-          shakeFields.date && "animate-shake",
-          errors.date && "ring-2 ring-destructive/30"
-        )}>
-          <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+        <div 
+          className={cn(
+            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer",
+            shakeFields.date && "animate-shake",
+            errors.date && "ring-2 ring-destructive/30"
+          )}
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('button')) {
+              const trigger = (e.currentTarget as HTMLElement).querySelector('button') as HTMLButtonElement;
+              trigger?.click();
+            }
+          }}
+        >
+          <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
             {t("pickupDate") || "Pickup date"}
           </label>
           <div className="flex items-center gap-2 min-w-0">
-            <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
+            <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
             <div className="flex-1 min-w-0 overflow-hidden">
               <FloatingLabelDatePicker 
                 label="" 
@@ -221,16 +230,25 @@ export const RideFormContent = memo(({
             </div>
           </div>
         </div>
-        <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden",
-          shakeFields.time && "animate-shake",
-          errors.time && "ring-2 ring-destructive/30"
-        )}>
-          <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+        <div 
+          className={cn(
+            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer",
+            shakeFields.time && "animate-shake",
+            errors.time && "ring-2 ring-destructive/30"
+          )}
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('button')) {
+              const trigger = (e.currentTarget as HTMLElement).querySelector('button') as HTMLButtonElement;
+              trigger?.click();
+            }
+          }}
+        >
+          <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
             {t("pickupTime") || "Pickup time"}
           </label>
           <div className="flex items-center gap-2 min-w-0">
-            <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
+            <Clock className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
             <TimePickerAMPM 
               value={time} 
               onValueChange={handleTimeChange} 
@@ -266,12 +284,21 @@ export const RideFormContent = memo(({
       {/* Return Date/Time - Show when return trip is enabled */}
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden">
-            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+          <div 
+            className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-all"
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (!target.closest('button')) {
+                const trigger = (e.currentTarget as HTMLElement).querySelector('button') as HTMLButtonElement;
+                trigger?.click();
+              }
+            }}
+          >
+            <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
               {t("returnDate") || "Return date"}
             </label>
             <div className="flex items-center gap-2 min-w-0">
-              <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
+              <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
               <div className="flex-1 min-w-0 overflow-hidden">
                 <FloatingLabelDatePicker 
                   label="" 
@@ -285,12 +312,21 @@ export const RideFormContent = memo(({
               </div>
             </div>
           </div>
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden">
-            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+          <div 
+            className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-all"
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (!target.closest('button')) {
+                const trigger = (e.currentTarget as HTMLElement).querySelector('button') as HTMLButtonElement;
+                trigger?.click();
+              }
+            }}
+          >
+            <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
               {t("returnTime") || "Return time"}
             </label>
             <div className="flex items-center gap-2 min-w-0">
-              <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
+              <Clock className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
               <TimePickerAMPM 
                 value={returnTime || ""} 
                 onValueChange={setReturnTime} 

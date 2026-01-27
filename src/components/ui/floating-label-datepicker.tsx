@@ -20,6 +20,7 @@ interface FloatingLabelDatePickerProps {
   triggerClassName?: string;
   disabledDates?: (date: Date) => boolean;
   dateFormat?: string;
+  dataTrigger?: string;
 }
 
 export const FloatingLabelDatePicker = React.forwardRef<
@@ -34,7 +35,8 @@ export const FloatingLabelDatePicker = React.forwardRef<
   className,
   triggerClassName,
   disabledDates,
-  dateFormat = "dd MMM"
+  dateFormat = "dd MMM",
+  dataTrigger,
 }, ref) => {
   const [open, setOpen] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
@@ -69,6 +71,7 @@ export const FloatingLabelDatePicker = React.forwardRef<
             ref={ref}
             variant="outline"
             disabled={disabled}
+            data-date-trigger={dataTrigger}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             className={cn(
