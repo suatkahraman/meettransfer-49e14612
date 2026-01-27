@@ -173,11 +173,11 @@ const WebsiteHeader = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Dropdown style */}
       {mobileMenuOpen && (
         <div 
           ref={menuRef}
-          className="lg:hidden bg-black/95 backdrop-blur-md border-t border-white/10 animate-in fade-in slide-in-from-top-2 duration-200"
+          className="lg:hidden absolute right-3 top-full mt-2 w-72 bg-black/95 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50"
         >
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2">
             {navLinks.map((link) => (
