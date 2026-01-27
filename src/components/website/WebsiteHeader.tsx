@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogIn, LogOut, User, Download, Building2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,17 @@ const WebsiteHeader = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Scroll detection for header shrink animation
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Check if path matches considering language prefix
   const isActive = (path: string) => {
@@ -88,26 +99,40 @@ const WebsiteHeader = () => {
   }, [getLocalizedPath, location.pathname, navigate]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)]">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 h-14 sm:h-[4.5rem] flex items-center justify-between">
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)] transition-all duration-300 ${
+        isScrolled ? "shadow-md" : ""
+      }`}
+    >
+      <div 
+        className={`max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between transition-all duration-300 ${
+          isScrolled ? "h-12 sm:h-14" : "h-14 sm:h-[4.5rem]"
+        }`}
+      >
         {/* Left - Logo */}
         <Link to={getLocalizedPath("/")} className="flex-shrink-0 absolute left-2 sm:left-4 z-10">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer Logo" 
-            className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl object-cover shadow-xl ring-2 ring-primary/40 hover:ring-primary/60 transition-all"
+            className={`rounded-xl object-cover shadow-xl ring-2 ring-primary/40 hover:ring-primary/60 transition-all duration-300 ${
+              isScrolled ? "h-9 w-9 sm:h-11 sm:w-11" : "h-12 w-12 sm:h-16 sm:w-16"
+            }`}
           />
         </Link>
         
-        {/* Center - Brand Name (Mobile only) */}
-        <Link to={getLocalizedPath("/")} className="absolute left-1/2 -translate-x-1/2 z-10 md:hidden">
-          <span className="font-serif text-xl font-bold whitespace-nowrap tracking-tight">
+        {/* Center - Brand Name (All screens) */}
+        <Link to={getLocalizedPath("/")} className="absolute left-1/2 -translate-x-1/2 z-10">
+          <span 
+            className={`font-serif font-bold whitespace-nowrap tracking-tight transition-all duration-300 ${
+              isScrolled ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"
+            }`}
+          >
             <span className="text-primary">Meet</span> Transfer
           </span>
         </Link>
 
-        {/* Center - Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4">
+        {/* Desktop Navigation - Right aligned */}
+        <nav className="hidden md:flex items-center gap-4 ml-auto mr-4">
           <Link
             to={getLocalizedPath("/services")}
             className={`text-sm font-medium transition-colors ${
