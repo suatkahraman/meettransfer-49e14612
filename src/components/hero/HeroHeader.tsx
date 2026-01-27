@@ -19,14 +19,14 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
         <img 
           src={meetTransferLogo} 
           alt="Meet Transfer" 
-          width={48}
-          height={48}
+          width={64}
+          height={64}
           loading="eager"
           decoding="async"
           onError={(e) => {
             e.currentTarget.style.display = "none";
           }}
-          className="h-10 w-10 md:h-12 md:w-12 rounded-xl object-cover shadow-lg ring-1 ring-primary/30"
+          className="h-14 w-14 md:h-16 md:w-16 rounded-xl object-cover shadow-lg ring-2 ring-primary/30"
         />
         <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight" role="heading" aria-level={1}>
           <span className="text-primary">Meet</span> Transfer
