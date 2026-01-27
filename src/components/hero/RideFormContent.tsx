@@ -200,7 +200,7 @@ export const RideFormContent = memo(({
       <div className="grid grid-cols-2 gap-3">
         <div 
           className={cn(
-            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer",
+            "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer",
             shakeFields.date && "animate-shake",
             errors.date && "ring-2 ring-destructive/30"
           )}
@@ -232,7 +232,7 @@ export const RideFormContent = memo(({
         </div>
         <div 
           className={cn(
-            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer",
+            "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer",
             shakeFields.time && "animate-shake",
             errors.time && "ring-2 ring-destructive/30"
           )}
@@ -267,7 +267,7 @@ export const RideFormContent = memo(({
             "w-full h-[75px] rounded-xl transition-all text-sm font-bold tracking-wide uppercase flex items-center justify-center",
             hasReturnTrip 
               ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 ring-2 ring-green-500" 
-              : "bg-white dark:bg-zinc-800 text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
+              : "bg-white dark:bg-zinc-800 text-foreground hover:bg-zinc-50 dark:hover:bg-zinc-700 border border-zinc-100 dark:border-zinc-700"
           )}
         >
           {hasReturnTrip ? (
@@ -285,7 +285,7 @@ export const RideFormContent = memo(({
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
           <div 
-            className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-all"
+            className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
             onClick={(e) => {
               const target = e.target as HTMLElement;
               if (!target.closest('button')) {
@@ -313,7 +313,7 @@ export const RideFormContent = memo(({
             </div>
           </div>
           <div 
-            className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-all"
+            className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
             onClick={(e) => {
               const target = e.target as HTMLElement;
               if (!target.closest('button')) {
@@ -338,7 +338,7 @@ export const RideFormContent = memo(({
       )}
 
       {/* Passengers - Compact like other fields */}
-      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between">
+      <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-foreground" />
           <div className="flex flex-col">
