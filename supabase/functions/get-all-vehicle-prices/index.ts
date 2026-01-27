@@ -8,6 +8,7 @@ interface GetPricesRequest {
   pickup: string;
   dropoff: string;
   customerCurrency: string;
+  pickupDate?: string; // YYYY-MM-DD format for seasonal pricing
 }
 
 interface VehiclePriceInfo {
@@ -101,9 +102,9 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { pickup, dropoff, customerCurrency }: GetPricesRequest = await req.json();
+    const { pickup, dropoff, customerCurrency, pickupDate }: GetPricesRequest = await req.json();
 
-    console.log("🚗 Getting all vehicle prices for route:", pickup, "→", dropoff);
+    console.log("🚗 Getting all vehicle prices for route:", pickup, "→", dropoff, pickupDate ? `(date: ${pickupDate})` : "(no date)");
 
     // Detect region from locations - this is the authoritative source
     // PRIORITY CHECK: Turkey keywords before Dubai to prevent false positives
@@ -249,62 +250,133 @@ const handler = async (req: Request): Promise<Response> => {
       const vehicleType = vehicleTypeConfig.value;
       let foundPrice: { price: number; currency: string } | null = null;
 
+      // Helper function to query intercity prices with seasonal support
+      const queryIntercityPrice = async (
+        fromCity: string,
+        toCity: string,
+        fromDistrict: string | null,
+        toDistrict: string | null,
+        vType: string
+      ): Promise<{ price: number; currency: string } | null> => {
+        let query = supabase
+          .from("intercity_prices")
+          .select("price, price_currency, valid_from, valid_to")
+          .eq("vehicle_type", vType)
+          .eq("is_active", true);
+
+        // Build the OR condition for bidirectional matching
+        if (fromDistrict && toDistrict) {
+          query = query.or(`and(from_city.eq.${fromCity},from_district.eq.${fromDistrict},to_city.eq.${toCity},to_district.eq.${toDistrict}),and(from_city.eq.${toCity},from_district.eq.${toDistrict},to_city.eq.${fromCity},to_district.eq.${fromDistrict})`);
+        } else if (fromDistrict || toDistrict) {
+          const districtToMatch = fromDistrict || toDistrict;
+          const cityWithDistrict = fromDistrict ? fromCity : toCity;
+          const cityWithoutDistrict = fromDistrict ? toCity : fromCity;
+          query = query.or(`and(from_city.eq.${cityWithDistrict},from_district.eq.${districtToMatch},to_city.eq.${cityWithoutDistrict}),and(to_city.eq.${cityWithDistrict},to_district.eq.${districtToMatch},from_city.eq.${cityWithoutDistrict})`);
+        } else {
+          query = query.is("from_district", null).is("to_district", null)
+            .or(`and(from_city.eq.${fromCity},to_city.eq.${toCity}),and(from_city.eq.${toCity},to_city.eq.${fromCity})`);
+        }
+
+        const { data } = await query;
+        if (!data || data.length === 0) return null;
+
+        // First try to find seasonal price matching the pickup date
+        if (pickupDate) {
+          const seasonalPrice = data.find(p => 
+            p.valid_from && p.valid_to && 
+            pickupDate >= p.valid_from && pickupDate <= p.valid_to
+          );
+          if (seasonalPrice) {
+            console.log(`🗓️ Seasonal intercity price found for ${vType}: ${seasonalPrice.price} ${seasonalPrice.price_currency}`);
+            return { price: seasonalPrice.price, currency: seasonalPrice.price_currency };
+          }
+        }
+
+        // Fallback to base price (valid_from is NULL)
+        const basePrice = data.find(p => !p.valid_from);
+        if (basePrice) {
+          return { price: basePrice.price, currency: basePrice.price_currency };
+        }
+
+        // If no base price, use first available
+        return { price: data[0].price, currency: data[0].price_currency };
+      };
+
       // For intercity routes, first check intercity_prices table
       if (isIntercity && intercityFromCity && intercityToCity) {
         // Try exact district match first (both directions)
         if (intercityFromDistrict && intercityToDistrict) {
-          const { data: exactIntercityData } = await supabase
-            .from("intercity_prices")
-            .select("price, price_currency")
-            .eq("vehicle_type", vehicleType)
-            .eq("is_active", true)
-            .or(`and(from_city.eq.${intercityFromCity},from_district.eq.${intercityFromDistrict},to_city.eq.${intercityToCity},to_district.eq.${intercityToDistrict}),and(from_city.eq.${intercityToCity},from_district.eq.${intercityToDistrict},to_city.eq.${intercityFromCity},to_district.eq.${intercityFromDistrict})`)
-            .limit(1);
-
-          if (exactIntercityData && exactIntercityData.length > 0) {
-            foundPrice = { price: exactIntercityData[0].price, currency: exactIntercityData[0].price_currency };
+          foundPrice = await queryIntercityPrice(intercityFromCity, intercityToCity, intercityFromDistrict, intercityToDistrict, vehicleType);
+          if (foundPrice) {
             console.log(`✅ Intercity exact price found for ${vehicleType}: ${foundPrice.price} ${foundPrice.currency}`);
           }
         }
 
         // Try partial district match - when only one side has district (e.g., airport)
         if (!foundPrice && (intercityFromDistrict || intercityToDistrict)) {
-          const districtToMatch = intercityFromDistrict || intercityToDistrict;
-          const cityWithDistrict = intercityFromDistrict ? intercityFromCity : intercityToCity;
-          const cityWithoutDistrict = intercityFromDistrict ? intercityToCity : intercityFromCity;
-          
-          const { data: partialIntercityData } = await supabase
-            .from("intercity_prices")
-            .select("price, price_currency")
-            .eq("vehicle_type", vehicleType)
-            .eq("is_active", true)
-            .or(`and(from_city.eq.${cityWithDistrict},from_district.eq.${districtToMatch},to_city.eq.${cityWithoutDistrict}),and(to_city.eq.${cityWithDistrict},to_district.eq.${districtToMatch},from_city.eq.${cityWithoutDistrict})`)
-            .limit(1);
-
-          if (partialIntercityData && partialIntercityData.length > 0) {
-            foundPrice = { price: partialIntercityData[0].price, currency: partialIntercityData[0].price_currency };
+          foundPrice = await queryIntercityPrice(
+            intercityFromDistrict ? intercityFromCity : intercityToCity,
+            intercityFromDistrict ? intercityToCity : intercityFromCity,
+            intercityFromDistrict || intercityToDistrict,
+            null,
+            vehicleType
+          );
+          if (foundPrice) {
             console.log(`✅ Intercity partial price found for ${vehicleType}: ${foundPrice.price} ${foundPrice.currency}`);
           }
         }
 
         // Try city-only match (no district specified in price)
         if (!foundPrice) {
-          const { data: intercityData } = await supabase
-            .from("intercity_prices")
-            .select("price, price_currency")
-            .eq("vehicle_type", vehicleType)
-            .eq("is_active", true)
-            .is("from_district", null)
-            .is("to_district", null)
-            .or(`and(from_city.eq.${intercityFromCity},to_city.eq.${intercityToCity}),and(from_city.eq.${intercityToCity},to_city.eq.${intercityFromCity})`)
-            .limit(1);
-
-          if (intercityData && intercityData.length > 0) {
-            foundPrice = { price: intercityData[0].price, currency: intercityData[0].price_currency };
+          foundPrice = await queryIntercityPrice(intercityFromCity, intercityToCity, null, null, vehicleType);
+          if (foundPrice) {
             console.log(`✅ Intercity city price found for ${vehicleType}: ${foundPrice.price} ${foundPrice.currency}`);
           }
         }
       }
+
+      // Helper function to query region prices with seasonal support
+      const queryRegionPrice = async (
+        cityVal: string | null,
+        airportVal: string | null,
+        districtVal: string | null,
+        vType: string
+      ): Promise<{ price: number; currency: string } | null> => {
+        let query = supabase
+          .from("region_prices")
+          .select("price, price_currency, valid_from, valid_to")
+          .eq("vehicle_type", vType)
+          .eq("is_active", true);
+
+        if (cityVal) query = query.eq("city", cityVal);
+        if (airportVal) query = query.eq("airport", airportVal);
+        if (districtVal) query = query.eq("district", districtVal);
+
+        const { data } = await query;
+        if (!data || data.length === 0) return null;
+
+        // First try to find seasonal price matching the pickup date
+        if (pickupDate) {
+          const seasonalPrice = data.find(p => 
+            p.valid_from && p.valid_to && 
+            pickupDate >= p.valid_from && pickupDate <= p.valid_to
+          );
+          if (seasonalPrice) {
+            console.log(`🗓️ Seasonal region price found for ${vType}: ${seasonalPrice.price} ${seasonalPrice.price_currency}`);
+            return { price: seasonalPrice.price, currency: seasonalPrice.price_currency };
+          }
+        }
+
+        // Fallback to base price (valid_from is NULL)
+        const basePrice = data.find(p => !p.valid_from);
+        if (basePrice) {
+          return { price: basePrice.price, currency: basePrice.price_currency };
+        }
+
+        // If no base price, use first available (sorted by price ascending)
+        const sorted = data.sort((a, b) => a.price - b.price);
+        return { price: sorted[0].price, currency: sorted[0].price_currency };
+      };
 
       // Try exact match (airport + city + district + vehicle)
       // Try both full airport name and airport code (e.g., "Zurich Airport (ZRH)" and "ZRH")
@@ -315,18 +387,8 @@ const handler = async (req: Request): Promise<Response> => {
         
         for (const airportQuery of airportQueries) {
           if (foundPrice) break;
-          const { data } = await supabase
-            .from("region_prices")
-            .select("price, price_currency")
-            .eq("city", city)
-            .eq("airport", airportQuery)
-            .eq("district", matchedDistrict)
-            .eq("vehicle_type", vehicleType)
-            .eq("is_active", true)
-            .limit(1);
-
-          if (data && data.length > 0) {
-            foundPrice = { price: data[0].price, currency: data[0].price_currency };
+          foundPrice = await queryRegionPrice(city, airportQuery, matchedDistrict, vehicleType);
+          if (foundPrice) {
             console.log(`✅ Exact match found for ${vehicleType} with airport ${airportQuery}: ${foundPrice.price} ${foundPrice.currency}`);
           }
         }
@@ -340,18 +402,8 @@ const handler = async (req: Request): Promise<Response> => {
         
         for (const airportQuery of airportQueries) {
           if (foundPrice) break;
-          const { data } = await supabase
-            .from("region_prices")
-            .select("price, price_currency")
-            .eq("city", city)
-            .eq("airport", airportQuery)
-            .eq("vehicle_type", vehicleType)
-            .eq("is_active", true)
-            .order("price", { ascending: true })
-            .limit(1);
-
-          if (data && data.length > 0) {
-            foundPrice = { price: data[0].price, currency: data[0].price_currency };
+          foundPrice = await queryRegionPrice(city, airportQuery, null, vehicleType);
+          if (foundPrice) {
             console.log(`✅ Airport+city match found for ${vehicleType} with airport ${airportQuery}: ${foundPrice.price} ${foundPrice.currency}`);
           }
         }
@@ -359,34 +411,12 @@ const handler = async (req: Request): Promise<Response> => {
 
       // Try city only match (DISABLED for strict airport transfers to avoid wrong cross-region pricing)
       if (!strictRegionalOnly && !foundPrice && city) {
-        const { data } = await supabase
-          .from("region_prices")
-          .select("price, price_currency")
-          .eq("city", city)
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .order("price", { ascending: true })
-          .limit(1);
-
-        if (data && data.length > 0) {
-          foundPrice = { price: data[0].price, currency: data[0].price_currency };
-        }
+        foundPrice = await queryRegionPrice(city, null, null, vehicleType);
       }
 
       // Try airport only match (DISABLED for strict airport transfers to avoid wrong cross-region pricing)
       if (!strictRegionalOnly && !foundPrice && airport) {
-        const { data } = await supabase
-          .from("region_prices")
-          .select("price, price_currency")
-          .eq("airport", airport)
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .order("price", { ascending: true })
-          .limit(1);
-
-        if (data && data.length > 0) {
-          foundPrice = { price: data[0].price, currency: data[0].price_currency };
-        }
+        foundPrice = await queryRegionPrice(null, airport, null, vehicleType);
       }
 
       const config = vehicleConfig[vehicleType];

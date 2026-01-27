@@ -143,45 +143,84 @@ export function useHourlyForm(
           'sprinter-minibus': 'sprinter-minibus'
         };
         
+        // Format pickup date for seasonal price matching
+        const pickupDateStr = hourlyDate ? format(hourlyDate, 'yyyy-MM-dd') : null;
+        
         if (hourlyDuration === "custom") {
           const { data } = await supabase
             .from("hourly_rental_prices")
-            .select("vehicle_type, hourly_rate, price_currency")
+            .select("vehicle_type, hourly_rate, price_currency, valid_from, valid_to")
             .eq("city", hourlyCity)
             .eq("duration_type", "custom")
             .eq("is_active", true);
             
-          const prices = data?.filter(i => i.hourly_rate).map(i => ({
-            vehicleType: vehicleTypeMapping[i.vehicle_type] || i.vehicle_type,
-            price: i.hourly_rate! * (parseInt(customHours) || 9),
-            currency: i.price_currency
-          })) || [];
+          // Group by vehicle type and select seasonal or base price
+          const pricesByVehicle = new Map<string, typeof data[0]>();
+          data?.forEach(item => {
+            const existing = pricesByVehicle.get(item.vehicle_type);
+            
+            // Check if this is a seasonal price matching the pickup date
+            if (pickupDateStr && item.valid_from && item.valid_to) {
+              if (pickupDateStr >= item.valid_from && pickupDateStr <= item.valid_to) {
+                console.log(`🗓️ Using seasonal hourly rate for ${item.vehicle_type}`);
+                pricesByVehicle.set(item.vehicle_type, item);
+                return;
+              }
+            }
+            
+            // Use base price (valid_from is NULL) if no seasonal match yet
+            if (!existing && !item.valid_from) {
+              pricesByVehicle.set(item.vehicle_type, item);
+            }
+          });
+          
+          const prices = Array.from(pricesByVehicle.values())
+            .filter(i => i.hourly_rate)
+            .map(i => ({
+              vehicleType: vehicleTypeMapping[i.vehicle_type] || i.vehicle_type,
+              price: i.hourly_rate! * (parseInt(customHours) || 9),
+              currency: i.price_currency
+            }));
           setAllHourlyPrices(prices);
         } else {
           const { data: shortData } = await supabase
             .from("hourly_rental_prices")
-            .select("vehicle_type, price, price_currency")
+            .select("vehicle_type, price, price_currency, valid_from, valid_to")
             .eq("city", hourlyCity)
             .eq("duration_type", `${hourlyDuration}h`)
             .eq("is_active", true);
             
           const { data: longData } = await supabase
             .from("hourly_rental_prices")
-            .select("vehicle_type, price, price_currency")
+            .select("vehicle_type, price, price_currency, valid_from, valid_to")
             .eq("city", hourlyCity)
             .eq("duration_type", `${hourlyDuration}_hours`)
             .eq("is_active", true);
             
           const combined = [...(shortData || []), ...(longData || [])];
-          const map = new Map<string, { price: number; currency: string }>();
-          combined.forEach(i => {
-            if (!map.has(i.vehicle_type)) {
-              map.set(i.vehicle_type, { price: i.price, currency: i.price_currency });
+          
+          // Group by vehicle type and select seasonal or base price
+          const pricesByVehicle = new Map<string, { price: number; currency: string }>();
+          combined.forEach(item => {
+            const existing = pricesByVehicle.get(item.vehicle_type);
+            
+            // Check if this is a seasonal price matching the pickup date
+            if (pickupDateStr && item.valid_from && item.valid_to) {
+              if (pickupDateStr >= item.valid_from && pickupDateStr <= item.valid_to) {
+                console.log(`🗓️ Using seasonal price for ${item.vehicle_type}: ${item.price}`);
+                pricesByVehicle.set(item.vehicle_type, { price: item.price, currency: item.price_currency });
+                return;
+              }
+            }
+            
+            // Use base price (valid_from is NULL) if no seasonal match yet
+            if (!existing && !item.valid_from) {
+              pricesByVehicle.set(item.vehicle_type, { price: item.price, currency: item.price_currency });
             }
           });
           
           const prices: Array<{ vehicleType: string; price: number; currency: string }> = [];
-          map.forEach((v, k) => prices.push({
+          pricesByVehicle.forEach((v, k) => prices.push({
             vehicleType: vehicleTypeMapping[k] || k,
             price: v.price,
             currency: v.currency
@@ -196,7 +235,7 @@ export function useHourlyForm(
     };
     
     fetchPrices();
-  }, [hourlyCity, hourlyDuration, customHours]);
+  }, [hourlyCity, hourlyDuration, customHours, hourlyDate]);
 
   // Handlers
   const handleSetHourlyCity = useCallback((c: string) => setHourlyCity(c), []);
