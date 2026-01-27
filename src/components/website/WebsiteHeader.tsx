@@ -15,7 +15,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import meetTransferLogo from "@/assets/meet-transfer-logo.webp";
+import meetTransferLogo from "@/assets/meet-transfer-logo-transparent.png";
 
 const WebsiteHeader = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -49,16 +49,14 @@ const WebsiteHeader = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-28 sm:h-32 relative">
         {/* Left - Logo + Brand Name on mobile */}
         <Link to={getLocalizedPath("/")} className="flex items-center gap-2 hover:opacity-90 transition-opacity z-10">
-          <div className="relative h-12 w-12 sm:h-16 sm:w-16 overflow-hidden rounded-xl">
-            <img 
-              src={meetTransferLogo} 
-              alt="Meet Transfer" 
-              width={72}
-              height={72}
-              loading="eager"
-              className="absolute inset-[-15%] h-[130%] w-[130%] object-cover"
-            />
-          </div>
+          <img 
+            src={meetTransferLogo} 
+            alt="Meet Transfer" 
+            width={56}
+            height={56}
+            loading="eager"
+            className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+          />
           {/* Mobile brand name */}
           <span className="sm:hidden text-base font-bold text-foreground">
             <span className="text-primary">Meet</span> Transfer
