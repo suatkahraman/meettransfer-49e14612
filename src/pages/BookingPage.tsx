@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { TimePickerAMPM } from "@/components/ui/time-picker-ampm";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { 
@@ -1315,11 +1316,11 @@ const BookingPage = () => {
 
   // Booking Success Screen - Immediate redirect for logged-in users
   useEffect(() => {
-    if (bookingCompleted && user) {
-      // Immediate redirect without animation
-      navigate('/customer', { replace: true });
+    if (bookingCompleted && user && completedReservationId) {
+      // Redirect to specific reservation page
+      navigate(`/customer/reservations/${completedReservationId}`, { replace: true });
     }
-  }, [bookingCompleted, user, navigate]);
+  }, [bookingCompleted, user, completedReservationId, navigate]);
 
   // Only show success screen for guests (not logged in)
   if (bookingCompleted && !user) {
@@ -1756,6 +1757,10 @@ const BookingPage = () => {
                       onClick={() => {
                         const newValue = !hasReturnTrip;
                         setHasReturnTrip(newValue);
+                        // Set default return time if not already set
+                        if (newValue && !returnTime) {
+                          setReturnTime("10:00");
+                        }
                         // Only auto-apply promo for Turkey locations
                         if (isTurkey && newValue && activePromo.code && !promoCode) {
                           handlePromoCodeChange(activePromo.code);
@@ -1768,6 +1773,10 @@ const BookingPage = () => {
                         onCheckedChange={(checked) => {
                           const newValue = checked === true;
                           setHasReturnTrip(newValue);
+                          // Set default return time if not already set
+                          if (newValue && !returnTime) {
+                            setReturnTime("10:00");
+                          }
                           // Only auto-apply promo for Turkey locations
                           if (isTurkey && newValue && activePromo.code && !promoCode) {
                             handlePromoCodeChange(activePromo.code);
@@ -1824,16 +1833,19 @@ const BookingPage = () => {
                         </div>
                         <div>
                           <Label className="text-sm text-muted-foreground mb-2 block">{t("returnTime")}</Label>
-                          <Select value={returnTime} onValueChange={setReturnTime}>
-                            <SelectTrigger>
-                              <SelectValue placeholder={t("selectTime")} />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                              {timeOptions.map((opt) => (
-                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <div className="flex items-center h-10 px-3 py-2 border rounded-md bg-background">
+                            <Clock className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
+                            <TimePickerAMPM
+                              value={returnTime || "10:00"}
+                              onValueChange={setReturnTime}
+                              triggerClassName="text-sm font-medium"
+                              labels={{
+                                hour: language === 'TR' ? 'Saat' : 'Hour',
+                                minute: language === 'TR' ? 'Dakika' : 'Minute',
+                                save: language === 'TR' ? 'Kaydet' : 'Save'
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
