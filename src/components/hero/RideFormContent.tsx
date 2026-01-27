@@ -218,11 +218,11 @@ export const RideFormContent = memo(({
           shakeFields.date && "animate-shake",
           errors.date && "ring-2 ring-destructive/30"
         )}>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
+          <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
             {t("pickupDate") || "Pickup date"}
           </label>
           <div className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <CalendarIcon className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
             <FloatingLabelDatePicker 
               label="" 
               date={date} 
@@ -238,11 +238,11 @@ export const RideFormContent = memo(({
           shakeFields.time && "animate-shake",
           errors.time && "ring-2 ring-destructive/30"
         )}>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
+          <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
             {t("pickupTime") || "Pickup time"}
           </label>
           <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <Clock className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
             <LazyFloatingLabelSelect 
               label="" 
               value={time} 
@@ -281,11 +281,11 @@ export const RideFormContent = memo(({
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
           <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
+            <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
               {t("returnDate") || "Return date"}
             </label>
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <CalendarIcon className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
               <FloatingLabelDatePicker 
                 label="" 
                 date={returnDate} 
@@ -297,11 +297,11 @@ export const RideFormContent = memo(({
             </div>
           </div>
           <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
+            <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
               {t("returnTime") || "Return time"}
             </label>
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+              <Clock className="h-5 w-5 text-muted-foreground/60 flex-shrink-0" />
               <LazyFloatingLabelSelect 
                 label="" 
                 value={returnTime || ""} 
@@ -317,8 +317,8 @@ export const RideFormContent = memo(({
       {/* Passengers - Floating label with dark square +/- buttons like reference */}
       <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
         <div className="flex items-center gap-2 mb-2">
-          <Users className="h-5 w-5 text-muted-foreground" />
-          <span className="text-sm font-medium text-muted-foreground">
+          <Users className="h-5 w-5 text-muted-foreground/60" />
+          <span className="text-sm font-medium text-muted-foreground/70">
             {t("passengers") || "Passengers"}
           </span>
         </div>
