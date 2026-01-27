@@ -156,9 +156,18 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   const [pickup, setPickup] = useState(() => loadSavedFormData()?.pickup || "");
   const [dropoff, setDropoff] = useState(() => loadSavedFormData()?.dropoff || "");
   const [date, setDate] = useState<Date | undefined>(() => 
-    parseSavedDate(loadSavedFormData()?.date)
+    parseSavedDate(loadSavedFormData()?.date) || new Date()
   );
-  const [time, setTime] = useState(() => loadSavedFormData()?.time || "");
+  const [time, setTime] = useState(() => {
+    const saved = loadSavedFormData()?.time;
+    if (saved) return saved;
+    // Default to current time rounded to next 30 minutes
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const roundedMinutes = minutes < 30 ? 30 : 0;
+    const hours = minutes < 30 ? now.getHours() : now.getHours() + 1;
+    return `${hours.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
+  });
   const [passengers, setPassengers] = useState(() => loadSavedFormData()?.passengers || "2");
   const [vehicleType, setVehicleType] = useState(() => loadSavedFormData()?.vehicleType || "mercedes-vito");
   const [submitting, setSubmitting] = useState(false);
