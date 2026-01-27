@@ -89,7 +89,7 @@ const WebsiteHeader = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)]">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 h-12 sm:h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 h-14 sm:h-[4.5rem] flex items-center justify-between">
         {/* Left - Logo */}
         <Link to={getLocalizedPath("/")} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <img 
