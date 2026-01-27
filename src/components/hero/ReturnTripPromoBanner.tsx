@@ -154,26 +154,19 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
       <button
         type="button"
         onClick={handleClick}
-        className="w-full text-left relative bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 border border-green-500/30 rounded-xl px-3 md:px-4 py-2 md:py-2.5 backdrop-blur-sm hover:border-green-500/50 hover:from-green-500/15 hover:to-green-500/15 transition-all cursor-pointer group"
+        className="w-full text-left relative bg-gradient-to-r from-yellow-400/90 via-yellow-500/90 to-yellow-400/90 border-2 border-black/30 rounded-xl px-3 md:px-4 py-2.5 md:py-3 hover:from-yellow-500 hover:to-yellow-500 transition-all cursor-pointer group shadow-lg"
       >
-        {/* Animated background shimmer - CSS only */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+        {/* Animated background shimmer */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
         
         <div className="relative flex items-center justify-center gap-3">
           {/* Turkish Flag */}
           <span className="text-xl">🇹🇷</span>
           
-          {/* Simple discount text */}
-          <span className="font-bold text-green-700 dark:text-green-400 text-sm md:text-base">
-            %{promoData.discount_percentage} {promoTranslations.discount[language] || promoTranslations.discount.EN}
+          {/* Simple discount text - yellow/black theme */}
+          <span className="font-bold text-black text-sm md:text-base">
+            {promoTranslations.return[language] || promoTranslations.return.EN} %{promoData.discount_percentage} {promoTranslations.discount[language] || promoTranslations.discount.EN}
           </span>
-          
-          {/* Promo Code */}
-          <div className="flex items-center gap-1 bg-green-500/20 rounded-lg px-2 py-1 group-hover:bg-green-500/30 transition-colors">
-            <code className="font-mono font-bold text-green-700 dark:text-green-300 text-xs md:text-sm">
-              {promoData.code}
-            </code>
-          </div>
         </div>
       </button>
     </div>
