@@ -18,9 +18,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { Calendar, TrendingUp, TrendingDown, RefreshCw, Percent } from "lucide-react";
+import { Calendar, TrendingUp, TrendingDown, RefreshCw, Percent, CalendarRange } from "lucide-react";
 import { format, endOfMonth } from "date-fns";
+import { tr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 type PriceType = "hourly" | "region" | "intercity";
 
@@ -66,6 +74,11 @@ const MonthlyPriceUpdateDialog = ({
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [loading, setLoading] = useState(false);
   const [previewCount, setPreviewCount] = useState<number | null>(null);
+  
+  // Custom date range mode
+  const [dateMode, setDateMode] = useState<"months" | "custom">("months");
+  const [customDateFrom, setCustomDateFrom] = useState<Date | undefined>();
+  const [customDateTo, setCustomDateTo] = useState<Date | undefined>();
 
   const getTitle = () => {
     switch (priceType) {
@@ -102,8 +115,13 @@ const MonthlyPriceUpdateDialog = ({
       return;
     }
 
-    if (selectedMonths.length === 0) {
+    if (dateMode === "months" && selectedMonths.length === 0) {
       toast.error("En az bir ay seçin");
+      return;
+    }
+    
+    if (dateMode === "custom" && (!customDateFrom || !customDateTo)) {
+      toast.error("Başlangıç ve bitiş tarihi seçin");
       return;
     }
 
@@ -146,13 +164,25 @@ const MonthlyPriceUpdateDialog = ({
       return;
     }
 
-    if (selectedMonths.length === 0) {
+    if (dateMode === "months" && selectedMonths.length === 0) {
       toast.error("En az bir ay seçin");
       return;
     }
+    
+    if (dateMode === "custom" && (!customDateFrom || !customDateTo)) {
+      toast.error("Başlangıç ve bitiş tarihi seçin");
+      return;
+    }
 
-    const monthNames = selectedMonths.map(m => MONTHS.find(month => month.value === m)?.label).join(", ");
-    const confirmMessage = `${previewCount || "Seçili"} fiyat için ${selectedYear} ${monthNames} aylarına özel sezonluk fiyatlar oluşturulacak. Devam etmek istiyor musunuz?`;
+    let confirmMessage: string;
+    if (dateMode === "custom") {
+      const fromStr = format(customDateFrom!, "d MMMM yyyy", { locale: tr });
+      const toStr = format(customDateTo!, "d MMMM yyyy", { locale: tr });
+      confirmMessage = `${previewCount || "Seçili"} fiyat için ${fromStr} - ${toStr} tarih aralığında sezonluk fiyatlar oluşturulacak. Devam etmek istiyor musunuz?`;
+    } else {
+      const monthNames = selectedMonths.map(m => MONTHS.find(month => month.value === m)?.label).join(", ");
+      confirmMessage = `${previewCount || "Seçili"} fiyat için ${selectedYear} ${monthNames} aylarına özel sezonluk fiyatlar oluşturulacak. Devam etmek istiyor musunuz?`;
+    }
     
     if (!confirm(confirmMessage)) return;
 
@@ -167,6 +197,19 @@ const MonthlyPriceUpdateDialog = ({
       let successCount = 0;
       let errorCount = 0;
 
+      // Get date ranges based on mode
+      const dateRanges: { validFrom: Date; validTo: Date }[] = [];
+      
+      if (dateMode === "custom") {
+        dateRanges.push({ validFrom: customDateFrom!, validTo: customDateTo! });
+      } else {
+        for (const month of selectedMonths) {
+          const validFrom = new Date(selectedYear, month - 1, 1);
+          const validTo = endOfMonth(validFrom);
+          dateRanges.push({ validFrom, validTo });
+        }
+      }
+
       if (priceType === "region") {
         // Fetch region prices
         let query = supabase.from("region_prices").select("*").is("valid_from", null);
@@ -176,9 +219,7 @@ const MonthlyPriceUpdateDialog = ({
         if (result.error) throw result.error;
         const basePrices = result.data || [];
 
-        for (const month of selectedMonths) {
-          const validFrom = new Date(selectedYear, month - 1, 1);
-          const validTo = endOfMonth(validFrom);
+        for (const { validFrom, validTo } of dateRanges) {
           const validFromStr = format(validFrom, "yyyy-MM-dd");
           const validToStr = format(validTo, "yyyy-MM-dd");
 
@@ -234,9 +275,7 @@ const MonthlyPriceUpdateDialog = ({
         if (result.error) throw result.error;
         const basePrices = result.data || [];
 
-        for (const month of selectedMonths) {
-          const validFrom = new Date(selectedYear, month - 1, 1);
-          const validTo = endOfMonth(validFrom);
+        for (const { validFrom, validTo } of dateRanges) {
           const validFromStr = format(validFrom, "yyyy-MM-dd");
           const validToStr = format(validTo, "yyyy-MM-dd");
 
@@ -297,9 +336,7 @@ const MonthlyPriceUpdateDialog = ({
         if (result.error) throw result.error;
         const basePrices = result.data || [];
 
-        for (const month of selectedMonths) {
-          const validFrom = new Date(selectedYear, month - 1, 1);
-          const validTo = endOfMonth(validFrom);
+        for (const { validFrom, validTo } of dateRanges) {
           const validFromStr = format(validFrom, "yyyy-MM-dd");
           const validToStr = format(validTo, "yyyy-MM-dd");
 
@@ -367,7 +404,14 @@ const MonthlyPriceUpdateDialog = ({
     setSelectedMonths([]);
     setSelectedYear(currentYear);
     setPreviewCount(null);
+    setDateMode("months");
+    setCustomDateFrom(undefined);
+    setCustomDateTo(undefined);
   };
+  
+  const isDateSelectionValid = dateMode === "months" 
+    ? selectedMonths.length > 0 
+    : (customDateFrom && customDateTo);
 
   return (
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) resetForm(); }}>
@@ -380,49 +424,149 @@ const MonthlyPriceUpdateDialog = ({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Year Selection */}
+          {/* Date Mode Selection */}
           <div className="space-y-2">
-            <Label>Yıl</Label>
-            <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[currentYear, currentYear + 1, currentYear + 2].map(year => (
-                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Month Selection */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Aylar</Label>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="sm"
-                onClick={selectAllMonths}
+            <Label>Tarih Seçim Modu</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant={dateMode === "months" ? "default" : "outline"}
+                onClick={() => { setDateMode("months"); setPreviewCount(null); }}
+                className="flex items-center gap-2"
               >
-                {selectedMonths.length === 12 ? "Hiçbirini Seçme" : "Tümünü Seç"}
+                <Calendar className="h-4 w-4" />
+                Aylık
+              </Button>
+              <Button
+                type="button"
+                variant={dateMode === "custom" ? "default" : "outline"}
+                onClick={() => { setDateMode("custom"); setPreviewCount(null); }}
+                className="flex items-center gap-2"
+              >
+                <CalendarRange className="h-4 w-4" />
+                Özel Tarih
               </Button>
             </div>
-            <div className="grid grid-cols-4 gap-2">
-              {MONTHS.map(month => (
-                <Button
-                  key={month.value}
-                  type="button"
-                  variant={selectedMonths.includes(month.value) ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => toggleMonth(month.value)}
-                  className="text-xs"
-                >
-                  {month.label}
-                </Button>
-              ))}
-            </div>
           </div>
+          
+          {dateMode === "months" ? (
+            <>
+              {/* Year Selection */}
+              <div className="space-y-2">
+                <Label>Yıl</Label>
+                <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[currentYear, currentYear + 1, currentYear + 2].map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Month Selection */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Aylar</Label>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={selectAllMonths}
+                  >
+                    {selectedMonths.length === 12 ? "Hiçbirini Seçme" : "Tümünü Seç"}
+                  </Button>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {MONTHS.map(month => (
+                    <Button
+                      key={month.value}
+                      type="button"
+                      variant={selectedMonths.includes(month.value) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => toggleMonth(month.value)}
+                      className="text-xs"
+                    >
+                      {month.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            /* Custom Date Range Selection */
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Başlangıç Tarihi</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !customDateFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {customDateFrom 
+                        ? format(customDateFrom, "d MMMM yyyy", { locale: tr }) 
+                        : "Tarih seçin"
+                      }
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-background z-50" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={customDateFrom}
+                      onSelect={(date) => { setCustomDateFrom(date); setPreviewCount(null); }}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Bitiş Tarihi</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !customDateTo && "text-muted-foreground"
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {customDateTo 
+                        ? format(customDateTo, "d MMMM yyyy", { locale: tr }) 
+                        : "Tarih seçin"
+                      }
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-background z-50" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={customDateTo}
+                      onSelect={(date) => { setCustomDateTo(date); setPreviewCount(null); }}
+                      disabled={(date) => customDateFrom ? date < customDateFrom : date < new Date()}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              {customDateFrom && customDateTo && (
+                <div className="p-2 bg-muted rounded-md text-sm text-center">
+                  {format(customDateFrom, "d MMMM", { locale: tr })} - {format(customDateTo, "d MMMM yyyy", { locale: tr })}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Operation Selection */}
           <div className="grid grid-cols-2 gap-2">
@@ -512,7 +656,7 @@ const MonthlyPriceUpdateDialog = ({
             variant="outline"
             className="w-full"
             onClick={handlePreview}
-            disabled={!percentage || selectedMonths.length === 0}
+            disabled={!percentage || !isDateSelectionValid}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Önizle
@@ -522,10 +666,13 @@ const MonthlyPriceUpdateDialog = ({
           {previewCount !== null && (
             <div className={`p-3 rounded-lg text-center ${operation === "increase" ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
               <p className="font-semibold">
-                {previewCount} temel fiyat için {selectedMonths.length} ay boyunca sezonluk fiyatlar {operation === "increase" ? "artırılarak" : "azaltılarak"} oluşturulacak
+                {dateMode === "custom" 
+                  ? `${previewCount} temel fiyat için özel tarih aralığında sezonluk fiyatlar ${operation === "increase" ? "artırılarak" : "azaltılarak"} oluşturulacak`
+                  : `${previewCount} temel fiyat için ${selectedMonths.length} ay boyunca sezonluk fiyatlar ${operation === "increase" ? "artırılarak" : "azaltılarak"} oluşturulacak`
+                }
               </p>
               <p className="text-sm mt-1">
-                Toplam {previewCount * selectedMonths.length} sezonluk fiyat kaydı
+                Toplam {dateMode === "custom" ? previewCount : previewCount * selectedMonths.length} sezonluk fiyat kaydı
               </p>
             </div>
           )}
@@ -537,7 +684,7 @@ const MonthlyPriceUpdateDialog = ({
           </DialogClose>
           <Button
             onClick={handleSubmit}
-            disabled={loading || !percentage || selectedMonths.length === 0 || previewCount === null || previewCount === 0}
+            disabled={loading || !percentage || !isDateSelectionValid || previewCount === null || previewCount === 0}
             className={operation === "increase" ? "" : "bg-destructive hover:bg-destructive/90"}
           >
             {loading ? "İşleniyor..." : `Sezonluk Fiyatları Oluştur`}
