@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Menu, X, MapPin, Car, Phone, FileText, Info, LogIn, LogOut, User, UserPlus, Building2 } from "lucide-react";
+import { Menu, X, MapPin, Car, Phone, FileText, Info, LogIn, LogOut, User, UserPlus, Building2, BookOpen } from "lucide-react";
 import LanguageSelector from "./LanguageSelector";
 import meetTransferLogo from "@/assets/meet-transfer-logo-new.png";
 
@@ -58,7 +58,7 @@ const WebsiteHeader = () => {
     { path: "/destinations", label: t("cities") || "Cities", icon: MapPin },
     { path: "/fleet", label: t("fleet") || "Fleet", icon: Car },
     { path: "/about", label: t("about") || "About", icon: Info },
-    { path: "/terms", label: t("terms") || "Terms", icon: FileText },
+    { path: "/blog", label: t("blog") || "Blog", icon: BookOpen },
     { path: "/contact", label: t("contact") || "Contact", icon: Phone },
   ];
 
