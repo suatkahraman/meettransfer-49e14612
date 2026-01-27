@@ -503,6 +503,7 @@ const BookingPage = () => {
             pickup: urlPickup,
             dropoff: urlDropoff,
             customerCurrency: preferredCurrency,
+            pickupDate: urlDate || undefined, // Send date for seasonal pricing
           },
         });
 
@@ -530,7 +531,7 @@ const BookingPage = () => {
     };
 
     fetchPrices();
-  }, [urlPickup, urlDropoff, preferredCurrency, isHourlyBooking, searchParams, vehiclePrices.length]);
+  }, [urlPickup, urlDropoff, urlDate, preferredCurrency, isHourlyBooking, searchParams, vehiclePrices.length]);
 
   // Fetch hourly rental prices with minimum 8 second loading animation
   useEffect(() => {
@@ -542,14 +543,56 @@ const BookingPage = () => {
       const minLoadingTime = 5000; // 5 seconds minimum
       
       try {
-        const { data, error } = await supabase
+        // Build query for hourly prices with seasonal support
+        let query = supabase
           .from("hourly_rental_prices")
-          .select("*")
+          .select("*, valid_from, valid_to")
           .eq("city", urlCity)
           .eq("is_active", true);
 
+        const { data, error } = await query;
+
         if (error) throw error;
-        setHourlyPrices(data || []);
+        
+        // Filter to get seasonal prices if pickup date is available
+        const filteredPrices = (data || []).map(price => {
+          // Check if there's a seasonal price for this vehicle type and duration
+          const matchingPrices = data.filter(p => 
+            p.vehicle_type === price.vehicle_type && 
+            p.duration_type === price.duration_type
+          );
+          
+          if (urlDate && matchingPrices.length > 1) {
+            // Find seasonal price matching the date
+            const seasonalPrice = matchingPrices.find(p => 
+              p.valid_from && p.valid_to && 
+              urlDate >= p.valid_from && urlDate <= p.valid_to
+            );
+            if (seasonalPrice && price.id === seasonalPrice.id) {
+              console.log(`🗓️ Using seasonal hourly price: ${price.price} ${price.price_currency}`);
+              return price;
+            }
+            // If this is the seasonal one, return it, otherwise skip duplicates
+            if (seasonalPrice && price.id !== seasonalPrice.id && price.valid_from) {
+              return null; // Skip non-matching seasonal prices
+            }
+          }
+          
+          // Return base prices (valid_from is NULL) or single prices
+          if (!price.valid_from) return price;
+          return null;
+        }).filter(Boolean);
+        
+        // Deduplicate by vehicle_type + duration_type
+        const seen = new Set<string>();
+        const uniquePrices = filteredPrices.filter(p => {
+          const key = `${p.vehicle_type}-${p.duration_type}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        
+        setHourlyPrices(uniquePrices || []);
         
         // Wait for remaining time to complete 8 seconds
         const elapsedTime = Date.now() - startTime;
@@ -566,7 +609,7 @@ const BookingPage = () => {
     };
 
     fetchHourlyPrices();
-  }, [isHourlyBooking, urlCity]);
+  }, [isHourlyBooking, urlCity, urlDate]);
 
   // Get price for a specific vehicle (transfer)
   const getPriceForVehicle = (vType: string) => {
