@@ -24,7 +24,11 @@ const languages = [
 
 const LANGUAGE_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt"];
 
-const LanguageSelector = () => {
+interface LanguageSelectorProps {
+  onLanguageChange?: () => void;
+}
+
+const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,6 +54,9 @@ const LanguageSelector = () => {
       : `${targetLang?.prefix}${basePath === "/" ? "" : basePath}`;
 
     navigate(newPath);
+    
+    // Call the callback to close mobile menu
+    onLanguageChange?.();
   };
 
   return (
