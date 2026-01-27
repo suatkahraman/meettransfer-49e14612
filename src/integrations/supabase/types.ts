@@ -735,6 +735,8 @@ export type Database = {
           price: number
           price_currency: string
           updated_at: string
+          valid_from: string | null
+          valid_to: string | null
           vehicle_type: string
         }
         Insert: {
@@ -748,6 +750,8 @@ export type Database = {
           price: number
           price_currency?: string
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
           vehicle_type?: string
         }
         Update: {
@@ -761,6 +765,8 @@ export type Database = {
           price?: number
           price_currency?: string
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
           vehicle_type?: string
         }
         Relationships: []
@@ -778,6 +784,8 @@ export type Database = {
           to_city: string
           to_district: string | null
           updated_at: string
+          valid_from: string | null
+          valid_to: string | null
           vehicle_type: string
         }
         Insert: {
@@ -792,6 +800,8 @@ export type Database = {
           to_city: string
           to_district?: string | null
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
           vehicle_type?: string
         }
         Update: {
@@ -806,6 +816,8 @@ export type Database = {
           to_city?: string
           to_district?: string | null
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
           vehicle_type?: string
         }
         Relationships: []
@@ -1363,6 +1375,8 @@ export type Database = {
           price: number
           price_currency: string
           updated_at: string
+          valid_from: string | null
+          valid_to: string | null
           vehicle_type: string
         }
         Insert: {
@@ -1376,6 +1390,8 @@ export type Database = {
           price: number
           price_currency?: string
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
           vehicle_type?: string
         }
         Update: {
@@ -1389,6 +1405,8 @@ export type Database = {
           price?: number
           price_currency?: string
           updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
           vehicle_type?: string
         }
         Relationships: []
