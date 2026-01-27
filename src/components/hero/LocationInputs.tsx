@@ -32,12 +32,12 @@ const LocationInputsComponent = ({
     <div className="space-y-3">
       {/* Pickup - Floating label structure like reference */}
       <div className={cn(
-        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all",
+        "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all",
         pickupError 
           ? "ring-2 ring-destructive/30" 
-          : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
+          : "hover:bg-zinc-200 dark:hover:bg-zinc-700"
       )}>
-        <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
+        <label className="block text-sm font-medium text-foreground/60 mb-1">
           {language === 'TR' ? 'Nereden' :
            language === 'DE' ? 'Von' :
            language === 'FR' ? 'De' :
@@ -65,7 +65,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="bg-transparent border-0 p-0 h-auto text-base font-medium placeholder:text-muted-foreground/40 focus:ring-0 focus-visible:ring-0"
+            className="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
             value={pickup}
           />
         </div>
@@ -73,12 +73,12 @@ const LocationInputsComponent = ({
       
       {/* Dropoff - Floating label structure like reference */}
       <div className={cn(
-        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all",
+        "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all",
         dropoffError
           ? "ring-2 ring-destructive/30"
-          : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
+          : "hover:bg-zinc-200 dark:hover:bg-zinc-700"
       )}>
-        <label className="block text-sm font-medium text-muted-foreground/70 mb-1">
+        <label className="block text-sm font-medium text-foreground/60 mb-1">
           {language === 'TR' ? 'Nereye' :
            language === 'DE' ? 'Nach' :
            language === 'FR' ? 'À' :
@@ -106,7 +106,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="bg-transparent border-0 p-0 h-auto text-base font-medium placeholder:text-muted-foreground/40 focus:ring-0 focus-visible:ring-0"
+            className="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
             value={dropoff}
           />
         </div>
