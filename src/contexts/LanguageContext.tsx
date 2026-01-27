@@ -282,8 +282,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro",
     getQuote: "Get Quote",
     babySeatLabel: "Baby",
-    freeWifi: "Free WiFi",
-    googleReviews: "Google",
+    returnAdded: "RETURN ADDED",
+    addReturn: "Add Return",
     // Extra Options (Form)
     extraOptions: "Add Return",
     returnShort: "Return",
@@ -2096,6 +2096,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Profi",
     getQuote: "Angebot",
     babySeatLabel: "Baby",
+    returnAdded: "RÜCKFAHRT HINZUGEFÜGT",
+    addReturn: "Rückfahrt hinzufügen",
     freeWifi: "Kostenloses WLAN",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -3949,6 +3951,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro",
     getQuote: "Devis",
     babySeatLabel: "Bébé",
+    returnAdded: "RETOUR AJOUTÉ",
+    addReturn: "Ajouter le retour",
     freeWifi: "WiFi Gratuit",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -5516,6 +5520,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Профи",
     getQuote: "Запрос",
     babySeatLabel: "Детское",
+    returnAdded: "ОБРАТНЫЙ ПУТЬ ДОБАВЛЕН",
+    addReturn: "Добавить обратно",
     freeWifi: "Бесплатный WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -6947,6 +6953,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro",
     getQuote: "Preventivo",
     babySeatLabel: "Bimbo",
+    returnAdded: "RITORNO AGGIUNTO",
+    addReturn: "Aggiungi Ritorno",
     freeWifi: "WiFi Gratuito",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -8425,6 +8433,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro",
     getQuote: "Cotizar",
     babySeatLabel: "Bebé",
+    returnAdded: "REGRESO AGREGADO",
+    addReturn: "Agregar Regreso",
     freeWifi: "WiFi Gratis",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -9903,6 +9913,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "محترف",
     getQuote: "عرض سعر",
     babySeatLabel: "طفل",
+    returnAdded: "تم إضافة العودة",
+    addReturn: "إضافة العودة",
     freeWifi: "واي فاي مجاني",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -11331,6 +11343,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Pro Şoför",
     getQuote: "Fiyat Al",
     babySeatLabel: "Bebek",
+    returnAdded: "DÖNÜŞ EKLENDİ",
+    addReturn: "Dönüş Ekle",
     freeWifi: "Ücretsiz WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -12952,6 +12966,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "Профі",
     getQuote: "Запит",
     babySeatLabel: "Дитяче",
+    returnAdded: "ЗВОРОТНИЙ РЕЙС ДОДАНО",
+    addReturn: "Додати назад",
     freeWifi: "Безкоштовний WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -14346,6 +14362,8 @@ const translations: Record<Language, Record<string, string>> = {
     proDriver: "プロ",
     getQuote: "見積り",
     babySeatLabel: "ベビー",
+    returnAdded: "復路が追加されました",
+    addReturn: "復路を追加",
     freeWifi: "無料WiFi",
     googleReviews: "Google",
     // Extra Options (Form)
@@ -15459,6 +15477,13 @@ const translations: Record<Language, Record<string, string>> = {
     noPaymentHistory: "Ainda não há histórico de pagamentos",
     loadingPayments: "Carregando...",
     support: "Suporte",
+    // Hero Form
+    returnAdded: "RETORNO ADICIONADO",
+    addReturn: "Adicionar Retorno",
+    pickupDate: "Data de recolha",
+    pickupTime: "Hora de recolha",
+    passengers: "Passageiros",
+    getQuote: "Obter Preço",
     // All other keys will use English as fallback through the t() function
   },
 };
