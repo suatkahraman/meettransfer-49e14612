@@ -27,8 +27,9 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar } from 'lucide-react';
 import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
+import MonthlyPriceUpdateDialog from "@/components/admin/MonthlyPriceUpdateDialog";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -144,6 +145,8 @@ const AdminRegionPrices = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
   const [isBulkIntercityUpdateDialogOpen, setIsBulkIntercityUpdateDialogOpen] = useState(false);
+  const [isMonthlyUpdateDialogOpen, setIsMonthlyUpdateDialogOpen] = useState(false);
+  const [isMonthlyIntercityUpdateDialogOpen, setIsMonthlyIntercityUpdateDialogOpen] = useState(false);
   const [editingPrice, setEditingPrice] = useState<RegionPrice | null>(null);
   
   // Airport form state - now supports all 4 vehicles at once
@@ -735,6 +738,10 @@ const AdminRegionPrices = () => {
                   Havalimanı Transfer Fiyatları
                 </CardTitle>
                 <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setIsMonthlyUpdateDialogOpen(true)}>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Aylık Fiyat
+                  </Button>
                   <Button variant="outline" onClick={() => setIsBulkUpdateDialogOpen(true)}>
                     <Percent className="h-4 w-4 mr-2" />
                     % Güncelle
@@ -946,6 +953,10 @@ const AdminRegionPrices = () => {
                   Şehirler Arası Fiyatlar
                 </CardTitle>
                 <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setIsMonthlyIntercityUpdateDialogOpen(true)}>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Aylık Fiyat
+                  </Button>
                   <Button variant="outline" onClick={() => setIsBulkIntercityUpdateDialogOpen(true)}>
                     <Percent className="h-4 w-4 mr-2" />
                     % Güncelle
@@ -1182,6 +1193,24 @@ const AdminRegionPrices = () => {
         <BulkPriceUpdateDialog
           open={isBulkIntercityUpdateDialogOpen}
           onOpenChange={setIsBulkIntercityUpdateDialogOpen}
+          priceType="intercity"
+          onSuccess={fetchIntercityPrices}
+          cities={Object.keys(CITIES_DATA)}
+          vehicleTypes={VEHICLE_TYPES}
+        />
+        
+        {/* Monthly Price Update Dialogs */}
+        <MonthlyPriceUpdateDialog
+          open={isMonthlyUpdateDialogOpen}
+          onOpenChange={setIsMonthlyUpdateDialogOpen}
+          priceType="region"
+          onSuccess={fetchPrices}
+          cities={Object.keys(CITIES_DATA)}
+          vehicleTypes={VEHICLE_TYPES}
+        />
+        <MonthlyPriceUpdateDialog
+          open={isMonthlyIntercityUpdateDialogOpen}
+          onOpenChange={setIsMonthlyIntercityUpdateDialogOpen}
           priceType="intercity"
           onSuccess={fetchIntercityPrices}
           cities={Object.keys(CITIES_DATA)}
