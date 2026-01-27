@@ -49,14 +49,14 @@ const WebsiteHeader = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-16 sm:h-20 relative">
         {/* Left - Logo + Brand Name */}
         <Link to={getLocalizedPath("/")} className="flex items-center gap-2 hover:opacity-90 transition-opacity z-10">
-          <div className="h-10 w-10 sm:h-11 sm:w-11 bg-black rounded-lg flex items-center justify-center overflow-hidden">
+          <div className="h-12 w-12 sm:h-14 sm:w-14 bg-black rounded-lg flex items-center justify-center overflow-hidden">
             <img 
               src={meetTransferLogo} 
               alt="Meet Transfer" 
-              width={44}
-              height={44}
+              width={56}
+              height={56}
               loading="eager"
-              className="h-8 w-8 sm:h-9 sm:w-9 object-contain"
+              className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
             />
           </div>
           <h1 className="text-lg sm:text-xl md:text-2xl font-black text-white whitespace-nowrap tracking-tight">
