@@ -176,7 +176,7 @@ export const HourlyFormContent = memo(({
         shakeFields.city && "animate-shake",
         errors.city 
           ? "ring-2 ring-destructive/30" 
-          : "hover:bg-amber-100 dark:hover:bg-zinc-700"
+          : "hover:bg-amber-200 dark:hover:bg-zinc-700"
       )}>
         <label className="block text-xs font-medium text-foreground/70 mb-0.5">
           {getPickupLabel()}
@@ -196,7 +196,7 @@ export const HourlyFormContent = memo(({
       {/* Duration and Date Row */}
       <div className="grid grid-cols-2 gap-3">
         <div 
-          className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-100 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700"
+          className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700"
           onClick={(e) => {
             const target = e.target as HTMLElement;
             if (!target.closest('button')) {
@@ -225,7 +225,9 @@ export const HourlyFormContent = memo(({
           className={cn(
             "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-100 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700",
             shakeFields.date && "animate-shake",
-            errors.date && "ring-2 ring-destructive/30"
+            errors.date 
+              ? "ring-2 ring-destructive/30" 
+              : "hover:bg-amber-200"
           )}
           onClick={(e) => {
             const target = e.target as HTMLElement;
@@ -260,7 +262,9 @@ export const HourlyFormContent = memo(({
         className={cn(
           "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-100 dark:hover:bg-zinc-700 cursor-pointer border border-amber-200 dark:border-zinc-700",
           shakeFields.time && "animate-shake",
-          errors.time && "ring-2 ring-destructive/30"
+          errors.time 
+            ? "ring-2 ring-destructive/30" 
+            : "hover:bg-amber-200"
         )}
         onClick={(e) => {
           const target = e.target as HTMLElement;
@@ -284,7 +288,7 @@ export const HourlyFormContent = memo(({
       </div>
 
       {/* Passengers Row */}
-      <div className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between border border-amber-200 dark:border-zinc-700">
+      <div className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between border border-amber-200 dark:border-zinc-700 transition-all hover:bg-amber-200 dark:hover:bg-zinc-700">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-foreground" />
           <div className="flex flex-col">

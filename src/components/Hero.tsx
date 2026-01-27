@@ -153,7 +153,7 @@ export const Hero = () => {
                 className="shadow-none rounded-none flex-1 flex flex-col"
               >
                 {/* Tabs */}
-                <div className="flex bg-muted/50 relative">
+                <div className="flex bg-muted/50 relative border-b border-amber-200">
                   <div 
                     className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300"
                     style={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }}
@@ -161,8 +161,8 @@ export const Hero = () => {
                   <button 
                     onClick={() => setActiveTab("ride")} 
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative",
-                      activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative border-r border-amber-200",
+                      activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-amber-100"
                     )}
                   >
                     <Car className="h-4 w-4 md:h-4 md:w-4" />
@@ -172,7 +172,7 @@ export const Hero = () => {
                     onClick={() => setActiveTab("hourly")} 
                     className={cn(
                       "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm",
-                      activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-amber-100"
                     )}
                   >
                     <Timer className="h-4 w-4 md:h-4 md:w-4" />

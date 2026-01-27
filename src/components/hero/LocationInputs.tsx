@@ -37,7 +37,7 @@ const LocationInputsComponent = ({
         "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
         pickupError 
           ? "ring-2 ring-destructive/30" 
-          : "hover:bg-amber-100 dark:hover:bg-zinc-700"
+          : "hover:bg-amber-200 dark:hover:bg-zinc-700"
       )}>
         <label className="block text-xs font-medium text-foreground/70 mb-0.5">
           {language === 'TR' ? 'Nereden' :
@@ -79,7 +79,7 @@ const LocationInputsComponent = ({
         "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
         dropoffError
           ? "ring-2 ring-destructive/30"
-          : "hover:bg-amber-100 dark:hover:bg-zinc-700"
+          : "hover:bg-amber-200 dark:hover:bg-zinc-700"
       )}>
         <label className="block text-xs font-medium text-foreground/70 mb-0.5">
           {language === 'TR' ? 'Nereye' :
