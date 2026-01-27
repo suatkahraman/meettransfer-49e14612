@@ -21,19 +21,24 @@ import sprinterArrival from "@/assets/vehicles/sprinter-arrival.webp";
 import sedanAirport from "@/assets/vehicles/sedan-standard-airport.webp";
 import sedanExterior from "@/assets/vehicles/sedan-standard-exterior.webp";
 
+// Turkey-specific sedan images (Renault Megane, Toyota Corolla)
+import sedanRenaultMegane from "@/assets/vehicles/sedan-renault-megane.webp";
+import sedanToyotaCorolla from "@/assets/vehicles/sedan-toyota-corolla.webp";
+
 // Dubai vehicle images - WebP optimized
 import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.webp";
 
 // Vehicle images map with multiple images per vehicle for carousel
 const vehicleImageSets: Record<string, string[]> = {
-  'sedan': [sedanImg, sedanAirport, sedanExterior],
+  // Turkey sedan - Renault Megane & Toyota Corolla
+  'sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanImg],
   'mercedes-vito': [vitoImg, vitoAirportPremium],
   'vip-mercedes': [vitoVipImg, vipVitoStarlight],
   'maybach-minibus': [maybachImg, maybachLuxury],
   'sprinter-minibus': [sprinterImg, sprinterArrival],
   'minibus': [sprinterImg, sprinterArrival],
   // Dubai vehicles
-  'dubai-private-sedan': [sedanImg, sedanAirport],
+  'dubai-private-sedan': [sedanRenaultMegane, sedanToyotaCorolla],
   'dubai-premium-van': [vitoVipImg, vipVitoStarlight],
   'dubai-suburban-suv': [vitoImg, vitoAirportPremium],
   'dubai-vip-sprinter': [dubaiVipVanImg, sprinterArrival],
@@ -41,13 +46,13 @@ const vehicleImageSets: Record<string, string[]> = {
 
 // Single image fallback
 const vehicleImages: Record<string, string> = {
-  'sedan': sedanImg,
+  'sedan': sedanRenaultMegane,
   'mercedes-vito': vitoImg,
   'vip-mercedes': vitoVipImg,
   'maybach-minibus': maybachImg,
   'sprinter-minibus': sprinterImg,
   'minibus': sprinterImg,
-  'dubai-private-sedan': sedanImg,
+  'dubai-private-sedan': sedanRenaultMegane,
   'dubai-premium-van': vitoVipImg,
   'dubai-suburban-suv': vitoImg,
   'dubai-vip-sprinter': dubaiVipVanImg,
