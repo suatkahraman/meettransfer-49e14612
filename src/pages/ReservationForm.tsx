@@ -171,6 +171,9 @@ const ReservationForm = () => {
   // Check if prices were pre-fetched during animation (from CustomerHome)
   const pricesPreFetched = searchParams.get('pricesPreFetched') === 'true';
   
+  // Check if coming from Hero form to show vehicle selection
+  const urlShowVehicleSelection = searchParams.get('showVehicleSelection') === 'true';
+  
   // State for vehicle prices and loading
   const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
   const [isPricesLoading, setIsPricesLoading] = useState(false);
@@ -256,6 +259,64 @@ const ReservationForm = () => {
     }
   }, [pricesPreFetched, user, urlPickup, urlDropoff, vehiclePrices, showVehicleSelection]);
   
+  // Show vehicle selection when coming from Hero form (urlShowVehicleSelection=true)
+  useEffect(() => {
+    const fetchAndShowVehicleSelection = async () => {
+      if (!urlShowVehicleSelection || !user || !urlPickup || !urlDropoff) return;
+      if (showVehicleSelection || showPricePreparation) return; // Already showing
+      
+      setShowPricePreparation(true);
+      setIsLoading(true);
+      
+      try {
+        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
+          body: {
+            pickup: urlPickup,
+            dropoff: urlDropoff,
+            customerCurrency: urlCurrency,
+          },
+        });
+        
+        // Wait for animation
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        if (data?.prices && data.prices.length > 0) {
+          setFetchedVehiclePrices(data.prices);
+          setSelectedVehicleForConfirm(urlVehicleType || 'mercedes-vito');
+        } else {
+          setFetchedVehiclePrices([]);
+          setSelectedVehicleForConfirm(urlVehicleType || 'mercedes-vito');
+        }
+        
+        // Set pending form data
+        setPendingFormData({
+          ...defaultFormData,
+          pickup: urlPickup,
+          dropoff: urlDropoff,
+          date: urlDate,
+          time: urlTime,
+          vehicleType: urlVehicleType || 'mercedes-vito',
+          paymentMethod: '' as '' | 'cash' | 'payment_link',
+          notes: urlCustomerNotes || '',
+        });
+        setPendingPassengerNames(passengerNames.filter(n => n.trim() !== ''));
+        
+        setShowPricePreparation(false);
+        setShowVehicleSelection(true);
+      } catch (error) {
+        console.error("Error fetching prices:", error);
+        setFetchedVehiclePrices([]);
+        setSelectedVehicleForConfirm(urlVehicleType || 'mercedes-vito');
+        setShowPricePreparation(false);
+        setShowVehicleSelection(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchAndShowVehicleSelection();
+  }, [urlShowVehicleSelection, user, urlPickup, urlDropoff, showVehicleSelection, showPricePreparation]);
+  
   // Fetch prices when pickup/dropoff change (only for logged-in users without pre-loaded prices)
   useEffect(() => {
     const fetchPrices = async () => {
@@ -264,6 +325,7 @@ const ReservationForm = () => {
       if (Object.keys(vehiclePrices).length > 0) return;
       if (urlAllVehiclePrices) return; // Already have prices from URL
       if (pricesPreFetched) return; // Already pre-fetched during animation
+      if (urlShowVehicleSelection) return; // Handled by the above effect
       
       setIsPricesLoading(true);
       try {
@@ -292,7 +354,7 @@ const ReservationForm = () => {
     };
     
     fetchPrices();
-  }, [user, urlPickup, urlDropoff, urlCurrency, urlAllVehiclePrices, vehiclePrices, pricesPreFetched]);
+  }, [user, urlPickup, urlDropoff, urlCurrency, urlAllVehiclePrices, vehiclePrices, pricesPreFetched, urlShowVehicleSelection]);
   
   const [hasReturnTrip, setHasReturnTrip] = useState(urlHasReturn);
   const [promoCode, setPromoCode] = useState(urlPromoCode);
@@ -1521,8 +1583,8 @@ const ReservationForm = () => {
                     variant="outline"
                     size="icon"
                     className="h-7 w-7 sm:h-8 sm:w-8"
-                    onClick={() => setBabySeatCount(Math.min(3, babySeatCount + 1))}
-                    disabled={babySeatCount >= 3}
+                    onClick={() => setBabySeatCount(Math.min(1, babySeatCount + 1))}
+                    disabled={babySeatCount >= 1}
                   >
                     <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
