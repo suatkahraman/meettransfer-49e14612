@@ -75,22 +75,9 @@ const UniversalLanguageSelector = ({
       return;
     }
 
-    // For public website routes, navigate to the localized URL
-    const pathParts = location.pathname.split("/").filter(Boolean);
-    const firstPart = pathParts[0]?.toLowerCase();
-    
-    let basePath: string;
-    if (LANGUAGE_PREFIXES.includes(firstPart)) {
-      basePath = "/" + pathParts.slice(1).join("/") || "/";
-    } else {
-      basePath = location.pathname;
-    }
-
-    // Build new path with target language prefix
+    // Navigate to homepage with the selected language prefix
     const targetLang = LANGUAGES.find(l => l.code === newLang);
-    const newPath = newLang === "EN" 
-      ? basePath 
-      : `${targetLang?.prefix}${basePath === "/" ? "" : basePath}`;
+    const newPath = newLang === "EN" ? "/" : targetLang?.prefix || "/";
 
     navigate(newPath);
   };
