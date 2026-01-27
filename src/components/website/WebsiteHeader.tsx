@@ -173,7 +173,7 @@ const WebsiteHeader = () => {
         </div>
       </div>
 
-      {/* Mobile Menu - Slide-in Panel from Left */}
+      {/* Mobile Menu - Slide-in Panel from Right */}
       {mobileMenuOpen && (
         <>
           {/* Overlay */}
@@ -185,7 +185,7 @@ const WebsiteHeader = () => {
           {/* Slide Panel */}
           <div 
             ref={menuRef}
-            className="lg:hidden fixed left-0 top-0 h-full w-72 bg-black border-r border-white/10 shadow-2xl z-50 animate-in slide-in-from-left duration-300"
+            className="lg:hidden fixed right-0 top-0 h-full w-72 bg-black border-l border-white/10 shadow-2xl z-50 animate-in slide-in-from-right duration-300"
           >
             {/* Panel Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10">
