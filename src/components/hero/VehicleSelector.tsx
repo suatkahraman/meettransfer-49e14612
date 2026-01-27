@@ -113,9 +113,11 @@ export const VehicleSelector = memo(({
                 )}
               </div>
               
-              {/* Vehicle Name */}
-              <div className="text-sm font-bold truncate mb-1 pointer-events-none text-foreground leading-tight">
-                {vehicle.label}
+              {/* Vehicle Name - Vertical layout */}
+              <div className="text-xs font-bold pointer-events-none text-foreground leading-tight mb-1 min-h-[2rem] flex flex-col items-center justify-center">
+                {vehicle.label.split(' ').map((word, i) => (
+                  <span key={i} className="block">{word}</span>
+                ))}
               </div>
               
               {/* Passenger & Luggage Count */}

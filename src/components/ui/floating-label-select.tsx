@@ -75,11 +75,12 @@ export const FloatingLabelSelect = React.memo(React.forwardRef<
           ref={ref}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className={cn(
-            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] bg-muted/50 border-border rounded-xl text-base md:text-sm touch-manipulation",
+            className={cn(
+            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] bg-card border-2 rounded-xl text-base md:text-sm touch-manipulation",
             "transition-all duration-200 ease-out",
-            "focus:ring-2 focus:ring-primary/20 focus:border-primary active:bg-muted/80",
-            isFocused && "border-primary shadow-sm shadow-primary/10",
+            "focus:ring-2 focus:ring-primary/20 focus:border-primary hover:bg-muted/30 active:bg-muted/50",
+            hasValue ? "border-primary shadow-md shadow-primary/15" : "border-border",
+            isFocused && "border-primary shadow-md shadow-primary/20",
             triggerClassName
           )}
         >
@@ -87,8 +88,8 @@ export const FloatingLabelSelect = React.memo(React.forwardRef<
             {icon && (
               <span
                 className={cn(
-                  "flex-shrink-0 transition-all duration-150 [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4",
-                  isFocused && "text-primary scale-110"
+                  "flex-shrink-0 transition-all duration-150 [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 text-primary",
+                  (isFocused || hasValue) && "scale-110"
                 )}
               >
                 {icon}

@@ -72,17 +72,18 @@ export const FloatingLabelDatePicker = React.forwardRef<
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             className={cn(
-              "w-full h-14 md:h-12 min-h-[56px] md:min-h-[48px] justify-start bg-muted/50 border-border rounded-xl text-base md:text-sm transition-all duration-200 touch-manipulation",
-              "focus:ring-2 focus:ring-primary/20 focus:border-primary hover:bg-muted/70 active:bg-muted/80",
-              (isFocused || open) && "border-primary shadow-sm shadow-primary/10",
+              "w-full h-14 md:h-12 min-h-[56px] md:min-h-[48px] justify-start bg-card border-2 rounded-xl text-base md:text-sm transition-all duration-200 touch-manipulation",
+              "focus:ring-2 focus:ring-primary/20 focus:border-primary hover:bg-muted/30 active:bg-muted/50",
+              hasValue ? "border-primary shadow-md shadow-primary/15" : "border-border",
+              (isFocused || open) && "border-primary shadow-md shadow-primary/20",
               !hasValue && "text-transparent",
               triggerClassName
             )}
           >
             <span
               className={cn(
-                "mr-2.5 md:mr-2 flex-shrink-0 [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 transition-colors duration-150",
-                (isFocused || open) && "text-primary"
+                "mr-2.5 md:mr-2 flex-shrink-0 [&>svg]:h-5 [&>svg]:w-5 md:[&>svg]:h-4 md:[&>svg]:w-4 transition-all duration-150 text-primary",
+                (isFocused || open || hasValue) && "scale-110"
               )}
             >
               {icon || <CalendarIcon className="h-5 w-5 md:h-4 md:w-4" />}
