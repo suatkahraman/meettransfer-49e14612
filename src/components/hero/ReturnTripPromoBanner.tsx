@@ -150,21 +150,15 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
   }
 
   return (
-    <div className="mb-3 relative overflow-hidden animate-fade-in">
+    <div className="mb-2 relative overflow-hidden animate-fade-in">
       <button
         type="button"
         onClick={handleClick}
-        className="w-full text-left relative bg-gradient-to-r from-yellow-400/90 via-yellow-500/90 to-yellow-400/90 border-2 border-black/30 rounded-xl px-3 md:px-4 py-2.5 md:py-3 hover:from-yellow-500 hover:to-yellow-500 transition-all cursor-pointer group shadow-lg"
+        className="w-full text-center relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 border border-black/20 rounded-full px-4 py-1.5 hover:from-yellow-500 hover:to-yellow-500 transition-all cursor-pointer group shadow-md"
       >
-        {/* Animated background shimmer */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-        
-        <div className="relative flex items-center justify-center gap-3">
-          {/* Turkish Flag */}
-          <span className="text-xl">🇹🇷</span>
-          
-          {/* Simple discount text - yellow/black theme */}
-          <span className="font-bold text-black text-sm md:text-base">
+        <div className="relative flex items-center justify-center gap-2">
+          <span className="text-base">🇹🇷</span>
+          <span className="font-bold text-black text-xs md:text-sm">
             {promoTranslations.return[language] || promoTranslations.return.EN} %{promoData.discount_percentage} {promoTranslations.discount[language] || promoTranslations.discount.EN}
           </span>
         </div>
