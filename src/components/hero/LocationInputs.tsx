@@ -4,6 +4,7 @@ import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete } from "@/comp
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaceSelectedHandler } from "./types";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CompactRouteMap = lazy(() => import("@/components/ui/compact-route-map").then(m => ({ default: m.CompactRouteMap })));
 
@@ -27,6 +28,7 @@ const LocationInputsComponent = ({
   pickupError,
   dropoffError
 }: LocationInputsProps) => {
+  const { t } = useLanguage();
 
   return (
     <div className="space-y-3">
@@ -67,6 +69,7 @@ const LocationInputsComponent = ({
             } 
             className="bg-transparent border-0 p-0 h-auto text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={pickup}
+            myLocationLabel={t('useMyLocation')}
           />
         </div>
       </div>
@@ -108,6 +111,7 @@ const LocationInputsComponent = ({
             } 
             className="bg-transparent border-0 p-0 h-auto text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={dropoff}
+            myLocationLabel={t('useMyLocation')}
           />
         </div>
       </div>

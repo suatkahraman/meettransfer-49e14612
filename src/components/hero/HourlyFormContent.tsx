@@ -188,6 +188,7 @@ export const HourlyFormContent = memo(({
             placeholder={getPickupPlaceholder()} 
             className="bg-transparent border-0 p-0 h-auto text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={hourlyCity}
+            myLocationLabel={t('useMyLocation')}
           />
         </div>
       </div>
