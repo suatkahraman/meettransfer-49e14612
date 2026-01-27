@@ -213,18 +213,18 @@ export const HourlyFormContent = memo(({
         />
       )}
 
-      {/* Date/Time/Passengers - larger touch targets on mobile */}
-      <div className="grid grid-cols-3 gap-2.5 md:gap-2">
+      {/* Date/Time/Passengers - Enhanced prominence with border and shadow */}
+      <div className="grid grid-cols-3 gap-2.5 md:gap-2 p-2 bg-muted/30 rounded-xl border border-border/50">
         <div className={cn(shakeFields.date && "animate-shake")}>
           <FloatingLabelDatePicker 
             label={t("date") || "Date"} 
             date={hourlyDate} 
             onSelect={handleDateChange} 
-            icon={<CalendarIcon className="h-4 w-4 md:h-4 md:w-4" />} 
+            icon={<CalendarIcon className="h-5 w-5 md:h-4 md:w-4" />} 
             disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
             className="col-span-1" 
             triggerClassName={cn(
-              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
+              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors",
               errors.date && "border-destructive ring-2 ring-destructive/20"
             )}
           />
@@ -235,10 +235,10 @@ export const HourlyFormContent = memo(({
           value={hourlyTime} 
           onValueChange={handleTimeChange} 
           options={memoizedTimeOptions} 
-          icon={<Clock className="h-4 w-4 md:h-4 md:w-4" />} 
+          icon={<Clock className="h-5 w-5 md:h-4 md:w-4" />} 
           className="col-span-1" 
           triggerClassName={cn(
-            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
+            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors",
             errors.time && "border-destructive ring-2 ring-destructive/20"
           )}
         />
@@ -248,9 +248,9 @@ export const HourlyFormContent = memo(({
           value={hourlyPassengers} 
           onValueChange={setHourlyPassengers} 
           options={passengerOptions} 
-          icon={<Users className="h-4 w-4 md:h-4 md:w-4" />} 
+          icon={<Users className="h-5 w-5 md:h-4 md:w-4" />} 
           className="col-span-1" 
-          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
+          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors"
         />
       </div>
 
