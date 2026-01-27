@@ -92,12 +92,12 @@ const WebsiteHeader = () => {
             {user ? (
               <>
                 <Link to={getDashboardPath()}>
-                  <Button variant="ghost" size="sm" className="gap-2">
+                  <Button variant="ghost" size="sm" className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
                     <User className="h-4 w-4" />
                     {t("myAccount")}
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm" onClick={() => signOut()} className="gap-2">
+                <Button variant="outline" size="sm" onClick={() => signOut()} className="gap-2 border-white/30 text-white hover:bg-white/10 hover:text-white">
                   <LogOut className="h-4 w-4" />
                   {t("logout")}
                 </Button>
@@ -105,13 +105,13 @@ const WebsiteHeader = () => {
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="ghost" size="sm" className="gap-2">
+                  <Button variant="ghost" size="sm" className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
                     <LogIn className="h-4 w-4" />
                     {t("guestLogin") || "Guest Login"}
                   </Button>
                 </Link>
                 <Link to="/login/agency">
-                  <Button variant="secondary" size="sm" className="gap-2">
+                  <Button size="sm" className="gap-2 bg-white text-black hover:bg-white/90 font-semibold">
                     <Building2 className="h-4 w-4" />
                     {t("agencyLogin") || "Agency"}
                   </Button>
