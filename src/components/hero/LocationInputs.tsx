@@ -32,7 +32,7 @@ const LocationInputsComponent = ({
     <div className="space-y-3">
       {/* Pickup - Floating label structure like reference */}
       <div className={cn(
-        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center transition-all",
+        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all",
         pickupError 
           ? "ring-2 ring-destructive/30" 
           : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
@@ -73,7 +73,7 @@ const LocationInputsComponent = ({
       
       {/* Dropoff - Floating label structure like reference */}
       <div className={cn(
-        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center transition-all",
+        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all",
         dropoffError
           ? "ring-2 ring-destructive/30"
           : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
