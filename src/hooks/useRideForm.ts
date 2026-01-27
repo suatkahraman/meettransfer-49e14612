@@ -306,6 +306,9 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     if (babySeatCount > 0) params.set("babySeatCount", babySeatCount.toString());
     if (luggageCount > 0) params.set("luggageCount", luggageCount.toString());
     
+    // Flag to show vehicle selection on Book page
+    params.set("showVehicleSelection", "true");
+    
     navigate(`/book?${params.toString()}`);
   }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount]);
 
