@@ -108,7 +108,7 @@ const WebsiteHeader = () => {
     >
       <div 
         className={`max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between transition-all duration-300 ${
-          isScrolled ? "h-12 sm:h-14" : "h-14 sm:h-[4.5rem]"
+          isScrolled ? "h-10 sm:h-11" : "h-11 sm:h-12"
         }`}
       >
         {/* Left - Language Selector */}
