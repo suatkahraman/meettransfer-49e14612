@@ -172,11 +172,11 @@ export const HourlyFormContent = memo(({
     <div key="hourly-form" className="space-y-3 md:space-y-3 flex-1 flex flex-col">
       {/* Pickup Location - Google Places Autocomplete */}
       <div className={cn(
-        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all",
+        "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all",
         shakeFields.city && "animate-shake",
         errors.city 
           ? "ring-2 ring-destructive/30" 
-          : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
+          : "hover:bg-zinc-200 dark:hover:bg-zinc-700"
       )}>
         <label className="block text-xs font-medium text-foreground/70 mb-0.5">
           {getPickupLabel()}
@@ -196,7 +196,7 @@ export const HourlyFormContent = memo(({
       {/* Duration and Date Row */}
       <div className="grid grid-cols-2 gap-3">
         <div 
-          className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer"
+          className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer"
           onClick={(e) => {
             const target = e.target as HTMLElement;
             if (!target.closest('button')) {
@@ -223,7 +223,7 @@ export const HourlyFormContent = memo(({
         
         <div 
           className={cn(
-            "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer",
+            "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer",
             shakeFields.date && "animate-shake",
             errors.date && "ring-2 ring-destructive/30"
           )}
@@ -258,7 +258,7 @@ export const HourlyFormContent = memo(({
       {/* Time Row */}
       <div 
         className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer",
+          "bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer",
           shakeFields.time && "animate-shake",
           errors.time && "ring-2 ring-destructive/30"
         )}
@@ -284,7 +284,7 @@ export const HourlyFormContent = memo(({
       </div>
 
       {/* Passengers Row */}
-      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between">
+      <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-foreground" />
           <div className="flex flex-col">
