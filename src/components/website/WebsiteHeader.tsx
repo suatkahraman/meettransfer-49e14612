@@ -49,14 +49,17 @@ const WebsiteHeader = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-14 sm:h-16 relative">
         {/* Left - Logo + Brand Name */}
         <Link to={getLocalizedPath("/")} className="flex items-center gap-2.5 hover:opacity-90 transition-opacity z-10">
-          <img 
-            src={meetTransferLogo} 
-            alt="Meet Transfer" 
-            width={56}
-            height={56}
-            loading="eager"
-            className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
-          />
+          <div className="h-10 w-10 sm:h-12 sm:w-12 bg-black rounded-lg flex items-center justify-center overflow-hidden">
+            <img 
+              src={meetTransferLogo} 
+              alt="Meet Transfer" 
+              width={56}
+              height={56}
+              loading="eager"
+              className="h-9 w-9 sm:h-11 sm:w-11 object-contain"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
+          </div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white whitespace-nowrap tracking-tight">
             Meet Transfer
           </h1>
@@ -130,14 +133,14 @@ const WebsiteHeader = () => {
                 <span className={`absolute h-0.5 w-5 bg-white rounded-full transition-all duration-400 ease-out ${menuOpen ? "-rotate-45" : "translate-y-1.5"}`} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 bg-card/98 backdrop-blur-lg border border-border shadow-xl z-50 animate-in slide-in-from-top-3 fade-in-0 duration-300">
+            <DropdownMenuContent align="end" className="w-64 bg-zinc-900 border border-zinc-700 shadow-xl z-50 animate-in slide-in-from-top-3 fade-in-0 duration-300">
               {navLinks.map((link) => {
                 const active = isActive(link.path);
                 const IconComponent = link.icon;
                 return (
-                  <DropdownMenuItem key={link.path} className={`py-2.5 ${active ? "bg-primary/15 focus:bg-primary/20" : ""}`} onClick={() => setMenuOpen(false)}>
+                  <DropdownMenuItem key={link.path} className={`py-2.5 text-white/90 hover:text-white hover:bg-white/10 focus:bg-white/10 focus:text-white ${active ? "bg-primary/20 text-primary" : ""}`} onClick={() => setMenuOpen(false)}>
                     <Link to={getLocalizedPath(link.path)} className={`w-full flex items-center gap-3 ${active ? "text-primary font-semibold" : ""}`}>
-                      <IconComponent className={`h-4 w-4 flex-shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                      <IconComponent className={`h-4 w-4 flex-shrink-0 ${active ? "text-primary" : "text-white/60"}`} />
                       <span>{link.label}</span>
                     </Link>
                   </DropdownMenuItem>
@@ -148,32 +151,32 @@ const WebsiteHeader = () => {
                 <InstallAppButton variant="prominent" size="default" fullWidth animated />
               </div>
               
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-zinc-700" />
               
               {user ? (
                 <>
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="text-white/90 hover:text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">
                     <Link to={getDashboardPath()} className="w-full cursor-pointer gap-2">
-                      <User className="h-4 w-4" />
+                      <User className="h-4 w-4 text-white/60" />
                       {t("myAccount")}
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer gap-2">
-                    <LogOut className="h-4 w-4" />
+                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer gap-2 text-white/90 hover:text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">
+                    <LogOut className="h-4 w-4 text-white/60" />
                     {t("logout")}
                   </DropdownMenuItem>
                 </>
               ) : (
                 <>
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="text-white/90 hover:text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">
                     <Link to="/login" className="w-full cursor-pointer gap-2">
-                      <LogIn className="h-4 w-4" />
+                      <LogIn className="h-4 w-4 text-white/60" />
                       {t("guestLogin") || "Guest Login"}
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="text-white/90 hover:text-white hover:bg-white/10 focus:bg-white/10 focus:text-white">
                     <Link to="/login/agency" className="w-full cursor-pointer gap-2">
-                      <Building2 className="h-4 w-4" />
+                      <Building2 className="h-4 w-4 text-white/60" />
                       {t("agencyLogin") || "Agency"}
                     </Link>
                   </DropdownMenuItem>

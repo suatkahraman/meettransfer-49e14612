@@ -212,10 +212,9 @@ export const RideFormContent = memo(({
         />
       </div>
       
-      {/* Date and Time - Floating label style like reference */}
       <div className="grid grid-cols-2 gap-3">
         <div className={cn(
-          "bg-muted/60 rounded-xl p-3 pb-2 transition-all hover:bg-muted/80",
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
           shakeFields.date && "animate-shake",
           errors.date && "ring-2 ring-destructive/30"
         )}>
@@ -235,7 +234,7 @@ export const RideFormContent = memo(({
           </div>
         </div>
         <div className={cn(
-          "bg-muted/60 rounded-xl p-3 pb-2 transition-all hover:bg-muted/80",
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
           shakeFields.time && "animate-shake",
           errors.time && "ring-2 ring-destructive/30"
         )}>
@@ -264,7 +263,7 @@ export const RideFormContent = memo(({
             "w-full py-4 rounded-xl transition-all text-base font-bold tracking-wide uppercase",
             hasReturnTrip 
               ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 ring-2 ring-green-500" 
-              : "bg-muted/60 text-foreground hover:bg-muted/80"
+              : "bg-zinc-200 dark:bg-zinc-800 text-foreground hover:bg-zinc-300 dark:hover:bg-zinc-700"
           )}
         >
           {hasReturnTrip ? (
@@ -281,7 +280,7 @@ export const RideFormContent = memo(({
       {/* Return Date/Time - Show when return trip is enabled */}
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
-          <div className="bg-muted/60 rounded-xl p-3 pb-2">
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
             <label className="block text-sm font-medium text-muted-foreground mb-1">
               {t("returnDate") || "Return date"}
             </label>
@@ -297,7 +296,7 @@ export const RideFormContent = memo(({
               />
             </div>
           </div>
-          <div className="bg-muted/60 rounded-xl p-3 pb-2">
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
             <label className="block text-sm font-medium text-muted-foreground mb-1">
               {t("returnTime") || "Return time"}
             </label>
@@ -316,7 +315,7 @@ export const RideFormContent = memo(({
       )}
 
       {/* Passengers - Floating label with dark square +/- buttons like reference */}
-      <div className="bg-muted/60 rounded-xl p-3 pb-2">
+      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
         <div className="flex items-center gap-2 mb-2">
           <Users className="h-5 w-5 text-muted-foreground" />
           <span className="text-sm font-medium text-muted-foreground">
