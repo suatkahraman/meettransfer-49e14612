@@ -117,7 +117,8 @@ const WebsiteHeader = () => {
           <Link to={getLocalizedPath("/")}>
             <Button 
               size="sm" 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-3 sm:px-6"
+              variant="accent"
+              className="font-bold px-3 sm:px-6"
             >
               {t("bookNow") || "Book Now"}
             </Button>
