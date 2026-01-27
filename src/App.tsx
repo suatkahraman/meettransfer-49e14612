@@ -133,8 +133,10 @@ const GreeceTransfer = lazy(() => import("./pages/website/GreeceTransfer"));
 const SwitzerlandTransfer = lazy(() => import("./pages/website/SwitzerlandTransfer"));
 
 // New SEO Landing Pages
-const IstanbulAirportTransfer = lazy(() => import("./pages/website/IstanbulAirportTransfer"));
-const AntalyaAirportTransfer = lazy(() => import("./pages/website/AntalyaAirportTransfer"));
+const IstanbulAirportTransfer = lazy(() => import("./pages/website/IstanbulAirportTransferService"));
+const AntalyaAirportTransfer = lazy(() => import("./pages/website/AntalyaAirportTransferService"));
+const CyprusAirportTransfer = lazy(() => import("./pages/website/CyprusAirportTransferService"));
+const IstanbulToBursaTransfer = lazy(() => import("./pages/website/IstanbulToBursaTransfer"));
 const BodrumAirportTransfer = lazy(() => import("./pages/website/BodrumAirportTransfer"));
 const CappadociaAirportTransfer = lazy(() => import("./pages/website/CappadociaAirportTransfer"));
 const DalamanAirportTransfer = lazy(() => import("./pages/website/DalamanAirportTransfer"));
@@ -336,6 +338,8 @@ const App = () => {
               {/* SEO Landing Pages */}
               {localizedRoutes("/istanbul-airport-transfer", <IstanbulAirportTransfer />)}
               {localizedRoutes("/antalya-airport-transfer", <AntalyaAirportTransfer />)}
+              {localizedRoutes("/cyprus-airport-transfer", <CyprusAirportTransfer />)}
+              {localizedRoutes("/istanbul-to-bursa-transfer", <IstanbulToBursaTransfer />)}
               {localizedRoutes("/bodrum-airport-transfer", <BodrumAirportTransfer />)}
               {localizedRoutes("/cappadocia-airport-transfer", <CappadociaAirportTransfer />)}
               {localizedRoutes("/dalaman-airport-transfer", <DalamanAirportTransfer />)}
