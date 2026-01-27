@@ -11134,7 +11134,7 @@ const translations: Record<Language, Record<string, string>> = {
     login: "Giriş Yap",
     logout: "Çıkış Yap",
     myAccount: "Hesabım",
-    bookNow: "Fiyat Teklifi Al",
+    bookNow: "Rezervasyon Yap",
     installApp: "Uygulamayı Yükle",
     blog: "Blog",
     terms: "Şartlar",
