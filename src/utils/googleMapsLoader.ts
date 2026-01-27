@@ -168,17 +168,21 @@ export const loadGoogleMapsScript = (libraries: string[] = ['places']): Promise<
 /**
  * Preload Google Maps script during idle time
  * Call this to prepare for future use without blocking
+ * 
+ * IMPORTANT: This should be called AFTER LCP to avoid competing with critical resources
  */
 export const preloadGoogleMaps = (libraries: string[] = ['places']): void => {
   if (isLoaded || loadPromise) return;
 
+  // Use longer timeout to ensure it doesn't compete with LCP
   if ('requestIdleCallback' in window) {
     (window as any).requestIdleCallback(
       () => loadGoogleMapsScript(libraries).catch(() => {}),
-      { timeout: 3000 }
+      { timeout: 5000 } // Increased timeout for better LCP
     );
   } else {
-    setTimeout(() => loadGoogleMapsScript(libraries).catch(() => {}), 1000);
+    // Fallback with longer delay
+    setTimeout(() => loadGoogleMapsScript(libraries).catch(() => {}), 2000);
   }
 };
 

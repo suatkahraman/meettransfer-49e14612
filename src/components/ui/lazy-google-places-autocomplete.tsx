@@ -158,9 +158,24 @@ export interface LazyGooglePlacesAutocompleteProps {
   myLocationLabel?: string;
 }
 
-// Preload Google Maps script during idle time
+// Defer Google Maps preload to after LCP to improve initial load performance
+// This gives priority to critical hero content rendering first
 if (typeof window !== 'undefined') {
-  preloadGoogleMaps(['places']);
+  // Use a longer delay to ensure hero/LCP renders first
+  const deferPreload = () => {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => preloadGoogleMaps(['places']), { timeout: 5000 });
+    } else {
+      setTimeout(() => preloadGoogleMaps(['places']), 2500);
+    }
+  };
+  
+  // Wait for page to be interactive before preloading
+  if (document.readyState === 'complete') {
+    deferPreload();
+  } else {
+    window.addEventListener('load', deferPreload, { once: true });
+  }
 }
 
 // Pure CSS animated input component - no framer-motion for better performance
