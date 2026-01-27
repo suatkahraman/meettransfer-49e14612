@@ -5,8 +5,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TimePickerAMPMProps {
   value: string;
@@ -62,21 +60,27 @@ export const TimePickerAMPM = React.memo(({
   const [open, setOpen] = React.useState(false);
   
   const { hour, minute, period } = React.useMemo(() => parseTime(value), [value]);
+  
+  // Temporary state for selection before save
+  const [tempHour, setTempHour] = React.useState(hour);
+  const [tempMinute, setTempMinute] = React.useState(minute);
+  const [tempPeriod, setTempPeriod] = React.useState(period);
+  
+  // Sync temp state when value changes externally or popover opens
+  React.useEffect(() => {
+    setTempHour(hour);
+    setTempMinute(minute);
+    setTempPeriod(period);
+  }, [hour, minute, period, open]);
 
-  const hours = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-  const minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+  // 5 hours and 5 minutes options
+  const hours = [12, 3, 6, 9, 11];
+  const minutes = [0, 15, 30, 45, 55];
 
-  const handleHourChange = React.useCallback((newHour: number) => {
-    onValueChange(formatTime(newHour, minute, period));
-  }, [minute, period, onValueChange]);
-
-  const handleMinuteChange = React.useCallback((newMinute: number) => {
-    onValueChange(formatTime(hour, newMinute, period));
-  }, [hour, period, onValueChange]);
-
-  const handlePeriodChange = React.useCallback((newPeriod: "AM" | "PM") => {
-    onValueChange(formatTime(hour, minute, newPeriod));
-  }, [hour, minute, onValueChange]);
+  const handleSave = React.useCallback(() => {
+    onValueChange(formatTime(tempHour, tempMinute, tempPeriod));
+    setOpen(false);
+  }, [tempHour, tempMinute, tempPeriod, onValueChange]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -95,21 +99,21 @@ export const TimePickerAMPM = React.memo(({
         className="w-auto p-0 z-50 bg-zinc-900 border border-zinc-700 shadow-xl" 
         align="start"
       >
-        <div className="flex gap-0">
-          {/* Hours Column */}
-          <div className="flex flex-col">
-            <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
-              Saat
-            </div>
-            <ScrollArea className="h-[200px]">
+        <div className="flex flex-col">
+          <div className="flex gap-0">
+            {/* Hours Column */}
+            <div className="flex flex-col">
+              <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
+                Saat
+              </div>
               <div className="flex flex-col p-1">
                 {hours.map((h) => (
                   <button
                     key={h}
-                    onClick={() => handleHourChange(h)}
+                    onClick={() => setTempHour(h)}
                     className={cn(
                       "w-12 h-10 rounded-lg text-base font-semibold transition-all",
-                      hour === h
+                      tempHour === h
                         ? "bg-yellow-500 text-black"
                         : "text-white hover:bg-zinc-700"
                     )}
@@ -118,53 +122,63 @@ export const TimePickerAMPM = React.memo(({
                   </button>
                 ))}
               </div>
-            </ScrollArea>
-          </div>
+            </div>
 
-          {/* Minutes Column */}
-          <div className="flex flex-col border-l border-zinc-700">
-            <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
-              Dakika
+            {/* Minutes Column */}
+            <div className="flex flex-col border-l border-zinc-700">
+              <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
+                Dakika
+              </div>
+              <div className="flex flex-col p-1">
+                {minutes.map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setTempMinute(m)}
+                    className={cn(
+                      "w-12 h-10 rounded-lg text-base font-semibold transition-all",
+                      tempMinute === m
+                        ? "bg-yellow-500 text-black"
+                        : "text-white hover:bg-zinc-700"
+                    )}
+                  >
+                    {m.toString().padStart(2, "0")}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-col p-1">
-              {minutes.map((m) => (
-                <button
-                  key={m}
-                  onClick={() => handleMinuteChange(m)}
-                  className={cn(
-                    "w-12 h-10 rounded-lg text-base font-semibold transition-all",
-                    minute === m
-                      ? "bg-yellow-500 text-black"
-                      : "text-white hover:bg-zinc-700"
-                  )}
-                >
-                  {m.toString().padStart(2, "0")}
-                </button>
-              ))}
+
+            {/* AM/PM Column */}
+            <div className="flex flex-col border-l border-zinc-700">
+              <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
+                &nbsp;
+              </div>
+              <div className="flex flex-col p-1">
+                {(["AM", "PM"] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setTempPeriod(p)}
+                    className={cn(
+                      "w-14 h-10 rounded-lg text-base font-bold transition-all",
+                      tempPeriod === p
+                        ? "bg-yellow-500 text-black"
+                        : "text-white hover:bg-zinc-700"
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-
-          {/* AM/PM Column */}
-          <div className="flex flex-col border-l border-zinc-700">
-            <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
-              &nbsp;
-            </div>
-            <div className="flex flex-col p-1">
-              {(["AM", "PM"] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePeriodChange(p)}
-                  className={cn(
-                    "w-14 h-10 rounded-lg text-base font-bold transition-all",
-                    period === p
-                      ? "bg-yellow-500 text-black"
-                      : "text-white hover:bg-zinc-700"
-                  )}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
+          
+          {/* Save Button */}
+          <div className="border-t border-zinc-700 p-2">
+            <button
+              onClick={handleSave}
+              className="w-full py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-all"
+            >
+              Kaydet
+            </button>
           </div>
         </div>
       </PopoverContent>
