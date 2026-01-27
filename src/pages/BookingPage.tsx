@@ -121,7 +121,7 @@ const BookingPage = () => {
   const urlDuration = searchParams.get("duration") || "4h";
   
   // Return trip & extras params from URL
-  const urlHasReturnTrip = searchParams.get("hasReturnTrip") === "true";
+  const urlHasReturnTrip = searchParams.get("hasReturn") === "true" || searchParams.get("hasReturnTrip") === "true";
   const urlReturnDate = searchParams.get("returnDate") || "";
   const urlReturnTime = searchParams.get("returnTime") || "";
   const urlBabySeatCount = searchParams.get("babySeatCount");
