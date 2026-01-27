@@ -40,9 +40,15 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
 
   return (
     <div className="text-left">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] font-black text-foreground leading-tight tracking-tight italic">
+      <h1 className="text-[1.75rem] sm:text-[2rem] md:text-[2.5rem] lg:text-[2.75rem] font-black text-foreground leading-[1.15] tracking-tight">
         {title}
       </h1>
+      <div className="flex items-center gap-2 mt-2">
+        <span className="text-xl sm:text-2xl">🇹🇷</span>
+        <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
+          {discount}
+        </span>
+      </div>
     </div>
   );
 });
