@@ -199,35 +199,37 @@ export const RideFormContent = memo(({
       
       <div className="grid grid-cols-2 gap-3">
         <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden",
           shakeFields.date && "animate-shake",
           errors.date && "ring-2 ring-destructive/30"
         )}>
           <label className="block text-xs font-medium text-foreground/70 mb-0.5">
             {t("pickupDate") || "Pickup date"}
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
-            <FloatingLabelDatePicker 
-              label="" 
-              date={date} 
-              onSelect={handleDateChange} 
-              disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-              dateFormat="EEE, dd MMM yyyy"
-              triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
-              icon={<span />}
-            />
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <FloatingLabelDatePicker 
+                label="" 
+                date={date} 
+                onSelect={handleDateChange} 
+                disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+                dateFormat="EEE, dd MMM"
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start w-full truncate"
+                icon={<span />}
+              />
+            </div>
           </div>
         </div>
         <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 overflow-hidden",
           shakeFields.time && "animate-shake",
           errors.time && "ring-2 ring-destructive/30"
         )}>
           <label className="block text-xs font-medium text-foreground/70 mb-0.5">
             {t("pickupTime") || "Pickup time"}
           </label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
             <TimePickerAMPM 
               value={time} 
@@ -264,28 +266,30 @@ export const RideFormContent = memo(({
       {/* Return Date/Time - Show when return trip is enabled */}
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center">
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden">
             <label className="block text-xs font-medium text-foreground/70 mb-0.5">
               {t("returnDate") || "Return date"}
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
-              <FloatingLabelDatePicker 
-                label="" 
-                date={returnDate} 
-                onSelect={setReturnDate} 
-                disabledDates={(d) => d < (date || new Date())} 
-                dateFormat="EEE, dd MMM yyyy"
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
-                icon={<span />}
-              />
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <FloatingLabelDatePicker 
+                  label="" 
+                  date={returnDate} 
+                  onSelect={setReturnDate} 
+                  disabledDates={(d) => d < (date || new Date())} 
+                  dateFormat="EEE, dd MMM"
+                  triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start w-full truncate"
+                  icon={<span />}
+                />
+              </div>
             </div>
           </div>
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center">
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden">
             <label className="block text-xs font-medium text-foreground/70 mb-0.5">
               {t("returnTime") || "Return time"}
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
               <TimePickerAMPM 
                 value={returnTime || ""} 

@@ -690,16 +690,26 @@ const BookingPage = () => {
       "vito-vip": "vito_vip",
       "minibus": "sprinter",
       "maybach": "maybach",
+      "sedan": "sedan",
     };
     
     const mappedType = vehicleMap[vType] || vType;
     
-    // Parse hours from duration (handles "4h", "24h", "48h", etc.)
-    const hours = parseInt(duration.replace("h", ""));
+    // Convert day-based durations to hours (1d = 24h, 2d = 48h, etc.)
+    let hours: number;
+    let durationKey = duration;
+    
+    if (duration.endsWith('d')) {
+      const days = parseInt(duration.replace("d", ""));
+      hours = days * 24;
+      durationKey = `${hours}h`; // Convert to hour format for DB lookup
+    } else {
+      hours = parseInt(duration.replace("h", ""));
+    }
     
     // First try to find exact duration price (for standard durations like 4h, 6h, 8h)
     const exactPrice = hourlyPrices.find(
-      p => p.vehicle_type === mappedType && p.duration_type === duration
+      p => p.vehicle_type === mappedType && (p.duration_type === duration || p.duration_type === durationKey)
     );
     
     if (exactPrice) {
@@ -739,16 +749,16 @@ const BookingPage = () => {
     }
     
     // Final fallback: Calculate from shortest available duration
-    const vehiclePrices = hourlyPrices
+    const vehiclePricesFiltered = hourlyPrices
       .filter(p => p.vehicle_type === mappedType && p.price)
       .sort((a, b) => {
-        const hoursA = parseInt(a.duration_type.replace("h", "")) || 0;
-        const hoursB = parseInt(b.duration_type.replace("h", "")) || 0;
+        const hoursA = parseInt(a.duration_type.replace("h", "").replace("d", "")) || 0;
+        const hoursB = parseInt(b.duration_type.replace("h", "").replace("d", "")) || 0;
         return hoursA - hoursB;
       });
     
-    if (vehiclePrices.length > 0) {
-      const basePrice = vehiclePrices[0];
+    if (vehiclePricesFiltered.length > 0) {
+      const basePrice = vehiclePricesFiltered[0];
       const baseHours = parseInt(basePrice.duration_type.replace("h", "")) || 4;
       const perHourRate = basePrice.price / baseHours;
       console.log(`📊 Calculating from ${basePrice.duration_type} base: ${perHourRate}/h x ${hours}h`);
