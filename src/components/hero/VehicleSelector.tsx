@@ -56,8 +56,8 @@ const AUTO_ROTATE_INTERVAL = 3000;
 const vehicleImageSets: Record<string, string[]> = {
 // Turkey sedan - Renault Megane & Toyota Corolla with interior
   'sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanToyotaAirport, sedanRenaultHotel, sedanInteriorPremium],
-// Mercedes Vito - premium exterior and interior images
-  'mercedes-vito': [vitoPremiumExterior, vitoPremiumInterior, vitoHotelArrival],
+// Mercedes Vito - black Vito exterior and interior images
+  'mercedes-vito': [vitoImg, vitoInterior, vitoExterior],
   // VIP Mercedes - luxury exterior and interior
   'vip-mercedes': [vitoVipImg, vipMercedesExterior, vipMercedesInterior, vipVitoStarlight],
 // Maybach Minivan - luxury exterior and interior images
