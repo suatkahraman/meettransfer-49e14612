@@ -96,7 +96,19 @@ const IstanbulAirportTransferService = () => {
       />
       <SchemaOrg
         schemas={[
+          { type: 'LocalBusiness', includeRating: false },
           { type: 'TransportationService', areaServed: ['Istanbul Airport', 'IST', 'Sabiha Gökçen', 'SAW', 'Taksim', 'Sultanahmet', 'Beşiktaş', 'Kadıköy'] },
+          {
+            type: 'WebPage',
+            name: 'Istanbul Airport Private Transfer | Meet Transfer',
+            description: 'Book Istanbul Airport private transfer from €50. Professional meet & greet at IST & SAW airports.',
+            url: 'https://meettransfer.app/istanbul-airport-transfer',
+            breadcrumb: [
+              { name: 'Home', url: '/' },
+              { name: 'Services', url: '/services' },
+              { name: 'Istanbul Airport Transfer', url: '/istanbul-airport-transfer' },
+            ],
+          },
           {
             type: 'BreadcrumbList',
             items: [

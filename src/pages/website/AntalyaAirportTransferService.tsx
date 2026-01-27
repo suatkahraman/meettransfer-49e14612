@@ -95,7 +95,19 @@ const AntalyaAirportTransferService = () => {
       />
       <SchemaOrg
         schemas={[
+          { type: 'LocalBusiness', includeRating: false },
           { type: 'TransportationService', areaServed: ['Antalya Airport', 'AYT', 'Belek', 'Lara', 'Side', 'Alanya', 'Kemer', 'Kaş', 'Kalkan'] },
+          {
+            type: 'WebPage',
+            name: 'Antalya Airport Private Transfer | Meet Transfer',
+            description: 'Book Antalya Airport private transfer from €50. Direct service to Lara, Belek, Side, Alanya.',
+            url: 'https://meettransfer.app/antalya-airport-transfer',
+            breadcrumb: [
+              { name: 'Home', url: '/' },
+              { name: 'Services', url: '/services' },
+              { name: 'Antalya Airport Transfer', url: '/antalya-airport-transfer' },
+            ],
+          },
           {
             type: 'BreadcrumbList',
             items: [

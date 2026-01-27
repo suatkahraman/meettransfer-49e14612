@@ -95,7 +95,19 @@ const CyprusAirportTransferService = () => {
       />
       <SchemaOrg
         schemas={[
+          { type: 'LocalBusiness', includeRating: false },
           { type: 'TransportationService', areaServed: ['Cyprus', 'Larnaca Airport', 'Paphos Airport', 'Ercan Airport', 'Ayia Napa', 'Limassol', 'Kyrenia', 'Famagusta', 'Northern Cyprus'] },
+          {
+            type: 'WebPage',
+            name: 'Cyprus Airport Private Transfer | Meet Transfer',
+            description: 'Book Cyprus airport private transfer from Larnaca, Paphos & Ercan airports to all destinations.',
+            url: 'https://meettransfer.app/cyprus-airport-transfer',
+            breadcrumb: [
+              { name: 'Home', url: '/' },
+              { name: 'Services', url: '/services' },
+              { name: 'Cyprus Airport Transfer', url: '/cyprus-airport-transfer' },
+            ],
+          },
           {
             type: 'BreadcrumbList',
             items: [

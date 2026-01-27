@@ -60,7 +60,19 @@ const LuxuryChauffeur = () => {
       />
       <SchemaOrg
         schemas={[
+          { type: 'LocalBusiness', includeRating: false },
           { type: 'TransportationService', isGlobal: true },
+          {
+            type: 'WebPage',
+            name: 'Luxury Chauffeur Service | Meet Transfer',
+            description: 'Premium luxury chauffeur service for business travel, events, and VIP transportation across Turkey.',
+            url: 'https://meettransfer.app/luxury-chauffeur',
+            breadcrumb: [
+              { name: 'Home', url: '/' },
+              { name: 'Services', url: '/services' },
+              { name: 'Luxury Chauffeur', url: '/luxury-chauffeur' },
+            ],
+          },
           {
             type: 'BreadcrumbList',
             items: [
