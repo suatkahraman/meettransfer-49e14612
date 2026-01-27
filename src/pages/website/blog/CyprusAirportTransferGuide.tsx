@@ -278,8 +278,21 @@ const CyprusAirportTransferGuide = () => {
 
           <h2 id="cyprus-private">{t("blogCyprusSection5Title")}</h2>
           <p>
-            <Link to={getLocalizedPath("/cyprus-transfer")} className="text-primary hover:underline">{t("blogCyprusPrivateTransfer")}</Link> {t("blogCyprusSection5P1")}
+            <Link to={getLocalizedPath("/cyprus-airport-transfer")} className="text-primary hover:underline font-semibold">{t("blogCyprusPrivateTransfer")}</Link> {t("blogCyprusSection5P1")}
           </p>
+          
+          <div className="not-prose my-6 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+            <p className="text-sm text-muted-foreground mb-3">
+              Looking for Cyprus airport transfer service? Check our dedicated service page:
+            </p>
+            <Link 
+              to={getLocalizedPath("/cyprus-airport-transfer")} 
+              className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
+            >
+              <Plane className="h-4 w-4" />
+              Book Cyprus Airport Private Transfer →
+            </Link>
+          </div>
 
           <h3>{t("blogCyprusWhyPrivate")}</h3>
           <p>{t("blogCyprusWhyPrivateP1")}</p>
@@ -400,6 +413,19 @@ const CyprusAirportTransferGuide = () => {
           <h2>{t("blogCyprusConclusion")}</h2>
           <p>{t("blogCyprusConclusionP1")}</p>
           <p>{t("blogCyprusConclusionP2")}</p>
+          
+          <div className="not-prose my-8 p-6 bg-card border border-border rounded-xl">
+            <h3 className="text-xl font-bold mb-3">Ready to Book Your Cyprus Airport Transfer?</h3>
+            <p className="text-muted-foreground mb-4">
+              Our professional team is available 24/7 for all Cyprus airports: Larnaca (LCA), Paphos (PFO), and Ercan (ECN).
+            </p>
+            <Link 
+              to={getLocalizedPath("/cyprus-airport-transfer")} 
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+            >
+              Book Cyprus Airport Transfer Now →
+            </Link>
+          </div>
         </div>
 
         <section className="not-prose my-8">
