@@ -65,7 +65,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="bg-transparent border-0 p-0 h-auto text-base font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="bg-transparent border-0 p-0 h-auto text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={pickup}
           />
         </div>
@@ -106,7 +106,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="bg-transparent border-0 p-0 h-auto text-base font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="bg-transparent border-0 p-0 h-auto text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={dropoff}
           />
         </div>
