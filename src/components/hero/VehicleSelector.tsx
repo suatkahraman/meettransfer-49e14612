@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, useMemo } from "react";
+import { memo, useState, useCallback, useMemo, useEffect } from "react";
 import { Users, Check, Briefcase, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VehicleTypeInfo } from "@/lib/vehicleTypes";
@@ -18,15 +18,21 @@ import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
 import vipVitoStarlight from "@/assets/vehicles/vip-vito-starlight.webp";
 import maybachLuxury from "@/assets/vehicles/maybach-luxury.webp";
 import sprinterArrival from "@/assets/vehicles/sprinter-arrival.webp";
-import sedanAirport from "@/assets/vehicles/sedan-standard-airport.webp";
-import sedanExterior from "@/assets/vehicles/sedan-standard-exterior.webp";
 
 // Turkey-specific sedan images (Renault Megane, Toyota Corolla)
 import sedanRenaultMegane from "@/assets/vehicles/sedan-renault-megane.webp";
 import sedanToyotaCorolla from "@/assets/vehicles/sedan-toyota-corolla.webp";
 
+// Maybach Minivan luxury images
+import maybachInteriorLuxury from "@/assets/vehicles/maybach-interior-luxury.webp";
+import maybachMinivanExterior from "@/assets/vehicles/maybach-minivan-exterior.webp";
+import maybachInteriorRear from "@/assets/vehicles/maybach-interior-rear.webp";
+
 // Dubai vehicle images - WebP optimized
 import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.webp";
+
+// Auto-rotate interval in milliseconds
+const AUTO_ROTATE_INTERVAL = 3000;
 
 // Vehicle images map with multiple images per vehicle for carousel
 const vehicleImageSets: Record<string, string[]> = {
@@ -34,7 +40,8 @@ const vehicleImageSets: Record<string, string[]> = {
   'sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanImg],
   'mercedes-vito': [vitoImg, vitoAirportPremium],
   'vip-mercedes': [vitoVipImg, vipVitoStarlight],
-  'maybach-minibus': [maybachImg, maybachLuxury],
+  // Maybach Minivan - luxury exterior and interior images
+  'maybach-minibus': [maybachMinivanExterior, maybachInteriorLuxury, maybachInteriorRear, maybachImg, maybachLuxury],
   'sprinter-minibus': [sprinterImg, sprinterArrival],
   'minibus': [sprinterImg, sprinterArrival],
   // Dubai vehicles
@@ -49,7 +56,7 @@ const vehicleImages: Record<string, string> = {
   'sedan': sedanRenaultMegane,
   'mercedes-vito': vitoImg,
   'vip-mercedes': vitoVipImg,
-  'maybach-minibus': maybachImg,
+  'maybach-minibus': maybachMinivanExterior,
   'sprinter-minibus': sprinterImg,
   'minibus': sprinterImg,
   'dubai-private-sedan': sedanRenaultMegane,
@@ -94,9 +101,21 @@ const VehicleCard = memo(({
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   
   const images = vehicleImageSets[vehicle.value] || [vehicleImages[vehicle.value]];
   const hasMultipleImages = images.length > 1;
+  
+  // Auto-rotate images
+  useEffect(() => {
+    if (!hasMultipleImages || isPaused) return;
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex(prev => (prev + 1) % images.length);
+    }, AUTO_ROTATE_INTERVAL);
+    
+    return () => clearInterval(interval);
+  }, [hasMultipleImages, images.length, isPaused]);
   
   const nextImage = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -112,8 +131,8 @@ const VehicleCard = memo(({
     <div 
       className="relative"
       data-vehicle-card
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => { setIsHovered(true); setIsPaused(true); }}
+      onMouseLeave={() => { setIsHovered(false); setIsPaused(false); }}
     >
       <button
         type="button"
@@ -136,7 +155,7 @@ const VehicleCard = memo(({
             src={images[currentImageIndex]} 
             alt={vehicle.label}
             className={cn(
-              "w-full h-full object-cover transition-transform duration-500",
+              "w-full h-full object-cover transition-all duration-500",
               isHovered && "scale-110"
             )}
             loading={index === 0 ? "eager" : "lazy"}
@@ -174,6 +193,21 @@ const VehicleCard = memo(({
                 ))}
               </div>
             </>
+          )}
+          
+          {/* Image indicators - always visible */}
+          {hasMultipleImages && !isHovered && (
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, i) => (
+                <div 
+                  key={i} 
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full transition-all",
+                    i === currentImageIndex ? "bg-white w-3" : "bg-white/50"
+                  )} 
+                />
+              ))}
+            </div>
           )}
           
           {/* Selected Overlay */}
