@@ -9,23 +9,22 @@ import { VehiclePrice } from "./types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-// Standard duration options (4-9 hours)
-const DURATION_OPTIONS = [
-  { value: "4", label: "4h" },
-  { value: "5", label: "5h" },
-  { value: "6", label: "6h" },
-  { value: "7", label: "7h" },
-  { value: "8", label: "8h" },
-  { value: "9", label: "9h" },
-];
+// Generate hour options (4-24) - just numbers
+const generateHourOptions = (t: (key: string) => string) => {
+  const hourSuffix = t("hourlyHours") || "h";
+  return Array.from({ length: 21 }, (_, i) => ({
+    value: (i + 4).toString(),
+    label: `${i + 4}${hourSuffix}`,
+  }));
+};
 
-const hourlyDurationOptions = [
-  { value: "4", labelKey: "fourHours", defaultLabel: "4 Hours" },
-  { value: "5", labelKey: "fiveHours", defaultLabel: "5 Hours" },
-  { value: "6", labelKey: "sixHours", defaultLabel: "6 Hours" },
-  { value: "7", labelKey: "sevenHours", defaultLabel: "7 Hours" },
-  { value: "8", labelKey: "eightHours", defaultLabel: "8 Hours" },
-  { value: "9", labelKey: "nineHours", defaultLabel: "9 Hours" },
+// Day options (1-5)
+const generateDayOptions = (t: (key: string) => string) => [
+  { value: "1d", label: t("day1") || "1 Day" },
+  { value: "2d", label: t("day2") || "2 Days" },
+  { value: "3d", label: t("day3") || "3 Days" },
+  { value: "4d", label: t("day4") || "4 Days" },
+  { value: "5d", label: t("day5") || "5 Days" },
 ];
 
 interface HourlyFormContentProps {
@@ -86,19 +85,11 @@ export const HourlyFormContent = memo(({
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
 
-  const customHoursOptions = useMemo(() => 
-    Array.from({ length: 16 }, (_, i) => ({ value: (i + 9).toString(), label: `${i + 9} ${t("hours") || "hours"}` })),
-    [t]
-  );
-  
-  // Use fixed duration options instead of city-dependent ones
-  const durationOptions = useMemo(() => 
-    DURATION_OPTIONS.map(d => {
-      const opt = hourlyDurationOptions.find(o => o.value === d.value);
-      return { value: d.value, label: opt ? (t(opt.labelKey) || d.label) : d.label };
-    }),
-    [t]
-  );
+  // Duration options: 4-24 hours + 1-5 days
+  const durationOptions = useMemo(() => [
+    ...generateHourOptions(t),
+    ...generateDayOptions(t),
+  ], [t]);
 
   const validateAndContinue = useCallback(() => {
     const newErrors: ValidationErrors = {};
@@ -106,7 +97,7 @@ export const HourlyFormContent = memo(({
     
     if (!hourlyCity) {
       newErrors.city = true;
-      missing.push(t("pickupPoint") || "Pickup Location");
+      missing.push(t("hourlyPickupLocation") || t("pickupPoint") || "Pickup Location");
     }
     if (!hourlyDate) {
       newErrors.date = true;
@@ -170,33 +161,11 @@ export const HourlyFormContent = memo(({
 
   // Get pickup label based on language
   const getPickupLabel = () => {
-    switch(language) {
-      case 'TR': return 'Alış Noktası';
-      case 'DE': return 'Abholort';
-      case 'FR': return 'Point de départ';
-      case 'RU': return 'Место посадки';
-      case 'IT': return 'Punto di ritiro';
-      case 'ES': return 'Punto de recogida';
-      case 'AR': return 'نقطة الالتقاط';
-      case 'UK': return 'Місце посадки';
-      case 'JA': return '乗車地';
-      default: return 'Pickup Location';
-    }
+    return t("hourlyPickupLocation") || (language === 'TR' ? 'Alış Noktası' : 'Pickup Location');
   };
 
   const getPickupPlaceholder = () => {
-    switch(language) {
-      case 'TR': return 'Adres, havalimanı, otel...';
-      case 'DE': return 'Adresse, Flughafen, Hotel...';
-      case 'FR': return 'Adresse, aéroport, hôtel...';
-      case 'RU': return 'Адрес, аэропорт, отель...';
-      case 'IT': return 'Indirizzo, aeroporto, hotel...';
-      case 'ES': return 'Dirección, aeropuerto, hotel...';
-      case 'AR': return 'عنوان، مطار، فندق...';
-      case 'UK': return 'Адреса, аеропорт, готель...';
-      case 'JA': return '住所、空港、ホテル...';
-      default: return 'Address, airport, hotel...';
-    }
+    return t("hourlyPickupPlaceholder") || (language === 'TR' ? 'Adres, havalimanı, otel...' : 'Address, airport, hotel...');
   };
 
   return (
