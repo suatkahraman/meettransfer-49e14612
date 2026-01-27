@@ -189,8 +189,47 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`🚗 Vehicle requested: ${booking.vehicle_type}, Fallbacks: ${vehicleFallbacks.join(', ')}`);
 
     // Query for matching price - bidirectional (airport->address OR address->airport same price)
-    let bestPrice = null;
+    let bestPrice: any = null;
     let matchType = '';
+
+    // Get pickup date for seasonal pricing
+    const pickupDate = booking.pickup_date; // YYYY-MM-DD format
+    console.log(`📅 Pickup date for seasonal pricing: ${pickupDate}`);
+
+    // Helper function to select best price from array (seasonal first, then base)
+    const selectBestPrice = (data: any[] | null, vehicleType: string, matchDesc: string): boolean => {
+      if (!data || data.length === 0) return false;
+      
+      // First try to find seasonal price matching the pickup date
+      if (pickupDate) {
+        const seasonalPrice = data.find(p => 
+          p.valid_from && p.valid_to && 
+          pickupDate >= p.valid_from && pickupDate <= p.valid_to
+        );
+        if (seasonalPrice) {
+          bestPrice = seasonalPrice;
+          matchType = `${matchDesc} [${vehicleType}] (seasonal)`;
+          console.log(`🗓️ Seasonal price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+          return true;
+        }
+      }
+      
+      // Fallback to base price (valid_from is NULL)
+      const basePrice = data.find(p => !p.valid_from);
+      if (basePrice) {
+        bestPrice = basePrice;
+        matchType = `${matchDesc} [${vehicleType}]`;
+        console.log(`✅ Base price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        return true;
+      }
+      
+      // If no base price, use first available (sorted by price)
+      const sorted = data.sort((a: any, b: any) => a.price - b.price);
+      bestPrice = sorted[0];
+      matchType = `${matchDesc} [${vehicleType}]`;
+      console.log(`✅ Price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+      return true;
+    };
 
     // Try each vehicle type in fallback order
     for (const vehicleType of vehicleFallbacks) {
@@ -205,13 +244,10 @@ const handler = async (req: Request): Promise<Response> => {
             .select("*")
             .eq("vehicle_type", vehicleType)
             .eq("is_active", true)
-            .or(`and(from_city.eq.${intercityFromCity},from_district.eq.${intercityFromDistrict},to_city.eq.${intercityToCity},to_district.eq.${intercityToDistrict}),and(from_city.eq.${intercityToCity},from_district.eq.${intercityToDistrict},to_city.eq.${intercityFromCity},to_district.eq.${intercityFromDistrict})`)
-            .limit(1);
+            .or(`and(from_city.eq.${intercityFromCity},from_district.eq.${intercityFromDistrict},to_city.eq.${intercityToCity},to_district.eq.${intercityToDistrict}),and(from_city.eq.${intercityToCity},from_district.eq.${intercityToDistrict},to_city.eq.${intercityFromCity},to_district.eq.${intercityFromDistrict})`);
 
-          if (exactIntercityData && exactIntercityData.length > 0) {
-            bestPrice = exactIntercityData[0];
-            matchType = `intercity exact (${intercityFromCity}/${intercityFromDistrict} → ${intercityToCity}/${intercityToDistrict}) [${vehicleType}]`;
-            console.log(`✅ Intercity exact price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+          if (selectBestPrice(exactIntercityData, vehicleType, `intercity exact (${intercityFromCity}/${intercityFromDistrict} → ${intercityToCity}/${intercityToDistrict})`)) {
+            break;
           }
         }
         
@@ -226,13 +262,10 @@ const handler = async (req: Request): Promise<Response> => {
             .select("*")
             .eq("vehicle_type", vehicleType)
             .eq("is_active", true)
-            .or(`and(from_city.eq.${cityWithDistrict},from_district.eq.${districtToMatch},to_city.eq.${cityWithoutDistrict}),and(to_city.eq.${cityWithDistrict},to_district.eq.${districtToMatch},from_city.eq.${cityWithoutDistrict})`)
-            .limit(1);
+            .or(`and(from_city.eq.${cityWithDistrict},from_district.eq.${districtToMatch},to_city.eq.${cityWithoutDistrict}),and(to_city.eq.${cityWithDistrict},to_district.eq.${districtToMatch},from_city.eq.${cityWithoutDistrict})`);
 
-          if (partialData && partialData.length > 0) {
-            bestPrice = partialData[0];
-            matchType = `intercity partial (${cityWithDistrict}/${districtToMatch} → ${cityWithoutDistrict}) [${vehicleType}]`;
-            console.log(`✅ Intercity partial price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+          if (selectBestPrice(partialData, vehicleType, `intercity partial (${cityWithDistrict}/${districtToMatch} → ${cityWithoutDistrict})`)) {
+            break;
           }
         }
         
@@ -245,13 +278,10 @@ const handler = async (req: Request): Promise<Response> => {
             .eq("is_active", true)
             .is("from_district", null)
             .is("to_district", null)
-            .or(`and(from_city.eq.${intercityFromCity},to_city.eq.${intercityToCity}),and(from_city.eq.${intercityToCity},to_city.eq.${intercityFromCity})`)
-            .limit(1);
+            .or(`and(from_city.eq.${intercityFromCity},to_city.eq.${intercityToCity}),and(from_city.eq.${intercityToCity},to_city.eq.${intercityFromCity})`);
 
-          if (intercityData && intercityData.length > 0) {
-            bestPrice = intercityData[0];
-            matchType = `intercity city-only (${intercityFromCity} → ${intercityToCity}) [${vehicleType}]`;
-            console.log(`✅ Intercity city price found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+          if (selectBestPrice(intercityData, vehicleType, `intercity city-only (${intercityFromCity} → ${intercityToCity})`)) {
+            break;
           }
         }
       }
@@ -265,13 +295,10 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("airport", airport)
           .eq("district", district)
           .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .limit(1);
+          .eq("is_active", true);
 
-        if (exactMatch && exactMatch.length > 0) {
-          bestPrice = exactMatch[0];
-          matchType = `exact (${airport} → ${city}/${district}) [${vehicleType}]`;
-          console.log(`✅ Exact match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        if (selectBestPrice(exactMatch, vehicleType, `exact (${airport} → ${city}/${district})`)) {
+          break;
         }
       }
 
@@ -283,14 +310,10 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("city", city)
           .eq("airport", airport)
           .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .order("price", { ascending: true })
-          .limit(1);
+          .eq("is_active", true);
 
-        if (cityMatch && cityMatch.length > 0) {
-          bestPrice = cityMatch[0];
-          matchType = `city+airport (${airport} → ${city}) [${vehicleType}]`;
-          console.log(`✅ City+Airport match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        if (selectBestPrice(cityMatch, vehicleType, `city+airport (${airport} → ${city})`)) {
+          break;
         }
       }
 
@@ -303,13 +326,10 @@ const handler = async (req: Request): Promise<Response> => {
           .eq("district", district)
           .is("airport", null)
           .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .limit(1);
+          .eq("is_active", true);
 
-        if (cityDistrictMatch && cityDistrictMatch.length > 0) {
-          bestPrice = cityDistrictMatch[0];
-          matchType = `city+district (${city}/${district}) [${vehicleType}]`;
-          console.log(`✅ City+District match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        if (selectBestPrice(cityDistrictMatch, vehicleType, `city+district (${city}/${district})`)) {
+          break;
         }
       }
 
@@ -323,14 +343,10 @@ const handler = async (req: Request): Promise<Response> => {
           .select("*")
           .eq("airport", airport)
           .eq("vehicle_type", vehicleType)
-          .eq("is_active", true)
-          .order("price", { ascending: true })
-          .limit(1);
+          .eq("is_active", true);
 
-        if (airportOnlyMatch && airportOnlyMatch.length > 0) {
-          bestPrice = airportOnlyMatch[0];
-          matchType = `airport-only (${airport}) [${vehicleType}]`;
-          console.log(`✅ Airport-only match found with ${vehicleType}:`, bestPrice.price, bestPrice.price_currency);
+        if (selectBestPrice(airportOnlyMatch, vehicleType, `airport-only (${airport})`)) {
+          break;
         }
       }
     }
