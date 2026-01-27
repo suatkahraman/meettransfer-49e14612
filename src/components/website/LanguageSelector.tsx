@@ -36,10 +36,10 @@ const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
   const handleLanguageChange = (newLang: Language) => {
     if (newLang === language) return;
 
-    // Update language context - triggers instant re-render without page reload
-    setLanguage(newLang);
+    // Close mobile menu first (before navigation)
+    onLanguageChange?.();
 
-    // Update URL to reflect language change (for bookmarking/sharing)
+    // Calculate new path before updating anything
     const pathParts = location.pathname.split("/").filter(Boolean);
     const firstPart = pathParts[0]?.toLowerCase();
     
@@ -52,14 +52,15 @@ const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
 
     const targetLang = languages.find(l => l.code === newLang);
     const newPath = newLang === "EN" 
-      ? basePath 
+      ? (basePath === "" ? "/" : basePath)
       : `${targetLang?.prefix}${basePath === "/" ? "" : basePath}`;
 
-    // Use replace to avoid adding to history stack
-    navigate(newPath, { replace: true });
-    
-    // Close mobile menu
-    onLanguageChange?.();
+    // Update language in localStorage (context will pick it up from URL prefix)
+    setLanguage(newLang);
+
+    // Navigate to new language path - this triggers context re-resolution
+    console.log('[LanguageSelector] Navigating to:', newPath, 'for language:', newLang);
+    navigate(newPath || "/", { replace: true });
   };
 
   return (
