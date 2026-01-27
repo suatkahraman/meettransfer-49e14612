@@ -294,7 +294,7 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
             onClick={handleGoogleLogin}
             disabled={googleLoading || isLoading}
             variant="outline"
-            className="w-full h-14 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-primary/50 font-semibold text-base rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all"
+            className="w-full h-14 bg-zinc-100 hover:bg-zinc-200 text-gray-700 border-2 border-zinc-200 hover:border-primary/50 font-semibold text-base rounded-xl shadow-lg flex items-center justify-center gap-3 transition-all"
           >
             {googleLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
