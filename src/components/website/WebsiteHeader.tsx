@@ -30,6 +30,15 @@ const WebsiteHeader = () => {
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Radix Select (and other Radix poppers) render their content in a Portal.
+      // When the language dropdown is open, clicking a SelectItem would otherwise look
+      // like a click "outside" of the mobile menu and immediately close it, cancelling
+      // the selection before onValueChange runs.
+      const target = event.target;
+      if (target instanceof Element && target.closest('[data-radix-popper-content-wrapper]')) {
+        return;
+      }
+
       if (
         mobileMenuOpen &&
         menuRef.current &&
