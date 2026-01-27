@@ -64,7 +64,7 @@ export const TimePickerAMPM = React.memo(({
   const { hour, minute, period } = React.useMemo(() => parseTime(value), [value]);
 
   const hours = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-  const minutes = [0, 30];
+  const minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
   const handleHourChange = React.useCallback((newHour: number) => {
     onValueChange(formatTime(newHour, minute, period));
