@@ -111,19 +111,8 @@ const WebsiteHeader = () => {
           isScrolled ? "h-12 sm:h-14" : "h-14 sm:h-[4.5rem]"
         }`}
       >
-        {/* Left - Logo */}
-        <Link to={getLocalizedPath("/")} className="flex-shrink-0 z-10">
-          <img 
-            src={meetTransferLogo} 
-            alt="Meet Transfer Logo" 
-            className={`rounded-xl object-cover shadow-xl ring-2 ring-primary/40 hover:ring-primary/60 transition-all duration-300 ${
-              isScrolled ? "h-10 w-10 sm:h-12 sm:w-12" : "h-14 w-14 sm:h-20 sm:w-20"
-            }`}
-          />
-        </Link>
-
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4 mx-4">
+        <nav className="hidden md:flex items-center gap-4">
           <Link
             to={getLocalizedPath("/services")}
             className={`text-sm font-medium transition-colors ${
@@ -218,18 +207,18 @@ const WebsiteHeader = () => {
           </Link>
         </nav>
 
-        {/* Center - Book Button (Mobile) - Centered */}
+        {/* Center - Book Button (Mobile) - Larger and Centered */}
         {user ? (
           <Link to={getLocalizedPath("/book")} className="md:hidden absolute left-1/2 -translate-x-1/2">
-            <Button variant="accent" size="sm" className="font-bold text-xs px-6 py-2 shadow-md animate-pulse-subtle text-center">
+            <Button variant="accent" size="default" className="font-bold text-sm px-8 py-3 shadow-lg animate-pulse-subtle">
               {t("bookNow")}
             </Button>
           </Link>
         ) : (
           <Button 
             variant="accent" 
-            size="sm" 
-            className="md:hidden absolute left-1/2 -translate-x-1/2 font-bold text-xs px-6 py-2 shadow-md text-center"
+            size="default" 
+            className="md:hidden absolute left-1/2 -translate-x-1/2 font-bold text-sm px-8 py-3 shadow-lg"
             onClick={scrollToBookingForm}
           >
             {t("bookNow")}

@@ -14,22 +14,26 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   
   return (
     <div className="mb-3 md:mb-5">
-      {/* Centered Header Row - Logo and Title side by side */}
-      <div className="flex items-center justify-center gap-3 mb-3 md:mb-4">
+      {/* Header Row - Logo left, Title center */}
+      <div className="flex items-center gap-4 mb-3 md:mb-4">
+        {/* Left - Large Logo */}
         <img 
           src={meetTransferLogo} 
           alt="Meet Transfer" 
-          width={64}
-          height={64}
+          width={80}
+          height={80}
           loading="eager"
           decoding="async"
           onError={(e) => {
             e.currentTarget.style.display = "none";
           }}
-          className="h-14 w-14 md:h-16 md:w-16 rounded-xl object-cover shadow-lg ring-2 ring-primary/30"
+          className="h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 rounded-xl object-cover shadow-xl ring-2 ring-primary/40 flex-shrink-0"
         />
-        <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight" role="heading" aria-level={1}>
-          <span className="text-primary">Meet</span> Transfer
+        {/* Center - Title */}
+        <div className="flex-1 text-center">
+          <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight" role="heading" aria-level={1}>
+            <span className="text-primary">Meet</span> Transfer
+          </div>
         </div>
       </div>
       
