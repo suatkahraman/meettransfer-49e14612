@@ -50,7 +50,7 @@ const LocationInputsComponent = ({
            'From'}
         </label>
         <div className="flex items-center gap-2">
-          <MapPin className={cn("h-5 w-5 flex-shrink-0", pickupError ? "text-destructive" : "text-primary/70")} />
+          <MapPin className={cn("h-5 w-5 flex-shrink-0", pickupError ? "text-destructive" : "text-foreground")} />
           <GooglePlacesAutocomplete 
             onPlaceSelected={onPickupSelected} 
             placeholder={
@@ -91,7 +91,7 @@ const LocationInputsComponent = ({
            'To'}
         </label>
         <div className="flex items-center gap-2">
-          <Navigation className={cn("h-5 w-5 flex-shrink-0", dropoffError ? "text-destructive" : "text-primary/70")} />
+          <Navigation className={cn("h-5 w-5 flex-shrink-0", dropoffError ? "text-destructive" : "text-foreground")} />
           <GooglePlacesAutocomplete 
             onPlaceSelected={onDropoffSelected} 
             placeholder={
