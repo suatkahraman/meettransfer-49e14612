@@ -84,6 +84,11 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
           <Check className="h-3.5 w-3.5 text-primary" />
           <span className="text-xs md:text-sm font-medium text-primary">{t("proDriver")}</span>
         </div>
+        {/* Mobile rating - visible only on mobile */}
+        <div className="flex items-center gap-1 md:hidden text-muted-foreground">
+          <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+          <span className="text-xs font-medium">{CACHED_RATING}</span>
+        </div>
       </div>
     </div>
   );
