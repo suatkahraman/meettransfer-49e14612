@@ -27,9 +27,10 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays } from 'lucide-react';
 import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
 import MonthlyPriceUpdateDialog from "@/components/admin/MonthlyPriceUpdateDialog";
+import SeasonalPricesManager from "@/components/admin/SeasonalPricesManager";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -135,7 +136,7 @@ interface IntercityPrice {
 
 const AdminRegionPrices = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'airport' | 'intercity'>('airport');
+  const [activeTab, setActiveTab] = useState<'airport' | 'intercity' | 'seasonal'>('airport');
   
   // Airport transfer prices state
   const [prices, setPrices] = useState<RegionPrice[]>([]);
@@ -716,16 +717,20 @@ const AdminRegionPrices = () => {
           </CardContent>
         </Card>
 
-        {/* Tabs for Airport and Intercity */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'airport' | 'intercity')}>
-          <TabsList className="grid w-full grid-cols-2">
+        {/* Tabs for Airport, Intercity, and Seasonal */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'airport' | 'intercity' | 'seasonal')}>
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="airport" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
-              Havalimanı Transferleri
+              Havalimanı
             </TabsTrigger>
             <TabsTrigger value="intercity" className="flex items-center gap-2">
               <ArrowRightLeft className="h-4 w-4" />
               Şehirler Arası
+            </TabsTrigger>
+            <TabsTrigger value="seasonal" className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
+              Sezonluk
             </TabsTrigger>
           </TabsList>
 
@@ -1178,6 +1183,12 @@ const AdminRegionPrices = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Seasonal Prices Tab */}
+          <TabsContent value="seasonal" className="space-y-6">
+            <SeasonalPricesManager priceType="region" />
+            <SeasonalPricesManager priceType="intercity" />
           </TabsContent>
         </Tabs>
 
