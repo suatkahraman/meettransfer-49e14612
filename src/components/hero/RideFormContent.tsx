@@ -222,7 +222,7 @@ export const RideFormContent = memo(({
             {t("pickupDate") || "Pickup date"}
           </label>
           <div className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-foreground/50 flex-shrink-0" />
+            <CalendarIcon className="h-5 w-5 text-foreground flex-shrink-0" />
             <FloatingLabelDatePicker 
               label="" 
               date={date} 
@@ -230,6 +230,7 @@ export const RideFormContent = memo(({
               disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
               dateFormat="EEE, dd MMM"
               triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+              icon={<span />}
             />
           </div>
         </div>
@@ -242,7 +243,7 @@ export const RideFormContent = memo(({
             {t("pickupTime") || "Pickup time"}
           </label>
           <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-foreground/50 flex-shrink-0" />
+            <Clock className="h-5 w-5 text-foreground flex-shrink-0" />
             <LazyFloatingLabelSelect 
               label="" 
               value={time} 
@@ -285,7 +286,7 @@ export const RideFormContent = memo(({
               {t("returnDate") || "Return date"}
             </label>
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-foreground/50 flex-shrink-0" />
+              <CalendarIcon className="h-5 w-5 text-foreground flex-shrink-0" />
               <FloatingLabelDatePicker 
                 label="" 
                 date={returnDate} 
@@ -293,6 +294,7 @@ export const RideFormContent = memo(({
                 disabledDates={(d) => d < (date || new Date())} 
                 dateFormat="EEE, dd MMM"
                 triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+                icon={<span />}
               />
             </div>
           </div>
@@ -301,7 +303,7 @@ export const RideFormContent = memo(({
               {t("returnTime") || "Return time"}
             </label>
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-foreground/50 flex-shrink-0" />
+              <Clock className="h-5 w-5 text-foreground flex-shrink-0" />
               <LazyFloatingLabelSelect 
                 label="" 
                 value={returnTime || ""} 
@@ -317,7 +319,7 @@ export const RideFormContent = memo(({
       {/* Passengers - Floating label with dark square +/- buttons like reference */}
       <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 pb-2">
         <div className="flex items-center gap-2 mb-2">
-          <Users className="h-5 w-5 text-foreground/50" />
+          <Users className="h-5 w-5 text-foreground" />
           <span className="text-sm font-medium text-foreground/60">
             {t("passengers") || "Passengers"}
           </span>
