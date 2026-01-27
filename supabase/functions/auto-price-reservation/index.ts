@@ -259,7 +259,11 @@ const handler = async (req: Request): Promise<Response> => {
           // Notify driver
           try {
             await supabase.functions.invoke('notify-driver-new-reservation', {
-              body: { reservation_id, driver_id: driver.id }
+              body: { 
+                reservationId: reservation_id, 
+                driverUserId: driver.user_id,
+                driverPhone: driver.phone
+              }
             });
             console.log("✅ Driver notification sent");
           } catch (notifyErr) {
