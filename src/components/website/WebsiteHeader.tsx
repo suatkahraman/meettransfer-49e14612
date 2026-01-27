@@ -36,7 +36,7 @@ const WebsiteHeader = () => {
   };
 
   return (
-    <header className="sticky top-0 w-full z-50 bg-black border-b border-border/20">
+    <header className="w-full z-50 bg-black border-b border-border/20">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-14 sm:h-16">
         {/* Left - Logo + Brand Name */}
         <Link to={getLocalizedPath("/")} className="flex items-center gap-2 hover:opacity-90 transition-opacity">
