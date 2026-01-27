@@ -32,12 +32,12 @@ const LocationInputsComponent = ({
     <div className="space-y-3">
       {/* Pickup - Floating label structure like reference */}
       <div className={cn(
-        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all",
+        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center transition-all",
         pickupError 
           ? "ring-2 ring-destructive/30" 
           : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
       )}>
-        <label className="block text-sm font-medium text-foreground/70 mb-1">
+        <label className="block text-xs font-medium text-foreground/70 mb-0.5">
           {language === 'TR' ? 'Nereden' :
            language === 'DE' ? 'Von' :
            language === 'FR' ? 'De' :
@@ -50,7 +50,7 @@ const LocationInputsComponent = ({
            'From'}
         </label>
         <div className="flex items-center gap-2">
-          <MapPin className={cn("h-5 w-5 flex-shrink-0", pickupError ? "text-destructive" : "text-foreground")} />
+          <MapPin className={cn("h-4 w-4 flex-shrink-0", pickupError ? "text-destructive" : "text-foreground")} />
           <GooglePlacesAutocomplete 
             onPlaceSelected={onPickupSelected} 
             placeholder={
@@ -65,7 +65,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="bg-transparent border-0 p-0 h-auto text-base font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="bg-transparent border-0 p-0 h-auto text-sm font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={pickup}
           />
         </div>
@@ -73,12 +73,12 @@ const LocationInputsComponent = ({
       
       {/* Dropoff - Floating label structure like reference */}
       <div className={cn(
-        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all",
+        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center transition-all",
         dropoffError
           ? "ring-2 ring-destructive/30"
           : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
       )}>
-        <label className="block text-sm font-medium text-foreground/70 mb-1">
+        <label className="block text-xs font-medium text-foreground/70 mb-0.5">
           {language === 'TR' ? 'Nereye' :
            language === 'DE' ? 'Nach' :
            language === 'FR' ? 'À' :
@@ -91,7 +91,7 @@ const LocationInputsComponent = ({
            'To'}
         </label>
         <div className="flex items-center gap-2">
-          <Navigation className={cn("h-5 w-5 flex-shrink-0", dropoffError ? "text-destructive" : "text-foreground")} />
+          <Navigation className={cn("h-4 w-4 flex-shrink-0", dropoffError ? "text-destructive" : "text-foreground")} />
           <GooglePlacesAutocomplete 
             onPlaceSelected={onDropoffSelected} 
             placeholder={
@@ -106,7 +106,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="bg-transparent border-0 p-0 h-auto text-base font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="bg-transparent border-0 p-0 h-auto text-sm font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={dropoff}
           />
         </div>
