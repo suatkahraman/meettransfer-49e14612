@@ -15,7 +15,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import meetTransferLogo from "@/assets/meet-transfer-logo-v3.png";
+import meetTransferLogo from "@/assets/meet-transfer-logo-dark.png";
 
 const WebsiteHeader = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -48,19 +48,16 @@ const WebsiteHeader = () => {
     <header className="w-full z-50 border-b border-border/20 bg-black">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-14 sm:h-16 relative">
         {/* Left - Logo + Brand Name */}
-        <Link to={getLocalizedPath("/")} className="flex items-center gap-2.5 hover:opacity-90 transition-opacity z-10">
-          <div className="h-10 w-10 sm:h-12 sm:w-12 bg-black rounded-lg flex items-center justify-center overflow-hidden">
-            <img 
-              src={meetTransferLogo} 
-              alt="Meet Transfer" 
-              width={56}
-              height={56}
-              loading="eager"
-              className="h-9 w-9 sm:h-11 sm:w-11 object-contain"
-              style={{ filter: 'brightness(0) invert(1)' }}
-            />
-          </div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white whitespace-nowrap tracking-tight">
+        <Link to={getLocalizedPath("/")} className="flex items-center gap-1.5 hover:opacity-90 transition-opacity z-10">
+          <img 
+            src={meetTransferLogo} 
+            alt="Meet Transfer" 
+            width={40}
+            height={40}
+            loading="eager"
+            className="h-8 w-8 sm:h-9 sm:w-9 object-contain rounded-md"
+          />
+          <h1 className="text-lg sm:text-xl md:text-2xl font-black text-white whitespace-nowrap tracking-tight">
             Meet Transfer
           </h1>
         </Link>

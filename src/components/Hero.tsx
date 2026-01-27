@@ -137,16 +137,20 @@ export const Hero = () => {
         <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100svh-8rem)] md:min-h-[calc(100svh-6rem)]">
           {/* Left Side - Form */}
           <div className="order-1 md:col-span-3 lg:col-span-1">
-            <HeroHeader language={language} />
-            {/* AI Assistant temporarily disabled */}
-            {/* Banner removed - replaced with HeroHeader text */}
+            {/* Unified container for header and booking form */}
+            <div className="bg-card rounded-2xl shadow-lg overflow-hidden">
+              {/* Header inside the card */}
+              <div className="p-4 sm:p-5 md:p-6 pb-2 sm:pb-3">
+                <HeroHeader language={language} />
+              </div>
 
-            {/* Booking Form Card - Critical for LCP, no Suspense wrapper */}
-            <SwipeableBookingCard 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab}
-              language={language}
-              t={t}
+              {/* Booking Form Card - Critical for LCP, no Suspense wrapper */}
+              <SwipeableBookingCard 
+                activeTab={activeTab} 
+                setActiveTab={setActiveTab}
+                language={language}
+                t={t}
+                className="shadow-none rounded-none"
               >
                 {/* Tabs */}
                 <div className="flex bg-muted/50 relative">
@@ -245,6 +249,7 @@ export const Hero = () => {
               </Suspense>
             </div>
           </SwipeableBookingCard>
+            </div>
 
             <HeroTrustBadges />
             
