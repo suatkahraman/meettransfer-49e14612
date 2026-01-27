@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useMemo } from "react";
 import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, RotateCcw, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LazyFloatingLabelSelect } from "@/components/ui/lazy-select";
+import { TimePickerAMPM } from "@/components/ui/time-picker-ampm";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { LocationInputs } from "@/components/hero";
 import { VehiclePrice } from "./types";
@@ -12,16 +12,6 @@ import { usePromo } from "@/contexts/PromoContext";
 import { VehicleRegion } from "@/lib/vehicleRegions";
 import { format } from "date-fns";
 
-// Memoize time options generation - only compute once
-const timeOptions = (() => {
-  const times: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      times.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
-    }
-  }
-  return times;
-})();
 
 interface RideFormContentProps {
   pickup: string;
@@ -109,11 +99,6 @@ export const RideFormContent = memo(({
   // Disable return trip discount for Dubai and Switzerland regions
   const isDiscountDisabledRegion = routeRegion === 'dubai' || routeRegion === 'switzerland';
   
-  // Memoize time options for Select
-  const memoizedTimeOptions = useMemo(() => 
-    timeOptions.map(opt => ({ value: opt, label: opt })),
-    []
-  );
 
   const validateAndContinue = useCallback(() => {
     const newErrors: ValidationErrors = {};
@@ -244,12 +229,10 @@ export const RideFormContent = memo(({
           </label>
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-foreground flex-shrink-0" />
-            <LazyFloatingLabelSelect 
-              label="" 
+            <TimePickerAMPM 
               value={time} 
               onValueChange={handleTimeChange} 
-              options={memoizedTimeOptions} 
-              triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start min-w-0"
+              triggerClassName="text-base font-semibold text-foreground"
             />
           </div>
         </div>
@@ -304,12 +287,10 @@ export const RideFormContent = memo(({
             </label>
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-foreground flex-shrink-0" />
-              <LazyFloatingLabelSelect 
-                label="" 
+              <TimePickerAMPM 
                 value={returnTime || ""} 
                 onValueChange={setReturnTime} 
-                options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start min-w-0"
+                triggerClassName="text-base font-semibold text-foreground"
               />
             </div>
           </div>
