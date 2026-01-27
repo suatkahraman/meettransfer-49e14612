@@ -20,8 +20,9 @@ export const SwipeableBookingCard = ({
     <div
       className={cn(
         "bg-card rounded-2xl shadow-lg overflow-hidden",
-        // CLS: reserve stable height for above-the-fold booking card on first paint (reduced for simplified design)
-        "min-h-[380px] md:min-h-[420px]",
+        // CLS: reserve stable height for above-the-fold booking card on first paint
+        // Mobile: flex layout for full-screen, Desktop: fixed min-height
+        "sm:min-h-[420px]",
         className
       )}
     >

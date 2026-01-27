@@ -132,15 +132,15 @@ export const Hero = () => {
         language={language} 
       />
 
-      {/* Mobile: pb-20 for bottom nav, desktop: normal padding. pt handled by WebsiteLayout */}
-      <div className="container relative z-10 px-2 sm:px-3 md:px-4 pt-4 md:pt-8 pb-4 md:pb-8 lg:pb-16">
-        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[calc(100svh-8rem)] md:min-h-[calc(100svh-6rem)]">
+      {/* Mobile: Full viewport height form, Desktop: normal grid layout */}
+      <div className="container relative z-10 px-0 sm:px-3 md:px-4 pt-0 sm:pt-4 md:pt-8 pb-0 sm:pb-4 md:pb-8 lg:pb-16">
+        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-0 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[100svh] sm:min-h-[calc(100svh-8rem)] md:min-h-[calc(100svh-6rem)]">
           {/* Left Side - Form */}
-          <div className="order-1 md:col-span-3 lg:col-span-1">
-            {/* Unified container for header and booking form */}
-            <div className="bg-card rounded-2xl shadow-lg overflow-hidden">
+          <div className="order-1 md:col-span-3 lg:col-span-1 h-full sm:h-auto">
+            {/* Unified container for header and booking form - Full screen on mobile */}
+            <div className="bg-card sm:rounded-2xl shadow-lg overflow-hidden min-h-[100svh] sm:min-h-0 flex flex-col">
               {/* Header inside the card */}
-              <div className="p-4 sm:p-5 md:p-6 pb-2 sm:pb-3">
+              <div className="p-4 sm:p-5 md:p-6 pb-2 sm:pb-3 pt-6 sm:pt-4">
                 <HeroHeader language={language} />
               </div>
 
@@ -150,7 +150,7 @@ export const Hero = () => {
                 setActiveTab={setActiveTab}
                 language={language}
                 t={t}
-                className="shadow-none rounded-none"
+                className="shadow-none rounded-none flex-1 flex flex-col"
               >
                 {/* Tabs */}
                 <div className="flex bg-muted/50 relative">
@@ -180,8 +180,8 @@ export const Hero = () => {
                   </button>
                 </div>
 
-                {/* Form Content - Lazy loaded */}
-                <div className="p-4 sm:p-4 md:p-5 lg:p-5">
+                {/* Form Content - Lazy loaded, flex-1 for mobile full height */}
+                <div className="p-4 sm:p-4 md:p-5 lg:p-5 flex-1 flex flex-col">
                   <Suspense fallback={<FormSkeleton />}>
                     {activeTab === "ride" ? (
                       <RideFormContent
@@ -251,12 +251,15 @@ export const Hero = () => {
           </SwipeableBookingCard>
             </div>
 
-            <HeroTrustBadges />
-            
-            {/* Payment Coming Soon Banner */}
-            <Suspense fallback={null}>
-              <PaymentComingSoonBanner language={language} compact className="mt-3" />
-            </Suspense>
+            {/* Trust badges and banner - hidden on mobile for cleaner look */}
+            <div className="hidden sm:block">
+              <HeroTrustBadges />
+              
+              {/* Payment Coming Soon Banner */}
+              <Suspense fallback={null}>
+                <PaymentComingSoonBanner language={language} compact className="mt-3" />
+              </Suspense>
+            </div>
           </div>
 
           {/* Visual Sections */}

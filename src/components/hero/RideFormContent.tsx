@@ -180,7 +180,7 @@ export const RideFormContent = memo(({
   }, [passengers, setPassengers]);
 
   return (
-    <div key="ride-form" className="space-y-3 md:space-y-3">
+    <div key="ride-form" className="space-y-3 md:space-y-3 flex-1 flex flex-col">
       {/* Location Inputs - Always visible, enlarged */}
       <div className={cn(
         (shakeFields.pickup || shakeFields.dropoff) && "animate-shake"
@@ -368,24 +368,29 @@ export const RideFormContent = memo(({
         </div>
       </div>
 
+      {/* Spacer to push button to bottom on mobile */}
+      <div className="flex-1 min-h-2 sm:hidden" />
+
       {/* Baby Seat & Luggage removed from Hero - now only in Book page */}
 
-      {/* Submit Button - Same height as other elements */}
-      <Button 
-        onClick={validateAndContinue} 
-        disabled={submitting} 
-        className="w-full h-[75px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
-      >
-        {submitting ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <>
-            <Zap className="mr-2 h-4 w-4 animate-pulse" />
-            <span className="tracking-wide">{t("getQuote")}</span>
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
-          </>
-        )}
-      </Button>
+      {/* Submit Button - Same height as other elements, sticky at bottom on mobile */}
+      <div className="mt-auto">
+        <Button 
+          onClick={validateAndContinue} 
+          disabled={submitting} 
+          className="w-full h-[75px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
+        >
+          {submitting ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <>
+              <Zap className="mr-2 h-4 w-4 animate-pulse" />
+              <span className="tracking-wide">{t("getQuote")}</span>
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 });
