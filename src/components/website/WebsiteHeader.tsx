@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -15,16 +15,35 @@ const WebsiteHeader = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Make header sticky after scrolling 100px
       setIsSticky(window.scrollY > 100);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuOpen &&
+        menuRef.current &&
+        buttonRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mobileMenuOpen]);
 
   const navLinks = [
     { path: "/destinations", label: t("cities") || "Cities", icon: MapPin },
@@ -143,6 +162,7 @@ const WebsiteHeader = () => {
 
           {/* Mobile Menu Button */}
           <Button
+            ref={buttonRef}
             variant="ghost"
             size="icon"
             className="lg:hidden text-white hover:bg-white/10"
@@ -155,7 +175,10 @@ const WebsiteHeader = () => {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-black/95 backdrop-blur-md border-t border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div 
+          ref={menuRef}
+          className="lg:hidden bg-black/95 backdrop-blur-md border-t border-white/10 animate-in fade-in slide-in-from-top-2 duration-200"
+        >
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-2">
             {navLinks.map((link) => (
               <Link
