@@ -69,14 +69,15 @@ const WebsiteHeader = () => {
           
           {/* Sign Up Button - Next to brand */}
           {!user && (
-            <Link to="/signup" className="hidden sm:block">
+            <Link to="/signup">
               <Button 
                 size="sm" 
                 variant="accent"
-                className="font-bold px-4 sm:px-6 h-10"
+                className="font-bold px-2 sm:px-4 md:px-6 h-8 sm:h-10 text-xs sm:text-sm"
               >
-                <UserPlus className="h-4 w-4 mr-1.5" />
-                {t("signUp") || "Sign Up"}
+                <UserPlus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <span className="hidden xs:inline">{t("signUp") || "Sign Up"}</span>
+                <span className="xs:hidden">{t("signUp")?.split(' ')[0] || "Sign"}</span>
               </Button>
             </Link>
           )}
