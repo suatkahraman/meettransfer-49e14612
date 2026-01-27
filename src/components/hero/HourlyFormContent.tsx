@@ -1,23 +1,13 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, MapPin, Timer, ArrowRight, Loader2, Zap } from "lucide-react";
+import { CalendarIcon, Clock, Users, MapPin, Timer, ArrowRight, Loader2, Zap, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LazyFloatingLabelSelect } from "@/components/ui/lazy-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
-import { VehicleSelector } from "@/components/hero";
+import { TimePickerAMPM } from "@/components/ui/time-picker-ampm";
+import { LazyGooglePlacesAutocomplete as GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { VehiclePrice } from "./types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
-// Memoize time options - only compute once
-const timeOptions = (() => {
-  const times: string[] = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      times.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
-    }
-  }
-  return times;
-})();
 
 const hourlyDurationOptions = [
   { value: "4", labelKey: "halfDay", defaultLabel: "4 Hours (Half Day)" },
@@ -83,25 +73,10 @@ export const HourlyFormContent = memo(({
 }: HourlyFormContentProps) => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
-  
-  const hasRoute = !!(hourlyCity && hourlyDuration);
-  
-  const currency = allHourlyPrices[0]?.currency || "EUR";
 
-  // Memoize options
-  const memoizedTimeOptions = useMemo(() => 
-    timeOptions.map(opt => ({ value: opt, label: opt })),
-    []
-  );
-  
-  const passengerOptions = useMemo(() => 
-    Array.from({ length: 12 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` })),
-    []
-  );
-  
-  const cityOptions = useMemo(() => 
-    availableCities.map(city => ({ value: city, label: city })),
-    [availableCities]
+  const customHoursOptions = useMemo(() => 
+    Array.from({ length: 16 }, (_, i) => ({ value: (i + 9).toString(), label: `${i + 9} ${t("hours") || "hours"}` })),
+    [t]
   );
   
   const durationOptions = useMemo(() => 
@@ -111,11 +86,6 @@ export const HourlyFormContent = memo(({
     }),
     [availableDurations, t]
   );
-  
-  const customHoursOptions = useMemo(() => 
-    Array.from({ length: 16 }, (_, i) => ({ value: (i + 9).toString(), label: `${i + 9} ${t("hours") || "hours"}` })),
-    [t]
-  );
 
   const validateAndContinue = useCallback(() => {
     const newErrors: ValidationErrors = {};
@@ -123,7 +93,7 @@ export const HourlyFormContent = memo(({
     
     if (!hourlyCity) {
       newErrors.city = true;
-      missing.push(t("city") || "City");
+      missing.push(t("pickupPoint") || "Pickup Location");
     }
     if (!hourlyDate) {
       newErrors.date = true;
@@ -150,7 +120,7 @@ export const HourlyFormContent = memo(({
   }, [hourlyCity, hourlyDate, hourlyTime, t, handleHourlyContinue]);
 
   // Clear error when field is filled
-  const handleCityChange = useCallback((value: string) => {
+  const handleCityChange = useCallback((value: string, details?: PlaceDetails) => {
     if (errors.city && value) {
       setErrors(prev => ({ ...prev, city: false }));
     }
@@ -171,124 +141,208 @@ export const HourlyFormContent = memo(({
     setHourlyTime(newTime);
   }, [errors.time, setHourlyTime]);
 
+  const handlePassengerIncrement = useCallback(() => {
+    const current = parseInt(hourlyPassengers) || 1;
+    if (current < 18) {
+      setHourlyPassengers((current + 1).toString());
+    }
+  }, [hourlyPassengers, setHourlyPassengers]);
+
+  const handlePassengerDecrement = useCallback(() => {
+    const current = parseInt(hourlyPassengers) || 1;
+    if (current > 1) {
+      setHourlyPassengers((current - 1).toString());
+    }
+  }, [hourlyPassengers, setHourlyPassengers]);
+
+  // Get pickup label based on language
+  const getPickupLabel = () => {
+    switch(language) {
+      case 'TR': return 'Alış Noktası';
+      case 'DE': return 'Abholort';
+      case 'FR': return 'Point de départ';
+      case 'RU': return 'Место посадки';
+      case 'IT': return 'Punto di ritiro';
+      case 'ES': return 'Punto de recogida';
+      case 'AR': return 'نقطة الالتقاط';
+      case 'UK': return 'Місце посадки';
+      case 'JA': return '乗車地';
+      default: return 'Pickup Location';
+    }
+  };
+
+  const getPickupPlaceholder = () => {
+    switch(language) {
+      case 'TR': return 'Adres, havalimanı, otel...';
+      case 'DE': return 'Adresse, Flughafen, Hotel...';
+      case 'FR': return 'Adresse, aéroport, hôtel...';
+      case 'RU': return 'Адрес, аэропорт, отель...';
+      case 'IT': return 'Indirizzo, aeroporto, hotel...';
+      case 'ES': return 'Dirección, aeropuerto, hotel...';
+      case 'AR': return 'عنوان، مطار، فندق...';
+      case 'UK': return 'Адреса, аеропорт, готель...';
+      case 'JA': return '住所、空港、ホテル...';
+      default: return 'Address, airport, hotel...';
+    }
+  };
+
   return (
     <div key="hourly-form" className="space-y-3 md:space-y-3">
-      {/* City & Duration - larger touch targets on mobile */}
-      <div className="grid grid-cols-2 gap-2.5 md:gap-2">
-        <div className={cn(shakeFields.city && "animate-shake")}>
-          <LazyFloatingLabelSelect 
-            label={t("city") || "City"} 
-            value={hourlyCity} 
-            onValueChange={handleCityChange} 
-            options={cityOptions} 
-            icon={<MapPin className="h-4 w-4 md:h-4 md:w-4" />} 
-            className="col-span-1" 
-            triggerClassName={cn(
-              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm",
-              errors.city && "border-destructive ring-2 ring-destructive/20"
-            )}
+      {/* Pickup Location - Google Places Autocomplete */}
+      <div className={cn(
+        "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all",
+        shakeFields.city && "animate-shake",
+        errors.city 
+          ? "ring-2 ring-destructive/30" 
+          : "hover:bg-zinc-300 dark:hover:bg-zinc-700"
+      )}>
+        <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+          {getPickupLabel()}
+        </label>
+        <div className="flex items-center gap-2">
+          <MapPin className={cn("h-4 w-4 flex-shrink-0", errors.city ? "text-destructive" : "text-foreground")} />
+          <GooglePlacesAutocomplete 
+            onPlaceSelected={handleCityChange} 
+            placeholder={getPickupPlaceholder()} 
+            className="bg-transparent border-0 p-0 h-auto text-sm font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            value={hourlyCity}
           />
         </div>
-        <LazyFloatingLabelSelect 
-          label={t("duration") || "Duration"} 
-          value={hourlyDuration} 
-          onValueChange={setHourlyDuration} 
-          options={durationOptions} 
-          icon={<Timer className="h-4 w-4 md:h-4 md:w-4" />} 
-          disabled={!hourlyCity} 
-          className="col-span-1" 
-          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
-        />
       </div>
 
-      {/* Custom Hours - larger touch target on mobile */}
-      {hourlyDuration === "custom" && (
-        <LazyFloatingLabelSelect 
-          label={t("customHours") || "Custom Hours"} 
-          value={customHours} 
-          onValueChange={setCustomHours} 
-          options={customHoursOptions} 
-          icon={<Timer className="h-4 w-4 md:h-4 md:w-4" />} 
-          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm"
-        />
-      )}
-
-      {/* Date/Time/Passengers - Enhanced prominence with border and shadow */}
-      <div className="grid grid-cols-3 gap-2.5 md:gap-2 p-2 bg-muted/30 rounded-xl border border-border/50">
-        <div className={cn(shakeFields.date && "animate-shake")}>
-          <FloatingLabelDatePicker 
-            label={t("date") || "Date"} 
-            date={hourlyDate} 
-            onSelect={handleDateChange} 
-            icon={<CalendarIcon className="h-5 w-5 md:h-4 md:w-4" />} 
-            disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-            className="col-span-1" 
-            triggerClassName={cn(
-              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors",
-              errors.date && "border-destructive ring-2 ring-destructive/20"
-            )}
-          />
+      {/* Duration Row */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700">
+          <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+            {t("duration") || "Duration"}
+          </label>
+          <div className="flex items-center gap-2">
+            <Timer className="h-4 w-4 text-foreground flex-shrink-0" />
+            <LazyFloatingLabelSelect 
+              label="" 
+              value={hourlyDuration} 
+              onValueChange={setHourlyDuration} 
+              options={durationOptions} 
+              triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-bold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+              icon={<span />}
+            />
+          </div>
         </div>
-        <div className={cn(shakeFields.time && "animate-shake")}>
-        <LazyFloatingLabelSelect 
-          label={t("time") || "Time"} 
-          value={hourlyTime} 
-          onValueChange={handleTimeChange} 
-          options={memoizedTimeOptions} 
-          icon={<Clock className="h-5 w-5 md:h-4 md:w-4" />} 
-          className="col-span-1" 
-          triggerClassName={cn(
-            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors",
-            errors.time && "border-destructive ring-2 ring-destructive/20"
-          )}
-        />
+        
+        {/* Custom Hours or empty slot */}
+        {hourlyDuration === "custom" ? (
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700">
+            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+              {t("customHours") || "Custom Hours"}
+            </label>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
+              <LazyFloatingLabelSelect 
+                label="" 
+                value={customHours} 
+                onValueChange={setCustomHours} 
+                options={customHoursOptions} 
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-bold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+                icon={<span />}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="bg-zinc-200/50 dark:bg-zinc-800/50 rounded-xl p-3 h-[75px] flex items-center justify-center">
+            <span className="text-xs text-foreground/40">{t("selectDuration") || "Select duration first"}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Date and Time Row */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className={cn(
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          shakeFields.date && "animate-shake",
+          errors.date && "ring-2 ring-destructive/30"
+        )}>
+          <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+            {t("pickupDate") || "Pickup date"}
+          </label>
+          <div className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
+            <FloatingLabelDatePicker 
+              label="" 
+              date={hourlyDate} 
+              onSelect={handleDateChange} 
+              disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
+              dateFormat="EEE, dd MMM"
+              triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+              icon={<span />}
+            />
+          </div>
         </div>
-        <LazyFloatingLabelSelect 
-          label={t("passengers") || "Pax"} 
-          value={hourlyPassengers} 
-          onValueChange={setHourlyPassengers} 
-          options={passengerOptions} 
-          icon={<Users className="h-5 w-5 md:h-4 md:w-4" />} 
-          className="col-span-1" 
-          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors"
-        />
+        <div className={cn(
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          shakeFields.time && "animate-shake",
+          errors.time && "ring-2 ring-destructive/30"
+        )}>
+          <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+            {t("pickupTime") || "Pickup time"}
+          </label>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
+            <TimePickerAMPM 
+              value={hourlyTime} 
+              onValueChange={handleTimeChange} 
+              triggerClassName="text-sm font-semibold text-foreground"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Vehicle Selection - Always visible */}
-      <div className="space-y-2 mt-1">
-        <VehicleSelector 
-          selectedVehicle={hourlyVehicleType} 
-          onSelectVehicle={setHourlyVehicleType}
-          passengers={hourlyPassengers} 
-          prices={allHourlyPrices} 
-          loadingPrices={loadingPrice} 
-          hasRoute={hasRoute} 
-          language={language} 
-          currency={currency} 
-        />
+      {/* Passengers Row */}
+      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-foreground" />
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-foreground/70">
+              {t("passengers") || "Passengers"}
+            </span>
+            <span className="text-lg font-bold">{hourlyPassengers}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePassengerDecrement}
+            disabled={parseInt(hourlyPassengers) <= 1}
+            className="w-9 h-9 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Minus className="h-4 w-4" strokeWidth={3} />
+          </button>
+          <button
+            type="button"
+            onClick={handlePassengerIncrement}
+            disabled={parseInt(hourlyPassengers) >= 18}
+            className="w-9 h-9 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Plus className="h-4 w-4" strokeWidth={3} />
+          </button>
+        </div>
       </div>
 
-
-      {/* Submit Button - eye-catching on mobile with pulse animation */}
-      <div className="relative">
-        {/* Glow effect behind button on mobile */}
-        <div className="absolute inset-0 bg-primary/30 blur-xl rounded-2xl animate-pulse md:hidden" />
-        <Button 
-          onClick={validateAndContinue} 
-          disabled={submitting} 
-          className="relative w-full h-16 md:h-12 min-h-[64px] md:min-h-[48px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-xl shadow-primary/30 md:shadow-lg rounded-xl text-lg md:text-base group touch-manipulation border-0 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/40"
-        >
-          {submitting ? (
-            <Loader2 className="h-6 w-6 md:h-5 md:w-5 animate-spin" />
-          ) : (
-            <>
-              <Zap className="mr-2 h-5 w-5 md:h-4 md:w-4 animate-pulse" />
-              <span className="tracking-wide">{t("getQuote") || (language === 'TR' ? 'Fiyat Al' : 'Get Quote')}</span>
-              <ArrowRight className="ml-2 h-6 w-6 md:h-5 md:w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
-            </>
-          )}
-        </Button>
-      </div>
+      {/* Submit Button - Same height as other elements */}
+      <Button 
+        onClick={validateAndContinue} 
+        disabled={submitting} 
+        className="w-full h-[75px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
+      >
+        {submitting ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <>
+            <Zap className="mr-2 h-4 w-4 animate-pulse" />
+            <span className="tracking-wide">{t("getQuote") || (language === 'TR' ? 'Fiyat Al' : 'Get Quote')}</span>
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
+          </>
+        )}
+      </Button>
     </div>
   );
 });
