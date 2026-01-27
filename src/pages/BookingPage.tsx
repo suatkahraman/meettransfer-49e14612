@@ -305,7 +305,9 @@ const BookingPage = () => {
     if (tokenBookingData) return;
     
     if (isHourlyBooking) {
-      if (!urlCity || !urlDate || !urlTime) {
+      // For hourly booking, accept either urlCity or urlPickup (pickup is sent from HourlyFormContent)
+      const hasPickupLocation = urlCity || urlPickup;
+      if (!hasPickupLocation || !urlDate || !urlTime) {
         navigate(getLocalizedPath("/"));
       }
     } else {
@@ -692,7 +694,10 @@ const BookingPage = () => {
     
     const mappedType = vehicleMap[vType] || vType;
     
-    // First try to find exact duration price
+    // Parse hours from duration (handles "4h", "24h", "48h", etc.)
+    const hours = parseInt(duration.replace("h", ""));
+    
+    // First try to find exact duration price (for standard durations like 4h, 6h, 8h)
     const exactPrice = hourlyPrices.find(
       p => p.vehicle_type === mappedType && p.duration_type === duration
     );
@@ -701,14 +706,53 @@ const BookingPage = () => {
       return exactPrice.price;
     }
     
-    // If custom duration, calculate from hourly rate
+    // For durations > 9 hours or no exact match, calculate from hourly rate
+    // Priority: 1. Custom hourly_rate, 2. Calculate from 1-hour base price
     const customRate = hourlyPrices.find(
       p => p.vehicle_type === mappedType && p.duration_type === "custom"
     );
     
     if (customRate?.hourly_rate) {
-      const hours = parseInt(duration.replace("h", ""));
+      console.log(`📊 Using custom hourly rate for ${vType}: ${customRate.hourly_rate} x ${hours}h`);
       return customRate.hourly_rate * hours;
+    }
+    
+    // Fallback: Find any hourly price to calculate rate
+    // Try to find 1h price first, then calculate per-hour rate from available prices
+    const oneHourPrice = hourlyPrices.find(
+      p => p.vehicle_type === mappedType && p.duration_type === "1h"
+    );
+    
+    if (oneHourPrice) {
+      console.log(`📊 Using 1h base price for ${vType}: ${oneHourPrice.price} x ${hours}h`);
+      return oneHourPrice.price * hours;
+    }
+    
+    // Last fallback: Find any price with hourly_rate set
+    const anyRatePrice = hourlyPrices.find(
+      p => p.vehicle_type === mappedType && p.hourly_rate
+    );
+    
+    if (anyRatePrice?.hourly_rate) {
+      console.log(`📊 Using fallback hourly rate for ${vType}: ${anyRatePrice.hourly_rate} x ${hours}h`);
+      return anyRatePrice.hourly_rate * hours;
+    }
+    
+    // Final fallback: Calculate from shortest available duration
+    const vehiclePrices = hourlyPrices
+      .filter(p => p.vehicle_type === mappedType && p.price)
+      .sort((a, b) => {
+        const hoursA = parseInt(a.duration_type.replace("h", "")) || 0;
+        const hoursB = parseInt(b.duration_type.replace("h", "")) || 0;
+        return hoursA - hoursB;
+      });
+    
+    if (vehiclePrices.length > 0) {
+      const basePrice = vehiclePrices[0];
+      const baseHours = parseInt(basePrice.duration_type.replace("h", "")) || 4;
+      const perHourRate = basePrice.price / baseHours;
+      console.log(`📊 Calculating from ${basePrice.duration_type} base: ${perHourRate}/h x ${hours}h`);
+      return Math.round(perHourRate * hours);
     }
     
     return null;

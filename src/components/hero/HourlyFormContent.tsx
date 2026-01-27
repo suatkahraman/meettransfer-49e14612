@@ -286,7 +286,12 @@ export const HourlyFormContent = memo(({
 
       {/* Submit Button - Same height as other elements */}
       <Button 
-        onClick={validateAndContinue} 
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          validateAndContinue();
+        }} 
         disabled={submitting} 
         className="w-full h-[75px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
       >

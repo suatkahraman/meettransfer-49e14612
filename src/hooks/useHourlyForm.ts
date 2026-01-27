@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { useHeroFormStorage, parseSavedDate, SavedFormData } from "./useHeroFormStorage";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface UseHourlyFormReturn {
   // State
@@ -44,6 +45,7 @@ export function useHourlyForm(
   appliedPromoCode: string
 ): UseHourlyFormReturn {
   const navigate = useNavigate();
+  const { getLocalizedPath } = useLanguage();
   const { loadSavedFormData } = useHeroFormStorage();
   
   // Initialize state from localStorage
@@ -266,13 +268,23 @@ export function useHourlyForm(
     params.set("pickup", hourlyCity);
     params.set("date", format(hourlyDate!, "yyyy-MM-dd"));
     params.set("time", hourlyTime);
-    params.set("duration", `${hourlyDuration}h`);
+    
+    // Handle duration - convert day values to hours (1d = 24h, 2d = 48h, etc.)
+    let durationValue = hourlyDuration;
+    if (hourlyDuration.endsWith('d')) {
+      const days = parseInt(hourlyDuration.replace('d', ''));
+      durationValue = `${days * 24}h`;
+    } else if (!hourlyDuration.endsWith('h')) {
+      durationValue = `${hourlyDuration}h`;
+    }
+    
+    params.set("duration", durationValue);
     params.set("passengers", hourlyPassengers);
     params.set("vehicleType", hourlyVehicleType);
     params.set("type", "hourly");
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
-    navigate(`/book?${params.toString()}`);
-  }, [hourlyCity, hourlyDate, hourlyTime, hourlyDuration, customHours, hourlyPassengers, hourlyVehicleType, appliedPromoCode, navigate, t]);
+    navigate(getLocalizedPath(`/book?${params.toString()}`));
+  }, [hourlyCity, hourlyDate, hourlyTime, hourlyDuration, customHours, hourlyPassengers, hourlyVehicleType, appliedPromoCode, navigate, t, getLocalizedPath]);
 
   const getFormData = useCallback((): Partial<SavedFormData> => ({
     hourlyCity,
