@@ -47,19 +47,25 @@ const WebsiteHeader = () => {
   return (
     <header className="w-full z-50 border-b border-border bg-card/95 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between h-28 sm:h-32 relative">
-        {/* Left - Logo (links to homepage) */}
-        <Link to={getLocalizedPath("/")} className="flex-shrink-0 hover:scale-105 transition-transform z-10">
-          <img 
-            src={meetTransferLogo} 
-            alt="Meet Transfer" 
-            width={72}
-            height={72}
-            loading="eager"
-            className="h-16 w-16 sm:h-20 sm:w-20 object-contain bg-transparent"
-          />
+        {/* Left - Logo + Brand Name on mobile */}
+        <Link to={getLocalizedPath("/")} className="flex items-center gap-2 hover:opacity-90 transition-opacity z-10">
+          <div className="relative h-12 w-12 sm:h-16 sm:w-16 overflow-hidden rounded-xl">
+            <img 
+              src={meetTransferLogo} 
+              alt="Meet Transfer" 
+              width={72}
+              height={72}
+              loading="eager"
+              className="absolute inset-[-15%] h-[130%] w-[130%] object-cover"
+            />
+          </div>
+          {/* Mobile brand name */}
+          <span className="sm:hidden text-base font-bold text-foreground">
+            <span className="text-primary">Meet</span> Transfer
+          </span>
         </Link>
 
-        {/* Center - Brand Name (links to homepage) - hidden on small screens to prevent overlap */}
+        {/* Center - Brand Name (links to homepage) - hidden on small screens */}
         <div className="hidden sm:block absolute left-1/2 -translate-x-1/2 pointer-events-auto">
           <Link to={getLocalizedPath("/")} className="flex items-center hover:opacity-80 transition-opacity">
             <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground whitespace-nowrap">
