@@ -95,7 +95,19 @@ const IstanbulToBursaTransfer = () => {
       />
       <SchemaOrg
         schemas={[
+          { type: 'LocalBusiness', includeRating: false },
           { type: 'TransportationService', areaServed: ['Istanbul', 'Bursa', 'Uludağ', 'Cumalıkızık', 'Iznik', 'Mudanya'] },
+          {
+            type: 'WebPage',
+            name: 'Istanbul to Bursa Private Transfer | Meet Transfer',
+            description: 'Book Istanbul to Bursa private transfer from €175. Scenic route via Osmangazi Bridge.',
+            url: 'https://meettransfer.app/istanbul-to-bursa-transfer',
+            breadcrumb: [
+              { name: 'Home', url: '/' },
+              { name: 'Services', url: '/services' },
+              { name: 'Istanbul to Bursa Transfer', url: '/istanbul-to-bursa-transfer' },
+            ],
+          },
           {
             type: 'BreadcrumbList',
             items: [

@@ -78,7 +78,19 @@ const EphesusPamukkale = () => {
       />
       <SchemaOrg
         schemas={[
+          { type: 'LocalBusiness', includeRating: false },
           { type: 'TransportationService', areaServed: ['Ephesus', 'Pamukkale', 'Kuşadası', 'Selçuk', 'Izmir'] },
+          {
+            type: 'WebPage',
+            name: 'Ephesus & Pamukkale Private Transfer | Meet Transfer',
+            description: 'Private transfer services to Ephesus and Pamukkale from all nearby airports and cities.',
+            url: 'https://meettransfer.app/ephesus-pamukkale',
+            breadcrumb: [
+              { name: 'Home', url: '/' },
+              { name: 'Destinations', url: '/destinations' },
+              { name: 'Ephesus & Pamukkale', url: '/ephesus-pamukkale' },
+            ],
+          },
           {
             type: 'BreadcrumbList',
             items: [
@@ -88,7 +100,6 @@ const EphesusPamukkale = () => {
             ],
           },
           { type: 'FAQPage', questions: faqItems },
-          { type: 'TransportationService', areaServed: ['Ephesus', 'Pamukkale', 'Izmir', 'Kusadasi'] },
         ]}
       />
 
