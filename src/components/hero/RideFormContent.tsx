@@ -199,52 +199,52 @@ export const RideFormContent = memo(({
       
       <div className="grid grid-cols-2 gap-3">
         <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
           shakeFields.date && "animate-shake",
           errors.date && "ring-2 ring-destructive/30"
         )}>
-          <label className="block text-sm font-medium text-foreground/70 mb-1">
+          <label className="block text-xs font-medium text-foreground/70 mb-0.5">
             {t("pickupDate") || "Pickup date"}
           </label>
           <div className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-foreground flex-shrink-0" />
+            <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
             <FloatingLabelDatePicker 
               label="" 
               date={date} 
               onSelect={handleDateChange} 
               disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
               dateFormat="EEE, dd MMM"
-              triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+              triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
               icon={<span />}
             />
           </div>
         </div>
         <div className={cn(
-          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2 transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
+          "bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700",
           shakeFields.time && "animate-shake",
           errors.time && "ring-2 ring-destructive/30"
         )}>
-          <label className="block text-sm font-medium text-foreground/70 mb-1">
+          <label className="block text-xs font-medium text-foreground/70 mb-0.5">
             {t("pickupTime") || "Pickup time"}
           </label>
           <div className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-foreground flex-shrink-0" />
+            <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
             <TimePickerAMPM 
               value={time} 
               onValueChange={handleTimeChange} 
-              triggerClassName="text-base font-semibold text-foreground"
+              triggerClassName="text-sm font-semibold text-foreground"
             />
           </div>
         </div>
       </div>
 
-      {/* Return Trip Button - Uppercase centered like reference */}
+      {/* Return Trip Button - Compact like other buttons */}
       {setHasReturnTrip && !isDiscountDisabledRegion && (
         <button
           type="button"
           onClick={() => setHasReturnTrip(!hasReturnTrip)}
           className={cn(
-            "w-full py-4 rounded-xl transition-all text-base font-bold tracking-wide uppercase",
+            "w-full h-[60px] rounded-xl transition-all text-sm font-bold tracking-wide uppercase flex items-center justify-center",
             hasReturnTrip 
               ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 ring-2 ring-green-500" 
               : "bg-zinc-200 dark:bg-zinc-800 text-foreground hover:bg-zinc-300 dark:hover:bg-zinc-700"
@@ -252,7 +252,7 @@ export const RideFormContent = memo(({
         >
           {hasReturnTrip ? (
             <span className="flex items-center justify-center gap-2">
-              <RotateCcw className="h-5 w-5" />
+              <RotateCcw className="h-4 w-4" />
               {t("returnAdded") || "RETURN ADDED"} • {discountPercent}% OFF
             </span>
           ) : (
@@ -264,91 +264,88 @@ export const RideFormContent = memo(({
       {/* Return Date/Time - Show when return trip is enabled */}
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
-            <label className="block text-sm font-medium text-foreground/70 mb-1">
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center">
+            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
               {t("returnDate") || "Return date"}
             </label>
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-foreground flex-shrink-0" />
+              <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0" />
               <FloatingLabelDatePicker 
                 label="" 
                 date={returnDate} 
                 onSelect={setReturnDate} 
                 disabledDates={(d) => d < (date || new Date())} 
                 dateFormat="EEE, dd MMM"
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-base font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
                 icon={<span />}
               />
             </div>
           </div>
-          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
-            <label className="block text-sm font-medium text-foreground/70 mb-1">
+          <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex flex-col justify-center">
+            <label className="block text-xs font-medium text-foreground/70 mb-0.5">
               {t("returnTime") || "Return time"}
             </label>
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-foreground flex-shrink-0" />
+              <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
               <TimePickerAMPM 
                 value={returnTime || ""} 
                 onValueChange={setReturnTime} 
-                triggerClassName="text-base font-semibold text-foreground"
+                triggerClassName="text-sm font-semibold text-foreground"
               />
             </div>
           </div>
         </div>
       )}
 
-      {/* Passengers - Floating label with dark square +/- buttons like reference */}
-      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 pb-2">
-        <div className="flex items-center gap-2 mb-2">
-          <Users className="h-5 w-5 text-foreground" />
-          <span className="text-sm font-medium text-foreground/70">
-            {t("passengers") || "Passengers"}
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-2xl font-bold">{passengers}</span>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePassengerDecrement}
-              disabled={parseInt(passengers) <= 1}
-              className="w-11 h-11 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-xl hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Minus className="h-5 w-5" strokeWidth={3} />
-            </button>
-            <button
-              type="button"
-              onClick={handlePassengerIncrement}
-              disabled={parseInt(passengers) >= 18}
-              className="w-11 h-11 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-xl hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <Plus className="h-5 w-5" strokeWidth={3} />
-            </button>
+      {/* Passengers - Compact like other fields */}
+      <div className="bg-zinc-200 dark:bg-zinc-800 rounded-xl p-3 h-[60px] flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-foreground" />
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-foreground/70">
+              {t("passengers") || "Passengers"}
+            </span>
+            <span className="text-lg font-bold">{passengers}</span>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePassengerDecrement}
+            disabled={parseInt(passengers) <= 1}
+            className="w-9 h-9 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Minus className="h-4 w-4" strokeWidth={3} />
+          </button>
+          <button
+            type="button"
+            onClick={handlePassengerIncrement}
+            disabled={parseInt(passengers) >= 18}
+            className="w-9 h-9 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Plus className="h-4 w-4" strokeWidth={3} />
+          </button>
         </div>
       </div>
 
       {/* Baby Seat & Luggage removed from Hero - now only in Book page */}
 
-      {/* Submit Button */}
-      <div className="relative">
-        <div className="absolute inset-0 bg-primary/30 blur-xl rounded-2xl animate-pulse md:hidden" />
-        <Button 
-          onClick={validateAndContinue} 
-          disabled={submitting} 
-          className="relative w-full h-16 md:h-14 min-h-[64px] md:min-h-[56px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-xl shadow-primary/30 md:shadow-lg rounded-xl text-lg md:text-base group touch-manipulation border-0 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/40"
-        >
-          {submitting ? (
-            <Loader2 className="h-6 w-6 md:h-5 md:w-5 animate-spin" />
-          ) : (
-            <>
-              <Zap className="mr-2 h-5 w-5 md:h-4 md:w-4 animate-pulse" />
-              <span className="tracking-wide">{t("getQuote")}</span>
-              <ArrowRight className="ml-2 h-6 w-6 md:h-5 md:w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
-            </>
-          )}
-        </Button>
-      </div>
+      {/* Submit Button - Same height as other elements */}
+      <Button 
+        onClick={validateAndContinue} 
+        disabled={submitting} 
+        className="w-full h-[60px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
+      >
+        {submitting ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <>
+            <Zap className="mr-2 h-4 w-4 animate-pulse" />
+            <span className="tracking-wide">{t("getQuote")}</span>
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
+          </>
+        )}
+      </Button>
     </div>
   );
 });
