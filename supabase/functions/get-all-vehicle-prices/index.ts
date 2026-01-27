@@ -106,6 +106,64 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("🚗 Getting all vehicle prices for route:", pickup, "→", dropoff, pickupDate ? `(date: ${pickupDate})` : "(no date)");
 
+    // ============ AMBIGUOUS LOCATION CHECK ============
+    // Reject overly vague locations like just "Türkiye", "Turkey", "Turkey, Türkiye"
+    // These cannot be priced correctly and should require more specific input
+    const pickupLower = pickup.toLowerCase().trim();
+    const dropoffLower = dropoff.toLowerCase().trim();
+    
+    // List of vague/country-level patterns that should not be priced
+    const vaguePatterns = [
+      /^t[uü]rkiye$/i,
+      /^turkey$/i,
+      /^t[uü]rkiye,?\s*t[uü]rkiye$/i,
+      /^turkey,?\s*t[uü]rkiye$/i,
+      /^t[uü]rkiye,?\s*turkey$/i,
+      /^united arab emirates$/i,
+      /^uae$/i,
+      /^dubai,?\s*uae$/i,
+      /^switzerland$/i,
+      /^schweiz$/i,
+      /^suisse$/i,
+      /^cyprus$/i,
+      /^k[iı]br[iı]s$/i,
+    ];
+    
+    const isPickupVague = vaguePatterns.some(pattern => pattern.test(pickupLower));
+    const isDropoffVague = vaguePatterns.some(pattern => pattern.test(dropoffLower));
+    
+    if (isPickupVague || isDropoffVague) {
+      const vagueSide = isPickupVague ? 'pickup' : 'dropoff';
+      console.log(`⚠️ Vague ${vagueSide} location detected: "${isPickupVague ? pickup : dropoff}" - requiring specific address`);
+      
+      // Detect region to return correct vehicle types structure
+      const combinedForRegion = (pickup + ' ' + dropoff).toLowerCase();
+      const hasTurkeyKeywordsVague = ['istanbul', 'ankara', 'antalya', 'izmir', 'bodrum', 'dalaman', 'turkiye', 'turkey'].some(k => combinedForRegion.includes(k));
+      let vagueRegion: VehicleRegion = hasTurkeyKeywordsVague ? 'turkey' : 'default';
+      const vagueVehicleTypes = getVehicleTypesForRegion(vagueRegion);
+      
+      return new Response(
+        JSON.stringify({
+          prices: vagueVehicleTypes.map(vt => ({
+            vehicleType: vt.value,
+            vehicleLabel: vt.label,
+            price: null,
+            currency: customerCurrency || 'EUR',
+            passengers: vt.passengers,
+            luggage: vt.luggage,
+            available: false,
+          })),
+          matched: false,
+          reason: "vague_location",
+          vagueLocation: isPickupVague ? pickup : dropoff,
+          requiresSpecificAddress: true,
+          region: vagueRegion,
+          isDubai: false,
+        }),
+        { headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     // Detect region from locations - this is the authoritative source
     // PRIORITY CHECK: Turkey keywords before Dubai to prevent false positives
     const combinedLocation = (pickup + ' ' + dropoff).toLowerCase();
