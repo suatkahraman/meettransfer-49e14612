@@ -149,75 +149,30 @@ export const ReturnTripPromoBanner = memo(({ language, onApplyPromoCode }: Retur
     return null;
   }
 
-  const expiryDate = formatExpiryDate(promoData.valid_until);
-
   return (
-    // CLS fix: Use CSS animation instead of framer-motion y offset
-    <div
-      className="mb-3 relative overflow-hidden animate-fade-in"
-    >
+    <div className="mb-3 relative overflow-hidden animate-fade-in">
       <button
         type="button"
         onClick={handleClick}
         className="w-full text-left relative bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 border border-green-500/30 rounded-xl px-3 md:px-4 py-2 md:py-2.5 backdrop-blur-sm hover:border-green-500/50 hover:from-green-500/15 hover:to-green-500/15 transition-all cursor-pointer group"
       >
         {/* Animated background shimmer - CSS only */}
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"
-        />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
         
-        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-          {/* Top Row - Promo Info */}
-          <div className="flex items-center justify-between md:justify-start gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-base md:text-lg animate-bounce">
-                🎁
-              </span>
-              <span className="font-bold text-green-700 dark:text-green-400 text-xs md:text-sm">
-                {promoTranslations.return[language] || promoTranslations.return.EN}: 
-                <span className="ml-1 text-sm md:text-base">%{promoData.discount_percentage} {promoTranslations.discount[language] || promoTranslations.discount.EN}</span>
-              </span>
-            </div>
-            
-            {/* Promo Code - Visible on all screens */}
-            <div className="flex items-center gap-1 bg-green-500/20 rounded-lg px-2 py-1 group-hover:bg-green-500/30 transition-colors">
-              <span className="text-[10px] md:text-xs text-green-700 dark:text-green-300 font-medium">
-                {promoTranslations.code[language] || promoTranslations.code.EN}:
-              </span>
-              <code className="font-mono font-bold text-green-700 dark:text-green-300 text-xs md:text-sm">
-                {promoData.code}
-              </code>
-            </div>
-          </div>
+        <div className="relative flex items-center justify-center gap-3">
+          {/* Turkish Flag */}
+          <span className="text-xl">🇹🇷</span>
           
-          {/* Bottom Row - Turkey Only Note & Expiry Date */}
-          <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3 flex-wrap">
-            {/* Turkey Only Note */}
-            <div className="flex items-center gap-1 bg-amber-500/20 rounded-lg px-2 py-0.5">
-              <span className="text-[9px] md:text-[10px] text-amber-700 dark:text-amber-400 font-medium">
-                🇹🇷 {promoTranslations.turkeyOnly[language] || promoTranslations.turkeyOnly.EN}
-              </span>
-            </div>
-            
-            {/* Expiry Date Display */}
-            {expiryDate && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-muted-foreground" />
-                <span className="text-[10px] md:text-xs text-muted-foreground">
-                  {promoTranslations.validUntil[language] || promoTranslations.validUntil.EN}
-                </span>
-                <span className="text-[10px] md:text-xs font-bold text-foreground">
-                  {expiryDate}
-                </span>
-              </div>
-            )}
-            
-            {/* Click hint - Desktop only */}
-            <span
-              className="text-[10px] md:text-xs text-green-600 dark:text-green-400 font-medium hidden md:inline-flex items-center gap-1 animate-pulse"
-            >
-              {promoTranslations.click[language] || promoTranslations.click.EN}
-            </span>
+          {/* Simple discount text */}
+          <span className="font-bold text-green-700 dark:text-green-400 text-sm md:text-base">
+            %{promoData.discount_percentage} {promoTranslations.discount[language] || promoTranslations.discount.EN}
+          </span>
+          
+          {/* Promo Code */}
+          <div className="flex items-center gap-1 bg-green-500/20 rounded-lg px-2 py-1 group-hover:bg-green-500/30 transition-colors">
+            <code className="font-mono font-bold text-green-700 dark:text-green-300 text-xs md:text-sm">
+              {promoData.code}
+            </code>
           </div>
         </div>
       </button>
