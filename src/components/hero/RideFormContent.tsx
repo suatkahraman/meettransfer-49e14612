@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { usePromo } from "@/contexts/PromoContext";
 import { VehicleRegion } from "@/lib/vehicleRegions";
 import { format } from "date-fns";
+import { scrollToFirstError } from "@/lib/formValidation";
 
 
 interface RideFormContentProps {
@@ -103,22 +104,27 @@ export const RideFormContent = memo(({
   const validateAndContinue = useCallback(() => {
     const newErrors: ValidationErrors = {};
     const missing: string[] = [];
+    const errorFieldIds: string[] = [];
     
     if (!pickup) {
       newErrors.pickup = true;
       missing.push(t("pickupPoint") || "Pickup");
+      errorFieldIds.push("ride-pickup-field");
     }
     if (!dropoff) {
       newErrors.dropoff = true;
       missing.push(t("dropoffLocation") || "Drop-off");
+      errorFieldIds.push("ride-dropoff-field");
     }
     if (!date) {
       newErrors.date = true;
       missing.push(t("pickupDate") || "Date");
+      errorFieldIds.push("ride-date-field");
     }
     if (!time) {
       newErrors.time = true;
       missing.push(t("pickupTime") || "Time");
+      errorFieldIds.push("ride-time-field");
     }
     
     if (Object.keys(newErrors).length > 0) {
@@ -127,6 +133,11 @@ export const RideFormContent = memo(({
       
       // Remove shake after animation
       setTimeout(() => setShakeFields({}), 500);
+      
+      // Scroll to first error field
+      if (errorFieldIds.length > 0) {
+        scrollToFirstError(errorFieldIds);
+      }
       
       toast.error(`${t("pleaseFilAllFields") || "Please fill in"}: ${missing.join(", ")}`);
       return;
@@ -199,6 +210,7 @@ export const RideFormContent = memo(({
       
       <div className="grid grid-cols-2 gap-3">
         <div 
+          id="ride-date-field"
           className={cn(
             "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700",
             shakeFields.date && "animate-shake",
@@ -212,11 +224,14 @@ export const RideFormContent = memo(({
             }
           }}
         >
-          <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
+          <label className={cn(
+            "block text-xs font-medium mb-0.5 pointer-events-none",
+            errors.date ? "text-destructive" : "text-foreground/70"
+          )}>
             {t("pickupDate") || "Pickup date"}
           </label>
           <div className="flex items-center gap-2 min-w-0">
-            <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
+            <CalendarIcon className={cn("h-4 w-4 flex-shrink-0 pointer-events-none", errors.date ? "text-destructive" : "text-foreground")} />
             <div className="flex-1 min-w-0 overflow-hidden">
               <FloatingLabelDatePicker 
                 label="" 
@@ -229,8 +244,14 @@ export const RideFormContent = memo(({
               />
             </div>
           </div>
+          {errors.date && (
+            <p className="text-xs text-destructive mt-0.5 font-medium animate-fade-in pointer-events-none">
+              {t('required') || 'Required'}
+            </p>
+          )}
         </div>
         <div 
+          id="ride-time-field"
           className={cn(
             "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700",
             shakeFields.time && "animate-shake",
@@ -244,17 +265,25 @@ export const RideFormContent = memo(({
             }
           }}
         >
-          <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
+          <label className={cn(
+            "block text-xs font-medium mb-0.5 pointer-events-none",
+            errors.time ? "text-destructive" : "text-foreground/70"
+          )}>
             {t("pickupTime") || "Pickup time"}
           </label>
           <div className="flex items-center gap-2 min-w-0">
-            <Clock className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
+            <Clock className={cn("h-4 w-4 flex-shrink-0 pointer-events-none", errors.time ? "text-destructive" : "text-foreground")} />
             <TimePickerAMPM 
               value={time} 
               onValueChange={handleTimeChange} 
               triggerClassName="text-sm font-semibold text-foreground"
             />
           </div>
+          {errors.time && (
+            <p className="text-xs text-destructive mt-0.5 font-medium animate-fade-in pointer-events-none">
+              {t('required') || 'Required'}
+            </p>
+          )}
         </div>
       </div>
 

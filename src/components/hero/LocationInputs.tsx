@@ -33,12 +33,14 @@ const LocationInputsComponent = ({
   return (
     <div className="space-y-3">
       {/* Pickup - Floating label structure like reference */}
-      <div className={cn(
-        "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
-        pickupError 
-          ? "ring-2 ring-destructive/30" 
-          : "hover:bg-amber-200 dark:hover:bg-zinc-700"
-      )}>
+      <div 
+        id="ride-pickup-field"
+        className={cn(
+          "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
+          pickupError 
+            ? "ring-2 ring-destructive/30" 
+            : "hover:bg-amber-200 dark:hover:bg-zinc-700"
+        )}>
         <label className="block text-xs font-medium text-foreground/70 mb-0.5">
           {language === 'TR' ? 'Nereden' :
            language === 'DE' ? 'Von' :
@@ -72,15 +74,22 @@ const LocationInputsComponent = ({
             myLocationLabel={t('useMyLocation')}
           />
         </div>
+        {pickupError && (
+          <p className="text-xs text-destructive mt-1 font-medium animate-fade-in">
+            {t('required') || 'Required'}
+          </p>
+        )}
       </div>
       
       {/* Dropoff - Floating label structure like reference */}
-      <div className={cn(
-        "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
-        dropoffError
-          ? "ring-2 ring-destructive/30"
-          : "hover:bg-amber-200 dark:hover:bg-zinc-700"
-      )}>
+      <div 
+        id="ride-dropoff-field"
+        className={cn(
+          "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
+          dropoffError
+            ? "ring-2 ring-destructive/30"
+            : "hover:bg-amber-200 dark:hover:bg-zinc-700"
+        )}>
         <label className="block text-xs font-medium text-foreground/70 mb-0.5">
           {language === 'TR' ? 'Nereye' :
            language === 'DE' ? 'Nach' :
@@ -114,6 +123,11 @@ const LocationInputsComponent = ({
             myLocationLabel={t('useMyLocation')}
           />
         </div>
+        {dropoffError && (
+          <p className="text-xs text-destructive mt-1 font-medium animate-fade-in">
+            {t('required') || 'Required'}
+          </p>
+        )}
       </div>
       
       {pickup && dropoff && (
