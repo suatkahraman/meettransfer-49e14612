@@ -187,7 +187,7 @@ const WebsiteHeader = () => {
             <div className="pt-3 mt-2 border-t border-white/10">
               <div className="flex items-center gap-3 px-3 py-2">
                 <span className="text-white/60 text-sm">Language:</span>
-                <LanguageSelector />
+                <LanguageSelector onLanguageChange={() => setMobileMenuOpen(false)} />
               </div>
             </div>
           </nav>
