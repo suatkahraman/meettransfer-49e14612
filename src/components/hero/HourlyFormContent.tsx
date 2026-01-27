@@ -283,6 +283,11 @@ export const HourlyFormContent = memo(({
             value={hourlyTime} 
             onValueChange={handleTimeChange} 
             triggerClassName="text-sm font-semibold text-foreground"
+            labels={{
+              hour: t("timeHour") || "Hour",
+              minute: t("timeMinute") || "Minute",
+              save: t("timeSave") || "Save"
+            }}
           />
         </div>
       </div>

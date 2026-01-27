@@ -14,6 +14,11 @@ interface TimePickerAMPMProps {
   className?: string;
   triggerClassName?: string;
   dataTrigger?: string;
+  labels?: {
+    hour: string;
+    minute: string;
+    save: string;
+  };
 }
 
 // Convert 24h to 12h format
@@ -59,7 +64,12 @@ export const TimePickerAMPM = React.memo(({
   className,
   triggerClassName,
   dataTrigger,
+  labels,
 }: TimePickerAMPMProps) => {
+  // Default labels if not provided
+  const hourLabel = labels?.hour || "Hour";
+  const minuteLabel = labels?.minute || "Minute";
+  const saveLabel = labels?.save || "Save";
   const [open, setOpen] = React.useState(false);
   
   const { hour, minute, period } = React.useMemo(() => parseTime(value), [value]);
@@ -109,7 +119,7 @@ export const TimePickerAMPM = React.memo(({
             {/* Hours Column - Scrollable */}
             <div className="flex flex-col">
               <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
-                Saat
+                {hourLabel}
               </div>
               <ScrollArea className="h-[200px]">
                 <div className="flex flex-col p-1">
@@ -134,7 +144,7 @@ export const TimePickerAMPM = React.memo(({
             {/* Minutes Column - Scrollable */}
             <div className="flex flex-col border-l border-zinc-700">
               <div className="text-xs font-medium text-zinc-400 text-center py-2 border-b border-zinc-700">
-                Dakika
+                {minuteLabel}
               </div>
               <ScrollArea className="h-[200px]">
                 <div className="flex flex-col p-1">
@@ -186,7 +196,7 @@ export const TimePickerAMPM = React.memo(({
               onClick={handleSave}
               className="w-full py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-all"
             >
-              Kaydet
+              {saveLabel}
             </button>
           </div>
         </div>
