@@ -15,6 +15,7 @@ import { ArrowLeft, Loader2, AlertCircle, Share2, Check, Eye, EyeOff } from 'luc
 import { toast } from 'sonner';
 import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
+import { scrollToFirstError } from '@/lib/formValidation';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -214,12 +215,20 @@ const SignupScreen = () => {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
+        const errorFieldIds: string[] = [];
         error.errors.forEach((err) => {
           if (err.path[0]) {
-            fieldErrors[err.path[0].toString()] = err.message;
+            const fieldName = err.path[0].toString();
+            fieldErrors[fieldName] = err.message;
+            errorFieldIds.push(fieldName);
           }
         });
         setErrors(fieldErrors);
+        // Scroll to first error field
+        if (errorFieldIds.length > 0) {
+          scrollToFirstError(errorFieldIds);
+          toast.error(Object.values(fieldErrors)[0]);
+        }
       } else {
         toast.error(t('loginFailed'));
       }
