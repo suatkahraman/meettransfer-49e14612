@@ -14,8 +14,9 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
   
   return (
     <div className="mb-3 md:mb-5">
-      {/* Logo - Left aligned */}
-      <div className="flex justify-start mb-3 md:mb-4">
+      {/* Horizontal layout - Logo left, Title & Badges right */}
+      <div className="flex items-center gap-4">
+        {/* Logo */}
         <img 
           src={meetTransferLogo} 
           alt="Meet Transfer" 
@@ -26,30 +27,30 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
           onError={(e) => {
             e.currentTarget.style.display = "none";
           }}
-          className="h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 rounded-xl object-cover shadow-xl ring-2 ring-primary/40"
+          className="h-14 w-14 md:h-18 md:w-18 lg:h-20 lg:w-20 rounded-xl object-cover shadow-xl ring-2 ring-primary/40 flex-shrink-0"
         />
-      </div>
-      
-      {/* Title - Centered */}
-      <div className="text-center mb-3 md:mb-4">
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground leading-tight">
-          <span className="text-primary">Meet</span> Transfer
-        </h1>
-      </div>
-      
-      {/* Trust Badges Row - Centered with consistent spacing */}
-      <div className="flex items-center justify-center gap-3 flex-wrap">
-        <div className="flex items-center gap-1.5 bg-primary/10 rounded-full px-3 py-1.5">
-          <Check className="h-4 w-4 text-primary" />
-          <span className="text-xs md:text-sm font-medium text-primary">{t("fixedPrice")}</span>
-        </div>
-        <div className="flex items-center gap-1.5 bg-primary/10 rounded-full px-3 py-1.5">
-          <Check className="h-4 w-4 text-primary" />
-          <span className="text-xs md:text-sm font-medium text-primary">{t("freeCancel")}</span>
-        </div>
-        <div className="flex items-center gap-1.5 bg-primary/10 rounded-full px-3 py-1.5">
-          <Check className="h-4 w-4 text-primary" />
-          <span className="text-xs md:text-sm font-medium text-primary">{t("proDriver")}</span>
+        
+        {/* Title & Badges */}
+        <div className="flex flex-col gap-2">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground leading-tight">
+            <span className="text-primary">Meet</span> Transfer
+          </h1>
+          
+          {/* Trust Badges - Horizontal */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1 bg-primary/10 rounded-full px-2 py-1">
+              <Check className="h-3 w-3 text-primary" />
+              <span className="text-[10px] md:text-xs font-medium text-primary">{t("fixedPrice")}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-primary/10 rounded-full px-2 py-1">
+              <Check className="h-3 w-3 text-primary" />
+              <span className="text-[10px] md:text-xs font-medium text-primary">{t("freeCancel")}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-primary/10 rounded-full px-2 py-1">
+              <Check className="h-3 w-3 text-primary" />
+              <span className="text-[10px] md:text-xs font-medium text-primary">{t("proDriver")}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
