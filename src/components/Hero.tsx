@@ -26,7 +26,7 @@ const HourlyFormContent = lazy(() =>
 
 // Lazy load non-critical visual components
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
-const ReturnTripPromoBanner = lazy(() => import("@/components/hero/ReturnTripPromoBanner").then(m => ({ default: m.ReturnTripPromoBanner })));
+// ReturnTripPromoBanner removed - promo now shown in HeroHeader
 const PaymentComingSoonBanner = lazy(() => import("@/components/hero/PaymentComingSoonBanner").then(m => ({ default: m.PaymentComingSoonBanner })));
 
 // Skeleton for booking card - shows during hydration
@@ -139,11 +139,7 @@ export const Hero = () => {
           <div className="order-1 md:col-span-3 lg:col-span-1">
             <HeroHeader language={language} />
             {/* AI Assistant temporarily disabled */}
-            <SilentSectionErrorBoundary fallback={null}>
-              <Suspense fallback={null}>
-                <ReturnTripPromoBanner language={language} onApplyPromoCode={rideForm.handleApplyPromoCode} />
-              </Suspense>
-            </SilentSectionErrorBoundary>
+            {/* Banner removed - replaced with HeroHeader text */}
 
             {/* Booking Form Card - Critical for LCP, no Suspense wrapper */}
             <SwipeableBookingCard 

@@ -1,17 +1,17 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, Baby, Briefcase, RotateCcw, ChevronDown, ChevronUp, Tag } from "lucide-react";
+import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, Baby, Briefcase, RotateCcw, Tag, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LazyFloatingLabelSelect } from "@/components/ui/lazy-select";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
-import { LocationInputs, VehicleSelector } from "@/components/hero";
+import { LocationInputs } from "@/components/hero";
 import { VehiclePrice } from "./types";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
 import { usePromo } from "@/contexts/PromoContext";
 import { VehicleRegion } from "@/lib/vehicleRegions";
+import { format } from "date-fns";
 
 // Memoize time options generation - only compute once
 const timeOptions = (() => {
@@ -75,9 +75,6 @@ export const RideFormContent = memo(({
   time,
   passengers,
   vehicleType,
-  allVehiclePrices,
-  loadingTransferPrice,
-  transferPriceCurrency,
   submitting,
   language,
   t,
@@ -87,7 +84,6 @@ export const RideFormContent = memo(({
   setDate,
   setTime,
   setPassengers,
-  setVehicleType,
   handleRideContinue,
   // Return trip
   returnDate,
@@ -106,7 +102,6 @@ export const RideFormContent = memo(({
 }: RideFormContentProps) => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [shakeFields, setShakeFields] = useState<ValidationErrors>({});
-  const [showExtras, setShowExtras] = useState(false);
   
   // Get dynamic promo discount from context
   const { promoCode } = usePromo();
@@ -115,20 +110,9 @@ export const RideFormContent = memo(({
   // Disable return trip discount for Dubai and Switzerland regions
   const isDiscountDisabledRegion = routeRegion === 'dubai' || routeRegion === 'switzerland';
   
-  const hasRoute = !!(pickup && dropoff);
-  const hasExtras = hasReturnTrip || babySeatCount > 0 || luggageCount > 0;
-  
-  // Vehicle selection is always visible; price will appear on each card once available.
-
   // Memoize time options for Select
   const memoizedTimeOptions = useMemo(() => 
     timeOptions.map(opt => ({ value: opt, label: opt })),
-    []
-  );
-  
-  // Memoize passenger options
-  const passengerOptions = useMemo(() => 
-    Array.from({ length: 18 }, (_, i) => ({ value: (i + 1).toString(), label: `${i + 1}` })),
     []
   );
 
@@ -197,9 +181,23 @@ export const RideFormContent = memo(({
     setTime(newTime);
   }, [errors.time, setTime]);
 
+  const handlePassengerIncrement = useCallback(() => {
+    const current = parseInt(passengers) || 1;
+    if (current < 18) {
+      setPassengers((current + 1).toString());
+    }
+  }, [passengers, setPassengers]);
+
+  const handlePassengerDecrement = useCallback(() => {
+    const current = parseInt(passengers) || 1;
+    if (current > 1) {
+      setPassengers((current - 1).toString());
+    }
+  }, [passengers, setPassengers]);
+
   return (
     <div key="ride-form" className="space-y-3 md:space-y-3">
-      {/* Location Inputs - Always visible */}
+      {/* Location Inputs - Always visible, enlarged */}
       <div className={cn(
         (shakeFields.pickup || shakeFields.dropoff) && "animate-shake"
       )}>
@@ -215,235 +213,198 @@ export const RideFormContent = memo(({
         />
       </div>
       
-      {/* Date/Time/Passengers - Enhanced prominence with border and shadow */}
-      <div className="grid grid-cols-3 gap-2.5 md:gap-2 p-2 bg-muted/30 rounded-xl border border-border/50">
+      {/* Date and Time - Same size as location fields */}
+      <div className="grid grid-cols-2 gap-3">
         <div className={cn(shakeFields.date && "animate-shake")}>
           <FloatingLabelDatePicker 
             label={t("date") || "Date"} 
             date={date} 
             onSelect={handleDateChange} 
-            icon={<CalendarIcon className="h-5 w-5 md:h-4 md:w-4" />} 
+            icon={<CalendarIcon className="h-6 w-6 md:h-5 md:w-5" />} 
             disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
-            className="col-span-1" 
+            dateFormat="dd MMM yyyy"
             triggerClassName={cn(
-              "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors",
+              "h-16 md:h-14 min-h-[64px] md:min-h-[56px] text-lg md:text-base bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors rounded-xl",
               errors.date && "border-destructive ring-2 ring-destructive/20"
             )}
           />
         </div>
         <div className={cn(shakeFields.time && "animate-shake")}>
-        <LazyFloatingLabelSelect 
-          label={t("time") || "Time"} 
-          value={time} 
-          onValueChange={handleTimeChange} 
-          options={memoizedTimeOptions} 
-          icon={<Clock className="h-5 w-5 md:h-4 md:w-4" />} 
-          className="col-span-1" 
-          triggerClassName={cn(
-            "h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors",
-            errors.time && "border-destructive ring-2 ring-destructive/20"
-          )}
-        />
+          <LazyFloatingLabelSelect 
+            label={t("time") || "Time"} 
+            value={time} 
+            onValueChange={handleTimeChange} 
+            options={memoizedTimeOptions} 
+            icon={<Clock className="h-6 w-6 md:h-5 md:w-5" />} 
+            triggerClassName={cn(
+              "h-16 md:h-14 min-h-[64px] md:min-h-[56px] text-lg md:text-base bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors rounded-xl",
+              errors.time && "border-destructive ring-2 ring-destructive/20"
+            )}
+          />
         </div>
-        <LazyFloatingLabelSelect 
-          label={t("passengers") || "Pax"} 
-          value={passengers} 
-          onValueChange={setPassengers} 
-          options={passengerOptions} 
-          icon={<Users className="h-5 w-5 md:h-4 md:w-4" />} 
-          className="col-span-1" 
-          triggerClassName="h-14 md:h-12 min-h-[56px] md:min-h-[48px] text-base md:text-sm bg-card shadow-sm border-2 border-border hover:border-primary/50 transition-colors"
-        />
       </div>
 
-      {/* Vehicle Selection - Always visible */}
-      <div className="space-y-2 mt-1">
-        <VehicleSelector 
-          selectedVehicle={vehicleType} 
-          onSelectVehicle={setVehicleType}
-          passengers={passengers} 
-          prices={allVehiclePrices} 
-          loadingPrices={loadingTransferPrice} 
-          hasRoute={hasRoute} 
-          language={language} 
-          currency={transferPriceCurrency}
-          region={routeRegion}
-        />
-      </div>
+      {/* Return Trip Button - Same size as other fields */}
+      {setHasReturnTrip && !isDiscountDisabledRegion && (
+        <button
+          type="button"
+          onClick={() => setHasReturnTrip(!hasReturnTrip)}
+          className={cn(
+            "w-full h-16 md:h-14 min-h-[64px] md:min-h-[56px] flex items-center justify-between px-4 rounded-xl border-2 transition-all text-lg md:text-base",
+            hasReturnTrip 
+              ? "bg-green-50 dark:bg-green-950/30 border-green-500 text-green-700 dark:text-green-400" 
+              : "bg-card border-border hover:border-primary/50"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <RotateCcw className={cn(
+              "h-6 w-6 md:h-5 md:w-5",
+              hasReturnTrip ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
+            )} />
+            <span className="font-medium">
+              {t("addReturn") || "Add Return"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-semibold",
+              hasReturnTrip 
+                ? "bg-green-500 text-white" 
+                : "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"
+            )}>
+              <Tag className="h-3 w-3" />
+              {discountPercent}% OFF
+            </span>
+            <Switch
+              checked={hasReturnTrip}
+              onCheckedChange={setHasReturnTrip}
+            />
+          </div>
+        </button>
+      )}
 
-      {/* Extras Section - Collapsible */}
-      <Collapsible open={showExtras || hasExtras} onOpenChange={setShowExtras}>
-        <CollapsibleTrigger asChild>
+      {/* Return Date/Time - Show when return trip is enabled */}
+      {hasReturnTrip && setReturnDate && setReturnTime && (
+        <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
+          <FloatingLabelDatePicker 
+            label={t("returnDate") || "Return Date"} 
+            date={returnDate} 
+            onSelect={setReturnDate} 
+            icon={<CalendarIcon className="h-6 w-6 md:h-5 md:w-5" />} 
+            disabledDates={(d) => d < (date || new Date())} 
+            dateFormat="dd MMM yyyy"
+            triggerClassName="h-16 md:h-14 min-h-[64px] md:min-h-[56px] text-lg md:text-base rounded-xl"
+          />
+          <LazyFloatingLabelSelect 
+            label={t("returnTime") || "Return Time"} 
+            value={returnTime || ""} 
+            onValueChange={setReturnTime} 
+            options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
+            icon={<Clock className="h-6 w-6 md:h-5 md:w-5" />} 
+            triggerClassName="h-16 md:h-14 min-h-[64px] md:min-h-[56px] text-lg md:text-base rounded-xl"
+          />
+        </div>
+      )}
+
+      {/* Passengers - Same size as other fields, with +/- buttons */}
+      <div className="w-full h-16 md:h-14 min-h-[64px] md:min-h-[56px] flex items-center justify-between px-4 rounded-xl border-2 border-border bg-card shadow-sm">
+        <div className="flex items-center gap-3">
+          <Users className="h-6 w-6 md:h-5 md:w-5 text-primary" />
+          <span className="font-medium text-lg md:text-base">
+            {t("passengers") || "Passengers"}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
           <button
             type="button"
-            className={cn(
-              "w-full flex items-center justify-between py-2.5 px-3 rounded-lg border transition-all",
-              showExtras || hasExtras 
-                ? "bg-primary/5 border-primary/30 text-primary" 
-                : "bg-muted/30 border-border/50 text-muted-foreground hover:border-primary/30 hover:text-foreground"
-            )}
+            onClick={handlePassengerDecrement}
+            disabled={parseInt(passengers) <= 1}
+            className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-foreground hover:bg-muted-foreground/20 hover:border-primary/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <div className="flex items-center gap-2">
-              <RotateCcw className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                {t("extraOptions") || "Extra Options"}
-              </span>
-              {hasExtras && (
-                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
-                  {[
-                    hasReturnTrip && (t("returnShort") || "Return"),
-                    babySeatCount > 0 && `${babySeatCount} ${t("seatLabel") || "seat"}`,
-                    luggageCount > 0 && `${luggageCount} ${t("bagLabel") || "bag"}`
-                  ].filter(Boolean).join(", ")}
-                </span>
-              )}
-            </div>
-            {showExtras || hasExtras ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
+            <Minus className="h-5 w-5" />
           </button>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent className="mt-2 space-y-3">
-          {/* Return Trip Toggle with Discount Badge - Hidden for Dubai/Switzerland */}
-          {setHasReturnTrip && !isDiscountDisabledRegion && (
-            <div className={cn(
-              "p-3 rounded-lg border transition-all",
-              hasReturnTrip 
-                ? "bg-green-50 dark:bg-green-950/30 border-green-300 dark:border-green-700" 
-                : "bg-muted/30 border-border/50"
-            )}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <RotateCcw className={cn(
-                    "h-4 w-4",
-                    hasReturnTrip ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
-                  )} />
-                  <span className="text-sm font-medium">
-                    {t("returnTrip") || "Return Trip"}
-                  </span>
-                  {/* Discount Badge */}
-                  <span className={cn(
-                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold transition-all",
-                    hasReturnTrip 
-                      ? "bg-green-500 text-white animate-pulse" 
-                      : "bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300"
-                  )}>
-                    <Tag className="h-3 w-3" />
-                    {discountPercent}% {t("off") || "OFF"}
-                  </span>
-                </div>
-                <Switch
-                  checked={hasReturnTrip}
-                  onCheckedChange={setHasReturnTrip}
-                />
-              </div>
-              {/* Discount info text when enabled */}
-              {hasReturnTrip && (
-                <p className="text-xs text-green-600 dark:text-green-400 mt-2 flex items-center gap-1 animate-in slide-in-from-top-1 duration-200">
-                  🎉 {t("returnTripDiscountApplied") || `${discountPercent}% discount will be applied to your return trip!`}
-                </p>
-              )}
-            </div>
-          )}
-          
-          {/* Return Date/Time - Show when return trip is enabled */}
-          {hasReturnTrip && setReturnDate && setReturnTime && (
-            <div className="grid grid-cols-2 gap-2 animate-in slide-in-from-top-2 duration-200">
-              <FloatingLabelDatePicker 
-                label={t("returnDate") || "Return Date"} 
-                date={returnDate} 
-                onSelect={setReturnDate} 
-                icon={<CalendarIcon className="h-4 w-4" />} 
-                disabledDates={(d) => d < (date || new Date())} 
-                triggerClassName="h-12 min-h-[48px] text-sm"
-              />
-              <LazyFloatingLabelSelect 
-                label={t("returnTime") || "Return Time"} 
-                value={returnTime || ""} 
-                onValueChange={setReturnTime} 
-                options={timeOptions.map(opt => ({ value: opt, label: opt }))} 
-                icon={<Clock className="h-4 w-4" />} 
-                triggerClassName="h-12 min-h-[48px] text-sm"
-              />
-            </div>
-          )}
-          
-          {/* Baby Seat & Luggage */}
-          <div className="grid grid-cols-2 gap-2">
-            {setBabySeatCount && (
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
-                <div className="flex items-center gap-2">
-                  <Baby className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs sm:text-sm">
-                    {t("babySeat") || "Baby Seat"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setBabySeatCount(Math.max(0, babySeatCount - 1))}
-                    className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                    disabled={babySeatCount <= 0}
-                  >
-                    -
-                  </button>
-                  <span className="w-6 text-center text-sm font-medium">{babySeatCount}</span>
-                  <button
-                    type="button"
-                    onClick={() => setBabySeatCount(Math.min(4, babySeatCount + 1))}
-                    className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                    disabled={babySeatCount >= 4}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {setLuggageCount && (
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs sm:text-sm">
-                    {t("largeBag") || "Large Bag"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setLuggageCount(Math.max(0, luggageCount - 1))}
-                    className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                    disabled={luggageCount <= 0}
-                  >
-                    -
-                  </button>
-                  <span className="w-6 text-center text-sm font-medium">{luggageCount}</span>
-                  <button
-                    type="button"
-                    onClick={() => setLuggageCount(Math.min(10, luggageCount + 1))}
-                    className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-                    disabled={luggageCount >= 10}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+          <span className="w-8 text-center text-xl font-bold">{passengers}</span>
+          <button
+            type="button"
+            onClick={handlePassengerIncrement}
+            disabled={parseInt(passengers) >= 18}
+            className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-foreground hover:bg-muted-foreground/20 hover:border-primary/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
 
-      {/* Submit Button - eye-catching on mobile with pulse animation */}
+      {/* Baby Seat & Luggage - Compact row */}
+      <div className="grid grid-cols-2 gap-3">
+        {setBabySeatCount && (
+          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50 h-14">
+            <div className="flex items-center gap-2">
+              <Baby className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                {t("babySeat") || "Baby Seat"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setBabySeatCount(Math.max(0, babySeatCount - 1))}
+                className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                disabled={babySeatCount <= 0}
+              >
+                -
+              </button>
+              <span className="w-6 text-center text-sm font-medium">{babySeatCount}</span>
+              <button
+                type="button"
+                onClick={() => setBabySeatCount(Math.min(4, babySeatCount + 1))}
+                className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                disabled={babySeatCount >= 4}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {setLuggageCount && (
+          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50 h-14">
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                {t("largeBag") || "Large Bag"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setLuggageCount(Math.max(0, luggageCount - 1))}
+                className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                disabled={luggageCount <= 0}
+              >
+                -
+              </button>
+              <span className="w-6 text-center text-sm font-medium">{luggageCount}</span>
+              <button
+                type="button"
+                onClick={() => setLuggageCount(Math.min(10, luggageCount + 1))}
+                className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                disabled={luggageCount >= 10}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Submit Button */}
       <div className="relative">
-        {/* Glow effect behind button on mobile */}
         <div className="absolute inset-0 bg-primary/30 blur-xl rounded-2xl animate-pulse md:hidden" />
         <Button 
           onClick={validateAndContinue} 
           disabled={submitting} 
-          className="relative w-full h-16 md:h-12 min-h-[64px] md:min-h-[48px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-xl shadow-primary/30 md:shadow-lg rounded-xl text-lg md:text-base group touch-manipulation border-0 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/40"
+          className="relative w-full h-16 md:h-14 min-h-[64px] md:min-h-[56px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-xl shadow-primary/30 md:shadow-lg rounded-xl text-lg md:text-base group touch-manipulation border-0 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/40"
         >
           {submitting ? (
             <Loader2 className="h-6 w-6 md:h-5 md:w-5 animate-spin" />
