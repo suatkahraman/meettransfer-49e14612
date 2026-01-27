@@ -29,12 +29,15 @@ interface LanguageSelectorProps {
 }
 
 const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLanguageChange = (newLang: Language) => {
     if (newLang === language) return;
+
+    // Update language context first
+    setLanguage(newLang);
 
     // Get current path without language prefix
     const pathParts = location.pathname.split("/").filter(Boolean);
