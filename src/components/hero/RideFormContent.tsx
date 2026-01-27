@@ -277,6 +277,11 @@ export const RideFormContent = memo(({
               value={time} 
               onValueChange={handleTimeChange} 
               triggerClassName="text-sm font-semibold text-foreground"
+              labels={{
+                hour: t("timeHour") || "Hour",
+                minute: t("timeMinute") || "Minute",
+                save: t("timeSave") || "Save"
+              }}
             />
           </div>
           {errors.time && (
@@ -360,6 +365,11 @@ export const RideFormContent = memo(({
                 value={returnTime || ""} 
                 onValueChange={setReturnTime} 
                 triggerClassName="text-sm font-semibold text-foreground"
+                labels={{
+                  hour: t("timeHour") || "Hour",
+                  minute: t("timeMinute") || "Minute",
+                  save: t("timeSave") || "Save"
+                }}
               />
             </div>
           </div>
