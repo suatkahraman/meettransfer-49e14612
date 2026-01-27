@@ -36,9 +36,12 @@ import sprinterExterior from "@/assets/vehicles/sprinter-exterior.webp";
 import vipMercedesInterior from "@/assets/vehicles/vip-mercedes-interior.webp";
 import vipMercedesExterior from "@/assets/vehicles/vip-mercedes-exterior.webp";
 
-// Mercedes Vito images
+// Mercedes Vito images - premium optimized
 import vitoInterior from "@/assets/vehicles/vito-interior.webp";
 import vitoExterior from "@/assets/vehicles/vito-exterior.webp";
+import vitoPremiumExterior from "@/assets/vehicles/vito-premium-exterior.webp";
+import vitoPremiumInterior from "@/assets/vehicles/vito-premium-interior.webp";
+import vitoHotelArrival from "@/assets/vehicles/vito-hotel-arrival.webp";
 
 // Dubai vehicle images - WebP optimized
 import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.webp";
@@ -50,8 +53,8 @@ const AUTO_ROTATE_INTERVAL = 3000;
 const vehicleImageSets: Record<string, string[]> = {
   // Turkey sedan - Renault Megane & Toyota Corolla
   'sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanImg],
-  // Mercedes Vito - exterior and interior
-  'mercedes-vito': [vitoImg, vitoExterior, vitoInterior, vitoAirportPremium],
+  // Mercedes Vito - premium exterior and interior images
+  'mercedes-vito': [vitoPremiumExterior, vitoPremiumInterior, vitoHotelArrival, vitoExterior, vitoInterior],
   // VIP Mercedes - luxury exterior and interior
   'vip-mercedes': [vitoVipImg, vipMercedesExterior, vipMercedesInterior, vipVitoStarlight],
   // Maybach Minivan - luxury exterior and interior images
@@ -62,14 +65,14 @@ const vehicleImageSets: Record<string, string[]> = {
   // Dubai vehicles
   'dubai-private-sedan': [sedanRenaultMegane, sedanToyotaCorolla],
   'dubai-premium-van': [vitoVipImg, vipMercedesExterior, vipMercedesInterior, vipVitoStarlight],
-  'dubai-suburban-suv': [vitoImg, vitoExterior, vitoInterior, vitoAirportPremium],
+  'dubai-suburban-suv': [vitoPremiumExterior, vitoPremiumInterior, vitoHotelArrival, vitoExterior],
   'dubai-vip-sprinter': [dubaiVipVanImg, sprinterExterior, sprinterInterior, sprinterArrival],
 };
 
 // Single image fallback
 const vehicleImages: Record<string, string> = {
   'sedan': sedanRenaultMegane,
-  'mercedes-vito': vitoExterior,
+  'mercedes-vito': vitoPremiumExterior,
   'vip-mercedes': vipMercedesExterior,
   'maybach-minibus': maybachMinivanExterior,
   'sprinter-minibus': sprinterExterior,
