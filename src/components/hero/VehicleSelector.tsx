@@ -22,6 +22,9 @@ import sprinterArrival from "@/assets/vehicles/sprinter-arrival.webp";
 // Turkey-specific sedan images (Renault Megane, Toyota Corolla)
 import sedanRenaultMegane from "@/assets/vehicles/sedan-renault-megane.webp";
 import sedanToyotaCorolla from "@/assets/vehicles/sedan-toyota-corolla.webp";
+import sedanToyotaAirport from "@/assets/vehicles/sedan-toyota-airport.webp";
+import sedanRenaultHotel from "@/assets/vehicles/sedan-renault-hotel.webp";
+import sedanInteriorPremium from "@/assets/vehicles/sedan-interior-premium.webp";
 
 // Maybach Minivan luxury images
 import maybachInteriorLuxury from "@/assets/vehicles/maybach-interior-luxury.webp";
@@ -51,8 +54,8 @@ const AUTO_ROTATE_INTERVAL = 3000;
 
 // Vehicle images map with multiple images per vehicle for carousel
 const vehicleImageSets: Record<string, string[]> = {
-  // Turkey sedan - Renault Megane & Toyota Corolla
-  'sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanImg],
+// Turkey sedan - Renault Megane & Toyota Corolla with interior
+  'sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanToyotaAirport, sedanRenaultHotel, sedanInteriorPremium],
 // Mercedes Vito - premium exterior and interior images
   'mercedes-vito': [vitoPremiumExterior, vitoPremiumInterior, vitoHotelArrival],
   // VIP Mercedes - luxury exterior and interior
@@ -62,8 +65,8 @@ const vehicleImageSets: Record<string, string[]> = {
   // Sprinter Minibus - exterior and interior
   'sprinter-minibus': [sprinterExterior, sprinterInterior, sprinterImg, sprinterArrival],
   'minibus': [sprinterExterior, sprinterInterior, sprinterImg, sprinterArrival],
-  // Dubai vehicles
-  'dubai-private-sedan': [sedanRenaultMegane, sedanToyotaCorolla],
+// Dubai vehicles
+  'dubai-private-sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanToyotaAirport, sedanRenaultHotel],
   'dubai-premium-van': [vitoVipImg, vipMercedesExterior, vipMercedesInterior, vipVitoStarlight],
   'dubai-suburban-suv': [vitoPremiumExterior, vitoPremiumInterior, vitoHotelArrival, vitoExterior],
   'dubai-vip-sprinter': [dubaiVipVanImg, sprinterExterior, sprinterInterior, sprinterArrival],

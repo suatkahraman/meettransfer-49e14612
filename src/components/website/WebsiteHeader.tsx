@@ -99,9 +99,9 @@ const WebsiteHeader = () => {
           />
         </Link>
         
-        {/* Center - Brand Name (visible on smaller screens) */}
-        <Link to={getLocalizedPath("/")} className="md:hidden absolute left-1/2 -translate-x-1/2">
-          <span className="font-serif text-lg font-bold whitespace-nowrap">
+        {/* Center - Brand Name */}
+        <Link to={getLocalizedPath("/")} className="absolute left-1/2 -translate-x-1/2 md:relative md:left-auto md:translate-x-0">
+          <span className="font-serif text-lg sm:text-xl font-bold whitespace-nowrap">
             <span className="text-primary">Meet</span> Transfer
           </span>
         </Link>
