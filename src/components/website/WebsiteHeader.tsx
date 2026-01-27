@@ -100,8 +100,10 @@ const WebsiteHeader = () => {
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)] transition-all duration-300 ${
-        isScrolled ? "shadow-md" : ""
+      className={`fixed top-0 left-0 right-0 z-50 border-b border-border pt-[env(safe-area-inset-top)] transition-all duration-300 ${
+        isScrolled 
+          ? "bg-background/98 backdrop-blur-md shadow-lg shadow-primary/10" 
+          : "bg-card/95 backdrop-blur-sm"
       }`}
     >
       <div 
@@ -110,29 +112,18 @@ const WebsiteHeader = () => {
         }`}
       >
         {/* Left - Logo */}
-        <Link to={getLocalizedPath("/")} className="flex-shrink-0 absolute left-2 sm:left-4 z-10">
+        <Link to={getLocalizedPath("/")} className="flex-shrink-0 z-10">
           <img 
             src={meetTransferLogo} 
             alt="Meet Transfer Logo" 
             className={`rounded-xl object-cover shadow-xl ring-2 ring-primary/40 hover:ring-primary/60 transition-all duration-300 ${
-              isScrolled ? "h-9 w-9 sm:h-11 sm:w-11" : "h-12 w-12 sm:h-16 sm:w-16"
+              isScrolled ? "h-10 w-10 sm:h-12 sm:w-12" : "h-14 w-14 sm:h-20 sm:w-20"
             }`}
           />
         </Link>
-        
-        {/* Center - Brand Name (All screens) */}
-        <Link to={getLocalizedPath("/")} className="absolute left-1/2 -translate-x-1/2 z-10">
-          <span 
-            className={`font-serif font-bold whitespace-nowrap tracking-tight transition-all duration-300 ${
-              isScrolled ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"
-            }`}
-          >
-            <span className="text-primary">Meet</span> Transfer
-          </span>
-        </Link>
 
-        {/* Desktop Navigation - Right aligned */}
-        <nav className="hidden md:flex items-center gap-4 ml-auto mr-4">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-4 mx-4">
           <Link
             to={getLocalizedPath("/services")}
             className={`text-sm font-medium transition-colors ${
@@ -227,10 +218,10 @@ const WebsiteHeader = () => {
           </Link>
         </nav>
 
-        {/* Center - Book Button (Mobile) - More prominent */}
+        {/* Center - Book Button (Mobile) - Centered */}
         {user ? (
-          <Link to={getLocalizedPath("/book")} className="md:hidden flex-1 mx-2 max-w-[140px]">
-            <Button variant="accent" size="sm" className="w-full font-bold text-xs px-4 py-2 shadow-md animate-pulse-subtle">
+          <Link to={getLocalizedPath("/book")} className="md:hidden absolute left-1/2 -translate-x-1/2">
+            <Button variant="accent" size="sm" className="font-bold text-xs px-6 py-2 shadow-md animate-pulse-subtle text-center">
               {t("bookNow")}
             </Button>
           </Link>
@@ -238,7 +229,7 @@ const WebsiteHeader = () => {
           <Button 
             variant="accent" 
             size="sm" 
-            className="md:hidden flex-1 mx-2 max-w-[140px] font-bold text-xs px-4 py-2 shadow-md"
+            className="md:hidden absolute left-1/2 -translate-x-1/2 font-bold text-xs px-6 py-2 shadow-md text-center"
             onClick={scrollToBookingForm}
           >
             {t("bookNow")}
