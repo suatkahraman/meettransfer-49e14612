@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import { Plane } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,17 +9,17 @@ import {
 } from "@/components/ui/select";
 
 const languages = [
-  { code: "EN" as Language, label: "English", flag: "🇬🇧", prefix: "", hasPlane: false },
-  { code: "TR" as Language, label: "Türkçe", flag: "🇹🇷", prefix: "/tr", hasPlane: true },
-  { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪", prefix: "/de", hasPlane: false },
-  { code: "FR" as Language, label: "Français", flag: "🇫🇷", prefix: "/fr", hasPlane: false },
-  { code: "RU" as Language, label: "Русский", flag: "🇷🇺", prefix: "/ru", hasPlane: false },
-  { code: "UK" as Language, label: "Українська", flag: "🇺🇦", prefix: "/uk", hasPlane: false },
-  { code: "IT" as Language, label: "Italiano", flag: "🇮🇹", prefix: "/it", hasPlane: false },
-  { code: "ES" as Language, label: "Español", flag: "🇪🇸", prefix: "/es", hasPlane: false },
-  { code: "AR" as Language, label: "العربية", flag: "🇸🇦", prefix: "/ar", hasPlane: false },
-  { code: "JA" as Language, label: "日本語", flag: "🇯🇵", prefix: "/ja", hasPlane: false },
-  { code: "PT" as Language, label: "Português", flag: "🇵🇹", prefix: "/pt", hasPlane: false },
+  { code: "EN" as Language, label: "English", flag: "🇬🇧", prefix: "" },
+  { code: "TR" as Language, label: "Türkçe", flag: "🇹🇷", prefix: "/tr" },
+  { code: "DE" as Language, label: "Deutsch", flag: "🇩🇪", prefix: "/de" },
+  { code: "FR" as Language, label: "Français", flag: "🇫🇷", prefix: "/fr" },
+  { code: "RU" as Language, label: "Русский", flag: "🇷🇺", prefix: "/ru" },
+  { code: "UK" as Language, label: "Українська", flag: "🇺🇦", prefix: "/uk" },
+  { code: "IT" as Language, label: "Italiano", flag: "🇮🇹", prefix: "/it" },
+  { code: "ES" as Language, label: "Español", flag: "🇪🇸", prefix: "/es" },
+  { code: "AR" as Language, label: "العربية", flag: "🇸🇦", prefix: "/ar" },
+  { code: "JA" as Language, label: "日本語", flag: "🇯🇵", prefix: "/ja" },
+  { code: "PT" as Language, label: "Português", flag: "🇵🇹", prefix: "/pt" },
 ] as const;
 
 const LANGUAGE_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt"];
@@ -63,27 +62,17 @@ const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
     onLanguageChange?.();
   };
 
-  const currentLang = languages.find((l) => l.code === language);
-  
   return (
     <Select value={language} onValueChange={(val) => handleLanguageChange(val as Language)}>
-      <SelectTrigger className="w-[110px] h-9 bg-card border-border">
+      <SelectTrigger className="w-[100px] h-9 bg-card border-border">
         <SelectValue>
-          <span className="flex items-center gap-1">
-            {currentLang?.flag}
-            {currentLang?.hasPlane && <Plane className="h-3 w-3 text-primary" />}
-            {language}
-          </span>
+          {languages.find((l) => l.code === language)?.flag} {language}
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="bg-card">
         {languages.map((lang) => (
           <SelectItem key={lang.code} value={lang.code}>
-            <span className="flex items-center gap-1">
-              {lang.flag}
-              {lang.hasPlane && <Plane className="h-3 w-3 text-primary" />}
-              {lang.label}
-            </span>
+            {lang.flag} {lang.label}
           </SelectItem>
         ))}
       </SelectContent>

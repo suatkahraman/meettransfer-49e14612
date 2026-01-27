@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { Plane } from "lucide-react";
 
 interface HeroHeaderProps {
   language: string;
@@ -45,6 +46,7 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
       </h1>
       <div className="flex items-center justify-center gap-2 mt-2">
         <span className="text-xl sm:text-2xl">🇹🇷</span>
+        <Plane className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
         <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
           {discount}
         </span>
