@@ -89,34 +89,25 @@ const WebsiteHeader = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border pt-[env(safe-area-inset-top)]">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 h-14 sm:h-[4.5rem] relative flex items-center">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 h-14 sm:h-[4.5rem] flex items-center justify-between">
         {/* Left - Logo */}
-        <Link to={getLocalizedPath("/")} className="flex items-center flex-shrink-0">
-          <img
-            src={meetTransferLogo}
-            alt="Meet Transfer Logo"
+        <Link to={getLocalizedPath("/")} className="flex-shrink-0 absolute left-2 sm:left-4 z-10">
+          <img 
+            src={meetTransferLogo} 
+            alt="Meet Transfer Logo" 
             className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl object-cover shadow-xl ring-2 ring-primary/40 hover:ring-primary/60 transition-all"
           />
         </Link>
-
-        {/* Center - Brand + Trust Text */}
-        <div className="absolute left-1/2 -translate-x-1/2 z-10 flex flex-col items-center leading-none pointer-events-none">
-          <Link to={getLocalizedPath("/")} className="pointer-events-auto">
-            <span className="font-serif text-lg sm:text-2xl font-bold whitespace-nowrap tracking-tight">
-              <span className="text-primary">Meet</span> Transfer
-            </span>
-          </Link>
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-1 text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
-            <span>{t("fixedPrice")}</span>
-            <span className="w-1 h-1 rounded-full bg-muted-foreground/60" aria-hidden="true" />
-            <span>{t("freeCancel")}</span>
-            <span className="w-1 h-1 rounded-full bg-muted-foreground/60" aria-hidden="true" />
-            <span>{t("proDriver")}</span>
-          </div>
-        </div>
+        
+        {/* Center - Brand Name */}
+        <Link to={getLocalizedPath("/")} className="absolute left-1/2 -translate-x-1/2 z-10">
+          <span className="font-serif text-xl sm:text-2xl font-bold whitespace-nowrap tracking-tight">
+            <span className="text-primary">Meet</span> Transfer
+          </span>
+        </Link>
 
         {/* Center - Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-4 ml-6">
+        <nav className="hidden md:flex items-center gap-4">
           <Link
             to={getLocalizedPath("/services")}
             className={`text-sm font-medium transition-colors ${
@@ -211,25 +202,26 @@ const WebsiteHeader = () => {
           </Link>
         </nav>
 
-        {/* Right - Actions */}
-        <div className="ml-auto flex items-center gap-2">
-          {/* Book Button (Mobile) */}
-          {user ? (
-            <Link to={getLocalizedPath("/book")} className="md:hidden">
-              <Button variant="accent" size="sm" className="font-bold text-xs px-3 py-2 shadow-md">
-                {t("bookNow")}
-              </Button>
-            </Link>
-          ) : (
-            <Button
-              variant="accent"
-              size="sm"
-              className="md:hidden font-bold text-xs px-3 py-2 shadow-md"
-              onClick={scrollToBookingForm}
-            >
+        {/* Center - Book Button (Mobile) - More prominent */}
+        {user ? (
+          <Link to={getLocalizedPath("/book")} className="md:hidden flex-1 mx-2 max-w-[140px]">
+            <Button variant="accent" size="sm" className="w-full font-bold text-xs px-4 py-2 shadow-md animate-pulse-subtle">
               {t("bookNow")}
             </Button>
-          )}
+          </Link>
+        ) : (
+          <Button 
+            variant="accent" 
+            size="sm" 
+            className="md:hidden flex-1 mx-2 max-w-[140px] font-bold text-xs px-4 py-2 shadow-md"
+            onClick={scrollToBookingForm}
+          >
+            {t("bookNow")}
+          </Button>
+        )}
+
+        {/* Right - Actions */}
+        <div className="flex items-center gap-2">
           {/* Book Button (Desktop) */}
           {user ? (
             <Link to={getLocalizedPath("/book")} className="hidden md:block">
