@@ -5,11 +5,13 @@ import PriceTable from "@/components/website/PriceTable";
 import FAQSection from "@/components/website/FAQSection";
 import FeatureList from "@/components/website/FeatureList";
 import WhatsAppButton from "@/components/website/WhatsAppButton";
-import { MapPin, ArrowRight } from "lucide-react";
+import { MapPin, ArrowRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useRegionPricesPublic, transformToPriceTableFormat } from "@/hooks/useRegionPricesPublic";
+import { Skeleton } from "@/components/ui/skeleton";
 // Vito VIP images - WebP optimized
 import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
 import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
@@ -26,27 +28,6 @@ import vito4 from "@/assets/vito-4.jpg";
 const destinations = [
   "Taksim", "Sultanahmet", "Galataport", "Kadıköy", "Levent",
   "Şişli", "Beşiktaş", "Nişantaşı", "Maslak", "Bakırköy"
-];
-
-const prices = [
-  { from: "IST Airport", to: "Taksim", price: "From €50" },
-  { from: "IST Airport", to: "Sultanahmet", price: "From €50" },
-  { from: "IST Airport", to: "Beşiktaş", price: "From €50" },
-  { from: "IST Airport", to: "Levent", price: "From €50" },
-  { from: "IST Airport", to: "Kadıköy", price: "From €65" },
-  { from: "IST Airport", to: "Üsküdar", price: "From €60" },
-  { from: "IST Airport", to: "Galataport", price: "From €50" },
-  { from: "SAW Airport", to: "Taksim", price: "From €65" },
-  { from: "SAW Airport", to: "Sultanahmet", price: "From €65" },
-  { from: "SAW Airport", to: "Beşiktaş", price: "From €65" },
-  { from: "SAW Airport", to: "Kadıköy", price: "From €45" },
-  { from: "SAW Airport", to: "Üsküdar", price: "From €45" },
-  { from: "IST Airport", to: "Bursa", price: "From €185" },
-  { from: "SAW Airport", to: "Bursa", price: "From €165" },
-  { from: "IST Airport", to: "Sapanca", price: "From €245" },
-  { from: "SAW Airport", to: "Sapanca", price: "From €225" },
-  { from: "IST Airport", to: "Kartepe", price: "From €255" },
-  { from: "SAW Airport", to: "Kartepe", price: "From €235" },
 ];
 
 const faqItems = [
@@ -101,6 +82,15 @@ const vehicles = [
 
 const IstanbulTransfer = () => {
   const { t } = useLanguage();
+  
+  // Fetch prices from database
+  const { data: regionPrices, isLoading: isPricesLoading } = useRegionPricesPublic({ 
+    city: "Istanbul",
+    pickupDate: new Date() 
+  });
+  
+  // Transform to PriceTable format
+  const dynamicPrices = regionPrices ? transformToPriceTableFormat(regionPrices, "mercedes-vito") : [];
   
   return (
     <WebsiteLayout>
@@ -176,7 +166,26 @@ const IstanbulTransfer = () => {
 
         <section>
           <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Istanbul</h2>
-          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
+          {isPricesLoading ? (
+            <div className="bg-card rounded-xl p-6 shadow-sm space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : dynamicPrices.length > 0 ? (
+            <PriceTable items={dynamicPrices} title={t("fixedPriceTransfers")} />
+          ) : (
+            <div className="bg-card rounded-xl p-6 shadow-sm text-center">
+              <p className="text-muted-foreground">{t("requestPrice")}</p>
+              <WhatsAppButton
+                variant="small"
+                message="Hi, I'd like to request a price for Istanbul airport transfer."
+                className="mt-4"
+              />
+            </div>
+          )}
         </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">
