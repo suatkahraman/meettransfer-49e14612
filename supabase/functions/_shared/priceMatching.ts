@@ -183,7 +183,9 @@ export const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: numbe
       'bitez', 'turkbuku', 'türkbükü', 'golturkbuku', 'göltürkbükü',
       'ortakent', 'gumusluk', 'gümüşlük', 'akyarlar', 'gundogan', 'gündoğan',
       'kadikalesi', 'torba', 'gulluk', 'güllük', 'konacik', 'konacık',
-      'yahsi', 'yahşi', 'palmarina'
+      'yahsi', 'yahşi', 'palmarina',
+      // Didim area (Aydın province but served by Bodrum Airport)
+      'didim', 'altinkum', 'altınkum', 'akbuk', 'akbük', 'aydin', 'aydın'
     ]
   },
   'Dalaman': {
@@ -387,6 +389,9 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Gumusluk': { priority: 1, keywords: ['gumusluk', 'gümüşlük', 'rabbit island', 'tavsan adasi', 'tavşan adası'], city: 'Bodrum' },
   'Gundogan': { priority: 2, keywords: ['gundogan', 'gündoğan', 'farilya'], city: 'Bodrum' },
   'Torba': { priority: 2, keywords: ['torba', 'torba bay', 'torba koy', 'torba koyu'], city: 'Bodrum' },
+  
+  // Didim area (Aydın province but served by Bodrum Airport - 70km distance)
+  'Didim': { priority: 1, keywords: ['didim', 'altinkum', 'altınkum', 'akbuk', 'akbük', 'didim center', 'didim merkez', 'didim beach'], city: 'Bodrum' },
   
   // Dalaman / Fethiye / Marmaris - Each district separate
   'Fethiye': { priority: 1, keywords: ['fethiye', 'fethiye marina', 'fethiye center', 'fethiye merkez'], city: 'Dalaman' },
