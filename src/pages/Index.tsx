@@ -9,6 +9,7 @@ import { useBrowserLanguageRedirect } from "@/hooks/useBrowserLanguageRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
 import TrustBar from "@/components/website/TrustBar";
 import LazyOnView from "@/components/performance/LazyOnView";
+import { IOSDownloadButton } from "@/components/website/IOSDownloadButton";
 
 
 // Below-the-fold components are lazy loaded with deferred imports
@@ -127,6 +128,9 @@ const Index = () => {
       </LazyOnView>
       
       <Footer />
+      
+      {/* iOS-specific download button - shows only on iOS devices */}
+      <IOSDownloadButton />
     </WebsiteLayout>
   );
 };
