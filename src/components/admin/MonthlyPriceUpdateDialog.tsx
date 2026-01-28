@@ -211,13 +211,35 @@ const MonthlyPriceUpdateDialog = ({
       }
 
       if (priceType === "region") {
-        // Fetch region prices
-        let query = supabase.from("region_prices").select("*").is("valid_from", null);
-        if (filterCity !== "all") query = query.eq("city", filterCity);
-        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
-        const result = await query;
-        if (result.error) throw result.error;
-        const basePrices = result.data || [];
+        // Fetch ALL region base prices with pagination to avoid 1000-row limit
+        let allBasePrices: any[] = [];
+        let page = 0;
+        const pageSize = 1000;
+        let hasMore = true;
+        
+        while (hasMore) {
+          let query = supabase
+            .from("region_prices")
+            .select("*")
+            .is("valid_from", null)
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+          
+          if (filterCity !== "all") query = query.eq("city", filterCity);
+          if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+          
+          const result = await query;
+          if (result.error) throw result.error;
+          
+          if (result.data && result.data.length > 0) {
+            allBasePrices = [...allBasePrices, ...result.data];
+            page++;
+            hasMore = result.data.length === pageSize;
+          } else {
+            hasMore = false;
+          }
+        }
+        
+        const basePrices = allBasePrices;
 
         for (const { validFrom, validTo } of dateRanges) {
           const validFromStr = format(validFrom, "yyyy-MM-dd");
@@ -267,13 +289,35 @@ const MonthlyPriceUpdateDialog = ({
           }
         }
       } else if (priceType === "intercity") {
-        // Fetch intercity prices
-        let query = supabase.from("intercity_prices").select("*").is("valid_from", null);
-        if (filterCity !== "all") query = query.eq("from_city", filterCity);
-        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
-        const result = await query;
-        if (result.error) throw result.error;
-        const basePrices = result.data || [];
+        // Fetch ALL intercity base prices with pagination
+        let allBasePrices: any[] = [];
+        let page = 0;
+        const pageSize = 1000;
+        let hasMore = true;
+        
+        while (hasMore) {
+          let query = supabase
+            .from("intercity_prices")
+            .select("*")
+            .is("valid_from", null)
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+          
+          if (filterCity !== "all") query = query.eq("from_city", filterCity);
+          if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+          
+          const result = await query;
+          if (result.error) throw result.error;
+          
+          if (result.data && result.data.length > 0) {
+            allBasePrices = [...allBasePrices, ...result.data];
+            page++;
+            hasMore = result.data.length === pageSize;
+          } else {
+            hasMore = false;
+          }
+        }
+        
+        const basePrices = allBasePrices;
 
         for (const { validFrom, validTo } of dateRanges) {
           const validFromStr = format(validFrom, "yyyy-MM-dd");
@@ -328,13 +372,35 @@ const MonthlyPriceUpdateDialog = ({
           }
         }
       } else {
-        // Hourly prices
-        let query = supabase.from("hourly_rental_prices").select("*").is("valid_from", null);
-        if (filterCity !== "all") query = query.eq("city", filterCity);
-        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
-        const result = await query;
-        if (result.error) throw result.error;
-        const basePrices = result.data || [];
+        // Fetch ALL hourly base prices with pagination
+        let allBasePrices: any[] = [];
+        let page = 0;
+        const pageSize = 1000;
+        let hasMore = true;
+        
+        while (hasMore) {
+          let query = supabase
+            .from("hourly_rental_prices")
+            .select("*")
+            .is("valid_from", null)
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+          
+          if (filterCity !== "all") query = query.eq("city", filterCity);
+          if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+          
+          const result = await query;
+          if (result.error) throw result.error;
+          
+          if (result.data && result.data.length > 0) {
+            allBasePrices = [...allBasePrices, ...result.data];
+            page++;
+            hasMore = result.data.length === pageSize;
+          } else {
+            hasMore = false;
+          }
+        }
+        
+        const basePrices = allBasePrices;
 
         for (const { validFrom, validTo } of dateRanges) {
           const validFromStr = format(validFrom, "yyyy-MM-dd");

@@ -117,15 +117,35 @@ const SeasonalPricesManager = ({ priceType }: SeasonalPricesManagerProps) => {
     setLoading(true);
     try {
       const tableName = getTableName();
-      const { data, error } = await supabase
-        .from(tableName)
-        .select("*")
-        .not("valid_from", "is", null)
-        .not("valid_to", "is", null)
-        .order("valid_from", { ascending: false });
+      
+      // Fetch all seasonal prices with pagination to avoid 1000-row limit
+      let allData: SeasonalPrice[] = [];
+      let page = 0;
+      const pageSize = 1000;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from(tableName)
+          .select("*")
+          .not("valid_from", "is", null)
+          .not("valid_to", "is", null)
+          .order("valid_from", { ascending: false })
+          .range(page * pageSize, (page + 1) * pageSize - 1);
 
-      if (error) throw error;
-      setPrices(data || []);
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          allData = [...allData, ...data];
+          page++;
+          // If we got less than pageSize, we've fetched all data
+          hasMore = data.length === pageSize;
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      setPrices(allData);
     } catch (error) {
       console.error("Error fetching seasonal prices:", error);
       toast.error("Sezonluk fiyatlar yüklenirken hata oluştu");
