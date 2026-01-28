@@ -92,27 +92,70 @@ export function transformToPriceTableFormat(
 ): PriceTableItem[] {
   const filteredPrices = prices.filter(p => p.vehicle_type === vehicleType);
   
-  // Map airport codes to readable names
-  const airportNames: Record<string, string> = {
-    IST: "IST Airport",
-    SAW: "SAW Airport",
-    ADA: "Adana Airport",
-    AYT: "Antalya Airport",
-    GZP: "Gazipaşa Airport",
-    DLM: "Dalaman Airport",
-    BJV: "Bodrum Airport",
-    ADB: "İzmir Airport",
-    ESB: "Ankara Airport",
-    TZX: "Trabzon Airport",
-    ECN: "Ercan Airport",
-    ZRH: "Zurich Airport",
-    GVA: "Geneva Airport",
-    BSL: "Basel Airport",
-    MXP: "Milan Malpensa",
+  // Map airport values to readable names - supports both codes and full names from DB
+  const getAirportDisplayName = (airport: string | null): string => {
+    if (!airport) return "Airport";
+    
+    // Direct code mappings
+    const codeMap: Record<string, string> = {
+      IST: "IST Airport",
+      SAW: "SAW Airport",
+      ADA: "Adana Airport",
+      AYT: "Antalya Airport",
+      GZP: "Gazipaşa Airport",
+      DLM: "Dalaman Airport",
+      BJV: "Bodrum Airport",
+      ADB: "İzmir Airport",
+      ESB: "Ankara Airport",
+      TZX: "Trabzon Airport",
+      ECN: "Ercan Airport",
+      ZRH: "Zurich Airport",
+      GVA: "Geneva Airport",
+      BSL: "Basel Airport",
+      MXP: "Milan Malpensa",
+      DIY: "Diyarbakır Airport",
+      MQM: "Mardin Airport",
+      NAV: "Kapadokya Airport",
+      ASR: "Kayseri Airport",
+      DXB: "Dubai Airport",
+    };
+    
+    // Check if it's a direct code match
+    if (codeMap[airport]) {
+      return codeMap[airport];
+    }
+    
+    // Extract code from full name like "Istanbul Airport (IST)" or "Bodrum-Milas Airport (BJV)"
+    const codeMatch = airport.match(/\(([A-Z]{3})\)/);
+    if (codeMatch && codeMap[codeMatch[1]]) {
+      return codeMap[codeMatch[1]];
+    }
+    
+    // Pattern matching for common formats
+    if (airport.includes("Istanbul") && airport.includes("IST")) return "IST Airport";
+    if (airport.includes("Sabiha") || airport.includes("SAW")) return "SAW Airport";
+    if (airport.includes("Antalya") || airport.includes("AYT")) return "Antalya Airport";
+    if (airport.includes("Bodrum") || airport.includes("BJV")) return "Bodrum Airport";
+    if (airport.includes("Dalaman") || airport.includes("DLM")) return "Dalaman Airport";
+    if (airport.includes("Izmir") || airport.includes("ADB")) return "İzmir Airport";
+    if (airport.includes("Ercan") || airport.includes("ECN")) return "Ercan Airport";
+    if (airport.includes("Adana")) return "Adana Airport";
+    if (airport.includes("Mardin")) return "Mardin Airport";
+    if (airport.includes("Kapadokya") || airport.includes("Nevsehir")) return "Kapadokya Airport";
+    if (airport.includes("Kayseri")) return "Kayseri Airport";
+    if (airport.includes("Diyarbakir")) return "Diyarbakır Airport";
+    if (airport.includes("Zurich")) return "Zurich Airport";
+    if (airport.includes("Geneva")) return "Geneva Airport";
+    if (airport.includes("Basel")) return "Basel Airport";
+    if (airport.includes("Milan") || airport.includes("Malpensa")) return "Milan Malpensa";
+    if (airport.includes("Dubai")) return "Dubai Airport";
+    
+    // If nothing matches, return as-is (cleaned up)
+    return airport.replace(/\s*\([A-Z]{3}\)\s*$/, '').trim() || "Airport";
   };
 
   return filteredPrices.map(price => ({
-    from: airportNames[price.airport || ''] || price.airport || "Airport",
+    from: getAirportDisplayName(price.airport),
     to: price.district,
     price: `From ${formatPriceDisplay(price.price, price.price_currency)}`,
   }));
