@@ -100,7 +100,37 @@ export function useImageOptimization({
 }
 
 /**
- * Get optimized image URL with WebP fallback
+ * Get optimized image URL with next-gen format support
+ * Returns object with AVIF, WebP and original sources
+ */
+export function getNextGenImageSources(src: string): {
+  avif?: string;
+  webp?: string;
+  original: string;
+} {
+  // Skip for data URLs, external URLs, or already next-gen formats
+  if (src.startsWith('data:')) return { original: src };
+  if (src.startsWith('http') && !src.includes('supabase.co')) return { original: src };
+  if (src.endsWith('.avif') || src.endsWith('.webp') || src.endsWith('.svg')) {
+    return { original: src };
+  }
+
+  const basePath = src.replace(/\.(jpg|jpeg|png)$/i, '');
+  const hasExtension = /\.(jpg|jpeg|png)$/i.test(src);
+
+  if (!hasExtension) {
+    return { original: src };
+  }
+
+  return {
+    avif: `${basePath}.avif`,
+    webp: `${basePath}.webp`,
+    original: src,
+  };
+}
+
+/**
+ * Get optimized image URL with WebP fallback (legacy support)
  */
 export function getOptimizedImageUrl(
   src: string,
