@@ -1675,6 +1675,33 @@ export type Database = {
           },
         ]
       }
+      shared_booking_links: {
+        Row: {
+          booking_data: Json
+          created_at: string
+          expires_at: string
+          id: string
+          short_code: string
+          view_count: number | null
+        }
+        Insert: {
+          booking_data: Json
+          created_at?: string
+          expires_at?: string
+          id?: string
+          short_code: string
+          view_count?: number | null
+        }
+        Update: {
+          booking_data?: Json
+          created_at?: string
+          expires_at?: string
+          id?: string
+          short_code?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       translation_cache: {
         Row: {
           created_at: string

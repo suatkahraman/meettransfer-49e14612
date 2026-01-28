@@ -824,53 +824,61 @@ const BookingPage = () => {
     }
   };
 
-  // Generate and copy shareable booking link
+  // Generate short code for sharing
+  const generateShortCode = (): string => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
+
+  // Generate and copy shareable booking link (short URL)
   const handleShareBooking = async () => {
     const baseUrl = window.location.origin;
-    const params = new URLSearchParams();
     
-    // Add booking type
-    params.set('type', isHourlyBooking ? 'hourly' : 'transfer');
-    
-    // Add route/location info
-    if (isHourlyBooking) {
-      if (effectiveCity) params.set('city', effectiveCity);
-      if (effectivePickup) params.set('pickup', effectivePickup);
-      params.set('duration', selectedDuration);
-    } else {
-      if (effectivePickup) params.set('pickup', effectivePickup);
-      if (effectiveDropoff) params.set('dropoff', effectiveDropoff);
-    }
-    
-    // Add date/time
-    if (effectiveDate) params.set('date', effectiveDate);
-    if (effectiveTime) params.set('time', effectiveTime);
-    
-    // Add passengers
-    params.set('passengers', passengers.toString());
-    
-    // Add vehicle type
-    params.set('vehicleType', vehicleType);
-    
-    // Add extras
-    if (luggageCount > 1) params.set('luggageCount', luggageCount.toString());
-    if (babySeatCount > 0) params.set('babySeatCount', babySeatCount.toString());
-    
-    // Add return trip info
-    if (hasReturnTrip) {
-      params.set('hasReturn', 'true');
-      if (returnDate) params.set('returnDate', returnDate);
-      if (returnTime) params.set('returnTime', returnTime);
-    }
-    
-    // Add promo code if valid
-    if (isPromoCodeValid && promoCode) {
-      params.set('promoCode', promoCode);
-    }
-    
-    const shareUrl = `${baseUrl}${getLocalizedPath('/book')}?${params.toString()}`;
+    // Collect all booking data
+    const bookingData = {
+      type: effectiveIsHourly ? 'hourly' : 'transfer',
+      pickup: effectivePickup,
+      dropoff: effectiveDropoff,
+      city: effectiveCity,
+      date: effectiveDate,
+      time: effectiveTime,
+      passengers,
+      vehicleType,
+      duration: effectiveIsHourly ? selectedDuration : null,
+      luggageCount: luggageCount > 1 ? luggageCount : null,
+      babySeatCount: babySeatCount > 0 ? babySeatCount : null,
+      hasReturn: hasReturnTrip,
+      returnDate: hasReturnTrip ? returnDate : null,
+      returnTime: hasReturnTrip ? returnTime : null,
+      promoCode: isPromoCodeValid && promoCode ? promoCode : null,
+      language
+    };
     
     try {
+      // Generate a unique short code
+      const shortCode = generateShortCode();
+      
+      // Save to database
+      const { error } = await supabase
+        .from('shared_booking_links')
+        .insert({
+          short_code: shortCode,
+          booking_data: bookingData
+        });
+      
+      if (error) {
+        console.error('Failed to save shared link:', error);
+        toast.error(language === 'TR' ? 'Link oluşturulamadı' : 'Failed to create link');
+        return;
+      }
+      
+      // Create short URL
+      const shareUrl = `${baseUrl}/s/${shortCode}`;
+      
       await navigator.clipboard.writeText(shareUrl);
       setLinkCopied(true);
       toast.success(language === 'TR' ? 'Link kopyalandı!' : 'Link copied!');
