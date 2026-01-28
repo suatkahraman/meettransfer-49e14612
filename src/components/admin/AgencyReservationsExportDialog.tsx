@@ -150,7 +150,7 @@ export const AgencyReservationsExportDialog = ({
 
       const worksheet = workbook.addWorksheet('Rezervasyonlar');
 
-      // Define columns
+      // Define columns (removed: luggage, baby seat, system price, created_at; consolidated notes)
       worksheet.columns = [
         { header: 'Rezervasyon Kodu', key: 'reservation_code', width: 15 },
         { header: 'Tarih', key: 'pickup_date', width: 12 },
@@ -161,10 +161,7 @@ export const AgencyReservationsExportDialog = ({
         { header: 'Varış Noktası', key: 'dropoff', width: 35 },
         { header: 'Araç Tipi', key: 'vehicle_type', width: 15 },
         { header: 'Yolcu Listesi', key: 'passenger_names', width: 30 },
-        { header: 'Valiz', key: 'luggage_count', width: 8 },
-        { header: 'Bebek Koltuğu', key: 'baby_seat_count', width: 12 },
         { header: 'Uçuş No', key: 'flight_number', width: 12 },
-        { header: 'Fiyat (Sistem)', key: 'system_price', width: 15 },
         { header: 'Müşteri Fiyatı', key: 'customer_price', width: 15 },
         { header: 'Para Birimi', key: 'currency', width: 10 },
         { header: 'Yolcu Nakit', key: 'passenger_cash', width: 15 },
@@ -173,10 +170,7 @@ export const AgencyReservationsExportDialog = ({
         { header: 'Durum', key: 'status', width: 15 },
         { header: 'Şoför', key: 'driver_name', width: 20 },
         { header: 'Plaka', key: 'plate_number', width: 12 },
-        { header: 'Müşteri Notları', key: 'customer_notes', width: 30 },
-        { header: 'Şoför Notları', key: 'driver_notes', width: 30 },
-        { header: 'Acenta Notları', key: 'agency_notes', width: 30 },
-        { header: 'Oluşturulma', key: 'created_at', width: 18 },
+        { header: 'Notlar', key: 'notes', width: 50 },
       ];
 
       // Style header row
@@ -241,6 +235,19 @@ export const AgencyReservationsExportDialog = ({
           ? reservation.passenger_names.join(', ') 
           : '';
 
+        // Consolidate all notes into a single field
+        const allNotes: string[] = [];
+        if (reservation.customer_notes?.trim()) {
+          allNotes.push(`Müşteri: ${reservation.customer_notes.trim()}`);
+        }
+        if (reservation.driver_notes?.trim()) {
+          allNotes.push(`Şoför: ${reservation.driver_notes.trim()}`);
+        }
+        if (details?.agency_notes?.trim()) {
+          allNotes.push(`Acenta: ${details.agency_notes.trim()}`);
+        }
+        const consolidatedNotes = allNotes.length > 0 ? allNotes.join(' | ') : '-';
+
         worksheet.addRow({
           reservation_code: reservation.reservation_code || '-',
           pickup_date: format(new Date(reservation.pickup_date), 'dd.MM.yyyy'),
@@ -251,10 +258,7 @@ export const AgencyReservationsExportDialog = ({
           dropoff: reservation.dropoff,
           vehicle_type: vehicleTypeMap[reservation.vehicle_type] || reservation.vehicle_type,
           passenger_names: passengerNames,
-          luggage_count: reservation.luggage_count || 0,
-          baby_seat_count: reservation.baby_seat_count || 0,
           flight_number: reservation.flight_number || '-',
-          system_price: reservation.price ? `${reservation.price}` : '-',
           customer_price: details?.customer_price ? `${details.customer_price}` : '-',
           currency: details?.agency_price_currency || reservation.price_currency || 'TRY',
           passenger_cash: reservation.passenger_cash_amount 
@@ -265,10 +269,7 @@ export const AgencyReservationsExportDialog = ({
           status: statusMap[reservation.status] || reservation.status,
           driver_name: reservation.drivers?.name || '-',
           plate_number: reservation.drivers?.plate_number || '-',
-          customer_notes: reservation.customer_notes || '-',
-          driver_notes: reservation.driver_notes || '-',
-          agency_notes: details?.agency_notes || '-',
-          created_at: format(new Date(reservation.created_at), 'dd.MM.yyyy HH:mm'),
+          notes: consolidatedNotes,
         });
 
         // Alternate row colors
@@ -307,11 +308,11 @@ export const AgencyReservationsExportDialog = ({
       });
 
       worksheet.addRow([]);
-      worksheet.addRow(['Para Birimi', 'Rezervasyon Sayısı', 'Sistem Fiyatı Toplamı', 'Müşteri Fiyatı Toplamı']);
+      worksheet.addRow(['Para Birimi', 'Rezervasyon Sayısı', 'Müşteri Fiyatı Toplamı']);
       worksheet.getRow(worksheet.rowCount).font = { bold: true };
 
       Object.entries(totals).forEach(([currency, data]) => {
-        worksheet.addRow([currency, data.count, data.price.toFixed(2), data.customerPrice.toFixed(2)]);
+        worksheet.addRow([currency, data.count, data.customerPrice.toFixed(2)]);
       });
 
       // Auto-fit columns
