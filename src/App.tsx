@@ -96,6 +96,7 @@ const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const CustomerPortal = lazy(() => import("./pages/CustomerPortal"));
 const ConfirmBooking = lazy(() => import("./pages/ConfirmBooking"));
 const QuickBookingCustomerInfo = lazy(() => import("./pages/QuickBookingCustomerInfo"));
+const SharedBookingRedirect = lazy(() => import("./pages/SharedBookingRedirect"));
 
 // Payment Pages
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
@@ -386,6 +387,9 @@ const App = () => {
               {localizedBlogRoutes("/blog/switzerland-airport-transfer-guide", <SwitzerlandAirportTransferGuide />)}
               {localizedBlogRoutes("/blog/adana-airport-transfer-guide", <AdanaAirportTransferGuide />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
+              
+              {/* Shared Booking Short Links - Not localized */}
+              <Route path="/s/:shortCode" element={<LazyRoute><SharedBookingRedirect /></LazyRoute>} />
               
               {/* Auth routes - Not localized (use common language) */}
               <Route path="/auth" element={<LazyRoute><Auth /></LazyRoute>} />
