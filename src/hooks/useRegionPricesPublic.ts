@@ -19,21 +19,36 @@ interface UseRegionPricesPublicOptions {
 }
 
 export function useRegionPricesPublic({ city, alternativeCityNames = [], pickupDate }: UseRegionPricesPublicOptions) {
+  // Normalize pickupDate to just the date part for stable cache keys
+  const dateKey = pickupDate ? pickupDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+  
   return useQuery({
-    queryKey: ["region-prices-public", city, alternativeCityNames.join(','), pickupDate?.toISOString()],
+    queryKey: ["region-prices-public", city, alternativeCityNames.join(','), dateKey],
     queryFn: async () => {
-      // Build OR query for city and alternative names
+      // Build query for city and alternative names
       const cityNames = [city, ...alternativeCityNames];
-      const cityFilter = cityNames.map(name => `city.ilike.%${name}%`).join(',');
       
-      const { data, error } = await supabase
+      // Use a simpler approach: fetch with single ilike first, then filter
+      // This works better with PostgREST's OR syntax requirements
+      let query = supabase
         .from("region_prices")
         .select("city, airport, district, vehicle_type, price, price_currency, valid_from, valid_to")
-        .eq("is_active", true)
-        .or(cityFilter)
+        .eq("is_active", true);
+      
+      // If only one city, use simple ilike
+      if (cityNames.length === 1) {
+        query = query.ilike("city", `%${cityNames[0]}%`);
+      } else {
+        // For multiple city names, we need to use OR properly
+        // PostgREST OR syntax: field.operator.value,field.operator.value
+        const orFilter = cityNames.map(name => `city.ilike.%${name}%`).join(',');
+        query = query.or(orFilter);
+      }
+      
+      const { data, error } = await query
         .order("district", { ascending: true })
         .order("vehicle_type", { ascending: true });
-
+      
       if (error) throw error;
 
       // Filter prices based on date - prefer seasonal prices over base prices
