@@ -122,7 +122,9 @@ const ChatVehicleCard = memo(function ChatVehicleCard({
       <div className="p-1.5 flex-1 flex flex-col gap-1">
         {/* Vehicle Name & Capacity */}
         <div className="flex items-center justify-between">
-          <h4 className="font-bold text-[10px] leading-tight line-clamp-1">{vehicle.label}</h4>
+          <h4 className="font-bold text-[10px] leading-tight line-clamp-1">
+            {vehicle.labelTranslations?.[language.toLowerCase()] || vehicle.label}
+          </h4>
           <div className="flex items-center gap-1 text-muted-foreground text-[8px]">
             <Users className="h-2.5 w-2.5" />
             <span>{vehicle.passengers}</span>
