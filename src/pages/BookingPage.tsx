@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TimePickerAMPM } from "@/components/ui/time-picker-ampm";
+import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { 
@@ -1823,12 +1824,18 @@ const BookingPage = () => {
                     {hasReturnTrip && (
                       <div className="grid sm:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2">
                         <div>
-                          <Label className="text-sm text-muted-foreground mb-2 block">{t("returnDate")}</Label>
-                          <Input
-                            type="date"
-                            value={returnDate}
-                            onChange={(e) => setReturnDate(e.target.value)}
-                            min={urlDate}
+                          <FloatingLabelDatePicker
+                            label={t("returnDate") || "Return Date"}
+                            date={returnDate ? parse(returnDate, 'yyyy-MM-dd', new Date()) : undefined}
+                            onSelect={(date) => setReturnDate(date ? format(date, 'yyyy-MM-dd') : '')}
+                            icon={<Calendar className="h-4 w-4" />}
+                            disabledDates={(date) => {
+                              const pickupDate = urlDate ? parse(urlDate, 'yyyy-MM-dd', new Date()) : new Date();
+                              return date < pickupDate;
+                            }}
+                            dateFormat="EEE, dd MMM yyyy"
+                            className="w-full"
+                            triggerClassName="h-12"
                           />
                         </div>
                         <div>
