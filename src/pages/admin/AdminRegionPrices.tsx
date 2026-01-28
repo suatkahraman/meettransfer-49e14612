@@ -119,7 +119,24 @@ interface RegionPrice {
   price_currency: string;
   is_active: boolean;
   created_at: string;
+  valid_from?: string | null;
+  valid_to?: string | null;
 }
+
+const MONTHS = [
+  { value: 1, label: "Ocak" },
+  { value: 2, label: "Şubat" },
+  { value: 3, label: "Mart" },
+  { value: 4, label: "Nisan" },
+  { value: 5, label: "Mayıs" },
+  { value: 6, label: "Haziran" },
+  { value: 7, label: "Temmuz" },
+  { value: 8, label: "Ağustos" },
+  { value: 9, label: "Eylül" },
+  { value: 10, label: "Ekim" },
+  { value: 11, label: "Kasım" },
+  { value: 12, label: "Aralık" },
+];
 
 interface IntercityPrice {
   id: string;
@@ -143,6 +160,8 @@ const AdminRegionPrices = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCity, setFilterCity] = useState<string>('all');
+  const [filterMonth, setFilterMonth] = useState<string>('all');
+  const [filterPriceType, setFilterPriceType] = useState<'all' | 'base' | 'seasonal'>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
   const [isBulkIntercityUpdateDialogOpen, setIsBulkIntercityUpdateDialogOpen] = useState(false);
@@ -530,6 +549,16 @@ const AdminRegionPrices = () => {
     return `${symbols[currency] || currency} ${price.toLocaleString()}`;
   };
 
+  const getMonthFromDate = (dateStr: string | null | undefined): number => {
+    if (!dateStr) return 0;
+    try {
+      const date = new Date(dateStr);
+      return date.getMonth() + 1;
+    } catch {
+      return 0;
+    }
+  };
+
   const filteredPrices = prices.filter(price => {
     const matchesSearch = 
       price.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -538,7 +567,17 @@ const AdminRegionPrices = () => {
     
     const matchesCity = filterCity === 'all' || price.city === filterCity;
     
-    return matchesSearch && matchesCity;
+    // Filter by price type (base or seasonal)
+    const isSeasonalPrice = price.valid_from && price.valid_to;
+    const matchesPriceType = filterPriceType === 'all' || 
+      (filterPriceType === 'base' && !isSeasonalPrice) ||
+      (filterPriceType === 'seasonal' && isSeasonalPrice);
+    
+    // Filter by month
+    const matchesMonth = filterMonth === 'all' || 
+      (isSeasonalPrice && getMonthFromDate(price.valid_from) === parseInt(filterMonth));
+    
+    return matchesSearch && matchesCity && matchesPriceType && matchesMonth;
   });
 
   const filteredIntercityPrices = intercityPrices.filter(price => {
@@ -856,27 +895,83 @@ const AdminRegionPrices = () => {
               </CardHeader>
               <CardContent>
                 {/* Filters */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Şehir, ilçe veya havalimanı ara..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
+                <div className="flex flex-col gap-4 mb-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Şehir, ilçe veya havalimanı ara..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <Select value={filterCity} onValueChange={setFilterCity}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Şehir filtrele" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tüm Şehirler</SelectItem>
+                        {Object.keys(CITIES_DATA).map(city => (
+                          <SelectItem key={city} value={city}>{city}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={filterPriceType} onValueChange={(v) => setFilterPriceType(v as 'all' | 'base' | 'seasonal')}>
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Fiyat tipi" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tüm Fiyatlar</SelectItem>
+                        <SelectItem value="base">Temel Fiyat</SelectItem>
+                        <SelectItem value="seasonal">Aylık Fiyat</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={filterMonth} onValueChange={setFilterMonth}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Ay filtrele" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tüm Aylar</SelectItem>
+                        {MONTHS.map(m => (
+                          <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Select value={filterCity} onValueChange={setFilterCity}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Şehir filtrele" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tüm Şehirler</SelectItem>
-                      {Object.keys(CITIES_DATA).map(city => (
-                        <SelectItem key={city} value={city}>{city}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  
+                  {/* Active filter summary */}
+                  {(filterCity !== 'all' || filterMonth !== 'all' || filterPriceType !== 'all') && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm text-muted-foreground">Aktif filtreler:</span>
+                      {filterCity !== 'all' && (
+                        <Badge variant="secondary" className="gap-1">
+                          Şehir: {filterCity}
+                          <button onClick={() => setFilterCity('all')} className="ml-1 hover:text-destructive">×</button>
+                        </Badge>
+                      )}
+                      {filterPriceType !== 'all' && (
+                        <Badge variant="secondary" className="gap-1">
+                          {filterPriceType === 'base' ? 'Temel' : 'Aylık'} Fiyat
+                          <button onClick={() => setFilterPriceType('all')} className="ml-1 hover:text-destructive">×</button>
+                        </Badge>
+                      )}
+                      {filterMonth !== 'all' && (
+                        <Badge variant="secondary" className="gap-1">
+                          {MONTHS.find(m => m.value.toString() === filterMonth)?.label}
+                          <button onClick={() => setFilterMonth('all')} className="ml-1 hover:text-destructive">×</button>
+                        </Badge>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        setFilterCity('all');
+                        setFilterMonth('all');
+                        setFilterPriceType('all');
+                        setSearchTerm('');
+                      }}>
+                        Temizle
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Table */}
@@ -899,51 +994,78 @@ const AdminRegionPrices = () => {
                           <TableHead>Havalimanı</TableHead>
                           <TableHead>İlçe/Bölge</TableHead>
                           <TableHead>Araç</TableHead>
+                          <TableHead>Dönem</TableHead>
                           <TableHead className="text-right">Fiyat</TableHead>
                           <TableHead className="text-right">İşlemler</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredPrices.map((price) => (
-                          <TableRow key={price.id}>
-                            <TableCell className="font-medium">{price.city}</TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {price.airport || '-'}
-                            </TableCell>
-                            <TableCell>{price.district}</TableCell>
-                            <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
-                            <TableCell className="text-right font-bold text-accent">
-                              {formatPrice(price.price, price.price_currency)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => openEditDialog(price)}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDelete(price.id)}
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {filteredPrices.map((price) => {
+                          const isSeasonalPrice = price.valid_from && price.valid_to;
+                          const monthLabel = isSeasonalPrice && price.valid_from
+                            ? MONTHS.find(m => m.value === getMonthFromDate(price.valid_from))?.label
+                            : null;
+                          
+                          return (
+                            <TableRow key={price.id}>
+                              <TableCell className="font-medium">{price.city}</TableCell>
+                              <TableCell className="text-muted-foreground">
+                                {price.airport || '-'}
+                              </TableCell>
+                              <TableCell>{price.district}</TableCell>
+                              <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
+                              <TableCell>
+                                {isSeasonalPrice ? (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {monthLabel} {new Date(price.valid_from!).getFullYear()}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs">
+                                    Temel Fiyat
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-right font-bold text-accent">
+                                {formatPrice(price.price, price.price_currency)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => openEditDialog(price)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDelete(price.id)}
+                                    className="text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
                 )}
 
                 {/* Summary */}
-                <div className="mt-4 text-sm text-muted-foreground">
-                  Toplam {filteredPrices.length} fiyat kaydı
+                <div className="mt-4 text-sm text-muted-foreground flex items-center justify-between">
+                  <span>
+                    Toplam {filteredPrices.length} fiyat kaydı
+                    {filterCity !== 'all' && ` (${filterCity})`}
+                    {filterMonth !== 'all' && ` - ${MONTHS.find(m => m.value.toString() === filterMonth)?.label}`}
+                  </span>
+                  <span className="text-xs">
+                    Temel: {prices.filter(p => !p.valid_from).length} | 
+                    Aylık: {prices.filter(p => p.valid_from).length}
+                  </span>
                 </div>
               </CardContent>
             </Card>
