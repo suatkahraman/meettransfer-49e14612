@@ -136,20 +136,18 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       { icon: 'droplets', label: 'Bottled Water', labelTr: 'Su İkramı' },
       { icon: 'luggage', label: 'Large Luggage Space', labelTr: 'Geniş Bagaj Alanı' },
     ],
-    // MERCEDES VITO ONLY IMAGES - NO Sedan, NO Maybach, NO Sprinter, NO VIP Vito starlight
+    // MERCEDES VITO ONLY IMAGES - BLACK Vito only, NO grey, NO Sedan, NO Maybach, NO Sprinter, NO VIP Vito starlight
     images: [
       { src: vitoPremiumExterior, alt: "Mercedes Vito premium exterior luxury design" },
       { src: vitoPremiumInterior, alt: "Mercedes Vito premium interior leather seats" },
-      { src: vitoHotelArrival, alt: "Mercedes Vito hotel arrival service" },
       { src: vitoAirportPremium, alt: "Mercedes Vito VIP airport transfer with professional chauffeur" },
       { src: vitoInterior, alt: "Mercedes Vito interior comfort seats" },
-      { src: vitoExterior, alt: "Mercedes Vito exterior professional transfer" },
+      { src: vitoExteriorBlack, alt: "Mercedes Vito black exterior professional transfer" },
       { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
       { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
       { src: vitoCappadociaBalloon, alt: "Mercedes Vito transfer to Cappadocia hot air balloons" },
       { src: vitoFamilyInterior, alt: "Mercedes Vito spacious family interior with leather seats" },
       { src: vitoInteriorLeather, alt: "Mercedes Vito premium leather interior detail" },
-      { src: vitoExteriorBlack, alt: "Mercedes Vito black exterior professional transfer" },
       { src: vitoPassengerOrange, alt: "Mercedes Vito passengers enjoying comfortable ride" },
       { src: vitoExteriorOpendoor, alt: "Mercedes Vito with open door welcoming passengers" },
       { src: vitoPassengerNight, alt: "Mercedes Vito night transfer service with ambient lighting" },

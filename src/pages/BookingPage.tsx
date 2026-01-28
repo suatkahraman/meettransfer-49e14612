@@ -23,7 +23,7 @@ import confetti from "canvas-confetti";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus, Share2, Copy, Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired, VehicleTypeInfo } from "@/lib/vehicleTypes";
@@ -230,6 +230,9 @@ const BookingPage = () => {
   // Booking success state
   const [bookingCompleted, setBookingCompleted] = useState(false);
   const [completedReservationId, setCompletedReservationId] = useState<string | null>(null);
+  
+  // Share link state
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Effective values - use token data if available, otherwise URL params
   const effectivePickup = tokenBookingData?.pickup || urlPickup;
@@ -821,7 +824,62 @@ const BookingPage = () => {
     }
   };
 
-  // Validate guest form
+  // Generate and copy shareable booking link
+  const handleShareBooking = async () => {
+    const baseUrl = window.location.origin;
+    const params = new URLSearchParams();
+    
+    // Add booking type
+    params.set('type', isHourlyBooking ? 'hourly' : 'transfer');
+    
+    // Add route/location info
+    if (isHourlyBooking) {
+      if (effectiveCity) params.set('city', effectiveCity);
+      if (effectivePickup) params.set('pickup', effectivePickup);
+      params.set('duration', selectedDuration);
+    } else {
+      if (effectivePickup) params.set('pickup', effectivePickup);
+      if (effectiveDropoff) params.set('dropoff', effectiveDropoff);
+    }
+    
+    // Add date/time
+    if (effectiveDate) params.set('date', effectiveDate);
+    if (effectiveTime) params.set('time', effectiveTime);
+    
+    // Add passengers
+    params.set('passengers', passengers.toString());
+    
+    // Add vehicle type
+    params.set('vehicleType', vehicleType);
+    
+    // Add extras
+    if (luggageCount > 1) params.set('luggageCount', luggageCount.toString());
+    if (babySeatCount > 0) params.set('babySeatCount', babySeatCount.toString());
+    
+    // Add return trip info
+    if (hasReturnTrip) {
+      params.set('hasReturn', 'true');
+      if (returnDate) params.set('returnDate', returnDate);
+      if (returnTime) params.set('returnTime', returnTime);
+    }
+    
+    // Add promo code if valid
+    if (isPromoCodeValid && promoCode) {
+      params.set('promoCode', promoCode);
+    }
+    
+    const shareUrl = `${baseUrl}${getLocalizedPath('/book')}?${params.toString()}`;
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setLinkCopied(true);
+      toast.success(language === 'TR' ? 'Link kopyalandı!' : 'Link copied!');
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      toast.error(language === 'TR' ? 'Link kopyalanamadı' : 'Failed to copy link');
+    }
+  };
   const validateGuestForm = (): boolean => {
     const errors: Record<string, string> = {};
     
@@ -1441,8 +1499,21 @@ const BookingPage = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-28 lg:pb-8">
           {/* Compact Hero with Route Info */}
-          <div className="bg-gradient-to-r from-primary via-primary/90 to-primary/80 rounded-xl sm:rounded-2xl p-3 sm:p-6 text-white mb-4 sm:mb-8 shadow-2xl">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+          <div className="bg-gradient-to-r from-primary via-primary/90 to-primary/80 rounded-xl sm:rounded-2xl p-3 sm:p-6 text-white mb-4 sm:mb-8 shadow-2xl relative">
+            {/* Share Button */}
+            <button
+              onClick={handleShareBooking}
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 p-2 sm:p-2.5 rounded-lg bg-white/20 hover:bg-white/30 transition-all duration-200 group"
+              title={language === 'TR' ? 'Linki Kopyala' : 'Copy Link'}
+            >
+              {linkCopied ? (
+                <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-300" />
+              ) : (
+                <Share2 className="h-4 w-4 sm:h-5 sm:w-5 text-white/90 group-hover:text-white" />
+              )}
+            </button>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 pr-10 sm:pr-12">
               {isHourlyBooking ? (
                 <>
                   <div className="flex items-start gap-2 sm:gap-3 col-span-2">
