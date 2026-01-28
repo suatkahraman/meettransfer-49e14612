@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useRegionPricesPublic, transformToPriceTableFormat } from "@/hooks/useRegionPricesPublic";
+import { Skeleton } from "@/components/ui/skeleton";
 import bodrumMeetTransfer from "@/assets/bodrum-transfer.webp";
 
 // Premium images - WebP optimized
@@ -21,17 +23,6 @@ import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
 const destinations = [
   "Yalıkavak", "Türkbükü", "Gümüşlük", "Bodrum Center", "Gündoğan",
   "Torba", "Göltürkbükü", "Ortakent", "Bitez", "Gümbet"
-];
-
-const prices = [
-  { from: "BJV Airport", to: "Bodrum Center", price: "€60" },
-  { from: "BJV Airport", to: "Torba", price: "€60" },
-  { from: "BJV Airport", to: "Yalıkavak", price: "€76" },
-  { from: "BJV Airport", to: "Türkbükü", price: "€65" },
-  { from: "BJV Airport", to: "Gündoğan", price: "€65" },
-  { from: "BJV Airport", to: "Turgutreis", price: "€75" },
-  { from: "BJV Airport", to: "Akyarlar", price: "€74" },
-  { from: "BJV Airport", to: "Güllük", price: "€50" },
 ];
 
 const faqItems = [
@@ -80,6 +71,15 @@ const vehicles = [
 
 const BodrumTransfer = () => {
   const { t } = useLanguage();
+  
+  // Fetch prices from database
+  const { data: regionPrices, isLoading: isPricesLoading } = useRegionPricesPublic({ 
+    city: "Bodrum",
+    pickupDate: new Date() 
+  });
+  
+  // Transform to PriceTable format
+  const dynamicPrices = regionPrices ? transformToPriceTableFormat(regionPrices, "mercedes-vito") : [];
   
   return (
     <WebsiteLayout>
@@ -190,7 +190,25 @@ const BodrumTransfer = () => {
 
         <section>
           <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Bodrum</h2>
-          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
+          {isPricesLoading ? (
+            <div className="bg-card rounded-xl p-6 shadow-sm space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : dynamicPrices.length > 0 ? (
+            <PriceTable items={dynamicPrices} title={t("fixedPriceTransfers")} />
+          ) : (
+            <div className="bg-card rounded-xl p-6 shadow-sm text-center">
+              <p className="text-muted-foreground">{t("requestPrice")}</p>
+              <WhatsAppButton
+                variant="small"
+                message="Hi, I'd like to request a price for Bodrum airport transfer."
+                className="mt-4"
+              />
+            </div>
+          )}
         </section>
 
         <div className="bg-secondary rounded-2xl p-8 text-center">

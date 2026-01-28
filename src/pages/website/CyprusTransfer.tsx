@@ -10,6 +10,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useRegionPricesPublic, transformToPriceTableFormat } from "@/hooks/useRegionPricesPublic";
+import { Skeleton } from "@/components/ui/skeleton";
 import cyprusHeroImage from "@/assets/cyprus-transfer-hero.jpg";
 
 // Premium images - WebP optimized
@@ -28,16 +30,6 @@ const airports = [
   { code: "LCA", name: "Larnaca International Airport", description: "Main airport of the Republic of Cyprus, serving the eastern and central regions" },
   { code: "PFO", name: "Paphos International Airport", description: "Serves the western region including Paphos and Limassol" },
   { code: "ECN", name: "Ercan International Airport", description: "Main airport in Northern Cyprus, serving Kyrenia and Famagusta" },
-];
-
-const prices = [
-  { from: "Larnaca Airport", to: "Ayia Napa", price: "Request Price" },
-  { from: "Larnaca Airport", to: "Limassol", price: "Request Price" },
-  { from: "Larnaca Airport", to: "Paphos", price: "Request Price" },
-  { from: "Larnaca Airport", to: "Nicosia", price: "Request Price" },
-  { from: "Paphos Airport", to: "Limassol", price: "Request Price" },
-  { from: "Ercan Airport", to: "Kyrenia", price: "Request Price" },
-  { from: "Ercan Airport", to: "Famagusta", price: "Request Price" },
 ];
 
 const popularRoutes = [
@@ -101,6 +93,16 @@ const vehicles = [
 
 const CyprusTransfer = () => {
   const { t } = useLanguage();
+  
+  // Fetch prices from database - Cyprus has multiple city names
+  const { data: regionPrices, isLoading: isPricesLoading } = useRegionPricesPublic({ 
+    city: "Cyprus",
+    alternativeCityNames: ["Kuzey Kıbrıs", "Kıbrıs", "KKTC"],
+    pickupDate: new Date() 
+  });
+  
+  // Transform to PriceTable format - use minivan for Cyprus (mercedes-vito equivalent)
+  const dynamicPrices = regionPrices ? transformToPriceTableFormat(regionPrices, "minivan") : [];
   
   return (
     <WebsiteLayout>
@@ -267,7 +269,25 @@ const CyprusTransfer = () => {
         {/* Prices */}
         <section>
           <h2 className="text-2xl font-bold mb-4">{t("airportTransferPricesTitle")} Cyprus</h2>
-          <PriceTable items={prices} title={t("fixedPriceTransfers")} />
+          {isPricesLoading ? (
+            <div className="bg-card rounded-xl p-6 shadow-sm space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : dynamicPrices.length > 0 ? (
+            <PriceTable items={dynamicPrices} title={t("fixedPriceTransfers")} />
+          ) : (
+            <div className="bg-card rounded-xl p-6 shadow-sm text-center">
+              <p className="text-muted-foreground">{t("requestPrice")}</p>
+              <WhatsAppButton
+                variant="small"
+                message="Hello, I would like to request a price for Cyprus airport transfer."
+                className="mt-4"
+              />
+            </div>
+          )}
         </section>
 
         {/* CTA */}

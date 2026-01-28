@@ -14,18 +14,23 @@ export interface RegionPricePublic {
 
 interface UseRegionPricesPublicOptions {
   city: string;
+  alternativeCityNames?: string[]; // For cities with multiple names (e.g., Cyprus = Kuzey Kıbrıs)
   pickupDate?: Date;
 }
 
-export function useRegionPricesPublic({ city, pickupDate }: UseRegionPricesPublicOptions) {
+export function useRegionPricesPublic({ city, alternativeCityNames = [], pickupDate }: UseRegionPricesPublicOptions) {
   return useQuery({
-    queryKey: ["region-prices-public", city, pickupDate?.toISOString()],
+    queryKey: ["region-prices-public", city, alternativeCityNames.join(','), pickupDate?.toISOString()],
     queryFn: async () => {
+      // Build OR query for city and alternative names
+      const cityNames = [city, ...alternativeCityNames];
+      const cityFilter = cityNames.map(name => `city.ilike.%${name}%`).join(',');
+      
       const { data, error } = await supabase
         .from("region_prices")
         .select("city, airport, district, vehicle_type, price, price_currency, valid_from, valid_to")
         .eq("is_active", true)
-        .ilike("city", `%${city}%`)
+        .or(cityFilter)
         .order("district", { ascending: true })
         .order("vehicle_type", { ascending: true });
 
