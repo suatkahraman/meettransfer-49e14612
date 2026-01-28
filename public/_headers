@@ -1,3 +1,17 @@
+# ============================================
+# SECURITY HEADERS - Applied to all responses
+# ============================================
+/*
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# ============================================
+# CACHE HEADERS
+# ============================================
+
 # Long-term immutable cache for hashed build assets (JS, CSS, images)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
