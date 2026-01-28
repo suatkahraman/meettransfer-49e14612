@@ -113,13 +113,28 @@
     <!-- Bing Webmaster Verification -->
     <meta name="msvalidate.01" content="0CAD332D394D79C6D5C254FFC9FF906B" />
 
-    <!-- Google tag (gtag.js) - Deferred initialization for better Speed Index -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-668686697"></script>
+    <!-- Google tag (gtag.js) - Fully deferred to after LCP for minimal main-thread impact -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      // Defer gtag initialization to after first paint using requestIdleCallback
+      
+      // Defer gtag script loading to AFTER Largest Contentful Paint
+      // This ensures analytics doesn't compete with critical rendering
       (function() {
+        var gtagLoaded = false;
+        
+        function loadGtagScript() {
+          if (gtagLoaded) return;
+          gtagLoaded = true;
+          
+          var script = document.createElement('script');
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=AW-668686697';
+          script.async = true;
+          script.defer = true;
+          script.onload = initGtag;
+          document.head.appendChild(script);
+        }
+        
         function initGtag() {
           gtag('js', new Date());
           gtag('config', 'AW-668686697', {
@@ -127,16 +142,54 @@
             'transport_type': 'beacon'
           });
         }
-        // Use requestIdleCallback if available, otherwise defer with setTimeout
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(initGtag, { timeout: 3000 });
+        
+        // Wait for LCP before loading analytics
+        if ('PerformanceObserver' in window) {
+          var lcpObserved = false;
+          var observer = new PerformanceObserver(function(list) {
+            if (lcpObserved) return;
+            var entries = list.getEntries();
+            if (entries.length > 0) {
+              lcpObserved = true;
+              observer.disconnect();
+              // Small delay after LCP to avoid competition
+              setTimeout(function() {
+                if ('requestIdleCallback' in window) {
+                  requestIdleCallback(loadGtagScript, { timeout: 4000 });
+                } else {
+                  loadGtagScript();
+                }
+              }, 200);
+            }
+          });
+          
+          try {
+            observer.observe({ type: 'largest-contentful-paint', buffered: true });
+            // Fallback: load anyway after 6 seconds
+            setTimeout(function() {
+              if (!lcpObserved) {
+                lcpObserved = true;
+                observer.disconnect();
+                loadGtagScript();
+              }
+            }, 6000);
+          } catch (e) {
+            // Observer not supported, use idle callback
+            if ('requestIdleCallback' in window) {
+              requestIdleCallback(loadGtagScript, { timeout: 4000 });
+            } else {
+              window.addEventListener('load', function() {
+                setTimeout(loadGtagScript, 1000);
+              });
+            }
+          }
         } else {
-          // Fallback: run after load event + short delay
+          // Fallback for older browsers
           if (document.readyState === 'complete') {
-            setTimeout(initGtag, 100);
+            setTimeout(loadGtagScript, 1000);
           } else {
             window.addEventListener('load', function() {
-              setTimeout(initGtag, 100);
+              setTimeout(loadGtagScript, 1000);
             });
           }
         }

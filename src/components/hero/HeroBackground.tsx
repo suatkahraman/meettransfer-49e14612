@@ -1,7 +1,9 @@
 import { memo } from "react";
 
 // Use public folder path for hero image - enables browser preload matching
-const heroImage = "/hero-bg-futuristic.webp";
+// Multiple formats for next-gen image support
+const heroImageWebP = "/hero-bg-futuristic.webp";
+const heroImageAvif = "/hero-bg-futuristic.avif"; // Falls back gracefully if not available
 
 interface HeroBackgroundProps {
   videosLoaded?: boolean;
@@ -21,25 +23,32 @@ export const HeroBackground = memo(({}: HeroBackgroundProps) => {
       <div className="absolute inset-0 z-0 hidden md:block">
         {/* 
           LCP Optimization:
-          - Using img element instead of CSS background for browser prioritization
+          - Using picture element for AVIF/WebP with fallback
           - fetchPriority="high" tells browser to load this first
           - loading="eager" ensures no lazy loading
           - Explicit width/height prevent CLS
           - decoding="async" allows non-blocking decode
-          - WebP format for optimal compression
+          - Next-gen formats (AVIF, WebP) for optimal compression
         */}
-        <img
-          src={heroImage}
-          alt=""
-          role="presentation"
-          width={1920}
-          height={1080}
-          // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-          className="absolute inset-0 w-full h-full object-cover object-right opacity-30"
-        />
+        <picture>
+          {/* AVIF - best compression, newest format */}
+          <source srcSet={heroImageAvif} type="image/avif" />
+          {/* WebP - good compression, wide support */}
+          <source srcSet={heroImageWebP} type="image/webp" />
+          {/* Fallback */}
+          <img
+            src={heroImageWebP}
+            alt=""
+            role="presentation"
+            width={1920}
+            height={1080}
+            // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover object-right opacity-30"
+          />
+        </picture>
         
         {/* Left fade for form readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
