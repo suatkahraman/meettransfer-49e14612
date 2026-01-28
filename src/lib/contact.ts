@@ -13,8 +13,9 @@ export const WHATSAPP_NUMBER = "15558051101";
 // Display format for the phone number
 export const WHATSAPP_DISPLAY = "+1 (555) 805-1101";
 
-// Emergency/alternative phone number (same as WhatsApp)
-export const EMERGENCY_PHONE = "+15558051101";
+// Emergency/alternative phone number (different from WhatsApp - for urgent support)
+export const EMERGENCY_PHONE = "+905321748390";
+export const EMERGENCY_PHONE_DISPLAY = "+90 532 174 83 90";
 
 // Email addresses
 export const SUPPORT_EMAIL = "info@meettransfer.app";
