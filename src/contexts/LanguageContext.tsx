@@ -433,11 +433,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP Mercedes Vito",
     vitoVipDesc: "Our most popular choice for airport transfers. The VIP Mercedes Vito offers spacious seating, ample luggage space, and premium comfort features perfect for families and small groups.",
-    vitoName: "Mercedes Vito",
+    vitoName: "Vito or Similar",
     vitoDesc: "The Mercedes Vito Comfortable family holiday transfer vehicles with best budget.",
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "The pinnacle of automotive luxury. Our Mercedes Maybach Minivan offers executive rear seating and the smoothest ride for VIP guests and business executives.",
-    sprinterName: "Mercedes Sprinter VIP Minibus",
+    sprinterName: "Mercedes Sprinter or Similar",
     sprinterDesc: "Perfect for larger groups, our VIP Sprinter offers airline-style seating for up to 16 passengers with individual screens and premium amenities.",
     
     // Dubai Exclusive Fleet
@@ -2263,11 +2263,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP Mercedes Vito",
     vitoVipDesc: "Unsere beliebteste Wahl für Flughafentransfers. Der VIP Mercedes Vito bietet geräumige Sitze, viel Gepäckraum und Premium-Komfortfunktionen, perfekt für Familien und kleine Gruppen.",
-    vitoName: "Mercedes Vito",
+    vitoName: "Vito oder Ähnlich",
     vitoDesc: "Der Mercedes Vito - komfortable Familienurlaubs-Transferfahrzeuge mit bestem Budget.",
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Der Gipfel des automobilen Luxus. Unser Mercedes Maybach Minivan bietet Executive-Rücksitze und die sanfteste Fahrt für VIP-Gäste und Geschäftsführer.",
-    sprinterName: "Mercedes Sprinter VIP Minibus",
+    sprinterName: "Mercedes Sprinter oder Ähnlich",
     sprinterDesc: "Perfekt für größere Gruppen, unser VIP Sprinter bietet Airline-Sitze für bis zu 16 Passagiere mit individuellen Bildschirmen und Premium-Ausstattung.",
     
     // Dubai Exclusive Fleet
@@ -4131,11 +4131,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP Mercedes Vito",
     vitoVipDesc: "Notre choix le plus populaire pour les transferts aéroport. Le VIP Mercedes Vito offre des sièges spacieux, un espace bagages généreux et des caractéristiques de confort premium.",
-    vitoName: "Mercedes Vito",
+    vitoName: "Vito ou Similaire",
     vitoDesc: "Le Mercedes Vito - véhicules de transfert familiaux confortables avec le meilleur budget.",
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Le summum du luxe automobile. Notre Mercedes Maybach Minivan offre des sièges arrière executive et le trajet le plus fluide pour les invités VIP.",
-    sprinterName: "Mercedes Sprinter VIP Minibus",
+    sprinterName: "Mercedes Sprinter ou Similaire",
     sprinterDesc: "Parfait pour les grands groupes, notre Sprinter VIP offre des sièges style avion pour jusqu'à 16 passagers avec équipements premium.",
     
     // Dubai Exclusive Fleet
@@ -5714,11 +5714,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP Mercedes Vito",
     vitoVipDesc: "Наш самый популярный выбор для трансферов из аэропорта. VIP Mercedes Vito предлагает просторные сиденья, много места для багажа и премиальные функции комфорта, идеально подходит для семей и небольших групп.",
-    vitoName: "Mercedes Vito",
+    vitoName: "Vito или Аналог",
     vitoDesc: "Mercedes Vito — комфортные семейные автомобили для трансфера с лучшим бюджетом.",
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Вершина автомобильной роскоши. Наш Mercedes Maybach Minivan предлагает представительские задние сиденья и самую плавную поездку для VIP-гостей и руководителей.",
-    sprinterName: "Mercedes Sprinter VIP Минибус",
+    sprinterName: "Mercedes Sprinter или Аналог",
     sprinterDesc: "Идеально для больших групп, наш VIP Sprinter предлагает сиденья авиационного класса для до 16 пассажиров с индивидуальными экранами и премиум-удобствами.",
     
     // Dubai Exclusive Fleet
@@ -7161,11 +7161,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP Mercedes Vito",
     vitoVipDesc: "La nostra scelta più popolare per i trasferimenti aeroportuali. Il VIP Mercedes Vito offre sedili spaziosi, ampio spazio bagagli e caratteristiche di comfort premium, perfetto per famiglie e piccoli gruppi.",
-    vitoName: "Mercedes Vito",
+    vitoName: "Vito o Simile",
     vitoDesc: "Il Mercedes Vito - veicoli di trasferimento familiari confortevoli con il miglior budget.",
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "L'apice del lusso automobilistico. Il nostro Mercedes Maybach Minivan offre sedili posteriori executive e il viaggio più fluido per ospiti VIP e dirigenti.",
-    sprinterName: "Mercedes Sprinter VIP Minibus",
+    sprinterName: "Mercedes Sprinter o Simile",
     sprinterDesc: "Perfetto per gruppi più grandi, il nostro Sprinter VIP offre sedili stile aereo per fino a 16 passeggeri con schermi individuali e comfort premium.",
     
     // Dubai Exclusive Fleet
@@ -8655,11 +8655,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP Mercedes Vito",
     vitoVipDesc: "Nuestra opción más popular para traslados desde el aeropuerto. El VIP Mercedes Vito ofrece asientos espaciosos, amplio espacio para equipaje y características de confort premium, perfecto para familias y grupos pequeños.",
-    vitoName: "Mercedes Vito",
+    vitoName: "Vito o Similar",
     vitoDesc: "El Mercedes Vito - vehículos de traslado familiar cómodos con el mejor presupuesto.",
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "La cima del lujo automotriz. Nuestro Mercedes Maybach Minivan ofrece asientos traseros ejecutivos y el viaje más suave para huéspedes VIP y ejecutivos.",
-    sprinterName: "Mercedes Sprinter VIP Minibús",
+    sprinterName: "Mercedes Sprinter o Similar",
     sprinterDesc: "Perfecto para grupos más grandes, nuestro Sprinter VIP ofrece asientos estilo avión para hasta 16 pasajeros con pantallas individuales y comodidades premium.",
     
     // Dubai Exclusive Fleet
@@ -10149,11 +10149,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP مرسيدس فيتو",
     vitoVipDesc: "خيارنا الأكثر شعبية لنقل المطار. يقدم VIP مرسيدس فيتو مقاعد واسعة، مساحة أمتعة كافية، وميزات راحة فاخرة مثالية للعائلات والمجموعات الصغيرة.",
-    vitoName: "مرسيدس فيتو",
+    vitoName: "فيتو أو ما شابه",
     vitoDesc: "مرسيدس فيتو - مركبات نقل عائلية مريحة بأفضل ميزانية.",
     maybachName: "مرسيدس مايباخ ميني فان",
     maybachDesc: "قمة الفخامة في السيارات. يقدم مرسيدس مايباخ ميني فان مقاعد تنفيذية خلفية وأسلس قيادة لضيوف VIP ورجال الأعمال.",
-    sprinterName: "ميني باص مرسيدس سبرينتر VIP",
+    sprinterName: "مرسيدس سبرينتر أو ما شابه",
     sprinterDesc: "مثالي للمجموعات الكبيرة، يقدم سبرينتر VIP مقاعد بطراز الطائرة لما يصل إلى 16 راكباً مع شاشات فردية ووسائل راحة فاخرة.",
     
     // Dubai Exclusive Fleet
@@ -11615,11 +11615,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP Mercedes Vito",
     vitoVipDesc: "Havalimanı transferleri için en popüler tercihimiz. VIP Mercedes Vito, aileler ve küçük gruplar için mükemmel, geniş oturma alanı, bol bagaj hacmi ve premium konfor özellikleri sunar.",
-    vitoName: "Mercedes Vito",
+    vitoName: "Vito veya Benzeri",
     vitoDesc: "Mercedes Vito - En uygun bütçeyle konforlu aile tatil transfer aracı.",
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Otomotiv lüksünün zirvesi. Mercedes Maybach Minivan'ımız VIP misafirler ve iş dünyası yöneticileri için executive arka koltuklar ve en yumuşak sürüş sunar.",
-    sprinterName: "Mercedes Sprinter VIP Minibüs",
+    sprinterName: "Mercedes Sprinter veya Benzeri",
     sprinterDesc: "Büyük gruplar için mükemmel, VIP Sprinter'ımız bireysel ekranlar ve premium olanaklarla 16 yolcuya kadar uçak tarzı oturma sunar.",
     
     // Dubai Exclusive Fleet
@@ -13170,11 +13170,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP Mercedes Vito",
     vitoVipDesc: "Наш найпопулярніший вибір для трансферів з аеропорту. VIP Mercedes Vito пропонує просторі сидіння, багато місця для багажу та преміальні функції комфорту.",
-    vitoName: "Mercedes Vito",
+    vitoName: "Vito або Аналог",
     vitoDesc: "Mercedes Vito — комфортні сімейні автомобілі для трансферу з найкращим бюджетом.",
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Вершина автомобільної розкоші. Наш Mercedes Maybach Minivan пропонує представницькі задні сидіння та найплавнішу поїздку для VIP-гостей.",
-    sprinterName: "Mercedes Sprinter VIP Мікроавтобус",
+    sprinterName: "Mercedes Sprinter або Аналог",
     sprinterDesc: "Ідеально для великих груп, наш VIP Sprinter пропонує сидіння авіаційного класу для до 16 пасажирів з індивідуальними екранами.",
     
     // Dubai Exclusive Fleet
@@ -14640,11 +14640,11 @@ const translations: Record<Language, Record<string, string>> = {
     // Vehicles
     vitoVipName: "VIP メルセデス・ヴィト",
     vitoVipDesc: "空港送迎で最も人気のある選択肢。VIP メルセデス・ヴィトは広々とした座席、十分な荷物スペース、家族や小グループに最適なプレミアム快適機能を備えています。",
-    vitoName: "メルセデス・ヴィト",
+    vitoName: "Vitoまたは同等",
     vitoDesc: "お手頃な価格で快適なファミリー向け送迎車両。",
     maybachName: "メルセデス・マイバッハ ミニバン",
     maybachDesc: "自動車の高級さの頂点。メルセデス・マイバッハ ミニバンはVIPゲストやビジネスエグゼクティブ向けのエグゼクティブリアシートと最も滑らかな乗り心地を提供します。",
-    sprinterName: "メルセデス・スプリンター VIPミニバス",
+    sprinterName: "Mercedes Sprinterまたは同等",
     sprinterDesc: "大人数グループに最適。VIPスプリンターは最大16名様まで個別スクリーンとプレミアムアメニティを備えた航空機スタイルのシートを提供します。",
     
     // Dubai Exclusive Fleet

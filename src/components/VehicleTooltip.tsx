@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Briefcase, Check, Sparkles } from "lucide-react";
-import { VEHICLE_TYPES, VehicleTypeInfo } from "@/lib/vehicleTypes";
+import { VEHICLE_TYPES, VehicleTypeInfo, getLocalizedVehicleLabel } from "@/lib/vehicleTypes";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -161,7 +161,9 @@ export const VehicleTooltip = ({
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">{vehicle.label}</h4>
+              <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">
+                {vehicle.labelTranslations?.[isTurkish ? 'tr' : 'en'] || vehicle.label}
+              </h4>
               <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground">
                 <span className="flex items-center gap-0.5">
                   <Users className="h-3 w-3" />

@@ -23,10 +23,11 @@ import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicat
 import { WHATSAPP_NUMBER } from '@/lib/contact';
 
 const vehicleTypeLabels: Record<string, string> = {
-  'mercedes-vito': 'Mercedes Vito',
+  'sedan': 'Sedan or Similar',
+  'mercedes-vito': 'Vito or Similar',
   'vip-mercedes': 'VIP Mercedes Vito',
   'maybach-minibus': 'Mercedes Maybach Minivan',
-  'minibus': 'Minibus',
+  'minibus': 'Mercedes Sprinter or Similar',
   // Legacy support
   'mercedes-vclass': 'VIP Mercedes Vito',
   'maybach': 'Mercedes Maybach Minivan',

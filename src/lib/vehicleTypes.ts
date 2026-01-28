@@ -85,6 +85,7 @@ export interface VehicleFeature {
 export interface VehicleTypeInfo {
   value: string;
   label: string;
+  labelTranslations?: Record<string, string>; // Multi-language labels
   passengers: number;
   luggage: number;
   images: VehicleImage[];
@@ -97,7 +98,20 @@ export interface VehicleTypeInfo {
 export const VEHICLE_TYPES: VehicleTypeInfo[] = [
   {
     value: 'sedan',
-    label: 'Sedan',
+    label: 'Sedan or Similar',
+    labelTranslations: {
+      en: 'Sedan or Similar',
+      tr: 'Sedan veya Benzeri',
+      de: 'Limousine oder Ähnlich',
+      fr: 'Berline ou Similaire',
+      ru: 'Седан или Аналог',
+      it: 'Berlina o Simile',
+      es: 'Sedán o Similar',
+      ar: 'سيدان أو ما شابه',
+      uk: 'Седан або Аналог',
+      ja: 'セダンまたは同等',
+      pt: 'Sedan ou Similar',
+    },
     passengers: 3,
     luggage: 2,
     description: 'Elegant sedan for solo travelers or couples. Perfect for business meetings and intimate airport transfers with professional chauffeur.',
@@ -123,7 +137,20 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
   },
   {
     value: 'mercedes-vito',
-    label: 'Mercedes Vito',
+    label: 'Vito or Similar',
+    labelTranslations: {
+      en: 'Vito or Similar',
+      tr: 'Vito veya Benzeri',
+      de: 'Vito oder Ähnlich',
+      fr: 'Vito ou Similaire',
+      ru: 'Vito или Аналог',
+      it: 'Vito o Simile',
+      es: 'Vito o Similar',
+      ar: 'فيتو أو ما شابه',
+      uk: 'Vito або Аналог',
+      ja: 'Vitoまたは同等',
+      pt: 'Vito ou Similar',
+    },
     passengers: 6,
     luggage: 6,
     description: 'Comfortable family minivan with spacious interior, perfect for airport transfers and city tours. Professional chauffeur service with meet & greet.',
@@ -218,7 +245,20 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
   },
   {
     value: 'minibus',
-    label: 'Mercedes Sprinter',
+    label: 'Mercedes Sprinter or Similar',
+    labelTranslations: {
+      en: 'Mercedes Sprinter or Similar',
+      tr: 'Mercedes Sprinter veya Benzeri',
+      de: 'Mercedes Sprinter oder Ähnlich',
+      fr: 'Mercedes Sprinter ou Similaire',
+      ru: 'Mercedes Sprinter или Аналог',
+      it: 'Mercedes Sprinter o Simile',
+      es: 'Mercedes Sprinter o Similar',
+      ar: 'مرسيدس سبرينتر أو ما شابه',
+      uk: 'Mercedes Sprinter або Аналог',
+      ja: 'Mercedes Sprinterまたは同等',
+      pt: 'Mercedes Sprinter ou Similar',
+    },
     passengers: 16,
     luggage: 16,
     description: 'Spacious VIP minibus perfect for large groups, corporate events, and airport transfers. Premium comfort with entertainment and ample luggage space.',
@@ -273,6 +313,20 @@ export const VEHICLE_LABELS: Record<string, string> = Object.fromEntries(
 // Get vehicle info by value
 export function getVehicleInfo(value: string): VehicleTypeInfo | undefined {
   return VEHICLE_TYPE_MAP[value];
+}
+
+// Get localized vehicle label
+export function getLocalizedVehicleLabel(value: string, language: string = 'en'): string {
+  const vehicle = VEHICLE_TYPE_MAP[value];
+  if (!vehicle) return value;
+  
+  // Check if vehicle has translations and the language exists
+  if (vehicle.labelTranslations && vehicle.labelTranslations[language]) {
+    return vehicle.labelTranslations[language];
+  }
+  
+  // Fallback to default label
+  return vehicle.label;
 }
 
 // Get available vehicles based on passenger/luggage count
