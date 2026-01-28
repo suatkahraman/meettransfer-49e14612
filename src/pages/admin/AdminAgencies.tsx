@@ -11,8 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Key, Mail, Phone, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Key, Mail, Phone, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { getCurrencySymbol, CURRENCY_OPTIONS } from '@/lib/currency';
+import { AgencyReservationsExportDialog } from '@/components/admin/AgencyReservationsExportDialog';
 
 // Fallback exchange rates
 const FALLBACK_RATES: Record<string, number> = {
@@ -74,6 +75,8 @@ const AdminAgencies = () => {
   const [deleting, setDeleting] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportAgency, setExportAgency] = useState<{ id: string; name: string } | null>(null);
   const [formData, setFormData] = useState({
     agency_name: '',
     email: '',
@@ -83,6 +86,11 @@ const AdminAgencies = () => {
     comments: '',
     currency: 'EUR',
   });
+
+  const openExportDialog = (agency: AgencyWithCalculatedBalance) => {
+    setExportAgency({ id: agency.id, name: agency.agency_name });
+    setExportDialogOpen(true);
+  };
 
   // Fetch exchange rate for a currency to TRY
   const getExchangeRate = async (currency: string): Promise<number> => {
@@ -580,6 +588,14 @@ const AdminAgencies = () => {
                       >
                         <DollarSign className="h-4 w-4" />
                       </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => openExportDialog(agency)}
+                        title="Rezervasyonları Excel'e Aktar"
+                      >
+                        <FileSpreadsheet className="h-4 w-4" />
+                      </Button>
                       {agency.user_id && (
                         <Button 
                           variant="ghost" 
@@ -858,6 +874,16 @@ const AdminAgencies = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Export Reservations Dialog */}
+      {exportAgency && (
+        <AgencyReservationsExportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          agencyId={exportAgency.id}
+          agencyName={exportAgency.name}
+        />
+      )}
     </div>
   );
 };
