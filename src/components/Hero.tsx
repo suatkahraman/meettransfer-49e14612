@@ -162,7 +162,7 @@ export const Hero = () => {
                     onClick={() => setActiveTab("ride")} 
                     className={cn(
                       "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative border-r border-amber-200",
-                      activeTab === "ride" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-amber-100"
+                      activeTab === "ride" ? "text-primary bg-amber-200 shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-amber-100"
                     )}
                   >
                     <Car className="h-4 w-4 md:h-4 md:w-4" />
@@ -172,7 +172,7 @@ export const Hero = () => {
                     onClick={() => setActiveTab("hourly")} 
                     className={cn(
                       "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm",
-                      activeTab === "hourly" ? "text-primary bg-card shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-amber-100"
+                      activeTab === "hourly" ? "text-primary bg-amber-200 shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-amber-100"
                     )}
                   >
                     <Timer className="h-4 w-4 md:h-4 md:w-4" />
