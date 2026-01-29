@@ -41,13 +41,14 @@ export const HeroHeader = memo(({ language }: HeroHeaderProps) => {
 
   return (
     <div className="text-center">
-      <h1 className="text-[1.75rem] sm:text-[2rem] md:text-[2.5rem] lg:text-[2.75rem] font-black text-foreground leading-[1.15] tracking-tight">
+      {/* Mobile-first: base size then scale up */}
+      <h1 className="text-[1.75rem] font-black leading-[1.15] tracking-tight text-foreground sm:text-[2rem] md:text-[2.5rem] lg:text-[2.75rem]">
         {title}
       </h1>
-      <div className="flex items-center justify-center gap-2 mt-2">
+      <div className="mt-2 flex items-center justify-center gap-2">
         <span className="text-xl sm:text-2xl">🇹🇷</span>
-        <Plane className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-        <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
+        <Plane className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
+        <span className="text-lg font-bold text-primary sm:text-xl md:text-2xl">
           {discount}
         </span>
       </div>

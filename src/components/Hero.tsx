@@ -84,15 +84,15 @@ export const Hero = () => {
         language={language} 
       />
 
-      {/* Mobile: Full viewport height form, Desktop: normal grid layout */}
-      <div className="container relative z-10 px-0 sm:px-3 md:px-4 pt-0 sm:pt-4 md:pt-8 pb-0 sm:pb-4 md:pb-8 lg:pb-16">
-        <div className="grid md:grid-cols-5 lg:grid-cols-2 gap-0 sm:gap-4 md:gap-6 lg:gap-12 items-start lg:items-center min-h-[100svh] sm:min-h-[calc(100svh-8rem)] md:min-h-[calc(100svh-6rem)]">
-          {/* Left Side - Form */}
-          <div className="order-1 md:col-span-3 lg:col-span-1 h-full sm:h-auto">
-            {/* Unified container for header and booking form - Full screen on mobile */}
-            <div className="bg-card sm:rounded-2xl shadow-lg overflow-hidden min-h-[100svh] sm:min-h-0 flex flex-col">
-              {/* Header inside the card */}
-              <div className="p-4 sm:p-5 md:p-6 pb-2 sm:pb-3 pt-6 sm:pt-4">
+      {/* Mobile-first layout: Full viewport on mobile, grid on desktop */}
+      <div className="container relative z-10 px-0 pt-0 pb-0 sm:px-3 sm:pt-4 sm:pb-4 md:px-4 md:pt-8 md:pb-8 lg:pb-16">
+        <div className="grid min-h-[100svh] items-start gap-0 sm:min-h-[calc(100svh-8rem)] sm:gap-4 md:min-h-[calc(100svh-6rem)] md:grid-cols-5 md:gap-6 lg:grid-cols-2 lg:items-center lg:gap-12">
+          {/* Left Side - Form (order-1 is default) */}
+          <div className="h-full md:col-span-3 md:h-auto lg:col-span-1">
+            {/* Unified container - Full screen mobile, card on desktop */}
+            <div className="flex min-h-[100svh] flex-col overflow-hidden bg-card shadow-lg sm:min-h-0 sm:rounded-2xl">
+              {/* Header inside the card - mobile-first padding */}
+              <div className="p-4 pb-2 pt-6 sm:p-5 sm:pb-3 sm:pt-4 md:p-6">
                 <HeroHeader language={language} />
               </div>
 
@@ -104,8 +104,8 @@ export const Hero = () => {
                 t={t}
                 className="shadow-none rounded-none flex-1 flex flex-col"
               >
-                {/* Tabs */}
-                <div className="flex bg-muted/50 relative border-b border-amber-200">
+                {/* Tabs - mobile-first with minimal desktop overrides */}
+                <div className="relative flex border-b border-amber-200 bg-muted/50">
                   <div 
                     className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300"
                     style={{ left: activeTab === "ride" ? "0%" : "50%", width: "50%" }}
@@ -113,27 +113,27 @@ export const Hero = () => {
                   <button 
                     onClick={() => setActiveTab("ride")} 
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm relative border-r border-amber-200",
-                      activeTab === "ride" ? "text-primary bg-amber-200 shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-amber-100"
+                      "relative flex flex-1 items-center justify-center gap-1.5 border-r border-amber-200 px-4 py-3.5 text-sm font-medium transition-all",
+                      activeTab === "ride" ? "bg-amber-200 text-primary shadow-sm" : "text-muted-foreground hover:bg-amber-100 hover:text-foreground"
                     )}
                   >
-                    <Car className="h-4 w-4 md:h-4 md:w-4" />
+                    <Car className="h-4 w-4" />
                     <span>{tSafe("pointToPoint", "Transfer")}</span>
                   </button>
                   <button 
                     onClick={() => setActiveTab("hourly")} 
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 md:gap-1.5 py-3.5 md:py-3 px-4 md:px-4 font-medium transition-all text-sm md:text-sm",
-                      activeTab === "hourly" ? "text-primary bg-amber-200 shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-amber-100"
+                      "flex flex-1 items-center justify-center gap-1.5 px-4 py-3.5 text-sm font-medium transition-all",
+                      activeTab === "hourly" ? "bg-amber-200 text-primary shadow-sm" : "text-muted-foreground hover:bg-amber-100 hover:text-foreground"
                     )}
                   >
-                    <Timer className="h-4 w-4 md:h-4 md:w-4" />
+                    <Timer className="h-4 w-4" />
                     <span>{tSafe("perHour", "Hourly")}</span>
                   </button>
                 </div>
 
-                {/* Form Content - Lazy loaded, flex-1 for mobile full height */}
-                <div className="p-4 sm:p-4 md:p-5 lg:p-5 flex-1 flex flex-col">
+                {/* Form Content - flex-1 for mobile full height, mobile-first padding */}
+                <div className="flex flex-1 flex-col p-4 md:p-5">
                   {/* Form Content - No Suspense for faster LCP */}
                     {activeTab === "ride" ? (
                       <RideFormContent
