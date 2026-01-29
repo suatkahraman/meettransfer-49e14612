@@ -137,28 +137,102 @@ const BulkPriceUpdateDialog = ({
 
       let prices: { id: string; price: number }[] = [];
 
-      // Fetch prices based on type
+      // Fetch ALL prices with pagination to avoid 1000-row limit
+      const pageSize = 1000;
+      
+      const fetchAllRegionPrices = async () => {
+        let allPrices: { id: string; price: number }[] = [];
+        let page = 0;
+        let hasMore = true;
+        
+        while (hasMore) {
+          let query = supabase
+            .from("region_prices")
+            .select("id, price")
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+          
+          if (filterCity !== "all") query = query.eq("city", filterCity);
+          if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+          
+          const { data, error } = await query;
+          if (error) throw error;
+          
+          if (data && data.length > 0) {
+            allPrices = [...allPrices, ...data];
+            hasMore = data.length === pageSize;
+            page++;
+          } else {
+            hasMore = false;
+          }
+        }
+        
+        return allPrices;
+      };
+
+      const fetchAllHourlyPrices = async () => {
+        let allPrices: { id: string; price: number }[] = [];
+        let page = 0;
+        let hasMore = true;
+        
+        while (hasMore) {
+          let query = supabase
+            .from("hourly_rental_prices")
+            .select("id, price")
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+          
+          if (filterCity !== "all") query = query.eq("city", filterCity);
+          if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+          
+          const { data, error } = await query;
+          if (error) throw error;
+          
+          if (data && data.length > 0) {
+            allPrices = [...allPrices, ...data];
+            hasMore = data.length === pageSize;
+            page++;
+          } else {
+            hasMore = false;
+          }
+        }
+        
+        return allPrices;
+      };
+
+      const fetchAllIntercityPrices = async () => {
+        let allPrices: { id: string; price: number }[] = [];
+        let page = 0;
+        let hasMore = true;
+        
+        while (hasMore) {
+          let query = supabase
+            .from("intercity_prices")
+            .select("id, price")
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+          
+          if (filterCity !== "all") query = query.eq("from_city", filterCity);
+          if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+          
+          const { data, error } = await query;
+          if (error) throw error;
+          
+          if (data && data.length > 0) {
+            allPrices = [...allPrices, ...data];
+            hasMore = data.length === pageSize;
+            page++;
+          } else {
+            hasMore = false;
+          }
+        }
+        
+        return allPrices;
+      };
+
       if (priceType === "hourly") {
-        let query = supabase.from("hourly_rental_prices").select("id, price");
-        if (filterCity !== "all") query = query.eq("city", filterCity);
-        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
-        const result = await query;
-        if (result.error) throw result.error;
-        prices = result.data || [];
+        prices = await fetchAllHourlyPrices();
       } else if (priceType === "region") {
-        let query = supabase.from("region_prices").select("id, price");
-        if (filterCity !== "all") query = query.eq("city", filterCity);
-        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
-        const result = await query;
-        if (result.error) throw result.error;
-        prices = result.data || [];
+        prices = await fetchAllRegionPrices();
       } else {
-        let query = supabase.from("intercity_prices").select("id, price");
-        if (filterCity !== "all") query = query.eq("from_city", filterCity);
-        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
-        const result = await query;
-        if (result.error) throw result.error;
-        prices = result.data || [];
+        prices = await fetchAllIntercityPrices();
       }
 
       if (prices.length === 0) {
