@@ -268,8 +268,9 @@ export const HourlyFormContent = memo(({
         )}
         onClick={(e) => {
           const target = e.target as HTMLElement;
-          if (!target.closest('button')) {
-            const trigger = (e.currentTarget as HTMLElement).querySelector('button') as HTMLButtonElement;
+          // Only trigger if not clicking directly on the TimePickerAMPM button
+          if (!target.closest('button') && !target.closest('[data-time-trigger]')) {
+            const trigger = (e.currentTarget as HTMLElement).querySelector('[data-time-trigger="hourly-time"]') as HTMLButtonElement;
             trigger?.click();
           }
         }}
@@ -283,6 +284,7 @@ export const HourlyFormContent = memo(({
             value={hourlyTime} 
             onValueChange={handleTimeChange} 
             triggerClassName="text-sm font-semibold text-foreground"
+            dataTrigger="hourly-time"
             labels={{
               hour: t("timeHour") || "Hour",
               minute: t("timeMinute") || "Minute",
