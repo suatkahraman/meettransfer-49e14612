@@ -117,8 +117,10 @@ export default defineConfig(({ mode }) => ({
         // Activate new SW immediately (prevents users getting stuck on an old cached app shell)
         skipWaiting: true,
         clientsClaim: true,
-        // Navigation preload for faster page loads
-        navigationPreload: true,
+        // Navigation preload can produce "navigation preload was cancelled" warnings
+        // when the SW doesn't explicitly consume preload responses (Workbox internal behavior).
+        // Disable for a clean, stable production console.
+        navigationPreload: false,
         runtimeCaching: [
           // ============================================
           // STATIC ASSETS - CacheFirst (immutable content)
