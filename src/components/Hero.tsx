@@ -4,7 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { SilentSectionErrorBoundary } from "@/components/hero/SilentSectionErrorBoundary";
 
-// Custom hooks for form state management - deferred import
+// Custom hooks for form state management
 import { useRideForm } from "@/hooks/useRideForm";
 import { useHourlyForm } from "@/hooks/useHourlyForm";
 import { useHeroFormStorage } from "@/hooks/useHeroFormStorage";
@@ -13,63 +13,15 @@ import { useHeroFormStorage } from "@/hooks/useHeroFormStorage";
 import { HeroHeader } from "@/components/hero/HeroHeader";
 import { HeroTrustBadges } from "@/components/hero/HeroTrustBadges";
 import { HeroBackground } from "@/components/hero/HeroBackground";
-// SwipeableBookingCard is critical for LCP - eagerly loaded
 import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
 
-// Lazy load form content components - hydrate after first paint
-const RideFormContent = lazy(() => 
-  import("@/components/hero/RideFormContent").then(m => ({ default: m.RideFormContent }))
-);
-const HourlyFormContent = lazy(() => 
-  import("@/components/hero/HourlyFormContent").then(m => ({ default: m.HourlyFormContent }))
-);
+// Form content components - eagerly import for faster LCP
+import { RideFormContent } from "@/components/hero/RideFormContent";
+import { HourlyFormContent } from "@/components/hero/HourlyFormContent";
 
-// Lazy load non-critical visual components
+// Lazy load non-critical visual components - loads after LCP
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
-// ReturnTripPromoBanner removed - promo now shown in HeroHeader
 const PaymentComingSoonBanner = lazy(() => import("@/components/hero/PaymentComingSoonBanner").then(m => ({ default: m.PaymentComingSoonBanner })));
-
-// Skeleton for booking card - shows during hydration
-const BookingCardSkeleton = () => (
-  <div className="bg-card rounded-2xl border border-border/50 shadow-xl overflow-hidden min-h-[430px] md:min-h-[460px]">
-    {/* Tab skeleton */}
-    <div className="flex bg-muted/50">
-      <div className="flex-1 py-3.5 px-4 flex items-center justify-center gap-1.5">
-        <div className="h-4 w-4 bg-muted-foreground/20 rounded" />
-        <div className="h-4 w-16 bg-muted-foreground/20 rounded" />
-      </div>
-      <div className="flex-1 py-3.5 px-4 flex items-center justify-center gap-1.5">
-        <div className="h-4 w-4 bg-muted-foreground/20 rounded" />
-        <div className="h-4 w-14 bg-muted-foreground/20 rounded" />
-      </div>
-    </div>
-    {/* Form skeleton */}
-    <div className="p-4 sm:p-4 md:p-5 space-y-3">
-      <div className="h-14 bg-muted rounded-xl animate-pulse" />
-      <div className="h-14 bg-muted rounded-xl animate-pulse" />
-      <div className="grid grid-cols-3 gap-2">
-        <div className="h-14 bg-muted rounded-xl animate-pulse" />
-        <div className="h-14 bg-muted rounded-xl animate-pulse" />
-        <div className="h-14 bg-muted rounded-xl animate-pulse" />
-      </div>
-      <div className="h-16 bg-primary/20 rounded-xl animate-pulse" />
-    </div>
-  </div>
-);
-
-// Minimal skeleton for form content inside card
-const FormSkeleton = () => (
-  <div className="space-y-3 animate-pulse min-h-[300px]">
-    <div className="h-14 bg-muted rounded-xl" />
-    <div className="h-14 bg-muted rounded-xl" />
-    <div className="grid grid-cols-3 gap-2">
-      <div className="h-14 bg-muted rounded-xl" />
-      <div className="h-14 bg-muted rounded-xl" />
-      <div className="h-14 bg-muted rounded-xl" />
-    </div>
-    <div className="h-16 bg-primary/20 rounded-xl" />
-  </div>
-);
 
 export const Hero = () => {
   const { t, language } = useLanguage();
@@ -182,7 +134,7 @@ export const Hero = () => {
 
                 {/* Form Content - Lazy loaded, flex-1 for mobile full height */}
                 <div className="p-4 sm:p-4 md:p-5 lg:p-5 flex-1 flex flex-col">
-                  <Suspense fallback={<FormSkeleton />}>
+                  {/* Form Content - No Suspense for faster LCP */}
                     {activeTab === "ride" ? (
                       <RideFormContent
                         pickup={rideForm.pickup}
@@ -246,7 +198,6 @@ export const Hero = () => {
                         handleHourlyContinue={hourlyForm.handleHourlyContinue}
                       />
                     )}
-              </Suspense>
             </div>
           </SwipeableBookingCard>
             </div>
