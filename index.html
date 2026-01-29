@@ -64,11 +64,8 @@
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
     <!-- LCP Image Preload - Critical for desktop hero background -->
-    <!-- AVIF first (best compression), WebP fallback - browser picks best supported format -->
+    <!-- NOTE: Only preload ONE format to avoid "preload was used but not consumed" warnings. -->
     <link rel="preload" as="image" href="/hero-bg-futuristic.avif" fetchpriority="high" media="(min-width: 768px)" type="image/avif" />
-    <link rel="preload" as="image" href="/hero-bg-futuristic.webp" fetchpriority="high" media="(min-width: 768px)" type="image/webp" />
-    <!-- LCP Vehicle Image Preload - First visible vehicle in selector -->
-    <link rel="preload" as="image" href="/lcp-sedan.webp" fetchpriority="high" type="image/webp" />
     
     <!-- Non-blocking font loading using media swap technique -->
     <!-- Critical hero fonts - async load with media swap (not render-blocking) -->
@@ -207,9 +204,6 @@
     <!-- Canonical tag - Default for homepage, dynamically updated by SEOHead component for each page -->
     <link rel="canonical" href="https://meettransfer.app" />
 
-    <!-- Early Hints for critical resources -->
-    <link rel="modulepreload" href="/src/main.tsx" />
-    
     <!-- Non-blocking CSS loading - critical CSS is already inlined above -->
     <script>
       // Async CSS loader for non-render-blocking styles
