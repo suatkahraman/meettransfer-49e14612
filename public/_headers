@@ -24,6 +24,12 @@
 # Explicit rules for common asset types in /assets/
 /assets/*.js
   Cache-Control: public, max-age=31536000, immutable
+  # Ensure module scripts are served with a strict JS MIME type (helps when browsers enforce nosniff)
+  Content-Type: application/javascript; charset=utf-8
+
+/assets/*.mjs
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: application/javascript; charset=utf-8
 /assets/*.css
   Cache-Control: public, max-age=31536000, immutable
 /assets/*.webp

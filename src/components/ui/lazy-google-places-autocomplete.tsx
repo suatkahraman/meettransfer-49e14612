@@ -9,6 +9,9 @@ import {
 } from '@/utils/googleMapsLoader';
 import { toast } from 'sonner';
 
+// Avoid module-level DOM access; keep only a simple module-level flag.
+let hasScheduledGoogleMapsPreload = false;
+
 /**
  * Hook to reposition the Google Places .pac-container dropdown
  * so it stays anchored to the input even in scrollable admin panels.
@@ -158,25 +161,7 @@ export interface LazyGooglePlacesAutocompleteProps {
   myLocationLabel?: string;
 }
 
-// Defer Google Maps preload to after LCP to improve initial load performance
-// This gives priority to critical hero content rendering first
-if (typeof window !== 'undefined') {
-  // Use a longer delay to ensure hero/LCP renders first
-  const deferPreload = () => {
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => preloadGoogleMaps(['places']), { timeout: 5000 });
-    } else {
-      setTimeout(() => preloadGoogleMaps(['places']), 2500);
-    }
-  };
-  
-  // Wait for page to be interactive before preloading
-  if (document.readyState === 'complete') {
-    deferPreload();
-  } else {
-    window.addEventListener('load', deferPreload, { once: true });
-  }
-}
+// (Google Maps preload scheduling is done inside React lifecycle below.)
 
 // Pure CSS animated input component - no framer-motion for better performance
 const AutocompleteInput = memo(({
@@ -352,6 +337,56 @@ export const LazyGooglePlacesAutocomplete = memo(({
   const [inputValue, setInputValue] = useState('');
   const [isScriptLoading, setIsScriptLoading] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  // Defer Google Maps preload to AFTER initial page load / LCP work.
+  // Keeping this inside React lifecycle avoids early DOM access in module scope.
+  useEffect(() => {
+    if (hasScheduledGoogleMapsPreload) return;
+    if (typeof document === 'undefined') return;
+
+    hasScheduledGoogleMapsPreload = true;
+
+    // Use globalThis to avoid relying on a typed `window` global in all TS lib configurations.
+    const w = globalThis as any;
+
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let idleId: number | null = null;
+
+    const schedule = () => {
+      if (cancelled) return;
+
+      const run = () => {
+        if (!cancelled) preloadGoogleMaps(['places']);
+      };
+
+      if (typeof w.requestIdleCallback === 'function') {
+        idleId = w.requestIdleCallback(run, { timeout: 5000 });
+      } else {
+        timeoutId = setTimeout(run, 2500);
+      }
+    };
+
+    const onLoad = () => {
+      // Give the app a moment after load to finish critical rendering work.
+      timeoutId = setTimeout(schedule, 500);
+    };
+
+    if (document.readyState === 'complete') {
+      onLoad();
+    } else {
+      w.addEventListener?.('load', onLoad, { once: true });
+    }
+
+    return () => {
+      cancelled = true;
+      w.removeEventListener?.('load', onLoad);
+      if (timeoutId) clearTimeout(timeoutId);
+      if (idleId != null && typeof w.cancelIdleCallback === 'function') {
+        w.cancelIdleCallback(idleId);
+      }
+    };
+  }, []);
   
   // Debounce input changes
   const debouncedInputValue = useDebounce(inputValue, debounceMs);
