@@ -71,6 +71,8 @@ export const AgencyReservationsExportDialog = ({
             customer_phone,
             pickup,
             dropoff,
+            pickup_place_name,
+            dropoff_place_name,
             pickup_date,
             pickup_time,
             vehicle_type,
@@ -82,13 +84,9 @@ export const AgencyReservationsExportDialog = ({
             driver_notes,
             customer_notes,
             passenger_names,
-            luggage_count,
-            baby_seat_count,
             flight_number,
             passenger_cash_amount,
             passenger_cash_currency,
-            created_at,
-            updated_at,
             drivers (name, plate_number)
           `)
           .eq('agency_id', agencyId)
@@ -248,14 +246,22 @@ export const AgencyReservationsExportDialog = ({
         }
         const consolidatedNotes = allNotes.length > 0 ? allNotes.join(' | ') : '-';
 
+        // Use place_name (main location) if available, otherwise extract first part of full address
+        const getMainLocationName = (placeName: string | null, fullAddress: string) => {
+          if (placeName?.trim()) return placeName.trim();
+          // If no place name, try to extract the first meaningful part before comma
+          const parts = fullAddress?.split(',');
+          return parts?.[0]?.trim() || fullAddress || '-';
+        };
+
         worksheet.addRow({
           reservation_code: reservation.reservation_code || '-',
           pickup_date: format(new Date(reservation.pickup_date), 'dd.MM.yyyy'),
           pickup_time: reservation.pickup_time?.slice(0, 5) || '-',
           customer_name: reservation.customer_name,
           customer_phone: reservation.customer_phone,
-          pickup: reservation.pickup,
-          dropoff: reservation.dropoff,
+          pickup: getMainLocationName(reservation.pickup_place_name, reservation.pickup),
+          dropoff: getMainLocationName(reservation.dropoff_place_name, reservation.dropoff),
           vehicle_type: vehicleTypeMap[reservation.vehicle_type] || reservation.vehicle_type,
           passenger_names: passengerNames,
           flight_number: reservation.flight_number || '-',
