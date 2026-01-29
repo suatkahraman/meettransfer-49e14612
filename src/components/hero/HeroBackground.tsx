@@ -16,10 +16,10 @@ interface HeroBackgroundProps {
 export const HeroBackground = memo(({}: HeroBackgroundProps) => {
   return (
     <>
-      {/* Static background - immediate render */}
+      {/* Static background - immediate render, mobile-first */}
       <div className="absolute inset-0 z-0 bg-background" />
       
-      {/* Desktop: Hero background image - LCP optimized with high priority */}
+      {/* Desktop only: Hero background image - hidden on mobile for faster LCP */}
       <div className="absolute inset-0 z-0 hidden md:block">
         {/* 
           LCP Optimization:
