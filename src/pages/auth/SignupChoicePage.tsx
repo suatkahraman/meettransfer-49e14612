@@ -2,17 +2,22 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, User, Building2, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import UniversalLanguageSelector from '@/components/UniversalLanguageSelector';
 
 const SignupChoicePage = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen flex flex-col bg-secondary">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="flex items-center h-14 px-4">
+        <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
             <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm">Back</span>
+            <span className="text-sm">{t('back')}</span>
           </Link>
+          <UniversalLanguageSelector variant="compact" />
         </div>
       </header>
 
@@ -21,10 +26,10 @@ const SignupChoicePage = () => {
         <div className="w-full max-w-lg space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
-              Join Meet Transfer
+              {t('signupChoiceTitle')}
             </h1>
             <p className="text-muted-foreground">
-              Choose how you'd like to register
+              {t('signupChoiceSubtitle')}
             </p>
           </div>
 
@@ -37,9 +42,9 @@ const SignupChoicePage = () => {
                     <User className="h-7 w-7 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-foreground">Customer Account</h3>
+                    <h3 className="text-lg font-semibold text-foreground">{t('customerAccountTitle')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Book premium transfers for your personal or business travel
+                      {t('customerAccountDesc')}
                     </p>
                   </div>
                   <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
@@ -55,9 +60,9 @@ const SignupChoicePage = () => {
                     <Building2 className="h-7 w-7 text-accent" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-foreground">Agency Partner</h3>
+                    <h3 className="text-lg font-semibold text-foreground">{t('agencyPartnerTitle')}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Partner with us to offer transfer services to your clients
+                      {t('agencyPartnerDesc')}
                     </p>
                   </div>
                   <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
@@ -68,9 +73,9 @@ const SignupChoicePage = () => {
 
           <div className="text-center pt-4">
             <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
+              {t('alreadyHaveAccountQuestion')}{' '}
               <Link to="/login" className="text-accent hover:underline font-medium">
-                Log In
+                {t('logIn')}
               </Link>
             </p>
           </div>

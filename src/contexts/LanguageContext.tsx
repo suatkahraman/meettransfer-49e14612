@@ -173,6 +173,15 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "Become a Meet Transfer agency partner!",
     guestLoginShareText: "Book your premium transfer with Meet Transfer!",
     guestSignupShareText: "Sign up for Meet Transfer premium transfers!",
+    // Signup Choice Page
+    signupChoiceTitle: "Join Meet Transfer",
+    signupChoiceSubtitle: "Choose how you'd like to register",
+    customerAccountTitle: "Customer Account",
+    customerAccountDesc: "Book premium transfers for your personal or business travel",
+    agencyPartnerTitle: "Agency Partner",
+    agencyPartnerDesc: "Partner with us to offer transfer services to your clients",
+    alreadyHaveAccountQuestion: "Already have an account?",
+    logIn: "Log In",
     
     // Hero Section
     heroTitle: "Your VIP Transfer Awaits",
@@ -2016,6 +2025,15 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "Werden Sie Meet Transfer Agenturpartner!",
     guestLoginShareText: "Buchen Sie Ihren Premium-Transfer mit Meet Transfer!",
     guestSignupShareText: "Registrieren Sie sich für Meet Transfer Premium-Transfers!",
+    // Signup Choice Page
+    signupChoiceTitle: "Werden Sie Teil von Meet Transfer",
+    signupChoiceSubtitle: "Wählen Sie, wie Sie sich registrieren möchten",
+    customerAccountTitle: "Kundenkonto",
+    customerAccountDesc: "Buchen Sie Premium-Transfers für Ihre privaten oder geschäftlichen Reisen",
+    agencyPartnerTitle: "Agenturpartner",
+    agencyPartnerDesc: "Arbeiten Sie mit uns zusammen, um Transferdienste für Ihre Kunden anzubieten",
+    alreadyHaveAccountQuestion: "Haben Sie bereits ein Konto?",
+    logIn: "Anmelden",
     
     // Hero Section
     heroTitle: "Ihr VIP-Transfer wartet",
@@ -3885,6 +3903,15 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "Devenez partenaire agence Meet Transfer !",
     guestLoginShareText: "Réservez votre transfert premium avec Meet Transfer !",
     guestSignupShareText: "Inscrivez-vous pour les transferts premium Meet Transfer !",
+    // Signup Choice Page
+    signupChoiceTitle: "Rejoignez Meet Transfer",
+    signupChoiceSubtitle: "Choisissez comment vous souhaitez vous inscrire",
+    customerAccountTitle: "Compte Client",
+    customerAccountDesc: "Réservez des transferts premium pour vos voyages personnels ou professionnels",
+    agencyPartnerTitle: "Partenaire Agence",
+    agencyPartnerDesc: "Associez-vous à nous pour offrir des services de transfert à vos clients",
+    alreadyHaveAccountQuestion: "Vous avez déjà un compte ?",
+    logIn: "Se Connecter",
     
     // Hero Section
     heroTitle: "Votre Transfert VIP Vous Attend",
@@ -5468,6 +5495,15 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "Станьте агентством-партнером Meet Transfer!",
     guestLoginShareText: "Забронируйте премиум-трансфер с Meet Transfer!",
     guestSignupShareText: "Зарегистрируйтесь для премиум-трансферов Meet Transfer!",
+    // Signup Choice Page
+    signupChoiceTitle: "Присоединяйтесь к Meet Transfer",
+    signupChoiceSubtitle: "Выберите способ регистрации",
+    customerAccountTitle: "Аккаунт клиента",
+    customerAccountDesc: "Бронируйте премиум-трансферы для личных или деловых поездок",
+    agencyPartnerTitle: "Партнер-агентство",
+    agencyPartnerDesc: "Сотрудничайте с нами для предоставления трансферных услуг вашим клиентам",
+    alreadyHaveAccountQuestion: "Уже есть аккаунт?",
+    logIn: "Войти",
     
     // Hero Section
     heroTitle: "Ваш VIP-трансфер ждёт",
@@ -6915,7 +6951,16 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "Diventa partner agenzia Meet Transfer!",
     guestLoginShareText: "Prenota il tuo trasferimento premium con Meet Transfer!",
     guestSignupShareText: "Registrati per i trasferimenti premium Meet Transfer!",
-    
+    // Signup Choice Page
+    signupChoiceTitle: "Unisciti a Meet Transfer",
+    signupChoiceSubtitle: "Scegli come desideri registrarti",
+    customerAccountTitle: "Account Cliente",
+    customerAccountDesc: "Prenota trasferimenti premium per i tuoi viaggi personali o di lavoro",
+    agencyPartnerTitle: "Partner Agenzia",
+    agencyPartnerDesc: "Collabora con noi per offrire servizi di trasferimento ai tuoi clienti",
+    alreadyHaveAccountQuestion: "Hai già un account?",
+    logIn: "Accedi",
+
     // Hero Section
     heroTitle: "Il Tuo Transfer VIP Ti Aspetta",
     heroSubtitle: "✈️ -25% Andata e Ritorno! Codice: Meet25Return | Turchia • Dubai • Cipro • Germania • Grecia",
@@ -8409,7 +8454,16 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "¡Conviértete en socio agencia de Meet Transfer!",
     guestLoginShareText: "¡Reserva tu traslado premium con Meet Transfer!",
     guestSignupShareText: "¡Regístrate para los traslados premium de Meet Transfer!",
-    
+    // Signup Choice Page
+    signupChoiceTitle: "Únete a Meet Transfer",
+    signupChoiceSubtitle: "Elige cómo te gustaría registrarte",
+    customerAccountTitle: "Cuenta de Cliente",
+    customerAccountDesc: "Reserva traslados premium para tus viajes personales o de negocios",
+    agencyPartnerTitle: "Socio Agencia",
+    agencyPartnerDesc: "Asóciate con nosotros para ofrecer servicios de traslado a tus clientes",
+    alreadyHaveAccountQuestion: "¿Ya tienes una cuenta?",
+    logIn: "Iniciar Sesión",
+
     // Hero Section
     heroTitle: "Tu Transfer VIP Te Espera",
     heroSubtitle: "✈️ -25% Ida y Vuelta! Código: Meet25Return | Turquía • Dubái • Chipre • Alemania • Grecia",
@@ -9903,7 +9957,16 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "كن شريك وكالة Meet Transfer!",
     guestLoginShareText: "احجز تحويلك المميز مع Meet Transfer!",
     guestSignupShareText: "سجل للحصول على تحويلات Meet Transfer المميزة!",
-    
+    // Signup Choice Page
+    signupChoiceTitle: "انضم إلى Meet Transfer",
+    signupChoiceSubtitle: "اختر طريقة التسجيل",
+    customerAccountTitle: "حساب العميل",
+    customerAccountDesc: "احجز تحويلات مميزة لسفرك الشخصي أو العملي",
+    agencyPartnerTitle: "شريك الوكالة",
+    agencyPartnerDesc: "تعاون معنا لتقديم خدمات التحويل لعملائك",
+    alreadyHaveAccountQuestion: "لديك حساب بالفعل؟",
+    logIn: "تسجيل الدخول",
+
     // Hero Section
     heroTitle: "توصيلتك VIP بانتظارك",
     heroSubtitle: "✈️ خصم 25% ذهاب وعودة! الكود: Meet25Return | تركيا • دبي • قبرص • ألمانيا • اليونان",
@@ -11334,7 +11397,16 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "Meet Transfer acenta ortağı olun!",
     guestLoginShareText: "Meet Transfer ile premium transfer rezervasyonu yapın!",
     guestSignupShareText: "Meet Transfer premium transferleri için kayıt olun!",
-    
+    // Signup Choice Page
+    signupChoiceTitle: "Meet Transfer'e Katılın",
+    signupChoiceSubtitle: "Nasıl kayıt olmak istediğinizi seçin",
+    customerAccountTitle: "Müşteri Hesabı",
+    customerAccountDesc: "Kişisel veya iş seyahatleriniz için premium transferler rezerve edin",
+    agencyPartnerTitle: "Acenta Ortağı",
+    agencyPartnerDesc: "Müşterilerinize transfer hizmetleri sunmak için bizimle ortak olun",
+    alreadyHaveAccountQuestion: "Zaten hesabınız var mı?",
+    logIn: "Giriş Yap",
+
     // Hero Section
     heroTitle: "VIP Transferiniz Hazır",
     heroSubtitle: "✈️ Gidiş-Dönüş %25 İNDİRİM! Kod: Meet25Return | Türkiye • Dubai • Kıbrıs • Almanya • Yunanistan",
@@ -12984,7 +13056,16 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "Станьте агентством-партнером Meet Transfer!",
     guestLoginShareText: "Забронюйте преміум-трансфер з Meet Transfer!",
     guestSignupShareText: "Зареєструйтесь для преміум-трансферів Meet Transfer!",
-    
+    // Signup Choice Page
+    signupChoiceTitle: "Приєднуйтесь до Meet Transfer",
+    signupChoiceSubtitle: "Виберіть спосіб реєстрації",
+    customerAccountTitle: "Акаунт клієнта",
+    customerAccountDesc: "Бронюйте преміум-трансфери для особистих або ділових поїздок",
+    agencyPartnerTitle: "Партнер-агентство",
+    agencyPartnerDesc: "Співпрацюйте з нами для надання трансферних послуг вашим клієнтам",
+    alreadyHaveAccountQuestion: "Вже маєте акаунт?",
+    logIn: "Увійти",
+
     // Hero Section
     heroTitle: "Ваш VIP-трансфер чекає",
     heroSubtitle: "✈️ ЗНИЖКА 25% туди-назад! Код: Meet25Return | Туреччина • Дубай • Кіпр • Німеччина • Греція",
@@ -14391,7 +14472,16 @@ const translations: Record<Language, Record<string, string>> = {
     agencySignupShareText: "Meet Transferの代理店パートナーになる！",
     guestLoginShareText: "Meet Transferでプレミアム送迎を予約！",
     guestSignupShareText: "Meet Transferプレミアム送迎に登録！",
-    
+    // Signup Choice Page
+    signupChoiceTitle: "Meet Transferに参加",
+    signupChoiceSubtitle: "登録方法を選択してください",
+    customerAccountTitle: "お客様アカウント",
+    customerAccountDesc: "個人またはビジネス旅行のためのプレミアム送迎を予約",
+    agencyPartnerTitle: "代理店パートナー",
+    agencyPartnerDesc: "お客様に送迎サービスを提供するためにパートナーになる",
+    alreadyHaveAccountQuestion: "すでにアカウントをお持ちですか？",
+    logIn: "ログイン",
+
     // Hero Section
     heroTitle: "VIP送迎をご予約",
     heroSubtitle: "✈️ 往復25%オフ! コード: Meet25Return | トルコ • ドバイ • キプロス • ドイツ • ギリシャ",
@@ -15621,6 +15711,15 @@ const translations: Record<Language, Record<string, string>> = {
     day3: "3 Dias",
     day4: "4 Dias",
     day5: "5 Dias",
+    // Signup Choice Page
+    signupChoiceTitle: "Junte-se ao Meet Transfer",
+    signupChoiceSubtitle: "Escolha como deseja se registrar",
+    customerAccountTitle: "Conta de Cliente",
+    customerAccountDesc: "Reserve transferências premium para suas viagens pessoais ou de negócios",
+    agencyPartnerTitle: "Parceiro de Agência",
+    agencyPartnerDesc: "Associe-se a nós para oferecer serviços de transferência aos seus clientes",
+    alreadyHaveAccountQuestion: "Já tem uma conta?",
+    logIn: "Entrar",
     // Common
     loading: "A carregar...",
     error: "Erro",
