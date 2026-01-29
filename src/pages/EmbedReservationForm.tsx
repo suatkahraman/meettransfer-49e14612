@@ -317,12 +317,8 @@ const EmbedReservationForm = () => {
     // Redirect to main site - open in parent window (breaks out of iframe)
     const targetUrl = `${BASE_URL}${langPrefix}/book?${params.toString()}`;
     
-    // Use top-level navigation to break out of iframe
-    if (window.top) {
-      window.top.location.href = targetUrl;
-    } else {
-      window.location.href = targetUrl;
-    }
+    // Use window.open with _top target to reliably break out of iframe (cross-origin safe)
+    window.open(targetUrl, '_top');
   }, [pickup, dropoff, date, time, passengers, language, t.pleaseComplete]);
   
   // Handle hourly form continue - redirect to meettransfer.app
@@ -347,14 +343,10 @@ const EmbedReservationForm = () => {
     // Language prefix for URL
     const langPrefix = language === "EN" ? "" : `/${language.toLowerCase()}`;
     
-    // Redirect to main site
+    // Redirect to main site - use window.open with _top target (cross-origin safe)
     const targetUrl = `${BASE_URL}${langPrefix}/book?${params.toString()}`;
     
-    if (window.top) {
-      window.top.location.href = targetUrl;
-    } else {
-      window.location.href = targetUrl;
-    }
+    window.open(targetUrl, '_top');
   }, [hourlyCity, hourlyDuration, hourlyDate, hourlyTime, hourlyPassengers, language, t.pleaseComplete]);
   
   // Handle place selection
