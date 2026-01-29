@@ -11,7 +11,9 @@ export const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: nu
       // They cause false airport detection for regular addresses in that district.
       'new istanbul airport', 'yeni istanbul havalimanı',
       'istanbul new airport', 'istanbul uluslararasi havalimani', 'istanbul international',
-      'istanbul havaalani', 'iğa', 'iga', 'istanbul ist', 'ist istanbul'
+      'istanbul havaalani', 'iğa', 'iga', 'istanbul ist', 'ist istanbul',
+      // Istanbul Airport specific addresses (Terminal Caddesi is the airport's street address)
+      'terminal caddesi', 'tayakadın', 'tayakadin'
       // Note: Removed 'ist' - too short, matches any Istanbul address
     ]
   },
