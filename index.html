@@ -89,11 +89,17 @@
           ]),
           new Promise(function(r) { setTimeout(r, 500); }) // 500ms timeout - faster LCP
         ]).then(function() {
-          document.body.classList.remove('font-loading');
-          document.body.classList.add('fonts-loaded');
+          if (document.body) {
+            document.body.classList.remove('font-loading');
+            document.body.classList.add('fonts-loaded');
+          }
         });
       } else {
-        setTimeout(function() { document.body.classList.remove('font-loading'); }, 300);
+        setTimeout(function() { 
+          if (document.body) {
+            document.body.classList.remove('font-loading'); 
+          }
+        }, 300);
       }
     </script>
 
@@ -597,11 +603,15 @@
       // Mark fonts as loaded when ready
       if (document.fonts) {
         document.fonts.ready.then(function() {
-          document.body.classList.remove('font-loading');
-          document.body.classList.add('fonts-loaded');
+          if (document.body) {
+            document.body.classList.remove('font-loading');
+            document.body.classList.add('fonts-loaded');
+          }
         });
       } else {
-        document.body.classList.remove('font-loading');
+        if (document.body) {
+          document.body.classList.remove('font-loading');
+        }
       }
     </script>
 

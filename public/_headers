@@ -43,6 +43,10 @@
 /images/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Ad blocker detection bait file
+/ads/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
 # PWA icons and manifest (root level)
 /pwa-192x192.png
   Cache-Control: public, max-age=31536000, immutable
