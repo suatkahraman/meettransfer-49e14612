@@ -169,16 +169,16 @@ export const HourlyFormContent = memo(({
   };
 
   return (
-    <div key="hourly-form" className="space-y-3 md:space-y-3 flex-1 flex flex-col">
+    <div key="hourly-form" className="flex flex-1 flex-col space-y-3">
       {/* Pickup Location - Google Places Autocomplete */}
       <div className={cn(
-        "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
+        "flex h-[75px] flex-col justify-center rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all dark:border-zinc-700 dark:bg-zinc-800",
         shakeFields.city && "animate-shake",
         errors.city 
           ? "ring-2 ring-destructive/30" 
           : "hover:bg-amber-200 dark:hover:bg-zinc-700"
       )}>
-        <label className="block text-xs font-medium text-foreground/70 mb-0.5">
+        <label className="mb-0.5 block text-xs font-medium text-foreground/70">
           {getPickupLabel()}
         </label>
         <div className="flex items-center gap-2">
@@ -186,17 +186,17 @@ export const HourlyFormContent = memo(({
           <GooglePlacesAutocomplete 
             onPlaceSelected={handleCityChange} 
             placeholder={getPickupPlaceholder()} 
-            className="bg-transparent border-0 p-0 h-auto text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="h-auto border-0 bg-transparent p-0 text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={hourlyCity}
             myLocationLabel={t('useMyLocation')}
           />
         </div>
       </div>
 
-      {/* Duration and Date Row */}
+      {/* Duration and Date Row - mobile-first grid */}
       <div className="grid grid-cols-2 gap-3">
         <div 
-          className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700"
+          className="flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
           onClick={(e) => {
             const target = e.target as HTMLElement;
             if (!target.closest('button')) {
@@ -205,17 +205,17 @@ export const HourlyFormContent = memo(({
             }
           }}
         >
-          <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
+          <label className="pointer-events-none mb-0.5 block text-xs font-medium text-foreground/70">
             {t("duration") || "Duration"}
           </label>
-          <div className="flex items-center gap-2 min-w-0">
-            <Timer className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
+          <div className="flex min-w-0 items-center gap-2">
+            <Timer className="pointer-events-none h-4 w-4 flex-shrink-0 text-foreground" />
             <LazyFloatingLabelSelect 
               label="" 
               value={hourlyDuration} 
               onValueChange={setHourlyDuration} 
               options={durationOptions} 
-              triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-bold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start"
+              triggerClassName="h-auto justify-start border-0 bg-transparent p-0 text-sm font-bold text-foreground shadow-none hover:bg-transparent focus:ring-0"
               icon={<span />}
             />
           </div>
@@ -223,7 +223,7 @@ export const HourlyFormContent = memo(({
         
         <div 
           className={cn(
-            "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-100 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700",
+            "flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
             shakeFields.date && "animate-shake",
             errors.date 
               ? "ring-2 ring-destructive/30" 
@@ -237,19 +237,19 @@ export const HourlyFormContent = memo(({
             }
           }}
         >
-          <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
+          <label className="pointer-events-none mb-0.5 block text-xs font-medium text-foreground/70">
             {t("pickupDate") || "Pickup date"}
           </label>
-          <div className="flex items-center gap-2 min-w-0">
-            <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
-            <div className="flex-1 min-w-0 overflow-hidden">
+          <div className="flex min-w-0 items-center gap-2">
+            <CalendarIcon className="pointer-events-none h-4 w-4 flex-shrink-0 text-foreground" />
+            <div className="min-w-0 flex-1 overflow-hidden">
               <FloatingLabelDatePicker 
                 label="" 
                 date={hourlyDate} 
                 onSelect={handleDateChange} 
                 disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
                 dateFormat="EEE, dd MMM"
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start w-full truncate"
+                triggerClassName="h-auto w-full justify-start truncate border-0 bg-transparent p-0 text-sm font-semibold text-foreground shadow-none hover:bg-transparent focus:ring-0"
                 icon={<span />}
               />
             </div>
@@ -260,7 +260,7 @@ export const HourlyFormContent = memo(({
       {/* Time Row */}
       <div 
         className={cn(
-          "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-100 dark:hover:bg-zinc-700 cursor-pointer border border-amber-200 dark:border-zinc-700",
+          "flex h-[75px] cursor-pointer flex-col justify-center rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
           shakeFields.time && "animate-shake",
           errors.time 
             ? "ring-2 ring-destructive/30" 
@@ -274,11 +274,11 @@ export const HourlyFormContent = memo(({
           }
         }}
       >
-        <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
+        <label className="pointer-events-none mb-0.5 block text-xs font-medium text-foreground/70">
           {t("pickupTime") || "Pickup time"}
         </label>
         <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
+          <Clock className="pointer-events-none h-4 w-4 flex-shrink-0 text-foreground" />
           <TimePickerAMPM 
             value={hourlyTime} 
             onValueChange={handleTimeChange} 
@@ -293,7 +293,7 @@ export const HourlyFormContent = memo(({
       </div>
 
       {/* Passengers Row */}
-      <div className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between border border-amber-200 dark:border-zinc-700 transition-all hover:bg-amber-200 dark:hover:bg-zinc-700">
+      <div className="flex h-[75px] items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-foreground" />
           <div className="flex flex-col">
@@ -308,7 +308,7 @@ export const HourlyFormContent = memo(({
             type="button"
             onClick={handlePassengerDecrement}
             disabled={parseInt(hourlyPassengers) <= 1}
-            className="w-9 h-9 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-lg font-bold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Minus className="h-4 w-4" strokeWidth={3} />
           </button>
@@ -316,7 +316,7 @@ export const HourlyFormContent = memo(({
             type="button"
             onClick={handlePassengerIncrement}
             disabled={parseInt(hourlyPassengers) >= 18}
-            className="w-9 h-9 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-lg font-bold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Plus className="h-4 w-4" strokeWidth={3} />
           </button>
@@ -324,7 +324,7 @@ export const HourlyFormContent = memo(({
       </div>
 
       {/* Spacer to push button to bottom on mobile */}
-      <div className="flex-1 min-h-2 sm:hidden" />
+      <div className="min-h-2 flex-1 sm:hidden" />
 
       {/* Submit Button - Same height as other elements */}
       <div className="mt-auto">
@@ -336,7 +336,7 @@ export const HourlyFormContent = memo(({
             validateAndContinue();
           }} 
           disabled={submitting} 
-          className="w-full h-[75px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
+          className="group h-[75px] w-full touch-manipulation rounded-xl border-0 bg-gradient-to-r from-primary via-primary to-primary/90 text-sm font-bold shadow-lg shadow-primary/30 transition-all duration-300 hover:from-primary/90 hover:to-primary hover:shadow-xl hover:shadow-primary/40 active:from-primary/80 active:to-primary/80"
         >
           {submitting ? (
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -344,7 +344,7 @@ export const HourlyFormContent = memo(({
             <>
               <Zap className="mr-2 h-4 w-4 animate-pulse" />
               <span className="tracking-wide">{t("getQuote") || (language === 'TR' ? 'Fiyat Al' : 'Get Quote')}</span>
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1.5" />
             </>
           )}
         </Button>

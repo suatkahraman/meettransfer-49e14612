@@ -191,7 +191,7 @@ export const RideFormContent = memo(({
   }, [passengers, setPassengers]);
 
   return (
-    <div key="ride-form" className="space-y-3 md:space-y-3 flex-1 flex flex-col">
+    <div key="ride-form" className="flex flex-1 flex-col space-y-3">
       {/* Location Inputs - Always visible, enlarged */}
       <div className={cn(
         (shakeFields.pickup || shakeFields.dropoff) && "animate-shake"
@@ -208,11 +208,12 @@ export const RideFormContent = memo(({
         />
       </div>
       
+      {/* Date & Time Row - mobile-first grid */}
       <div className="grid grid-cols-2 gap-3">
         <div 
           id="ride-date-field"
           className={cn(
-            "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700",
+            "flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
             shakeFields.date && "animate-shake",
             errors.date && "ring-2 ring-destructive/30"
           )}
@@ -225,27 +226,27 @@ export const RideFormContent = memo(({
           }}
         >
           <label className={cn(
-            "block text-xs font-medium mb-0.5 pointer-events-none",
+            "pointer-events-none mb-0.5 block text-xs font-medium",
             errors.date ? "text-destructive" : "text-foreground/70"
           )}>
             {t("pickupDate") || "Pickup date"}
           </label>
-          <div className="flex items-center gap-2 min-w-0">
-            <CalendarIcon className={cn("h-4 w-4 flex-shrink-0 pointer-events-none", errors.date ? "text-destructive" : "text-foreground")} />
-            <div className="flex-1 min-w-0 overflow-hidden">
+          <div className="flex min-w-0 items-center gap-2">
+            <CalendarIcon className={cn("pointer-events-none h-4 w-4 flex-shrink-0", errors.date ? "text-destructive" : "text-foreground")} />
+            <div className="min-w-0 flex-1 overflow-hidden">
               <FloatingLabelDatePicker 
                 label="" 
                 date={date} 
                 onSelect={handleDateChange} 
                 disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
                 dateFormat="EEE, dd MMM"
-                triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start w-full truncate"
+                triggerClassName="h-auto w-full justify-start truncate border-0 bg-transparent p-0 text-sm font-semibold text-foreground shadow-none hover:bg-transparent focus:ring-0"
                 icon={<span />}
               />
             </div>
           </div>
           {errors.date && (
-            <p className="text-xs text-destructive mt-0.5 font-medium animate-fade-in pointer-events-none">
+            <p className="pointer-events-none mt-0.5 animate-fade-in text-xs font-medium text-destructive">
               {t('required') || 'Required'}
             </p>
           )}
@@ -253,7 +254,7 @@ export const RideFormContent = memo(({
         <div 
           id="ride-time-field"
           className={cn(
-            "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all hover:bg-amber-200 dark:hover:bg-zinc-700 overflow-hidden cursor-pointer border border-amber-200 dark:border-zinc-700",
+            "flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
             shakeFields.time && "animate-shake",
             errors.time && "ring-2 ring-destructive/30"
           )}
@@ -266,13 +267,13 @@ export const RideFormContent = memo(({
           }}
         >
           <label className={cn(
-            "block text-xs font-medium mb-0.5 pointer-events-none",
+            "pointer-events-none mb-0.5 block text-xs font-medium",
             errors.time ? "text-destructive" : "text-foreground/70"
           )}>
             {t("pickupTime") || "Pickup time"}
           </label>
-          <div className="flex items-center gap-2 min-w-0">
-            <Clock className={cn("h-4 w-4 flex-shrink-0 pointer-events-none", errors.time ? "text-destructive" : "text-foreground")} />
+          <div className="flex min-w-0 items-center gap-2">
+            <Clock className={cn("pointer-events-none h-4 w-4 flex-shrink-0", errors.time ? "text-destructive" : "text-foreground")} />
             <TimePickerAMPM 
               value={time} 
               onValueChange={handleTimeChange} 
@@ -285,7 +286,7 @@ export const RideFormContent = memo(({
             />
           </div>
           {errors.time && (
-            <p className="text-xs text-destructive mt-0.5 font-medium animate-fade-in pointer-events-none">
+            <p className="pointer-events-none mt-0.5 animate-fade-in text-xs font-medium text-destructive">
               {t('required') || 'Required'}
             </p>
           )}
@@ -298,10 +299,10 @@ export const RideFormContent = memo(({
           type="button"
           onClick={() => setHasReturnTrip(!hasReturnTrip)}
           className={cn(
-            "w-full h-[75px] rounded-xl transition-all text-sm font-bold tracking-wide uppercase flex items-center justify-center border",
+            "flex h-[75px] w-full items-center justify-center rounded-xl border text-sm font-bold uppercase tracking-wide transition-all",
             hasReturnTrip 
-              ? "bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 ring-2 ring-green-500 border-green-500" 
-              : "bg-amber-50 dark:bg-amber-950/20 text-foreground hover:bg-amber-200 dark:hover:bg-amber-900/30 border-amber-200 dark:border-amber-800"
+              ? "border-green-500 bg-green-100 text-green-700 ring-2 ring-green-500 dark:bg-green-950/50 dark:text-green-400" 
+              : "border-amber-200 bg-amber-50 text-foreground hover:bg-amber-200 dark:border-amber-800 dark:bg-amber-950/20 dark:hover:bg-amber-900/30"
           )}
         >
           {hasReturnTrip ? (
@@ -317,9 +318,9 @@ export const RideFormContent = memo(({
 
       {/* Return Date/Time - Show when return trip is enabled */}
       {hasReturnTrip && setReturnDate && setReturnTime && (
-        <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
+        <div className="grid animate-in slide-in-from-top-2 grid-cols-2 gap-3 duration-200">
           <div 
-            className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden cursor-pointer hover:bg-amber-200 dark:hover:bg-zinc-700 transition-all border border-amber-200 dark:border-zinc-700"
+            className="flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
             onClick={(e) => {
               const target = e.target as HTMLElement;
               if (!target.closest('button')) {
@@ -328,26 +329,26 @@ export const RideFormContent = memo(({
               }
             }}
           >
-            <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
+            <label className="pointer-events-none mb-0.5 block text-xs font-medium text-foreground/70">
               {t("returnDate") || "Return date"}
             </label>
-            <div className="flex items-center gap-2 min-w-0">
-              <CalendarIcon className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
-              <div className="flex-1 min-w-0 overflow-hidden">
+            <div className="flex min-w-0 items-center gap-2">
+              <CalendarIcon className="pointer-events-none h-4 w-4 flex-shrink-0 text-foreground" />
+              <div className="min-w-0 flex-1 overflow-hidden">
                 <FloatingLabelDatePicker 
                   label="" 
                   date={returnDate} 
                   onSelect={setReturnDate} 
                   disabledDates={(d) => d < (date || new Date())} 
                   dateFormat="EEE, dd MMM"
-                  triggerClassName="bg-transparent border-0 p-0 h-auto text-sm font-semibold text-foreground hover:bg-transparent focus:ring-0 shadow-none justify-start w-full truncate"
+                  triggerClassName="h-auto w-full justify-start truncate border-0 bg-transparent p-0 text-sm font-semibold text-foreground shadow-none hover:bg-transparent focus:ring-0"
                   icon={<span />}
                 />
               </div>
             </div>
           </div>
           <div 
-            className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center overflow-hidden cursor-pointer hover:bg-amber-200 dark:hover:bg-zinc-700 transition-all border border-amber-200 dark:border-zinc-700"
+            className="flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
             onClick={(e) => {
               const target = e.target as HTMLElement;
               if (!target.closest('button')) {
@@ -356,11 +357,11 @@ export const RideFormContent = memo(({
               }
             }}
           >
-            <label className="block text-xs font-medium text-foreground/70 mb-0.5 pointer-events-none">
+            <label className="pointer-events-none mb-0.5 block text-xs font-medium text-foreground/70">
               {t("returnTime") || "Return time"}
             </label>
-            <div className="flex items-center gap-2 min-w-0">
-              <Clock className="h-4 w-4 text-foreground flex-shrink-0 pointer-events-none" />
+            <div className="flex min-w-0 items-center gap-2">
+              <Clock className="pointer-events-none h-4 w-4 flex-shrink-0 text-foreground" />
               <TimePickerAMPM 
                 value={returnTime || ""} 
                 onValueChange={setReturnTime} 
@@ -377,7 +378,7 @@ export const RideFormContent = memo(({
       )}
 
       {/* Passengers - Compact like other fields */}
-      <div className="bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex items-center justify-between border border-amber-200 dark:border-zinc-700 transition-all hover:bg-amber-200 dark:hover:bg-zinc-700">
+      <div className="flex h-[75px] items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-foreground" />
           <div className="flex flex-col">
@@ -392,7 +393,7 @@ export const RideFormContent = memo(({
             type="button"
             onClick={handlePassengerDecrement}
             disabled={parseInt(passengers) <= 1}
-            className="w-9 h-9 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-lg font-bold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Minus className="h-4 w-4" strokeWidth={3} />
           </button>
@@ -400,7 +401,7 @@ export const RideFormContent = memo(({
             type="button"
             onClick={handlePassengerIncrement}
             disabled={parseInt(passengers) >= 18}
-            className="w-9 h-9 rounded-lg bg-foreground text-background flex items-center justify-center font-bold text-lg hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-lg font-bold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Plus className="h-4 w-4" strokeWidth={3} />
           </button>
@@ -408,7 +409,7 @@ export const RideFormContent = memo(({
       </div>
 
       {/* Spacer to push button to bottom on mobile */}
-      <div className="flex-1 min-h-2 sm:hidden" />
+      <div className="min-h-2 flex-1 sm:hidden" />
 
       {/* Baby Seat & Luggage removed from Hero - now only in Book page */}
 
@@ -417,7 +418,7 @@ export const RideFormContent = memo(({
         <Button 
           onClick={validateAndContinue} 
           disabled={submitting} 
-          className="w-full h-[75px] font-bold bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:to-primary active:from-primary/80 active:to-primary/80 shadow-lg shadow-primary/30 rounded-xl text-sm group touch-manipulation border-0 transition-all duration-300 hover:shadow-xl hover:shadow-primary/40"
+          className="group h-[75px] w-full touch-manipulation rounded-xl border-0 bg-gradient-to-r from-primary via-primary to-primary/90 text-sm font-bold shadow-lg shadow-primary/30 transition-all duration-300 hover:from-primary/90 hover:to-primary hover:shadow-xl hover:shadow-primary/40 active:from-primary/80 active:to-primary/80"
         >
           {submitting ? (
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -425,7 +426,7 @@ export const RideFormContent = memo(({
             <>
               <Zap className="mr-2 h-4 w-4 animate-pulse" />
               <span className="tracking-wide">{t("getQuote")}</span>
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1.5 transition-transform duration-300" />
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1.5" />
             </>
           )}
         </Button>
