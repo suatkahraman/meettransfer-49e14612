@@ -54,7 +54,11 @@ export function useHourlyForm(
     parseSavedDate(loadSavedFormData()?.hourlyDate)
   );
   const [hourlyTime, setHourlyTime] = useState(() => loadSavedFormData()?.hourlyTime || "");
-  const [hourlyDuration, setHourlyDuration] = useState(() => loadSavedFormData()?.hourlyDuration || "4");
+  // Default to "4" hours - ensure a valid default is always set
+  const [hourlyDuration, setHourlyDuration] = useState<string>(() => {
+    const saved = loadSavedFormData()?.hourlyDuration;
+    return saved && saved.length > 0 ? saved : "4";
+  });
   const [hourlyPassengers, setHourlyPassengers] = useState(() => loadSavedFormData()?.hourlyPassengers || "2");
   const [hourlyVehicleType, setHourlyVehicleType] = useState(() => loadSavedFormData()?.hourlyVehicleType || "mercedes-vito");
   const [customHours, setCustomHours] = useState(() => loadSavedFormData()?.customHours || "9");
@@ -108,15 +112,19 @@ export function useHourlyForm(
     }
   }, [availableCities.length]);
 
-  // Reset duration when city changes
+  // Reset duration only when city changes to a city with different available durations
+  // Keep the user-selected duration intact unless it's truly incompatible
   useEffect(() => {
-    if (hourlyCity && availableDurations.length > 0 && !availableDurations.includes(hourlyDuration)) {
-      setHourlyDuration(availableDurations[0]);
-    } else if (!hourlyCity) {
-      setHourlyDuration("");
+    // Only reset prices when city changes, don't reset duration unless necessary
+    if (!hourlyCity) {
+      // If no city, reset to default duration
+      if (!hourlyDuration) {
+        setHourlyDuration("4");
+      }
     }
+    // Only clear prices when city changes - pricing will be recalculated
     setAllHourlyPrices([]);
-  }, [hourlyCity, availableDurations, hourlyDuration]);
+  }, [hourlyCity]);
 
   // Auto-adjust vehicle type based on passenger count
   useEffect(() => {
