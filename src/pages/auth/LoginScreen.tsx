@@ -52,11 +52,9 @@ type ViewMode = 'login' | 'forgot' | 'reset' | 'reset-sent' | '2fa';
 const LoginScreen = () => {
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [resetEmail, setResetEmail] = useState('');
-  const [googleError, setGoogleError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(() => {
     return localStorage.getItem('guestRememberMe') === 'true';
   });
@@ -133,54 +131,6 @@ const LoginScreen = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Improved Google OAuth handler
-  const handleGoogleLogin = useCallback(async () => {
-    setIsGoogleLoading(true);
-    setGoogleError(null);
-    
-    try {
-      const baseUrl = window.location.origin;
-      const redirectTo = `${baseUrl}/login`;
-      
-      // For iOS PWA standalone mode, show a helpful message
-      if (isIOS && isStandalone) {
-        const authUrl = `${baseUrl}/login?oauth=google`;
-        const opened = window.open(authUrl, '_blank');
-        if (!opened) {
-          setGoogleError(t('iosGoogleLoginNotice'));
-          setIsGoogleLoading(false);
-          return;
-        }
-        toast.info(t('redirectingGoogle'));
-        setIsGoogleLoading(false);
-        return;
-      }
-
-      // Standard OAuth flow
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'select_account',
-          },
-        },
-      });
-      
-      if (error) {
-        console.error('Google OAuth error:', error);
-        setGoogleError(error.message);
-        toast.error(error.message);
-      }
-    } catch (error: any) {
-      console.error('Google login error:', error);
-      setGoogleError(t('loginFailed'));
-      toast.error(t('loginFailed'));
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  }, [isIOS, isStandalone, t]);
 
   // Check if returning from password reset email
   useEffect(() => {
@@ -193,10 +143,15 @@ const LoginScreen = () => {
   // Auto-trigger OAuth if redirected from PWA
   useEffect(() => {
     const oauthParam = searchParams.get('oauth');
-    if (oauthParam === 'google' && !user && !authLoading) {
-      handleGoogleLogin();
+    if (oauthParam && !user && !authLoading) {
+      // Import is already at top via SocialAuthButtons; trigger OAuth via lovable SDK
+      import('@/integrations/lovable/index').then(({ lovable }) => {
+        lovable.auth.signInWithOAuth(oauthParam as 'google' | 'apple', {
+          redirect_uri: window.location.origin,
+        });
+      });
     }
-  }, [searchParams, user, authLoading, handleGoogleLogin]);
+  }, [searchParams, user, authLoading]);
 
   // Role-based redirect after login (only if not pending 2FA)
   useEffect(() => {
@@ -746,19 +701,10 @@ const LoginScreen = () => {
                 </div>
               )}
 
-              {/* Google Error Message */}
-              {googleError && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
-                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                  <p className="text-destructive">{googleError}</p>
-                </div>
-              )}
-
               {/* Social Sign-In Buttons */}
               <SocialAuthButtons
                 disabled={isLoading}
                 mode="login"
-                onGoogleClick={handleGoogleLogin}
               />
 
               <div className="relative">
