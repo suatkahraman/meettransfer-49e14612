@@ -186,17 +186,17 @@ export function isSwitzerlandLocation(location: string): boolean {
 
 // Detect region from pickup/dropoff locations
 export function detectRegion(pickup: string, dropoff: string): VehicleRegion {
-  // Check Switzerland first (most specific for ski transfers)
-  if (isSwitzerlandLocation(pickup) || isSwitzerlandLocation(dropoff)) {
-    return 'switzerland';
+  // IMPORTANT: Check Turkey FIRST to avoid false positives from brand names like "Swissôtel" in Turkey
+  if (isTurkeyLocation(pickup) || isTurkeyLocation(dropoff)) {
+    return 'turkey';
   }
   // Check Dubai
   if (isDubaiLocation(pickup) || isDubaiLocation(dropoff)) {
     return 'dubai';
   }
-  // Check Turkey
-  if (isTurkeyLocation(pickup) || isTurkeyLocation(dropoff)) {
-    return 'turkey';
+  // Check Switzerland last (to avoid false positives from "Swiss" in brand names)
+  if (isSwitzerlandLocation(pickup) || isSwitzerlandLocation(dropoff)) {
+    return 'switzerland';
   }
   // Default to Turkey/standard vehicles
   return 'default';
