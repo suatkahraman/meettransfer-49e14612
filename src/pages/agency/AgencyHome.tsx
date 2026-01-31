@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2, History, AlertCircle, Shield } from 'lucide-react';
+import { LogOut, Calendar, User, Loader2, BarChart3, Clock, Car, ChevronDown, RefreshCw, Wallet, TrendingUp, CheckCircle, CreditCard, Plus, Bell, BellOff, Receipt, Volume2, History, AlertCircle, Shield, UserX } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import AgencyLanguageSelector from '@/components/agency/AgencyLanguageSelector';
 import { useAgencyLanguage } from '@/contexts/AgencyLanguageContext';
@@ -679,6 +679,15 @@ const AgencyHome = () => {
             title={t('securitySettings') || 'Güvenlik Ayarları'}
           >
             <Shield className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate('/agency/settings')} 
+            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
+            title={t('accountSettings') || 'Hesap Ayarları'}
+          >
+            <UserX className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
           </Button>
           <Button 
             variant="ghost" 

@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, User, Phone, Mail, CheckCircle, AlertCircle, Sparkles, Shield, History, Star, Award, Bell, BellOff, BellRing } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, User, Phone, Mail, CheckCircle, AlertCircle, Sparkles, Shield, History, Star, Award, Bell, BellOff, BellRing, Trash2 } from 'lucide-react';
+import AccountDeletionCard from '@/components/security/AccountDeletionCard';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
@@ -864,6 +865,16 @@ const CustomerProfile = () => {
               </Button>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Account Deletion Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.4 }}
+          className="mt-6"
+        >
+          <AccountDeletionCard />
         </motion.div>
       </main>
     </div>

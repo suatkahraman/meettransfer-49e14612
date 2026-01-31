@@ -64,6 +64,7 @@ const DriverJobList = lazy(() => import("./pages/driver/DriverJobList"));
 const DriverAccounting = lazy(() => import("./pages/driver/DriverAccounting"));
 const DriverHistory = lazy(() => import("./pages/driver/DriverHistory"));
 const DriverMonthlyAccounting = lazy(() => import("./pages/driver/DriverMonthlyAccounting"));
+const DriverSettings = lazy(() => import("./pages/driver/DriverSettings"));
 
 // Admin Pages - lazy loaded
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -117,6 +118,7 @@ const AgencyTransactionHistory = lazy(() => import("./pages/agency/AgencyTransac
 const AgencyCurrencyDetail = lazy(() => import("./pages/agency/AgencyCurrencyDetail"));
 const AgencyPaymentSuccess = lazy(() => import("./pages/agency/AgencyPaymentSuccess"));
 const AgencyPayments = lazy(() => import("./pages/agency/AgencyPayments"));
+const AgencySettings = lazy(() => import("./pages/agency/AgencySettings"));
 
 // Website Pages - lazy loaded
 const IstanbulTransfer = lazy(() => import("./pages/website/IstanbulTransfer"));
@@ -426,6 +428,7 @@ const App = () => {
               <Route path="/driver/accounting" element={<DriverRoute><LazyRoute><DriverAccounting /></LazyRoute></DriverRoute>} />
               <Route path="/driver/monthly-accounting" element={<DriverRoute><LazyRoute><DriverMonthlyAccounting /></LazyRoute></DriverRoute>} />
               <Route path="/driver/history" element={<DriverRoute><LazyRoute><DriverHistory /></LazyRoute></DriverRoute>} />
+              <Route path="/driver/settings" element={<DriverRoute><LazyRoute><DriverSettings /></LazyRoute></DriverRoute>} />
               
               {/* Admin Routes - Protected */}
               <Route path="/admin" element={<AdminRoute><LazyRoute><AdminDashboard /></LazyRoute></AdminRoute>} />
@@ -468,6 +471,7 @@ const App = () => {
               <Route path="/agency/reservation/:id" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/reservation/:id/edit" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyEditReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               <Route path="/agency/payments" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyPayments /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
+              <Route path="/agency/settings" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencySettings /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
               
               {/* Customer Portal & Booking Confirmation - Public */}
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
