@@ -1,17 +1,17 @@
 {
-  "version": "2.5.1",
-  "releaseDate": "2025-01-15",
-  "buildNumber": 1,
+  "version": "2.5.2",
+  "releaseDate": "2026-01-31",
+  "buildNumber": 2,
   "notes": {
-    "TR": "Sesli yanıt için görsel dalga animasyonu, haptic feedback, PWA güncelleme sistemi optimize edildi",
-    "EN": "Visual wave animation for voice response, haptic feedback, PWA update system optimized",
-    "DE": "Visuelle Wellenanimation für Sprachantwort, haptisches Feedback, PWA-Update-System optimiert",
-    "FR": "Animation visuelle pour réponse vocale, retour haptique, système de mise à jour PWA optimisé",
-    "RU": "Визуальная волновая анимация для голосового ответа, тактильная обратная связь, оптимизирована система обновления PWA",
-    "IT": "Animazione visiva per risposta vocale, feedback aptico, sistema di aggiornamento PWA ottimizzato",
-    "ES": "Animación visual para respuesta de voz, retroalimentación háptica, sistema de actualización PWA optimizado",
-    "AR": "رسوم متحركة مرئية للاستجابة الصوتية، ردود فعل لمسية، تم تحسين نظام تحديث PWA",
-    "UK": "Візуальна хвильова анімація для голосової відповіді, тактильний зворотний зв'язок, оптимізовано систему оновлення PWA",
-    "JA": "音声応答用のビジュアルウェーブアニメーション、触覚フィードバック、PWA更新システムの最適化"
+    "TR": "Google OAuth Lovable Cloud'a taşındı, PWA güncelleme zorlama",
+    "EN": "Google OAuth migrated to Lovable Cloud, PWA update forced",
+    "DE": "Google OAuth zu Lovable Cloud migriert, PWA-Update erzwungen",
+    "FR": "Google OAuth migré vers Lovable Cloud, mise à jour PWA forcée",
+    "RU": "Google OAuth перенесен в Lovable Cloud, принудительное обновление PWA",
+    "IT": "Google OAuth migrato a Lovable Cloud, aggiornamento PWA forzato",
+    "ES": "Google OAuth migrado a Lovable Cloud, actualización PWA forzada",
+    "AR": "تم نقل Google OAuth إلى Lovable Cloud، تم فرض تحديث PWA",
+    "UK": "Google OAuth перенесено до Lovable Cloud, примусове оновлення PWA",
+    "JA": "Google OAuthをLovable Cloudに移行、PWA更新を強制"
   }
 }
