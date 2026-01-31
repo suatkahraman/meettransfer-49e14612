@@ -2,12 +2,11 @@
 # SECURITY HEADERS - Applied to all responses
 # ============================================
 /*
+  Content-Security-Policy: default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'
   X-Frame-Options: SAMEORIGIN
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'
   X-Content-Type-Options: nosniff
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
   Referrer-Policy: strict-origin-when-cross-origin
-
 # Allow embedding for /embed page only
 /embed
   X-Frame-Options: ALLOWALL
