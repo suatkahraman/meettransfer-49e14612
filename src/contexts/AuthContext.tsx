@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
@@ -204,59 +205,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGoogle = async () => {
     try {
-      const redirectUrl = `${window.location.origin}/auth`;
-      
       // Check if running as installed PWA (standalone mode)
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
                           (window.navigator as any).standalone === true;
       
       if (isStandalone) {
-        // For PWA standalone mode, we need to get the OAuth URL and open it in system browser
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: redirectUrl,
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'select_account',
-            },
-            skipBrowserRedirect: true, // Don't auto-redirect, we'll handle it
-          },
-        });
-        
-        if (error) {
-          toast.error(error.message);
-          return { error };
+        // For iOS PWA standalone mode, open in system browser
+        const authUrl = `${window.location.origin}/login?oauth=google`;
+        const opened = window.open(authUrl, '_blank');
+        if (!opened) {
+          toast.error('Lütfen tarayıcınızda açın');
+          return { error: new Error('Cannot open browser') };
         }
-        
-        // Open OAuth URL in system browser
-        if (data?.url) {
-          window.open(data.url, '_blank');
-          toast.info('Lütfen açılan tarayıcıda Google ile giriş yapın, ardından uygulamayı tekrar açın.');
-        }
-        
-        return { error: null };
-      } else {
-        // Normal browser flow
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: redirectUrl,
-            queryParams: {
-              access_type: 'offline',
-              prompt: 'select_account',
-            },
-          },
-        });
-        
-        if (error) {
-          toast.error(error.message);
-          return { error };
-        }
-        
+        toast.info('Lütfen açılan tarayıcıda Google ile giriş yapın');
         return { error: null };
       }
+      
+      // Use Lovable Cloud managed OAuth
+      const { error } = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.origin,
+      });
+      
+      if (error) {
+        console.error('Google OAuth error:', error);
+        toast.error(error.message || 'Google ile giriş yapılırken hata oluştu');
+        return { error };
+      }
+      
+      return { error: null };
     } catch (error: any) {
+      console.error('Google login error:', error);
       toast.error('Google ile giriş yapılırken hata oluştu');
       return { error };
     }
