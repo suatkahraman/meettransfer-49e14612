@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePromo } from '@/contexts/PromoContext';
@@ -2471,11 +2472,8 @@ const ReservationForm = () => {
                         variant="outline"
                         className="w-full bg-amber-50 hover:bg-amber-100 border-amber-200"
                         onClick={async () => {
-                          const { error } = await supabase.auth.signInWithOAuth({
-                            provider: 'google',
-                            options: {
-                              redirectTo: `${window.location.origin}/book/complete`,
-                            },
+                          const { error } = await lovable.auth.signInWithOAuth('google', {
+                            redirect_uri: `${window.location.origin}/book/complete`,
                           });
                           if (error) {
                             toast.error('Google sign-in failed');

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { validatePromoCode } from "@/hooks/useActivePromoCode";
@@ -959,11 +960,8 @@ const BookingPage = () => {
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('googleAuth', 'true');
       
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: currentUrl.toString(),
-        },
+      const { error } = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: currentUrl.toString(),
       });
       
       if (error) throw error;
