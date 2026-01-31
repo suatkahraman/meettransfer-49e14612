@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { PendingBookingStorage, type PendingBookingData } from "@/hooks/usePendingBookingStorage";
+import { setPostOAuthRedirect } from "@/lib/postOAuthRedirect";
 
 // Google icon component
 const GoogleIcon = () => (
@@ -166,8 +167,12 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
         console.log('[Security] Booking data saved to sessionStorage for post-login persistence');
       }
 
+      setPostOAuthRedirect(`${window.location.origin}/customer`);
+
       const { error } = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: `${window.location.origin}/customer`,
+        // NOTE: Using a path here can cause Google `redirect_uri_mismatch` for BYOK credentials.
+        // We keep redirect_uri stable and navigate after auth via sessionStorage.
+        redirect_uri: window.location.origin,
       });
 
       if (error) {

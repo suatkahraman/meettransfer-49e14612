@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { setPostOAuthRedirect } from "@/lib/postOAuthRedirect";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { validatePromoCode } from "@/hooks/useActivePromoCode";
@@ -959,9 +960,13 @@ const BookingPage = () => {
       // Build current URL with all params for redirect
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('googleAuth', 'true');
+
+      // Avoid path-based redirect_uri values (can trigger Google redirect_uri_mismatch).
+      // Instead, store the desired return URL and use a stable redirect_uri.
+      setPostOAuthRedirect(currentUrl.toString());
       
       const { error } = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: currentUrl.toString(),
+        redirect_uri: window.location.origin,
       });
       
       if (error) throw error;

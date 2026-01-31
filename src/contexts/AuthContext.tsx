@@ -5,6 +5,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
+import { consumePostOAuthRedirect } from '@/lib/postOAuthRedirect';
 
 interface AuthContextType {
   user: User | null;
@@ -49,6 +50,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (!isMounted) return;
             
             try {
+              // Clean up URL hash if present (OAuth callback)
+              if (window.location.hash.includes('access_token=')) {
+                const cleanUrl = window.location.pathname + window.location.search;
+                window.history.replaceState(null, '', cleanUrl);
+              }
+
+              // If a flow requested a specific post-OAuth return location, honor it.
+              // This avoids using path-based redirect_uri values that can trigger Google redirect_uri_mismatch.
+              const postOAuthRedirect = consumePostOAuthRedirect();
+              if (postOAuthRedirect) {
+                navigate(postOAuthRedirect, { replace: true });
+                return;
+              }
+
               const { data: roleData } = await supabase
                 .from('user_roles')
                 .select('role')
@@ -56,12 +71,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .maybeSingle();
 
               const userRole = roleData?.role || 'customer';
-              
-              // Clean up URL hash if present (OAuth callback)
-              if (window.location.hash.includes('access_token=')) {
-                const cleanUrl = window.location.pathname + window.location.search;
-                window.history.replaceState(null, '', cleanUrl);
-              }
               
               // Check for pending booking data from sessionStorage (secure storage)
               const pendingBookingData = PendingBookingStorage.load();
