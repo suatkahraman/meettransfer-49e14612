@@ -4,6 +4,7 @@ import { ArrowRight, UserPlus, Shield, Clock, Loader2, CheckCircle, Plane } from
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 import { PendingBookingStorage, type PendingBookingData } from "@/hooks/usePendingBookingStorage";
 
 // Google icon component
@@ -165,15 +166,8 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
         console.log('[Security] Booking data saved to sessionStorage for post-login persistence');
       }
 
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/customer`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        },
+      const { error } = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: `${window.location.origin}/customer`,
       });
 
       if (error) {

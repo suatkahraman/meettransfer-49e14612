@@ -22,6 +22,7 @@ import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
 import AdBlockWarning from "./components/AdBlockWarning";
 import { Button } from "@/components/ui/button";
 import { PWADebugPanel } from "./components/website/PWADebugPanel"; // visible with ?pwa_debug=1
+import OfflineIndicator from "./components/OfflineIndicator";
 import CanonicalManager from "./components/seo/CanonicalManager";
 
 // IMPORTANT: Keep debug page eager-loaded.
@@ -304,6 +305,7 @@ const App = () => {
               <PWADebugPanel />
               <AdBlockWarning />
               <CanonicalManager />
+              <OfflineIndicator />
               <AuthProvider>
                 <Routes>
               {/* Localized Website Pages - Support all languages */}
