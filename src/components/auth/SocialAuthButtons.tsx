@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { lovable } from '@/integrations/lovable/index';
-import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePWADetect } from '@/hooks/usePWADetect';
 
@@ -36,14 +35,6 @@ const AppleIcon = () => (
   </svg>
 );
 
-// Helper to detect if we're on a custom domain (not Lovable's domains)
-const isCustomDomain = () => {
-  const hostname = window.location.hostname;
-  return !hostname.includes('lovable.app') && 
-         !hostname.includes('lovableproject.com') &&
-         !hostname.includes('localhost');
-};
-
 interface SocialAuthButtonsProps {
   disabled?: boolean;
   mode?: 'login' | 'signup';
@@ -72,10 +63,8 @@ export const SocialAuthButtons = ({
 
     setIsGoogleLoading(true);
     try {
-      const onCustomDomain = isCustomDomain();
-
-      // For iOS PWA standalone mode on Lovable domains, open in new window
-      if (isIOS && isStandalone && !onCustomDomain) {
+      // For iOS PWA standalone mode, open in new window to handle OAuth properly
+      if (isIOS && isStandalone) {
         const authUrl = `${window.location.origin}/${mode === 'login' ? 'login' : 'signup'}?oauth=google`;
         const opened = window.open(authUrl, '_blank');
         if (!opened) {
@@ -88,29 +77,7 @@ export const SocialAuthButtons = ({
         return;
       }
 
-      // For custom domains (including iOS), use Supabase directly to bypass auth-bridge
-      if (onCustomDomain) {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin,
-            skipBrowserRedirect: true,
-          },
-        });
-
-        if (error) {
-          console.error('Google OAuth error:', error);
-          toast.error(error.message || t('loginFailed'));
-          return;
-        }
-
-        if (data?.url) {
-          window.location.href = data.url;
-        }
-        return;
-      }
-
-      // For Lovable domains, use managed OAuth
+      // Always use Lovable managed OAuth (handles both lovable.app and custom domains)
       const { error } = await lovable.auth.signInWithOAuth('google', {
         redirect_uri: window.location.origin,
       });
@@ -135,10 +102,8 @@ export const SocialAuthButtons = ({
 
     setIsAppleLoading(true);
     try {
-      const onCustomDomain = isCustomDomain();
-
-      // For iOS PWA standalone mode on Lovable domains, open in new window
-      if (isIOS && isStandalone && !onCustomDomain) {
+      // For iOS PWA standalone mode, open in new window to handle OAuth properly
+      if (isIOS && isStandalone) {
         const authUrl = `${window.location.origin}/${mode === 'login' ? 'login' : 'signup'}?oauth=apple`;
         const opened = window.open(authUrl, '_blank');
         if (!opened) {
@@ -151,29 +116,7 @@ export const SocialAuthButtons = ({
         return;
       }
 
-      // For custom domains (including iOS), use Supabase directly to bypass auth-bridge
-      if (onCustomDomain) {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'apple',
-          options: {
-            redirectTo: window.location.origin,
-            skipBrowserRedirect: true,
-          },
-        });
-
-        if (error) {
-          console.error('Apple OAuth error:', error);
-          toast.error(error.message || t('loginFailed'));
-          return;
-        }
-
-        if (data?.url) {
-          window.location.href = data.url;
-        }
-        return;
-      }
-
-      // For Lovable domains, use managed OAuth
+      // Always use Lovable managed OAuth (handles both lovable.app and custom domains)
       const { error } = await lovable.auth.signInWithOAuth('apple', {
         redirect_uri: window.location.origin,
       });
