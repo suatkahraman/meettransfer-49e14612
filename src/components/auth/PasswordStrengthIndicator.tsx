@@ -48,6 +48,8 @@ const PasswordStrengthIndicator = ({ password, language = 'EN' }: PasswordStreng
 
   if (!password) return null;
 
+  const allMet = criteria.every(c => c.met);
+
   return (
     <div className="space-y-3 mt-2">
       {/* Strength bar */}
@@ -98,6 +100,15 @@ const PasswordStrengthIndicator = ({ password, language = 'EN' }: PasswordStreng
           </div>
         ))}
       </div>
+
+      {/* Security tip when all criteria met */}
+      {allMet && (
+        <p className="text-[10px] text-muted-foreground/80 leading-tight">
+          {language === 'TR' 
+            ? '💡 İpucu: @#$! gibi özel karakterler ekleyerek şifrenizi daha güvenli yapabilirsiniz.' 
+            : '💡 Tip: Add special characters like @#$! to make your password even more secure.'}
+        </p>
+      )}
     </div>
   );
 };

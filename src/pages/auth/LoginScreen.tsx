@@ -606,7 +606,16 @@ const LoginScreen = () => {
       });
 
       if (error) {
-        toast.error(error.message);
+        if (error.message.toLowerCase().includes('weak') || error.message.toLowerCase().includes('easy to guess') || error.message.toLowerCase().includes('pwned')) {
+          // Supabase leaked password check - provide helpful message
+          toast.error(
+            language === 'TR'
+              ? 'Bu şifre veri ihlallerinde bulundu. Lütfen daha benzersiz bir şifre seçin (örn: @#$ gibi özel karakterler ekleyin).'
+              : 'This password has been found in data breaches. Please choose a more unique password (e.g., add special characters like @#$).'
+          );
+        } else {
+          toast.error(error.message);
+        }
       } else {
         toast.success(t('passwordUpdated'));
         setViewMode('login');
