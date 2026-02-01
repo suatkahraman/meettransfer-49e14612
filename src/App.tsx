@@ -45,6 +45,7 @@ const ReservationForm = lazy(() => import("./pages/ReservationForm"));
 const BookingPage = lazy(() => import("./pages/BookingPage"));
 const StandaloneReservation = lazy(() => import("./pages/StandaloneReservation"));
 const EmbedReservationForm = lazy(() => import("./pages/EmbedReservationForm"));
+const EmbedSocialAuth = lazy(() => import("./pages/EmbedSocialAuth"));
 const InstallApp = lazy(() => import("./pages/InstallApp"));
 const SecuritySettings = lazy(() => import("./pages/SecuritySettings"));
 
@@ -395,6 +396,7 @@ const App = () => {
               
               {/* Embeddable Form for External Websites - Not localized */}
               <Route path="/embed" element={<LazyRoute><EmbedReservationForm /></LazyRoute>} />
+              <Route path="/embed/auth" element={<LazyRoute><EmbedSocialAuth /></LazyRoute>} />
               
               {/* Shared Booking Short Links - Not localized */}
               <Route path="/s/:shortCode" element={<LazyRoute><SharedBookingRedirect /></LazyRoute>} />
