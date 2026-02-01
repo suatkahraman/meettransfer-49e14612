@@ -158,11 +158,13 @@ const Auth = () => {
       // Check for recovery type in URL params or hash
       const isRecoveryType = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
       const hasAccessToken = hashParams.get('access_token');
-      const errorDescription = hashParams.get('error_description');
+      const hasCode = params.get('code') || hashParams.get('code');
+      const errorDescription = hashParams.get('error_description') || params.get('error_description');
       
       console.log('Recovery check:', { 
         isRecoveryType, 
         hasAccessToken: !!hasAccessToken, 
+        hasCode: !!hasCode,
         errorDescription,
         hash: window.location.hash.substring(0, 50) + '...'
       });
@@ -179,17 +181,47 @@ const Auth = () => {
         return;
       }
 
-      // If recovery type is set and there's an access token in the hash
-      if (isRecoveryType && hasAccessToken) {
-        console.log('Recovery token detected, waiting for session...');
-        setViewMode('reset');
-        setIsRecoverySession(true);
-        
-        // Clean URL hash after processing
-        setTimeout(() => {
+      // PKCE flow: exchange code for session first
+      if (hasCode) {
+        console.log('PKCE code detected, exchanging for session...');
+        const code = params.get('code') || hashParams.get('code');
+        if (code) {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            console.error('Code exchange failed:', error);
+            toast.error('Recovery link has expired or is invalid. Please request a new one.');
+            setViewMode('reset-error');
+            setRecoveryChecked(true);
+            window.history.replaceState(null, '', '/auth');
+            return;
+          }
+          if (data?.session) {
+            console.log('Session established from PKCE code');
+            setViewMode('reset');
+            setIsRecoverySession(true);
+            setRecoveryChecked(true);
+            window.history.replaceState(null, '', '/auth?type=recovery');
+            return;
+          }
+        }
+      }
+
+      // If recovery type is set and there's an access token in the hash (implicit flow)
+      if (hasAccessToken) {
+        console.log('Access token detected in hash, letting Supabase handle it...');
+        // Supabase client automatically picks up access_token from hash
+        const { data: { session: hashSession } } = await supabase.auth.getSession();
+        if (hashSession) {
+          console.log('Session established from hash token');
+          setViewMode('reset');
+          setIsRecoverySession(true);
+          setRecoveryChecked(true);
           window.history.replaceState(null, '', '/auth?type=recovery');
-        }, 100);
-      } else if (isRecoveryType) {
+          return;
+        }
+      }
+      
+      if (isRecoveryType) {
         // Just the type=recovery param without token (user might already have session)
         console.log('Recovery type without token, checking existing session...');
         
