@@ -15,6 +15,8 @@ import { z } from 'zod';
 import { ArrowLeft, Loader2, Building2, User, KeyRound, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
+import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
+import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
 
 const loginSchema = z.object({
   email: z.string().trim().email().max(255),
@@ -29,10 +31,10 @@ const AgencyLoginScreen = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [resetEmail, setResetEmail] = useState('');
   const [rememberMe, setRememberMe] = useState(() => {
-    return localStorage.getItem('agencyRememberMe') === 'true';
+    return safeLocalGet('agencyRememberMe') === 'true';
   });
   const [savedEmail, setSavedEmail] = useState(() => {
-    return localStorage.getItem('agencySavedEmail') || '';
+    return safeLocalGet('agencySavedEmail') || '';
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
@@ -126,7 +128,7 @@ const AgencyLoginScreen = () => {
     const result = await verify2FA(code);
     if (result.success && pendingRole) {
       // 2FA complete – allow global redirects again
-      localStorage.removeItem('suppress_auth_redirect');
+      clearSuppressAuthRedirect();
 
       // If user chose to remember device, register it
       if (rememberDevice && twoFactorState.userId) {
@@ -183,7 +185,7 @@ const AgencyLoginScreen = () => {
   // Handle 2FA cancel
   const handle2FACancel = async () => {
     // User aborted 2FA – allow redirects again
-    localStorage.removeItem('suppress_auth_redirect');
+    clearSuppressAuthRedirect();
 
     cancel2FA();
     setPendingRole(null);
@@ -226,15 +228,15 @@ const AgencyLoginScreen = () => {
       
       // Save or clear email based on remember me
       if (rememberMe) {
-        localStorage.setItem('agencyRememberMe', 'true');
-        localStorage.setItem('agencySavedEmail', validation.email);
+        safeLocalSet('agencyRememberMe', 'true');
+        safeLocalSet('agencySavedEmail', validation.email);
       } else {
-        localStorage.removeItem('agencyRememberMe');
-        localStorage.removeItem('agencySavedEmail');
+        safeLocalRemove('agencyRememberMe');
+        safeLocalRemove('agencySavedEmail');
       }
 
       // Prevent global auth redirect racing our 2FA flow
-      localStorage.setItem('suppress_auth_redirect', 'true');
+      setSuppressAuthRedirect();
 
       // Use supabase directly to get the user data for 2FA check
       const { error, data: authData } = await supabase.auth.signInWithPassword({
@@ -252,7 +254,7 @@ const AgencyLoginScreen = () => {
           
           // After 2+ failed attempts, require 2FA on next successful login
           if (failedAttempts >= 2) {
-            localStorage.setItem(`require2FA_${validation.email}`, 'true');
+            safeLocalSet(`require2FA_${validation.email}`, 'true');
           }
           
           setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
@@ -275,7 +277,7 @@ const AgencyLoginScreen = () => {
         
         // Check if 2FA is required due to previous failed attempts
         const require2FAKey = `require2FA_${validation.email}`;
-        const require2FADueToFailedAttempts = localStorage.getItem(require2FAKey) === 'true';
+        const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
         
         // Check if device is trusted
         const isTrusted = await checkTrustedDevice(authData.user.id);
@@ -299,7 +301,7 @@ const AgencyLoginScreen = () => {
           if (result.success) {
             toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
             // Clear the flag after initiating 2FA
-            localStorage.removeItem(require2FAKey);
+            safeLocalRemove(require2FAKey);
           } else {
             // Email sending failed - revert back to login screen
             toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
@@ -327,7 +329,7 @@ const AgencyLoginScreen = () => {
       }
     } finally {
       if (!keepRedirectSuppressed) {
-        localStorage.removeItem('suppress_auth_redirect');
+        clearSuppressAuthRedirect();
       }
       setIsLoading(false);
     }
@@ -344,8 +346,12 @@ const AgencyLoginScreen = () => {
     setIsResetLoading(true);
     
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
-        redirectTo: `${window.location.origin}/auth?type=recovery`,
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: resetEmail.trim(),
+          redirect_url: `${window.location.origin}/login?type=recovery`,
+          language,
+        },
       });
       
       if (error) {
