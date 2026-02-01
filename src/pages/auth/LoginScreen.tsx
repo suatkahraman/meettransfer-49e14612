@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useLoginRateLimit } from '@/hooks/useLoginRateLimit';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -143,15 +144,26 @@ const LoginScreen = () => {
   // Auto-trigger OAuth if redirected from PWA
   useEffect(() => {
     const oauthParam = searchParams.get('oauth');
-    if (oauthParam && !user && !authLoading) {
-      // Import is already at top via SocialAuthButtons; trigger OAuth via lovable SDK
-      import('@/integrations/lovable/index').then(({ lovable }) => {
-        lovable.auth.signInWithOAuth(oauthParam as 'google' | 'apple', {
-          redirect_uri: window.location.origin,
-        });
-      });
-    }
-  }, [searchParams, user, authLoading]);
+    if (!oauthParam || user || authLoading) return;
+
+    // NOTE: This MUST be wrapped in try/catch.
+    // On iOS Safari/PWA, an unhandled rejection here can leave the app in a broken state.
+    (async () => {
+      try {
+        const { error } = await lovable.auth.signInWithOAuth(
+          oauthParam as 'google' | 'apple',
+          { redirect_uri: window.location.origin }
+        );
+        if (error) {
+          console.error('[LoginScreen] OAuth auto-trigger error:', error);
+          toast.error(t('loginFailed'));
+        }
+      } catch (err) {
+        console.error('[LoginScreen] OAuth auto-trigger failed:', err);
+        toast.error(t('loginFailed'));
+      }
+    })();
+  }, [searchParams, user, authLoading, t]);
 
   // Role-based redirect after login (only if not pending 2FA)
   useEffect(() => {
