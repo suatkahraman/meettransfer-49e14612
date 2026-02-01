@@ -42,98 +42,73 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Handle successful sign in - redirect based on role
         if (event === 'SIGNED_IN' && currentSession?.user) {
           // Some flows (like our 2FA pre-check) intentionally sign in and immediately sign out.
-          // In that window we must prevent global redirects, otherwise the app navigates away
-          // and the OTP entry screen never renders.
-          const suppressRedirect = isSuppressAuthRedirect();
-          if (suppressRedirect) return;
+          if (isSuppressAuthRedirect()) return;
 
-          // Role check - no need for setTimeout, just ensure async operation
+          // Fast async redirect - no blocking operations
           (async () => {
             if (!isMounted) return;
             
+            // Clean up URL hash immediately (non-blocking)
+            if (window.location.hash.includes('access_token=')) {
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+
+            // Check for post-OAuth redirect first (fastest path)
+            const postOAuthRedirect = consumePostOAuthRedirect();
+            if (postOAuthRedirect) {
+              navigate(postOAuthRedirect, { replace: true });
+              return;
+            }
+
+            // Check current path early to avoid unnecessary DB calls
+            const currentPath = window.location.pathname;
+            const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
+            const isOAuthCallbackPath = currentPath.startsWith('/~oauth/callback') || currentPath.startsWith('/oauth/callback');
+            const isHomePage = currentPath === '/' || currentPath === '';
+            const hasOAuthParams = window.location.hash.includes('access_token=') || window.location.search.includes('code=');
+            
+            const needsRedirect = isAuthPage || isOAuthCallbackPath || (isHomePage && hasOAuthParams);
+            
+            // Check pending booking (sessionStorage - instant, no network)
+            const pendingBookingData = PendingBookingStorage.load();
+            const legacyToken = safeLocalGet('pending_booking_token');
+            const legacyData = safeLocalGet('pending_booking_data');
+            
+            if (pendingBookingData || legacyToken || legacyData) {
+              // Migrate legacy data if needed
+              if ((legacyToken || legacyData) && !pendingBookingData) {
+                try {
+                  PendingBookingStorage.save(legacyData ? JSON.parse(legacyData) : {});
+                  localStorage.removeItem('pending_booking_token');
+                  localStorage.removeItem('pending_booking_data');
+                } catch { /* ignore */ }
+              }
+              navigate('/customer', { replace: true });
+              return;
+            }
+
+            // Only fetch role if we actually need to redirect
+            if (!needsRedirect) return;
+
             try {
-              // Clean up URL hash if present (OAuth callback)
-              if (window.location.hash.includes('access_token=')) {
-                const cleanUrl = window.location.pathname + window.location.search;
-                window.history.replaceState(null, '', cleanUrl);
-              }
-
-              // If a flow requested a specific post-OAuth return location, honor it.
-              // This avoids using path-based redirect_uri values that can trigger Google redirect_uri_mismatch.
-              const postOAuthRedirect = consumePostOAuthRedirect();
-              if (postOAuthRedirect) {
-                navigate(postOAuthRedirect, { replace: true });
-                return;
-              }
-
               const { data: roleData } = await supabase
                 .from('user_roles')
                 .select('role')
                 .eq('user_id', currentSession.user.id)
                 .maybeSingle();
 
-              const userRole = roleData?.role || 'customer';
+              if (!isMounted) return;
               
-              // Check for pending booking data from sessionStorage (secure storage)
-              const pendingBookingData = PendingBookingStorage.load();
+              const redirectMap: Record<string, string> = {
+                admin: '/admin',
+                driver: '/driver', 
+                agency: '/agency',
+                customer: '/customer'
+              };
               
-              // Also check legacy localStorage (for backward compatibility, then migrate)
-              const legacyToken = safeLocalGet('pending_booking_token');
-              const legacyData = safeLocalGet('pending_booking_data');
-              
-              if (pendingBookingData || legacyToken || legacyData) {
-                console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
-                
-                // Migrate legacy data to sessionStorage if exists
-                if ((legacyToken || legacyData) && !pendingBookingData) {
-                  try {
-                    const parsed = legacyData ? JSON.parse(legacyData) : {};
-                    PendingBookingStorage.save(parsed);
-                    localStorage.removeItem('pending_booking_token');
-                    localStorage.removeItem('pending_booking_data');
-                    console.log('[Auth] Migrated legacy booking data to sessionStorage');
-                  } catch {
-                    // Ignore parse errors
-                  }
-                }
-                
-                // Redirect to customer panel where they can complete missing info
-                navigate('/customer', { replace: true });
-                return;
-              }
-
-              // Check if on auth pages - need to redirect
-              const currentPath = window.location.pathname;
-              const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
-
-              // Also redirect from home page after OAuth callback
-              const isHomePage = currentPath === '/' || currentPath === '';
-              const isOAuthCallback = window.location.hash.includes('access_token=') ||
-                                     window.location.search.includes('code=');
-
-              // Some providers (and our managed flow) can return to /~oauth/callback
-              const isOAuthCallbackPath = currentPath.startsWith('/~oauth/callback') || currentPath.startsWith('/oauth/callback');
-
-              if (isAuthPage || isOAuthCallbackPath || (isHomePage && isOAuthCallback)) {
-                switch (userRole) {
-                  case 'admin':
-                    navigate('/admin', { replace: true });
-                    break;
-                  case 'driver':
-                    navigate('/driver', { replace: true });
-                    break;
-                  case 'agency':
-                    navigate('/agency', { replace: true });
-                    break;
-                  default:
-                    navigate('/customer', { replace: true });
-                }
-              }
-            } catch (error) {
-              console.error('Role fetch error:', error);
-              if (isMounted) {
-                navigate('/customer', { replace: true });
-              }
+              navigate(redirectMap[roleData?.role || 'customer'] || '/customer', { replace: true });
+            } catch {
+              if (isMounted) navigate('/customer', { replace: true });
             }
           })();
         }
