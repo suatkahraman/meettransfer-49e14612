@@ -23,6 +23,8 @@ const LanguageQueryRedirect = () => {
       "/auth",
       "/login",
       "/signup",
+      "/oauth",
+      "/~oauth",
       "/customer",
       "/admin",
       "/driver",

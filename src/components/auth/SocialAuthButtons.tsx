@@ -44,6 +44,8 @@ const isCustomDomain = () => {
   return !isLocal && !isLovableHosted;
 };
 
+const getOAuthReturnTo = () => `${window.location.origin}/oauth/callback`;
+
 const isSafeOAuthRedirectUrl = (url: string) => {
   try {
     const u = new URL(url);
@@ -104,7 +106,7 @@ export const SocialAuthButtons = ({
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${window.location.origin}/`,
+            redirectTo: getOAuthReturnTo(),
             skipBrowserRedirect: true,
           },
         });
@@ -115,15 +117,17 @@ export const SocialAuthButtons = ({
           return;
         }
 
-        if (data?.url) {
-          if (!isSafeOAuthRedirectUrl(data.url)) {
-            console.error('Blocked unsafe OAuth redirect URL:', data.url);
-            toast.error(t('loginFailed'));
-            return;
-          }
-          window.location.assign(data.url);
+        if (!data?.url) {
+          toast.error(t('loginFailed'));
           return;
         }
+        if (!isSafeOAuthRedirectUrl(data.url)) {
+          console.error('Blocked unsafe OAuth redirect URL:', data.url);
+          toast.error(t('loginFailed'));
+          return;
+        }
+        window.location.assign(data.url);
+        return;
       }
 
       // Always use Lovable managed OAuth (handles both lovable.app and custom domains)
@@ -172,7 +176,7 @@ export const SocialAuthButtons = ({
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'apple',
           options: {
-            redirectTo: `${window.location.origin}/`,
+            redirectTo: getOAuthReturnTo(),
             skipBrowserRedirect: true,
           },
         });
@@ -183,15 +187,17 @@ export const SocialAuthButtons = ({
           return;
         }
 
-        if (data?.url) {
-          if (!isSafeOAuthRedirectUrl(data.url)) {
-            console.error('Blocked unsafe OAuth redirect URL:', data.url);
-            toast.error(t('loginFailed'));
-            return;
-          }
-          window.location.assign(data.url);
+        if (!data?.url) {
+          toast.error(t('loginFailed'));
           return;
         }
+        if (!isSafeOAuthRedirectUrl(data.url)) {
+          console.error('Blocked unsafe OAuth redirect URL:', data.url);
+          toast.error(t('loginFailed'));
+          return;
+        }
+        window.location.assign(data.url);
+        return;
       }
 
       // Always use Lovable managed OAuth (handles both lovable.app and custom domains)

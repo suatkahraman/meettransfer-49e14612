@@ -25,6 +25,35 @@ import { scrollToFirstError } from '@/lib/formValidation';
 import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
 import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
 
+// Helper to detect if we're on a custom domain (not Lovable's domains)
+const isCustomDomain = () => {
+  const hostname = window.location.hostname;
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+  const isLovableHosted = hostname.endsWith('lovable.app') || hostname.endsWith('lovableproject.com');
+  return !isLocal && !isLovableHosted;
+};
+
+const isSafeOAuthRedirectUrl = (url: string) => {
+  try {
+    const u = new URL(url);
+    const backendHost = new URL(import.meta.env.VITE_SUPABASE_URL).hostname;
+    return u.hostname === backendHost && u.pathname.startsWith('/auth/v1/authorize');
+  } catch {
+    return false;
+  }
+};
+
+const stripQueryParam = (key: string) => {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.delete(key);
+    const next = url.pathname + (url.searchParams.toString() ? `?${url.searchParams.toString()}` : '') + (url.hash || '');
+    window.history.replaceState(null, '', next);
+  } catch {
+    // ignore
+  }
+};
+
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
   .min(6, 'Password must be at least 6 characters')
@@ -152,17 +181,49 @@ const LoginScreen = () => {
     // On iOS Safari/PWA, an unhandled rejection here can leave the app in a broken state.
     (async () => {
       try {
-        const { error } = await lovable.auth.signInWithOAuth(
-          oauthParam as 'google' | 'apple',
-          { redirect_uri: window.location.origin }
-        );
+        const provider = oauthParam as 'google' | 'apple';
+
+        // On custom domains we avoid the managed redirect bridge and do a direct OAuth start.
+        // This also ensures the post-auth return lands on /oauth/callback (no ~), which avoids 404s.
+        if (isCustomDomain()) {
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+              redirectTo: `${window.location.origin}/oauth/callback`,
+              skipBrowserRedirect: true,
+            },
+          });
+
+          if (error) {
+            console.error('[LoginScreen] OAuth auto-trigger error:', error);
+            toast.error(t('loginFailed'));
+            stripQueryParam('oauth');
+            return;
+          }
+
+          if (!data?.url || !isSafeOAuthRedirectUrl(data.url)) {
+            console.error('[LoginScreen] OAuth auto-trigger returned invalid URL:', data?.url);
+            toast.error(t('loginFailed'));
+            stripQueryParam('oauth');
+            return;
+          }
+
+          window.location.assign(data.url);
+          return;
+        }
+
+        const { error } = await lovable.auth.signInWithOAuth(provider, {
+          redirect_uri: window.location.origin,
+        });
         if (error) {
           console.error('[LoginScreen] OAuth auto-trigger error:', error);
           toast.error(t('loginFailed'));
+          stripQueryParam('oauth');
         }
       } catch (err) {
         console.error('[LoginScreen] OAuth auto-trigger failed:', err);
         toast.error(t('loginFailed'));
+        stripQueryParam('oauth');
       }
     })();
   }, [searchParams, user, authLoading, t]);
