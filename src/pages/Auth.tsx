@@ -2,7 +2,9 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
+import { safeLocalGet } from '@/lib/safeStorage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -143,6 +145,7 @@ const Auth = () => {
   const [recoveryChecked, setRecoveryChecked] = useState(false);
   const { signIn, signUp, user, session } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -233,8 +236,8 @@ const Auth = () => {
     
     if (user && !roleLoading && role && recoveryChecked) {
       // Check for pending booking from quick booking flow
-      const pendingBookingToken = localStorage.getItem('pending_booking_token');
-      const pendingBookingData = localStorage.getItem('pending_booking_data');
+      const pendingBookingToken = safeLocalGet('pending_booking_token');
+      const pendingBookingData = safeLocalGet('pending_booking_data');
       
       if (pendingBookingToken || pendingBookingData) {
         console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
@@ -328,8 +331,13 @@ const Auth = () => {
       console.log('Sending reset email to:', validation.email);
       console.log('Redirect URL:', `${window.location.origin}/auth?type=recovery`);
       
-      const { error } = await supabase.auth.resetPasswordForEmail(validation.email, {
-        redirectTo: `${window.location.origin}/auth?type=recovery`,
+      // Use custom reset email sender to guarantee link presence across clients
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: validation.email,
+          redirect_url: `${window.location.origin}/auth?type=recovery`,
+          language,
+        },
       });
 
       if (error) {

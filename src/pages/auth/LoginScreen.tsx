@@ -22,6 +22,8 @@ import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { scrollToFirstError } from '@/lib/formValidation';
+import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
+import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
 
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
@@ -57,10 +59,10 @@ const LoginScreen = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [resetEmail, setResetEmail] = useState('');
   const [rememberMe, setRememberMe] = useState(() => {
-    return localStorage.getItem('guestRememberMe') === 'true';
+    return safeLocalGet('guestRememberMe') === 'true';
   });
   const [savedEmail] = useState(() => {
-    return localStorage.getItem('guestSavedEmail') || '';
+    return safeLocalGet('guestSavedEmail') || '';
   });
   const [copied, setCopied] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -191,7 +193,7 @@ const LoginScreen = () => {
     const result = await verify2FA(code);
     if (result.success && pendingRole) {
       // 2FA complete – allow global redirects again
-      localStorage.removeItem('suppress_auth_redirect');
+      clearSuppressAuthRedirect();
 
       // If user chose to remember device, register it
       if (rememberDevice && twoFactorState.userId) {
@@ -247,7 +249,7 @@ const LoginScreen = () => {
   // Handle 2FA cancel - sign out and go back to login
   const handle2FACancel = async () => {
     // User aborted 2FA – allow redirects again
-    localStorage.removeItem('suppress_auth_redirect');
+    clearSuppressAuthRedirect();
 
     cancel2FA();
     setPendingRole(null);
@@ -290,15 +292,15 @@ const LoginScreen = () => {
       
       // Save remember me preference
       if (rememberMe) {
-        localStorage.setItem('guestRememberMe', 'true');
-        localStorage.setItem('guestSavedEmail', validation.email);
+        safeLocalSet('guestRememberMe', 'true');
+        safeLocalSet('guestSavedEmail', validation.email);
       } else {
-        localStorage.removeItem('guestRememberMe');
-        localStorage.removeItem('guestSavedEmail');
+        safeLocalRemove('guestRememberMe');
+        safeLocalRemove('guestSavedEmail');
       }
 
       // Prevent global auth redirect racing our 2FA flow
-      localStorage.setItem('suppress_auth_redirect', 'true');
+      setSuppressAuthRedirect();
       
       // Use supabase directly to get the user data for 2FA check
       const { error, data: authData } = await supabase.auth.signInWithPassword({
@@ -317,7 +319,7 @@ const LoginScreen = () => {
           
           // After 2+ failed attempts, require 2FA on next successful login
           if (failedAttempts >= 2) {
-            localStorage.setItem(`require2FA_${validation.email}`, 'true');
+            safeLocalSet(`require2FA_${validation.email}`, 'true');
           }
           
           setErrors({ password: 'Geçersiz email veya şifre' });
@@ -336,7 +338,7 @@ const LoginScreen = () => {
         
         // Check if 2FA is required due to previous failed attempts
         const require2FAKey = `require2FA_${validation.email}`;
-        const require2FADueToFailedAttempts = localStorage.getItem(require2FAKey) === 'true';
+        const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
         
         // Check if device is trusted
         const isTrusted = await checkTrustedDevice(authData.user.id);
@@ -372,7 +374,7 @@ const LoginScreen = () => {
           }
 
           // Clear the flag after initiating 2FA
-          localStorage.removeItem(require2FAKey);
+          safeLocalRemove(require2FAKey);
         } else {
           // Device trusted and no suspicious activity - proceed with login
           await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
@@ -398,7 +400,7 @@ const LoginScreen = () => {
       }
     } finally {
       if (!keepRedirectSuppressed) {
-        localStorage.removeItem('suppress_auth_redirect');
+        clearSuppressAuthRedirect();
       }
       setIsLoading(false);
     }
@@ -460,6 +462,32 @@ const LoginScreen = () => {
 
     try {
       const validation = newPasswordSchema.parse({ password, confirmPassword });
+
+      // Ensure we have a valid session. Some iOS flows can reach this screen before
+      // the PKCE code is exchanged (or the `type` is only present in hash).
+      let { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession) {
+        const url = new URL(window.location.href);
+        const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+        const code = url.searchParams.get("code") || hashParams.get("code");
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) {
+            console.error('[LoginScreen] exchangeCodeForSession failed:', exchangeError);
+          }
+          const after = await supabase.auth.getSession();
+          currentSession = after.data.session;
+        }
+      }
+
+      if (!currentSession) {
+        toast.error(
+          language === 'TR'
+            ? 'Oturum bulunamadı. Lütfen yeni bir şifre sıfırlama bağlantısı isteyin.'
+            : 'Auth session missing. Please request a new reset link.'
+        );
+        return;
+      }
       
       const { error } = await supabase.auth.updateUser({ 
         password: validation.password 

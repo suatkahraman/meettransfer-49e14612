@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
 import { consumePostOAuthRedirect } from '@/lib/postOAuthRedirect';
 import { safeLocalGet } from '@/lib/safeStorage';
+import { isSuppressAuthRedirect } from '@/lib/authRedirectGuard';
 
 interface AuthContextType {
   user: User | null;
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Some flows (like our 2FA pre-check) intentionally sign in and immediately sign out.
           // In that window we must prevent global redirects, otherwise the app navigates away
           // and the OTP entry screen never renders.
-          const suppressRedirect = safeLocalGet('suppress_auth_redirect') === 'true';
+          const suppressRedirect = isSuppressAuthRedirect();
           if (suppressRedirect) return;
 
           // Defer role check to avoid Supabase deadlock

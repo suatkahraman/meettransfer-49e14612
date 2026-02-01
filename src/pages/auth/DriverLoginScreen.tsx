@@ -15,6 +15,8 @@ import { z } from 'zod';
 import { ArrowLeft, Loader2, Car, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
+import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
+import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
 
 const loginSchema = z.object({
   email: z.string().trim().email().max(255),
@@ -29,10 +31,10 @@ const DriverLoginScreen = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [resetEmail, setResetEmail] = useState('');
   const [rememberMe, setRememberMe] = useState(() => {
-    return localStorage.getItem('driverRememberMe') === 'true';
+    return safeLocalGet('driverRememberMe') === 'true';
   });
   const [savedEmail, setSavedEmail] = useState(() => {
-    return localStorage.getItem('driverSavedEmail') || '';
+    return safeLocalGet('driverSavedEmail') || '';
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
@@ -97,7 +99,7 @@ const DriverLoginScreen = () => {
     const result = await verify2FA(code);
     if (result.success && pendingRole) {
       // 2FA complete – allow global redirects again
-      localStorage.removeItem('suppress_auth_redirect');
+      clearSuppressAuthRedirect();
 
       // If user chose to remember device, register it
       if (rememberDevice && twoFactorState.userId) {
@@ -153,7 +155,7 @@ const DriverLoginScreen = () => {
   // Handle 2FA cancel
   const handle2FACancel = async () => {
     // User aborted 2FA – allow redirects again
-    localStorage.removeItem('suppress_auth_redirect');
+    clearSuppressAuthRedirect();
 
     cancel2FA();
     setPendingRole(null);
@@ -196,15 +198,15 @@ const DriverLoginScreen = () => {
       
       // Save or clear email based on remember me
       if (rememberMe) {
-        localStorage.setItem('driverRememberMe', 'true');
-        localStorage.setItem('driverSavedEmail', validation.email);
+        safeLocalSet('driverRememberMe', 'true');
+        safeLocalSet('driverSavedEmail', validation.email);
       } else {
-        localStorage.removeItem('driverRememberMe');
-        localStorage.removeItem('driverSavedEmail');
+        safeLocalRemove('driverRememberMe');
+        safeLocalRemove('driverSavedEmail');
       }
 
       // Prevent global auth redirect racing our 2FA flow
-      localStorage.setItem('suppress_auth_redirect', 'true');
+      setSuppressAuthRedirect();
 
       // Use supabase directly to get the user data for 2FA check
       const { error, data: authData } = await supabase.auth.signInWithPassword({
@@ -222,7 +224,7 @@ const DriverLoginScreen = () => {
           
           // After 2+ failed attempts, require 2FA on next successful login
           if (failedAttempts >= 2) {
-            localStorage.setItem(`require2FA_${validation.email}`, 'true');
+            safeLocalSet(`require2FA_${validation.email}`, 'true');
           }
           
           setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
@@ -253,7 +255,7 @@ const DriverLoginScreen = () => {
         
         // Check if 2FA is required due to previous failed attempts
         const require2FAKey = `require2FA_${validation.email}`;
-        const require2FADueToFailedAttempts = localStorage.getItem(require2FAKey) === 'true';
+        const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
         
         // Check if device is trusted
         const isTrusted = await checkTrustedDevice(authData.user.id);
@@ -276,7 +278,7 @@ const DriverLoginScreen = () => {
           if (result.success) {
             toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
             // Clear the flag after initiating 2FA
-            localStorage.removeItem(require2FAKey);
+            safeLocalRemove(require2FAKey);
           } else {
             toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
             setPendingRole(null);
@@ -303,7 +305,7 @@ const DriverLoginScreen = () => {
       }
     } finally {
       if (!keepRedirectSuppressed) {
-        localStorage.removeItem('suppress_auth_redirect');
+        clearSuppressAuthRedirect();
       }
       setIsLoading(false);
     }
@@ -320,8 +322,12 @@ const DriverLoginScreen = () => {
     setIsResetLoading(true);
     
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
-        redirectTo: `${window.location.origin}/auth?type=recovery`,
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: resetEmail.trim(),
+          redirect_url: `${window.location.origin}/login?type=recovery`,
+          language,
+        },
       });
       
       if (error) {
