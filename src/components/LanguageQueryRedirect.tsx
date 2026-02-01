@@ -13,33 +13,12 @@ const LanguageQueryRedirect = () => {
     const searchParams = new URLSearchParams(location.search);
     const langParam = searchParams.get("lang");
 
-    if (!langParam) return;
-
     const supportedLangs = ["de", "fr", "ru", "it", "es", "ar", "tr", "uk", "ja", "pt"];
-    const normalizedLang = langParam.toLowerCase();
-
-    // Always strip ?lang= from URL
-    searchParams.delete("lang");
-    const remainingParams = searchParams.toString();
-
-    const stripExistingLangPrefix = (pathname: string) => {
-      const parts = pathname.split("/").filter(Boolean);
-      const first = parts[0]?.toLowerCase();
-      const allLangs = [...supportedLangs, "en"]; // 'en' is default
-
-      if (first && allLangs.includes(first)) {
-        const rest = parts.slice(1);
-        return rest.length ? `/${rest.join("/")}` : "/";
-      }
-
-      return pathname;
-    };
-
-    const basePath = stripExistingLangPrefix(location.pathname);
+    const allLangs = [...supportedLangs, "en"]; // 'en' is default
 
     // These routes are intentionally NOT localized with a /xx prefix.
     // If we prefix them (e.g. /tr/auth, /tr/customer), the app shows a 404.
-    // For these, we only strip ?lang= and keep the path as-is.
+    // For these, we must strip any language prefix and/or ?lang=.
     const NON_LOCALIZED_PREFIXES = [
       "/auth",
       "/login",
@@ -61,9 +40,42 @@ const LanguageQueryRedirect = () => {
       "/s",
     ];
 
+    const stripExistingLangPrefix = (pathname: string) => {
+      const parts = pathname.split("/").filter(Boolean);
+      const first = parts[0]?.toLowerCase();
+
+      if (first && allLangs.includes(first)) {
+        const rest = parts.slice(1);
+        return rest.length ? `/${rest.join("/")}` : "/";
+      }
+
+      return pathname;
+    };
+
+    const pathnameParts = location.pathname.split("/").filter(Boolean);
+    const pathLangPrefix = pathnameParts[0]?.toLowerCase();
+    const hasPathLangPrefix = !!pathLangPrefix && allLangs.includes(pathLangPrefix);
+
+    const basePath = stripExistingLangPrefix(location.pathname);
+
     const isNonLocalized = NON_LOCALIZED_PREFIXES.some(
       (p) => basePath === p || basePath.startsWith(`${p}/`)
     );
+
+    // Case A: URL is like /tr/login (no ?lang=). Strip the /tr prefix for non-localized routes.
+    if (!langParam && hasPathLangPrefix && isNonLocalized && basePath !== location.pathname) {
+      navigate(`${basePath}${location.search || ""}`, { replace: true });
+      return;
+    }
+
+    // Case B: Classic Google/Search Console pattern: /login?lang=tr
+    if (!langParam) return;
+
+    const normalizedLang = langParam.toLowerCase();
+
+    // Always strip ?lang= from URL
+    searchParams.delete("lang");
+    const remainingParams = searchParams.toString();
 
     // Build target path
     let targetPath: string;
