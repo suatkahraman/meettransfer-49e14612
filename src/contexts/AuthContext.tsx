@@ -1,13 +1,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { lovable } from '@/integrations/lovable/index';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
 import { consumePostOAuthRedirect } from '@/lib/postOAuthRedirect';
 import { safeLocalGet } from '@/lib/safeStorage';
 import { isSuppressAuthRedirect } from '@/lib/authRedirectGuard';
+import { startOAuthSignIn } from '@/lib/oauthSignIn';
 
 interface AuthContextType {
   user: User | null;
@@ -233,10 +233,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error: null };
       }
       
-      // Use Lovable Cloud managed OAuth
-      const { error } = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
-      });
+      const { error } = await startOAuthSignIn('google');
       
       if (error) {
         console.error('Google OAuth error:', error);
