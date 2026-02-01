@@ -124,6 +124,30 @@ const DEFAULT_OTP_RESEND_COOLDOWN = 60000; // 60 seconds
 const DEFAULT_MAX_VERIFY_ATTEMPTS = 5;
 const DEFAULT_OTP_LENGTH = 6;
 
+// iOS (and some locales) can input non-ASCII numerals (e.g. Arabic-Indic digits) or include
+// invisible/whitespace characters when using auto-fill. Normalize to plain ASCII digits.
+const normalizeOtpCode = (input: string): string => {
+  const trimmed = (input || '').trim();
+
+  const arabicIndic = '٠١٢٣٤٥٦٧٨٩'; // U+0660..U+0669
+  const easternArabicIndic = '۰۱۲۳۴۵۶۷۸۹'; // U+06F0..U+06F9
+  const fullWidth = '０１２３４５６７８９'; // U+FF10..U+FF19
+
+  const mapped = trimmed
+    // Remove common whitespace + directional marks
+    .replace(/[\s\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
+    // Convert Arabic-Indic digits
+    .replace(/[٠-٩]/g, (d) => String(arabicIndic.indexOf(d)))
+    // Convert Eastern Arabic-Indic digits
+    .replace(/[۰-۹]/g, (d) => String(easternArabicIndic.indexOf(d)))
+    // Convert Full-width digits
+    .replace(/[０-９]/g, (d) => String(fullWidth.indexOf(d)))
+    // Keep only ASCII digits afterwards
+    .replace(/[^0-9]/g, '');
+
+  return mapped;
+};
+
 export const useTwoFactorAuth = () => {
   const [twoFactorState, setTwoFactorState] = useState<TwoFactorState>({
     isPending: false,
@@ -305,6 +329,8 @@ export const useTwoFactorAuth = () => {
       return { success: false, error: 'no_pending', errorCode: 'no_pending' };
     }
 
+    const normalizedOtpCode = normalizeOtpCode(otpCode);
+
     // Check max attempts
     if (twoFactorState.attempts >= otpSettings.maxVerifyAttempts) {
       setError('Çok fazla hatalı deneme. Yeni kod isteyin.');
@@ -317,7 +343,7 @@ export const useTwoFactorAuth = () => {
 
     // Validate OTP format before sending (dynamic length)
     const otpRegex = new RegExp(`^\\d{${otpSettings.otpLength}}$`);
-    if (!otpRegex.test(otpCode)) {
+    if (!otpRegex.test(normalizedOtpCode)) {
       setError(`Kod ${otpSettings.otpLength} haneli olmalıdır`);
       return { success: false, error: 'invalid_format', errorCode: 'invalid' };
     }
@@ -327,7 +353,7 @@ export const useTwoFactorAuth = () => {
 
     try {
       const { data, error: invokeError } = await supabase.functions.invoke('verify-2fa-otp', {
-        body: { userId: twoFactorState.userId, otpCode },
+        body: { userId: twoFactorState.userId, otpCode: normalizedOtpCode },
       });
 
       if (invokeError) {
