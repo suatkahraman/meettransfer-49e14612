@@ -44,7 +44,7 @@ const isCustomDomain = () => {
   return !isLocal && !isLovableHosted;
 };
 
-const getOAuthReturnTo = () => `${window.location.origin}/oauth/callback`;
+const getOAuthReturnTo = () => `${window.location.origin}/~oauth/callback`;
 
 const isSafeOAuthRedirectUrl = (url: string) => {
   try {

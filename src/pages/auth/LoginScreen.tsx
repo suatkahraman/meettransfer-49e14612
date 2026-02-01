@@ -189,7 +189,7 @@ const LoginScreen = () => {
           const { data, error } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
-              redirectTo: `${window.location.origin}/oauth/callback`,
+              redirectTo: `${window.location.origin}/~oauth/callback`,
               skipBrowserRedirect: true,
             },
           });
