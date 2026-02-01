@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
 import { consumePostOAuthRedirect } from '@/lib/postOAuthRedirect';
+import { safeLocalGet } from '@/lib/safeStorage';
 
 interface AuthContextType {
   user: User | null;
@@ -35,14 +36,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        setLoading(false);
+        // INITIAL auth load controls loading; onAuthStateChange should not.
 
         // Handle successful sign in - redirect based on role
         if (event === 'SIGNED_IN' && currentSession?.user) {
           // Some flows (like our 2FA pre-check) intentionally sign in and immediately sign out.
           // In that window we must prevent global redirects, otherwise the app navigates away
           // and the OTP entry screen never renders.
-          const suppressRedirect = localStorage.getItem('suppress_auth_redirect') === 'true';
+          const suppressRedirect = safeLocalGet('suppress_auth_redirect') === 'true';
           if (suppressRedirect) return;
 
           // Defer role check to avoid Supabase deadlock
@@ -76,8 +77,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               const pendingBookingData = PendingBookingStorage.load();
               
               // Also check legacy localStorage (for backward compatibility, then migrate)
-              const legacyToken = localStorage.getItem('pending_booking_token');
-              const legacyData = localStorage.getItem('pending_booking_data');
+              const legacyToken = safeLocalGet('pending_booking_token');
+              const legacyData = safeLocalGet('pending_booking_data');
               
               if (pendingBookingData || legacyToken || legacyData) {
                 console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
@@ -144,13 +145,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (isMounted) {
           setSession(existingSession);
           setUser(existingSession?.user ?? null);
-          setLoading(false);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        if (isMounted) {
-          setLoading(false);
-        }
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
     
