@@ -54,10 +54,8 @@ const OAuthCallbackHandler = ({ children }: OAuthCallbackHandlerProps) => {
             // ignore
           }
           
-          // Small delay to ensure auth state is propagated
-          setTimeout(() => {
-            setIsProcessingOAuth(false);
-          }, 100);
+          // No delay needed - auth state is already propagated by this point
+          setIsProcessingOAuth(false);
         } catch (error) {
           console.error('OAuth processing error:', error);
           setIsProcessingOAuth(false);
