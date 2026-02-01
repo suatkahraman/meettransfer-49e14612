@@ -403,12 +403,18 @@ const LoginScreen = () => {
     try {
       const validation = resetEmailSchema.parse({ email: email.trim() });
       
-      const { error } = await supabase.auth.resetPasswordForEmail(validation.email, {
-        redirectTo: `${window.location.origin}/login?type=recovery`,
+      // Use custom edge function that sends proper reset email with link
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: validation.email,
+          redirect_url: `${window.location.origin}/login?type=recovery`,
+          language: language,
+        },
       });
 
       if (error) {
-        toast.error(error.message);
+        console.error('Password reset error:', error);
+        toast.error(t('resetFailed'));
       } else {
         setResetEmail(validation.email);
         setViewMode('reset-sent');
@@ -422,6 +428,9 @@ const LoginScreen = () => {
           }
         });
         setErrors(fieldErrors);
+      } else {
+        console.error('Unexpected error:', error);
+        toast.error(t('resetFailed'));
       }
     } finally {
       setIsLoading(false);
