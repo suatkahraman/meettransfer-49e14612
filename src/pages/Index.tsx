@@ -26,6 +26,7 @@ const GoogleReviewsCarousel = lazy(() => import("@/components/website/GoogleRevi
 const ReviewPlatformLogos = lazy(() => import("@/components/website/ReviewPlatformLogos"));
 const PWAPromoBanner = lazy(() => import("@/components/website/PWAPromoBanner").then(m => ({ default: m.PWAPromoBanner })));
 const HomeFAQ = lazy(() => import("@/components/website/HomeFAQ"));
+const CookieConsent = lazy(() => import("@/components/website/CookieConsent"));
 
 // Smaller placeholder - reduces layout shift perception
 const SectionPlaceholder = () => <div className="min-h-[100px]" aria-hidden="true" />;
@@ -131,6 +132,11 @@ const Index = () => {
       
       {/* iOS-specific download button - shows only on iOS devices */}
       <IOSDownloadButton />
+      
+      {/* Cookie consent banner */}
+      <Suspense fallback={null}>
+        <CookieConsent />
+      </Suspense>
     </WebsiteLayout>
   );
 };
