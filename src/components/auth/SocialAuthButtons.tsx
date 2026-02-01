@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePWADetect } from '@/hooks/usePWADetect';
-import { startOAuthSignIn } from '@/lib/oauthSignIn';
+import { startOAuthSignIn, getOAuthUrl, isCustomDomain } from '@/lib/oauthSignIn';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -67,6 +67,24 @@ export const SocialAuthButtons = ({
     try {
       // For iOS PWA standalone mode, open in new window to handle OAuth properly
       if (isIOS && isStandalone) {
+        if (isCustomDomain()) {
+          // Custom domain: get Supabase OAuth URL and open in new window
+          const { url, error } = await getOAuthUrl('google');
+          if (error || !url) {
+            toast.error(error?.message || t('loginFailed'));
+            setIsGoogleLoading(false);
+            return;
+          }
+          const opened = window.open(url, '_blank');
+          if (!opened) {
+            toast.error(t('iosGoogleLoginNotice'));
+          } else {
+            toast.info(t('redirectingGoogle'));
+          }
+          setIsGoogleLoading(false);
+          return;
+        }
+        // Managed domain: use Lovable bridge via login page
         const authUrl = `${window.location.origin}/${mode === 'login' ? 'login' : 'signup'}?oauth=google`;
         const opened = window.open(authUrl, '_blank');
         if (!opened) {
@@ -103,6 +121,24 @@ export const SocialAuthButtons = ({
     try {
       // For iOS PWA standalone mode, open in new window to handle OAuth properly
       if (isIOS && isStandalone) {
+        if (isCustomDomain()) {
+          // Custom domain: get Supabase OAuth URL and open in new window
+          const { url, error } = await getOAuthUrl('apple');
+          if (error || !url) {
+            toast.error(error?.message || t('loginFailed'));
+            setIsAppleLoading(false);
+            return;
+          }
+          const opened = window.open(url, '_blank');
+          if (!opened) {
+            toast.error(t('iosAppleLoginNotice') || 'Please open in Safari to sign in with Apple');
+          } else {
+            toast.info(t('redirectingApple') || 'Redirecting...');
+          }
+          setIsAppleLoading(false);
+          return;
+        }
+        // Managed domain: use Lovable bridge via login page
         const authUrl = `${window.location.origin}/${mode === 'login' ? 'login' : 'signup'}?oauth=apple`;
         const opened = window.open(authUrl, '_blank');
         if (!opened) {

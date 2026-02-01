@@ -25,6 +25,28 @@ const isSafeOAuthRedirectUrl = (url: string) => {
 };
 
 /**
+ * Gets the OAuth authorization URL for custom domains (BYOK).
+ * Used by iOS PWA to open in a new window.
+ */
+export async function getOAuthUrl(provider: OAuthProvider): Promise<{ url: string | null; error: Error | null }> {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: getOAuthReturnTo(),
+      skipBrowserRedirect: true,
+    },
+  });
+
+  if (error) return { url: null, error };
+
+  if (!data?.url || !isSafeOAuthRedirectUrl(data.url)) {
+    return { url: null, error: new Error("Unsafe OAuth redirect URL") };
+  }
+
+  return { url: data.url, error: null };
+}
+
+/**
  * Starts OAuth sign-in.
  * - On custom domains, starts a direct backend OAuth flow and navigates to the authorize URL.
  * - On Lovable-hosted domains, uses the managed OAuth bridge.
@@ -33,21 +55,9 @@ export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error
   const onCustomDomain = isCustomDomain();
 
   if (onCustomDomain) {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: getOAuthReturnTo(),
-        skipBrowserRedirect: true,
-      },
-    });
-
+    const { url, error } = await getOAuthUrl(provider);
     if (error) return { error };
-
-    if (!data?.url || !isSafeOAuthRedirectUrl(data.url)) {
-      return { error: new Error("Unsafe OAuth redirect URL") };
-    }
-
-    window.location.assign(data.url);
+    if (url) window.location.assign(url);
     return { error: null };
   }
 
