@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { PWADebugPanel } from "./components/website/PWADebugPanel"; // visible with ?pwa_debug=1
 import OfflineIndicator from "./components/OfflineIndicator";
 import CanonicalManager from "./components/seo/CanonicalManager";
+import { GlobalErrorHandlers } from "./components/GlobalErrorHandlers";
 
 // IMPORTANT: Keep debug page eager-loaded.
 // Homepage is now split into its own chunk to reduce initial JS.
@@ -275,6 +276,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <GlobalErrorHandlers />
             <BrowserRouter>
               <LanguageProvider>
                 <PromoProvider>
@@ -294,6 +296,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <GlobalErrorHandlers />
         <BrowserRouter>
           <HashScroll />
           <LanguageQueryRedirect />
