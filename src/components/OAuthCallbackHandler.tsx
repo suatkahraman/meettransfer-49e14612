@@ -15,10 +15,13 @@ const OAuthCallbackHandler = ({ children }: OAuthCallbackHandlerProps) => {
 
   useEffect(() => {
     const hash = window.location.hash;
-    
-    // Only process if we have an access_token in the hash (OAuth callback)
-    const isOAuthCallback = hash.includes('access_token=');
-    
+    const search = window.location.search;
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get('code');
+
+    // OAuth callback can be implicit (access_token in hash) or PKCE (code in query)
+    const isOAuthCallback = hash.includes('access_token=') || !!code;
+
     if (isOAuthCallback) {
       setIsProcessingOAuth(true);
       
@@ -26,16 +29,29 @@ const OAuthCallbackHandler = ({ children }: OAuthCallbackHandlerProps) => {
       // We just need to wait for it and then clean up the URL
       const handleOAuthCallback = async () => {
         try {
-          // Wait for Supabase to process the hash
-          const { error } = await supabase.auth.getSession();
-          
-          if (error) {
-            console.error('OAuth callback error:', error);
+          // PKCE flow: exchange code for session explicitly (prevents "Auth session missing")
+          if (code) {
+            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            if (error) {
+              console.error('OAuth code exchange error:', error);
+            }
+          } else {
+            // Implicit flow: let the client parse hash
+            const { error } = await supabase.auth.getSession();
+            if (error) {
+              console.error('OAuth callback error:', error);
+            }
           }
           
-          // Clean up the URL by removing the hash
-          if (window.location.hash) {
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          // Clean up the URL (remove OAuth params + hash) to avoid re-processing on refresh
+          try {
+            const clean = new URL(window.location.href);
+            clean.hash = '';
+            // OAuth noise params we don't want to keep
+            ['code', 'state', 'scope', 'authuser', 'prompt'].forEach((k) => clean.searchParams.delete(k));
+            window.history.replaceState(null, '', clean.pathname + (clean.search ? clean.search : ''));
+          } catch {
+            // ignore
           }
           
           // Small delay to ensure auth state is propagated

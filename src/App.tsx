@@ -34,6 +34,9 @@ import DebugPage from "./pages/DebugPage";
 // Critical pages - NotFound can remain lazy
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// OAuth callback landing page (prevents router 404 on /~oauth/callback)
+const OAuthCallbackPage = lazy(() => import("./pages/OAuthCallback"));
+
 // Auth pages - lazy loaded
 const Auth = lazy(() => import("./pages/Auth"));
 const LoginScreen = lazy(() => import("./pages/auth/LoginScreen"));
@@ -413,6 +416,10 @@ const App = () => {
               <Route path="/login/agency" element={<LazyRoute><AgencyLoginScreen /></LazyRoute>} />
               <Route path="/login/driver" element={<LazyRoute><DriverLoginScreen /></LazyRoute>} />
               <Route path="/install" element={<LazyRoute><InstallApp /></LazyRoute>} />
+
+              {/* OAuth callback routes - Not localized */}
+              <Route path="/~oauth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
+              <Route path="/oauth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
               
               {/* Customer Routes - Protected */}
               <Route path="/customer" element={<CustomerRoute><LazyRoute><CustomerHome /></LazyRoute></CustomerRoute>} />
