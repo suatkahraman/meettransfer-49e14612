@@ -431,6 +431,9 @@ const Auth = () => {
         
         if (error.message.includes('same password') || error.message.includes('different from')) {
           toast.error('New password must be different from your current password');
+        } else if (error.message.toLowerCase().includes('weak') || error.message.toLowerCase().includes('easy to guess') || error.message.toLowerCase().includes('pwned')) {
+          // Supabase leaked password check - provide helpful message
+          toast.error('This password has been found in data breaches. Please choose a more unique password (e.g., add special characters like @#$).');
         } else {
           toast.error(error.message);
         }
