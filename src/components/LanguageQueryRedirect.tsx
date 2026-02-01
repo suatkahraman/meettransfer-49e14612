@@ -63,10 +63,19 @@ const LanguageQueryRedirect = () => {
     );
 
     // Case A: URL is like /tr/login (no ?lang=). Strip the /tr prefix for non-localized routes.
-    if (!langParam && hasPathLangPrefix && isNonLocalized && basePath !== location.pathname) {
-      navigate(`${basePath}${location.search || ""}`, { replace: true });
-      return;
+    // Only redirect if we actually have a language prefix to strip (basePath differs from pathname)
+    if (hasPathLangPrefix && isNonLocalized) {
+      // Use window.location for hard navigation to prevent React Router infinite loops on iOS
+      const targetUrl = `${basePath}${location.search || ""}`;
+      if (targetUrl !== location.pathname + (location.search || "")) {
+        console.log("[LanguageQueryRedirect] Stripping lang prefix:", location.pathname, "->", targetUrl);
+        window.location.replace(targetUrl);
+        return;
+      }
     }
+
+    // Case B: No ?lang= parameter and no action needed
+    if (!langParam) return;
 
     // Case B: Classic Google/Search Console pattern: /login?lang=tr
     if (!langParam) return;
