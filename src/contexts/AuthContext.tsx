@@ -105,13 +105,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               // Check if on auth pages - need to redirect
               const currentPath = window.location.pathname;
               const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
-              
+
               // Also redirect from home page after OAuth callback
               const isHomePage = currentPath === '/' || currentPath === '';
-              const isOAuthCallback = window.location.hash.includes('access_token=') || 
+              const isOAuthCallback = window.location.hash.includes('access_token=') ||
                                      window.location.search.includes('code=');
-              
-              if (isAuthPage || (isHomePage && isOAuthCallback)) {
+
+              // Some providers (and our managed flow) can return to /~oauth/callback
+              const isOAuthCallbackPath = currentPath.startsWith('/~oauth/callback') || currentPath.startsWith('/oauth/callback');
+
+              if (isAuthPage || isOAuthCallbackPath || (isHomePage && isOAuthCallback)) {
                 switch (userRole) {
                   case 'admin':
                     navigate('/admin', { replace: true });
