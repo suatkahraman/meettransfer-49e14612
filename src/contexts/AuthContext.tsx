@@ -47,8 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const suppressRedirect = isSuppressAuthRedirect();
           if (suppressRedirect) return;
 
-          // Defer role check to avoid Supabase deadlock
-          setTimeout(async () => {
+          // Role check - no need for setTimeout, just ensure async operation
+          (async () => {
             if (!isMounted) return;
             
             try {
@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 navigate('/customer', { replace: true });
               }
             }
-          }, 0);
+          })();
         }
       }
     );
