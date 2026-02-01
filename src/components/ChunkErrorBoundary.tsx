@@ -12,6 +12,37 @@ interface State {
   isRefreshing: boolean;
 }
 
+const safeSessionGet = (key: string): string | null => {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeSessionSet = (key: string, value: string) => {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+};
+
+const safeSessionRemove = (key: string) => {
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+};
+
+const hardReloadWithBust = () => {
+  // Preserve current path + query (important for OAuth callbacks) and just bust caches.
+  const url = new URL(window.location.href);
+  url.searchParams.set("_t", String(Date.now()));
+  window.location.replace(url.toString());
+};
+
 // Detect chunk loading errors
 function isChunkLoadError(error: Error): boolean {
   const message = error.message?.toLowerCase() || "";
@@ -93,7 +124,7 @@ class ChunkErrorBoundary extends Component<Props, State> {
   handleAutoRefresh = async () => {
     // Check if we already tried auto-refresh recently (prevent infinite loop)
     const lastRefreshKey = "chunk_error_last_refresh";
-    const lastRefresh = sessionStorage.getItem(lastRefreshKey);
+    const lastRefresh = safeSessionGet(lastRefreshKey);
     const now = Date.now();
 
     if (lastRefresh && now - parseInt(lastRefresh) < 30000) {
@@ -102,7 +133,7 @@ class ChunkErrorBoundary extends Component<Props, State> {
       return;
     }
 
-    sessionStorage.setItem(lastRefreshKey, now.toString());
+    safeSessionSet(lastRefreshKey, now.toString());
     
     this.setState({ isRefreshing: true });
 
@@ -110,9 +141,9 @@ class ChunkErrorBoundary extends Component<Props, State> {
       await clearAllCaches();
       await unregisterServiceWorkers();
       
-      // Wait a bit then reload
+      // Wait a bit then reload with cache-bust (iOS can keep serving stale assets otherwise)
       setTimeout(() => {
-        window.location.reload();
+        hardReloadWithBust();
       }, 500);
     } catch (e) {
       console.error("[ChunkErrorBoundary] Auto-refresh failed:", e);
@@ -125,13 +156,13 @@ class ChunkErrorBoundary extends Component<Props, State> {
 
     try {
       // Clear the auto-refresh check
-      sessionStorage.removeItem("chunk_error_last_refresh");
+      safeSessionRemove("chunk_error_last_refresh");
       
       await clearAllCaches();
       await unregisterServiceWorkers();
       
-      // Force reload from server
-      window.location.href = window.location.href.split("?")[0] + "?_t=" + Date.now();
+      // Force reload from server (preserve existing query params)
+      hardReloadWithBust();
     } catch (e) {
       console.error("[ChunkErrorBoundary] Manual refresh failed:", e);
       window.location.reload();
