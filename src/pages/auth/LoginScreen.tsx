@@ -164,13 +164,64 @@ const LoginScreen = () => {
   };
 
 
-  // Check if returning from password reset email
+  // Check if returning from password reset email and exchange PKCE code if present
   useEffect(() => {
-    const type = searchParams.get('type');
-    if (type === 'recovery') {
-      setViewMode('reset');
-    }
-  }, [searchParams]);
+    const checkRecoverySession = async () => {
+      const type = searchParams.get('type');
+      if (type !== 'recovery') return;
+      
+      const url = new URL(window.location.href);
+      const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
+      const code = url.searchParams.get('code') || hashParams.get('code');
+      const hasAccessToken = hashParams.get('access_token');
+      
+      // PKCE flow: exchange code for session
+      if (code) {
+        console.log('[LoginScreen] Recovery PKCE code detected, exchanging...');
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error('[LoginScreen] PKCE exchange failed:', error);
+          toast.error(language === 'TR' 
+            ? 'Bağlantı süresi dolmuş veya geçersiz. Lütfen yeni bir şifre sıfırlama bağlantısı isteyin.'
+            : 'Recovery link expired or invalid. Please request a new one.');
+          // Clean URL and stay on login
+          window.history.replaceState(null, '', '/login');
+          return;
+        }
+        if (data?.session) {
+          console.log('[LoginScreen] Session established from PKCE code');
+          window.history.replaceState(null, '', '/login?type=recovery');
+          setViewMode('reset');
+          return;
+        }
+      }
+      
+      // Implicit flow: access_token in hash
+      if (hasAccessToken) {
+        console.log('[LoginScreen] Access token in hash, waiting for session...');
+        const { data: { session: hashSession } } = await supabase.auth.getSession();
+        if (hashSession) {
+          console.log('[LoginScreen] Session from hash token established');
+          window.history.replaceState(null, '', '/login?type=recovery');
+          setViewMode('reset');
+          return;
+        }
+      }
+      
+      // No code/token but type=recovery - check existing session
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      if (existingSession) {
+        setViewMode('reset');
+      } else {
+        toast.error(language === 'TR' 
+          ? 'Oturum bulunamadı. Lütfen yeni bir şifre sıfırlama bağlantısı isteyin.'
+          : 'Session not found. Please request a new password reset link.');
+        window.history.replaceState(null, '', '/login');
+      }
+    };
+    
+    checkRecoverySession();
+  }, [searchParams, language]);
 
   // Auto-trigger OAuth if redirected from PWA
   useEffect(() => {
