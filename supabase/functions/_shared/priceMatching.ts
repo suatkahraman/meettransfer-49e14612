@@ -373,8 +373,8 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Beldibi': { priority: 1, keywords: ['beldibi', 'beldib'], city: 'Antalya' },
   'Goynuk': { priority: 1, keywords: ['goynuk', 'göynük', 'goynuk canyon', 'göynük kanyonu'], city: 'Antalya' },
   'Tekirova': { priority: 1, keywords: ['tekirova', 'phaselis', 'faselis'], city: 'Antalya' },
-  'Cirali': { priority: 1, keywords: ['cirali', 'çıralı', 'chimaera', 'yanartaş'], city: 'Antalya' },
-  'Olympos': { priority: 1, keywords: ['olympos', 'olimpos'], city: 'Antalya' },
+  // Cirali/Olympos/Ulupinar are in the same area - use Cirali pricing (exists in DB)
+  'Cirali': { priority: 1, keywords: ['cirali', 'çıralı', 'chimaera', 'yanartaş', 'olympos', 'olimpos', 'olimpos plaji', 'olimpos plajı', 'olympos beach', 'ulupinar', 'ulupınar', 'yanartas'], city: 'Antalya' },
   'Kas': { priority: 1, keywords: ['kas', 'kaş', 'patara'], city: 'Antalya' },
   'Kalkan': { priority: 1, keywords: ['kalkan', 'saklikent', 'saklıkent', 'xanthos', 'letoon'], city: 'Antalya' },
   
