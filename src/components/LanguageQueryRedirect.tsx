@@ -37,9 +37,41 @@ const LanguageQueryRedirect = () => {
 
     const basePath = stripExistingLangPrefix(location.pathname);
 
+    // These routes are intentionally NOT localized with a /xx prefix.
+    // If we prefix them (e.g. /tr/auth, /tr/customer), the app shows a 404.
+    // For these, we only strip ?lang= and keep the path as-is.
+    const NON_LOCALIZED_PREFIXES = [
+      "/auth",
+      "/login",
+      "/signup",
+      "/customer",
+      "/admin",
+      "/driver",
+      "/agency",
+      "/embed",
+      "/install",
+      "/security-settings",
+      "/customer-portal",
+      "/confirm-booking",
+      "/quick-booking-info",
+      "/payment-success",
+      "/payment-cancel",
+      "/payment-error",
+      "/payment",
+      "/s",
+    ];
+
+    const isNonLocalized = NON_LOCALIZED_PREFIXES.some(
+      (p) => basePath === p || basePath.startsWith(`${p}/`)
+    );
+
     // Build target path
     let targetPath: string;
-    if (supportedLangs.includes(normalizedLang)) {
+
+    if (isNonLocalized) {
+      // Just remove ?lang= and keep the route unchanged.
+      targetPath = basePath;
+    } else if (supportedLangs.includes(normalizedLang)) {
       targetPath = basePath === "/" ? `/${normalizedLang}` : `/${normalizedLang}${basePath}`;
     } else if (normalizedLang === "en") {
       // English is default (no prefix)
