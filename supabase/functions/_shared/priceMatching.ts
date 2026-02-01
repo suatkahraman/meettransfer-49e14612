@@ -369,12 +369,13 @@ export const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: strin
   'Side': { priority: 1, keywords: ['side', 'kumkoy', 'kumköy', 'colakli', 'çolaklı', 'evrenseki', 'titreyengol', 'titreyen gol', 'sorgun'], city: 'Antalya' },
   'Manavgat': { priority: 1, keywords: ['manavgat', 'gundogdu', 'gündoğdu'], city: 'Antalya' },
   'Alanya': { priority: 1, keywords: ['alanya', 'mahmutlar', 'okurcalar', 'avsallar', 'konakli', 'konaklı', 'incekum', 'alanya castle', 'cleopatra beach', 'kleopatra plaji', 'kestel', 'oba', 'tosmur'], city: 'Antalya' },
-  'Kemer': { priority: 1, keywords: ['kemer', 'kemer center', 'kemer merkez', 'kemer marina', 'camyuva', 'kiriş', 'kiris'], city: 'Antalya' },
+  // IMPORTANT: Kemer has lower priority (3) because addresses often contain "Kemer/Antalya" for areas like Cirali, Olympos
+  'Kemer': { priority: 3, keywords: ['kemer center', 'kemer merkez', 'kemer marina', 'camyuva', 'çamyuva', 'kiriş', 'kiris'], city: 'Antalya' },
   'Beldibi': { priority: 1, keywords: ['beldibi', 'beldib'], city: 'Antalya' },
   'Goynuk': { priority: 1, keywords: ['goynuk', 'göynük', 'goynuk canyon', 'göynük kanyonu'], city: 'Antalya' },
   'Tekirova': { priority: 1, keywords: ['tekirova', 'phaselis', 'faselis'], city: 'Antalya' },
-  // Cirali/Olympos/Ulupinar are in the same area - use Cirali pricing (exists in DB)
-  'Cirali': { priority: 1, keywords: ['cirali', 'çıralı', 'chimaera', 'yanartaş', 'olympos', 'olimpos', 'olimpos plaji', 'olimpos plajı', 'olympos beach', 'ulupinar', 'ulupınar', 'yanartas'], city: 'Antalya' },
+  // Cirali/Olympos/Ulupinar are in the same area - use Cirali pricing (exists in DB) - HIGH PRIORITY
+  'Cirali': { priority: 0, keywords: ['cirali', 'çıralı', 'chimaera', 'yanartaş', 'olympos', 'olimpos', 'olimpos plaji', 'olimpos plajı', 'olympos beach', 'ulupinar', 'ulupınar', 'yanartas'], city: 'Antalya' },
   'Kas': { priority: 1, keywords: ['kas', 'kaş', 'patara'], city: 'Antalya' },
   'Kalkan': { priority: 1, keywords: ['kalkan', 'saklikent', 'saklıkent', 'xanthos', 'letoon'], city: 'Antalya' },
   
@@ -917,8 +918,10 @@ const POSTAL_CODE_TO_DISTRICT: Record<string, { district: string; city: string }
   // Antalya - Belek/Serik district
   '07506': { district: 'Belek', city: 'Antalya' },
   '07300': { district: 'Serik', city: 'Antalya' },
-  // Antalya - Kemer district
+  // Antalya - Kemer district (main Kemer center area only)
   '07190': { district: 'Kemer', city: 'Antalya' },
+  // Antalya - Cirali/Olympos area (07982 is the postal code for Ulupınar/Olympos/Çıralı)
+  '07982': { district: 'Cirali', city: 'Antalya' },
   '07980': { district: 'Finike', city: 'Antalya' },
   '07570': { district: 'Demre', city: 'Antalya' },
   '07350': { district: 'Kumluca', city: 'Antalya' },
