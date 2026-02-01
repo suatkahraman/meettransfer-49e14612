@@ -72,8 +72,10 @@ export const SocialAuthButtons = ({
 
     setIsGoogleLoading(true);
     try {
-      // For iOS PWA standalone mode, show a helpful message
-      if (isIOS && isStandalone) {
+      const onCustomDomain = isCustomDomain();
+
+      // For iOS PWA standalone mode on Lovable domains, open in new window
+      if (isIOS && isStandalone && !onCustomDomain) {
         const authUrl = `${window.location.origin}/${mode === 'login' ? 'login' : 'signup'}?oauth=google`;
         const opened = window.open(authUrl, '_blank');
         if (!opened) {
@@ -86,8 +88,8 @@ export const SocialAuthButtons = ({
         return;
       }
 
-      // For custom domains, use Supabase directly to bypass auth-bridge
-      if (isCustomDomain()) {
+      // For custom domains (including iOS), use Supabase directly to bypass auth-bridge
+      if (onCustomDomain) {
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -133,8 +135,10 @@ export const SocialAuthButtons = ({
 
     setIsAppleLoading(true);
     try {
-      // For iOS PWA standalone mode
-      if (isIOS && isStandalone) {
+      const onCustomDomain = isCustomDomain();
+
+      // For iOS PWA standalone mode on Lovable domains, open in new window
+      if (isIOS && isStandalone && !onCustomDomain) {
         const authUrl = `${window.location.origin}/${mode === 'login' ? 'login' : 'signup'}?oauth=apple`;
         const opened = window.open(authUrl, '_blank');
         if (!opened) {
@@ -147,8 +151,8 @@ export const SocialAuthButtons = ({
         return;
       }
 
-      // For custom domains, use Supabase directly to bypass auth-bridge
-      if (isCustomDomain()) {
+      // For custom domains (including iOS), use Supabase directly to bypass auth-bridge
+      if (onCustomDomain) {
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'apple',
           options: {
