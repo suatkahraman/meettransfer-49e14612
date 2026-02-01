@@ -588,6 +588,72 @@ const ADDRESS_STOPWORDS = new Set([
   'havalimanı', 'havalimani', 'airport', 'terminal', 'ege'
 ]);
 
+// Country names that should NEVER be matched to Turkish cities/districts
+// This prevents "Almanya" (Germany) from matching "Alanya" (Turkish city)
+const COUNTRY_NAMES = new Set([
+  'almanya', 'germany', 'deutschland',
+  'fransa', 'france', 'frankreich',
+  'ingiltere', 'england', 'uk', 'united kingdom', 'britain', 'great britain',
+  'italya', 'italy', 'italien',
+  'ispanya', 'spain', 'spanien',
+  'hollanda', 'netherlands', 'holland', 'niederlande',
+  'belcika', 'belgium', 'belgien',
+  'avusturya', 'austria', 'osterreich',
+  'polonya', 'poland', 'polen',
+  'rusya', 'russia', 'russland',
+  'yunanistan', 'greece', 'griechenland',
+  'bulgaristan', 'bulgaria', 'bulgarien',
+  'romanya', 'romania', 'rumanien',
+  'macaristan', 'hungary', 'ungarn',
+  'cekya', 'czechia', 'czech republic', 'tschechien',
+  'slovakya', 'slovakia', 'slowakei',
+  'slovenya', 'slovenia', 'slowenien',
+  'hirvatistan', 'croatia', 'kroatien',
+  'sirbistan', 'serbia', 'serbien',
+  'arnavutluk', 'albania', 'albanien',
+  'ukrayna', 'ukraine',
+  'bae', 'uae', 'united arab emirates', 'birlesmis arap emirlikleri',
+  'suudi arabistan', 'saudi arabia',
+  'katar', 'qatar',
+  'kuveyt', 'kuwait',
+  'misir', 'egypt', 'agypten',
+  'israil', 'israel',
+  'cin', 'china',
+  'japonya', 'japan',
+  'hindistan', 'india',
+  'kanada', 'canada',
+  'amerika', 'usa', 'abd', 'united states', 'vereinigte staaten',
+  'meksika', 'mexico', 'mexiko',
+  'brezilya', 'brazil', 'brasilien',
+  'arjantin', 'argentina', 'argentinien',
+  'avustralya', 'australia', 'australien',
+  'yeni zelanda', 'new zealand', 'neuseeland',
+  'guney afrika', 'south africa', 'sudafrika',
+  // Cities in other countries that should not match Turkish locations
+  'berlin', 'munich', 'frankfurt', 'hamburg', 'cologne', 'koln',
+  'paris', 'lyon', 'marseille', 'nice', 'bordeaux',
+  'london', 'manchester', 'birmingham', 'liverpool', 'edinburgh',
+  'rome', 'milan', 'florence', 'venice', 'naples', 'roma', 'milano',
+  'madrid', 'barcelona', 'valencia', 'seville', 'malaga',
+  'amsterdam', 'rotterdam', 'the hague', 'utrecht',
+  'vienna', 'wien', 'salzburg', 'innsbruck',
+  'brussels', 'brussel', 'antwerp', 'ghent',
+  'warsaw', 'krakow', 'gdansk', 'wroclaw',
+  'moscow', 'moskova', 'saint petersburg',
+  'athens', 'atina', 'thessaloniki', 'selanik',
+  'sofia', 'plovdiv', 'varna',
+  'bucharest', 'bucuresti', 'cluj', 'timisoara',
+  'budapest', 'debrecen', 'szeged',
+  'prague', 'prag', 'brno', 'ostrava',
+  'bratislava', 'kosice',
+  'ljubljana', 'maribor',
+  'zagreb', 'split', 'dubrovnik',
+  'belgrade', 'belgrat', 'novi sad',
+  'sindelfingen', 'stuttgart', 'mannheim', 'karlsruhe', 'heidelberg', 'freiburg',
+  'dusseldorf', 'essen', 'dortmund', 'bonn', 'aachen',
+  'hannover', 'bremen', 'nurnberg', 'leipzig', 'dresden'
+]);
+
 function fuzzyMatch(text: string, keyword: string, threshold: number = 0.8): boolean {
   const normalizedText = normalizeLocation(text);
   const normalizedKeyword = normalizeLocation(keyword);
@@ -739,13 +805,50 @@ export function findAirport(location: string): MatchResult | null {
   return bestMatch;
 }
 
+// Check if location contains country names that indicate it's NOT in Turkey/supported regions
+// This prevents "GDS2, Sindelfingen, Almanya" from matching Antalya's "Alanya"
+function containsExcludedCountryOrCity(normalized: string): boolean {
+  const words = normalized.split(/[\s,]+/).filter(w => w.length > 2);
+  for (const word of words) {
+    if (COUNTRY_NAMES.has(word)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function findCity(location: string): MatchResult | null {
   const normalized = normalizeLocation(location);
+  
+  // CRITICAL: If location contains excluded country/city names, return null
+  // This prevents false matches like "Sindelfingen, Almanya" -> "Antalya" via Alanya
+  if (containsExcludedCountryOrCity(normalized)) {
+    console.log(`🚫 findCity: Location contains excluded country/city name, skipping: "${location}"`);
+    return null;
+  }
+  
   let bestMatch: MatchResult | null = null;
   
   for (const [city, data] of Object.entries(CITY_KEYWORDS)) {
     for (const keyword of data.keywords) {
       const keywordNorm = normalizeLocation(keyword);
+      
+      // Skip if the keyword itself is similar to a country name (e.g., "alanya" vs "almanya")
+      // Check Levenshtein distance between keyword and any country name
+      let isTooSimilarToCountry = false;
+      for (const countryName of COUNTRY_NAMES) {
+        if (countryName.length >= 4 && keywordNorm.length >= 4) {
+          const distance = levenshteinDistance(keywordNorm, countryName);
+          const maxLen = Math.max(keywordNorm.length, countryName.length);
+          // If similarity > 70%, it's too close to a country name
+          if (1 - (distance / maxLen) >= 0.7 && normalized.includes(countryName)) {
+            isTooSimilarToCountry = true;
+            console.log(`🚫 findCity: Keyword "${keywordNorm}" too similar to country "${countryName}", skipping`);
+            break;
+          }
+        }
+      }
+      if (isTooSimilarToCountry) continue;
       
       if (normalized.includes(keywordNorm)) {
         const confidence = Math.min(1, 0.6 + (keywordNorm.length / 20));
@@ -761,7 +864,7 @@ export function findCity(location: string): MatchResult | null {
           };
         }
       }
-      // Fuzzy match
+      // Fuzzy match - but NOT if location contains country names
       else if (keywordNorm.length >= 5 && fuzzyMatch(normalized, keywordNorm, 0.85)) {
         const confidence = Math.min(0.7, 0.4 + (keywordNorm.length / 25));
         
@@ -869,6 +972,14 @@ function isKeywordInEndPortion(normalized: string, keywordNorm: string): boolean
 
 export function findDistrict(location: string, cityHint?: string | null): DistrictMatchResult | null {
   const normalized = normalizeLocation(location);
+  
+  // CRITICAL: If location contains excluded country/city names, return null
+  // This prevents false matches like "Sindelfingen, Almanya" -> "Alanya" 
+  if (containsExcludedCountryOrCity(normalized)) {
+    console.log(`🚫 findDistrict: Location contains excluded country/city name, skipping: "${location}"`);
+    return null;
+  }
+  
   let bestMatch: DistrictMatchResult | null = null;
   
   // PRIORITY 1: Check postal code first - most reliable method
