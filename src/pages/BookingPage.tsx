@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { setPostOAuthRedirect } from "@/lib/postOAuthRedirect";
+import { startOAuthSignIn } from "@/lib/oauthSignIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { validatePromoCode } from "@/hooks/useActivePromoCode";
@@ -965,9 +965,7 @@ const BookingPage = () => {
       currentUrl.searchParams.set('googleAuth', 'true');
       setPostOAuthRedirect(currentUrl.toString());
       
-      const { error } = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
-      });
+      const { error } = await startOAuthSignIn('google');
       
       if (error) throw error;
     } catch (err: any) {
@@ -987,9 +985,7 @@ const BookingPage = () => {
       currentUrl.searchParams.set('googleAuth', 'true');
       setPostOAuthRedirect(currentUrl.toString());
       
-      const { error } = await lovable.auth.signInWithOAuth('apple', {
-        redirect_uri: window.location.origin,
-      });
+      const { error } = await startOAuthSignIn('apple');
       
       if (error) throw error;
     } catch (err: any) {

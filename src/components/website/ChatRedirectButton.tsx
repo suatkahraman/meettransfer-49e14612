@@ -3,10 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, UserPlus, Shield, Clock, Loader2, CheckCircle, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { PendingBookingStorage, type PendingBookingData } from "@/hooks/usePendingBookingStorage";
 import { setPostOAuthRedirect } from "@/lib/postOAuthRedirect";
+import { startOAuthSignIn } from "@/lib/oauthSignIn";
 
 // Google icon component
 const GoogleIcon = () => (
@@ -169,11 +168,7 @@ export const ChatRedirectButton = memo(function ChatRedirectButton({
 
       setPostOAuthRedirect(`${window.location.origin}/customer`);
 
-      const { error } = await lovable.auth.signInWithOAuth('google', {
-        // NOTE: Using a path here can cause Google `redirect_uri_mismatch` for BYOK credentials.
-        // We keep redirect_uri stable and navigate after auth via sessionStorage.
-        redirect_uri: window.location.origin,
-      });
+      const { error } = await startOAuthSignIn('google');
 
       if (error) {
         console.error('Google login error:', error);

@@ -20,8 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
+import { startOAuthSignIn } from "@/lib/oauthSignIn";
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -171,9 +171,7 @@ const EmbedSocialAuth = () => {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: window.location.origin,
-      });
+      const { error } = await startOAuthSignIn('google');
       
       if (error) {
         console.error('Google OAuth error:', error);
@@ -190,9 +188,7 @@ const EmbedSocialAuth = () => {
   const handleAppleSignIn = async () => {
     setIsAppleLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth('apple', {
-        redirect_uri: window.location.origin,
-      });
+      const { error } = await startOAuthSignIn('apple');
       
       if (error) {
         console.error('Apple OAuth error:', error);
