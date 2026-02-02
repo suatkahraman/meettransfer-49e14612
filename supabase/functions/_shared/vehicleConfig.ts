@@ -1,5 +1,5 @@
 // Shared vehicle configuration for edge functions
-// Keep in sync with src/lib/vehicleTypes.ts, src/lib/dubaiVehicleTypes.ts, and src/lib/switzerlandVehicleTypes.ts
+// Keep in sync with src/lib/vehicleTypes.ts, src/lib/dubaiVehicleTypes.ts, src/lib/switzerlandVehicleTypes.ts, and src/lib/cyprusVehicleTypes.ts
 
 export interface VehicleTypeConfig {
   value: string;
@@ -9,7 +9,7 @@ export interface VehicleTypeConfig {
 }
 
 // Supported regions - add new regions here
-export type VehicleRegion = 'turkey' | 'dubai' | 'switzerland' | 'default';
+export type VehicleRegion = 'turkey' | 'dubai' | 'switzerland' | 'cyprus' | 'default';
 
 // Central vehicle types - matches frontend (Turkey/Standard)
 export const VEHICLE_TYPES: VehicleTypeConfig[] = [
@@ -35,17 +35,24 @@ export const SWITZERLAND_VEHICLE_TYPES: VehicleTypeConfig[] = [
   { value: 'mercedes_vclass', label: 'Mercedes V-Class', passengers: 7, luggage: 7 },
 ];
 
+// Cyprus (KKTC) specific vehicle types
+export const CYPRUS_VEHICLE_TYPES: VehicleTypeConfig[] = [
+  { value: 'standard_sedan', label: 'Mercedes Sedan', passengers: 3, luggage: 3 },
+  { value: 'minivan', label: 'Mercedes Vito Similar', passengers: 7, luggage: 7 },
+];
+
 // Region to vehicle types mapping - ADD NEW REGIONS HERE
 const REGION_VEHICLE_MAP: Record<VehicleRegion, VehicleTypeConfig[]> = {
   'turkey': VEHICLE_TYPES,
   'dubai': DUBAI_VEHICLE_TYPES,
   'switzerland': SWITZERLAND_VEHICLE_TYPES,
+  'cyprus': CYPRUS_VEHICLE_TYPES,
   'default': VEHICLE_TYPES,
 };
 
 // Vehicle labels lookup
 export const VEHICLE_LABELS: Record<string, string> = Object.fromEntries(
-  [...VEHICLE_TYPES, ...DUBAI_VEHICLE_TYPES, ...SWITZERLAND_VEHICLE_TYPES].map(v => [v.value, v.label])
+  [...VEHICLE_TYPES, ...DUBAI_VEHICLE_TYPES, ...SWITZERLAND_VEHICLE_TYPES, ...CYPRUS_VEHICLE_TYPES].map(v => [v.value, v.label])
 );
 
 // Get vehicle label for display
@@ -184,9 +191,47 @@ export function isSwitzerlandLocation(location: string): boolean {
   return switzerlandKeywords.some(keyword => normalizedLocation.includes(keyword));
 }
 
+// Check if location is in Northern Cyprus (KKTC)
+export function isCyprusLocation(location: string): boolean {
+  if (!location) return false;
+  const normalizedLocation = normalizeTurkishChars(location);
+  
+  const cyprusKeywords = [
+    // Country/Region names
+    'kuzey kibris', 'northern cyprus', 'north cyprus',
+    'kktc', 'trnc', 'kibris', 'cyprus',
+    // Airport
+    'ecn', 'ercan', 'ercan airport', 'ercan havalimani',
+    // Major cities
+    'girne', 'kyrenia',
+    'lefkosa', 'nicosia', 'lefkose',
+    'gazimagusa', 'famagusta', 'magusa',
+    'guzelyurt', 'morphou',
+    'iskele', 'trikomo',
+    // Districts
+    'alsancak', 'lapta', 'esentepe', 'catalkoy',
+    'karakum', 'karsiyaka', 'yenierekoy',
+    'yeni bogazici', 'maras', 'varosha',
+    'dipkarpaz', 'karpaz', 'karpasia', 'mehmetcik',
+    'akdeniz', 'lefke', 'degirmenlik',
+    // Popular areas
+    'bellapais', 'beylerbeyi', 'ozankoy',
+    'karaoglanoglu', 'karmi', 'ilgaz',
+    'zeytinlik', 'edremit', 'tatlisu',
+    'bogaz', 'kumyali',
+  ];
+  
+  return cyprusKeywords.some(keyword => normalizedLocation.includes(keyword));
+}
+
 // Detect region from pickup/dropoff locations
 export function detectRegion(pickup: string, dropoff: string): VehicleRegion {
-  // IMPORTANT: Check Turkey FIRST to avoid false positives from brand names like "Swissôtel" in Turkey
+  // IMPORTANT: Check Cyprus/KKTC FIRST to avoid conflicts with Turkey
+  // (some district names like Alsancak exist in both Turkey and KKTC)
+  if (isCyprusLocation(pickup) || isCyprusLocation(dropoff)) {
+    return 'cyprus';
+  }
+  // Check Turkey next
   if (isTurkeyLocation(pickup) || isTurkeyLocation(dropoff)) {
     return 'turkey';
   }
@@ -245,6 +290,12 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   's-class': ['s_class'],
   'v-class': ['mercedes_vclass'],
   
+  // Cyprus (KKTC) vehicle mappings
+  'standard_sedan': ['standard_sedan'],
+  'minivan': ['minivan'],
+  'Mercedes Sedan': ['standard_sedan'],
+  'Mercedes Vito Similar': ['minivan'],
+  
   // Common aliases
   'Mercedes Vito': ['mercedes-vito'],
   'Mercedes Vito VIP': ['mercedes-vito-vip', 'vip-mercedes'],
@@ -255,9 +306,9 @@ export const VEHICLE_FALLBACK_ORDER: Record<string, string[]> = {
   'Mercedes Maybach': ['mercedes-maybach', 'maybach-minibus'],
   'Maybach Minivan': ['mercedes-maybach', 'maybach-minibus'],
   'VIP': ['mercedes-vito-vip', 'vip-mercedes'],
-  'Minivan': ['mercedes-vito'],
+  'Minivan': ['mercedes-vito', 'minivan'],
   'Minibus': ['mercedes-sprinter', 'minibus'],
-  'Sedan': ['sedan', 'mercedes-vito'],
+  'Sedan': ['sedan', 'standard_sedan', 'mercedes-vito'],
   // Dubai aliases
   'Private Sedan': ['dubai-private-sedan', 'sedan'],
   'V Class': ['dubai-v-class', 'mercedes-vito'],

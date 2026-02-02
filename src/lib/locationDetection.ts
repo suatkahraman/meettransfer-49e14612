@@ -253,3 +253,42 @@ export function isSwitzerlandLocation(location: string): boolean {
   
   return switzerlandKeywords.some(keyword => normalizedLocation.includes(keyword));
 }
+
+// Check if a location is in Northern Cyprus (KKTC)
+export function isCyprusLocation(location: string): boolean {
+  if (!location) return false;
+  const normalizedLocation = location.toLowerCase();
+  
+  const cyprusKeywords = [
+    // Country/Region names
+    'kuzey kıbrıs', 'kuzey kibris', 'northern cyprus', 'north cyprus',
+    'kktc', 'trnc', 'kibris', 'kıbrıs', 'cyprus',
+    
+    // Airport
+    'ecn', 'ercan', 'ercan airport', 'ercan havalimanı', 'ercan havalimani',
+    'kktc havalimanı', 'kktc havalimani', 'kıbrıs ercan',
+    
+    // Major cities
+    'girne', 'kyrenia',
+    'lefkoşa', 'lefkosa', 'nicosia', 'lefkoşe',
+    'gazimağusa', 'gazimagusa', 'famagusta', 'mağusa', 'magusa',
+    'güzelyurt', 'guzelyurt', 'morphou',
+    'iskele', 'İskele', 'trikomo',
+    
+    // Districts
+    'alsancak kktc', 'lapta kktc', 'bafra kktc',
+    'alsancak', 'lapta', 'esentepe', 'çatalköy', 'catalkoy',
+    'karakum', 'karşıyaka', 'karsiyaka', 'yenierenköy', 'yenierekoy',
+    'yeni boğaziçi', 'yeni bogazici', 'maraş', 'maras', 'varosha',
+    'dipkarpaz', 'karpaz', 'karpasia', 'mehmetçik', 'mehmetcik',
+    'akdeniz', 'lefke', 'değirmenlik', 'degirmenlik',
+    
+    // Popular areas
+    'bellapais', 'beylerbeyi', 'ozankoy', 'ozanköy',
+    'karaoğlanoğlu', 'karaoglanoglu', 'karmi', 'ilgaz',
+    'zeytinlik', 'edremit', 'tatlısu', 'tatlisu',
+    'bogaz', 'boğaz', 'kumyalı', 'kumyali',
+  ];
+  
+  return cyprusKeywords.some(keyword => normalizedLocation.includes(keyword));
+}
