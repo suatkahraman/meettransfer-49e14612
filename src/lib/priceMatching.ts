@@ -427,29 +427,60 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Protaras': { priority: 1, keywords: ['protaras', 'fig tree bay'], city: 'Cyprus' },
   'Paralimni': { priority: 2, keywords: ['paralimni'], city: 'Cyprus' },
   
-  // KKTC (Kuzey Kıbrıs) - Veritabanındaki district isimleriyle birebir eşleşen
+  // KKTC (Kuzey Kıbrıs) - Veritabanındaki district isimleriyle BİREBİR eşleşen
   // DB'de city: "Kuzey Kıbrıs", airport: "ECN"
-  'Girne Merkez': { priority: 1, keywords: ['girne merkez', 'girne center', 'girne', 'kyrenia', 'kyrenia center', 'girne liman', 'girne harbour', 'bellapais'], city: 'Kuzey Kıbrıs' },
-  'Lefkoşe': { priority: 1, keywords: ['lefkoşe', 'lefkose', 'lefkoşa', 'lefkosa', 'lefkoşa merkez', 'lefkosa merkez', 'kuzey lefkoşa', 'north nicosia', 'nicosia north', 'kuzey nicosia'], city: 'Kuzey Kıbrıs' },
-  'Mağusa': { priority: 1, keywords: ['mağusa', 'magusa', 'gazimağusa', 'gazimagusa', 'gazimağusa merkez', 'gazimagusa merkez', 'famagusta', 'ammochostos'], city: 'Kuzey Kıbrıs' },
-  'İskele': { priority: 1, keywords: ['iskele', 'İskele', 'trikomo', 'long beach iskele', 'bogaz iskele', 'boğaz iskele', 'long beach kktc'], city: 'Kuzey Kıbrıs' },
-  'Alsancak KKTC': { priority: 1, keywords: ['alsancak kktc', 'alsancak girne', 'alsancak kıbrıs', 'karavostasi'], city: 'Kuzey Kıbrıs' },
-  'Lapta KKTC': { priority: 1, keywords: ['lapta', 'lapithos', 'lapta kktc', 'lapta girne'], city: 'Kuzey Kıbrıs' },
-  'Bafra KKTC': { priority: 1, keywords: ['bafra kktc', 'bafra beach', 'bafra iskele', 'bafra kıbrıs'], city: 'Kuzey Kıbrıs' },
-  'Çatalköy': { priority: 1, keywords: ['çatalköy', 'catalkoy', 'çatalköy girne', 'agios epiktitos'], city: 'Kuzey Kıbrıs' },
-  'Karakum': { priority: 1, keywords: ['karakum', 'karakum girne', 'karaoğlanoğlu', 'karaoglanoglu'], city: 'Kuzey Kıbrıs' },
+  // Veritabanındaki semtler: Girne Merkez, Lefkoşe, Mağusa, Alsancak, Bafra, Lapta, İskele, Çatalköy, Karakum
+  'Girne Merkez': { priority: 1, keywords: ['girne merkez', 'girne center', 'girne', 'kyrenia', 'kyrenia center', 'girne liman', 'girne harbour', 'bellapais', 'girne kktc', 'girne kıbrıs'], city: 'Kuzey Kıbrıs' },
+  'Lefkoşe': { priority: 1, keywords: ['lefkoşe', 'lefkose', 'lefkoşa', 'lefkosa', 'lefkoşa merkez', 'lefkosa merkez', 'kuzey lefkoşa', 'north nicosia', 'nicosia north', 'kuzey nicosia', 'lefkoşe kktc'], city: 'Kuzey Kıbrıs' },
+  'Mağusa': { priority: 1, keywords: ['mağusa', 'magusa', 'gazimağusa', 'gazimagusa', 'gazimağusa merkez', 'gazimagusa merkez', 'famagusta', 'ammochostos', 'mağusa kktc'], city: 'Kuzey Kıbrıs' },
+  'İskele': { priority: 1, keywords: ['iskele kktc', 'İskele', 'trikomo', 'long beach iskele', 'bogaz iskele', 'boğaz iskele', 'long beach kktc', 'iskele kıbrıs', 'iskele cyprus'], city: 'Kuzey Kıbrıs' },
+  // Bu semtler Türkiye'deki aynı isimli semtlerle çakışıyor, KKTC prefix/suffix ile ayırt ediyoruz
+  'Alsancak-KKTC': { priority: 1, keywords: ['alsancak kktc', 'alsancak girne', 'alsancak kıbrıs', 'karavostasi', 'alsancak cyprus', 'alsancak north cyprus'], city: 'Kuzey Kıbrıs' },
+  'Lapta': { priority: 1, keywords: ['lapta', 'lapithos', 'lapta kktc', 'lapta girne', 'lapta kıbrıs', 'lapta cyprus'], city: 'Kuzey Kıbrıs' },
+  'Bafra-KKTC': { priority: 1, keywords: ['bafra kktc', 'bafra beach', 'bafra iskele', 'bafra kıbrıs', 'bafra cyprus', 'bafra north cyprus'], city: 'Kuzey Kıbrıs' },
+  'Çatalköy': { priority: 1, keywords: ['çatalköy', 'catalkoy', 'çatalköy girne', 'agios epiktitos', 'çatalköy kktc'], city: 'Kuzey Kıbrıs' },
+  'Karakum': { priority: 1, keywords: ['karakum', 'karakum girne', 'karaoğlanoğlu', 'karaoglanoglu', 'karakum kktc'], city: 'Kuzey Kıbrıs' },
   // Ek KKTC semtleri (veritabanında henüz olmayan ama fiyat eklenebilir)
-  'Güzelyurt': { priority: 1, keywords: ['güzelyurt', 'guzelyurt', 'morphou'], city: 'Kuzey Kıbrıs' },
-  'Esentepe': { priority: 1, keywords: ['esentepe', 'agios amvrosios', 'bahçeli', 'bahceli', 'tatlısu', 'tatlisu'], city: 'Kuzey Kıbrıs' },
-  'Karşıyaka KKTC': { priority: 1, keywords: ['karşıyaka kktc', 'karsiyaka kktc', 'karşıyaka girne', 'vasilia'], city: 'Kuzey Kıbrıs' },
+  'Güzelyurt-KKTC': { priority: 1, keywords: ['güzelyurt kktc', 'guzelyurt kktc', 'morphou', 'güzelyurt kıbrıs'], city: 'Kuzey Kıbrıs' },
+  'Esentepe-KKTC': { priority: 1, keywords: ['esentepe kktc', 'agios amvrosios', 'bahçeli kktc', 'bahceli kktc', 'tatlısu', 'tatlisu', 'esentepe kıbrıs'], city: 'Kuzey Kıbrıs' },
+  'Karşıyaka-KKTC': { priority: 1, keywords: ['karşıyaka kktc', 'karsiyaka kktc', 'karşıyaka girne', 'vasilia', 'karşıyaka kıbrıs'], city: 'Kuzey Kıbrıs' },
   'Yeni Boğaziçi': { priority: 1, keywords: ['yeni boğaziçi', 'yeni bogazici', 'yeniboğaziçi', 'yenibogazici', 'monarga'], city: 'Kuzey Kıbrıs' },
-  'Maraş': { priority: 1, keywords: ['maraş', 'maras', 'varosha', 'kapalı maraş', 'kapali maras'], city: 'Kuzey Kıbrıs' },
-  'Dipkarpaz': { priority: 2, keywords: ['dipkarpaz', 'karpaz', 'karpaz peninsula', 'rizokarpaso'], city: 'Kuzey Kıbrıs' },
-  'Mehmetçik': { priority: 2, keywords: ['mehmetçik', 'mehmetcik', 'galateia'], city: 'Kuzey Kıbrıs' },
-  'Yenierenköy': { priority: 2, keywords: ['yenierenköy', 'yenierekoy', 'yenierenk', 'yiallousa'], city: 'Kuzey Kıbrıs' },
-  'Akdeniz KKTC': { priority: 2, keywords: ['akdeniz kktc', 'akdeniz kıbrıs', 'agia irini'], city: 'Kuzey Kıbrıs' },
-  'Lefke': { priority: 2, keywords: ['lefke', 'lefka'], city: 'Kuzey Kıbrıs' },
-  'Değirmenlik': { priority: 2, keywords: ['değirmenlik', 'degirmenlik', 'kythrea'], city: 'Kuzey Kıbrıs' },
+  'Maraş-KKTC': { priority: 1, keywords: ['maraş kktc', 'maras kktc', 'varosha', 'kapalı maraş', 'kapali maras', 'maraş kıbrıs'], city: 'Kuzey Kıbrıs' },
+  'Dipkarpaz': { priority: 2, keywords: ['dipkarpaz', 'karpaz', 'karpaz peninsula', 'rizokarpaso', 'dipkarpaz kktc'], city: 'Kuzey Kıbrıs' },
+  'Mehmetçik': { priority: 2, keywords: ['mehmetçik', 'mehmetcik', 'galateia', 'mehmetçik kktc'], city: 'Kuzey Kıbrıs' },
+  'Yenierenköy': { priority: 2, keywords: ['yenierenköy', 'yenierekoy', 'yenierenk', 'yiallousa', 'yenierenköy kktc'], city: 'Kuzey Kıbrıs' },
+  'Akdeniz-KKTC': { priority: 2, keywords: ['akdeniz kktc', 'akdeniz kıbrıs', 'agia irini'], city: 'Kuzey Kıbrıs' },
+  'Lefke': { priority: 2, keywords: ['lefke', 'lefka', 'lefke kktc'], city: 'Kuzey Kıbrıs' },
+  'Değirmenlik': { priority: 2, keywords: ['değirmenlik', 'degirmenlik', 'kythrea', 'değirmenlik kktc'], city: 'Kuzey Kıbrıs' },
+};
+
+// KKTC District name mapping: Code ID -> Database name
+const KKTC_DISTRICT_DB_MAPPING: Record<string, string> = {
+  'Alsancak-KKTC': 'Alsancak',
+  'Bafra-KKTC': 'Bafra',
+  'Güzelyurt-KKTC': 'Güzelyurt',
+  'Esentepe-KKTC': 'Esentepe',
+  'Karşıyaka-KKTC': 'Karşıyaka',
+  'Maraş-KKTC': 'Maraş',
+  'Akdeniz-KKTC': 'Akdeniz',
+};
+
+// Airport name to DB code mapping (how airports are stored in region_prices.airport)
+const AIRPORT_TO_DB_CODE: Record<string, string> = {
+  'Istanbul Airport (IST)': 'IST',
+  'Sabiha Gokcen Airport (SAW)': 'SAW',
+  'Antalya Airport (AYT)': 'AYT',
+  'Bodrum-Milas Airport (BJV)': 'BJV',
+  'Dalaman Airport (DLM)': 'DLM',
+  'Izmir Adnan Menderes Airport (ADB)': 'ADB',
+  'Kayseri Airport (ASR)': 'ASR',
+  'Nevsehir-Kapadokya Airport (NAV)': 'NAV',
+  'Dubai International Airport (DXB)': 'DXB',
+  'Al Maktoum International Airport (DWC)': 'DWC',
+  'Larnaca Airport (LCA)': 'LCA',
+  'Paphos Airport (PFO)': 'PFO',
+  'Ercan Airport (ECN)': 'ECN',
+  'Bursa Yenisehir Airport (YEI)': 'YEI',
 };
 
 // ==================== NORMALIZATION ====================
@@ -502,7 +533,7 @@ const AIRPORT_TO_CITY: Record<string, string> = {
   'Al Maktoum International Airport (DWC)': 'Dubai',
   'Larnaca Airport (LCA)': 'Cyprus',
   'Paphos Airport (PFO)': 'Cyprus',
-  'Ercan Airport (ECN)': 'Cyprus',
+  'Ercan Airport (ECN)': 'Kuzey Kıbrıs', // DB'de "Kuzey Kıbrıs" olarak kayıtlı
   'Bursa Yenisehir Airport (YEI)': 'Bursa',
 };
 
@@ -707,18 +738,36 @@ export async function matchPrice(
     
     console.log('🚗 Transfer info:', { airport, city, district });
     
+    // Convert airport name to DB code (e.g., 'Ercan Airport (ECN)' -> 'ECN')
+    let airportDbCode: string | null = null;
+    if (airport && AIRPORT_TO_DB_CODE[airport]) {
+      airportDbCode = AIRPORT_TO_DB_CODE[airport];
+      console.log('🔄 Airport DB code mapping:', airport, '->', airportDbCode);
+    } else if (airport) {
+      // Fallback: extract code from parentheses if present
+      const codeMatch = airport.match(/\(([A-Z]{3})\)/);
+      airportDbCode = codeMatch ? codeMatch[1] : airport;
+    }
+    
+    // Convert KKTC district codes to DB names (e.g., 'Alsancak-KKTC' -> 'Alsancak')
+    if (district && KKTC_DISTRICT_DB_MAPPING[district]) {
+      const originalDistrict = district;
+      district = KKTC_DISTRICT_DB_MAPPING[district];
+      console.log('🔄 KKTC district mapping:', originalDistrict, '->', district);
+    }
+    
     if (!city && !airport) {
       console.log('❌ No city or airport found in locations');
       return { found: false };
     }
     
     // 1. Try exact match
-    if (airport && city && district) {
+    if (airportDbCode && city && district) {
       const { data: exactMatch, error } = await supabase
         .from('region_prices')
         .select('*')
         .eq('city', city)
-        .eq('airport', airport)
+        .eq('airport', airportDbCode)
         .eq('district', district)
         .eq('vehicle_type', vehicleType)
         .eq('is_active', true)
@@ -740,12 +789,12 @@ export async function matchPrice(
     }
     
     // 2. Try airport + city match
-    if (airport && city) {
+    if (airportDbCode && city) {
       const { data: cityMatch, error } = await supabase
         .from('region_prices')
         .select('*')
         .eq('city', city)
-        .eq('airport', airport)
+        .eq('airport', airportDbCode)
         .eq('vehicle_type', vehicleType)
         .eq('is_active', true)
         .order('price', { ascending: true })
