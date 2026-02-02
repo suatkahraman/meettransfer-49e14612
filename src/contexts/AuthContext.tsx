@@ -44,52 +44,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Some flows (like our 2FA pre-check) intentionally sign in and immediately sign out.
           if (isSuppressAuthRedirect()) return;
 
-          // Fast async redirect - no blocking operations
+          // Clean up URL hash immediately (non-blocking)
+          if (window.location.hash.includes('access_token=')) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+
+          // Check for post-OAuth redirect first (fastest path - sync)
+          const postOAuthRedirect = consumePostOAuthRedirect();
+          if (postOAuthRedirect) {
+            navigate(postOAuthRedirect, { replace: true });
+            return;
+          }
+
+          // Check pending booking (sessionStorage - instant, no network)
+          const pendingBookingData = PendingBookingStorage.load();
+          const legacyToken = safeLocalGet('pending_booking_token');
+          const legacyData = safeLocalGet('pending_booking_data');
+          
+          if (pendingBookingData || legacyToken || legacyData) {
+            // Migrate legacy data if needed
+            if ((legacyToken || legacyData) && !pendingBookingData) {
+              try {
+                PendingBookingStorage.save(legacyData ? JSON.parse(legacyData) : {});
+                localStorage.removeItem('pending_booking_token');
+                localStorage.removeItem('pending_booking_data');
+              } catch { /* ignore */ }
+            }
+            navigate('/customer', { replace: true });
+            return;
+          }
+
+          // Check current path to determine if redirect needed
+          const currentPath = window.location.pathname;
+          const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
+          const isOAuthCallbackPath = currentPath.startsWith('/~oauth/callback') || currentPath.startsWith('/oauth/callback');
+          const isHomePage = currentPath === '/' || currentPath === '';
+          const hasOAuthParams = window.location.hash.includes('access_token=') || window.location.search.includes('code=');
+          
+          const needsRedirect = isAuthPage || isOAuthCallbackPath || (isHomePage && hasOAuthParams);
+          
+          // Only fetch role if we actually need to redirect
+          if (!needsRedirect) return;
+
+          // Fire-and-forget role fetch with immediate fallback
           (async () => {
-            if (!isMounted) return;
-            
-            // Clean up URL hash immediately (non-blocking)
-            if (window.location.hash.includes('access_token=')) {
-              window.history.replaceState(null, '', window.location.pathname + window.location.search);
-            }
-
-            // Check for post-OAuth redirect first (fastest path)
-            const postOAuthRedirect = consumePostOAuthRedirect();
-            if (postOAuthRedirect) {
-              navigate(postOAuthRedirect, { replace: true });
-              return;
-            }
-
-            // Check current path early to avoid unnecessary DB calls
-            const currentPath = window.location.pathname;
-            const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
-            const isOAuthCallbackPath = currentPath.startsWith('/~oauth/callback') || currentPath.startsWith('/oauth/callback');
-            const isHomePage = currentPath === '/' || currentPath === '';
-            const hasOAuthParams = window.location.hash.includes('access_token=') || window.location.search.includes('code=');
-            
-            const needsRedirect = isAuthPage || isOAuthCallbackPath || (isHomePage && hasOAuthParams);
-            
-            // Check pending booking (sessionStorage - instant, no network)
-            const pendingBookingData = PendingBookingStorage.load();
-            const legacyToken = safeLocalGet('pending_booking_token');
-            const legacyData = safeLocalGet('pending_booking_data');
-            
-            if (pendingBookingData || legacyToken || legacyData) {
-              // Migrate legacy data if needed
-              if ((legacyToken || legacyData) && !pendingBookingData) {
-                try {
-                  PendingBookingStorage.save(legacyData ? JSON.parse(legacyData) : {});
-                  localStorage.removeItem('pending_booking_token');
-                  localStorage.removeItem('pending_booking_data');
-                } catch { /* ignore */ }
-              }
-              navigate('/customer', { replace: true });
-              return;
-            }
-
-            // Only fetch role if we actually need to redirect
-            if (!needsRedirect) return;
-
             try {
               const { data: roleData } = await supabase
                 .from('user_roles')
