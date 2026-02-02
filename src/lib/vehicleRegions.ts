@@ -5,15 +5,17 @@
 import { VehicleTypeInfo, VEHICLE_TYPES } from './vehicleTypes';
 import { DUBAI_VEHICLE_TYPES } from './dubaiVehicleTypes';
 import { SWITZERLAND_VEHICLE_TYPES } from './switzerlandVehicleTypes';
+import { CYPRUS_VEHICLE_TYPES } from './cyprusVehicleTypes';
 
 // Supported regions - add new regions here
-export type VehicleRegion = 'turkey' | 'dubai' | 'switzerland' | 'default';
+export type VehicleRegion = 'turkey' | 'dubai' | 'switzerland' | 'cyprus' | 'default';
 
 // Map of region to vehicle types
 const REGION_VEHICLE_MAP: Record<VehicleRegion, VehicleTypeInfo[]> = {
   'turkey': VEHICLE_TYPES,
   'dubai': DUBAI_VEHICLE_TYPES,
   'switzerland': SWITZERLAND_VEHICLE_TYPES,
+  'cyprus': CYPRUS_VEHICLE_TYPES,
   'default': VEHICLE_TYPES, // Fallback to Turkey/standard vehicles
 };
 
@@ -57,4 +59,4 @@ export function getSuitableVehicle(
 }
 
 // Export region types for type safety
-export const SUPPORTED_REGIONS: VehicleRegion[] = ['turkey', 'dubai', 'switzerland'];
+export const SUPPORTED_REGIONS: VehicleRegion[] = ['turkey', 'dubai', 'switzerland', 'cyprus'];
