@@ -18,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { TimePickerAMPM } from "@/components/ui/time-picker-ampm";
+import { TimePickerGrid } from "@/components/ui/time-picker-grid";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -1939,20 +1939,13 @@ const BookingPage = () => {
                           />
                         </div>
                         <div>
-                          <Label className="text-sm text-muted-foreground mb-2 block">{t("returnTime")}</Label>
-                          <div className="flex items-center h-10 px-3 py-2 border rounded-md bg-background">
-                            <Clock className="h-4 w-4 text-muted-foreground mr-2 flex-shrink-0" />
-                            <TimePickerAMPM
-                              value={returnTime || "10:00"}
-                              onValueChange={setReturnTime}
-                              triggerClassName="text-sm font-medium"
-                              labels={{
-                                hour: language === 'TR' ? 'Saat' : 'Hour',
-                                minute: language === 'TR' ? 'Dakika' : 'Minute',
-                                save: language === 'TR' ? 'Kaydet' : 'Save'
-                              }}
-                            />
-                          </div>
+                          <TimePickerGrid
+                            value={returnTime || "10:00"}
+                            onValueChange={setReturnTime}
+                            label={t("returnTime") || "Return Time"}
+                            allowFullscreen
+                            className="h-12"
+                          />
                         </div>
                       </div>
                     )}
