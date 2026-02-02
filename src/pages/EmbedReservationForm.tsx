@@ -15,18 +15,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
-import { Car, Timer, MapPin, Calendar, Clock, Users, ArrowRight, Loader2 } from "lucide-react";
+import { Car, Timer, MapPin, Calendar, Clock, Users, ArrowRight, Loader2, Maximize2, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
 // Import UI components
 import { LazyGooglePlacesAutocomplete, type PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
-import { TimePickerAMPM } from "@/components/ui/time-picker-ampm";
+import { TimePickerGrid } from "@/components/ui/time-picker-grid";
 
 // Translations for the embed form
 const EMBED_TRANSLATIONS: Record<string, Record<string, string>> = {
@@ -441,10 +440,12 @@ const EmbedReservationForm = () => {
                   className="h-[60px]"
                 />
                 
-                {/* Time */}
-                <TimePickerAMPM
+                {/* Time - Grid Layout */}
+                <TimePickerGrid
                   value={time}
                   onValueChange={setTime}
+                  label={t.pickupTime}
+                  allowFullscreen
                 />
                 
                 {/* Passengers */}
@@ -534,10 +535,12 @@ const EmbedReservationForm = () => {
                   className="h-[60px]"
                 />
                 
-                {/* Time */}
-                <TimePickerAMPM
+                {/* Time - Grid Layout */}
+                <TimePickerGrid
                   value={hourlyTime}
                   onValueChange={setHourlyTime}
+                  label={t.pickupTime}
+                  allowFullscreen
                 />
                 
                 {/* Passengers */}
