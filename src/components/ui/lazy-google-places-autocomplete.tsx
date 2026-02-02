@@ -462,7 +462,8 @@ export const LazyGooglePlacesAutocomplete = memo(({
           {
             types: ['establishment', 'geocode'],
             fields: ['formatted_address', 'name', 'address_components', 'place_id', 'geometry'],
-            componentRestrictions: { country: ['tr', 'ae', 'cy', 'de', 'gr', 'ch', 'it'] },
+            // Note: KKTC (North Cyprus) doesn't have a separate ISO country code
+            // Removing componentRestrictions to allow all locations including Ercan Airport
           }
         );
         console.log('[LazyGooglePlacesAutocomplete] Autocomplete instance created successfully');

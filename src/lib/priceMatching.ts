@@ -112,7 +112,9 @@ const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: number }>
   'Ercan Airport (ECN)': {
     priority: 1,
     keywords: [
-      'ercan airport', 'ecn', 'ercan havalimanı', 'lefkoşa havalimanı', 'lefkosa airport'
+      'ercan airport', 'ecn', 'ercan havalimanı', 'ercan havalimani', 'lefkoşa havalimanı', 
+      'lefkosa airport', 'kktc havalimanı', 'kuzey kıbrıs havalimanı', 'kuzey kibris havalimani',
+      'north cyprus airport', 'trnc airport', 'ercan', 'kıbrıs ercan', 'kibris ercan'
     ]
   },
   'Bursa Yenisehir Airport (YEI)': {
@@ -236,6 +238,16 @@ const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = 
       'limassol', 'larnaca', 'paphos', 'famagusta', 'magusa', 'mağusa',
       'kyrenia', 'girne', 'ayia napa', 'protaras', 'paralimni', 'polis',
       'coral bay', 'latchi', 'troodos', 'platres'
+    ]
+  },
+  'KKTC': {
+    priority: 1,
+    keywords: [
+      'kktc', 'trnc', 'north cyprus', 'northern cyprus', 'kuzey kıbrıs', 'kuzey kibris',
+      'girne', 'lefkoşa', 'lefkosa', 'gazimağusa', 'gazimagusa', 'mağusa', 'magusa',
+      'iskele', 'güzelyurt', 'guzelyurt', 'alsancak', 'lapta', 'esentepe', 'tatlısu',
+      'karşıyaka', 'karsiyaka', 'yeni boğaziçi', 'yeni bogazici', 'maraş', 'maras',
+      'dipkarpaz', 'bafra', 'mehmetcik', 'yeniboğaziçi', 'yenierenköy', 'yenierekoy'
     ]
   },
 };
@@ -415,6 +427,26 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Protaras': { priority: 1, keywords: ['protaras', 'fig tree bay'], city: 'Cyprus' },
   'Paralimni': { priority: 2, keywords: ['paralimni'], city: 'Cyprus' },
   'Famagusta': { priority: 1, keywords: ['famagusta', 'magusa', 'mağusa'], city: 'Cyprus' },
+  
+  // KKTC (Kuzey Kıbrıs) - Türkçe semtler
+  'Girne Merkez': { priority: 1, keywords: ['girne merkez', 'girne center', 'girne', 'kyrenia center', 'girne liman', 'girne harbour'], city: 'KKTC' },
+  'Lefkoşa Merkez': { priority: 1, keywords: ['lefkoşa merkez', 'lefkosa merkez', 'lefkoşa', 'lefkosa', 'kuzey lefkoşa', 'north nicosia'], city: 'KKTC' },
+  'Gazimağusa Merkez': { priority: 1, keywords: ['gazimağusa merkez', 'gazimagusa merkez', 'gazimağusa', 'gazimagusa', 'mağusa merkez', 'magusa merkez', 'famagusta center'], city: 'KKTC' },
+  'Güzelyurt': { priority: 1, keywords: ['güzelyurt', 'guzelyurt', 'morphou'], city: 'KKTC' },
+  'İskele': { priority: 1, keywords: ['iskele', 'İskele', 'trikomo', 'long beach', 'bogaz', 'boğaz'], city: 'KKTC' },
+  'Alsancak KKTC': { priority: 1, keywords: ['alsancak kktc', 'karakum', 'karaoğlanoğlu', 'karaoglanoglu', 'alsancak girne'], city: 'KKTC' },
+  'Lapta': { priority: 1, keywords: ['lapta', 'lapithos', 'lapta kktc'], city: 'KKTC' },
+  'Esentepe': { priority: 1, keywords: ['esentepe', 'agios amvrosios', 'bahçeli', 'bahceli', 'tatlısu', 'tatlisu'], city: 'KKTC' },
+  'Karşıyaka KKTC': { priority: 1, keywords: ['karşıyaka kktc', 'karsiyaka kktc', 'vasilia', 'karşıyaka girne'], city: 'KKTC' },
+  'Yeni Boğaziçi': { priority: 1, keywords: ['yeni boğaziçi', 'yeni bogazici', 'yeniboğaziçi', 'yenibogazici', 'monarga'], city: 'KKTC' },
+  'Maraş': { priority: 1, keywords: ['maraş', 'maras', 'varosha', 'kapalı maraş', 'kapali maras'], city: 'KKTC' },
+  'Dipkarpaz': { priority: 2, keywords: ['dipkarpaz', 'karpaz', 'karpaz peninsula', 'rizokarpaso'], city: 'KKTC' },
+  'Bafra': { priority: 1, keywords: ['bafra', 'bafra kktc', 'bafra beach'], city: 'KKTC' },
+  'Mehmetçik': { priority: 2, keywords: ['mehmetçik', 'mehmetcik', 'galateia'], city: 'KKTC' },
+  'Yenierenköy': { priority: 2, keywords: ['yenierenköy', 'yenierekoy', 'yenierenk', 'yiallousa'], city: 'KKTC' },
+  'Akdeniz': { priority: 2, keywords: ['akdeniz', 'agia irini'], city: 'KKTC' },
+  'Lefke': { priority: 2, keywords: ['lefke', 'lefka'], city: 'KKTC' },
+  'Değirmenlik': { priority: 2, keywords: ['değirmenlik', 'degirmenlik', 'kythrea'], city: 'KKTC' },
 };
 
 // ==================== NORMALIZATION ====================
