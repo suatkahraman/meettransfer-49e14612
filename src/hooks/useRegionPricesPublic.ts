@@ -153,8 +153,8 @@ export function transformToPriceTableFormat(
     if (airport.includes("Bodrum") || airport.includes("BJV")) return "Bodrum Airport";
     if (airport.includes("Dalaman") || airport.includes("DLM")) return "Dalaman Airport";
     if (airport.includes("Izmir") || airport.includes("ADB")) return "İzmir Airport";
-    if (airport.includes("Ercan") || airport.includes("ECN")) return "Ercan Airport";
-    if (airport.includes("Adana")) return "Adana Airport";
+    if (airport.includes("Ercan") || airport.includes("ECN") || airport === "ECN") return "Ercan Airport";
+    if (airport.includes("Adana") || airport.includes("ADA")) return "Adana Airport";
     if (airport.includes("Mardin")) return "Mardin Airport";
     if (airport.includes("Kapadokya") || airport.includes("Nevsehir")) return "Kapadokya Airport";
     if (airport.includes("Kayseri")) return "Kayseri Airport";
