@@ -302,7 +302,7 @@ const BookingPage = () => {
   // Get the correct vehicle map based on location
   const vehicleTypeMap = isDubai ? DUBAI_VEHICLE_TYPE_MAP : VEHICLE_TYPE_MAP;
 
-  // Auto-select appropriate vehicle based on location
+  // Auto-select appropriate vehicle based on location and availability
   useEffect(() => {
     if (isDubai) {
       // For Dubai, auto-select first Dubai vehicle if current vehicle is not a Dubai type
@@ -312,8 +312,24 @@ const BookingPage = () => {
       }
     } else if (minibusRequired && vehicleType !== 'minibus') {
       setVehicleType('minibus');
+    } else if (!minibusRequired && availableVehicles.length > 0) {
+      // Ensure mercedes-vito is selected if available, otherwise select first available
+      const mercedesVitoAvailable = availableVehicles.some(v => v.value === 'mercedes-vito');
+      const currentVehicleAvailable = availableVehicles.some(v => v.value === vehicleType);
+      
+      if (!currentVehicleAvailable) {
+        // Current vehicle not in list, select mercedes-vito if available, otherwise first
+        if (mercedesVitoAvailable) {
+          setVehicleType('mercedes-vito');
+        } else {
+          setVehicleType(availableVehicles[0].value);
+        }
+      } else if (!vehicleType && mercedesVitoAvailable) {
+        // No vehicle selected, default to mercedes-vito
+        setVehicleType('mercedes-vito');
+      }
     }
-  }, [minibusRequired, vehicleType, isDubai]);
+  }, [minibusRequired, vehicleType, isDubai, availableVehicles]);
 
   // Load booking data from token (AI assistant flow)
   useEffect(() => {
