@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { setPostOAuthRedirect } from "@/lib/postOAuthRedirect";
-import { startOAuthSignIn } from "@/lib/oauthSignIn";
+import { startOAuthSignIn, getOAuthUrl } from "@/lib/oauthSignIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { validatePromoCode } from "@/hooks/useActivePromoCode";
@@ -1053,15 +1053,27 @@ const BookingPage = () => {
       // iOS PWA standalone mode: run OAuth in a new Safari window/tab.
       // Redirecting the current PWA window often breaks the return navigation and can lead to 404.
       if (isIOS && isStandalone) {
-        const authUrl = `${window.location.origin}/login?oauth=apple`;
-        const opened = window.open(authUrl, '_blank');
-        if (!opened) {
-          toast.error(t('iosAppleLoginNotice') || 'Lütfen Safari’de açarak Apple ile giriş yapın');
-        } else {
-          toast.info(t('redirectingApple') || 'Yönlendiriliyor...');
+        try {
+          const { url, error: urlErr } = await getOAuthUrl('apple');
+          if (urlErr || !url) {
+            toast.error(urlErr?.message || t('loginFailed') || 'Login failed');
+            setAppleLoading(false);
+            return;
+          }
+          const opened = window.open(url, '_blank');
+          if (!opened) {
+            toast.error(t('iosAppleLoginNotice') || 'Lutfen Safari\'de acarak Apple ile giris yapin');
+          } else {
+            toast.info(t('redirectingApple') || 'Yonlendiriliyor...');
+          }
+          setAppleLoading(false);
+          return;
+        } catch (err) {
+          console.error('iOS PWA OAuth URL fetch failed:', err);
+          toast.error(t('loginFailed') || 'Login failed');
+          setAppleLoading(false);
+          return;
         }
-        setAppleLoading(false);
-        return;
       }
       
       const { error } = await startOAuthSignIn('apple');
