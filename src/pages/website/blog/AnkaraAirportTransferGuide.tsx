@@ -46,6 +46,14 @@ const AnkaraAirportTransferGuide = () => {
     { to: t("blogAnkaraDestCayyolu"), sedan: "€54", vito: "€59", maybachMinivan: "€98", vipVito: "€76", sprinter: "€110" },
     { to: t("blogAnkaraDestEryaman"), sedan: "€54", vito: "€59", maybachMinivan: "€98", vipVito: "€76", sprinter: "€110" },
     { to: t("blogAnkaraDestBatikent"), sedan: "€54", vito: "€59", maybachMinivan: "€98", vipVito: "€76", sprinter: "€110" },
+    { to: t("blogAnkaraDestTurkkonut"), sedan: "€68", vito: "€72", maybachMinivan: "€120", vipVito: "€88", sprinter: "€130" },
+    { to: t("blogAnkaraDestYapracik"), sedan: "€68", vito: "€72", maybachMinivan: "€120", vipVito: "€88", sprinter: "€130" },
+    { to: t("blogAnkaraDestTurkuaz"), sedan: "€68", vito: "€72", maybachMinivan: "€120", vipVito: "€88", sprinter: "€130" },
+    { to: t("blogAnkaraDestYasamkent"), sedan: "€68", vito: "€72", maybachMinivan: "€120", vipVito: "€88", sprinter: "€130" },
+    { to: t("blogAnkaraDestGolbasi"), sedan: "€68", vito: "€72", maybachMinivan: "€120", vipVito: "€88", sprinter: "€130" },
+    { to: t("blogAnkaraDestIncek"), sedan: "€68", vito: "€72", maybachMinivan: "€120", vipVito: "€88", sprinter: "€130" },
+    { to: t("blogAnkaraDestSincanOSB"), sedan: "€68", vito: "€72", maybachMinivan: "€120", vipVito: "€88", sprinter: "€130" },
+    { to: t("blogAnkaraDestTorekent"), sedan: "€68", vito: "€72", maybachMinivan: "€120", vipVito: "€88", sprinter: "€130" },
   ];
 
   return (
