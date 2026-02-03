@@ -77,6 +77,7 @@ const currencies = [
 
 const defaultCities = [
   "Istanbul",
+  "Ankara",
   "Antalya",
   "Bodrum",
   "Dalaman",

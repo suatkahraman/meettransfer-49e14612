@@ -318,6 +318,40 @@ const destinationData: Record<string, {
     locations: ["Limassol", "Ayia Napa", "Protaras", "Paphos", "Nicosia", "Kyrenia", "Famagusta"],
     gradient: "from-green-500/80 to-emerald-600/80",
   },
+  ankara: {
+    name: "Ankara",
+    nameTR: "Ankara",
+    airports: ["ESB"],
+    rating: 4.8,
+    fromPrice: 44,
+    popular: false,
+    description: {
+      en: "Ankara, Turkey's capital city, offers seamless airport transfers from Esenboğa Airport (ESB). Our professional chauffeurs provide VIP service to all government districts, business centers, embassies, and hotels throughout the city.",
+      tr: "Türkiye'nin başkenti Ankara, Esenboğa Havalimanı'ndan (ESB) kesintisiz havalimanı transferleri sunar. Profesyonel şoförlerimiz, şehirdeki tüm hükümet bölgelerine, iş merkezlerine, elçiliklere ve otellere VIP hizmet sağlar."
+    },
+    highlights: {
+      en: ["Capital city expertise", "Embassy & government transfers", "Business district coverage", "24/7 professional service"],
+      tr: ["Başkent uzmanlığı", "Elçilik ve hükümet transferleri", "İş bölgesi kapsamı", "7/24 profesyonel hizmet"]
+    },
+    prices: [
+      { route: "ESB Airport → Kızılay", price: "€44" },
+      { route: "ESB Airport → Çankaya", price: "€44" },
+      { route: "ESB Airport → Çukurambar", price: "€48" },
+      { route: "ESB Airport → Bilkent", price: "€48" },
+      { route: "ESB Airport → Çayyolu", price: "€54" },
+      { route: "ESB Airport → Gölbaşı", price: "€68" },
+    ],
+    faqItems: [
+      { question: "How long is the transfer from Esenboğa Airport to city center?", answer: "The journey to Kızılay/Çankaya typically takes 35-45 minutes depending on traffic. Our drivers monitor real-time traffic for optimal routes." },
+      { question: "Do you provide transfers to government buildings?", answer: "Yes, we specialize in embassy, ministry, and government building transfers with professional, discreet service." },
+    ],
+    locations: ["Kızılay", "Çankaya", "Çukurambar", "Bilkent", "Çayyolu", "Gölbaşı", "Eryaman", "Batıkent"],
+    gradient: "from-red-500/80 to-rose-600/80",
+    galleryImages: [
+      { src: "https://images.unsplash.com/photo-1569360155989-7d40ed562cb8?w=800", alt: "Ankara Kocatepe Mosque" },
+      { src: "https://images.unsplash.com/photo-1580502304784-8985b7eb7260?w=800", alt: "Anıtkabir" },
+    ],
+  },
   fethiye: {
     name: "Fethiye",
     nameTR: "Fethiye",
