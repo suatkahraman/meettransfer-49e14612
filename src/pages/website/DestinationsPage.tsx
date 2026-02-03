@@ -166,20 +166,31 @@ const DestinationsPage = () => {
         { label: "Ski Resort Guide", path: "/blog/switzerland-airport-transfer-guide" },
       ],
     },
+    {
+      id: 14,
+      name: "Ankara",
+      airports: "ESB",
+      tagline: t("capitalCity"),
+      icon: "🏛️",
+      IconComponent: Building2,
+      locations: ["Çankaya", "Kızılay", "Ulus", "Gölbaşı", "İncek", "Çayyolu", "Eryaman"],
+      vehicles: "Mercedes Vito VIP",
+      link: "/blog/ankara-airport-transfer-guide",
+    },
   ];
   
   return (
     <WebsiteLayout>
       <SEOHead
         title="Airport Transfer Destinations | Turkey, Dubai, Cyprus, Germany, Switzerland VIP Transfers | Meet Transfer"
-        description="Premium airport transfer service across Turkey, Dubai, Cyprus, Germany and Switzerland. VIP transfers from Istanbul, Antalya, Bodrum, Dubai, Larnaca, Paphos, Frankfurt, Zurich, Geneva airports. Swiss ski resort transfers. Mercedes fleet, 24/7 meet & greet service."
-        keywords="airport transfer destinations, Turkey airport transfer, Istanbul transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, Dubai airport transfer, Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Frankfurt airport transfer, Germany transfer, Switzerland airport transfer, Zurich airport transfer, Geneva airport transfer, St Moritz transfer, Zermatt transfer, ski resort transfer, VIP transfer, private chauffeur, Mercedes transfer"
+        description="Premium airport transfer service across Turkey, Dubai, Cyprus, Germany and Switzerland. VIP transfers from Istanbul, Ankara, Antalya, Bodrum, Dubai, Larnaca, Paphos, Frankfurt, Zurich, Geneva airports. Swiss ski resort transfers. Mercedes fleet, 24/7 meet & greet service."
+        keywords="airport transfer destinations, Turkey airport transfer, Istanbul transfer, Ankara transfer, Antalya transfer, Bodrum transfer, Dalaman transfer, Izmir transfer, Cappadocia transfer, Dubai airport transfer, Cyprus airport transfer, Larnaca airport transfer, Paphos airport transfer, Frankfurt airport transfer, Germany transfer, Switzerland airport transfer, Zurich airport transfer, Geneva airport transfer, St Moritz transfer, Zermatt transfer, ski resort transfer, VIP transfer, private chauffeur, Mercedes transfer"
         canonicalPath="/destinations"
         ogImage="https://meettransfer.app/images/meet-transfer-vip-mercedes-vito.jpg"
       />
       <SchemaOrg
         schemas={[
-          { type: 'TransportationService', areaServed: ['Istanbul', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos', 'Bursa', 'Uludağ', 'Frankfurt', 'Germany', 'Athens', 'Greece', 'Thessaloniki', 'Switzerland', 'Zurich', 'Geneva', 'Basel', 'St. Moritz', 'Zermatt', 'Verbier', 'Davos'] },
+          { type: 'TransportationService', areaServed: ['Istanbul', 'Ankara', 'Antalya', 'Bodrum', 'Dalaman', 'Izmir', 'Cappadocia', 'Dubai', 'Cyprus', 'Larnaca', 'Paphos', 'Bursa', 'Uludağ', 'Frankfurt', 'Germany', 'Athens', 'Greece', 'Thessaloniki', 'Switzerland', 'Zurich', 'Geneva', 'Basel', 'St. Moritz', 'Zermatt', 'Verbier', 'Davos'] },
           {
             type: 'BreadcrumbList',
             items: [

@@ -9,6 +9,7 @@ import bodrumTransfer from "@/assets/bodrum-transfer.webp";
 import istanbulTransfer from "@/assets/istanbul-transfer.webp";
 import antalyaTransfer from "@/assets/antalya-transfer.webp";
 import bursaTransfer from "@/assets/bursa-transfer.webp";
+import ankaraTransfer from "@/assets/ankara-transfer.webp";
 
 export const Destinations = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -49,6 +50,13 @@ export const Destinations = () => {
       descKey: "bursaDesc",
       image: bursaTransfer,
       link: "/bursa-transfer",
+    },
+    {
+      routeKey: "ankaraCenter",
+      airports: "ESB",
+      descKey: "ankaraDesc",
+      image: ankaraTransfer,
+      link: "/blog/ankara-airport-transfer-guide",
     },
   ];
 

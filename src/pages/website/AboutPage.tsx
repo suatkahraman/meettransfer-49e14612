@@ -11,7 +11,7 @@ import { PaymentComingSoonBanner } from "@/components/hero/PaymentComingSoonBann
 
 const cities = [
   // Turkey
-  "Istanbul", "Antalya", "Bodrum", "Dalaman", "Izmir",
+  "Istanbul", "Ankara", "Antalya", "Bodrum", "Dalaman", "Izmir",
   "Cappadocia", "Fethiye", "Marmaris", "Alanya", "Side",
   // Germany
   "Frankfurt", "Berlin", "Munich",
