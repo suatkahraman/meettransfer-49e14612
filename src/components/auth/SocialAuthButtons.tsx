@@ -65,18 +65,11 @@ export const SocialAuthButtons = ({
 
     setIsGoogleLoading(true);
     try {
-      // For iOS PWA standalone mode, open OAuth bridge page in new Safari window
-      // This uses Lovable managed OAuth which doesn't work with getOAuthUrl
+      // IMPORTANT (iOS PWA): Do NOT open OAuth in a new Safari tab/window.
+      // iOS isolates storage between PWA standalone and Safari, so the session would not
+      // carry back to the PWA. Keep the whole OAuth flow in the same PWA window.
       if (isIOS && isStandalone) {
-        const oauthBridgeUrl = `${window.location.origin}/oauth-start?provider=google`;
-        const opened = window.open(oauthBridgeUrl, '_blank');
-        if (!opened) {
-          toast.error(t('iosGoogleLoginNotice') || 'Lütfen Safari\'de açarak Google ile giriş yapın');
-        } else {
-          toast.info(t('redirectingGoogle') || 'Yönlendiriliyor...');
-        }
-        setIsGoogleLoading(false);
-        return;
+        toast.info(t('redirectingGoogle') || 'Yönlendiriliyor...');
       }
 
       const { error } = await startOAuthSignIn('google');
@@ -101,18 +94,10 @@ export const SocialAuthButtons = ({
 
     setIsAppleLoading(true);
     try {
-      // For iOS PWA standalone mode, open OAuth bridge page in new Safari window
-      // This uses Lovable managed OAuth which doesn't work with getOAuthUrl
+      // IMPORTANT (iOS PWA): Do NOT open OAuth in a new Safari tab/window.
+      // Keep the whole OAuth flow in the same PWA window to preserve auth session.
       if (isIOS && isStandalone) {
-        const oauthBridgeUrl = `${window.location.origin}/oauth-start?provider=apple`;
-        const opened = window.open(oauthBridgeUrl, '_blank');
-        if (!opened) {
-          toast.error(t('iosAppleLoginNotice') || 'Lütfen Safari\'de açarak Apple ile giriş yapın');
-        } else {
-          toast.info(t('redirectingApple') || 'Yönlendiriliyor...');
-        }
-        setIsAppleLoading(false);
-        return;
+        toast.info(t('redirectingApple') || 'Yönlendiriliyor...');
       }
 
       const { error } = await startOAuthSignIn('apple');
