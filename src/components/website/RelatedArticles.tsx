@@ -95,6 +95,16 @@ export const allBlogPosts = [
     isStatic: true,
   },
   {
+    id: "ankara-airport-transfer-guide",
+    titleKey: "blogAnkaraTitle",
+    descriptionKey: "blogAnkaraDesc",
+    category: "Ankara",
+    categoryKey: "ankara",
+    readTime: 8,
+    date: "2025-02-03",
+    image: vitoExteriorBlack,
+  },
+  {
     id: "diyarbakir-airport-transfer-guide",
     titleKey: "blogDiyTitle",
     descriptionKey: "blogDiyDesc",
