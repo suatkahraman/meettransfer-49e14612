@@ -75,7 +75,7 @@ const WebsiteHeader = () => {
   };
 
   return (
-    <header className={`w-full z-50 bg-black border-b border-border/20 transition-all duration-300 ${isSticky ? 'fixed top-0 left-0 right-0 shadow-lg animate-in slide-in-from-top-2' : ''}`}>
+    <header className={`w-full z-50 bg-black border-b border-border/20 transition-all duration-300 safe-area-inset-top ${isSticky ? 'fixed top-0 left-0 right-0 shadow-lg animate-in slide-in-from-top-2 fixed-header-ios' : ''}`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between h-20 sm:h-24">
         {/* Left - Logo + Brand Name + Sign Up */}
         <div className="flex items-center gap-3 sm:gap-4">

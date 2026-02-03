@@ -412,6 +412,31 @@ body {
   }
 }
 
+/* Safe area utility classes for iOS PWA standalone mode */
+.safe-area-inset-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-top-margin {
+  margin-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Fixed header safe area for iOS PWA */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .header-safe-area {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  /* When header is fixed, add top padding for safe area */
+  .fixed-header-ios {
+    top: env(safe-area-inset-top, 0px);
+  }
+}
+
 /* Prevent touch scrolling issues on mobile */
 @media (max-width: 768px) {
   /* Ensure no element extends beyond viewport */
