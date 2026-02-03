@@ -450,9 +450,10 @@ body {
     overflow-x: hidden;
   }
   
-  /* Prevent horizontal rubber-banding on iOS */
+  /* Prevent horizontal rubber-banding on iOS - only for x-axis to allow smooth vertical scroll */
   html {
-    overscroll-behavior: none;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: auto;
   }
 }
 
