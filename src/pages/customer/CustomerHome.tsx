@@ -164,6 +164,15 @@ const CustomerHome = () => {
   } | null>(null);
   const [isCreatingReservation, setIsCreatingReservation] = useState(false);
   
+  // Phone number modal for OAuth users without phone
+  const [showPhoneRequiredModal, setShowPhoneRequiredModal] = useState(false);
+  const [pendingOAuthBooking, setPendingOAuthBooking] = useState<{
+    sessionData: any;
+    customerName: string;
+    customerEmail: string;
+  } | null>(null);
+  const [oauthPhoneNumber, setOauthPhoneNumber] = useState('');
+  
   const [formData, setFormData] = useState({
     pickup: '',
     dropoff: '',
@@ -445,11 +454,6 @@ const CustomerHome = () => {
       if (sessionBookingData && sessionBookingData.pickup && sessionBookingData.dropoff) {
         console.log('[CustomerHome] Found pending booking from sessionStorage, creating reservation...', sessionBookingData);
         
-        // Clear the pending booking data immediately to prevent duplicate processing
-        PendingBookingStorage.clear();
-        
-        setIsCreatingReservation(true);
-        
         try {
           // Get user profile info
           const { data: profile } = await supabase
@@ -461,6 +465,26 @@ const CustomerHome = () => {
           const customerName = sessionBookingData.customerName || profile?.full_name || user.user_metadata?.full_name || 'Customer';
           const customerPhone = sessionBookingData.customerPhone || profile?.phone || '';
           const customerEmail = user.email || '';
+          
+          // If phone number is missing, show modal to collect it
+          if (!customerPhone || customerPhone.trim() === '') {
+            console.log('[CustomerHome] Phone number missing, showing phone modal...');
+            setPendingOAuthBooking({
+              sessionData: sessionBookingData,
+              customerName,
+              customerEmail,
+            });
+            setOauthPhoneNumber('');
+            setShowPhoneRequiredModal(true);
+            // Clear pending booking to prevent reprocessing on refresh
+            PendingBookingStorage.clear();
+            return;
+          }
+          
+          // Clear the pending booking data immediately to prevent duplicate processing
+          PendingBookingStorage.clear();
+          
+          setIsCreatingReservation(true);
           
           // Determine initial status based on whether we have a price
           const hasPrice = sessionBookingData.estimatedPrice && sessionBookingData.estimatedPrice > 0;
@@ -739,7 +763,139 @@ const CustomerHome = () => {
     }
   };
 
-  // Wait for auth to complete before fetching data
+  // Handle completing OAuth booking after phone number is provided
+  const handleCompleteOAuthBooking = async () => {
+    if (!user?.id || !pendingOAuthBooking) return;
+    
+    const phoneNumber = oauthPhoneNumber.trim();
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast.error(language === 'TR' 
+        ? 'Lütfen geçerli bir telefon numarası girin'
+        : 'Please enter a valid phone number');
+      return;
+    }
+    
+    setIsCreatingReservation(true);
+    
+    try {
+      const { sessionData, customerName, customerEmail } = pendingOAuthBooking;
+      
+      // Update user profile with phone number
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        full_name: customerName,
+        phone: phoneNumber,
+        updated_at: new Date().toISOString()
+      });
+      
+      // Determine initial status based on whether we have a price
+      const hasPrice = sessionData.estimatedPrice && sessionData.estimatedPrice > 0;
+      const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
+      
+      // Build passenger names array
+      let passengerNamesArray = sessionData.passengerNames;
+      if (!passengerNamesArray || passengerNamesArray.length === 0) {
+        passengerNamesArray = [customerName];
+      }
+      
+      // Create main reservation
+      const reservationData = {
+        customer_id: user.id,
+        customer_name: customerName,
+        customer_phone: phoneNumber,
+        pickup: sessionData.pickup!,
+        dropoff: sessionData.dropoff!,
+        pickup_date: sessionData.date || new Date().toISOString().split('T')[0],
+        pickup_time: sessionData.time || '10:00',
+        vehicle_type: sessionData.vehicleType || 'Mercedes Vito',
+        passengers: sessionData.passengers || 1,
+        price: sessionData.estimatedPrice || null,
+        price_currency: sessionData.currency || 'EUR',
+        status: initialStatus,
+        payment_method: sessionData.paymentMethod || 'cash',
+        payment_type: sessionData.paymentMethod || 'cash',
+        luggage_count: sessionData.luggageCount || 1,
+        baby_seat_count: sessionData.babySeatCount || 0,
+        customer_notes: sessionData.customerNotes || null,
+        flight_number: sessionData.flightNumber || null,
+        passenger_names: passengerNamesArray,
+        promo_code: sessionData.promoCode || null,
+      };
+      
+      const { data: reservation, error: reservationError } = await supabase
+        .from('reservations')
+        .insert([reservationData])
+        .select()
+        .single();
+      
+      if (reservationError) {
+        console.error('[CustomerHome] Failed to create OAuth reservation:', reservationError);
+        toast.error(language === 'TR' 
+          ? 'Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.'
+          : 'Failed to create reservation. Please try again.');
+        return;
+      }
+      
+      console.log('[CustomerHome] OAuth Reservation created successfully:', reservation?.reservation_code);
+      
+      // Create return trip if requested
+      if (sessionData.hasReturnTrip && sessionData.returnDate && sessionData.returnTime) {
+        const returnData = {
+          customer_id: user.id,
+          customer_name: customerName,
+          customer_phone: phoneNumber,
+          pickup: sessionData.dropoff!, // Swap
+          dropoff: sessionData.pickup!, // Swap
+          pickup_date: sessionData.returnDate,
+          pickup_time: sessionData.returnTime,
+          vehicle_type: sessionData.vehicleType || 'Mercedes Vito',
+          passengers: sessionData.passengers || 1,
+          price: sessionData.returnPrice || sessionData.estimatedPrice || null,
+          price_currency: sessionData.currency || 'EUR',
+          status: initialStatus,
+          payment_method: sessionData.paymentMethod || 'cash',
+          payment_type: sessionData.paymentMethod || 'cash',
+          luggage_count: sessionData.luggageCount || 1,
+          baby_seat_count: sessionData.babySeatCount || 0,
+          customer_notes: sessionData.customerNotes || null,
+          passenger_names: passengerNamesArray,
+          promo_code: sessionData.promoCode || null,
+          is_return_trip: true,
+          original_reservation_id: reservation?.id,
+        };
+        
+        const { error: returnError } = await supabase
+          .from('reservations')
+          .insert([returnData]);
+        
+        if (returnError) {
+          console.error('[CustomerHome] Failed to create return reservation:', returnError);
+        } else {
+          console.log('[CustomerHome] Return reservation created successfully');
+        }
+      }
+      
+      toast.success(language === 'TR' 
+        ? `Rezervasyonunuz oluşturuldu! Kod: ${reservation?.reservation_code}`
+        : `Your reservation has been created! Code: ${reservation?.reservation_code}`);
+      
+      // Close modal and refresh
+      setShowPhoneRequiredModal(false);
+      setPendingOAuthBooking(null);
+      setOauthPhoneNumber('');
+      setProfileData({ full_name: customerName, phone: phoneNumber });
+      fetchData();
+      
+    } catch (err) {
+      console.error('[CustomerHome] Error completing OAuth booking:', err);
+      toast.error(language === 'TR' 
+        ? 'Bir hata oluştu. Lütfen tekrar deneyin.'
+        : 'An error occurred. Please try again.');
+    } finally {
+      setIsCreatingReservation(false);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && user?.id) {
       fetchData();
@@ -3200,6 +3356,102 @@ const CustomerHome = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Phone Number Required Modal - For OAuth users without phone */}
+      <Dialog open={showPhoneRequiredModal} onOpenChange={(open) => {
+        if (!open && !isCreatingReservation) {
+          setShowPhoneRequiredModal(false);
+          setPendingOAuthBooking(null);
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Phone className="h-6 w-6 text-primary" />
+              {language === 'TR' ? 'Telefon Numaranız' : 'Your Phone Number'}
+            </DialogTitle>
+            <DialogDescription>
+              {language === 'TR' 
+                ? 'Rezervasyonunuzu tamamlamak için lütfen telefon numaranızı girin. Şoförünüz bu numaradan sizinle iletişime geçecektir.'
+                : 'Please enter your phone number to complete your reservation. Your driver will contact you using this number.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          {pendingOAuthBooking && (
+            <div className="space-y-4 py-4">
+              {/* Booking Summary */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-green-600" />
+                  <span className="font-medium truncate">{pendingOAuthBooking.sessionData?.pickup}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="h-4 w-4 text-red-500" />
+                  <span className="font-medium truncate">{pendingOAuthBooking.sessionData?.dropoff}</span>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {pendingOAuthBooking.sessionData?.date}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {pendingOAuthBooking.sessionData?.time}
+                  </span>
+                </div>
+                {pendingOAuthBooking.sessionData?.estimatedPrice && (
+                  <div className="pt-2 border-t">
+                    <span className="text-lg font-bold text-primary">
+                      {pendingOAuthBooking.sessionData.estimatedPrice} {pendingOAuthBooking.sessionData.currency || 'EUR'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Phone Input */}
+              <div className="space-y-2">
+                <Label htmlFor="oauth-phone" className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  {language === 'TR' ? 'Telefon Numarası' : 'Phone Number'}
+                  <span className="text-destructive">*</span>
+                </Label>
+                <PhoneInput
+                  value={oauthPhoneNumber}
+                  onChange={setOauthPhoneNumber}
+                  placeholder={language === 'TR' ? 'Örn: +90 532 123 45 67' : 'E.g: +1 555 123 4567'}
+                  disabled={isCreatingReservation}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {language === 'TR' 
+                    ? 'Şoförünüz transfer öncesinde bu numaradan sizinle iletişime geçecektir.'
+                    : 'Your driver will contact you at this number before your transfer.'
+                  }
+                </p>
+              </div>
+              
+              {/* Submit Button */}
+              <Button 
+                onClick={handleCompleteOAuthBooking}
+                disabled={isCreatingReservation || !oauthPhoneNumber.trim()}
+                className="w-full h-12 text-base font-semibold"
+              >
+                {isCreatingReservation ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    {language === 'TR' ? 'Oluşturuluyor...' : 'Creating...'}
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    {language === 'TR' ? 'Rezervasyonu Tamamla' : 'Complete Reservation'}
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       
       {/* Pending Booking Modal - Complete Missing Info */}
       <Dialog open={showPendingBookingModal} onOpenChange={setShowPendingBookingModal}>
