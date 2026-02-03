@@ -1674,7 +1674,7 @@ const BookingPage = () => {
                 <CompactRouteMap 
                   pickup={effectivePickup} 
                   dropoff={effectiveDropoff}
-                  className="h-[200px] sm:h-[280px] [&>div]:h-full [&_div[style*='height']]:!h-full"
+                  mapHeight="250px"
                 />
               </CardContent>
             </Card>
