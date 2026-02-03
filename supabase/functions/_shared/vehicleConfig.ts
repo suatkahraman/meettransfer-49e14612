@@ -13,12 +13,43 @@ export type VehicleRegion = 'turkey' | 'dubai' | 'switzerland' | 'cyprus' | 'def
 
 // Central vehicle types - matches frontend (Turkey/Standard)
 export const VEHICLE_TYPES: VehicleTypeConfig[] = [
-  { value: 'sedan', label: 'Sedan', passengers: 3, luggage: 2 },
-  { value: 'mercedes-vito', label: 'Mercedes Vito', passengers: 6, luggage: 6 },
+  { value: 'sedan', label: 'Standart Sedan', passengers: 3, luggage: 2 },
+  { value: 'mercedes-vito', label: 'Mercedes Vito or Similar', passengers: 6, luggage: 6 },
   { value: 'vip-mercedes', label: 'VIP Mercedes Vito', passengers: 5, luggage: 5 },
   { value: 'maybach-minibus', label: 'Mercedes Maybach Minivan', passengers: 4, luggage: 4 },
-  { value: 'minibus', label: 'Mercedes Sprinter', passengers: 16, luggage: 16 },
+  { value: 'minibus', label: 'Mercedes Sprinter or Similar', passengers: 16, luggage: 16 },
 ];
+
+// Turkey distance-based fallback pricing (EUR)
+// Used when no price found in database
+export const TURKEY_DISTANCE_FALLBACK_PRICES: Record<string, { base50km: number; per_km_50_100: number }> = {
+  'sedan': { base50km: 58, per_km_50_100: 1 },
+  'mercedes-vito': { base50km: 62, per_km_50_100: 1 },
+  'vip-mercedes': { base50km: 70, per_km_50_100: 1 },
+  'maybach-minibus': { base50km: 85, per_km_50_100: 1 },
+  'minibus': { base50km: 120, per_km_50_100: 1 },
+};
+
+// Calculate fallback price for Turkey based on distance
+export function calculateTurkeyFallbackPrice(vehicleType: string, distanceKm: number): { price: number; currency: string } | null {
+  const fallback = TURKEY_DISTANCE_FALLBACK_PRICES[vehicleType];
+  if (!fallback) return null;
+  
+  // 0-50km: Fixed base price
+  if (distanceKm <= 50) {
+    return { price: fallback.base50km, currency: 'EUR' };
+  }
+  
+  // 50-100km: Base + 1 EUR per km above 50
+  if (distanceKm <= 100) {
+    const extraKm = Math.ceil(distanceKm - 50);
+    const price = fallback.base50km + (extraKm * fallback.per_km_50_100);
+    return { price, currency: 'EUR' };
+  }
+  
+  // 100km+: Return null - should use intercity/city prices instead
+  return null;
+}
 
 // Dubai-specific vehicle types
 export const DUBAI_VEHICLE_TYPES: VehicleTypeConfig[] = [
