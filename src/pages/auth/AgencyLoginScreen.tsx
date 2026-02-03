@@ -373,7 +373,7 @@ const AgencyLoginScreen = () => {
   if (viewMode === '2fa') {
     return (
       <div className="min-h-screen flex flex-col bg-secondary">
-        <header className="sticky top-0 z-50 bg-card border-b border-border">
+        <header className="sticky top-0 z-50 bg-card border-b border-border safe-area-header">
           <div className="flex items-center h-14 px-4">
             <button 
               onClick={handle2FACancel} 
@@ -408,7 +408,7 @@ const AgencyLoginScreen = () => {
   if (viewMode === 'reset') {
     return (
       <div className="min-h-screen flex flex-col bg-secondary">
-        <header className="sticky top-0 z-50 bg-card border-b border-border">
+        <header className="sticky top-0 z-50 bg-card border-b border-border safe-area-header">
           <div className="flex items-center h-14 px-4">
             <button 
               onClick={() => setViewMode('login')} 
@@ -475,8 +475,8 @@ const AgencyLoginScreen = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-secondary">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border">
+      {/* Header with iOS safe area support */}
+      <header className="sticky top-0 z-50 bg-card border-b border-border safe-area-header">
         <div className="flex items-center justify-between h-14 px-4">
           <Link to="/" className="flex items-center gap-2 text-foreground">
             <ArrowLeft className="h-5 w-5" />
