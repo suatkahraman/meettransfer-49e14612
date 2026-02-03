@@ -196,53 +196,99 @@ export function isCyprusLocation(location: string): boolean {
   if (!location) return false;
   const normalizedLocation = normalizeTurkishChars(location);
   
-  const cyprusKeywords = [
-    // Country/Region names
+  // Strong indicators that confirm Cyprus/KKTC
+  const strongCyprusIndicators = [
     'kuzey kibris', 'northern cyprus', 'north cyprus',
-    'kktc', 'trnc', 'kibris', 'cyprus',
-    // Airport
+    'kktc', 'trnc', 
     'ecn', 'ercan', 'ercan airport', 'ercan havalimani',
-    // Major cities
     'girne', 'kyrenia',
     'lefkosa', 'nicosia', 'lefkose',
     'gazimagusa', 'famagusta', 'magusa',
     'guzelyurt', 'morphou',
-    'iskele', 'trikomo',
-    // Districts
-    'alsancak', 'lapta', 'esentepe', 'catalkoy',
-    'karakum', 'karsiyaka', 'yenierekoy',
+  ];
+  
+  // If strong indicator found, it's Cyprus
+  if (strongCyprusIndicators.some(keyword => normalizedLocation.includes(keyword))) {
+    return true;
+  }
+  
+  // Ambiguous districts that exist in both Turkey and KKTC
+  // These require additional context to determine region
+  const ambiguousDistricts = ['alsancak', 'lapta', 'esentepe', 'karsiyaka'];
+  
+  // Check if location contains ambiguous district names
+  const hasAmbiguousDistrict = ambiguousDistricts.some(d => normalizedLocation.includes(d));
+  
+  // If ambiguous district found, check for Turkey-specific context
+  if (hasAmbiguousDistrict) {
+    const turkeyContextKeywords = [
+      'izmir', 'istanbul', 'antalya', 'konak', 'turkiye', 'turkey',
+      'adb', 'adnan menderes', 'sabiha', 'ist ',
+    ];
+    
+    // If Turkey context found, it's NOT Cyprus
+    if (turkeyContextKeywords.some(k => normalizedLocation.includes(k))) {
+      return false;
+    }
+    
+    // Check for Cyprus context with ambiguous districts
+    const cyprusContextKeywords = ['kibris', 'cyprus', 'kktc', 'girne', 'lefkosa'];
+    if (cyprusContextKeywords.some(k => normalizedLocation.includes(k))) {
+      return true;
+    }
+    
+    // No clear context - default to NOT Cyprus for safety
+    return false;
+  }
+  
+  // Other Cyprus-specific districts (not ambiguous)
+  const cyprusOnlyDistricts = [
+    'catalkoy', 'karakum', 'yenierekoy',
     'yeni bogazici', 'maras', 'varosha',
     'dipkarpaz', 'karpaz', 'karpasia', 'mehmetcik',
     'akdeniz', 'lefke', 'degirmenlik',
-    // Popular areas
     'bellapais', 'beylerbeyi', 'ozankoy',
     'karaoglanoglu', 'karmi', 'ilgaz',
     'zeytinlik', 'edremit', 'tatlisu',
-    'bogaz', 'kumyali',
+    'bogaz', 'kumyali', 'iskele', 'trikomo',
   ];
   
-  return cyprusKeywords.some(keyword => normalizedLocation.includes(keyword));
+  return cyprusOnlyDistricts.some(keyword => normalizedLocation.includes(keyword));
 }
 
 // Detect region from pickup/dropoff locations
 export function detectRegion(pickup: string, dropoff: string): VehicleRegion {
-  // IMPORTANT: Check Cyprus/KKTC FIRST to avoid conflicts with Turkey
-  // (some district names like Alsancak exist in both Turkey and KKTC)
+  const normalizedPickup = normalizeTurkishChars(pickup || '');
+  const normalizedDropoff = normalizeTurkishChars(dropoff || '');
+  
+  // IMPORTANT: Check TURKEY FIRST for locations with Turkish airport codes or city names
+  // This prevents false Cyprus detection for places like "Alsancak, Izmir"
+  if (isTurkeyLocation(pickup) || isTurkeyLocation(dropoff)) {
+    // Double-check: if there are strong Cyprus indicators, override
+    const strongCyprusIndicators = ['ercan', 'ecn', 'girne', 'lefkosa', 'gazimagusa', 'kktc', 'kuzey kibris'];
+    const hasCyprusIndicator = strongCyprusIndicators.some(k => 
+      normalizedPickup.includes(k) || normalizedDropoff.includes(k)
+    );
+    if (!hasCyprusIndicator) {
+      return 'turkey';
+    }
+  }
+  
+  // Check Cyprus/KKTC
   if (isCyprusLocation(pickup) || isCyprusLocation(dropoff)) {
     return 'cyprus';
   }
-  // Check Turkey next
-  if (isTurkeyLocation(pickup) || isTurkeyLocation(dropoff)) {
-    return 'turkey';
-  }
+  
   // Check Dubai
   if (isDubaiLocation(pickup) || isDubaiLocation(dropoff)) {
     return 'dubai';
   }
+  
   // Check Switzerland last (to avoid false positives from "Swiss" in brand names)
   if (isSwitzerlandLocation(pickup) || isSwitzerlandLocation(dropoff)) {
     return 'switzerland';
   }
+  
   // Default to Turkey/standard vehicles
   return 'default';
 }
