@@ -173,22 +173,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGoogle = async () => {
     try {
-      // Check if running as installed PWA (standalone mode)
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                          (window.navigator as any).standalone === true;
-      
-      if (isStandalone) {
-        // For iOS PWA standalone mode, open in system browser
-        const authUrl = `${window.location.origin}/login?oauth=google`;
-        const opened = window.open(authUrl, '_blank');
-        if (!opened) {
-          toast.error('Lütfen tarayıcınızda açın');
-          return { error: new Error('Cannot open browser') };
-        }
-        toast.info('Lütfen açılan tarayıcıda Google ile giriş yapın');
-        return { error: null };
-      }
-      
+      // IMPORTANT: Do not open OAuth in a separate tab/window for PWA.
+      // iOS isolates storage between PWA and Safari, so auth session would not persist.
       const { error } = await startOAuthSignIn('google');
       
       if (error) {
