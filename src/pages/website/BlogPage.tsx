@@ -350,6 +350,16 @@ const BlogPage = () => {
       isStatic: true,
     },
     {
+      id: "ankara-airport-transfer-guide",
+      titleKey: "blogAnkaraTitle",
+      descriptionKey: "blogAnkaraDesc",
+      category: "Ankara",
+      categoryKey: "ankara",
+      readTime: 8,
+      date: "2025-02-03",
+      image: vitoExteriorBlack,
+    },
+    {
       id: "switzerland-airport-transfer-guide",
       title: "Switzerland Airport Transfer Guide – Zurich, Geneva, Basel & Milan to Ski Resorts",
       description: "Complete guide to Switzerland airport transfers. Private transfers from Zurich, Geneva, Basel & Milan airports to St. Moritz, Zermatt, Verbier, Gstaad.",
