@@ -48,19 +48,13 @@ export async function getOAuthUrl(provider: OAuthProvider): Promise<{ url: strin
 
 /**
  * Starts OAuth sign-in.
- * - On custom domains, starts a direct backend OAuth flow and navigates to the authorize URL.
- * - On Lovable-hosted domains, uses the managed OAuth bridge.
+ * Always uses Lovable managed OAuth bridge which works on both Lovable domains and custom domains.
+ * 
+ * Note: The getOAuthUrl function is kept for iOS PWA popup flow (Safari blocks same-window redirects).
+ * For BYOK (Bring Your Own Keys) setup, configure OAuth credentials in Lovable Cloud settings.
  */
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
-  const onCustomDomain = isCustomDomain();
-
-  if (onCustomDomain) {
-    const { url, error } = await getOAuthUrl(provider);
-    if (error) return { error };
-    if (url) window.location.assign(url);
-    return { error: null };
-  }
-
+  // Always use Lovable managed OAuth - works on all domains including custom domains
   const { error } = await lovable.auth.signInWithOAuth(provider, {
     redirect_uri: window.location.origin,
   });
