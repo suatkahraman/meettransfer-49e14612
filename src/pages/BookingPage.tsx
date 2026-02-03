@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { validatePromoCode } from "@/hooks/useActivePromoCode";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePWADetect } from "@/hooks/usePWADetect";
 import { PendingBookingStorage } from "@/hooks/usePendingBookingStorage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,6 +106,7 @@ const BookingPage = () => {
   const { t, language, getLocalizedPath } = useLanguage();
   const { promoCode: activePromo } = usePromo();
   const { user } = useAuth();
+  const { isIOS, isStandalone } = usePWADetect();
 
   // Token for existing quick booking (from AI assistant)
   const urlToken = searchParams.get("token") || "";
@@ -1047,6 +1049,20 @@ const BookingPage = () => {
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('googleAuth', 'true');
       setPostOAuthRedirect(currentUrl.toString());
+
+      // iOS PWA standalone mode: run OAuth in a new Safari window/tab.
+      // Redirecting the current PWA window often breaks the return navigation and can lead to 404.
+      if (isIOS && isStandalone) {
+        const authUrl = `${window.location.origin}/login?oauth=apple`;
+        const opened = window.open(authUrl, '_blank');
+        if (!opened) {
+          toast.error(t('iosAppleLoginNotice') || 'Lütfen Safari’de açarak Apple ile giriş yapın');
+        } else {
+          toast.info(t('redirectingApple') || 'Yönlendiriliyor...');
+        }
+        setAppleLoading(false);
+        return;
+      }
       
       const { error } = await startOAuthSignIn('apple');
       
