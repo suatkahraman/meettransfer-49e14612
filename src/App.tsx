@@ -45,6 +45,7 @@ const SignupChoicePage = lazy(() => import("./pages/auth/SignupChoicePage"));
 const AgencySignupScreen = lazy(() => import("./pages/auth/AgencySignupScreen"));
 const AgencyLoginScreen = lazy(() => import("./pages/auth/AgencyLoginScreen"));
 const DriverLoginScreen = lazy(() => import("./pages/auth/DriverLoginScreen"));
+const OAuthStart = lazy(() => import("./pages/auth/OAuthStart"));
 const ReservationForm = lazy(() => import("./pages/ReservationForm"));
 const BookingPage = lazy(() => import("./pages/BookingPage"));
 const StandaloneReservation = lazy(() => import("./pages/StandaloneReservation"));
@@ -422,6 +423,7 @@ const App = () => {
               {/* OAuth callback routes - Not localized */}
               <Route path="/~oauth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
               <Route path="/oauth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
+              <Route path="/oauth-start" element={<LazyRoute><OAuthStart /></LazyRoute>} />
               
               {/* Customer Routes - Protected */}
               <Route path="/customer" element={<CustomerRoute><LazyRoute><CustomerHome /></LazyRoute></CustomerRoute>} />

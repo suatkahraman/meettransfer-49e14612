@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { setPostOAuthRedirect } from "@/lib/postOAuthRedirect";
-import { startOAuthSignIn, getOAuthUrl } from "@/lib/oauthSignIn";
+import { startOAuthSignIn } from "@/lib/oauthSignIn";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
 import { validatePromoCode } from "@/hooks/useActivePromoCode";
@@ -1029,6 +1029,20 @@ const BookingPage = () => {
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('googleAuth', 'true');
       setPostOAuthRedirect(currentUrl.toString());
+
+      // iOS PWA standalone mode: open OAuth bridge page in new Safari window
+      // This uses Lovable managed OAuth which doesn't work with getOAuthUrl
+      if (isIOS && isStandalone) {
+        const oauthBridgeUrl = `${window.location.origin}/oauth-start?provider=google`;
+        const opened = window.open(oauthBridgeUrl, '_blank');
+        if (!opened) {
+          toast.error(t('iosGoogleLoginNotice') || 'Lütfen Safari\'de açarak Google ile giriş yapın');
+        } else {
+          toast.info(t('redirectingGoogle') || 'Yönlendiriliyor...');
+        }
+        setGoogleLoading(false);
+        return;
+      }
       
       const { error } = await startOAuthSignIn('google');
       
@@ -1050,30 +1064,18 @@ const BookingPage = () => {
       currentUrl.searchParams.set('googleAuth', 'true');
       setPostOAuthRedirect(currentUrl.toString());
 
-      // iOS PWA standalone mode: run OAuth in a new Safari window/tab.
-      // Redirecting the current PWA window often breaks the return navigation and can lead to 404.
+      // iOS PWA standalone mode: open OAuth bridge page in new Safari window
+      // This uses Lovable managed OAuth which doesn't work with getOAuthUrl
       if (isIOS && isStandalone) {
-        try {
-          const { url, error: urlErr } = await getOAuthUrl('apple');
-          if (urlErr || !url) {
-            toast.error(urlErr?.message || t('loginFailed') || 'Login failed');
-            setAppleLoading(false);
-            return;
-          }
-          const opened = window.open(url, '_blank');
-          if (!opened) {
-            toast.error(t('iosAppleLoginNotice') || 'Lutfen Safari\'de acarak Apple ile giris yapin');
-          } else {
-            toast.info(t('redirectingApple') || 'Yonlendiriliyor...');
-          }
-          setAppleLoading(false);
-          return;
-        } catch (err) {
-          console.error('iOS PWA OAuth URL fetch failed:', err);
-          toast.error(t('loginFailed') || 'Login failed');
-          setAppleLoading(false);
-          return;
+        const oauthBridgeUrl = `${window.location.origin}/oauth-start?provider=apple`;
+        const opened = window.open(oauthBridgeUrl, '_blank');
+        if (!opened) {
+          toast.error(t('iosAppleLoginNotice') || 'Lütfen Safari\'de açarak Apple ile giriş yapın');
+        } else {
+          toast.info(t('redirectingApple') || 'Yönlendiriliyor...');
         }
+        setAppleLoading(false);
+        return;
       }
       
       const { error } = await startOAuthSignIn('apple');
