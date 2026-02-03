@@ -49,6 +49,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
           }
 
+          // Check current path first
+          const currentPath = window.location.pathname;
+          const isOAuthCallbackPath = currentPath.startsWith('/~oauth/callback') || currentPath.startsWith('/oauth/callback');
+          
+          // OAuth callback page handles its own redirect - don't interfere
+          if (isOAuthCallbackPath) return;
+
           // Check for post-OAuth redirect first (fastest path - sync)
           const postOAuthRedirect = consumePostOAuthRedirect();
           if (postOAuthRedirect) {
@@ -74,41 +81,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return;
           }
 
-          // Check current path to determine if redirect needed
-          const currentPath = window.location.pathname;
           const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
-          const isOAuthCallbackPath = currentPath.startsWith('/~oauth/callback') || currentPath.startsWith('/oauth/callback');
           const isHomePage = currentPath === '/' || currentPath === '';
           const hasOAuthParams = window.location.hash.includes('access_token=') || window.location.search.includes('code=');
           
-          const needsRedirect = isAuthPage || isOAuthCallbackPath || (isHomePage && hasOAuthParams);
+          const needsRedirect = isAuthPage || (isHomePage && hasOAuthParams);
           
-          // Only fetch role if we actually need to redirect
+          // Only fetch role if we actually need to redirect from auth pages
           if (!needsRedirect) return;
 
-          // Fire-and-forget role fetch with immediate fallback
-          (async () => {
-            try {
-              const { data: roleData } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', currentSession.user.id)
-                .maybeSingle();
-
-              if (!isMounted) return;
-              
-              const redirectMap: Record<string, string> = {
-                admin: '/admin',
-                driver: '/driver', 
-                agency: '/agency',
-                customer: '/customer'
-              };
-              
-              navigate(redirectMap[roleData?.role || 'customer'] || '/customer', { replace: true });
-            } catch {
-              if (isMounted) navigate('/customer', { replace: true });
-            }
-          })();
+          // For auth pages, redirect immediately to customer, then let dashboard handle role check
+          navigate('/customer', { replace: true });
         }
       }
     );
