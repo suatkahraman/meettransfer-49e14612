@@ -55,17 +55,22 @@ const SignupChoicePage = () => {
             {/* Agency Registration Card */}
             <Link to="/signup/agency">
               <Card className="cursor-pointer transition-all hover:border-accent hover:shadow-lg group">
-                <CardContent className="flex items-center gap-4 p-6">
-                  <div className="flex-shrink-0 w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                    <Building2 className="h-7 w-7 text-accent" />
+                <CardContent className="flex flex-col gap-3 p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-shrink-0 w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                      <Building2 className="h-7 w-7 text-accent" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-foreground">{t('agencyPartnerTitle')}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {t('agencyPartnerDesc')}
+                      </p>
+                    </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-foreground">{t('agencyPartnerTitle')}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {t('agencyPartnerDesc')}
-                    </p>
-                  </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                  <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-md">
+                    {t('agencyPartnerNote')}
+                  </p>
                 </CardContent>
               </Card>
             </Link>

@@ -221,8 +221,11 @@ export default function AgencySignupScreen() {
           </div>
           <CardTitle className="text-2xl font-bold">Agency Registration</CardTitle>
           <CardDescription className="text-muted-foreground">
-            Apply to become a Meet Transfer partner agency
+            We are the transfer service provider. Register to book transfers for your own customers.
           </CardDescription>
+          <p className="text-xs text-muted-foreground mt-2 bg-muted/50 p-2 rounded-md">
+            <strong>How it works:</strong> Agencies book transfers through us for their customers. You can track reservations, view driver details, and manage your account balance from your dedicated agency panel.
+          </p>
           
           {/* Share buttons */}
           <div className="flex items-center justify-center gap-2 mt-3">
