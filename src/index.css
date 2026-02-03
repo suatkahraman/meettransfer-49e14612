@@ -253,6 +253,11 @@ All colors MUST be HSL.
   -webkit-tap-highlight-color: transparent;
 }
 
+/* iOS safe area support for sticky headers */
+.safe-area-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 /* Smooth keyboard handling for mobile chat */
 @supports (height: 100dvh) {
   .mobile-chat-height {
