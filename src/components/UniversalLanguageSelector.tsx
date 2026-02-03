@@ -75,11 +75,25 @@ const UniversalLanguageSelector = ({
       return;
     }
 
-    // Navigate to homepage with the selected language prefix
-    const targetLang = LANGUAGES.find(l => l.code === newLang);
-    const newPath = newLang === "EN" ? "/" : targetLang?.prefix || "/";
+    // Calculate new path preserving current page structure and query params
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const firstPart = pathParts[0]?.toLowerCase();
+    
+    let basePath: string;
+    if (LANGUAGE_PREFIXES.includes(firstPart)) {
+      basePath = "/" + pathParts.slice(1).join("/") || "/";
+    } else {
+      basePath = location.pathname;
+    }
 
-    navigate(newPath);
+    const targetLang = LANGUAGES.find(l => l.code === newLang);
+    const newPath = newLang === "EN" 
+      ? (basePath === "" ? "/" : basePath)
+      : `${targetLang?.prefix}${basePath === "/" ? "" : basePath}`;
+
+    // Navigate with query params preserved (important for booking page data)
+    const fullPath = (newPath || "/") + location.search;
+    navigate(fullPath, { replace: true });
   };
 
   const triggerClasses = cn(
