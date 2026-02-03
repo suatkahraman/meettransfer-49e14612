@@ -55,8 +55,9 @@ const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
     // Update language in localStorage (context will pick it up from URL prefix)
     setLanguage(newLang);
 
-    // Navigate to new language path - this triggers context re-resolution
-    navigate(newPath || "/", { replace: true });
+    // Navigate to new language path with query params preserved - this triggers context re-resolution
+    const fullPath = (newPath || "/") + location.search;
+    navigate(fullPath, { replace: true });
     
     // Close mobile menu AFTER navigation is triggered
     // Use setTimeout to ensure the navigation completes first
