@@ -1904,3 +1904,134 @@ export function logPriceSanityCheck(
     console.log(`${'⚠️'.repeat(30)}\n`);
   }
 }
+
+// ==================== DISTANCE ESTIMATION FOR FALLBACK PRICING ====================
+// Estimates distance from route analysis for Turkey fallback pricing
+
+// Known airport-district distances in km (approximate)
+const AIRPORT_DISTRICT_DISTANCES: Record<string, Record<string, number>> = {
+  'Istanbul Airport (IST)': {
+    'Taksim': 40, 'Sultanahmet': 45, 'Kadıköy': 55, 'Beşiktaş': 40, 'Şişli': 35,
+    'Fatih': 43, 'Beyoğlu': 40, 'Üsküdar': 50, 'Bakırköy': 30, 'Ataşehir': 55,
+    'Pendik': 65, 'Kartal': 60, 'Sarıyer': 35, 'Beylikdüzü': 25, 'Zeytinburnu': 35,
+    'Levent': 35, 'Maslak': 30, 'Nişantaşı': 38, 'Galata': 42, 'Balat': 42,
+    'Florya': 28, 'Yeşilköy': 30, 'Arnavutköy': 15, 'Başakşehir': 20, 
+    'Esenyurt': 22, 'Avcılar': 28, 'Esenler': 30, 'Eyüpsultan': 35, 'Küçükçekmece': 25,
+  },
+  'Sabiha Gokcen Airport (SAW)': {
+    'Taksim': 50, 'Sultanahmet': 48, 'Kadıköy': 35, 'Beşiktaş': 55, 'Şişli': 55,
+    'Fatih': 48, 'Beyoğlu': 50, 'Üsküdar': 40, 'Bakırköy': 55, 'Ataşehir': 30,
+    'Pendik': 10, 'Kartal': 15, 'Sarıyer': 65, 'Maltepe': 20, 'Tuzla': 12,
+    'Gebze': 15, 'Kurtköy': 5, 'Sultanbeyli': 8,
+  },
+  'Antalya Airport (AYT)': {
+    'Kaleiçi': 15, 'Konyaaltı': 18, 'Lara': 10, 'Kundu': 8, 'Belek': 35,
+    'Side': 65, 'Alanya': 120, 'Kemer': 45, 'Kaş': 180, 'Kalkan': 155,
+    'Manavgat': 70, 'Serik': 35, 'Beldibi': 55, 'Göynük': 50, 'Tekirova': 60,
+    'Çıralı': 80, 'Oba': 115, 'Finike': 120, 'Demre': 140, 'Güzeloba': 8, 'Antalya Centrum': 12,
+  },
+  'Bodrum-Milas Airport (BJV)': {
+    'Bodrum': 35, 'Turgutreis': 50, 'Yalıkavak': 55, 'Gümbet': 32, 'Bitez': 38,
+    'Ortakent': 40, 'Gümüşlük': 55, 'Göltürkbükü': 45, 'Torba': 40, 'Güvercinlik': 45,
+  },
+  'Dalaman Airport (DLM)': {
+    'Fethiye': 45, 'Ölüdeniz': 55, 'Kalkan': 85, 'Kaş': 110, 'Marmaris': 90,
+    'Dalyan': 25, 'Göcek': 22, 'Hisarönü': 55, 'Ovacık': 52,
+  },
+  'Izmir Adnan Menderes Airport (ADB)': {
+    'Alsancak': 20, 'Konak': 18, 'Bornova': 25, 'Karşıyaka': 25, 'Çeşme': 85,
+    'Alaçatı': 80, 'Kuşadası': 65, 'Selçuk': 55, 'Efes': 55, 'Seferihisar': 35,
+  },
+  'Kayseri Airport (ASR)': {
+    'Göreme': 75, 'Ürgüp': 70, 'Uçhisar': 70, 'Avanos': 65, 'Nevşehir': 60,
+    'Kayseri': 8, 'Mustafapaşa': 75,
+  },
+  'Nevsehir-Kapadokya Airport (NAV)': {
+    'Göreme': 35, 'Ürgüp': 38, 'Uçhisar': 32, 'Avanos': 25, 'Nevşehir': 30,
+    'Mustafapaşa': 42,
+  },
+  'Mardin Airport (MQM)': {
+    'Mardin': 25, 'Midyat': 65, 'Nusaybin': 55, 'Savur': 70,
+  },
+  'Adana Airport (ADA)': {
+    'Adana': 5, 'Mersin': 70, 'Tarsus': 40, 'Antakya': 190, 'İskenderun': 130,
+  },
+  'Bursa Yenişehir Airport (YEI)': {
+    'Bursa': 45, 'Yenişehir': 5,
+  },
+  'Ercan Airport (ECN)': {
+    'Girne': 40, 'Lefkoşa': 12, 'Gazimağusa': 55, 'Güzelyurt': 60,
+  },
+};
+
+// Normalize Turkish characters for matching
+function normalizeTurkishForDistance(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/İ/g, 'i')
+    .replace(/Ğ/g, 'g')
+    .replace(/Ü/g, 'u')
+    .replace(/Ş/g, 's')
+    .replace(/Ö/g, 'o')
+    .replace(/Ç/g, 'c');
+}
+
+// Estimate distance from route for fallback pricing
+export function estimateDistanceFromRoute(
+  pickup: string, 
+  dropoff: string, 
+  transferInfo: TransferInfo
+): number | null {
+  const { airport, district, direction } = transferInfo;
+  
+  // Need airport and district for estimation
+  if (!airport || !district) {
+    console.log('📏 Cannot estimate distance: missing airport or district');
+    return null;
+  }
+  
+  const airportDistances = AIRPORT_DISTRICT_DISTANCES[airport];
+  if (!airportDistances) {
+    console.log(`📏 Cannot estimate distance: airport ${airport} not in distance table`);
+    return null;
+  }
+  
+  // Try to find exact district match
+  const normalizedDistrict = normalizeTurkishForDistance(district);
+  
+  for (const [districtName, distance] of Object.entries(airportDistances)) {
+    if (normalizeTurkishForDistance(districtName) === normalizedDistrict) {
+      console.log(`📏 Estimated distance: ${airport} → ${districtName} = ${distance}km`);
+      return distance;
+    }
+  }
+  
+  // Try partial match
+  for (const [districtName, distance] of Object.entries(airportDistances)) {
+    const normalizedKey = normalizeTurkishForDistance(districtName);
+    if (normalizedDistrict.includes(normalizedKey) || normalizedKey.includes(normalizedDistrict)) {
+      console.log(`📏 Estimated distance (partial match): ${airport} → ${districtName} = ${distance}km`);
+      return distance;
+    }
+  }
+  
+  // Default estimate based on city
+  const pickupLower = pickup.toLowerCase();
+  const dropoffLower = dropoff.toLowerCase();
+  
+  // If it's a short city transfer (same city, no long distance keywords)
+  if (!pickupLower.includes('airport') && !dropoffLower.includes('airport')) {
+    // Intra-city transfer without airport - estimate 20km
+    console.log('📏 Estimated distance: intra-city transfer ≈ 20km');
+    return 20;
+  }
+  
+  console.log(`📏 Cannot estimate distance: district ${district} not found for ${airport}`);
+  return null;
+}

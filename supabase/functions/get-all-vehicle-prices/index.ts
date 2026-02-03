@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck, validateDistrictByDistance, getExpectedPriceRange } from "../_shared/priceMatching.ts";
+import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck, validateDistrictByDistance, getExpectedPriceRange, estimateDistanceFromRoute } from "../_shared/priceMatching.ts";
 import { corsHeaders, dynamicCacheHeaders } from "../_shared/cacheHeaders.ts";
-import { detectRegion, getVehicleTypesForRegion, VehicleRegion, VEHICLE_TYPES, isValidSwitzerlandRoute } from "../_shared/vehicleConfig.ts";
+import { detectRegion, getVehicleTypesForRegion, VehicleRegion, VEHICLE_TYPES, isValidSwitzerlandRoute, calculateTurkeyFallbackPrice } from "../_shared/vehicleConfig.ts";
 import { checkRateLimit, getClientIdentifier, createRateLimitResponse, addRateLimitHeaders, RATE_LIMIT_CONFIGS } from "../_shared/rateLimiter.ts";
 interface GetPricesRequest {
   pickup: string;
@@ -579,15 +579,52 @@ const handler = async (req: Request): Promise<Response> => {
           available: true,
         });
       } else {
-        vehiclePrices.push({
-          vehicleType,
-          vehicleLabel: config.label,
-          price: null,
-          currency: customerCurrency || (isDubai ? 'AED' : 'EUR'),
-          passengers: config.passengers,
-          luggage: config.luggage,
-          available: false,
-        });
+        // No price found in database - try Turkey distance-based fallback
+        let fallbackPrice: { price: number; currency: string } | null = null;
+        
+        if (region === 'turkey' || region === 'default') {
+          // Estimate distance from route analysis
+          const estimatedDistance = estimateDistanceFromRoute(pickup, dropoff, transferInfo);
+          
+          if (estimatedDistance !== null && estimatedDistance <= 100) {
+            fallbackPrice = calculateTurkeyFallbackPrice(vehicleType, estimatedDistance);
+            if (fallbackPrice) {
+              console.log(`🇹🇷 Turkey fallback price for ${vehicleType}: ${fallbackPrice.price}€ (distance: ${estimatedDistance}km)`);
+            }
+          }
+        }
+        
+        if (fallbackPrice) {
+          // Convert to customer currency if needed
+          let finalPrice = fallbackPrice.price;
+          let finalCurrency = fallbackPrice.currency;
+          
+          if (customerCurrency && customerCurrency !== fallbackPrice.currency) {
+            const conversion = await convertCurrency(fallbackPrice.price, fallbackPrice.currency, customerCurrency);
+            finalPrice = Math.ceil(conversion.amount);
+            finalCurrency = customerCurrency;
+          }
+          
+          vehiclePrices.push({
+            vehicleType,
+            vehicleLabel: config.label,
+            price: finalPrice,
+            currency: finalCurrency,
+            passengers: config.passengers,
+            luggage: config.luggage,
+            available: true,
+          });
+        } else {
+          vehiclePrices.push({
+            vehicleType,
+            vehicleLabel: config.label,
+            price: null,
+            currency: customerCurrency || (isDubai ? 'AED' : 'EUR'),
+            passengers: config.passengers,
+            luggage: config.luggage,
+            available: false,
+          });
+        }
       }
     }
 
