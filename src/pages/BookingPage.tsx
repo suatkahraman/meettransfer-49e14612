@@ -1845,10 +1845,10 @@ const BookingPage = () => {
                             </div>
                           )}
                           
-                          <div className="relative">
+                          <div className="relative touch-pan-y">
                             <Carousel 
-                              className="w-full" 
-                              opts={{ loop: true }}
+                              className="w-full touch-pan-y" 
+                              opts={{ loop: true, watchDrag: false }}
                               plugins={[
                                 Fade(),
                                 Autoplay({
