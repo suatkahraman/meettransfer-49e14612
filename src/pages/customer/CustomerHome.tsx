@@ -463,23 +463,8 @@ const CustomerHome = () => {
             .single();
           
           const customerName = sessionBookingData.customerName || profile?.full_name || user.user_metadata?.full_name || 'Customer';
-          const customerPhone = sessionBookingData.customerPhone || profile?.phone || '';
+          const customerPhone = sessionBookingData.customerPhone || profile?.phone || 'N/A'; // Allow reservation without phone, user can add later
           const customerEmail = user.email || '';
-          
-          // If phone number is missing, show modal to collect it
-          if (!customerPhone || customerPhone.trim() === '') {
-            console.log('[CustomerHome] Phone number missing, showing phone modal...');
-            setPendingOAuthBooking({
-              sessionData: sessionBookingData,
-              customerName,
-              customerEmail,
-            });
-            setOauthPhoneNumber('');
-            setShowPhoneRequiredModal(true);
-            // Clear pending booking to prevent reprocessing on refresh
-            PendingBookingStorage.clear();
-            return;
-          }
           
           // Clear the pending booking data immediately to prevent duplicate processing
           PendingBookingStorage.clear();
