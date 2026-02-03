@@ -7,6 +7,7 @@ interface CompactRouteMapProps {
   pickup: string;
   dropoff: string;
   className?: string;
+  mapHeight?: string; // e.g., "200px", "280px" - defaults to "140px"
 }
 
 interface Coordinates {
@@ -23,6 +24,7 @@ const CompactRouteMapComponent = ({
   pickup,
   dropoff,
   className,
+  mapHeight = "140px",
 }: CompactRouteMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -289,7 +291,7 @@ const CompactRouteMapComponent = ({
         </div>
       )}
       
-      <div ref={mapContainer} className="h-[140px] w-full" />
+      <div ref={mapContainer} style={{ height: mapHeight }} className="w-full" />
       
       {/* Hover overlay */}
       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
