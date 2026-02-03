@@ -179,7 +179,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Customer Account",
     customerAccountDesc: "Book premium transfers for your personal or business travel",
     agencyPartnerTitle: "Agency Partner",
-    agencyPartnerDesc: "Partner with us to offer transfer services to your clients",
+    agencyPartnerDesc: "We are the transfer service provider. Register to book transfers for your own customers, track reservations, and manage your account.",
+    agencyPartnerNote: "Note: We don't send reservations to agencies. Agencies book transfers through us for their customers.",
     alreadyHaveAccountQuestion: "Already have an account?",
     logIn: "Log In",
     
@@ -2031,7 +2032,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Kundenkonto",
     customerAccountDesc: "Buchen Sie Premium-Transfers für Ihre privaten oder geschäftlichen Reisen",
     agencyPartnerTitle: "Agenturpartner",
-    agencyPartnerDesc: "Arbeiten Sie mit uns zusammen, um Transferdienste für Ihre Kunden anzubieten",
+    agencyPartnerDesc: "Wir sind der Transferdienstleister. Registrieren Sie sich, um Transfers für Ihre eigenen Kunden zu buchen, Reservierungen zu verfolgen und Ihr Konto zu verwalten.",
+    agencyPartnerNote: "Hinweis: Wir senden keine Reservierungen an Agenturen. Agenturen buchen Transfers über uns für ihre Kunden.",
     alreadyHaveAccountQuestion: "Haben Sie bereits ein Konto?",
     logIn: "Anmelden",
     
@@ -3909,7 +3911,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Compte Client",
     customerAccountDesc: "Réservez des transferts premium pour vos voyages personnels ou professionnels",
     agencyPartnerTitle: "Partenaire Agence",
-    agencyPartnerDesc: "Associez-vous à nous pour offrir des services de transfert à vos clients",
+    agencyPartnerDesc: "Nous sommes le prestataire de transfert. Inscrivez-vous pour réserver des transferts pour vos propres clients, suivre les réservations et gérer votre compte.",
+    agencyPartnerNote: "Note : Nous n'envoyons pas de réservations aux agences. Les agences réservent des transferts via nous pour leurs clients.",
     alreadyHaveAccountQuestion: "Vous avez déjà un compte ?",
     logIn: "Se Connecter",
     
@@ -5501,7 +5504,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Аккаунт клиента",
     customerAccountDesc: "Бронируйте премиум-трансферы для личных или деловых поездок",
     agencyPartnerTitle: "Партнер-агентство",
-    agencyPartnerDesc: "Сотрудничайте с нами для предоставления трансферных услуг вашим клиентам",
+    agencyPartnerDesc: "Мы — поставщик трансферных услуг. Зарегистрируйтесь, чтобы бронировать трансферы для своих клиентов, отслеживать бронирования и управлять своим счетом.",
+    agencyPartnerNote: "Примечание: Мы не отправляем бронирования агентствам. Агентства бронируют трансферы через нас для своих клиентов.",
     alreadyHaveAccountQuestion: "Уже есть аккаунт?",
     logIn: "Войти",
     
@@ -6957,7 +6961,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Account Cliente",
     customerAccountDesc: "Prenota trasferimenti premium per i tuoi viaggi personali o di lavoro",
     agencyPartnerTitle: "Partner Agenzia",
-    agencyPartnerDesc: "Collabora con noi per offrire servizi di trasferimento ai tuoi clienti",
+    agencyPartnerDesc: "Siamo il fornitore del servizio di trasferimento. Registrati per prenotare trasferimenti per i tuoi clienti, monitorare le prenotazioni e gestire il tuo account.",
+    agencyPartnerNote: "Nota: Non inviamo prenotazioni alle agenzie. Le agenzie prenotano trasferimenti tramite noi per i loro clienti.",
     alreadyHaveAccountQuestion: "Hai già un account?",
     logIn: "Accedi",
 
@@ -8460,7 +8465,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Cuenta de Cliente",
     customerAccountDesc: "Reserva traslados premium para tus viajes personales o de negocios",
     agencyPartnerTitle: "Socio Agencia",
-    agencyPartnerDesc: "Asóciate con nosotros para ofrecer servicios de traslado a tus clientes",
+    agencyPartnerDesc: "Somos el proveedor del servicio de traslado. Regístrate para reservar traslados para tus propios clientes, seguir reservas y gestionar tu cuenta.",
+    agencyPartnerNote: "Nota: No enviamos reservas a las agencias. Las agencias reservan traslados a través de nosotros para sus clientes.",
     alreadyHaveAccountQuestion: "¿Ya tienes una cuenta?",
     logIn: "Iniciar Sesión",
 
@@ -9963,7 +9969,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "حساب العميل",
     customerAccountDesc: "احجز تحويلات مميزة لسفرك الشخصي أو العملي",
     agencyPartnerTitle: "شريك الوكالة",
-    agencyPartnerDesc: "تعاون معنا لتقديم خدمات التحويل لعملائك",
+    agencyPartnerDesc: "نحن مزود خدمة النقل. سجل لحجز النقل لعملائك، وتتبع الحجوزات وإدارة حسابك.",
+    agencyPartnerNote: "ملاحظة: نحن لا نرسل حجوزات للوكالات. الوكالات تحجز النقل من خلالنا لعملائها.",
     alreadyHaveAccountQuestion: "لديك حساب بالفعل؟",
     logIn: "تسجيل الدخول",
 
@@ -11403,7 +11410,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Müşteri Hesabı",
     customerAccountDesc: "Kişisel veya iş seyahatleriniz için premium transferler rezerve edin",
     agencyPartnerTitle: "Acenta Ortağı",
-    agencyPartnerDesc: "Müşterilerinize transfer hizmetleri sunmak için bizimle ortak olun",
+    agencyPartnerDesc: "Biz transfer hizmeti sağlayıcısıyız. Kendi müşterileriniz için rezervasyon yapın, takip edin ve hesabınızı yönetin.",
+    agencyPartnerNote: "Not: Biz acentalara rezervasyon göndermiyoruz. Acentalar kendi müşterileri için bizden transfer rezervasyonu yapar.",
     alreadyHaveAccountQuestion: "Zaten hesabınız var mı?",
     logIn: "Giriş Yap",
 
@@ -13062,7 +13070,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Акаунт клієнта",
     customerAccountDesc: "Бронюйте преміум-трансфери для особистих або ділових поїздок",
     agencyPartnerTitle: "Партнер-агентство",
-    agencyPartnerDesc: "Співпрацюйте з нами для надання трансферних послуг вашим клієнтам",
+    agencyPartnerDesc: "Ми — постачальник трансферних послуг. Зареєструйтеся, щоб бронювати трансфери для своїх клієнтів, відстежувати бронювання та керувати своїм рахунком.",
+    agencyPartnerNote: "Примітка: Ми не надсилаємо бронювання агентствам. Агентства бронюють трансфери через нас для своїх клієнтів.",
     alreadyHaveAccountQuestion: "Вже маєте акаунт?",
     logIn: "Увійти",
 
@@ -14478,7 +14487,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "お客様アカウント",
     customerAccountDesc: "個人またはビジネス旅行のためのプレミアム送迎を予約",
     agencyPartnerTitle: "代理店パートナー",
-    agencyPartnerDesc: "お客様に送迎サービスを提供するためにパートナーになる",
+    agencyPartnerDesc: "私たちは送迎サービスプロバイダーです。登録してお客様のための送迎を予約し、予約を追跡し、アカウントを管理してください。",
+    agencyPartnerNote: "注：代理店に予約を送信することはありません。代理店は顧客のために私たちを通じて送迎を予約します。",
     alreadyHaveAccountQuestion: "すでにアカウントをお持ちですか？",
     logIn: "ログイン",
 
@@ -15717,7 +15727,8 @@ const translations: Record<Language, Record<string, string>> = {
     customerAccountTitle: "Conta de Cliente",
     customerAccountDesc: "Reserve transferências premium para suas viagens pessoais ou de negócios",
     agencyPartnerTitle: "Parceiro de Agência",
-    agencyPartnerDesc: "Associe-se a nós para oferecer serviços de transferência aos seus clientes",
+    agencyPartnerDesc: "Somos o prestador de serviços de transferência. Registe-se para reservar transferências para os seus clientes, acompanhar reservas e gerir a sua conta.",
+    agencyPartnerNote: "Nota: Não enviamos reservas às agências. As agências reservam transferências através de nós para os seus clientes.",
     alreadyHaveAccountQuestion: "Já tem uma conta?",
     logIn: "Entrar",
     // Common

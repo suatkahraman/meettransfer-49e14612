@@ -25,8 +25,9 @@ const AgencyPartnershipGuide = () => {
       badge: "B2B Partnership",
       title: "Become a Meet Transfer Partner Agency – B2B Partnership for Travel Agencies",
       h1: "Turkey Airport Transfer Partner – Join Meet Transfer B2B Network",
-      intro: "Are you a travel agency looking for a reliable airport transfer partner in Turkey? Meet Transfer offers a seamless B2B partnership program for agencies worldwide. Get exclusive rates, real-time booking, and dedicated support.",
+      intro: "We are the transfer service provider – you book transfers for your customers through us. Meet Transfer offers a seamless B2B partnership program for agencies worldwide. Get exclusive rates, your own agency panel to track reservations, view driver details, and manage your account balance.",
       metaDesc: "Become a Meet Transfer B2B partner. Best Turkey airport transfer partner for travel agencies. Exclusive rates, instant booking, 24/7 support. Join our agency network today.",
+      businessModelNote: "Important: We don't send reservations to agencies. As the service provider, we handle drivers, vehicles, and operations. Agencies book transfers through us for their own customers.",
       keywords: "Turkey transfer partner, B2B airport transfer Turkey, travel agency partner Turkey, Turkey ground transportation partner, airport transfer wholesale Turkey, DMC Turkey partner, incoming agency Turkey, Meet Transfer partner, agency partnership Turkey, Turkey transfer supplier",
       readTime: "10",
       
@@ -113,10 +114,11 @@ const AgencyPartnershipGuide = () => {
       badge: "B2B Ortaklık",
       title: "Meet Transfer Acenta Ortağı Olun – Seyahat Acentaları İçin B2B Ortaklık",
       h1: "Türkiye Havalimanı Transfer Ortağı – Meet Transfer B2B Ağına Katılın",
-      intro: "Türkiye'de güvenilir bir havalimanı transfer ortağı arayan seyahat acentası mısınız? Meet Transfer, dünya genelindeki acentalar için sorunsuz bir B2B ortaklık programı sunuyor. Özel fiyatlar, anlık rezervasyon ve özel destek alın.",
+      intro: "Biz transfer hizmeti sağlayıcısıyız – siz kendi müşterileriniz için bizden transfer rezervasyonu yaparsınız. Meet Transfer, dünya genelindeki acentalar için sorunsuz bir B2B ortaklık programı sunuyor. Özel fiyatlar, rezervasyon takibi, şoför bilgisi görüntüleme ve cari hesap yönetimi için kendi acenta panelinize sahip olun.",
       metaDesc: "Meet Transfer B2B ortağı olun. Seyahat acentaları için en iyi Türkiye transfer ortağı. Özel fiyatlar, anında rezervasyon, 7/24 destek. Bugün acenta ağımıza katılın.",
       keywords: "Türkiye transfer ortağı, B2B havalimanı transfer Türkiye, seyahat acentası ortağı Türkiye, Türkiye yer hizmetleri ortağı, havalimanı transfer toptancı Türkiye, DMC Türkiye ortağı, incoming acenta Türkiye, Meet Transfer ortağı, acenta ortaklığı Türkiye, Türkiye transfer tedarikçisi",
       readTime: "10",
+      businessModelNote: "Önemli: Biz acentalara rezervasyon göndermiyoruz. Hizmet sağlayıcı olarak şoförler, araçlar ve operasyonu biz yönetiyoruz. Acentalar kendi müşterileri için bizden transfer rezervasyonu yapar.",
       
       whyPartnerTitle: "Neden Meet Transfer ile Ortak Olmalısınız?",
       whyPartnerDesc: "Türkiye'nin en güvenilir havalimanı transfer ağına katılın ve işinizi güvenle büyütün.",
