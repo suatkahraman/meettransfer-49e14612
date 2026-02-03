@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePWADetect } from '@/hooks/usePWADetect';
-import { startOAuthSignIn, getOAuthUrl, isCustomDomain } from '@/lib/oauthSignIn';
+import { startOAuthSignIn, getOAuthUrl } from '@/lib/oauthSignIn';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -65,34 +65,21 @@ export const SocialAuthButtons = ({
 
     setIsGoogleLoading(true);
     try {
-      // For iOS PWA standalone mode, open in new window to handle OAuth properly
+      // For iOS PWA standalone mode, open actual OAuth URL in new window to avoid 404 on /login?oauth=
+      // Using getOAuthUrl ensures we bypass the internal PWA browser routing issues.
       if (isIOS && isStandalone) {
-        if (isCustomDomain()) {
-          // Custom domain: get Supabase OAuth URL and open in new window
-          const { url, error } = await getOAuthUrl('google');
-          if (error || !url) {
-            toast.error(error?.message || t('loginFailed'));
-            setIsGoogleLoading(false);
-            return;
-          }
-          const opened = window.open(url, '_blank');
-          if (!opened) {
-            toast.error(t('iosGoogleLoginNotice'));
-          } else {
-            toast.info(t('redirectingGoogle'));
-          }
+        const { url, error } = await getOAuthUrl('google');
+        if (error || !url) {
+          toast.error(error?.message || t('loginFailed'));
           setIsGoogleLoading(false);
           return;
         }
-        // Managed domain: use Lovable bridge via login page
-        const authUrl = `${window.location.origin}/${mode === 'login' ? 'login' : 'signup'}?oauth=google`;
-        const opened = window.open(authUrl, '_blank');
+        const opened = window.open(url, '_blank');
         if (!opened) {
           toast.error(t('iosGoogleLoginNotice'));
-          setIsGoogleLoading(false);
-          return;
+        } else {
+          toast.info(t('redirectingGoogle'));
         }
-        toast.info(t('redirectingGoogle'));
         setIsGoogleLoading(false);
         return;
       }
@@ -119,34 +106,21 @@ export const SocialAuthButtons = ({
 
     setIsAppleLoading(true);
     try {
-      // For iOS PWA standalone mode, open in new window to handle OAuth properly
+      // For iOS PWA standalone mode, open actual OAuth URL in new window to avoid 404 on /login?oauth=
+      // Using getOAuthUrl ensures we bypass the internal PWA browser routing issues.
       if (isIOS && isStandalone) {
-        if (isCustomDomain()) {
-          // Custom domain: get Supabase OAuth URL and open in new window
-          const { url, error } = await getOAuthUrl('apple');
-          if (error || !url) {
-            toast.error(error?.message || t('loginFailed'));
-            setIsAppleLoading(false);
-            return;
-          }
-          const opened = window.open(url, '_blank');
-          if (!opened) {
-            toast.error(t('iosAppleLoginNotice') || 'Please open in Safari to sign in with Apple');
-          } else {
-            toast.info(t('redirectingApple') || 'Redirecting...');
-          }
+        const { url, error } = await getOAuthUrl('apple');
+        if (error || !url) {
+          toast.error(error?.message || t('loginFailed'));
           setIsAppleLoading(false);
           return;
         }
-        // Managed domain: use Lovable bridge via login page
-        const authUrl = `${window.location.origin}/${mode === 'login' ? 'login' : 'signup'}?oauth=apple`;
-        const opened = window.open(authUrl, '_blank');
+        const opened = window.open(url, '_blank');
         if (!opened) {
           toast.error(t('iosAppleLoginNotice') || 'Please open in Safari to sign in with Apple');
-          setIsAppleLoading(false);
-          return;
+        } else {
+          toast.info(t('redirectingApple') || 'Redirecting...');
         }
-        toast.info(t('redirectingApple') || 'Redirecting...');
         setIsAppleLoading(false);
         return;
       }
