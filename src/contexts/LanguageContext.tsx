@@ -343,6 +343,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "Exclusive transfers and tour services throughout the magical Cappadocia region.",
     bursaTours: "Istanbul ⇄ Bursa Tours",
     bursaDesc: "Day tours and private transfers to historic Ottoman capital Bursa, Uludağ mountain, and UNESCO villages.",
+    ankaraCenter: "Ankara ⇄ City Center",
+    ankaraDesc: "Professional VIP transfer service from Esenboğa Airport to Ankara city center, hotels, and all districts.",
+    capitalCity: "Capital City",
     
     // Services Page
     servicesTitle: "Premium VIP Airport & Chauffeur Services",
@@ -2183,6 +2186,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "Exklusive Transfers und Touren in der magischen Region Kappadokien.",
     bursaTours: "Istanbul ⇄ Bursa Touren",
     bursaDesc: "Tagesausflüge und Privattransfers zur historischen osmanischen Hauptstadt Bursa, Uludağ-Berg und UNESCO-Dörfern.",
+    ankaraCenter: "Ankara ⇄ Stadtzentrum",
+    ankaraDesc: "Professioneller VIP-Transferservice vom Flughafen Esenboğa ins Stadtzentrum von Ankara, Hotels und alle Stadtteile.",
+    capitalCity: "Hauptstadt",
     
     // Services Page
     servicesTitle: "Premium VIP Flughafen- & Chauffeurservices",
@@ -4061,6 +4067,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "Transferts exclusifs et services de visite dans la région magique de la Cappadoce.",
     bursaTours: "Istanbul ⇄ Tours à Bursa",
     bursaDesc: "Excursions d'une journée et transferts privés vers l'ancienne capitale ottomane Bursa, le mont Uludağ et les villages UNESCO.",
+    ankaraCenter: "Ankara ⇄ Centre-ville",
+    ankaraDesc: "Service de transfert VIP professionnel de l'aéroport d'Esenboğa au centre-ville d'Ankara, hôtels et tous les quartiers.",
+    capitalCity: "Capitale",
     
     // Services Page
     servicesTitle: "Services VIP Aéroport & Chauffeur Premium",
@@ -5654,6 +5663,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "Эксклюзивные трансферы и экскурсии по волшебному региону Каппадокии.",
     bursaTours: "Стамбул ⇄ Туры в Бурсу",
     bursaDesc: "Однодневные туры и частные трансферы в историческую османскую столицу Бурсу, гору Улудаг и деревни ЮНЕСКО.",
+    ankaraCenter: "Анкара ⇄ Центр города",
+    ankaraDesc: "Профессиональный VIP-трансфер из аэропорта Эсенбога в центр Анкары, отели и все районы.",
+    capitalCity: "Столица",
     
     // Services Page
     servicesTitle: "Премиум VIP Аэропорт и Услуги Водителя",
@@ -7111,6 +7123,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "Trasferimenti esclusivi e servizi di tour nella magica regione della Cappadocia.",
     bursaTours: "Istanbul ⇄ Tour a Bursa",
     bursaDesc: "Tour giornalieri e trasferimenti privati verso l'antica capitale ottomana Bursa, il monte Uludağ e i villaggi UNESCO.",
+    ankaraCenter: "Ankara ⇄ Centro Città",
+    ankaraDesc: "Servizio di trasferimento VIP professionale dall'aeroporto di Esenboğa al centro di Ankara, hotel e tutti i quartieri.",
+    capitalCity: "Capitale",
     
     // Services Page
     servicesTitle: "Servizi VIP Aeroporto e Autista Premium",
@@ -8615,6 +8630,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "Traslados exclusivos y servicios de tour por la mágica región de Capadocia.",
     bursaTours: "Estambul ⇄ Tours a Bursa",
     bursaDesc: "Tours de un día y traslados privados a la histórica capital otomana Bursa, el monte Uludağ y los pueblos UNESCO.",
+    ankaraCenter: "Ankara ⇄ Centro de la Ciudad",
+    ankaraDesc: "Servicio profesional de traslado VIP desde el aeropuerto de Esenboğa al centro de Ankara, hoteles y todos los distritos.",
+    capitalCity: "Ciudad Capital",
     
     // Services Page
     servicesTitle: "Servicios VIP de Aeropuerto y Chófer Premium",
@@ -10119,6 +10137,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "نقل حصري وخدمات جولات في جميع أنحاء منطقة كابادوكيا الساحرة.",
     bursaTours: "إسطنبول ⇄ جولات بورصة",
     bursaDesc: "جولات يومية وتحويلات خاصة إلى العاصمة العثمانية التاريخية بورصة، جبل أولوداغ وقرى اليونسكو.",
+    ankaraCenter: "أنقرة ⇄ وسط المدينة",
+    ankaraDesc: "خدمة نقل VIP احترافية من مطار إيسنبوغا إلى وسط مدينة أنقرة والفنادق وجميع الأحياء.",
+    capitalCity: "العاصمة",
     
     // Services Page
     servicesTitle: "خدمات VIP للمطار والسائق الخاص",
@@ -11595,6 +11616,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "Büyülü Kapadokya bölgesinde özel transfer ve tur hizmetleri.",
     bursaTours: "İstanbul ⇄ Bursa Turları",
     bursaDesc: "Tarihi Osmanlı başkenti Bursa, Uludağ dağı ve UNESCO köylerine günübirlik turlar ve özel transferler.",
+    ankaraCenter: "Ankara ⇄ Şehir Merkezi",
+    ankaraDesc: "Esenboğa Havalimanı'ndan Ankara şehir merkezine, otellere ve tüm ilçelere profesyonel VIP transfer hizmeti.",
+    capitalCity: "Başkent",
     
     // Services Page
     servicesTitle: "Premium VIP Havalimanı ve Şoför Hizmetleri",
@@ -13220,6 +13244,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "Ексклюзивні трансфери та тури по чарівному регіону Каппадокії.",
     bursaTours: "Стамбул ⇄ Бурса тури",
     bursaDesc: "Одноденні тури та приватні трансфери до історичної османської столиці Бурса, гори Улудаг та сіл ЮНЕСКО.",
+    ankaraCenter: "Анкара ⇄ Центр міста",
+    ankaraDesc: "Професійний VIP-трансфер з аеропорту Есенбога до центру Анкари, готелів та всіх районів.",
+    capitalCity: "Столиця",
     
     // Services Page
     servicesTitle: "Преміум VIP аеропортові та шоферські послуги",
@@ -14640,6 +14667,9 @@ const translations: Record<Language, Record<string, string>> = {
     cappadociaDesc: "魔法のカッパドキア地域全域での特別送迎とツアーサービス",
     bursaTours: "イスタンブール ⇄ ブルサツアー",
     bursaDesc: "歴史的なオスマン帝国の首都ブルサ、ウルダー山、ユネスコ村への日帰りツアーとプライベート送迎",
+    ankaraCenter: "アンカラ ⇄ 市内中心部",
+    ankaraDesc: "エセンボーア空港からアンカラ市内中心部、ホテル、全地区へのプロフェッショナルVIP送迎サービス",
+    capitalCity: "首都",
     
     // Services Page
     servicesTitle: "プレミアムVIP空港・シャトルサービス",

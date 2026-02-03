@@ -137,6 +137,16 @@ const cities = [
     popular: false,
     gradient: "from-orange-500/60 to-red-600/60",
   },
+  {
+    name: "Ankara",
+    nameTR: "Ankara",
+    imagePath: () => import("@/assets/destinations/ankara-city.webp"),
+    fromPrice: 44,
+    airports: ["ESB"],
+    rating: 4.8,
+    popular: true,
+    gradient: "from-red-600/60 to-rose-600/60",
+  },
 ];
 
 type CityType = typeof cities[0];
