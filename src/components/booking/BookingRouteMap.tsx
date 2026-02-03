@@ -28,7 +28,7 @@ const escapeHtml = (text: string): string => {
   return div.innerHTML;
 };
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || '';
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || import.meta.env.VITE_MAPBOX_TOKEN || '';
 
 const BookingRouteMap = ({ pickup, dropoff, className }: BookingRouteMapProps) => {
   const { language } = useLanguage();
