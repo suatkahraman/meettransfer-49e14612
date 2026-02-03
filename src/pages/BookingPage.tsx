@@ -43,6 +43,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
+import BookingRouteMap from "@/components/booking/BookingRouteMap";
 import { z } from "zod";
 
 // Session storage key for caching booking form state during Google OAuth
@@ -1606,6 +1607,24 @@ const BookingPage = () => {
               </div>
             </div>
           </div>
+
+          {/* Route Map - Only for transfer bookings */}
+          {!effectiveIsHourly && effectivePickup && effectiveDropoff && (
+            <Card className="mb-4 sm:mb-8">
+              <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  {language === 'TR' ? 'Güzergah Haritası' : 'Route Map'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <BookingRouteMap 
+                  pickup={effectivePickup} 
+                  dropoff={effectiveDropoff} 
+                />
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Main Form */}
