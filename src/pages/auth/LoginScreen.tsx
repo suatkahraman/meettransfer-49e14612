@@ -25,23 +25,7 @@ import { scrollToFirstError } from '@/lib/formValidation';
 import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
 import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
 
-// Helper to detect if we're on a custom domain (not Lovable's domains)
-const isCustomDomain = () => {
-  const hostname = window.location.hostname;
-  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
-  const isLovableHosted = hostname.endsWith('lovable.app') || hostname.endsWith('lovableproject.com');
-  return !isLocal && !isLovableHosted;
-};
 
-const isSafeOAuthRedirectUrl = (url: string) => {
-  try {
-    const u = new URL(url);
-    const backendHost = new URL(import.meta.env.VITE_SUPABASE_URL).hostname;
-    return u.hostname === backendHost && u.pathname.startsWith('/auth/v1/authorize');
-  } catch {
-    return false;
-  }
-};
 
 const stripQueryParam = (key: string) => {
   try {
@@ -234,35 +218,7 @@ const LoginScreen = () => {
       try {
         const provider = oauthParam as 'google' | 'apple';
 
-        // On custom domains we avoid the managed redirect bridge and do a direct OAuth start.
-        // This also ensures the post-auth return lands on /oauth/callback (no ~), which avoids 404s.
-        if (isCustomDomain()) {
-          const { data, error } = await supabase.auth.signInWithOAuth({
-            provider,
-            options: {
-              redirectTo: `${window.location.origin}/~oauth/callback`,
-              skipBrowserRedirect: true,
-            },
-          });
-
-          if (error) {
-            console.error('[LoginScreen] OAuth auto-trigger error:', error);
-            toast.error(t('loginFailed'));
-            stripQueryParam('oauth');
-            return;
-          }
-
-          if (!data?.url || !isSafeOAuthRedirectUrl(data.url)) {
-            console.error('[LoginScreen] OAuth auto-trigger returned invalid URL:', data?.url);
-            toast.error(t('loginFailed'));
-            stripQueryParam('oauth');
-            return;
-          }
-
-          window.location.assign(data.url);
-          return;
-        }
-
+        // Always use Lovable managed OAuth - works on all domains including custom domains
         const { error } = await lovable.auth.signInWithOAuth(provider, {
           redirect_uri: window.location.origin,
         });
