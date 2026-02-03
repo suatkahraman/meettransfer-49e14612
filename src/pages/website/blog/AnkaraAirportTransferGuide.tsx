@@ -42,6 +42,10 @@ const AnkaraAirportTransferGuide = () => {
     { to: t("blogAnkaraDestBalgat"), sedan: "€48", vito: "€54", maybachMinivan: "€88", vipVito: "€66", sprinter: "€98" },
     { to: t("blogAnkaraDestBilkent"), sedan: "€48", vito: "€54", maybachMinivan: "€88", vipVito: "€66", sprinter: "€98" },
     { to: t("blogAnkaraDestMKM"), sedan: "€48", vito: "€54", maybachMinivan: "€88", vipVito: "€66", sprinter: "€98" },
+    { to: t("blogAnkaraDestUmitkoy"), sedan: "€54", vito: "€59", maybachMinivan: "€98", vipVito: "€76", sprinter: "€110" },
+    { to: t("blogAnkaraDestCayyolu"), sedan: "€54", vito: "€59", maybachMinivan: "€98", vipVito: "€76", sprinter: "€110" },
+    { to: t("blogAnkaraDestEryaman"), sedan: "€54", vito: "€59", maybachMinivan: "€98", vipVito: "€76", sprinter: "€110" },
+    { to: t("blogAnkaraDestBatikent"), sedan: "€54", vito: "€59", maybachMinivan: "€98", vipVito: "€76", sprinter: "€110" },
   ];
 
   return (
