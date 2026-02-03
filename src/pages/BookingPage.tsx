@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +20,7 @@ import { PhoneInput } from "@/components/ui/phone-input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TimePickerGrid } from "@/components/ui/time-picker-grid";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
+import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { 
@@ -240,13 +241,54 @@ const BookingPage = () => {
   // Share link state
   const [linkCopied, setLinkCopied] = useState(false);
 
-  // Effective values - use token data if available, otherwise URL params
-  const effectivePickup = tokenBookingData?.pickup || urlPickup;
-  const effectiveDropoff = tokenBookingData?.dropoff || urlDropoff;
+  // Editable location state - initialized from URL/token data
+  const [editablePickup, setEditablePickup] = useState("");
+  const [editableDropoff, setEditableDropoff] = useState("");
+  
+  // Initialize editable locations from URL params on mount
+  useEffect(() => {
+    if (urlPickup && !editablePickup) {
+      setEditablePickup(urlPickup);
+    }
+    if (urlDropoff && !editableDropoff) {
+      setEditableDropoff(urlDropoff);
+    }
+  }, [urlPickup, urlDropoff]);
+  
+  // Update editable locations when token data loads
+  useEffect(() => {
+    if (tokenBookingData?.pickup && !editablePickup) {
+      setEditablePickup(tokenBookingData.pickup);
+    }
+    if (tokenBookingData?.dropoff && !editableDropoff) {
+      setEditableDropoff(tokenBookingData.dropoff);
+    }
+  }, [tokenBookingData]);
+
+  // Effective values - use editable state if changed, otherwise fall back to token/URL data
+  const effectivePickup = editablePickup || tokenBookingData?.pickup || urlPickup;
+  const effectiveDropoff = editableDropoff || tokenBookingData?.dropoff || urlDropoff;
   const effectiveDate = tokenBookingData?.pickup_date || urlDate;
   const effectiveTime = tokenBookingData?.pickup_time || urlTime;
   const effectiveCity = tokenBookingData?.city || urlCity;
   const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
+
+  // Place selection handlers
+  const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {
+    if (details?.formattedAddress) {
+      setEditablePickup(details.formattedAddress);
+    } else if (value) {
+      setEditablePickup(value);
+    }
+  }, []);
+  
+  const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => {
+    if (details?.formattedAddress) {
+      setEditableDropoff(details.formattedAddress);
+    } else if (value) {
+      setEditableDropoff(value);
+    }
+  }, []);
 
   // Check if location is in Dubai or Turkey - use edge function's region if available
   const isDubai = detectedRegion === 'dubai' || (!detectedRegion && (isDubaiLocation(effectivePickup) || isDubaiLocation(effectiveDropoff)));
@@ -1576,17 +1618,29 @@ const BookingPage = () => {
               ) : (
                 <>
                   <div className="flex items-start gap-2 sm:gap-3 col-span-2 sm:col-span-1">
-                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 mt-2.5 text-accent shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-white/70 text-xs sm:text-sm">{t("pickupPoint")}</p>
-                      <p className="font-medium text-sm sm:text-base line-clamp-2">{effectivePickup}</p>
+                      <p className="text-white/70 text-xs sm:text-sm mb-1">{t("pickupPoint")}</p>
+                      <GooglePlacesAutocomplete 
+                        onPlaceSelected={handlePickupSelected}
+                        placeholder={t("enterPickupAddress") || "Enter pickup address..."}
+                        value={effectivePickup}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40 text-sm sm:text-base"
+                        myLocationLabel={t("useMyLocation") || "Use My Location"}
+                      />
                     </div>
                   </div>
                   <div className="flex items-start gap-2 sm:gap-3 col-span-2 sm:col-span-1">
-                    <Navigation className="h-4 w-4 sm:h-5 sm:w-5 mt-0.5 sm:mt-1 text-accent shrink-0" />
+                    <Navigation className="h-4 w-4 sm:h-5 sm:w-5 mt-2.5 text-accent shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-white/70 text-xs sm:text-sm">{t("dropoffLocation")}</p>
-                      <p className="font-medium text-sm sm:text-base line-clamp-2">{effectiveDropoff}</p>
+                      <p className="text-white/70 text-xs sm:text-sm mb-1">{t("dropoffLocation")}</p>
+                      <GooglePlacesAutocomplete 
+                        onPlaceSelected={handleDropoffSelected}
+                        placeholder={t("enterDropoffAddress") || "Enter dropoff address..."}
+                        value={effectiveDropoff}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/20 focus:border-white/40 text-sm sm:text-base"
+                        myLocationLabel={t("useMyLocation") || "Use My Location"}
+                      />
                     </div>
                   </div>
                 </>
