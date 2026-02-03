@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePWADetect } from '@/hooks/usePWADetect';
-import { startOAuthSignIn, getOAuthUrl } from '@/lib/oauthSignIn';
+import { startOAuthSignIn } from '@/lib/oauthSignIn';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -65,20 +65,15 @@ export const SocialAuthButtons = ({
 
     setIsGoogleLoading(true);
     try {
-      // For iOS PWA standalone mode, open actual OAuth URL in new window to avoid 404 on /login?oauth=
-      // Using getOAuthUrl ensures we bypass the internal PWA browser routing issues.
+      // For iOS PWA standalone mode, open OAuth bridge page in new Safari window
+      // This uses Lovable managed OAuth which doesn't work with getOAuthUrl
       if (isIOS && isStandalone) {
-        const { url, error } = await getOAuthUrl('google');
-        if (error || !url) {
-          toast.error(error?.message || t('loginFailed'));
-          setIsGoogleLoading(false);
-          return;
-        }
-        const opened = window.open(url, '_blank');
+        const oauthBridgeUrl = `${window.location.origin}/oauth-start?provider=google`;
+        const opened = window.open(oauthBridgeUrl, '_blank');
         if (!opened) {
-          toast.error(t('iosGoogleLoginNotice'));
+          toast.error(t('iosGoogleLoginNotice') || 'Lütfen Safari\'de açarak Google ile giriş yapın');
         } else {
-          toast.info(t('redirectingGoogle'));
+          toast.info(t('redirectingGoogle') || 'Yönlendiriliyor...');
         }
         setIsGoogleLoading(false);
         return;
@@ -106,20 +101,15 @@ export const SocialAuthButtons = ({
 
     setIsAppleLoading(true);
     try {
-      // For iOS PWA standalone mode, open actual OAuth URL in new window to avoid 404 on /login?oauth=
-      // Using getOAuthUrl ensures we bypass the internal PWA browser routing issues.
+      // For iOS PWA standalone mode, open OAuth bridge page in new Safari window
+      // This uses Lovable managed OAuth which doesn't work with getOAuthUrl
       if (isIOS && isStandalone) {
-        const { url, error } = await getOAuthUrl('apple');
-        if (error || !url) {
-          toast.error(error?.message || t('loginFailed'));
-          setIsAppleLoading(false);
-          return;
-        }
-        const opened = window.open(url, '_blank');
+        const oauthBridgeUrl = `${window.location.origin}/oauth-start?provider=apple`;
+        const opened = window.open(oauthBridgeUrl, '_blank');
         if (!opened) {
-          toast.error(t('iosAppleLoginNotice') || 'Please open in Safari to sign in with Apple');
+          toast.error(t('iosAppleLoginNotice') || 'Lütfen Safari\'de açarak Apple ile giriş yapın');
         } else {
-          toast.info(t('redirectingApple') || 'Redirecting...');
+          toast.info(t('redirectingApple') || 'Yönlendiriliyor...');
         }
         setIsAppleLoading(false);
         return;
