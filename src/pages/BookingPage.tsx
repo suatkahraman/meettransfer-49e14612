@@ -553,10 +553,11 @@ const BookingPage = () => {
     checkGoogleAuth();
   }, [searchParams, navigate, urlPickup, urlDropoff, urlDate, urlTime, urlCity, urlPassengers, vehicleType, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount, promoCode, isHourlyBooking, language]);
 
-  // Fetch vehicle prices for transfer bookings with minimum 8 second loading animation
+  // Fetch vehicle prices for transfer bookings - re-fetch when locations change
   useEffect(() => {
     const fetchPrices = async () => {
-      if (isHourlyBooking || !urlPickup || !urlDropoff) return;
+      // Use effective values (editable state if changed, otherwise URL params)
+      if (isHourlyBooking || !effectivePickup || !effectiveDropoff) return;
       
       // Skip price fetching entirely if returning from Google OAuth (we're redirecting anyway)
       const googleAuth = searchParams.get("googleAuth");
@@ -567,15 +568,17 @@ const BookingPage = () => {
       
       setIsPricesLoading(true);
       const startTime = Date.now();
-      const minLoadingTime = 5000; // 5 seconds minimum
+      // Use shorter loading time for re-fetches (when user changes location)
+      const isInitialFetch = vehiclePrices.length === 0;
+      const minLoadingTime = isInitialFetch ? 5000 : 1500; // 5s initial, 1.5s for updates
       
       try {
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: {
-            pickup: urlPickup,
-            dropoff: urlDropoff,
+            pickup: effectivePickup,
+            dropoff: effectiveDropoff,
             customerCurrency: preferredCurrency,
-            pickupDate: urlDate || undefined, // Send date for seasonal pricing
+            pickupDate: effectiveDate || undefined, // Send date for seasonal pricing
           },
         });
 
@@ -588,7 +591,7 @@ const BookingPage = () => {
           setDetectedRegion(data.region);
         }
         
-        // Wait for remaining time to complete 8 seconds
+        // Wait for remaining time to complete minimum loading time
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
         
@@ -603,7 +606,7 @@ const BookingPage = () => {
     };
 
     fetchPrices();
-  }, [urlPickup, urlDropoff, urlDate, preferredCurrency, isHourlyBooking, searchParams, vehiclePrices.length]);
+  }, [effectivePickup, effectiveDropoff, effectiveDate, preferredCurrency, isHourlyBooking, searchParams]);
 
   // Extract city from address for hourly pricing
   const extractCityFromAddress = (address: string): string | null => {
