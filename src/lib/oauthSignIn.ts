@@ -55,11 +55,9 @@ export async function getOAuthUrl(provider: OAuthProvider): Promise<{ url: strin
  */
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
   // Always use Lovable managed OAuth - works on all domains including custom domains
-  const { error } = await lovable.auth.signInWithOAuth(provider, {
-    // IMPORTANT: Match the app route that actually handles OAuth callbacks.
-    // Using only origin can lead to a mismatch and 404s on certain iOS/PWA flows.
-    redirect_uri: getOAuthReturnTo(),
-  });
+  // NOTE: Do NOT pass redirect_uri explicitly - it breaks state parameter management
+  // for managed OAuth. The library handles this internally.
+  const { error } = await lovable.auth.signInWithOAuth(provider);
 
   return { error: error ?? null };
 }

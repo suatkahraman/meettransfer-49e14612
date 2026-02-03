@@ -219,10 +219,9 @@ const LoginScreen = () => {
         const provider = oauthParam as 'google' | 'apple';
 
         // Always use Lovable managed OAuth - works on all domains including custom domains
-        // IMPORTANT: redirect back to the dedicated callback route to avoid iOS/PWA 404s.
-        const { error } = await lovable.auth.signInWithOAuth(provider, {
-          redirect_uri: `${window.location.origin}/~oauth/callback`,
-        });
+        // NOTE: Do NOT pass redirect_uri explicitly - it breaks state parameter management
+        // for managed OAuth. The library handles this internally.
+        const { error } = await lovable.auth.signInWithOAuth(provider);
         if (error) {
           console.error('[LoginScreen] OAuth auto-trigger error:', error);
           toast.error(t('loginFailed'));

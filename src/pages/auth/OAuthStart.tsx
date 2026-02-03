@@ -22,9 +22,9 @@ const OAuthStart = () => {
       }
 
       try {
-        const { error: oauthError } = await lovable.auth.signInWithOAuth(provider, {
-          redirect_uri: `${window.location.origin}/~oauth/callback`,
-        });
+        // NOTE: Do NOT pass redirect_uri explicitly - it breaks state parameter management
+        // for managed OAuth. The library handles this internally.
+        const { error: oauthError } = await lovable.auth.signInWithOAuth(provider);
 
         if (oauthError) {
           console.error('OAuth start error:', oauthError);
