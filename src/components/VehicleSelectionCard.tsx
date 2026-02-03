@@ -284,6 +284,15 @@ return (
           </div>
         )}
         
+        {/* Selected Label - Red text */}
+        {isSelected && (
+          <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-10">
+            <span className="text-xs sm:text-sm font-bold text-red-600 bg-red-50 dark:bg-red-900/30 px-2 py-1 rounded-md border border-red-200 dark:border-red-800 animate-pulse">
+              {isTurkish ? "Seçildi" : "Selected"}
+            </span>
+          </div>
+        )}
+        
         {/* Recommended Badge - Compact on mobile */}
         {isRecommended && !badge && (
           <div className="absolute top-0 left-0 z-10">
