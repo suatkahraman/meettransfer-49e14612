@@ -1089,11 +1089,11 @@ const BookingPage = () => {
         "create-quick-booking-reservation",
         {
           body: {
-            // Booking details
-            pickup: isHourlyBooking ? urlCity : urlPickup,
-            dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}` : urlDropoff,
-            pickupDate: urlDate,
-            pickupTime: urlTime,
+            // Booking details - use effective values (editable or URL params)
+            pickup: isHourlyBooking ? (effectiveCity || urlCity) : effectivePickup,
+            dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${effectiveCity || urlCity}` : effectiveDropoff,
+            pickupDate: effectiveDate,
+            pickupTime: effectiveTime,
             vehicleType,
             passengers,
             price: currentPrice,
@@ -1113,7 +1113,7 @@ const BookingPage = () => {
             passengerNames: passengerNames.filter(n => n.trim()).length > 0 ? passengerNames.filter(n => n.trim()) : null,
             // Customer info
             customerName: customerName.trim(),
-            customerPhone: customerPhone.trim(),
+            customerPhone: customerPhone.trim() || 'N/A',
             customerEmail: customerEmail.trim(),
             customerPassword: isGoogleUser ? null : guestPassword,
             isGoogleUser,
@@ -1183,13 +1183,13 @@ const BookingPage = () => {
     try {
       const reservationData = isHourlyBooking
         ? {
-            pickup: urlCity,
-            dropoff: `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${urlCity}`,
-            pickup_date: urlDate,
-            pickup_time: urlTime,
+            pickup: effectiveCity || urlCity,
+            dropoff: `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${effectiveCity || urlCity}`,
+            pickup_date: effectiveDate,
+            pickup_time: effectiveTime,
             vehicle_type: vehicleType,
             customer_name: customerName.trim(),
-            customer_phone: customerPhone.trim(),
+            customer_phone: customerPhone.trim() || 'N/A',
             customer_notes: `[${selectedDuration} Hourly Rental] ${customerNotes.trim()}`.trim(),
             customer_id: user!.id,
             payment_type: paymentType,
@@ -1201,13 +1201,13 @@ const BookingPage = () => {
             status: getHourlyPrice(vehicleType, selectedDuration) ? "confirmed" : "awaiting-price",
           }
         : {
-            pickup: urlPickup,
-            dropoff: urlDropoff,
-            pickup_date: urlDate,
-            pickup_time: urlTime,
+            pickup: effectivePickup,
+            dropoff: effectiveDropoff,
+            pickup_date: effectiveDate,
+            pickup_time: effectiveTime,
             vehicle_type: vehicleType,
             customer_name: customerName.trim(),
-            customer_phone: customerPhone.trim(),
+            customer_phone: customerPhone.trim() || 'N/A',
             customer_notes: customerNotes.trim() || null,
             customer_id: user!.id,
             payment_type: paymentType,
@@ -1242,8 +1242,8 @@ const BookingPage = () => {
         await supabase
           .from("reservations")
           .insert({
-            pickup: urlDropoff, // Swap pickup and dropoff
-            dropoff: urlPickup,
+            pickup: effectiveDropoff, // Swap pickup and dropoff
+            dropoff: effectivePickup,
             pickup_date: returnDate,
             pickup_time: returnTime,
             vehicle_type: vehicleType,
@@ -1271,10 +1271,10 @@ const BookingPage = () => {
         await supabase.functions.invoke("notify-admin-new-reservation", {
           body: {
             reservationId: reservation.id,
-            pickup: isHourlyBooking ? urlCity : urlPickup,
-            dropoff: isHourlyBooking ? `${selectedDuration} Hourly` : urlDropoff,
-            pickupDate: urlDate,
-            pickupTime: urlTime,
+            pickup: isHourlyBooking ? (effectiveCity || urlCity) : effectivePickup,
+            dropoff: isHourlyBooking ? `${selectedDuration} Hourly` : effectiveDropoff,
+            pickupDate: effectiveDate,
+            pickupTime: effectiveTime,
             vehicleType,
             customerName: customerName.trim(),
             customerPhone: customerPhone.trim(),
