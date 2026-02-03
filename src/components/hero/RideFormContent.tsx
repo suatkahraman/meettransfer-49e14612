@@ -3,7 +3,7 @@ import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, RotateCcw, Plus, 
 import { Button } from "@/components/ui/button";
 import { TimePickerAMPM } from "@/components/ui/time-picker-ampm";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
-import { LocationInputs } from "@/components/hero";
+import { LocationInputs } from "./LocationInputs";
 import { VehiclePrice } from "./types";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { cn } from "@/lib/utils";
