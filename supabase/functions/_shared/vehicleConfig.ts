@@ -23,7 +23,7 @@ export const VEHICLE_TYPES: VehicleTypeConfig[] = [
 // Turkey distance-based fallback pricing (EUR)
 // Used when no price found in database
 export const TURKEY_DISTANCE_FALLBACK_PRICES: Record<string, { base50km: number; per_km_50_100: number }> = {
-  'sedan': { base50km: 58, per_km_50_100: 1 },
+  'sedan': { base50km: 36, per_km_50_100: 1 },
   'mercedes-vito': { base50km: 62, per_km_50_100: 1 },
   'vip-mercedes': { base50km: 70, per_km_50_100: 1 },
   'maybach-minibus': { base50km: 85, per_km_50_100: 1 },
