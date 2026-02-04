@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Hero } from "@/components/Hero";
-import { HeroErrorBoundary } from "@/components/hero";
+import HeroErrorBoundary from "@/components/hero/HeroErrorBoundary";
 // BookingForm removed - form is now inside Hero component
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
