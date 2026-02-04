@@ -121,6 +121,11 @@ export default defineConfig(({ mode }) => ({
         // when the SW doesn't explicitly consume preload responses (Workbox internal behavior).
         // Disable for a clean, stable production console.
         navigationPreload: false,
+
+         // CRITICAL (iOS PWA OAuth): allow the managed OAuth broker endpoint to hit the network.
+         // If the Service Worker serves index.html for /~oauth/initiate, the app router shows 404
+         // and the OAuth flow never actually starts.
+         navigateFallbackDenylist: [/^\/~oauth\/initiate(?:\/|$)/],
         runtimeCaching: [
           // ============================================
           // STATIC ASSETS - CacheFirst (immutable content)
