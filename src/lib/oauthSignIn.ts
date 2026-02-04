@@ -44,12 +44,11 @@ function getLovableAuth() {
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
   const lovableAuth = getLovableAuth();
 
-  // iOS PWA fix: ensure we always land on our dedicated callback route.
-  // This prevents "returned to homepage without being logged in" and makes the flow deterministic.
-  // redirect_uri MUST be the current origin's callback (NOT the lovable.app origin) so user returns to their domain.
-  const result = await lovableAuth.signInWithOAuth(provider, {
-    redirect_uri: `${window.location.origin}/~oauth/callback`,
-  });
+  // CRITICAL: Do NOT pass redirect_uri explicitly!
+  // Passing redirect_uri breaks the library's internal state parameter management,
+  // causing "Missing state parameter" errors on callback.
+  // The library handles redirect_uri internally and returns to current origin.
+  const result = await lovableAuth.signInWithOAuth(provider);
 
   // If the library redirected (full-page navigation), nothing more to do here.
   if (result.redirected) {
