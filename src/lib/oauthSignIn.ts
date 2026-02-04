@@ -14,8 +14,11 @@ export type OAuthProvider = "google" | "apple";
  * - Token exchange and session creation
  */
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
-  // ALWAYS use Lovable managed OAuth - it handles credentials automatically
-  // NOTE: Do NOT pass redirect_uri - the library manages state internally
-  const { error } = await lovable.auth.signInWithOAuth(provider);
+  // ALWAYS use Lovable managed OAuth - it handles credentials automatically.
+  // iOS PWA fix: ensure we always land on our dedicated callback route.
+  // This prevents "returned to homepage without being logged in" and makes the flow deterministic.
+  const { error } = await lovable.auth.signInWithOAuth(provider, {
+    redirect_uri: `${window.location.origin}/~oauth/callback`,
+  });
   return { error: error ?? null };
 }
