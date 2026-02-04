@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         if (!isMounted) return;
         
         setSession(currentSession);
@@ -90,8 +90,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Only fetch role if we actually need to redirect from auth pages
           if (!needsRedirect) return;
 
-          // For auth pages, redirect immediately to customer, then let dashboard handle role check
-          navigate('/customer', { replace: true });
+          // Fetch user role and redirect accordingly
+          try {
+            const { data: roleData } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", currentSession.user.id)
+              .maybeSingle();
+
+            const role = roleData?.role;
+            
+            if (role === "admin") {
+              navigate("/admin", { replace: true });
+            } else if (role === "agency") {
+              navigate("/agency", { replace: true });
+            } else if (role === "driver") {
+              navigate("/driver", { replace: true });
+            } else {
+              navigate("/customer", { replace: true });
+            }
+          } catch {
+            // Fallback to customer if role check fails
+            navigate("/customer", { replace: true });
+          }
         }
       }
     );
