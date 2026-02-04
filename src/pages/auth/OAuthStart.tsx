@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { lovable } from '@/integrations/lovable/index';
 import { Loader2 } from 'lucide-react';
+import { startOAuthSignIn } from '@/lib/oauthSignIn';
 
 /**
  * OAuth Start Page - Bridge for iOS PWA standalone mode
@@ -22,9 +22,7 @@ const OAuthStart = () => {
       }
 
       try {
-        // NOTE: Do NOT pass redirect_uri explicitly - it breaks state parameter management
-        // for managed OAuth. The library handles this internally.
-        const { error: oauthError } = await lovable.auth.signInWithOAuth(provider);
+        const { error: oauthError } = await startOAuthSignIn(provider);
 
         if (oauthError) {
           console.error('OAuth start error:', oauthError);
