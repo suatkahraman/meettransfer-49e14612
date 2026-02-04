@@ -27,10 +27,10 @@ export default function OAuthCallback() {
         return;
       }
 
-      // Clean up URL hash immediately
-      if (window.location.hash.includes('access_token=')) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
+      // NOTE: We intentionally do NOT clear the URL hash here.
+      // Supabase JS client reads tokens from the hash asynchronously.
+      // Clearing the hash prematurely causes "no session" on iOS PWA.
+      // The URL is cleaned after session is established (below).
 
       // Safety net: if callback arrives with PKCE code but handler hasn't processed for some reason,
       // exchange here and then wait until a session exists.
@@ -48,6 +48,14 @@ export default function OAuthCallback() {
       while (Date.now() - start < 8000) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          // Session established - now safe to clean up URL
+          try {
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.hash = '';
+            ['code', 'state', 'scope', 'authuser', 'prompt', 'error', 'error_description'].forEach((k) => cleanUrl.searchParams.delete(k));
+            window.history.replaceState(null, '', cleanUrl.pathname + (cleanUrl.search || ''));
+          } catch { /* ignore */ }
+
           // Check for post-OAuth redirect first
           const postOAuthRedirect = consumePostOAuthRedirect();
           if (postOAuthRedirect) {
