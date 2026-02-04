@@ -122,10 +122,14 @@ export default defineConfig(({ mode }) => ({
         // Disable for a clean, stable production console.
         navigationPreload: false,
 
-         // CRITICAL (iOS PWA OAuth): allow the managed OAuth broker endpoint to hit the network.
-         // If the Service Worker serves index.html for /~oauth/initiate, the app router shows 404
+         // CRITICAL (iOS PWA OAuth): allow ALL OAuth broker endpoints to hit the network.
+         // If the Service Worker serves index.html for /~oauth/*, the app router shows 404
          // and the OAuth flow never actually starts.
-         navigateFallbackDenylist: [/^\/~oauth\/initiate(?:\/|$)/],
+         navigateFallbackDenylist: [
+           /^\/~oauth\/.*/,   // Lovable managed OAuth broker paths (e.g. /~oauth/initiate)
+           /^\/oauth\/.*/,    // Standard OAuth callback paths
+           /^\/auth\/v1\/.*/  // Supabase auth API paths (if ever hit directly)
+         ],
         runtimeCaching: [
           // ============================================
           // STATIC ASSETS - CacheFirst (immutable content)
