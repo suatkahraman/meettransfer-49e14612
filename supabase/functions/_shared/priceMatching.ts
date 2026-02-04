@@ -1701,6 +1701,7 @@ function calculateKmBasedMinimum(distanceKm: number, vehicleType: string): numbe
   
   // Minimum base prices
   const minBase: Record<string, number> = {
+    'sedan': 36,
     'vito': 35,
     'vito-vip': 45,
     'sprinter': 70,
