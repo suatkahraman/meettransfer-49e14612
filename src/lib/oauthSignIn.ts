@@ -25,8 +25,8 @@ const isSafeOAuthRedirectUrl = (url: string) => {
 };
 
 /**
- * Gets the OAuth authorization URL for custom domains (BYOK).
- * Used by iOS PWA to open in a new window.
+ * Gets the OAuth authorization URL using the backend authorize endpoint.
+ * We use skipBrowserRedirect so we can validate the URL before redirecting.
  */
 export async function getOAuthUrl(provider: OAuthProvider): Promise<{ url: string | null; error: Error | null }> {
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -48,16 +48,41 @@ export async function getOAuthUrl(provider: OAuthProvider): Promise<{ url: strin
 
 /**
  * Starts OAuth sign-in.
- * Always uses Lovable managed OAuth bridge which works on both Lovable domains and custom domains.
- * 
- * Note: The getOAuthUrl function is kept for iOS PWA popup flow (Safari blocks same-window redirects).
- * For BYOK (Bring Your Own Keys) setup, configure OAuth credentials in Lovable Cloud settings.
+ *
+ * We prefer the backend "authorize -> code" flow (via getOAuthUrl) because some environments
+ * can reject the managed id_token grant with an "Unacceptable audience" error.
+ * If the provider isn't enabled for the standard flow, we fall back to managed OAuth.
  */
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
-  // Always use Lovable managed OAuth - works on all domains including custom domains
-  // NOTE: Do NOT pass redirect_uri explicitly - it breaks state parameter management
-  // for managed OAuth. The library handles this internally.
-  const { error } = await lovable.auth.signInWithOAuth(provider);
+  const isIOSDevice = (() => {
+    try {
+      const ua = navigator.userAgent || "";
+      const iOS = /iPad|iPhone|iPod/i.test(ua);
+      const iPadOS = ua.includes("Mac") && (navigator as any).maxTouchPoints > 1;
+      return iOS || iPadOS;
+    } catch {
+      return false;
+    }
+  })();
 
+  // 1) Prefer standard OAuth (PKCE/code) and manually redirect after validating returned URL.
+  try {
+    const { url, error } = await getOAuthUrl(provider);
+    if (!error && url) {
+      window.location.assign(url);
+      return { error: null };
+    }
+
+    // On iOS, managed OAuth can lead to a "redirect but not signed in" experience.
+    // If standard OAuth fails, surface the error instead of silently falling back.
+    if (isIOSDevice && error) {
+      return { error };
+    }
+  } catch {
+    // ignore and fall back to managed OAuth
+  }
+
+  // 2) Fallback: managed OAuth (no redirect_uri passed; library manages state).
+  const { error } = await lovable.auth.signInWithOAuth(provider);
   return { error: error ?? null };
 }
