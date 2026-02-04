@@ -952,8 +952,8 @@ const translations: Record<Language, Record<string, string>> = {
     finalOfferMessage: "This is our special discounted final offer for you.",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - International VIP Airport Transfer & Chauffeur Service | Turkey, Dubai, Cyprus",
-    seoHomeDesc: "Luxury VIP airport transfer and private chauffeur service in Turkey, Dubai, Cyprus. Professional drivers, Mercedes fleet, 24/7 service.",
+    seoHomeTitle: "Meet Transfer | VIP Airport Transfer Service",
+    seoHomeDesc: "Premium VIP airport transfer in Turkey, Dubai & Cyprus. Mercedes fleet, professional drivers, 24/7 service.",
     seoHomeKeywords: "international airport transfer, VIP airport transfer, private chauffeur service, luxury airport transfer, Istanbul transfer, Antalya transfer, Dubai transfer, Cyprus transfer, Mercedes transfer",
     seoServicesTitle: "International VIP Airport & Chauffeur Services | Turkey, Dubai, Cyprus | Meet Transfer",
     seoServicesDesc: "Professional VIP airport transfer and chauffeur services across Turkey, Dubai and Cyprus. Istanbul, Antalya, Bodrum, Dubai, Larnaca, Cappadocia. Mercedes fleet, 24/7 service.",
@@ -2688,8 +2688,8 @@ const translations: Record<Language, Record<string, string>> = {
     loadingPayments: "Laden...",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - Internationaler VIP Flughafentransfer & Chauffeurservice | Türkei, Dubai, Zypern",
-    seoHomeDesc: "Luxuriöser VIP Flughafentransfer und privater Chauffeurservice weltweit. Professionelle Fahrer, Mercedes-Flotte, 24/7 Service. Istanbul, Antalya, Dubai, Zypern, Kappadokien und mehr.",
+    seoHomeTitle: "Meet Transfer | VIP Flughafentransfer Service",
+    seoHomeDesc: "Premium VIP Flughafentransfer in Türkei, Dubai & Zypern. Mercedes-Flotte, professionelle Fahrer, 24/7 Service.",
     seoHomeKeywords: "internationaler Flughafentransfer, VIP Flughafentransfer, Privatchauffeur, Luxus Flughafentransfer, Istanbul Transfer, Antalya Transfer, Dubai Transfer, Zypern Transfer",
     seoServicesTitle: "Internationaler VIP Flughafen- & Chauffeurservice | Türkei, Dubai, Zypern | Meet Transfer",
     seoServicesDesc: "Professioneller VIP Flughafentransfer und Chauffeurservice in der Türkei, Dubai und Zypern. Istanbul, Antalya, Bodrum, Dubai, Larnaca, Kappadokien. Mercedes-Flotte, 24/7 Service.",
@@ -4569,8 +4569,8 @@ const translations: Record<Language, Record<string, string>> = {
     loadingPayments: "Chargement...",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - Service VIP International de Transfert Aéroport & Chauffeur | Turquie, Dubaï, Chypre",
-    seoHomeDesc: "Transfert VIP aéroport de luxe et service de chauffeur privé dans le monde entier. Chauffeurs professionnels, flotte Mercedes, service 24/7. Istanbul, Antalya, Dubaï, Chypre, Cappadoce et plus.",
+    seoHomeTitle: "Meet Transfer | Service VIP Transfert Aéroport",
+    seoHomeDesc: "Transfert VIP aéroport premium en Turquie, Dubaï & Chypre. Flotte Mercedes, chauffeurs professionnels, service 24/7.",
     seoHomeKeywords: "transfert aéroport international, transfert VIP aéroport, chauffeur privé, transfert luxe, transfert Istanbul, transfert Antalya, transfert Dubaï, transfert Chypre",
     seoServicesTitle: "Services VIP Internationaux Aéroport & Chauffeur | Turquie, Dubaï, Chypre | Meet Transfer",
     seoServicesDesc: "Services professionnels de transfert VIP aéroport et chauffeur en Turquie, Dubaï et Chypre. Istanbul, Antalya, Bodrum, Dubaï, Larnaca, Cappadoce. Flotte Mercedes, service 24/7.",
@@ -6165,8 +6165,8 @@ const translations: Record<Language, Record<string, string>> = {
     loadingPayments: "Загрузка...",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - Международный VIP Трансфер из Аэропорта и Услуги Шофера | Турция, Дубай, Кипр",
-    seoHomeDesc: "Люксовый VIP трансфер из аэропорта и услуги частного шофера по всему миру. Профессиональные водители, парк Mercedes, сервис 24/7. Стамбул, Анталья, Дубай, Кипр, Каппадокия и другие.",
+    seoHomeTitle: "Meet Transfer | VIP Трансфер из Аэропорта",
+    seoHomeDesc: "Премиум VIP трансфер в Турции, Дубае и на Кипре. Парк Mercedes, профессиональные водители, сервис 24/7.",
     seoHomeKeywords: "международный трансфер аэропорт, VIP трансфер, частный шофер, люкс трансфер, трансфер Стамбул, трансфер Анталья, трансфер Дубай, трансфер Кипр",
     seoServicesTitle: "Международные VIP Услуги Трансфера из Аэропорта и Шофера | Турция, Дубай, Кипр | Meet Transfer",
     seoServicesDesc: "Профессиональные VIP услуги трансфера из аэропорта и шофера в Турции, Дубае и на Кипре. Стамбул, Анталья, Бодрум, Дубай, Ларнака, Каппадокия. Парк Mercedes, сервис 24/7.",
@@ -7625,8 +7625,8 @@ const translations: Record<Language, Record<string, string>> = {
     loadingPayments: "Caricamento...",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - Servizio VIP Internazionale Trasferimento Aeroporto & Autista | Turchia, Dubai, Cipro",
-    seoHomeDesc: "Trasferimento VIP aeroporto di lusso e servizio autista privato in tutto il mondo. Autisti professionisti, flotta Mercedes, servizio 24/7. Istanbul, Antalya, Dubai, Cipro, Cappadocia e altro.",
+    seoHomeTitle: "Meet Transfer | Servizio VIP Trasferimento Aeroporto",
+    seoHomeDesc: "Trasferimento VIP aeroporto premium in Turchia, Dubai e Cipro. Flotta Mercedes, autisti professionisti, servizio 24/7.",
     seoHomeKeywords: "trasferimento aeroporto internazionale, trasferimento VIP aeroporto, autista privato, trasferimento lusso, trasferimento Istanbul, trasferimento Antalya, trasferimento Dubai, trasferimento Cipro",
     seoServicesTitle: "Servizi VIP Internazionali Aeroporto & Autista | Turchia, Dubai, Cipro | Meet Transfer",
     seoServicesDesc: "Servizi professionali di trasferimento VIP aeroporto e autista in Turchia, Dubai e Cipro. Istanbul, Antalya, Bodrum, Dubai, Larnaca, Cappadocia. Flotta Mercedes, servizio 24/7.",
@@ -9132,8 +9132,8 @@ const translations: Record<Language, Record<string, string>> = {
     loadingPayments: "Cargando...",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - Servicio VIP Internacional de Traslado Aeropuerto y Chófer | Turquía, Dubái, Chipre",
-    seoHomeDesc: "Traslado VIP aeropuerto de lujo y servicio de chófer privado en todo el mundo. Conductores profesionales, flota Mercedes, servicio 24/7. Estambul, Antalya, Dubái, Chipre, Capadocia y más.",
+    seoHomeTitle: "Meet Transfer | Servicio VIP Traslado Aeropuerto",
+    seoHomeDesc: "Traslado VIP aeropuerto premium en Turquía, Dubái y Chipre. Flota Mercedes, conductores profesionales, servicio 24/7.",
     seoHomeKeywords: "traslado aeropuerto internacional, traslado VIP aeropuerto, chófer privado, traslado lujo, traslado Estambul, traslado Antalya, traslado Dubái, traslado Chipre",
     seoServicesTitle: "Servicios VIP Internacionales Aeropuerto y Chófer | Turquía, Dubái, Chipre | Meet Transfer",
     seoServicesDesc: "Servicios profesionales de traslado VIP aeropuerto y chófer en Turquía, Dubái y Chipre. Estambul, Antalya, Bodrum, Dubái, Larnaca, Capadocia. Flota Mercedes, servicio 24/7.",
@@ -10639,8 +10639,8 @@ const translations: Record<Language, Record<string, string>> = {
     loadingPayments: "جاري التحميل...",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - خدمة نقل VIP دولية من المطار وسائق خاص | تركيا، دبي، قبرص",
-    seoHomeDesc: "نقل VIP فاخر من المطار وخدمة سائق خاص حول العالم. سائقون محترفون، أسطول مرسيدس، خدمة 24/7. إسطنبول، أنطاليا، دبي، قبرص، كابادوكيا والمزيد.",
+    seoHomeTitle: "Meet Transfer | خدمة نقل VIP من المطار",
+    seoHomeDesc: "نقل VIP فاخر في تركيا ودبي وقبرص. أسطول مرسيدس، سائقون محترفون، خدمة 24/7.",
     seoHomeKeywords: "نقل مطار دولي، نقل VIP مطار، سائق خاص، نقل فاخر، نقل إسطنبول، نقل أنطاليا، نقل دبي، نقل قبرص",
     seoServicesTitle: "خدمات VIP دولية للمطار والسائق الخاص | تركيا، دبي، قبرص | Meet Transfer",
     seoServicesDesc: "خدمات نقل VIP احترافية من المطار وسائق في تركيا ودبي وقبرص. إسطنبول، أنطاليا، بودروم، دبي، لارنكا، كابادوكيا. أسطول مرسيدس، خدمة 24/7.",
@@ -12222,8 +12222,8 @@ const translations: Record<Language, Record<string, string>> = {
     noAccessToken: "Erişim tokeni sağlanmadı",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - Uluslararası Premium VIP Havalimanı Transfer ve Şoför Hizmeti | Türkiye, Dubai, Kıbrıs",
-    seoHomeDesc: "Dünya genelinde lüks VIP havalimanı transferi ve özel şoför hizmeti. Profesyonel şoförler, Mercedes filo, 7/24 hizmet. İstanbul, Antalya, Dubai, Kıbrıs, Kapadokya ve daha fazlası.",
+    seoHomeTitle: "Meet Transfer | VIP Havalimanı Transfer Hizmeti",
+    seoHomeDesc: "Türkiye, Dubai ve Kıbrıs'ta premium VIP havalimanı transferi. Mercedes filo, profesyonel şoförler, 7/24 hizmet.",
     seoHomeKeywords: "uluslararası havalimanı transferi, VIP havalimanı transferi, özel şoför hizmeti, lüks havalimanı transferi, İstanbul transfer, Antalya transfer, Dubai transfer, Kıbrıs transfer, Mercedes transfer",
     seoServicesTitle: "Uluslararası VIP Havalimanı ve Şoför Hizmetleri | Türkiye, Dubai, Kıbrıs | Meet Transfer",
     seoServicesDesc: "Türkiye, Dubai ve Kıbrıs genelinde profesyonel VIP havalimanı transfer ve şoför hizmetleri. İstanbul, Antalya, Bodrum, Dubai, Larnaka, Kapadokya. Mercedes filo, 7/24 hizmet.",
@@ -13815,8 +13815,8 @@ const translations: Record<Language, Record<string, string>> = {
     antalyaWhatsApp: "Привіт, я хотів би забронювати трансфер з аеропорту Анталії.",
     
     // SEO Meta Tags
-    seoHomeTitle: "Meet Transfer - Міжнародний Преміум VIP трансфер з аеропорту та шоферський сервіс | Туреччина, Дубай, Кіпр",
-    seoHomeDesc: "Люксовий VIP трансфер з аеропорту та приватний шоферський сервіс по всьому світу. Професійні водії, автопарк Mercedes, сервіс 24/7. Стамбул, Анталія, Дубай, Кіпр, Каппадокія та інші.",
+    seoHomeTitle: "Meet Transfer | VIP Трансфер з Аеропорту",
+    seoHomeDesc: "Преміум VIP трансфер у Туреччині, Дубаї та на Кіпрі. Автопарк Mercedes, професійні водії, сервіс 24/7.",
     seoHomeKeywords: "міжнародний трансфер з аеропорту, VIP трансфер, приватний шоферський сервіс, люксовий трансфер, трансфер Дубай, трансфер Кіпр",
     seoServicesTitle: "Міжнародні Преміум VIP аеропортові та шоферські послуги | Туреччина, Дубай, Кіпр | Meet Transfer",
     seoServicesDesc: "Професійний VIP трансфер з аеропорту та шоферські послуги в Туреччині, Дубаї та на Кіпрі. Стамбул, Анталія, Бодрум, Дубай, Ларнака, Каппадокія. Автопарк Mercedes, сервіс 24/7.",
@@ -15240,8 +15240,8 @@ const translations: Record<Language, Record<string, string>> = {
     loadingPayments: "読み込み中...",
     
     // SEO Meta Tags
-    seoHomeTitle: "ミートトランスファー - 国際プレミアムVIP空港送迎・シャトルサービス | トルコ、ドバイ、キプロス",
-    seoHomeDesc: "世界中での高級VIP空港送迎とプライベートシャトルサービス。プロのドライバー、メルセデスフリート、24時間サービス。イスタンブール、アンタルヤ、ドバイ、キプロス、カッパドキアなど。",
+    seoHomeTitle: "Meet Transfer | VIP空港送迎サービス",
+    seoHomeDesc: "トルコ、ドバイ、キプロスでのプレミアムVIP空港送迎。メルセデスフリート、プロドライバー、24時間対応。",
     seoHomeKeywords: "国際空港送迎, VIP空港送迎, プライベートシャトルサービス, 高級空港送迎, イスタンブール送迎, アンタルヤ送迎, ドバイ送迎, キプロス送迎, メルセデス送迎",
     seoServicesTitle: "国際プレミアムVIP空港・シャトルサービス | トルコ、ドバイ、キプロス | ミートトランスファー",
     seoServicesDesc: "トルコ、ドバイ、キプロスでのプロフェッショナルVIP空港送迎・シャトルサービス。イスタンブール、アンタルヤ、ボドルム、ドバイ、ラルナカ、カッパドキア。メルセデスフリート、24時間サービス。",
@@ -15794,6 +15794,10 @@ const translations: Record<Language, Record<string, string>> = {
     pickupTime: "Hora de recolha",
     passengers: "Passageiros",
     getQuote: "Obter Preço",
+    // SEO Meta Tags
+    seoHomeTitle: "Meet Transfer | Serviço VIP de Transfer Aeroporto",
+    seoHomeDesc: "Transfer VIP premium na Turquia, Dubai e Chipre. Frota Mercedes, motoristas profissionais, serviço 24/7.",
+    seoHomeKeywords: "transfer aeroporto internacional, transfer VIP, motorista privado, transfer luxo, transfer Istambul, transfer Dubai, transfer Chipre",
     // All other keys will use English as fallback through the t() function
   },
 };
