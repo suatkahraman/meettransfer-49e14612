@@ -8,11 +8,13 @@ export type OAuthProvider = "google" | "apple";
  */
 function isCustomDomain(): boolean {
   const host = window.location.hostname;
-  return (
-    !host.endsWith(".lovable.app") &&
-    !host.endsWith(".lovableproject.com") &&
-    host !== "localhost"
-  );
+  // Check for Lovable managed domains
+  const isLovableDomain = 
+    host.endsWith(".lovable.app") ||
+    host.endsWith(".lovableproject.com") ||
+    host === "localhost";
+  
+  return !isLovableDomain;
 }
 
 /**
