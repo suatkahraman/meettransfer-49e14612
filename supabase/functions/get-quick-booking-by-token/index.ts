@@ -1,11 +1,29 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { validateTokenInput, createValidationErrorResponse } from "../_shared/validation.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Inline validation for token input
+function validateTokenInput(data: unknown): { success: boolean; data?: { token: string }; error?: string } {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Invalid request body' };
+  }
+  
+  const { token } = data as Record<string, unknown>;
+  
+  if (!token || typeof token !== 'string') {
+    return { success: false, error: 'Token is required' };
+  }
+  
+  if (token.length < 10 || token.length > 200) {
+    return { success: false, error: 'Invalid token format' };
+  }
+  
+  return { success: true, data: { token } };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -18,7 +36,10 @@ serve(async (req) => {
     const validationResult = validateTokenInput(rawData);
     
     if (!validationResult.success) {
-      return createValidationErrorResponse(validationResult.error!, corsHeaders);
+      return new Response(JSON.stringify({ error: validationResult.error }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
     
     const { token } = validationResult.data!;
