@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             } else if (role === "driver") {
               navigate("/driver-dashboard", { replace: true });
             } else {
-              navigate("/customer", { replace: true });
+              navigate("/customer-dashboard", { replace: true });
             }
           } catch {
             // Fallback to customer if role check fails
