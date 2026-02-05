@@ -7,6 +7,48 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
+// District mapping for known locations
+const DISTRICT_MAPPING: Record<string, string> = {
+  "alanya": "Alanya",
+  "belek": "Belek",
+  "side": "Side",
+  "kemer": "Kemer",
+  "lara": "Lara",
+  "kundu": "Kundu",
+  "beldibi": "Beldibi",
+  "göynük": "Göynük",
+  "tekirova": "Tekirova",
+  "manavgat": "Manavgat",
+  "taksim": "Taksim",
+  "sultanahmet": "Sultanahmet",
+  "kadikoy": "Kadıköy",
+  "besiktas": "Beşiktaş",
+  "sisli": "Şişli",
+  "levent": "Levent",
+  "atasehir": "Ataşehir",
+  "bakirkoy": "Bakırköy",
+  "bodrum": "Bodrum Merkez",
+  "turgutreis": "Turgutreis",
+  "yalikavak": "Yalıkavak",
+  "gumbet": "Gümbet",
+  "bitez": "Bitez",
+  "fethiye": "Fethiye",
+  "oludeniz": "Ölüdeniz",
+  "marmaris": "Marmaris",
+  "dalyan": "Dalyan",
+  "cesme": "Çeşme",
+  "alacati": "Alaçatı",
+  "kusadasi": "Kuşadası",
+};
+
+function detectDistrict(text: string): string | null {
+  const lower = text.toLowerCase();
+  for (const [key, value] of Object.entries(DISTRICT_MAPPING)) {
+    if (lower.includes(key)) return value;
+  }
+  return null;
+}
+
 // ---- Minimal helpers ----
 function analyzeSimple(pickup: string, dropoff: string): { airport: string | null; city: string | null; district: string | null; direction: string; confidence: string } {
   const s = (pickup + " " + dropoff).toLowerCase();
@@ -14,21 +56,24 @@ function analyzeSimple(pickup: string, dropoff: string): { airport: string | nul
   let airport: string | null = null;
   if (/istanbul airport|\bist\b/i.test(s)) airport = "Istanbul Airport (IST)";
   else if (/sabiha|gokcen|\bsaw\b/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
-  else if (/antalya.*airport|\bayt\b/i.test(s)) airport = "Antalya Airport (AYT)";
+  else if (/antalya.*airport|antalya.*havalimanı|\bayt\b/i.test(s)) airport = "Antalya Airport (AYT)";
   else if (/bodrum|milas|\bbjv\b/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
   else if (/dalaman|\bdlm\b/i.test(s)) airport = "Dalaman Airport (DLM)";
   else if (/adnan menderes|\badb\b/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
 
-  const direction = dropoff.toLowerCase().includes("airport") ? "to_airport" : airport ? "from_airport" : "city_to_city";
+  const direction = dropoff.toLowerCase().includes("airport") || dropoff.toLowerCase().includes("havalimanı") 
+    ? "to_airport" 
+    : airport ? "from_airport" : "city_to_city";
 
   let city: string | null = null;
   if (/istanbul|\bist\b|\bsaw\b/i.test(s)) city = "Istanbul";
-  else if (/antalya|\bayt\b|alanya|belek/i.test(s)) city = "Antalya";
-  else if (/bodrum|\bbjv\b/i.test(s)) city = "Bodrum";
-  else if (/dalaman|\bdlm\b|fethiye|marmaris/i.test(s)) city = "Dalaman";
-  else if (/izmir|\badb\b|cesme/i.test(s)) city = "Izmir";
+  else if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat/i.test(s)) city = "Antalya";
+  else if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) city = "Bodrum";
+  else if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) city = "Dalaman";
+  else if (/izmir|\badb\b|cesme|alacati|kusadasi/i.test(s)) city = "Izmir";
 
-  const district = pickup.split(",")[0]?.trim() || null;
+  // Detect district from pickup or dropoff
+  const district = detectDistrict(pickup) || detectDistrict(dropoff);
 
   return { airport, city, district, direction, confidence: airport && city ? "high" : city ? "medium" : "low" };
 }
@@ -90,8 +135,63 @@ async function sendManualEmail(booking: Record<string, unknown>, info: { airport
   await sendEmail(
     "sautkahraman@gmail.com",
     `⚠️ Quick Booking Manuel Fiyat Gerekli: ${booking.customer_name || "Misafir"}`,
-    `<p>Pickup: ${booking.pickup}</p><p>Dropoff: ${booking.dropoff}</p><p>City: ${info.city}</p><p>Airport: ${info.airport}</p>`
+    `<p>Pickup: ${booking.pickup}</p><p>Dropoff: ${booking.dropoff}</p><p>City: ${info.city}</p><p>Airport: ${info.airport}</p><p>District: ${info.district}</p>`
   );
+}
+
+async function findBestPrice(vehicleType: string, city: string | null, airport: string | null, district: string | null): Promise<Record<string, unknown> | null> {
+  // Strategy 1: Try with district if available
+  if (district && city && airport) {
+    const prices = await supabaseQuery("region_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      city: `eq.${city}`,
+      airport: `eq.${airport}`,
+      district: `eq.${district}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (prices?.[0]) return prices[0];
+  }
+
+  // Strategy 2: City + Airport without district
+  if (city && airport) {
+    const prices = await supabaseQuery("region_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      city: `eq.${city}`,
+      airport: `eq.${airport}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (prices?.[0]) return prices[0];
+  }
+
+  // Strategy 3: City only
+  if (city) {
+    const prices = await supabaseQuery("region_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      city: `eq.${city}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (prices?.[0]) return prices[0];
+  }
+
+  // Strategy 4: Airport only
+  if (airport) {
+    const prices = await supabaseQuery("region_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      airport: `eq.${airport}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (prices?.[0]) return prices[0];
+  }
+
+  return null;
 }
 
 // ---- HANDLER ----
@@ -126,47 +226,22 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ matched: false, reason: "no_location_match" }), { headers: corsHeaders });
     }
 
-    // Try to find price - build query params
-    const queryParams: Record<string, string> = {
-      vehicle_type: `eq.${booking.vehicle_type}`,
-      is_active: "eq.true",
-      select: "*",
-      limit: "1",
-    };
-    if (city) queryParams.city = `eq.${city}`;
-    if (airport) queryParams.airport = `eq.${airport}`;
-    if (district) queryParams.district = `eq.${district}`;
-
-    let prices = await supabaseQuery("region_prices", queryParams);
-    let bestPrice = prices?.[0] ?? null;
-
-    // Fallback city+airport
-    if (!bestPrice && city && airport) {
-      const fallbackParams: Record<string, string> = {
-        vehicle_type: `eq.${booking.vehicle_type}`,
-        city: `eq.${city}`,
-        airport: `eq.${airport}`,
-        is_active: "eq.true",
-        select: "*",
-        limit: "1",
-      };
-      const p2 = await supabaseQuery("region_prices", fallbackParams);
-      bestPrice = p2?.[0] ?? null;
-    }
+    // Find best price with fallback strategies
+    const bestPrice = await findBestPrice(booking.vehicle_type, city, airport, district);
 
     if (!bestPrice) {
       await sendManualEmail(booking, { airport, city, district, direction, confidence });
-      return new Response(JSON.stringify({ matched: false, reason: "no_price_found" }), { headers: corsHeaders });
+      return new Response(JSON.stringify({ matched: false, reason: "no_price_found", debug: { city, airport, district, vehicleType: booking.vehicle_type } }), { headers: corsHeaders });
     }
 
     // Price logic
-    const baseCurrency = bestPrice.price_currency || "EUR";
+    const baseCurrency = (bestPrice.price_currency as string) || "EUR";
     const customerCurrency = booking.price_currency || baseCurrency;
 
-    let finalPrice = bestPrice.price;
+    let finalPrice = bestPrice.price as number;
     let finalCurrency = baseCurrency;
     if (customerCurrency !== baseCurrency) {
-      const c = await convertCurrency(bestPrice.price, baseCurrency, customerCurrency);
+      const c = await convertCurrency(finalPrice, baseCurrency, customerCurrency);
       finalPrice = c.amount;
       finalCurrency = customerCurrency;
     }
@@ -196,7 +271,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    return new Response(JSON.stringify({ matched: true, price: finalPrice, currency: finalCurrency, returnPrice, totalPrice }), { headers: corsHeaders });
+    return new Response(JSON.stringify({ matched: true, price: finalPrice, currency: finalCurrency, returnPrice, totalPrice, matchedCity: city, matchedAirport: airport, matchedDistrict: district }), { headers: corsHeaders });
   } catch (e: unknown) {
     const error = e instanceof Error ? e.message : "Unknown error";
     console.error("auto-price-quick-booking error:", error);
