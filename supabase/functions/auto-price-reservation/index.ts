@@ -2,376 +2,6 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
-// NOTE: `_shared/*` was removed to prevent bundle timeouts. Keep this function self-contained.
-
-type Direction = "to_airport" | "from_airport" | "city_to_city";
-
-type SideAnalysis = {
-  airport: { value: string } | null;
-  city: { value: string } | null;
-  district: { value: string; city?: string } | null;
-};
-
-type TransferInfo = {
-  airport: string | null;
-  city: string | null;
-  district: string | null;
-  direction: Direction;
-  confidence: "high" | "medium" | "low";
-  pickupAnalysis: SideAnalysis;
-  dropoffAnalysis: SideAnalysis;
-};
-
-function stripDiacritics(input: string): string {
-  return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-function norm(input: string): string {
-  return stripDiacritics(input)
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function canonicalizeDistrict(raw: string): string {
-  const cleaned = stripDiacritics(raw)
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  return cleaned
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => (w.length <= 2 ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()))
-    .join(" ");
-}
-
-const AIRPORT_MATCHERS: Array<{ re: RegExp; value: string }> = [
-  { re: /(istanbul airport|\bist\b)/i, value: "Istanbul Airport (IST)" },
-  { re: /(sabiha|gokcen|\bsaw\b)/i, value: "Sabiha Gokcen Airport (SAW)" },
-  { re: /(antalya.*airport|\bayt\b)/i, value: "Antalya Airport (AYT)" },
-  { re: /(bodrum|milas|\bbjv\b)/i, value: "Bodrum-Milas Airport (BJV)" },
-  { re: /(dalaman|\bdlm\b)/i, value: "Dalaman Airport (DLM)" },
-  { re: /(adnan menderes|izmir.*airport|\badb\b)/i, value: "Izmir Adnan Menderes Airport (ADB)" },
-  { re: /(kayseri|\basr\b)/i, value: "Kayseri Airport (ASR)" },
-  { re: /(nevsehir|kapadokya|\bnav\b)/i, value: "Nevsehir-Kapadokya Airport (NAV)" },
-  { re: /(esenboga|ankara.*airport|\besb\b)/i, value: "Esenboğa Havalimanı (ESB)" },
-  { re: /(diyarbakir|\bdiy\b)/i, value: "Diyarbakir Airport (DIY)" },
-  { re: /(mardin|\bmqm\b)/i, value: "Mardin Airport (MQM)" },
-  { re: /(ercan|\becn\b)/i, value: "ECN" },
-  { re: /(dubai.*airport|\bdxb\b)/i, value: "DXB" },
-  { re: /(zurich|\bzrh\b)/i, value: "ZRH" },
-  { re: /(geneva|\bgva\b)/i, value: "GVA" },
-  { re: /(basel|\bbsl\b)/i, value: "BSL" },
-  { re: /(malpensa|\bmxp\b)/i, value: "MXP" },
-];
-
-function findAirport(text: string): string | null {
-  for (const m of AIRPORT_MATCHERS) {
-    if (m.re.test(text)) return m.value;
-  }
-  return null;
-}
-
-function detectCityFromText(text: string): string | null {
-  const t = norm(text);
-  if (/(\bdubai\b|\buae\b|\bdxb\b)/.test(t)) return "Dubai";
-  if (/(\bcyprus\b|\bkibris\b|\bkıbrıs\b|\bkktc\b|\becn\b)/.test(t)) return "Cyprus";
-  if (/(\bzrh\b|\bgva\b|\bbsl\b|\bmxp\b|switzerland|schweiz|suisse|zurich|geneva|basel|malpensa)/.test(t)) return "Switzerland";
-
-  const cityMatchers: Array<{ re: RegExp; value: string }> = [
-    { re: /(istanbul|\bist\b|\bsaw\b)/, value: "Istanbul" },
-    { re: /(antalya|\bayt\b|alanya|kemer|belek|side|manavgat|kas|kaş|kalkan)/, value: "Antalya" },
-    { re: /(bodrum|\bbjv\b)/, value: "Bodrum" },
-    { re: /(dalaman|\bdlm\b|fethiye|marmaris|oludeniz|ölüdeniz|gocek|göcek)/, value: "Dalaman" },
-    { re: /(izmir|\badb\b|cesme|çeşme|kusadasi|kuşadası)/, value: "Izmir" },
-    { re: /(cappadocia|kapadokya|goreme|göreme|urgup|ürgüp|\basr\b|\bnav\b)/, value: "Cappadocia" },
-    { re: /(ankara|\besb\b|esenboga|esenboğa)/, value: "Ankara" },
-    { re: /(adana)/, value: "Adana" },
-    { re: /(diyarbakir|diyarbakır|\bdiy\b)/, value: "Diyarbakir" },
-    { re: /(mardin|\bmqm\b)/, value: "Mardin" },
-    { re: /(kocaeli|gebze|izmit|i̇zmit)/, value: "Kocaeli" },
-    { re: /(sapanca)/, value: "Sapanca" },
-    { re: /(muğla|mugla)/, value: "Muğla" },
-  ];
-
-  for (const m of cityMatchers) {
-    if (m.re.test(t)) return m.value;
-  }
-  return null;
-}
-
-function extractDistrictCandidate(text: string, city: string | null): string | null {
-  const parts = text
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  if (parts.length === 0) return null;
-  if (!city) return parts[0] || null;
-
-  const cityNorm = norm(city);
-  const idx = parts.findIndex((p) => norm(p).includes(cityNorm));
-  if (idx > 0) return parts[idx - 1];
-
-  const slash = parts[0]?.split("/").map((p) => p.trim()).filter(Boolean) ?? [];
-  if (slash.length >= 2) return slash[0];
-
-  return parts[0] || null;
-}
-
-function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
-  const pickupAirport = findAirport(pickup);
-  const dropoffAirport = findAirport(dropoff);
-
-  const direction: Direction = dropoffAirport
-    ? "to_airport"
-    : pickupAirport
-      ? "from_airport"
-      : "city_to_city";
-
-  const pickupCity = detectCityFromText(pickup);
-  const dropoffCity = detectCityFromText(dropoff);
-
-  const pickupDistrictRaw = extractDistrictCandidate(pickup, pickupCity);
-  const dropoffDistrictRaw = extractDistrictCandidate(dropoff, dropoffCity);
-
-  const pickupDistrict = pickupDistrictRaw ? canonicalizeDistrict(pickupDistrictRaw) : null;
-  const dropoffDistrict = dropoffDistrictRaw ? canonicalizeDistrict(dropoffDistrictRaw) : null;
-
-  const pickupAnalysis: SideAnalysis = {
-    airport: pickupAirport ? { value: pickupAirport } : null,
-    city: pickupCity ? { value: pickupCity } : null,
-    district: pickupDistrict ? { value: pickupDistrict, city: pickupCity ?? undefined } : null,
-  };
-
-  const dropoffAnalysis: SideAnalysis = {
-    airport: dropoffAirport ? { value: dropoffAirport } : null,
-    city: dropoffCity ? { value: dropoffCity } : null,
-    district: dropoffDistrict ? { value: dropoffDistrict, city: dropoffCity ?? undefined } : null,
-  };
-
-  const airport = dropoffAirport || pickupAirport || null;
-  const city = direction === "to_airport" ? pickupCity : direction === "from_airport" ? dropoffCity : pickupCity || dropoffCity;
-  const district = direction === "to_airport" ? pickupDistrict : direction === "from_airport" ? dropoffDistrict : pickupDistrict || dropoffDistrict;
-  const confidence: TransferInfo["confidence"] = airport && city ? "high" : city ? "medium" : "low";
-
-  return {
-    airport,
-    city,
-    district,
-    direction,
-    confidence,
-    pickupAnalysis,
-    dropoffAnalysis,
-  };
-}
-
-type SanityCheckResult = {
-  isValid: boolean;
-  reason?: string;
-  minimumExpected?: number;
-  actualPrice?: number;
-  vehicleType?: string;
-  confidence?: "high" | "medium" | "low";
-  routeKey?: string;
-};
-
-function toEur(amount: number, currency: string): number {
-  const c = (currency || "EUR").toUpperCase();
-  if (c === "EUR") return amount;
-  if (c === "TRY") return amount / 38;
-  if (c === "USD") return amount / 1.08;
-  if (c === "GBP") return amount * 1.17;
-  if (c === "AED") return amount / 3.97;
-  return amount;
-}
-
-function checkPriceSanity(
-  pickupCity: string | null,
-  dropoffCity: string | null,
-  price: number,
-  currency: string,
-  vehicleType: string,
-  airport: string | null
-): SanityCheckResult {
-  const priceEur = toEur(price, currency);
-  const vt = (vehicleType || "").toLowerCase();
-
-  let min = 25;
-  if (/(s_class|maybach)/.test(vt)) min = 140;
-  else if (/(sprinter|minibus)/.test(vt)) min = 85;
-  else if (/(vito|vclass|minivan|vip)/.test(vt)) min = 50;
-  if (airport) min += 10;
-
-  const routeKey = `${pickupCity ?? "?"}->${dropoffCity ?? "?"}${airport ? `@${airport}` : ""}`;
-
-  if (!Number.isFinite(priceEur) || priceEur <= 0) {
-    return { isValid: false, reason: "invalid_price", minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "low", routeKey };
-  }
-  if (priceEur < min) {
-    return { isValid: false, reason: `too_low(<${min}€)`, minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "medium", routeKey };
-  }
-  if (priceEur > 5000) {
-    return { isValid: false, reason: "too_high(>5000€)", minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "low", routeKey };
-  }
-  return { isValid: true, minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "high", routeKey };
-}
-
-function logPriceSanityCheck(scope: string, id: string, result: SanityCheckResult) {
-  console.log(`[sanity:${scope}] ${id}`, result);
-}
-
-function logAnalysis(
-  scope: "quick_booking" | "reservation",
-  entityId: string,
-  pickup: string,
-  dropoff: string,
-  transferInfo: TransferInfo
-) {
-  console.log(`[analysis:${scope}] ${entityId}`, { pickup, dropoff, ...transferInfo });
-}
-
-function unique(list: string[]): string[] {
-  return Array.from(new Set(list.filter(Boolean)));
-}
-
-function getVehicleFallbackList(requested: string): string[] {
-  const r = (requested || "").toLowerCase();
-
-  if (r.includes("dubai-")) return [requested];
-
-  if (/(sprinter|minibus)/.test(r)) {
-    return unique([
-      requested,
-      "sprinter",
-      "mercedes-sprinter",
-      "Mercedes Sprinter or Similar",
-      "minibus",
-      "maybach-minibus",
-    ]);
-  }
-
-  if (/(vito|vclass)/.test(r)) {
-    return unique([
-      requested,
-      "vito",
-      "mercedes-vito",
-      "Vip Mercedes Vito",
-      "vip-vito",
-      "mercedes-vip-vito",
-      "minivan",
-      "vip_minivan",
-    ]);
-  }
-
-  if (/(minivan)/.test(r)) {
-    return unique([requested, "minivan", "vip_minivan", "mercedes-vito", "vito"]);
-  }
-
-  if (/(sedan)/.test(r)) {
-    return unique([requested, "sedan", "standard-sedan", "standard_sedan"]);
-  }
-
-  return [requested];
-}
-
-type VehicleRegion = "turkey" | "dubai" | "switzerland" | "default";
-
-function detectRegion(pickup: string, dropoff: string): VehicleRegion {
-  const s = (pickup + " " + dropoff).toLowerCase();
-  if (/(\bdubai\b|\buae\b|\bdxb\b)/i.test(s)) return "dubai";
-  if (/(\bzrh\b|\bgva\b|\bbsl\b|\bmxp\b|switzerland|schweiz|suisse|zurich|geneva|basel|malpensa)/i.test(s)) return "switzerland";
-  if (/(istanbul|turkiye|türkiye|turkey|antalya|izmir|bodrum|dalaman|ankara|adana|diyarbakir|mardin|sapanca|kocaeli)/i.test(s)) return "turkey";
-  return "default";
-}
-
-async function convertCurrency(
-  amount: number,
-  fromCurrency: string,
-  toCurrency: string
-): Promise<{ amount: number; rate: number }> {
-  if (fromCurrency === toCurrency) return { amount: Math.ceil(amount), rate: 1 };
-
-  try {
-    const response = await fetch(
-      `https://api.frankfurter.app/latest?from=${encodeURIComponent(fromCurrency)}&to=${encodeURIComponent(toCurrency)}`
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      const rate = data.rates?.[toCurrency];
-      if (typeof rate === "number" && Number.isFinite(rate)) {
-        return { amount: Math.ceil(amount * rate), rate };
-      }
-    }
-  } catch (e) {
-    console.error("Currency conversion error:", e);
-  }
-
-  return { amount: Math.ceil(amount), rate: 1 };
-}
-
-type DiscountInfo = {
-  price: number;
-  discountApplied: boolean;
-  discountPercent: number;
-};
-
-function calculateDiscount(
-  basePrice: number,
-  hasReturnTrip: boolean,
-  promoCode: string | null,
-  region: VehicleRegion
-): DiscountInfo {
-  // Current business rule in code: disable discounts for Dubai/Switzerland.
-  if (region === "dubai" || region === "switzerland") {
-    return { price: Math.ceil(basePrice), discountApplied: false, discountPercent: 0 };
-  }
-
-  if (!hasReturnTrip) {
-    return { price: Math.ceil(basePrice), discountApplied: false, discountPercent: 0 };
-  }
-
-  const code = (promoCode || "").toUpperCase();
-  const discountPercent = code ? 25 : 0;
-  const discounted = discountPercent > 0 ? Math.ceil(basePrice * (1 - discountPercent / 100)) : Math.ceil(basePrice);
-
-  return { price: discounted, discountApplied: discountPercent > 0, discountPercent };
-}
-
-function manualPriceRequiredEmail(
-  reservation: any,
-  info: {
-    airport: string | null;
-    city: string | null;
-    district: string | null;
-    direction: string;
-    confidence: string;
-    additionalReason?: string;
-  },
-  scope: "reservation" | "quick_booking"
-): string {
-  const reason = info.additionalReason ? `<p><strong>Reason:</strong> ${info.additionalReason}</p>` : "";
-  return `
-    <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:20px;">
-      <h2>Manual pricing required (${scope})</h2>
-      ${reason}
-      <p><strong>Pickup:</strong> ${reservation.pickup}</p>
-      <p><strong>Dropoff:</strong> ${reservation.dropoff}</p>
-      <p><strong>Date/Time:</strong> ${reservation.pickup_date} ${reservation.pickup_time}</p>
-      <p><strong>Vehicle:</strong> ${reservation.vehicle_type}</p>
-      <hr />
-      <p><strong>Matched city:</strong> ${info.city ?? "N/A"}</p>
-      <p><strong>Matched district:</strong> ${info.district ?? "N/A"}</p>
-      <p><strong>Matched airport:</strong> ${info.airport ?? "N/A"}</p>
-      <p><strong>Direction:</strong> ${info.direction} (${info.confidence})</p>
-    </div>
-  `;
-}
-
-
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
@@ -379,987 +9,143 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface AutoPriceRequest {
-  reservation_id: string;
+// ---- Minimal helpers ----
+function analyzeSimple(pickup: string, dropoff: string): { airport: string | null; city: string | null; district: string | null; direction: string; confidence: string } {
+  const s = (pickup + " " + dropoff).toLowerCase();
+
+  let airport: string | null = null;
+  if (/istanbul airport|\bist\b/i.test(s)) airport = "Istanbul Airport (IST)";
+  else if (/sabiha|gokcen|\bsaw\b/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
+  else if (/antalya.*airport|\bayt\b/i.test(s)) airport = "Antalya Airport (AYT)";
+  else if (/bodrum|milas|\bbjv\b/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
+  else if (/dalaman|\bdlm\b/i.test(s)) airport = "Dalaman Airport (DLM)";
+  else if (/adnan menderes|\badb\b/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
+
+  const direction = dropoff.toLowerCase().includes("airport") ? "to_airport" : airport ? "from_airport" : "city_to_city";
+
+  let city: string | null = null;
+  if (/istanbul|\bist\b|\bsaw\b/i.test(s)) city = "Istanbul";
+  else if (/antalya|\bayt\b|alanya|belek/i.test(s)) city = "Antalya";
+  else if (/bodrum|\bbjv\b/i.test(s)) city = "Bodrum";
+  else if (/dalaman|\bdlm\b|fethiye|marmaris/i.test(s)) city = "Dalaman";
+  else if (/izmir|\badb\b|cesme/i.test(s)) city = "Izmir";
+
+  const district = pickup.split(",")[0]?.trim() || null;
+
+  return { airport, city, district, direction, confidence: airport && city ? "high" : city ? "medium" : "low" };
 }
 
-// Send admin notification for manual pricing
-async function sendManualPriceRequestEmail(
-  reservation: any,
-  transferInfo: any,
-  reason?: string
-): Promise<void> {
-  const adminEmail = "sautkahraman@gmail.com";
-  
+async function convertCurrency(amount: number, from: string, to: string): Promise<{ amount: number; rate: number }> {
+  if (from === to) return { amount, rate: 1 };
   try {
-    const emailHtml = manualPriceRequiredEmail(
-      reservation,
-      {
-        airport: transferInfo.airport,
-        city: transferInfo.city,
-        district: transferInfo.district,
-        direction: transferInfo.direction,
-        confidence: transferInfo.confidence,
-        additionalReason: reason,
-      },
-      'reservation'
-    );
-
-    await resend.emails.send({
-      from: "Meet Transfer <noreply@mail.meettransfer.app>",
-      to: adminEmail,
-      subject: `⚠️ Manuel Fiyat Gerekli: ${reservation.customer_name}`,
-      html: emailHtml,
-    });
-    console.log("📧 Manual price request email sent to admin");
-  } catch (emailError) {
-    console.error("Failed to send manual price request email:", emailError);
-  }
+    const r = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=${to}`);
+    if (r.ok) {
+      const d = await r.json();
+      const rate = d.rates?.[to];
+      if (rate) return { amount: Math.ceil(amount * rate), rate };
+    }
+  } catch {}
+  return { amount, rate: 1 };
 }
 
-const handler = async (req: Request): Promise<Response> => {
+// ---- HANDLER ----
+serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Parse request body
-    let reservation_id: string;
-    try {
-      const body = await req.json();
-      reservation_id = body.reservation_id;
-      if (!reservation_id) {
-        console.error("❌ Missing reservation_id in request body");
-        return new Response(JSON.stringify({ error: "reservation_id is required", matched: false }), {
-          status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
-        });
-      }
-    } catch (parseError) {
-      console.error("❌ Failed to parse request body:", parseError);
-      return new Response(JSON.stringify({ error: "Invalid request body", matched: false }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+    const body = await req.json();
+    const reservation_id: string = body.reservation_id;
+
+    if (!reservation_id) {
+      return new Response(JSON.stringify({ error: "reservation_id required", matched: false }), { status: 400, headers: corsHeaders });
     }
 
-    console.log("🚗 Auto-pricing started for reservation:", reservation_id);
+    const { data: reservation, error: resErr } = await supabase.from("reservations").select("*").eq("id", reservation_id).single();
 
-    // Fetch the reservation
-    const { data: reservation, error: reservationError } = await supabase
-      .from("reservations")
-      .select("*")
-      .eq("id", reservation_id)
-      .single();
-
-    if (reservationError || !reservation) {
-      console.error("❌ Reservation not found:", reservationError);
-      return new Response(JSON.stringify({ error: "Reservation not found", matched: false }), {
-        status: 404,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+    if (resErr || !reservation) {
+      return new Response(JSON.stringify({ error: "Reservation not found", matched: false }), { status: 404, headers: corsHeaders });
     }
 
-    // For agency reservations: skip pricing but still do driver matching
-    const isAgencyReservation = reservation.agency_id || reservation.agency_user_id;
-    if (isAgencyReservation) {
-      console.log("🏢 Agency reservation - skip pricing, attempt driver matching only");
+    // Skip agency
+    if (reservation.agency_id || reservation.agency_user_id) {
+      return new Response(JSON.stringify({ matched: false, reason: "agency_reservation" }), { headers: corsHeaders });
     }
 
-    // Skip if already has a price (but not for agency - they don't use auto-pricing)
-    if (!isAgencyReservation && reservation.price && reservation.price > 0) {
-      console.log("💰 Reservation already has price - skipping");
-      return new Response(JSON.stringify({ matched: false, reason: "already_priced" }), {
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+    // Skip already priced
+    if (reservation.price && reservation.price > 0) {
+      return new Response(JSON.stringify({ matched: false, reason: "already_priced" }), { headers: corsHeaders });
     }
 
-    // For agency reservations: only do driver matching, skip pricing logic
-    if (isAgencyReservation) {
-      // Analyze transfer for driver matching only
-      const transferInfo = analyzeTransfer(reservation.pickup, reservation.dropoff);
-      const { city, airport } = transferInfo;
-      
-      const pickupCity = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
-      const dropoffCity = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
-      const airportCity = airport ? (
-        airport.includes('Istanbul') || airport.includes('Sabiha') ? 'Istanbul' :
-        airport.includes('Antalya') ? 'Antalya' :
-        airport.includes('Bodrum') ? 'Bodrum' :
-        airport.includes('Dalaman') ? 'Dalaman' :
-        airport.includes('Izmir') ? 'Izmir' :
-        airport.includes('Kayseri') || airport.includes('Nevsehir') ? 'Cappadocia' :
-        airport.includes('Dubai') ? 'Dubai' :
-        airport.includes('Larnaca') || airport.includes('Paphos') || airport.includes('Ercan') ? 'Cyprus' :
-        airport.includes('Bursa') ? 'Bursa' : null
-      ) : null;
-      
-      const driverMatchCity = city || pickupCity || dropoffCity || airportCity;
-      
-      // =====================================================
-      // AUTO-FILL: passenger_cash_amount & customer_price for cash payments
-      // =====================================================
-      if (reservation.payment_type === 'cash' && reservation.price && reservation.price > 0) {
-        console.log(`💵 Cash payment detected for agency reservation - auto-filling amounts`);
-        
-        // Update reservation with passenger_cash_amount
-        const { error: cashUpdateError } = await supabase
-          .from("reservations")
-          .update({
-            passenger_cash_amount: reservation.price,
-            passenger_cash_currency: reservation.price_currency || 'TRY'
-          })
-          .eq("id", reservation_id);
-        
-        if (cashUpdateError) {
-          console.error("❌ Failed to update passenger_cash_amount:", cashUpdateError);
-        } else {
-          console.log(`✅ passenger_cash_amount set to ${reservation.price} ${reservation.price_currency}`);
-        }
-        
-        // Check if agency_reservation_details exists
-        const { data: existingDetails } = await supabase
-          .from("agency_reservation_details")
-          .select("id")
-          .eq("reservation_id", reservation_id)
-          .single();
-        
-        if (existingDetails) {
-          // Update existing record
-          const { error: detailsError } = await supabase
-            .from("agency_reservation_details")
-            .update({
-              customer_price: reservation.price,
-              agency_price_currency: reservation.price_currency || 'USD',
-              updated_at: new Date().toISOString()
-            })
-            .eq("reservation_id", reservation_id);
-          
-          if (detailsError) {
-            console.error("❌ Failed to update agency_reservation_details:", detailsError);
-          } else {
-            console.log(`✅ customer_price set to ${reservation.price} ${reservation.price_currency}`);
-          }
-        } else {
-          // Insert new record
-          const { error: insertError } = await supabase
-            .from("agency_reservation_details")
-            .insert({
-              reservation_id: reservation_id,
-              customer_price: reservation.price,
-              agency_price_currency: reservation.price_currency || 'USD',
-              agency_user_id: reservation.agency_user_id
-            });
-          
-          if (insertError) {
-            console.error("❌ Failed to insert agency_reservation_details:", insertError);
-          } else {
-            console.log(`✅ agency_reservation_details created with customer_price ${reservation.price}`);
-          }
-        }
-      }
-      // =====================================================
-      
-      if (driverMatchCity) {
-        console.log(`🚗 Agency reservation - attempting driver matching for: ${driverMatchCity}`);
-        
-        const cityToRegionMap: Record<string, string[]> = {
-          'Istanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
-          'İstanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
-          'Antalya': ['Antalya', 'antalya', 'ANTALYA'],
-          'Alanya': ['Antalya', 'antalya', 'ANTALYA'],
-          'Kemer': ['Antalya', 'antalya', 'ANTALYA'],
-          'Belek': ['Antalya', 'antalya', 'ANTALYA'],
-          'Side': ['Antalya', 'antalya', 'ANTALYA'],
-          'Manavgat': ['Antalya', 'antalya', 'ANTALYA'],
-          'Izmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
-          'İzmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
-          'Bodrum': ['Bodrum', 'bodrum', 'BODRUM', 'Mugla', 'Muğla'],
-          'Dalaman': ['Dalaman', 'dalaman', 'DALAMAN', 'Mugla', 'Muğla'],
-          'Fethiye': ['Fethiye', 'fethiye', 'FETHIYE', 'Dalaman'],
-          'Marmaris': ['Dalaman', 'dalaman', 'DALAMAN'],
-          'Cappadocia': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'],
-          'Dubai': ['Dubai', 'dubai', 'DUBAI', 'UAE'],
-          'Cyprus': ['Cyprus', 'Kıbrıs', 'KKTC', 'Larnaca', 'Paphos', 'Ercan'],
-          'Bursa': ['Bursa', 'bursa', 'BURSA'],
-        };
-        
-        const possibleRegions = cityToRegionMap[driverMatchCity] || [driverMatchCity];
-        
-        const { data: matchingDrivers } = await supabase
-          .from('drivers')
-          .select('id, name, user_id, phone, plate_number, region')
-          .eq('active', true)
-          .in('region', possibleRegions)
-          .limit(5);
-        
-        if (matchingDrivers && matchingDrivers.length > 0) {
-          const driver = matchingDrivers[0];
-          console.log(`✅ Agency reservation - auto-assigning driver: ${driver.name}`);
-          
-          // Update only driver fields, keep status as is (confirmed for agency)
-          const { error: updateError } = await supabase
-            .from("reservations")
-            .update({
-              driver_id: driver.id,
-              driver_user_id: driver.user_id,
-              status: 'sent_to_driver'
-            })
-            .eq("id", reservation_id);
-          
-          if (updateError) {
-            console.error("❌ Failed to assign driver:", updateError);
-            throw updateError;
-          }
-          
-          // Notify driver
-          try {
-            await supabase.functions.invoke('notify-driver-new-reservation', {
-              body: { 
-                reservationId: reservation_id, 
-                driverUserId: driver.user_id,
-                driverPhone: driver.phone
-              }
-            });
-            console.log("✅ Driver notification sent");
-          } catch (notifyErr) {
-            console.log("Driver notification skipped:", notifyErr);
-          }
-          
-          // Send admin notification for agency reservation
-          try {
-            await supabase.functions.invoke('notify-admin-new-reservation', {
-              body: { 
-                reservation_id,
-                customer_name: reservation.customer_name,
-                pickup: reservation.pickup,
-                dropoff: reservation.dropoff,
-                pickup_date: reservation.pickup_date,
-                pickup_time: reservation.pickup_time,
-                vehicle_type: reservation.vehicle_type,
-                customer_phone: reservation.customer_phone
-              }
-            });
-            console.log("✅ Admin notification sent for agency reservation");
-          } catch (adminNotifyErr) {
-            console.log("Admin notification skipped:", adminNotifyErr);
-          }
-          
-          // Send confirmation email to customer if they have an email
-          try {
-            if (reservation.customer_id) {
-              await supabase.functions.invoke('send-confirmation-email', {
-                body: { reservation_id, lang: 'tr' }
-              });
-              console.log("✅ Customer confirmation email sent");
-            }
-          } catch (emailErr) {
-            console.log("Customer email skipped:", emailErr);
-          }
-          
-          return new Response(JSON.stringify({ 
-            matched: true, 
-            reason: "agency_driver_assigned",
-            driverAssigned: true,
-            driverName: driver.name,
-            driverRegion: driver.region,
-            adminNotified: true,
-            customerEmailSent: true,
-            cashAmountSet: reservation.payment_type === 'cash'
-          }), {
-            headers: { "Content-Type": "application/json", ...corsHeaders },
-          });
-        }
-      }
-      
-      console.log("🏢 Agency reservation - no driver matched, manual assignment required");
-      
-      // Even without driver match, still send admin notification for agency reservation
-      try {
-        await supabase.functions.invoke('notify-admin-new-reservation', {
-          body: { 
-            reservation_id,
-            customer_name: reservation.customer_name,
-            pickup: reservation.pickup,
-            dropoff: reservation.dropoff,
-            pickup_date: reservation.pickup_date,
-            pickup_time: reservation.pickup_time,
-            vehicle_type: reservation.vehicle_type,
-            customer_phone: reservation.customer_phone
-          }
-        });
-        console.log("✅ Admin notification sent (no driver match)");
-      } catch (adminNotifyErr) {
-        console.log("Admin notification skipped:", adminNotifyErr);
-      }
-      
-      // Send confirmation email to customer
-      try {
-        if (reservation.customer_id) {
-          await supabase.functions.invoke('send-confirmation-email', {
-            body: { reservation_id, lang: 'tr' }
-          });
-          console.log("✅ Customer confirmation email sent (no driver match)");
-        }
-      } catch (emailErr) {
-        console.log("Customer email skipped:", emailErr);
-      }
-      
-      return new Response(JSON.stringify({ 
-        matched: false, 
-        reason: "agency_no_driver_match",
-        adminNotified: true,
-        customerEmailSent: true,
-        cashAmountSet: reservation.payment_type === 'cash'
-      }), {
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
-
-    // Analyze transfer using shared module
-    const transferInfo = analyzeTransfer(reservation.pickup, reservation.dropoff);
-    logAnalysis('reservation', reservation_id, reservation.pickup, reservation.dropoff, transferInfo);
-
-    const { airport, city, district, direction, confidence } = transferInfo;
+    const { airport, city, district, direction, confidence } = analyzeSimple(reservation.pickup, reservation.dropoff);
 
     if (!city && !airport) {
-      console.log("❌ No city or airport matched - manual pricing required");
-      // Send email to admin for manual pricing
-      await sendManualPriceRequestEmail(reservation, transferInfo);
-      return new Response(JSON.stringify({ matched: false, reason: "no_location_match" }), {
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      await sendManualEmail(reservation, { airport, city, district, direction, confidence });
+      return new Response(JSON.stringify({ matched: false, reason: "no_location_match" }), { headers: corsHeaders });
     }
 
-    // Check if this is a city-to-city or intercity transfer
-    const pickupCity = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
-    const dropoffCity = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
-    const pickupDistrict = transferInfo.pickupAnalysis.district?.value || null;
-    const dropoffDistrict = transferInfo.dropoffAnalysis.district?.value || null;
-    
-    // IMPORTANT: Also check intercity when going to/from airport if the non-airport city is different from airport's city
-    const airportCity = airport ? (
-      airport.includes('Istanbul') ? 'Istanbul' :
-      airport.includes('Sabiha') ? 'Istanbul' :
-      airport.includes('Antalya') ? 'Antalya' :
-      airport.includes('Bodrum') ? 'Bodrum' :
-      airport.includes('Dalaman') ? 'Dalaman' :
-      airport.includes('Izmir') ? 'Izmir' :
-      airport.includes('Kayseri') ? 'Cappadocia' :
-      airport.includes('Nevsehir') ? 'Cappadocia' :
-      airport.includes('Dubai') ? 'Dubai' :
-      airport.includes('Larnaca') || airport.includes('Paphos') || airport.includes('Ercan') ? 'Cyprus' :
-      airport.includes('Bursa') ? 'Bursa' :
-      null
-    ) : null;
-    
-    const nonAirportCity = direction === 'to_airport' ? pickupCity : 
-                           direction === 'from_airport' ? dropoffCity : null;
-    
-    // Intercity conditions:
-    // 1. city_to_city with different cities
-    // 2. to_airport/from_airport where non-airport city is different from airport's city
-    const isIntercity = (
-      (direction === 'city_to_city' && pickupCity && dropoffCity && pickupCity !== dropoffCity) ||
-      (airport && nonAirportCity && airportCity && nonAirportCity !== airportCity)
-    );
-    
-    // For intercity airport transfers, we need to know both cities
-    const intercityFromCity = direction === 'to_airport' ? pickupCity : 
-                              direction === 'from_airport' ? airportCity : pickupCity;
-    const intercityToCity = direction === 'to_airport' ? airportCity : 
-                            direction === 'from_airport' ? dropoffCity : dropoffCity;
-    const intercityFromDistrict = direction === 'to_airport' ? pickupDistrict : 
-                                  direction === 'from_airport' ? airport : pickupDistrict;
-    const intercityToDistrict = direction === 'to_airport' ? airport : 
-                                direction === 'from_airport' ? dropoffDistrict : dropoffDistrict;
+    // Try to find price
+    let query = supabase.from("region_prices").select("*").eq("vehicle_type", reservation.vehicle_type).eq("is_active", true);
+    if (city) query = query.eq("city", city);
+    if (airport) query = query.eq("airport", airport);
+    if (district) query = query.eq("district", district);
 
-    console.log("🔍 Route type:", isIntercity ? "intercity" : "airport transfer", { 
-      pickupCity, pickupDistrict, dropoffCity, dropoffDistrict, 
-      airportCity, nonAirportCity, intercityFromCity, intercityToCity 
-    });
+    const { data: prices } = await query.limit(1);
+    let bestPrice = prices?.[0] ?? null;
 
-    // Get vehicle fallback list for flexible matching
-    const vehicleFallbacks = getVehicleFallbackList(reservation.vehicle_type);
-    console.log(`🚗 Vehicle requested: ${reservation.vehicle_type}, Fallbacks: ${vehicleFallbacks.join(', ')}`);
-
-    // Query for matching price - bidirectional (airport->address OR address->airport same price)
-    let bestPrice: any = null;
-    let matchType = '';
-    
-    // Get pickup_date for seasonal pricing
-    const pickupDate = reservation.pickup_date;
-    console.log(`📅 Pickup date for seasonal pricing: ${pickupDate}`);
-    
-    // Helper function to select best price (seasonal > base > first available)
-    const selectBestPrice = (data: any[] | null, matchDesc: string): boolean => {
-      if (!data || data.length === 0) return false;
-      
-      // Try to find seasonal price matching the pickup date
-      if (pickupDate) {
-        const seasonalPrice = data.find(p => 
-          p.valid_from && p.valid_to && pickupDate >= p.valid_from && pickupDate <= p.valid_to
-        );
-        if (seasonalPrice) {
-          bestPrice = seasonalPrice;
-          matchType = `${matchDesc} [SEASONAL: ${seasonalPrice.valid_from} to ${seasonalPrice.valid_to}]`;
-          console.log(`🌴 Seasonal price found: ${seasonalPrice.price} ${seasonalPrice.price_currency}`);
-          return true;
-        }
-      }
-      
-      // Fallback to base price (no valid_from/valid_to)
-      const basePrice = data.find(p => !p.valid_from && !p.valid_to);
-      if (basePrice) {
-        bestPrice = basePrice;
-        matchType = `${matchDesc} [BASE]`;
-        console.log(`📦 Base price found: ${basePrice.price} ${basePrice.price_currency}`);
-        return true;
-      }
-      
-      // Fallback to first available
-      bestPrice = data[0];
-      matchType = matchDesc;
-      console.log(`✅ Price found: ${bestPrice.price} ${bestPrice.price_currency}`);
-      return true;
-    };
-
-    // Try each vehicle type in fallback order
-    for (const vehicleType of vehicleFallbacks) {
-      if (bestPrice) break;
-      
-      // 0. For intercity routes, first check intercity_prices table
-      if (isIntercity && intercityFromCity && intercityToCity) {
-        // Try exact district match first
-        if (intercityFromDistrict && intercityToDistrict) {
-          const { data: exactIntercityData } = await supabase
-            .from("intercity_prices")
-            .select("*")
-            .eq("vehicle_type", vehicleType)
-            .eq("is_active", true)
-            .or(`and(from_city.eq.${intercityFromCity},from_district.eq.${intercityFromDistrict},to_city.eq.${intercityToCity},to_district.eq.${intercityToDistrict}),and(from_city.eq.${intercityToCity},from_district.eq.${intercityToDistrict},to_city.eq.${intercityFromCity},to_district.eq.${intercityFromDistrict})`);
-
-          if (selectBestPrice(exactIntercityData, `intercity exact (${intercityFromCity}/${intercityFromDistrict} → ${intercityToCity}/${intercityToDistrict}) [${vehicleType}]`)) {
-            break;
-          }
-        }
-        
-        // Try partial district match - when only one side has district (e.g., airport)
-        if (!bestPrice && (intercityFromDistrict || intercityToDistrict)) {
-          const districtToMatch = intercityFromDistrict || intercityToDistrict;
-          const cityWithDistrict = intercityFromDistrict ? intercityFromCity : intercityToCity;
-          const cityWithoutDistrict = intercityFromDistrict ? intercityToCity : intercityFromCity;
-          
-          const { data: partialData } = await supabase
-            .from("intercity_prices")
-            .select("*")
-            .eq("vehicle_type", vehicleType)
-            .eq("is_active", true)
-            .or(`and(from_city.eq.${cityWithDistrict},from_district.eq.${districtToMatch},to_city.eq.${cityWithoutDistrict}),and(to_city.eq.${cityWithDistrict},to_district.eq.${districtToMatch},from_city.eq.${cityWithoutDistrict})`);
-
-          if (selectBestPrice(partialData, `intercity partial (${cityWithDistrict}/${districtToMatch} → ${cityWithoutDistrict}) [${vehicleType}]`)) {
-            break;
-          }
-        }
-        
-        // Try city-only match
-        if (!bestPrice) {
-          const { data: intercityData } = await supabase
-            .from("intercity_prices")
-            .select("*")
-            .eq("vehicle_type", vehicleType)
-            .eq("is_active", true)
-            .is("from_district", null)
-            .is("to_district", null)
-            .or(`and(from_city.eq.${intercityFromCity},to_city.eq.${intercityToCity}),and(from_city.eq.${intercityToCity},to_city.eq.${intercityFromCity})`);
-
-          if (selectBestPrice(intercityData, `intercity city-only (${intercityFromCity} → ${intercityToCity}) [${vehicleType}]`)) {
-            break;
-          }
-        }
-      }
-      
-      // 1. Try exact match (airport + city + district + vehicle)
-      if (!bestPrice && airport && city && district) {
-        const { data: exactMatch } = await supabase
-          .from("region_prices")
-          .select("*")
-          .eq("city", city)
-          .eq("airport", airport)
-          .eq("district", district)
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true);
-
-        if (selectBestPrice(exactMatch, `exact (${airport} → ${city}/${district}) [${vehicleType}]`)) {
-          break;
-        }
-      }
-
-      // 2. Try airport + city match (any district)
-      if (!bestPrice && airport && city) {
-        const { data: cityMatch } = await supabase
-          .from("region_prices")
-          .select("*")
-          .eq("city", city)
-          .eq("airport", airport)
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true);
-
-        if (selectBestPrice(cityMatch, `city+airport (${airport} → ${city}) [${vehicleType}]`)) {
-          break;
-        }
-      }
-
-      // 3. Try city + district match (ONLY when airport is null - true intercity rows)
-      if (!bestPrice && city && district) {
-        const { data: cityDistrictMatch } = await supabase
-          .from("region_prices")
-          .select("*")
-          .eq("city", city)
-          .eq("district", district)
-          .is("airport", null)
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true);
-
-        if (selectBestPrice(cityDistrictMatch, `city+district (${city}/${district}) [${vehicleType}]`)) {
-          break;
-        }
-      }
-
-      // NOTE: city-only match REMOVED - too broad, causes incorrect pricing
-      // If no airport and no district match, require manual pricing
-
-      // 4. Try airport only match (if we have airport but city matching failed)
-      if (!bestPrice && airport) {
-        const { data: airportOnlyMatch } = await supabase
-          .from("region_prices")
-          .select("*")
-          .eq("airport", airport)
-          .eq("vehicle_type", vehicleType)
-          .eq("is_active", true);
-
-        if (selectBestPrice(airportOnlyMatch, `airport-only (${airport}) [${vehicleType}]`)) {
-          break;
-        }
-      }
+    if (!bestPrice && city && airport) {
+      const { data: p2 } = await supabase.from("region_prices").select("*").eq("vehicle_type", reservation.vehicle_type).eq("city", city).eq("airport", airport).eq("is_active", true).limit(1);
+      bestPrice = p2?.[0] ?? null;
     }
-
-
 
     if (!bestPrice) {
-      console.log("❌ No price found for this route after trying all vehicle fallbacks");
-      console.log(`   Searched: Airport=${airport}, City=${city}, District=${district}, Vehicles=${vehicleFallbacks.join(', ')}`);
-      // Send email to admin for manual pricing
-      await sendManualPriceRequestEmail(reservation, transferInfo);
-      return new Response(JSON.stringify({ 
-        matched: false, 
-        reason: "no_price_found",
-        searchedParams: { airport, city, district, vehicles: vehicleFallbacks }
-      }), {
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+      await sendManualEmail(reservation, { airport, city, district, direction, confidence });
+      return new Response(JSON.stringify({ matched: false, reason: "no_price_found" }), { headers: corsHeaders });
     }
 
-    console.log(`🎯 Best price found: ${bestPrice.price} ${bestPrice.price_currency} | Match type: ${matchType}`);
+    const baseCurrency = bestPrice.price_currency || "EUR";
+    const customerCurrency = reservation.price_currency || baseCurrency;
 
-    // Sanity check: verify price is reasonable for the route
-    const pickupCityForCheck = transferInfo.pickupAnalysis.city?.value || transferInfo.pickupAnalysis.district?.city || null;
-    const dropoffCityForCheck = transferInfo.dropoffAnalysis.city?.value || transferInfo.dropoffAnalysis.district?.city || null;
-    
-    const sanityCheck = checkPriceSanity(
-      pickupCityForCheck,
-      dropoffCityForCheck,
-      bestPrice.price,
-      bestPrice.price_currency || 'EUR',
-      reservation.vehicle_type, // Vehicle type for accurate minimums
-      airport // Airport for airport-city route checks
-    );
-
-    // Log sanity check result
-    logPriceSanityCheck('reservation', reservation_id, sanityCheck);
-
-    if (!sanityCheck.isValid) {
-      console.log(`⚠️ Price sanity check FAILED: ${sanityCheck.reason}`);
-      console.log(`   Route: ${sanityCheck.routeKey || 'N/A'}`);
-      console.log(`   Price: ${sanityCheck.actualPrice}€, Min Expected: ${sanityCheck.minimumExpected}€`);
-      console.log(`   Vehicle: ${sanityCheck.vehicleType}, Confidence: ${sanityCheck.confidence}`);
-      
-      // Send email to admin for manual pricing with reason
-      await sendManualPriceRequestEmail(reservation, transferInfo, sanityCheck.reason);
-      
-      return new Response(JSON.stringify({ 
-        matched: false, 
-        reason: "price_sanity_failed",
-        sanityCheck: {
-          reason: sanityCheck.reason,
-          minimumExpected: sanityCheck.minimumExpected,
-          actualPrice: sanityCheck.actualPrice,
-          vehicleType: sanityCheck.vehicleType,
-          confidence: sanityCheck.confidence,
-        },
-        searchedParams: { airport, city, district, vehicles: vehicleFallbacks }
-      }), {
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
+    let finalPrice = bestPrice.price;
+    let finalCurrency = baseCurrency;
+    if (customerCurrency !== baseCurrency) {
+      const c = await convertCurrency(bestPrice.price, baseCurrency, customerCurrency);
+      finalPrice = c.amount;
+      finalCurrency = customerCurrency;
     }
 
-    console.log(`✅ Price sanity check passed (confidence: ${sanityCheck.confidence})`);
+    // Update reservation
+    await supabase.from("reservations").update({ price: finalPrice, price_currency: finalCurrency, status: "sent_to_driver" }).eq("id", reservation_id);
 
-    // Admin enters price in EUR - check if customer requested different currency
-    // Price in region_prices is base price (EUR)
-    const basePriceCurrency = bestPrice.price_currency || 'EUR';
-    const customerRequestedCurrency = reservation.price_currency || basePriceCurrency;
-    
-    // Detect region to check if discount is disabled
-    const detectedRegion = detectRegion(reservation.pickup, reservation.dropoff);
-    console.log(`🌍 Detected region for discount check: ${detectedRegion}`);
-    
-    // Calculate final price with discount (region check disables discount for Dubai/Switzerland)
-    const hasReturnTrip = reservation.is_return_transfer || false;
-    const discountInfo = calculateDiscount(
-      bestPrice.price,
-      hasReturnTrip,
-      reservation.promo_code,
-      detectedRegion // Pass region to disable discounts for Dubai/Switzerland
-    );
-
-    let finalPrice = discountInfo.price;
-    let finalCurrency = basePriceCurrency;
-    let exchangeRate = 1;
-
-    // Convert to customer's requested currency if different
-    if (customerRequestedCurrency !== basePriceCurrency) {
-      const conversion = await convertCurrency(discountInfo.price, basePriceCurrency, customerRequestedCurrency);
-      finalPrice = conversion.amount;
-      finalCurrency = customerRequestedCurrency;
-      exchangeRate = conversion.rate;
-      console.log(`💱 Currency converted: ${discountInfo.price} ${basePriceCurrency} → ${finalPrice} ${finalCurrency} (rate: ${exchangeRate})`);
-    }
-
-    const discountApplied = discountInfo.discountApplied;
-
-    // ============================================
-    // AUTO DRIVER ASSIGNMENT BASED ON CITY/REGION
-    // ============================================
-    let autoAssignedDriver: { id: string; name: string; user_id: string; phone: string; plate_number: string | null } | null = null;
-    
-    // Determine which city to use for driver matching
-    const driverMatchCity = city || pickupCity || dropoffCity || airportCity;
-    
-    if (driverMatchCity) {
-      console.log(`🚗 Attempting auto-driver assignment for region: ${driverMatchCity}`);
-      
-      // Map city names to driver regions (normalize variations)
-      const cityToRegionMap: Record<string, string[]> = {
-        'Istanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
-        'İstanbul': ['Istanbul', 'İstanbul', 'istanbul', 'İSTANBUL'],
-        'Antalya': ['Antalya', 'antalya', 'ANTALYA'],
-        'Alanya': ['Antalya', 'antalya', 'ANTALYA'], // Alanya is in Antalya region
-        'Kemer': ['Antalya', 'antalya', 'ANTALYA'], // Kemer is in Antalya region
-        'Belek': ['Antalya', 'antalya', 'ANTALYA'], // Belek is in Antalya region
-        'Side': ['Antalya', 'antalya', 'ANTALYA'], // Side is in Antalya region
-        'Manavgat': ['Antalya', 'antalya', 'ANTALYA'], // Manavgat is in Antalya region
-        'Kas': ['Antalya', 'antalya', 'ANTALYA'], // Kaş is in Antalya region
-        'Izmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
-        'İzmir': ['Izmir', 'İzmir', 'izmir', 'İZMİR'],
-        'Cesme': ['Izmir', 'İzmir', 'izmir', 'İZMİR'], // Çeşme is in İzmir region
-        'Kusadasi': ['Izmir', 'İzmir', 'izmir', 'İZMİR'], // Kuşadası is in İzmir region
-        'Bodrum': ['Bodrum', 'bodrum', 'BODRUM', 'Mugla', 'Muğla'],
-        'Dalaman': ['Dalaman', 'dalaman', 'DALAMAN', 'Mugla', 'Muğla'],
-        'Fethiye': ['Fethiye', 'fethiye', 'FETHIYE', 'Dalaman', 'Mugla', 'Muğla'],
-        'Marmaris': ['Dalaman', 'dalaman', 'DALAMAN', 'Mugla', 'Muğla'], // Marmaris uses Dalaman
-        'Cappadocia': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'],
-        'Goreme': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'], // Göreme is in Cappadocia
-        'Urgup': ['Cappadocia', 'Kapadokya', 'Nevsehir', 'Nevşehir', 'Kayseri'], // Ürgüp is in Cappadocia
-        'Dubai': ['Dubai', 'dubai', 'DUBAI', 'UAE'],
-        'Abu Dhabi': ['Abu Dhabi', 'abu dhabi', 'ABU DHABI', 'UAE'],
-        'Cyprus': ['Cyprus', 'Kıbrıs', 'KKTC', 'Larnaca', 'Paphos', 'Ercan'],
-        'Bursa': ['Bursa', 'bursa', 'BURSA'],
-      };
-      
-      // Get possible region values for this city
-      const possibleRegions = cityToRegionMap[driverMatchCity] || [driverMatchCity];
-      
-      // Find an active driver with matching region
-      // Priority: exact region match, then any active driver if no region match
-      const { data: matchingDrivers } = await supabase
-        .from('drivers')
-        .select('id, name, user_id, phone, plate_number, region')
-        .eq('active', true)
-        .in('region', possibleRegions)
-        .limit(5);
-      
-      if (matchingDrivers && matchingDrivers.length > 0) {
-        // Select the first available driver (could be enhanced with load balancing)
-        autoAssignedDriver = matchingDrivers[0];
-        console.log(`✅ Auto-assigning driver: ${autoAssignedDriver.name} (region: ${matchingDrivers[0].region})`);
-      } else {
-        console.log(`⚠️ No active driver found for region: ${driverMatchCity} - manual assignment required`);
-      }
-    }
-
-    // Update reservation with price and optionally driver
-    const updateData: Record<string, any> = {
-      price: finalPrice,
-      price_currency: finalCurrency,
-      status: autoAssignedDriver ? 'sent_to_driver' : 'waiting_for_customer_approval',
-      discount_percentage: discountApplied ? discountInfo.discountPercent : null,
-    };
-    
-    if (autoAssignedDriver) {
-      updateData.driver_id = autoAssignedDriver.id;
-      updateData.driver_user_id = autoAssignedDriver.user_id;
-    }
-    
-    const { error: updateError } = await supabase
-      .from("reservations")
-      .update(updateData)
-      .eq("id", reservation_id);
-
-    if (updateError) {
-      console.error("❌ Failed to update reservation:", updateError);
-      throw updateError;
-    }
-
-    // Record price history
-    const priceHistoryNote = autoAssignedDriver 
-      ? `Otomatik fiyat + Şoför: ${autoAssignedDriver.name}`
-      : discountApplied 
-        ? `Otomatik fiyat + %${discountInfo.discountPercent} indirim` 
-        : `Otomatik fiyat: ${city || 'N/A'} - ${district || 'N/A'} (${airport || 'N/A'})${exchangeRate !== 1 ? ` [Kur: ${exchangeRate.toFixed(2)}]` : ''}`;
-    
-    await supabase.from("price_history").insert({
-      reservation_id: reservation_id,
-      price: finalPrice,
-      price_currency: finalCurrency,
-      action: autoAssignedDriver ? 'auto_priced_with_driver' : 'auto_priced',
-      customer_note: priceHistoryNote,
-    });
-
-    console.log(`✅ Auto-priced reservation: ${finalPrice} ${finalCurrency}`);
-
-    // Send email notification to admin
-    const adminEmail = "sautkahraman@gmail.com";
+    // Admin email
     try {
       await resend.emails.send({
         from: "Meet Transfer <noreply@mail.meettransfer.app>",
-        to: adminEmail,
-        subject: `🤖 Otomatik Fiyat: ${reservation.customer_name} - ${finalPrice} ${finalCurrency}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">🤖 Otomatik Fiyat Verildi</h1>
-            </div>
-            
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
-              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #10b981;">
-                <h3 style="margin: 0 0 10px 0; color: #333;">Müşteri Bilgileri</h3>
-                <p style="margin: 5px 0; color: #666;"><strong>Müşteri:</strong> ${reservation.customer_name}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Telefon:</strong> ${reservation.customer_phone}</p>
-              </div>
-              
-              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #667eea;">
-                <h3 style="margin: 0 0 10px 0; color: #333;">Transfer Detayları</h3>
-                <p style="margin: 5px 0; color: #666;"><strong>Alış:</strong> ${reservation.pickup}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Bırakış:</strong> ${reservation.dropoff}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Tarih:</strong> ${reservation.pickup_date}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Saat:</strong> ${reservation.pickup_time}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Araç:</strong> ${reservation.vehicle_type}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Yön:</strong> ${direction} (${confidence})</p>
-              </div>
-              
-              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #f59e0b;">
-                <h3 style="margin: 0 0 10px 0; color: #333;">Eşleştirme Bilgisi</h3>
-                <p style="margin: 5px 0; color: #666;"><strong>Şehir:</strong> ${city || 'N/A'}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>İlçe:</strong> ${district || 'N/A'}</p>
-                <p style="margin: 5px 0; color: #666;"><strong>Havalimanı:</strong> ${airport || 'N/A'}</p>
-              </div>
-              
-              <div style="text-align: center; margin: 20px 0; padding: 20px; background: #10b981; border-radius: 8px;">
-                <p style="font-size: 14px; color: white; margin-bottom: 5px;">Otomatik Fiyat</p>
-                ${exchangeRate !== 1 ? `<p style="font-size: 14px; color: #d1fae5; margin-bottom: 5px;">Baz Fiyat: ${discountInfo.price} ${basePriceCurrency}</p>` : ''}
-                <p style="font-size: 32px; font-weight: bold; color: white; margin: 0;">
-                  ${finalPrice} ${finalCurrency}
-                </p>
-                ${exchangeRate !== 1 ? `<p style="color: #d1fae5; font-size: 14px; margin-top: 5px;">💱 Kur: 1 ${basePriceCurrency} = ${exchangeRate.toFixed(2)} ${finalCurrency}</p>` : ''}
-                ${discountApplied ? `<p style="color: #d1fae5; font-size: 14px; margin-top: 5px;">🎫 %${discountInfo.discountPercent} İndirim Uygulandı</p>` : ''}
-              </div>
-              
-              <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px;">
-                Bu bildirim otomatik fiyat sistemi tarafından gönderilmiştir.<br>
-                <strong>Not:</strong> Havalimanı ↔ Adres transferleri aynı fiyattır.
-                ${autoAssignedDriver ? `<br><strong style="color: #10b981;">🚗 Şoför Otomatik Atandı: ${autoAssignedDriver.name}</strong>` : ''}
-              </p>
-            </div>
-          </div>
-        `,
+        to: "sautkahraman@gmail.com",
+        subject: `🤖 Reservation Otomatik Fiyat: ${reservation.customer_name}`,
+        html: `<p>Price: ${finalPrice} ${finalCurrency}</p><p>Route: ${reservation.pickup} → ${reservation.dropoff}</p>`,
       });
-      console.log("📧 Admin notification email sent");
-    } catch (adminEmailError) {
-      console.error("Failed to send admin notification email:", adminEmailError);
-    }
+    } catch {}
 
-    // ============================================
-    // SEND DRIVER NOTIFICATION IF AUTO-ASSIGNED
-    // ============================================
-    if (autoAssignedDriver) {
-      try {
-        // Get driver's email
-        const { data: driverUserData } = await supabase.auth.admin.getUserById(autoAssignedDriver.user_id);
-        const driverEmail = driverUserData?.user?.email;
-        
-        if (driverEmail) {
-          await resend.emails.send({
-            from: "Meet Transfer <noreply@mail.meettransfer.app>",
-            to: driverEmail,
-            subject: `🚗 Yeni Transfer Görevi: ${reservation.pickup_date} ${reservation.pickup_time}`,
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 20px; border-radius: 10px 10px 0 0; text-align: center;">
-                  <h1 style="color: white; margin: 0; font-size: 24px;">🚗 Yeni Transfer Görevi</h1>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
-                  <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #3b82f6;">
-                    <h3 style="margin: 0 0 10px 0; color: #333;">Müşteri Bilgileri</h3>
-                    <p style="margin: 5px 0; color: #666;"><strong>Ad:</strong> ${reservation.customer_name}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>Telefon:</strong> ${reservation.customer_phone}</p>
-                  </div>
-                  
-                  <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #10b981;">
-                    <h3 style="margin: 0 0 10px 0; color: #333;">Transfer Detayları</h3>
-                    <p style="margin: 5px 0; color: #666;"><strong>📅 Tarih:</strong> ${reservation.pickup_date}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>🕐 Saat:</strong> ${reservation.pickup_time}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>📍 Alış:</strong> ${reservation.pickup}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>🏁 Bırakış:</strong> ${reservation.dropoff}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>🚗 Araç:</strong> ${reservation.vehicle_type}</p>
-                    ${reservation.flight_number ? `<p style="margin: 5px 0; color: #666;"><strong>✈️ Uçuş:</strong> ${reservation.flight_number}</p>` : ''}
-                  </div>
-                  
-                  <div style="text-align: center; margin: 20px 0;">
-                    <a href="https://meettransfer.lovable.app/driver" 
-                       style="display: inline-block; background: #3b82f6; color: white; padding: 14px 28px; 
-                              border-radius: 8px; text-decoration: none; font-weight: 600;">
-                      Görevi Görüntüle
-                    </a>
-                  </div>
-                  
-                  <p style="color: #999; font-size: 12px; text-align: center;">
-                    Bu görev otomatik olarak size atanmıştır.
-                  </p>
-                </div>
-              </div>
-            `,
-          });
-          console.log(`📧 Driver notification email sent to ${driverEmail}`);
-        }
-        
-        // Also create in-app notification for driver
-        await supabase.from('notifications').insert({
-          user_id: autoAssignedDriver.user_id,
-          title: 'Yeni Transfer Görevi',
-          message: `${reservation.pickup_date} ${reservation.pickup_time} - ${reservation.pickup} → ${reservation.dropoff}`,
-          type: 'driver_assignment',
-          reservation_id: reservation_id,
-        });
-        console.log(`🔔 In-app notification created for driver`);
-        
-      } catch (driverNotifyError) {
-        console.error("Failed to notify driver:", driverNotifyError);
-      }
-    }
-
-    // Get customer email for notification
-    let customerEmail = null;
-    if (reservation.customer_id) {
-      const { data: userData } = await supabase.auth.admin.getUserById(reservation.customer_id);
-      customerEmail = userData?.user?.email;
-    }
-
-    // Send email notification if customer has email
-    if (customerEmail && resend) {
-      const siteUrl = Deno.env.get("SITE_URL") || "https://meet-transfer.com";
-      
-      try {
-        await resend.emails.send({
-          from: "Meet Transfer <noreply@mail.meettransfer.app>",
-          to: customerEmail,
-          subject: `Fiyat Teklifi: ${finalPrice} ${finalCurrency} - Meet Transfer`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-                <h1 style="color: white; margin: 0; font-size: 28px;">Meet Transfer</h1>
-                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Premium Transfer Hizmeti</p>
-              </div>
-              
-              <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
-                <h2 style="color: #333; margin-top: 0;">Fiyat Teklifiniz Hazır!</h2>
-                
-                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
-                  <p style="margin: 5px 0; color: #666;"><strong>Alış:</strong> ${reservation.pickup}</p>
-                  <p style="margin: 5px 0; color: #666;"><strong>Bırakış:</strong> ${reservation.dropoff}</p>
-                  <p style="margin: 5px 0; color: #666;"><strong>Tarih:</strong> ${reservation.pickup_date}</p>
-                  <p style="margin: 5px 0; color: #666;"><strong>Saat:</strong> ${reservation.pickup_time}</p>
-                </div>
-                
-                <div style="text-align: center; margin: 30px 0;">
-                  <p style="font-size: 14px; color: #666; margin-bottom: 5px;">Toplam Fiyat</p>
-                  <p style="font-size: 36px; font-weight: bold; color: #667eea; margin: 0;">
-                    ${finalPrice} ${finalCurrency}
-                  </p>
-                  ${discountApplied ? `<p style="color: #28a745; font-size: 14px; margin-top: 5px;">🎫 %${discountInfo.discountPercent} İndirim Uygulandı!</p>` : ''}
-                </div>
-                
-                <div style="text-align: center;">
-                  <a href="${siteUrl}/customer/bookings" 
-                     style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                            color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; 
-                            font-weight: bold; font-size: 16px;">
-                    Rezervasyonu Görüntüle
-                  </a>
-                </div>
-                
-                <p style="color: #999; font-size: 12px; text-align: center; margin-top: 30px;">
-                  Sorularınız için WhatsApp: +1 (555) 805-1101
-                </p>
-              </div>
-            </div>
-          `,
-        });
-        console.log("📧 Price notification email sent to customer");
-      } catch (emailError) {
-        console.error("Failed to send email:", emailError);
-      }
-    }
-
-    return new Response(
-      JSON.stringify({
-        matched: true,
-        price: finalPrice,
-        currency: finalCurrency,
-        baseCurrency: basePriceCurrency,
-        exchangeRate: exchangeRate !== 1 ? exchangeRate : null,
-        discount_applied: discountApplied,
-        matchedCity: city,
-        matchedDistrict: district,
-        matchedAirport: airport,
-        direction,
-        confidence,
-        bidirectional: true, // Airport transfers are same price both ways
-      }),
-      { headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
-  } catch (error: any) {
-    console.error("❌ Error in auto-price-reservation:", error);
-    return new Response(
-      JSON.stringify({ error: error.message, matched: false }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-    );
+    return new Response(JSON.stringify({ matched: true, price: finalPrice, currency: finalCurrency, matchedCity: city, matchedAirport: airport }), { headers: corsHeaders });
+  } catch (e: any) {
+    console.error("auto-price-reservation error:", e);
+    return new Response(JSON.stringify({ error: e.message, matched: false }), { status: 500, headers: corsHeaders });
   }
-};
+});
 
-serve(handler);
+async function sendManualEmail(reservation: any, info: { airport: string | null; city: string | null; district: string | null; direction: string; confidence: string }) {
+  try {
+    await resend.emails.send({
+      from: "Meet Transfer <noreply@mail.meettransfer.app>",
+      to: "sautkahraman@gmail.com",
+      subject: `⚠️ Reservation Manuel Fiyat Gerekli: ${reservation.customer_name}`,
+      html: `<p>Pickup: ${reservation.pickup}</p><p>Dropoff: ${reservation.dropoff}</p><p>City: ${info.city}</p><p>Airport: ${info.airport}</p>`,
+    });
+  } catch {}
+}
