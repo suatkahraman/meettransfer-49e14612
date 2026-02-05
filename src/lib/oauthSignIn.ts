@@ -16,58 +16,73 @@ function isCustomDomain(): boolean {
 }
 
 /**
- * We create our own LovableAuth instance with an ABSOLUTE broker URL when on a custom domain.
- * This bypasses any proxy issues on the custom domain and ensures /~oauth/initiate reaches Lovable infra.
+ * Allowed OAuth provider hostnames for security validation
  */
-function getLovableAuth() {
-  const useAbsoluteBroker = isCustomDomain();
-  return createLovableAuth({
-    // On custom domain, point directly to the published lovable.app backend where the broker exists.
-    // On lovable.app domains the default relative /~oauth/initiate works fine.
-    oauthBrokerUrl: useAbsoluteBroker
-      ? "https://meettransfer.lovable.app/~oauth/initiate"
-      : undefined,
-  });
-}
+const ALLOWED_OAUTH_HOSTS = [
+  "accounts.google.com",
+  "appleid.apple.com",
+];
 
 /**
- * Starts OAuth sign-in using Lovable Cloud managed OAuth.
- *
- * CRITICAL: Always use this function for social login (Google/Apple).
- * Do NOT use supabase.auth.signInWithOAuth() directly - it requires BYOK setup.
- *
- * The managed OAuth handles:
- * - OAuth client credentials (no BYOK needed)
- * - Redirect URI management
- * - Token exchange and session creation
+ * Starts OAuth sign-in.
+ * 
+ * On custom domains: Uses Supabase native OAuth with skipBrowserRedirect
+ * to bypass the Lovable auth-bridge 404 issue.
+ * 
+ * On Lovable domains: Uses Lovable Cloud managed OAuth.
  */
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
-  const lovableAuth = getLovableAuth();
+  try {
+    const customDomain = isCustomDomain();
 
-  // CRITICAL: Do NOT pass redirect_uri explicitly!
-  // Passing redirect_uri breaks the library's internal state parameter management,
-  // causing "Missing state parameter" errors on callback.
-  // The library handles redirect_uri internally and returns to current origin.
-  const result = await lovableAuth.signInWithOAuth(provider);
+    if (customDomain) {
+      // Custom domain: bypass auth-bridge by getting OAuth URL directly
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/oauth/callback`,
+          skipBrowserRedirect: true, // Critical: prevents automatic redirect by auth-bridge
+        },
+      });
 
-  // If the library redirected (full-page navigation), nothing more to do here.
-  if (result.redirected) {
-    return { error: null };
-  }
+      if (error) {
+        return { error };
+      }
 
-  // Handle popup / web_message flow (iframe scenario)
-  if (result.error) {
-    return { error: result.error };
-  }
+      // Validate OAuth URL before redirect (security: prevent open redirect)
+      if (data?.url) {
+        const oauthUrl = new URL(data.url);
+        if (!ALLOWED_OAUTH_HOSTS.some((host) => oauthUrl.hostname === host)) {
+          return { error: new Error("Invalid OAuth redirect URL") };
+        }
+        window.location.href = data.url; // Manually redirect
+      }
 
-  // Set session from tokens
-  if (result.tokens) {
-    try {
-      await supabase.auth.setSession(result.tokens);
-    } catch (e) {
-      return { error: e instanceof Error ? e : new Error(String(e)) };
+      return { error: null };
     }
-  }
 
-  return { error: null };
+    // Lovable domains: use managed OAuth
+    const lovableAuth = createLovableAuth({});
+    const result = await lovableAuth.signInWithOAuth(provider);
+
+    if (result.redirected) {
+      return { error: null };
+    }
+
+    if (result.error) {
+      return { error: result.error };
+    }
+
+    if (result.tokens) {
+      try {
+        await supabase.auth.setSession(result.tokens);
+      } catch (e) {
+        return { error: e instanceof Error ? e : new Error(String(e)) };
+      }
+    }
+
+    return { error: null };
+  } catch (e) {
+    return { error: e instanceof Error ? e : new Error(String(e)) };
+  }
 }
