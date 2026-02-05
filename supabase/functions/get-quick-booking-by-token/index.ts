@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { validateTokenInput, createValidationErrorResponse } from "../_shared/validation.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,16 +13,15 @@ serve(async (req) => {
   }
 
   try {
-    const { token } = await req.json();
-
-    if (!token || typeof token !== 'string' || token.length < 10) {
-      return new Response(JSON.stringify({ 
-        error: "Invalid token" 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Parse and validate input
+    const rawData = await req.json();
+    const validationResult = validateTokenInput(rawData);
+    
+    if (!validationResult.success) {
+      return createValidationErrorResponse(validationResult.error!, corsHeaders);
     }
+    
+    const { token } = validationResult.data!;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

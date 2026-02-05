@@ -1,41 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { validateQuickBookingReservationInput, createValidationErrorResponse } from "../_shared/validation.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-interface CreateReservationRequest {
-  bookingId: string;
-  pickup: string;
-  dropoff: string;
-  pickupDate: string;
-  pickupTime: string;
-  vehicleType: string;
-  passengers: number;
-  price: number;
-  priceCurrency: string;
-  paymentMethod: string;
-  hasReturnTrip: boolean;
-  returnDate?: string;
-  returnTime?: string;
-  returnPrice?: number;
-  returnDiscountPercentage?: number;
-  returnDiscountAmount?: number;
-  promoCode?: string;
-  babySeatCount?: number;
-  luggageCount?: number;
-  customerNotes?: string;
-  flightNumber?: string;
-  passengerNames?: string[];
-  // Customer info from Step 2
-  customerName?: string;
-  customerPhone?: string;
-  customerEmail?: string;
-  customerPassword?: string;
-  isGoogleUser?: boolean;
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -48,7 +19,15 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const requestData: CreateReservationRequest = await req.json();
+    // Parse and validate input
+    const rawData = await req.json();
+    const validationResult = validateQuickBookingReservationInput(rawData);
+    
+    if (!validationResult.success) {
+      return createValidationErrorResponse(validationResult.error!, corsHeaders);
+    }
+    
+    const requestData = validationResult.data!;
 
     console.log("Creating reservation for quick booking:", requestData.bookingId);
     console.log("Customer info provided:", {

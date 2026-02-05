@@ -1,23 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { validateUpdateCustomerInput, createValidationErrorResponse } from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-interface UpdateCustomerRequest {
-  reservationId: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail: string;
-  customerPassword?: string;
-  customerId?: string; // For Google auth - existing user ID
-  isGoogleAuth?: boolean;
-  returnReservationCode?: string;
-  selectedVehicle?: string;
-  newPrice?: number;
-}
 
 // City to driver region mapping for auto-assignment
 const CITY_TO_REGION_MAP: Record<string, string[]> = {
@@ -172,14 +160,20 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const requestData: UpdateCustomerRequest = await req.json();
+    // Parse and validate input
+    const rawData = await req.json();
+    const validationResult = validateUpdateCustomerInput(rawData);
+    
+    if (!validationResult.success) {
+      return createValidationErrorResponse(validationResult.error!, corsHeaders);
+    }
+    
+    const requestData = validationResult.data!;
     
     console.log("Updating reservation with customer info:", requestData.reservationId, "isGoogleAuth:", requestData.isGoogleAuth);
 
-    // Validate password only for non-Google auth
-    if (!requestData.isGoogleAuth && (!requestData.customerPassword || requestData.customerPassword.length < 6)) {
-      throw new Error("Password must be at least 6 characters");
-    }
+    // Password validation is now handled by the validator
+    // For non-Google auth, password is required and must be 6+ chars
 
     let userId: string;
 
