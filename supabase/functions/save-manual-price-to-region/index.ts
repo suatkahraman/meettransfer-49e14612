@@ -1,6 +1,172 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.4";
-import { analyzeTransfer } from "../_shared/priceMatching.ts";
+
+// NOTE: `_shared/*` was removed to prevent bundle timeouts. Keep this function self-contained.
+
+type Direction = "to_airport" | "from_airport" | "city_to_city";
+
+type SideAnalysis = {
+  airport: { value: string } | null;
+  city: { value: string } | null;
+  district: { value: string; city?: string } | null;
+};
+
+type TransferInfo = {
+  airport: string | null;
+  city: string | null;
+  district: string | null;
+  direction: Direction;
+  confidence: "high" | "medium" | "low";
+  pickupAnalysis: SideAnalysis;
+  dropoffAnalysis: SideAnalysis;
+};
+
+function stripDiacritics(input: string): string {
+  return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function norm(input: string): string {
+  return stripDiacritics(input)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function canonicalizeDistrict(raw: string): string {
+  const cleaned = stripDiacritics(raw)
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => (w.length <= 2 ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()))
+    .join(" ");
+}
+
+const AIRPORT_MATCHERS: Array<{ re: RegExp; value: string }> = [
+  { re: /(istanbul airport|\bist\b)/i, value: "Istanbul Airport (IST)" },
+  { re: /(sabiha|gokcen|\bsaw\b)/i, value: "Sabiha Gokcen Airport (SAW)" },
+  { re: /(antalya.*airport|\bayt\b)/i, value: "Antalya Airport (AYT)" },
+  { re: /(bodrum|milas|\bbjv\b)/i, value: "Bodrum-Milas Airport (BJV)" },
+  { re: /(dalaman|\bdlm\b)/i, value: "Dalaman Airport (DLM)" },
+  { re: /(adnan menderes|izmir.*airport|\badb\b)/i, value: "Izmir Adnan Menderes Airport (ADB)" },
+  { re: /(kayseri|\basr\b)/i, value: "Kayseri Airport (ASR)" },
+  { re: /(nevsehir|kapadokya|\bnav\b)/i, value: "Nevsehir-Kapadokya Airport (NAV)" },
+  { re: /(esenboga|ankara.*airport|\besb\b)/i, value: "Esenboğa Havalimanı (ESB)" },
+  { re: /(diyarbakir|\bdiy\b)/i, value: "Diyarbakir Airport (DIY)" },
+  { re: /(mardin|\bmqm\b)/i, value: "Mardin Airport (MQM)" },
+  { re: /(ercan|\becn\b)/i, value: "ECN" },
+  { re: /(dubai.*airport|\bdxb\b)/i, value: "DXB" },
+  { re: /(zurich|\bzrh\b)/i, value: "ZRH" },
+  { re: /(geneva|\bgva\b)/i, value: "GVA" },
+  { re: /(basel|\bbsl\b)/i, value: "BSL" },
+  { re: /(malpensa|\bmxp\b)/i, value: "MXP" },
+];
+
+function findAirport(text: string): string | null {
+  for (const m of AIRPORT_MATCHERS) {
+    if (m.re.test(text)) return m.value;
+  }
+  return null;
+}
+
+function detectCityFromText(text: string): string | null {
+  const t = norm(text);
+  if (/(\bdubai\b|\buae\b|\bdxb\b)/.test(t)) return "Dubai";
+  if (/(\bcyprus\b|\bkibris\b|\bkıbrıs\b|\bkktc\b|\becn\b)/.test(t)) return "Kuzey Kıbrıs";
+  if (/(\bzrh\b|\bgva\b|\bbsl\b|\bmxp\b|switzerland|schweiz|suisse|zurich|geneva|basel|malpensa)/.test(t)) return "Switzerland";
+
+  const cityMatchers: Array<{ re: RegExp; value: string }> = [
+    { re: /(istanbul|\bist\b|\bsaw\b)/, value: "Istanbul" },
+    { re: /(antalya|\bayt\b|alanya|kemer|belek|side|manavgat|kas|kaş|kalkan)/, value: "Antalya" },
+    { re: /(bodrum|\bbjv\b)/, value: "Bodrum" },
+    { re: /(dalaman|\bdlm\b|fethiye|marmaris|oludeniz|ölüdeniz|gocek|göcek)/, value: "Dalaman" },
+    { re: /(izmir|\badb\b|cesme|çeşme|kusadasi|kuşadası)/, value: "Izmir" },
+    { re: /(cappadocia|kapadokya|goreme|göreme|urgup|ürgüp|\basr\b|\bnav\b)/, value: "Cappadocia" },
+    { re: /(ankara|\besb\b|esenboga|esenboğa)/, value: "Ankara" },
+    { re: /(adana)/, value: "Adana" },
+    { re: /(diyarbakir|diyarbakır|\bdiy\b)/, value: "Diyarbakir" },
+    { re: /(mardin|\bmqm\b)/, value: "Mardin" },
+    { re: /(kocaeli|gebze|izmit|i̇zmit)/, value: "Kocaeli" },
+    { re: /(sapanca)/, value: "Sapanca" },
+    { re: /(muğla|mugla)/, value: "Muğla" },
+  ];
+
+  for (const m of cityMatchers) {
+    if (m.re.test(t)) return m.value;
+  }
+  return null;
+}
+
+function extractDistrictCandidate(text: string, city: string | null): string | null {
+  const parts = text
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return null;
+  if (!city) return parts[0] || null;
+
+  const cityNorm = norm(city);
+  const idx = parts.findIndex((p) => norm(p).includes(cityNorm));
+  if (idx > 0) return parts[idx - 1];
+
+  const slash = parts[0]?.split("/").map((p) => p.trim()).filter(Boolean) ?? [];
+  if (slash.length >= 2) return slash[0];
+
+  return parts[0] || null;
+}
+
+function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
+  const pickupAirport = findAirport(pickup);
+  const dropoffAirport = findAirport(dropoff);
+
+  const direction: Direction = dropoffAirport
+    ? "to_airport"
+    : pickupAirport
+      ? "from_airport"
+      : "city_to_city";
+
+  const pickupCity = detectCityFromText(pickup);
+  const dropoffCity = detectCityFromText(dropoff);
+
+  const pickupDistrictRaw = extractDistrictCandidate(pickup, pickupCity);
+  const dropoffDistrictRaw = extractDistrictCandidate(dropoff, dropoffCity);
+
+  const pickupDistrict = pickupDistrictRaw ? canonicalizeDistrict(pickupDistrictRaw) : null;
+  const dropoffDistrict = dropoffDistrictRaw ? canonicalizeDistrict(dropoffDistrictRaw) : null;
+
+  const pickupAnalysis: SideAnalysis = {
+    airport: pickupAirport ? { value: pickupAirport } : null,
+    city: pickupCity ? { value: pickupCity } : null,
+    district: pickupDistrict ? { value: pickupDistrict, city: pickupCity ?? undefined } : null,
+  };
+
+  const dropoffAnalysis: SideAnalysis = {
+    airport: dropoffAirport ? { value: dropoffAirport } : null,
+    city: dropoffCity ? { value: dropoffCity } : null,
+    district: dropoffDistrict ? { value: dropoffDistrict, city: dropoffCity ?? undefined } : null,
+  };
+
+  const airport = dropoffAirport || pickupAirport || null;
+  const city = direction === "to_airport" ? pickupCity : direction === "from_airport" ? dropoffCity : pickupCity || dropoffCity;
+  const district = direction === "to_airport" ? pickupDistrict : direction === "from_airport" ? dropoffDistrict : pickupDistrict || dropoffDistrict;
+  const confidence: TransferInfo["confidence"] = airport && city ? "high" : city ? "medium" : "low";
+
+  return {
+    airport,
+    city,
+    district,
+    direction,
+    confidence,
+    pickupAnalysis,
+    dropoffAnalysis,
+  };
+}
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

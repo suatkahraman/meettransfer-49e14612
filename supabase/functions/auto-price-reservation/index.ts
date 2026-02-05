@@ -1,16 +1,376 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@2.0.0";
-import {
-  analyzeTransfer,
-  calculateDiscount,
-  logAnalysis,
-  checkPriceSanity,
-  logPriceSanityCheck,
-} from "../_shared/priceMatching.ts";
-import { getVehicleFallbackList, getVehicleLabel, detectRegion } from "../_shared/vehicleConfig.ts";
-import { convertCurrency, getCurrencySymbol } from "../_shared/currencyUtils.ts";
-import { autoPriceSuccessEmail, manualPriceRequiredEmail } from "../_shared/emailTemplates.ts";
+
+// NOTE: `_shared/*` was removed to prevent bundle timeouts. Keep this function self-contained.
+
+type Direction = "to_airport" | "from_airport" | "city_to_city";
+
+type SideAnalysis = {
+  airport: { value: string } | null;
+  city: { value: string } | null;
+  district: { value: string; city?: string } | null;
+};
+
+type TransferInfo = {
+  airport: string | null;
+  city: string | null;
+  district: string | null;
+  direction: Direction;
+  confidence: "high" | "medium" | "low";
+  pickupAnalysis: SideAnalysis;
+  dropoffAnalysis: SideAnalysis;
+};
+
+function stripDiacritics(input: string): string {
+  return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function norm(input: string): string {
+  return stripDiacritics(input)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function canonicalizeDistrict(raw: string): string {
+  const cleaned = stripDiacritics(raw)
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => (w.length <= 2 ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()))
+    .join(" ");
+}
+
+const AIRPORT_MATCHERS: Array<{ re: RegExp; value: string }> = [
+  { re: /(istanbul airport|\bist\b)/i, value: "Istanbul Airport (IST)" },
+  { re: /(sabiha|gokcen|\bsaw\b)/i, value: "Sabiha Gokcen Airport (SAW)" },
+  { re: /(antalya.*airport|\bayt\b)/i, value: "Antalya Airport (AYT)" },
+  { re: /(bodrum|milas|\bbjv\b)/i, value: "Bodrum-Milas Airport (BJV)" },
+  { re: /(dalaman|\bdlm\b)/i, value: "Dalaman Airport (DLM)" },
+  { re: /(adnan menderes|izmir.*airport|\badb\b)/i, value: "Izmir Adnan Menderes Airport (ADB)" },
+  { re: /(kayseri|\basr\b)/i, value: "Kayseri Airport (ASR)" },
+  { re: /(nevsehir|kapadokya|\bnav\b)/i, value: "Nevsehir-Kapadokya Airport (NAV)" },
+  { re: /(esenboga|ankara.*airport|\besb\b)/i, value: "Esenboğa Havalimanı (ESB)" },
+  { re: /(diyarbakir|\bdiy\b)/i, value: "Diyarbakir Airport (DIY)" },
+  { re: /(mardin|\bmqm\b)/i, value: "Mardin Airport (MQM)" },
+  { re: /(ercan|\becn\b)/i, value: "ECN" },
+  { re: /(dubai.*airport|\bdxb\b)/i, value: "DXB" },
+  { re: /(zurich|\bzrh\b)/i, value: "ZRH" },
+  { re: /(geneva|\bgva\b)/i, value: "GVA" },
+  { re: /(basel|\bbsl\b)/i, value: "BSL" },
+  { re: /(malpensa|\bmxp\b)/i, value: "MXP" },
+];
+
+function findAirport(text: string): string | null {
+  for (const m of AIRPORT_MATCHERS) {
+    if (m.re.test(text)) return m.value;
+  }
+  return null;
+}
+
+function detectCityFromText(text: string): string | null {
+  const t = norm(text);
+  if (/(\bdubai\b|\buae\b|\bdxb\b)/.test(t)) return "Dubai";
+  if (/(\bcyprus\b|\bkibris\b|\bkıbrıs\b|\bkktc\b|\becn\b)/.test(t)) return "Cyprus";
+  if (/(\bzrh\b|\bgva\b|\bbsl\b|\bmxp\b|switzerland|schweiz|suisse|zurich|geneva|basel|malpensa)/.test(t)) return "Switzerland";
+
+  const cityMatchers: Array<{ re: RegExp; value: string }> = [
+    { re: /(istanbul|\bist\b|\bsaw\b)/, value: "Istanbul" },
+    { re: /(antalya|\bayt\b|alanya|kemer|belek|side|manavgat|kas|kaş|kalkan)/, value: "Antalya" },
+    { re: /(bodrum|\bbjv\b)/, value: "Bodrum" },
+    { re: /(dalaman|\bdlm\b|fethiye|marmaris|oludeniz|ölüdeniz|gocek|göcek)/, value: "Dalaman" },
+    { re: /(izmir|\badb\b|cesme|çeşme|kusadasi|kuşadası)/, value: "Izmir" },
+    { re: /(cappadocia|kapadokya|goreme|göreme|urgup|ürgüp|\basr\b|\bnav\b)/, value: "Cappadocia" },
+    { re: /(ankara|\besb\b|esenboga|esenboğa)/, value: "Ankara" },
+    { re: /(adana)/, value: "Adana" },
+    { re: /(diyarbakir|diyarbakır|\bdiy\b)/, value: "Diyarbakir" },
+    { re: /(mardin|\bmqm\b)/, value: "Mardin" },
+    { re: /(kocaeli|gebze|izmit|i̇zmit)/, value: "Kocaeli" },
+    { re: /(sapanca)/, value: "Sapanca" },
+    { re: /(muğla|mugla)/, value: "Muğla" },
+  ];
+
+  for (const m of cityMatchers) {
+    if (m.re.test(t)) return m.value;
+  }
+  return null;
+}
+
+function extractDistrictCandidate(text: string, city: string | null): string | null {
+  const parts = text
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return null;
+  if (!city) return parts[0] || null;
+
+  const cityNorm = norm(city);
+  const idx = parts.findIndex((p) => norm(p).includes(cityNorm));
+  if (idx > 0) return parts[idx - 1];
+
+  const slash = parts[0]?.split("/").map((p) => p.trim()).filter(Boolean) ?? [];
+  if (slash.length >= 2) return slash[0];
+
+  return parts[0] || null;
+}
+
+function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
+  const pickupAirport = findAirport(pickup);
+  const dropoffAirport = findAirport(dropoff);
+
+  const direction: Direction = dropoffAirport
+    ? "to_airport"
+    : pickupAirport
+      ? "from_airport"
+      : "city_to_city";
+
+  const pickupCity = detectCityFromText(pickup);
+  const dropoffCity = detectCityFromText(dropoff);
+
+  const pickupDistrictRaw = extractDistrictCandidate(pickup, pickupCity);
+  const dropoffDistrictRaw = extractDistrictCandidate(dropoff, dropoffCity);
+
+  const pickupDistrict = pickupDistrictRaw ? canonicalizeDistrict(pickupDistrictRaw) : null;
+  const dropoffDistrict = dropoffDistrictRaw ? canonicalizeDistrict(dropoffDistrictRaw) : null;
+
+  const pickupAnalysis: SideAnalysis = {
+    airport: pickupAirport ? { value: pickupAirport } : null,
+    city: pickupCity ? { value: pickupCity } : null,
+    district: pickupDistrict ? { value: pickupDistrict, city: pickupCity ?? undefined } : null,
+  };
+
+  const dropoffAnalysis: SideAnalysis = {
+    airport: dropoffAirport ? { value: dropoffAirport } : null,
+    city: dropoffCity ? { value: dropoffCity } : null,
+    district: dropoffDistrict ? { value: dropoffDistrict, city: dropoffCity ?? undefined } : null,
+  };
+
+  const airport = dropoffAirport || pickupAirport || null;
+  const city = direction === "to_airport" ? pickupCity : direction === "from_airport" ? dropoffCity : pickupCity || dropoffCity;
+  const district = direction === "to_airport" ? pickupDistrict : direction === "from_airport" ? dropoffDistrict : pickupDistrict || dropoffDistrict;
+  const confidence: TransferInfo["confidence"] = airport && city ? "high" : city ? "medium" : "low";
+
+  return {
+    airport,
+    city,
+    district,
+    direction,
+    confidence,
+    pickupAnalysis,
+    dropoffAnalysis,
+  };
+}
+
+type SanityCheckResult = {
+  isValid: boolean;
+  reason?: string;
+  minimumExpected?: number;
+  actualPrice?: number;
+  vehicleType?: string;
+  confidence?: "high" | "medium" | "low";
+  routeKey?: string;
+};
+
+function toEur(amount: number, currency: string): number {
+  const c = (currency || "EUR").toUpperCase();
+  if (c === "EUR") return amount;
+  if (c === "TRY") return amount / 38;
+  if (c === "USD") return amount / 1.08;
+  if (c === "GBP") return amount * 1.17;
+  if (c === "AED") return amount / 3.97;
+  return amount;
+}
+
+function checkPriceSanity(
+  pickupCity: string | null,
+  dropoffCity: string | null,
+  price: number,
+  currency: string,
+  vehicleType: string,
+  airport: string | null
+): SanityCheckResult {
+  const priceEur = toEur(price, currency);
+  const vt = (vehicleType || "").toLowerCase();
+
+  let min = 25;
+  if (/(s_class|maybach)/.test(vt)) min = 140;
+  else if (/(sprinter|minibus)/.test(vt)) min = 85;
+  else if (/(vito|vclass|minivan|vip)/.test(vt)) min = 50;
+  if (airport) min += 10;
+
+  const routeKey = `${pickupCity ?? "?"}->${dropoffCity ?? "?"}${airport ? `@${airport}` : ""}`;
+
+  if (!Number.isFinite(priceEur) || priceEur <= 0) {
+    return { isValid: false, reason: "invalid_price", minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "low", routeKey };
+  }
+  if (priceEur < min) {
+    return { isValid: false, reason: `too_low(<${min}€)`, minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "medium", routeKey };
+  }
+  if (priceEur > 5000) {
+    return { isValid: false, reason: "too_high(>5000€)", minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "low", routeKey };
+  }
+  return { isValid: true, minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "high", routeKey };
+}
+
+function logPriceSanityCheck(scope: string, id: string, result: SanityCheckResult) {
+  console.log(`[sanity:${scope}] ${id}`, result);
+}
+
+function logAnalysis(
+  scope: "quick_booking" | "reservation",
+  entityId: string,
+  pickup: string,
+  dropoff: string,
+  transferInfo: TransferInfo
+) {
+  console.log(`[analysis:${scope}] ${entityId}`, { pickup, dropoff, ...transferInfo });
+}
+
+function unique(list: string[]): string[] {
+  return Array.from(new Set(list.filter(Boolean)));
+}
+
+function getVehicleFallbackList(requested: string): string[] {
+  const r = (requested || "").toLowerCase();
+
+  if (r.includes("dubai-")) return [requested];
+
+  if (/(sprinter|minibus)/.test(r)) {
+    return unique([
+      requested,
+      "sprinter",
+      "mercedes-sprinter",
+      "Mercedes Sprinter or Similar",
+      "minibus",
+      "maybach-minibus",
+    ]);
+  }
+
+  if (/(vito|vclass)/.test(r)) {
+    return unique([
+      requested,
+      "vito",
+      "mercedes-vito",
+      "Vip Mercedes Vito",
+      "vip-vito",
+      "mercedes-vip-vito",
+      "minivan",
+      "vip_minivan",
+    ]);
+  }
+
+  if (/(minivan)/.test(r)) {
+    return unique([requested, "minivan", "vip_minivan", "mercedes-vito", "vito"]);
+  }
+
+  if (/(sedan)/.test(r)) {
+    return unique([requested, "sedan", "standard-sedan", "standard_sedan"]);
+  }
+
+  return [requested];
+}
+
+type VehicleRegion = "turkey" | "dubai" | "switzerland" | "default";
+
+function detectRegion(pickup: string, dropoff: string): VehicleRegion {
+  const s = (pickup + " " + dropoff).toLowerCase();
+  if (/(\bdubai\b|\buae\b|\bdxb\b)/i.test(s)) return "dubai";
+  if (/(\bzrh\b|\bgva\b|\bbsl\b|\bmxp\b|switzerland|schweiz|suisse|zurich|geneva|basel|malpensa)/i.test(s)) return "switzerland";
+  if (/(istanbul|turkiye|türkiye|turkey|antalya|izmir|bodrum|dalaman|ankara|adana|diyarbakir|mardin|sapanca|kocaeli)/i.test(s)) return "turkey";
+  return "default";
+}
+
+async function convertCurrency(
+  amount: number,
+  fromCurrency: string,
+  toCurrency: string
+): Promise<{ amount: number; rate: number }> {
+  if (fromCurrency === toCurrency) return { amount: Math.ceil(amount), rate: 1 };
+
+  try {
+    const response = await fetch(
+      `https://api.frankfurter.app/latest?from=${encodeURIComponent(fromCurrency)}&to=${encodeURIComponent(toCurrency)}`
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      const rate = data.rates?.[toCurrency];
+      if (typeof rate === "number" && Number.isFinite(rate)) {
+        return { amount: Math.ceil(amount * rate), rate };
+      }
+    }
+  } catch (e) {
+    console.error("Currency conversion error:", e);
+  }
+
+  return { amount: Math.ceil(amount), rate: 1 };
+}
+
+type DiscountInfo = {
+  price: number;
+  discountApplied: boolean;
+  discountPercent: number;
+};
+
+function calculateDiscount(
+  basePrice: number,
+  hasReturnTrip: boolean,
+  promoCode: string | null,
+  region: VehicleRegion
+): DiscountInfo {
+  // Current business rule in code: disable discounts for Dubai/Switzerland.
+  if (region === "dubai" || region === "switzerland") {
+    return { price: Math.ceil(basePrice), discountApplied: false, discountPercent: 0 };
+  }
+
+  if (!hasReturnTrip) {
+    return { price: Math.ceil(basePrice), discountApplied: false, discountPercent: 0 };
+  }
+
+  const code = (promoCode || "").toUpperCase();
+  const discountPercent = code ? 25 : 0;
+  const discounted = discountPercent > 0 ? Math.ceil(basePrice * (1 - discountPercent / 100)) : Math.ceil(basePrice);
+
+  return { price: discounted, discountApplied: discountPercent > 0, discountPercent };
+}
+
+function manualPriceRequiredEmail(
+  reservation: any,
+  info: {
+    airport: string | null;
+    city: string | null;
+    district: string | null;
+    direction: string;
+    confidence: string;
+    additionalReason?: string;
+  },
+  scope: "reservation" | "quick_booking"
+): string {
+  const reason = info.additionalReason ? `<p><strong>Reason:</strong> ${info.additionalReason}</p>` : "";
+  return `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:20px;">
+      <h2>Manual pricing required (${scope})</h2>
+      ${reason}
+      <p><strong>Pickup:</strong> ${reservation.pickup}</p>
+      <p><strong>Dropoff:</strong> ${reservation.dropoff}</p>
+      <p><strong>Date/Time:</strong> ${reservation.pickup_date} ${reservation.pickup_time}</p>
+      <p><strong>Vehicle:</strong> ${reservation.vehicle_type}</p>
+      <hr />
+      <p><strong>Matched city:</strong> ${info.city ?? "N/A"}</p>
+      <p><strong>Matched district:</strong> ${info.district ?? "N/A"}</p>
+      <p><strong>Matched airport:</strong> ${info.airport ?? "N/A"}</p>
+      <p><strong>Direction:</strong> ${info.direction} (${info.confidence})</p>
+    </div>
+  `;
+}
+
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 

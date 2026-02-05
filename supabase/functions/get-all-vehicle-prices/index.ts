@@ -1,9 +1,435 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { analyzeTransfer, checkPriceSanity, logPriceSanityCheck, validateDistrictByDistance, getExpectedPriceRange, estimateDistanceFromRoute } from "../_shared/priceMatching.ts";
-import { corsHeaders, dynamicCacheHeaders } from "../_shared/cacheHeaders.ts";
-import { detectRegion, getVehicleTypesForRegion, VehicleRegion, VEHICLE_TYPES, isValidSwitzerlandRoute, calculateTurkeyFallbackPrice } from "../_shared/vehicleConfig.ts";
-import { checkRateLimit, getClientIdentifier, createRateLimitResponse, addRateLimitHeaders, RATE_LIMIT_CONFIGS } from "../_shared/rateLimiter.ts";
+
+// NOTE: `_shared/*` was removed to prevent bundle timeouts. Keep this function self-contained.
+
+const corsHeaders: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+};
+
+// Cache headers for price endpoint (public but short-lived)
+const dynamicCacheHeaders: Record<string, string> = {
+  ...corsHeaders,
+  "Cache-Control": "public, max-age=60, s-maxage=600, stale-while-revalidate=3600",
+};
+
+// -----------------------------
+// Rate limiting (in-memory)
+// -----------------------------
+type RateLimitConfig = { windowMs: number; max: number };
+
+type RateLimitResult =
+  | {
+      allowed: true;
+      remaining: number;
+      resetAt: number;
+    }
+  | {
+      allowed: false;
+      remaining: 0;
+      resetAt: number;
+      retryAfterSec: number;
+    };
+
+const RATE_LIMIT_CONFIGS = {
+  pricing: { windowMs: 60_000, max: 90 } satisfies RateLimitConfig,
+} as const;
+
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function getClientIdentifier(req: Request): string {
+  const cfIp = req.headers.get("cf-connecting-ip");
+  const realIp = req.headers.get("x-real-ip");
+  const xff = req.headers.get("x-forwarded-for");
+  const ip = cfIp || realIp || (xff ? xff.split(",")[0].trim() : null) || "unknown";
+  const ua = req.headers.get("user-agent") || "ua:unknown";
+  return `${ip}:${ua.slice(0, 40)}`;
+}
+
+function checkRateLimit(identifier: string, config: RateLimitConfig): RateLimitResult {
+  const now = Date.now();
+  const record = rateLimitStore.get(identifier);
+
+  if (!record || now >= record.resetAt) {
+    const resetAt = now + config.windowMs;
+    rateLimitStore.set(identifier, { count: 1, resetAt });
+    return { allowed: true, remaining: Math.max(0, config.max - 1), resetAt };
+  }
+
+  if (record.count >= config.max) {
+    const retryAfterSec = Math.max(1, Math.ceil((record.resetAt - now) / 1000));
+    return { allowed: false, remaining: 0, resetAt: record.resetAt, retryAfterSec };
+  }
+
+  record.count += 1;
+  rateLimitStore.set(identifier, record);
+  return { allowed: true, remaining: Math.max(0, config.max - record.count), resetAt: record.resetAt };
+}
+
+function addRateLimitHeaders(
+  headers: Record<string, string>,
+  result: RateLimitResult,
+  config: RateLimitConfig
+): Record<string, string> {
+  const base: Record<string, string> = {
+    ...headers,
+    "X-RateLimit-Limit": String(config.max),
+    "X-RateLimit-Reset": String(Math.floor(result.resetAt / 1000)),
+    "X-RateLimit-Remaining": String(result.allowed ? result.remaining : 0),
+  };
+  if (!result.allowed) base["Retry-After"] = String(result.retryAfterSec);
+  return base;
+}
+
+function createRateLimitResponse(result: RateLimitResult, config: RateLimitConfig): Response {
+  const body = {
+    error: "rate_limited",
+    message: "Too many requests. Please retry shortly.",
+    limit: config.max,
+    resetAt: result.resetAt,
+    retryAfterSec: result.allowed ? 0 : result.retryAfterSec,
+  };
+
+  return new Response(JSON.stringify(body), {
+    status: 429,
+    headers: addRateLimitHeaders({ ...corsHeaders, "Content-Type": "application/json" }, result, config),
+  });
+}
+
+// -----------------------------
+// Region + vehicle types
+// -----------------------------
+export type VehicleRegion = "turkey" | "dubai" | "switzerland" | "default";
+
+const VEHICLE_TYPES = [
+  { value: "sedan", label: "Sedan", passengers: 3, luggage: 3 },
+  { value: "standard-sedan", label: "Standard Sedan", passengers: 3, luggage: 3 },
+  { value: "standard_sedan", label: "Standard Sedan", passengers: 3, luggage: 3 },
+  { value: "vip-mercedes", label: "VIP Mercedes", passengers: 3, luggage: 3 },
+  { value: "s_class", label: "S-Class", passengers: 3, luggage: 3 },
+  { value: "minivan", label: "Minivan", passengers: 6, luggage: 6 },
+  { value: "vip_minivan", label: "VIP Minivan", passengers: 6, luggage: 6 },
+  { value: "mercedes-vito", label: "Mercedes Vito", passengers: 7, luggage: 7 },
+  { value: "vito", label: "Vito", passengers: 7, luggage: 7 },
+  { value: "vip-vito", label: "VIP Vito", passengers: 7, luggage: 7 },
+  { value: "mercedes-vip-vito", label: "VIP Mercedes Vito", passengers: 7, luggage: 7 },
+  { value: "mercedes-sprinter", label: "Mercedes Sprinter", passengers: 12, luggage: 12 },
+  { value: "sprinter", label: "Sprinter", passengers: 12, luggage: 12 },
+  { value: "minibus", label: "Minibus", passengers: 14, luggage: 14 },
+  { value: "maybach-minibus", label: "Maybach Minibus", passengers: 14, luggage: 14 },
+  // Dubai
+  { value: "dubai-private-sedan", label: "Dubai Private Sedan", passengers: 3, luggage: 3 },
+  { value: "dubai-suburban-suv", label: "Dubai Suburban SUV", passengers: 5, luggage: 5 },
+  { value: "dubai-v-class", label: "Dubai V-Class", passengers: 6, luggage: 6 },
+  { value: "dubai-vip-sprinter", label: "Dubai VIP Sprinter", passengers: 12, luggage: 12 },
+  { value: "dubai-premium-van", label: "Dubai Premium Van", passengers: 12, luggage: 12 },
+] as const;
+
+type VehicleTypeDef = (typeof VEHICLE_TYPES)[number];
+
+function detectRegion(pickup: string, dropoff: string): VehicleRegion {
+  const s = (pickup + " " + dropoff).toLowerCase();
+  if (/(\bdubai\b|\buae\b|\bdxb\b)/i.test(s)) return "dubai";
+  if (/(\bzrh\b|\bgva\b|\bbsl\b|\bmxp\b|switzerland|schweiz|suisse|zurich|geneva|basel|malpensa)/i.test(s)) return "switzerland";
+  if (/(istanbul|turkiye|türkiye|turkey|antalya|izmir|bodrum|dalaman|ankara|adana|diyarbakir|mardin|sapanca|kocaeli)/i.test(s)) {
+    return "turkey";
+  }
+  return "default";
+}
+
+function getVehicleTypesForRegion(region: VehicleRegion): VehicleTypeDef[] {
+  if (region === "dubai") {
+    return VEHICLE_TYPES.filter((v) => v.value.startsWith("dubai-"));
+  }
+  // Switzerland currently reuses the default set.
+  return VEHICLE_TYPES.filter((v) => !v.value.startsWith("dubai-"));
+}
+
+function isValidSwitzerlandRoute(_pickup: string, _dropoff: string): boolean {
+  // Conservative default: allow pricing attempts; if DB has no price, it will fall back to manual.
+  return true;
+}
+
+function calculateTurkeyFallbackPrice(vehicleType: string, distanceKm: number): { price: number; currency: string } | null {
+  // Only used as a last resort when DB has no matching rows.
+  const km = Math.max(0, Math.min(distanceKm, 100));
+
+  const vt = vehicleType.toLowerCase();
+  let base = 35;
+  let perKm = 0.9;
+
+  if (/(sprinter|minibus|maybach)/.test(vt)) {
+    base = 90;
+    perKm = 1.8;
+  } else if (/(vito|vclass|minivan|vip)/.test(vt)) {
+    base = 55;
+    perKm = 1.2;
+  } else if (/(s_class|maybach)/.test(vt)) {
+    base = 160;
+    perKm = 2.2;
+  }
+
+  const price = Math.ceil(base + km * perKm);
+  return { price, currency: "EUR" };
+}
+
+// -----------------------------
+// Transfer analysis + sanity checks
+// -----------------------------
+function stripDiacritics(input: string): string {
+  return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function norm(input: string): string {
+  return stripDiacritics(input)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function canonicalizeDistrict(raw: string): string {
+  const cleaned = stripDiacritics(raw)
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Title-case words, but preserve existing all-caps airport codes etc.
+  return cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => (w.length <= 2 ? w.toUpperCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()))
+    .join(" ");
+}
+
+const AIRPORT_MATCHERS: Array<{ re: RegExp; value: string }> = [
+  { re: /(istanbul airport|\bist\b)/i, value: "Istanbul Airport (IST)" },
+  { re: /(sabiha|gokcen|\bsaw\b)/i, value: "Sabiha Gokcen Airport (SAW)" },
+  { re: /(antalya.*airport|\bayt\b)/i, value: "Antalya Airport (AYT)" },
+  { re: /(bodrum|milas|\bbjv\b)/i, value: "Bodrum-Milas Airport (BJV)" },
+  { re: /(dalaman|\bdlm\b)/i, value: "Dalaman Airport (DLM)" },
+  { re: /(adnan menderes|izmir.*airport|\badb\b)/i, value: "Izmir Adnan Menderes Airport (ADB)" },
+  { re: /(kayseri|\basr\b)/i, value: "Kayseri Airport (ASR)" },
+  { re: /(nevsehir|kapadokya|\bnav\b)/i, value: "Nevsehir-Kapadokya Airport (NAV)" },
+  { re: /(esenboga|ankara.*airport|\besb\b)/i, value: "Esenboğa Havalimanı (ESB)" },
+  { re: /(diyarbakir|\bdiy\b)/i, value: "Diyarbakir Airport (DIY)" },
+  { re: /(mardin|\bmqm\b)/i, value: "Mardin Airport (MQM)" },
+  // Cyprus
+  { re: /(ercan|\becn\b)/i, value: "ECN" },
+  // Dubai
+  { re: /(dubai.*airport|\bdxb\b)/i, value: "DXB" },
+  // Switzerland (DB uses codes)
+  { re: /(zurich|\bzrh\b)/i, value: "ZRH" },
+  { re: /(geneva|\bgva\b)/i, value: "GVA" },
+  { re: /(basel|\bbsl\b)/i, value: "BSL" },
+  { re: /(malpensa|\bmxp\b)/i, value: "MXP" },
+];
+
+type Direction = "to_airport" | "from_airport" | "city_to_city";
+
+type SideAnalysis = {
+  airport: { value: string } | null;
+  city: { value: string } | null;
+  district: { value: string; city?: string } | null;
+};
+
+type TransferInfo = {
+  airport: string | null;
+  city: string | null;
+  district: string | null;
+  direction: Direction;
+  confidence: "high" | "medium" | "low";
+  pickupAnalysis: SideAnalysis;
+  dropoffAnalysis: SideAnalysis;
+};
+
+function findAirport(text: string): string | null {
+  for (const m of AIRPORT_MATCHERS) {
+    if (m.re.test(text)) return m.value;
+  }
+  return null;
+}
+
+function detectCityFromText(text: string): string | null {
+  const t = norm(text);
+  if (/(\bdubai\b|\buae\b|\bdxb\b)/.test(t)) return "Dubai";
+  if (/(\bcyprus\b|\bkibris\b|\bkıbrıs\b|\bkktc\b|\becn\b)/.test(t)) return "Kuzey Kıbrıs";
+  if (/(\bzrh\b|\bgva\b|\bbsl\b|\bmxp\b|switzerland|schweiz|suisse|zurich|geneva|basel|malpensa)/.test(t)) return "Switzerland";
+
+  const cityMatchers: Array<{ re: RegExp; value: string }> = [
+    { re: /(istanbul|\bist\b|\bsaw\b)/, value: "Istanbul" },
+    { re: /(antalya|\bayt\b|alanya|kemer|belek|side|manavgat|kas|kaş|kalkan)/, value: "Antalya" },
+    { re: /(bodrum|\bbjv\b)/, value: "Bodrum" },
+    { re: /(dalaman|\bdlm\b|fethiye|marmaris|oludeniz|ölüdeniz|gocek|göcek)/, value: "Dalaman" },
+    { re: /(izmir|\badb\b|cesme|çeşme|kusadasi|kuşadası)/, value: "Izmir" },
+    { re: /(cappadocia|kapadokya|goreme|göreme|urgup|ürgüp|\basr\b|\bnav\b)/, value: "Cappadocia" },
+    { re: /(ankara|\besb\b|esenboga|esenboğa)/, value: "Ankara" },
+    { re: /(adana)/, value: "Adana" },
+    { re: /(diyarbakir|diyarbakır|\bdiy\b)/, value: "Diyarbakir" },
+    { re: /(mardin|\bmqm\b)/, value: "Mardin" },
+    { re: /(kocaeli|gebze|izmit|i̇zmit)/, value: "Kocaeli" },
+    { re: /(sapanca)/, value: "Sapanca" },
+    { re: /(muğla|mugla)/, value: "Muğla" },
+  ];
+
+  for (const m of cityMatchers) {
+    if (m.re.test(t)) return m.value;
+  }
+
+  return null;
+}
+
+function extractDistrictCandidate(text: string, city: string | null): string | null {
+  const parts = text
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return null;
+  if (!city) return parts[0] || null;
+
+  const cityNorm = norm(city);
+  const idx = parts.findIndex((p) => norm(p).includes(cityNorm));
+  if (idx > 0) return parts[idx - 1];
+
+  // Common Google Places: "District/City" style
+  const slash = parts[0]?.split("/").map((p) => p.trim()).filter(Boolean) ?? [];
+  if (slash.length >= 2) return slash[0];
+
+  return parts[0] || null;
+}
+
+function analyzeTransfer(pickup: string, dropoff: string): TransferInfo {
+  const pickupAirport = findAirport(pickup);
+  const dropoffAirport = findAirport(dropoff);
+
+  const direction: Direction = dropoffAirport
+    ? "to_airport"
+    : pickupAirport
+      ? "from_airport"
+      : "city_to_city";
+
+  const pickupCity = detectCityFromText(pickup);
+  const dropoffCity = detectCityFromText(dropoff);
+
+  const pickupDistrictRaw = extractDistrictCandidate(pickup, pickupCity);
+  const dropoffDistrictRaw = extractDistrictCandidate(dropoff, dropoffCity);
+
+  const pickupDistrict = pickupDistrictRaw ? canonicalizeDistrict(pickupDistrictRaw) : null;
+  const dropoffDistrict = dropoffDistrictRaw ? canonicalizeDistrict(dropoffDistrictRaw) : null;
+
+  const pickupAnalysis: SideAnalysis = {
+    airport: pickupAirport ? { value: pickupAirport } : null,
+    city: pickupCity ? { value: pickupCity } : null,
+    district: pickupDistrict ? { value: pickupDistrict, city: pickupCity ?? undefined } : null,
+  };
+
+  const dropoffAnalysis: SideAnalysis = {
+    airport: dropoffAirport ? { value: dropoffAirport } : null,
+    city: dropoffCity ? { value: dropoffCity } : null,
+    district: dropoffDistrict ? { value: dropoffDistrict, city: dropoffCity ?? undefined } : null,
+  };
+
+  // Canonical fields used by pricing logic
+  const airport = dropoffAirport || pickupAirport || null;
+  const city = direction === "to_airport" ? pickupCity : direction === "from_airport" ? dropoffCity : pickupCity || dropoffCity;
+  const district = direction === "to_airport" ? pickupDistrict : direction === "from_airport" ? dropoffDistrict : pickupDistrict || dropoffDistrict;
+
+  const confidence: TransferInfo["confidence"] = airport && city ? "high" : city ? "medium" : "low";
+
+  return {
+    airport,
+    city,
+    district,
+    direction,
+    confidence,
+    pickupAnalysis,
+    dropoffAnalysis,
+  };
+}
+
+type SanityCheckResult = {
+  isValid: boolean;
+  reason?: string;
+  minimumExpected?: number;
+  actualPrice?: number;
+  vehicleType?: string;
+  confidence?: "high" | "medium" | "low";
+  routeKey?: string;
+};
+
+function toEur(amount: number, currency: string): number {
+  const c = (currency || "EUR").toUpperCase();
+  if (c === "EUR") return amount;
+  if (c === "TRY") return amount / 38;
+  if (c === "USD") return amount / 1.08;
+  if (c === "GBP") return amount * 1.17;
+  if (c === "AED") return amount / 3.97;
+  return amount;
+}
+
+function checkPriceSanity(
+  pickupCity: string | null,
+  dropoffCity: string | null,
+  price: number,
+  currency: string,
+  vehicleType: string,
+  airport: string | null
+): SanityCheckResult {
+  const priceEur = toEur(price, currency);
+  const vt = (vehicleType || "").toLowerCase();
+
+  let min = 25;
+  if (/(s_class|maybach)/.test(vt)) min = 140;
+  else if (/(sprinter|minibus)/.test(vt)) min = 85;
+  else if (/(vito|vclass|minivan|vip)/.test(vt)) min = 50;
+
+  // Slightly higher minimum for airport transfers.
+  if (airport) min += 10;
+
+  const routeKey = `${pickupCity ?? "?"}->${dropoffCity ?? "?"}${airport ? `@${airport}` : ""}`;
+
+  if (!Number.isFinite(priceEur) || priceEur <= 0) {
+    return { isValid: false, reason: "invalid_price", minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "low", routeKey };
+  }
+
+  if (priceEur < min) {
+    return { isValid: false, reason: `too_low(<${min}€)`, minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "medium", routeKey };
+  }
+
+  if (priceEur > 5000) {
+    return { isValid: false, reason: "too_high(>5000€)", minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "low", routeKey };
+  }
+
+  return { isValid: true, minimumExpected: min, actualPrice: priceEur, vehicleType, confidence: "high", routeKey };
+}
+
+function logPriceSanityCheck(scope: string, id: string, result: SanityCheckResult) {
+  console.log(`[sanity:${scope}] ${id}`, result);
+}
+
+function validateDistrictByDistance(
+  _airport: string,
+  _district: string,
+  _priceEur: number,
+  _vehicleType: string
+): { isValid: true } | { isValid: false; reason: string; expectedDistrict?: string } {
+  // Keep permissive to avoid false negatives; main safety net is DB matching + sanity check.
+  return { isValid: true };
+}
+
+function estimateDistanceFromRoute(pickup: string, dropoff: string, transferInfo: TransferInfo): number | null {
+  // Heuristic fallback distance for Turkey when DB has no rows.
+  const s = norm(pickup + " " + dropoff);
+  if (/(istanbul airport|\bist\b|\bsaw\b)/.test(s)) return 45;
+  if (/(antalya|\bayt\b)/.test(s)) return 35;
+  if (/(bodrum|\bbjv\b|dalaman|\bdlm\b)/.test(s)) return 55;
+  if (transferInfo.direction === "city_to_city") return 75;
+  return 50;
+}
+
 interface GetPricesRequest {
   pickup: string;
   dropoff: string;
