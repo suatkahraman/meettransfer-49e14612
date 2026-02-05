@@ -1,8 +1,23 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@2.0.0";
-import { getVehicleLabel } from "../_shared/vehicleConfig.ts";
-import { getCurrencySymbol } from "../_shared/currencyUtils.ts";
+
+// Inline vehicle config and currency utils to avoid shared module import issues
+const VEHICLE_LABELS: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'vip-mercedes': 'VIP Mercedes Vito',
+  'maybach': 'Mercedes Maybach Minivan',
+  'minibus': 'Mercedes Sprinter Minibus',
+};
+
+function getVehicleLabel(vehicleType: string): string {
+  return VEHICLE_LABELS[vehicleType] || vehicleType.replace(/-/g, ' ');
+}
+
+function getCurrencySymbol(currency: string): string {
+  const symbols: Record<string, string> = { EUR: '€', USD: '$', GBP: '£', TRY: '₺', AED: 'د.إ', AUD: 'A$' };
+  return symbols[currency] || currency;
+}
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 

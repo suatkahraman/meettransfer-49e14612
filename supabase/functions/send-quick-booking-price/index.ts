@@ -1,9 +1,62 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { getVehicleLabel, VEHICLE_LABELS } from "../_shared/vehicleConfig.ts";
-import { getCurrencySymbol } from "../_shared/currencyUtils.ts";
-import { getEmailHeader, getEmailFooter } from "../_shared/emailTemplates.ts";
+
+// Inline vehicle config, currency utils, and email helpers to avoid shared module import issues
+const VEHICLE_LABELS: Record<string, string> = {
+  'mercedes-vito': 'Mercedes Vito',
+  'vip-mercedes': 'VIP Mercedes Vito',
+  'maybach': 'Mercedes Maybach Minivan',
+  'minibus': 'Mercedes Sprinter Minibus',
+};
+
+function getVehicleLabel(vehicleType: string): string {
+  return VEHICLE_LABELS[vehicleType] || vehicleType.replace(/-/g, ' ');
+}
+
+function getCurrencySymbol(currency: string): string {
+  const symbols: Record<string, string> = { EUR: '€', USD: '$', GBP: '£', TRY: '₺', AED: 'د.إ', AUD: 'A$' };
+  return symbols[currency] || currency;
+}
+
+function getEmailHeader(title: string, subtitle?: string, lang: string = 'en'): string {
+  return `
+<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:20px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+<tr>
+  <td style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);padding:30px;text-align:center;">
+    <img src="https://meettransfer.app/images/meet-transfer-logo.png" alt="Meet Transfer" style="height:50px;margin-bottom:15px;">
+    <h1 style="color:#fff;margin:0;font-size:22px;font-weight:600;">${title}</h1>
+    ${subtitle ? `<p style="color:#94a3b8;margin:10px 0 0;font-size:14px;">${subtitle}</p>` : ''}
+  </td>
+</tr>`;
+}
+
+function getEmailFooter(lang: string = 'en'): string {
+  return `
+<tr>
+  <td style="background:#1e293b;padding:25px;text-align:center;">
+    <p style="color:#94a3b8;font-size:13px;margin:0 0 15px;">Questions? We're available 24/7</p>
+    <a href="https://wa.me/15558051101" style="display:inline-block;background:#25d366;color:#fff;padding:10px 25px;border-radius:6px;text-decoration:none;font-weight:500;margin-right:10px;">💬 WhatsApp</a>
+    <a href="mailto:info@meettransfer.app" style="display:inline-block;background:#3b82f6;color:#fff;padding:10px 25px;border-radius:6px;text-decoration:none;font-weight:500;">📧 Email</a>
+    <p style="color:#64748b;font-size:11px;margin:20px 0 0;">© ${new Date().getFullYear()} Meet Transfer. All rights reserved.</p>
+  </td>
+</tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
