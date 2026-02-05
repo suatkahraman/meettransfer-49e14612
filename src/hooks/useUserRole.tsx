@@ -23,17 +23,22 @@ export const useUserRole = () => {
 
       try {
         // Fetch user role
+        console.log('[useUserRole] Fetching role for user:', user.id, user.email);
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
           .maybeSingle();
 
+        console.log('[useUserRole] Role query result:', { roleData, roleError });
+
         if (roleError) {
           console.error('Error fetching role:', roleError);
           setRole('customer');
         } else {
-          setRole((roleData?.role as AppRole) || 'customer');
+          const detectedRole = (roleData?.role as AppRole) || 'customer';
+          console.log('[useUserRole] Setting role to:', detectedRole);
+          setRole(detectedRole);
         }
 
         // If user is a driver, fetch driver ID
