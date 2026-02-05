@@ -1,6 +1,48 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { generatePaymentSuccessEmail, generateAgencyPaymentSuccessEmail } from "../_shared/emailTemplates.ts";
+
+// Inline email template generators to avoid shared module import issues
+function generatePaymentSuccessEmail(data: any, lang: string = 'en'): string {
+  const title = lang === 'tr' ? 'Ödeme Başarılı!' : 'Payment Successful!';
+  const thanks = lang === 'tr' ? 'Ödemeniz başarıyla alındı.' : 'Your payment has been received.';
+  const currencySymbol = { EUR: '€', USD: '$', GBP: '£', TRY: '₺' }[data.currency] || data.currency;
+  
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:20px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+<tr><td style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);padding:30px;text-align:center;">
+  <h1 style="color:#fff;margin:0;font-size:24px;">✅ ${title}</h1>
+  <p style="color:rgba(255,255,255,0.9);margin:10px 0 0;font-size:14px;">${thanks}</p>
+</td></tr>
+<tr><td style="padding:30px;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;margin-bottom:20px;">
+    <tr><td style="padding:20px;">
+      <p style="margin:0 0 10px;color:#1e293b;font-weight:bold;">Reservation: ${data.reservation_code}</p>
+      <p style="margin:5px 0;color:#64748b;font-size:14px;">📍 ${data.pickup} → ${data.dropoff}</p>
+      <p style="margin:5px 0;color:#64748b;font-size:14px;">📅 ${data.pickup_date} - ${data.pickup_time}</p>
+      <p style="margin:10px 0 0;color:#10b981;font-size:20px;font-weight:bold;">${currencySymbol}${data.price}</p>
+    </td></tr>
+  </table>
+  <p style="text-align:center;color:#64748b;font-size:13px;">Payment via ${data.payment_provider}</p>
+</td></tr>
+<tr><td style="background:#1e293b;padding:20px;text-align:center;">
+  <p style="color:#94a3b8;font-size:12px;margin:0;">Meet Transfer - info@meettransfer.app</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
+
+function generateAgencyPaymentSuccessEmail(data: any, lang: string = 'en'): string {
+  return generatePaymentSuccessEmail({ ...data, agency_name: data.agency_name }, lang);
+}
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
