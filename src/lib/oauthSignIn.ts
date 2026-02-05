@@ -36,13 +36,15 @@ const ALLOWED_OAUTH_HOSTS = [
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
   try {
     const customDomain = isCustomDomain();
+    // Always use /oauth/callback as the redirect URL
+    const callbackUrl = `${window.location.origin}/oauth/callback`;
 
     if (customDomain) {
       // Custom domain: bypass auth-bridge by getting OAuth URL directly
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/oauth/callback`,
+          redirectTo: callbackUrl,
           skipBrowserRedirect: true, // Critical: prevents automatic redirect by auth-bridge
         },
       });
@@ -63,9 +65,11 @@ export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error
       return { error: null };
     }
 
-    // Lovable domains: use managed OAuth
+    // Lovable domains: use managed OAuth with explicit redirect_uri
     const lovableAuth = createLovableAuth({});
-    const result = await lovableAuth.signInWithOAuth(provider);
+    const result = await lovableAuth.signInWithOAuth(provider, {
+      redirect_uri: callbackUrl,
+    });
 
     if (result.redirected) {
       return { error: null };
