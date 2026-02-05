@@ -38,7 +38,7 @@ const ProtectedRoute = ({
     const roleRedirects: Record<AppRole, string> = {
       admin: '/admin',
       driver: '/driver-dashboard',
-      customer: '/customer',
+      customer: '/customer-dashboard',
       agency: '/agency-dashboard'
     };
     
