@@ -1,13 +1,11 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { Resend } from "https://esm.sh/resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 // ---- Minimal helpers ----
 function analyzeSimple(pickup: string, dropoff: string): { airport: string | null; city: string | null; district: string | null; direction: string; confidence: string } {
@@ -48,17 +46,61 @@ async function convertCurrency(amount: number, from: string, to: string): Promis
   return { amount, rate: 1 };
 }
 
+async function supabaseQuery(table: string, params: Record<string, string> = {}, method = "GET", body?: unknown) {
+  const url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  
+  const headers: Record<string, string> = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": `Bearer ${SUPABASE_KEY}`,
+    "Content-Type": "application/json",
+    "Prefer": method === "PATCH" ? "return=minimal" : "return=representation",
+  };
+
+  const res = await fetch(url.toString(), {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  if (method === "PATCH") return { ok: res.ok };
+  return res.json();
+}
+
+async function sendEmail(to: string, subject: string, html: string) {
+  if (!RESEND_API_KEY) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Meet Transfer <noreply@mail.meettransfer.app>",
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+  } catch {}
+}
+
+async function sendManualEmail(reservation: Record<string, unknown>, info: { airport: string | null; city: string | null; district: string | null; direction: string; confidence: string }) {
+  await sendEmail(
+    "sautkahraman@gmail.com",
+    `⚠️ Reservation Manuel Fiyat Gerekli: ${reservation.customer_name}`,
+    `<p>Pickup: ${reservation.pickup}</p><p>Dropoff: ${reservation.dropoff}</p><p>City: ${info.city}</p><p>Airport: ${info.airport}</p>`
+  );
+}
+
 // ---- HANDLER ----
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const body = await req.json();
     const reservation_id: string = body.reservation_id;
 
@@ -66,9 +108,14 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "reservation_id required", matched: false }), { status: 400, headers: corsHeaders });
     }
 
-    const { data: reservation, error: resErr } = await supabase.from("reservations").select("*").eq("id", reservation_id).single();
+    // Fetch reservation
+    const reservations = await supabaseQuery("reservations", {
+      id: `eq.${reservation_id}`,
+      select: "*",
+    });
 
-    if (resErr || !reservation) {
+    const reservation = reservations?.[0];
+    if (!reservation) {
       return new Response(JSON.stringify({ error: "Reservation not found", matched: false }), { status: 404, headers: corsHeaders });
     }
 
@@ -90,16 +137,29 @@ serve(async (req) => {
     }
 
     // Try to find price
-    let query = supabase.from("region_prices").select("*").eq("vehicle_type", reservation.vehicle_type).eq("is_active", true);
-    if (city) query = query.eq("city", city);
-    if (airport) query = query.eq("airport", airport);
-    if (district) query = query.eq("district", district);
+    const queryParams: Record<string, string> = {
+      vehicle_type: `eq.${reservation.vehicle_type}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    };
+    if (city) queryParams.city = `eq.${city}`;
+    if (airport) queryParams.airport = `eq.${airport}`;
+    if (district) queryParams.district = `eq.${district}`;
 
-    const { data: prices } = await query.limit(1);
+    let prices = await supabaseQuery("region_prices", queryParams);
     let bestPrice = prices?.[0] ?? null;
 
     if (!bestPrice && city && airport) {
-      const { data: p2 } = await supabase.from("region_prices").select("*").eq("vehicle_type", reservation.vehicle_type).eq("city", city).eq("airport", airport).eq("is_active", true).limit(1);
+      const fallbackParams: Record<string, string> = {
+        vehicle_type: `eq.${reservation.vehicle_type}`,
+        city: `eq.${city}`,
+        airport: `eq.${airport}`,
+        is_active: "eq.true",
+        select: "*",
+        limit: "1",
+      };
+      const p2 = await supabaseQuery("region_prices", fallbackParams);
       bestPrice = p2?.[0] ?? null;
     }
 
@@ -120,32 +180,24 @@ serve(async (req) => {
     }
 
     // Update reservation
-    await supabase.from("reservations").update({ price: finalPrice, price_currency: finalCurrency, status: "sent_to_driver" }).eq("id", reservation_id);
+    await supabaseQuery(
+      "reservations",
+      { id: `eq.${reservation_id}` },
+      "PATCH",
+      { price: finalPrice, price_currency: finalCurrency, status: "sent_to_driver" }
+    );
 
     // Admin email
-    try {
-      await resend.emails.send({
-        from: "Meet Transfer <noreply@mail.meettransfer.app>",
-        to: "sautkahraman@gmail.com",
-        subject: `🤖 Reservation Otomatik Fiyat: ${reservation.customer_name}`,
-        html: `<p>Price: ${finalPrice} ${finalCurrency}</p><p>Route: ${reservation.pickup} → ${reservation.dropoff}</p>`,
-      });
-    } catch {}
+    await sendEmail(
+      "sautkahraman@gmail.com",
+      `🤖 Reservation Otomatik Fiyat: ${reservation.customer_name}`,
+      `<p>Price: ${finalPrice} ${finalCurrency}</p><p>Route: ${reservation.pickup} → ${reservation.dropoff}</p>`
+    );
 
     return new Response(JSON.stringify({ matched: true, price: finalPrice, currency: finalCurrency, matchedCity: city, matchedAirport: airport }), { headers: corsHeaders });
-  } catch (e: any) {
-    console.error("auto-price-reservation error:", e);
-    return new Response(JSON.stringify({ error: e.message, matched: false }), { status: 500, headers: corsHeaders });
+  } catch (e: unknown) {
+    const error = e instanceof Error ? e.message : "Unknown error";
+    console.error("auto-price-reservation error:", error);
+    return new Response(JSON.stringify({ error, matched: false }), { status: 500, headers: corsHeaders });
   }
 });
-
-async function sendManualEmail(reservation: any, info: { airport: string | null; city: string | null; district: string | null; direction: string; confidence: string }) {
-  try {
-    await resend.emails.send({
-      from: "Meet Transfer <noreply@mail.meettransfer.app>",
-      to: "sautkahraman@gmail.com",
-      subject: `⚠️ Reservation Manuel Fiyat Gerekli: ${reservation.customer_name}`,
-      html: `<p>Pickup: ${reservation.pickup}</p><p>Dropoff: ${reservation.dropoff}</p><p>City: ${info.city}</p><p>Airport: ${info.airport}</p>`,
-    });
-  } catch {}
-}
