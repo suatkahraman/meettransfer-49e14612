@@ -92,25 +92,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           // Fetch user role and redirect accordingly
           try {
-            const { data: roleData } = await supabase
+            console.log('[AuthContext] Fetching role for user:', currentSession.user.id, currentSession.user.email);
+            const { data: roleData, error: roleError } = await supabase
               .from("user_roles")
               .select("role")
               .eq("user_id", currentSession.user.id)
               .maybeSingle();
 
+            console.log('[AuthContext] Role query result:', { roleData, roleError });
+
             const role = roleData?.role;
+            console.log('[AuthContext] Detected role:', role);
             
             if (role === "admin") {
+              console.log('[AuthContext] Redirecting to /admin');
               navigate("/admin", { replace: true });
             } else if (role === "agency") {
+              console.log('[AuthContext] Redirecting to /agency-dashboard');
               navigate("/agency-dashboard", { replace: true });
             } else if (role === "driver") {
+              console.log('[AuthContext] Redirecting to /driver-dashboard');
               navigate("/driver-dashboard", { replace: true });
             } else {
+              console.log('[AuthContext] Redirecting to /customer-dashboard (fallback)');
               navigate("/customer-dashboard", { replace: true });
             }
-          } catch {
+          } catch (err) {
             // Fallback to customer if role check fails
+            console.error('[AuthContext] Role check failed:', err);
             navigate("/customer", { replace: true });
           }
         }
