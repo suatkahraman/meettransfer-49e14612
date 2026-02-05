@@ -1,7 +1,72 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@2.0.0";
-import { validateQuickBookingReservationInput, createValidationErrorResponse } from "../_shared/validation.ts";
+
+// Inline validation to avoid bundling timeout from large shared module
+function validateInput(data: unknown): { success: boolean; error?: string; data?: Record<string, unknown> } {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' };
+  }
+  const obj = data as Record<string, unknown>;
+  
+  // Required string fields
+  const requiredStrings = ['bookingId', 'pickup', 'dropoff', 'pickupDate', 'pickupTime', 'vehicleType', 'priceCurrency', 'paymentMethod'];
+  for (const field of requiredStrings) {
+    if (!obj[field] || typeof obj[field] !== 'string' || (obj[field] as string).trim().length === 0) {
+      return { success: false, error: `${field} is required` };
+    }
+    if ((obj[field] as string).length > 500) {
+      return { success: false, error: `${field} exceeds maximum length` };
+    }
+  }
+  
+  // Required numbers
+  if (typeof obj.passengers !== 'number' || obj.passengers < 1 || obj.passengers > 50) {
+    return { success: false, error: 'passengers must be between 1 and 50' };
+  }
+  if (typeof obj.price !== 'number' || obj.price < 0 || obj.price > 100000) {
+    return { success: false, error: 'price must be between 0 and 100000' };
+  }
+  
+  // Optional string validations
+  const optionalStrings = ['customerName', 'customerPhone', 'customerEmail', 'customerNotes', 'flightNumber', 'returnDate', 'returnTime', 'promoCode', 'customerPassword'];
+  for (const field of optionalStrings) {
+    if (obj[field] !== undefined && obj[field] !== null) {
+      if (typeof obj[field] !== 'string') {
+        return { success: false, error: `${field} must be a string` };
+      }
+      if ((obj[field] as string).length > 500) {
+        return { success: false, error: `${field} exceeds maximum length` };
+      }
+    }
+  }
+  
+  // Optional numbers
+  if (obj.returnPrice !== undefined && obj.returnPrice !== null) {
+    if (typeof obj.returnPrice !== 'number' || obj.returnPrice < 0 || obj.returnPrice > 100000) {
+      return { success: false, error: 'returnPrice must be between 0 and 100000' };
+    }
+  }
+  if (obj.luggageCount !== undefined && obj.luggageCount !== null) {
+    if (typeof obj.luggageCount !== 'number' || obj.luggageCount < 0 || obj.luggageCount > 30) {
+      return { success: false, error: 'luggageCount must be between 0 and 30' };
+    }
+  }
+  if (obj.babySeatCount !== undefined && obj.babySeatCount !== null) {
+    if (typeof obj.babySeatCount !== 'number' || obj.babySeatCount < 0 || obj.babySeatCount > 10) {
+      return { success: false, error: 'babySeatCount must be between 0 and 10' };
+    }
+  }
+  
+  return { success: true, data: obj };
+}
+
+function createErrorResponse(error: string, headers: Record<string, string>) {
+  return new Response(JSON.stringify({ success: false, error }), {
+    status: 400,
+    headers: { ...headers, "Content-Type": "application/json" },
+  });
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,13 +86,41 @@ serve(async (req) => {
 
     // Parse and validate input
     const rawData = await req.json();
-    const validationResult = validateQuickBookingReservationInput(rawData);
+    const validationResult = validateInput(rawData);
     
     if (!validationResult.success) {
-      return createValidationErrorResponse(validationResult.error!, corsHeaders);
+      return createErrorResponse(validationResult.error!, corsHeaders);
     }
     
-    const requestData = validationResult.data!;
+    const requestData = validationResult.data! as {
+      bookingId: string;
+      pickup: string;
+      dropoff: string;
+      pickupDate: string;
+      pickupTime: string;
+      vehicleType: string;
+      passengers: number;
+      price: number;
+      priceCurrency: string;
+      paymentMethod: string;
+      hasReturnTrip?: boolean;
+      returnDate?: string;
+      returnTime?: string;
+      returnPrice?: number;
+      returnDiscountPercentage?: number;
+      returnDiscountAmount?: number;
+      promoCode?: string;
+      babySeatCount?: number;
+      luggageCount?: number;
+      customerNotes?: string;
+      flightNumber?: string;
+      passengerNames?: string[];
+      customerName?: string;
+      customerPhone?: string;
+      customerEmail?: string;
+      customerPassword?: string;
+      isGoogleUser?: boolean;
+    };
 
     console.log("Creating reservation for quick booking:", requestData.bookingId);
     console.log("Customer info provided:", {

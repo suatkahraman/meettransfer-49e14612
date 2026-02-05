@@ -1,6 +1,64 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { validateUpdateCustomerInput, createValidationErrorResponse } from "../_shared/validation.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+
+// Inline validation to avoid bundling timeout from large shared module
+function validateInput(data: unknown): { success: boolean; error?: string } {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' };
+  }
+  const obj = data as Record<string, unknown>;
+  
+  // Required: reservationId (UUID)
+  if (!obj.reservationId || typeof obj.reservationId !== 'string' || obj.reservationId.length > 36) {
+    return { success: false, error: 'reservationId is required' };
+  }
+  
+  // Required: customerName (max 100 chars)
+  if (!obj.customerName || typeof obj.customerName !== 'string' || obj.customerName.trim().length === 0) {
+    return { success: false, error: 'customerName is required' };
+  }
+  if (obj.customerName.length > 100) {
+    return { success: false, error: 'customerName exceeds maximum length of 100 characters' };
+  }
+  
+  // Required: customerPhone (max 30 chars)
+  if (!obj.customerPhone || typeof obj.customerPhone !== 'string') {
+    return { success: false, error: 'customerPhone is required' };
+  }
+  if (obj.customerPhone.length > 30) {
+    return { success: false, error: 'customerPhone exceeds maximum length' };
+  }
+  
+  // Optional: customerEmail (max 255 chars)
+  if (obj.customerEmail !== undefined && obj.customerEmail !== null) {
+    if (typeof obj.customerEmail !== 'string' || obj.customerEmail.length > 255) {
+      return { success: false, error: 'customerEmail format is invalid' };
+    }
+  }
+  
+  // Optional: customerPassword
+  if (obj.customerPassword !== undefined && obj.customerPassword !== null) {
+    if (typeof obj.customerPassword !== 'string' || obj.customerPassword.length < 6 || obj.customerPassword.length > 128) {
+      return { success: false, error: 'customerPassword must be 6-128 characters' };
+    }
+  }
+  
+  // Optional numbers: newPrice
+  if (obj.newPrice !== undefined && obj.newPrice !== null) {
+    if (typeof obj.newPrice !== 'number' || obj.newPrice < 0 || obj.newPrice > 100000) {
+      return { success: false, error: 'newPrice must be between 0 and 100000' };
+    }
+  }
+  
+  return { success: true };
+}
+
+function createErrorResponse(error: string, headers: Record<string, string>) {
+  return new Response(JSON.stringify({ success: false, error }), {
+    status: 400,
+    headers: { ...headers, "Content-Type": "application/json" },
+  });
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -162,13 +220,29 @@ serve(async (req) => {
 
     // Parse and validate input
     const rawData = await req.json();
-    const validationResult = validateUpdateCustomerInput(rawData);
+    const validationResult = validateInput(rawData);
     
     if (!validationResult.success) {
-      return createValidationErrorResponse(validationResult.error!, corsHeaders);
+      return createErrorResponse(validationResult.error!, corsHeaders);
     }
     
-    const requestData = validationResult.data!;
+    const requestData = rawData as {
+      reservationId: string;
+      customerName: string;
+      customerPhone: string;
+      customerEmail?: string;
+      customerPassword?: string;
+      customerId?: string;
+      isGoogleAuth?: boolean;
+      returnReservationCode?: string;
+      selectedVehicle?: string;
+      newPrice?: number;
+      customerNotes?: string;
+      flightNumber?: string;
+      passengerNames?: string[];
+      luggageCount?: number;
+      babySeatCount?: number;
+    };
     
     console.log("Updating reservation with customer info:", requestData.reservationId, "isGoogleAuth:", requestData.isGoogleAuth);
 

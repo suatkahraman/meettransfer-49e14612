@@ -1,6 +1,66 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { validateBookingAssistantInput, createValidationErrorResponse } from "../_shared/validation.ts";
+
+// Inline validation to avoid bundling timeout from large shared module
+function validateInput(data: unknown): { success: boolean; error?: string; data?: { message: string; language: string; conversationHistory: Array<{ role: string; content: string }>; visitorId?: string; stream: boolean; customerName?: string } } {
+  if (!data || typeof data !== 'object') {
+    return { success: false, error: 'Request body must be an object' };
+  }
+  const obj = data as Record<string, unknown>;
+  
+  // Validate message (required, max 4000 chars)
+  if (!obj.message || typeof obj.message !== 'string' || obj.message.trim().length === 0) {
+    return { success: false, error: 'message is required' };
+  }
+  if (obj.message.length > 4000) {
+    return { success: false, error: 'message exceeds maximum length of 4000 characters' };
+  }
+  
+  // Language (optional, default EN)
+  const language = typeof obj.language === 'string' ? obj.language.slice(0, 10) : 'EN';
+  
+  // Conversation history (optional array, max 100 items)
+  let conversationHistory: Array<{ role: string; content: string }> = [];
+  if (Array.isArray(obj.conversationHistory)) {
+    if (obj.conversationHistory.length > 100) {
+      return { success: false, error: 'conversationHistory exceeds maximum of 100 items' };
+    }
+    conversationHistory = obj.conversationHistory.filter((item): item is { role: string; content: string } => 
+      item && typeof item === 'object' && 
+      ['user', 'assistant', 'system'].includes(String((item as { role?: unknown }).role)) &&
+      typeof (item as { content?: unknown }).content === 'string' &&
+      ((item as { content: string }).content.length <= 4000)
+    ).map(item => ({ role: String(item.role), content: String(item.content).slice(0, 4000) }));
+  }
+  
+  // Visitor ID (optional)
+  const visitorId = typeof obj.visitorId === 'string' ? obj.visitorId.slice(0, 100) : undefined;
+  
+  // Stream (optional boolean)
+  const stream = obj.stream === true;
+  
+  // Customer name (optional)
+  const customerName = typeof obj.customerName === 'string' ? obj.customerName.slice(0, 100) : undefined;
+  
+  return {
+    success: true,
+    data: {
+      message: obj.message.trim(),
+      language,
+      conversationHistory,
+      visitorId,
+      stream,
+      customerName,
+    },
+  };
+}
+
+function createErrorResponse(error: string, headers: Record<string, string>) {
+  return new Response(JSON.stringify({ success: false, error }), {
+    status: 400,
+    headers: { ...headers, "Content-Type": "application/json" },
+  });
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,10 +75,10 @@ serve(async (req) => {
   try {
     // Parse and validate input
     const rawData = await req.json();
-    const validationResult = validateBookingAssistantInput(rawData);
+    const validationResult = validateInput(rawData);
     
     if (!validationResult.success) {
-      return createValidationErrorResponse(validationResult.error!, corsHeaders);
+      return createErrorResponse(validationResult.error!, corsHeaders);
     }
     
     const { message, language, conversationHistory, visitorId, stream, customerName } = validationResult.data!;
