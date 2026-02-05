@@ -103,9 +103,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (role === "admin") {
               navigate("/admin", { replace: true });
             } else if (role === "agency") {
-              navigate("/agency", { replace: true });
+              navigate("/agency-dashboard", { replace: true });
             } else if (role === "driver") {
-              navigate("/driver", { replace: true });
+              navigate("/driver-dashboard", { replace: true });
             } else {
               navigate("/customer", { replace: true });
             }

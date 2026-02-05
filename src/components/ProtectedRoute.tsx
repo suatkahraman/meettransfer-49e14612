@@ -37,9 +37,9 @@ const ProtectedRoute = ({
     // Redirect to appropriate home page based on role
     const roleRedirects: Record<AppRole, string> = {
       admin: '/admin',
-      driver: '/driver',
+      driver: '/driver-dashboard',
       customer: '/customer',
-      agency: '/agency'
+      agency: '/agency-dashboard'
     };
     
     const redirect = role ? roleRedirects[role] : redirectTo;
