@@ -35,6 +35,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, currentSession) => {
         if (!isMounted) return;
         
+        console.log('[AuthContext] onAuthStateChange event:', event);
+        
+        // Handle sign out - ensure clean state
+        if (event === 'SIGNED_OUT') {
+          console.log('[AuthContext] User signed out, clearing state');
+          setSession(null);
+          setUser(null);
+          return;
+        }
+        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         // INITIAL auth load controls loading; onAuthStateChange should not.
@@ -223,10 +233,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      console.log('[AuthContext] Signing out...');
+      // Clear state immediately before calling signOut
+      setUser(null);
+      setSession(null);
+      
+      // Use scope: 'global' to sign out from all tabs/windows
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      
+      if (error) {
+        console.error('[AuthContext] Sign out error:', error);
+        toast.error('Error signing out');
+        return;
+      }
+      
+      console.log('[AuthContext] Signed out successfully');
       toast.success('Signed out successfully');
-      navigate('/auth');
+      navigate('/auth', { replace: true });
     } catch (error) {
+      console.error('[AuthContext] Sign out exception:', error);
       toast.error('Error signing out');
     }
   };
