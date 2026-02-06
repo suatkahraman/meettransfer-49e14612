@@ -53,22 +53,6 @@ export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error
       if (error) return { error };
 
       if (data?.url) {
-        // Security: ensure we only redirect to allowed OAuth hosts
-        const oauthUrl = new URL(data.url);
-        const backendHost = getBackendHost();
-        
-        // Allow Supabase backend or Google accounts
-        const isValidHost = 
-          (backendHost && oauthUrl.hostname === backendHost) ||
-          oauthUrl.hostname === "accounts.google.com" ||
-          oauthUrl.hostname.endsWith(".google.com");
-
-        if (oauthUrl.protocol !== "https:" || !isValidHost) {
-          console.error("[OAuth] Invalid redirect URL:", data.url);
-          return { error: new Error("Invalid OAuth redirect URL") };
-        }
-
-        console.log("[OAuth] Redirecting to:", data.url);
         window.location.href = data.url;
       }
 
