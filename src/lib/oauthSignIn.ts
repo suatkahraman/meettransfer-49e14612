@@ -36,11 +36,12 @@ function getBackendHost(): string | null {
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
   try {
     const customDomain = isCustomDomain();
-    // Always use /oauth/callback as the redirect URL
-    const callbackUrl = `${window.location.origin}/oauth/callback`;
-
+    
+    // For custom domains, use native Supabase OAuth to bypass auth-bridge issues
     if (customDomain) {
-      // Custom domain: bypass auth-bridge by getting OAuth URL directly
+      // Use /oauth/callback which is our app's OAuth handler
+      const callbackUrl = `${window.location.origin}/oauth/callback`;
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -52,29 +53,34 @@ export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error
       if (error) return { error };
 
       if (data?.url) {
-        // Security: ensure we only redirect to our own backend auth endpoint
+        // Security: ensure we only redirect to allowed OAuth hosts
         const oauthUrl = new URL(data.url);
         const backendHost = getBackendHost();
+        
+        // Allow Supabase backend or Google accounts
+        const isValidHost = 
+          (backendHost && oauthUrl.hostname === backendHost) ||
+          oauthUrl.hostname === "accounts.google.com" ||
+          oauthUrl.hostname.endsWith(".google.com");
 
-        if (
-          oauthUrl.protocol !== "https:" ||
-          !backendHost ||
-          oauthUrl.hostname !== backendHost ||
-          !oauthUrl.pathname.startsWith("/auth/v1/authorize")
-        ) {
+        if (oauthUrl.protocol !== "https:" || !isValidHost) {
+          console.error("[OAuth] Invalid redirect URL:", data.url);
           return { error: new Error("Invalid OAuth redirect URL") };
         }
 
+        console.log("[OAuth] Redirecting to:", data.url);
         window.location.href = data.url;
       }
 
       return { error: null };
     }
 
-    // Lovable domains: use managed OAuth (do NOT pass redirect_uri; the SDK manages it)
+    // Lovable domains: use managed OAuth
+    // The SDK automatically handles the callback URL
     const { error } = await lovable.auth.signInWithOAuth(provider);
     return { error: error ? new Error(error.message) : null };
   } catch (e) {
+    console.error("[OAuth] Error:", e);
     return { error: e instanceof Error ? e : new Error(String(e)) };
   }
 }

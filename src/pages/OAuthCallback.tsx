@@ -76,15 +76,16 @@ export default function OAuthCallback() {
             if (role === "admin") {
               navigate("/admin", { replace: true });
             } else if (role === "agency") {
-              navigate("/agency", { replace: true });
+              navigate("/agency-dashboard", { replace: true });
             } else if (role === "driver") {
-              navigate("/driver", { replace: true });
+              navigate("/driver-dashboard", { replace: true });
             } else {
-              navigate("/customer", { replace: true });
+              // Customer or no role - redirect to customer dashboard
+              navigate("/customer-dashboard", { replace: true });
             }
           } catch {
-            // Fallback to customer if role check fails
-            navigate("/customer", { replace: true });
+            // Fallback to customer dashboard if role check fails
+            navigate("/customer-dashboard", { replace: true });
           }
           return;
         }
