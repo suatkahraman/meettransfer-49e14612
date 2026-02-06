@@ -3,10 +3,6 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { PendingBookingStorage } from '@/hooks/usePendingBookingStorage';
-import { consumePostOAuthRedirect } from '@/lib/postOAuthRedirect';
-import { safeLocalGet } from '@/lib/safeStorage';
-import { isSuppressAuthRedirect } from '@/lib/authRedirectGuard';
 import { startOAuthSignIn } from '@/lib/oauthSignIn';
 
 interface AuthContextType {
@@ -49,89 +45,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentSession?.user ?? null);
         // INITIAL auth load controls loading; onAuthStateChange should not.
 
-        // Handle successful sign in - redirect based on role
-        if (event === 'SIGNED_IN' && currentSession?.user) {
-          // Some flows (like our 2FA pre-check) intentionally sign in and immediately sign out.
-          if (isSuppressAuthRedirect()) return;
-
-          // Clean up URL hash immediately (non-blocking)
-          if (window.location.hash.includes('access_token=')) {
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
-          }
-
-          // Check current path first
-          const currentPath = window.location.pathname;
-          const isOAuthCallbackPath = currentPath.startsWith('/~oauth/callback') || currentPath.startsWith('/oauth/callback');
-          
-          // OAuth callback page handles its own redirect - don't interfere
-          if (isOAuthCallbackPath) return;
-
-          // Check for post-OAuth redirect first (fastest path - sync)
-          const postOAuthRedirect = consumePostOAuthRedirect();
-          if (postOAuthRedirect) {
-            navigate(postOAuthRedirect, { replace: true });
-            return;
-          }
-
-          // Check pending booking (sessionStorage - instant, no network)
-          const pendingBookingData = PendingBookingStorage.load();
-          const legacyToken = safeLocalGet('pending_booking_token');
-          const legacyData = safeLocalGet('pending_booking_data');
-          
-          if (pendingBookingData || legacyToken || legacyData) {
-            // Migrate legacy data if needed
-            if ((legacyToken || legacyData) && !pendingBookingData) {
-              try {
-                PendingBookingStorage.save(legacyData ? JSON.parse(legacyData) : {});
-                localStorage.removeItem('pending_booking_token');
-                localStorage.removeItem('pending_booking_data');
-              } catch { /* ignore */ }
-            }
-            navigate('/customer', { replace: true });
-            return;
-          }
-
-          const isAuthPage = ['/login', '/signup', '/auth'].some(p => currentPath.includes(p));
-          const isHomePage = currentPath === '/' || currentPath === '';
-          const hasOAuthParams = window.location.hash.includes('access_token=') || window.location.search.includes('code=');
-          
-          const needsRedirect = isAuthPage || (isHomePage && hasOAuthParams);
-          
-          // Only fetch role if we actually need to redirect from auth pages
-          if (!needsRedirect) return;
-
-          // Fetch user role and redirect accordingly
-          try {
-            console.log('[AuthContext] Fetching role for user:', currentSession.user.id, currentSession.user.email);
-            const { data: roleData, error: roleError } = await supabase
-              .from("user_roles")
-              .select("role")
-              .eq("user_id", currentSession.user.id)
-              .maybeSingle();
-
-            console.log('[AuthContext] Role query result:', { roleData, roleError });
-
-            const role = roleData?.role;
-            console.log('[AuthContext] Detected role:', role);
-            
-            if (role === "admin") {
-              console.log('[AuthContext] Redirecting to /admin');
-              navigate("/admin", { replace: true });
-            } else if (role === "agency") {
-              console.log('[AuthContext] Redirecting to /agency-dashboard');
-              navigate("/agency-dashboard", { replace: true });
-            } else if (role === "driver") {
-              console.log('[AuthContext] Redirecting to /driver-dashboard');
-              navigate("/driver-dashboard", { replace: true });
-            } else {
-              console.log('[AuthContext] Redirecting to /customer-dashboard (fallback)');
-              navigate("/customer-dashboard", { replace: true });
-            }
-          } catch (err) {
-            // Fallback to customer if role check fails
-            console.error('[AuthContext] Role check failed:', err);
-            navigate("/customer", { replace: true });
-          }
+        // Do not auto-redirect on sign-in here.
+        // Redirecting is handled by dedicated pages (OAuthCallback) and login screens.
+        if (event === 'SIGNED_IN') {
+          return;
         }
       }
     );

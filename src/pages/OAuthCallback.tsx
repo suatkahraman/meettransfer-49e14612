@@ -79,19 +79,19 @@ export default function OAuthCallback() {
 
         if (roleError) {
           console.error("[OAuthCallback] Role fetch error:", roleError);
-          return "/customer-dashboard";
+          return "/customer";
         }
 
         const role = roleData?.role;
         console.log("[OAuthCallback] User role:", role || "NO ROLE FOUND");
 
         if (role === "admin") return "/admin";
-        if (role === "agency") return "/agency-dashboard";
-        if (role === "driver") return "/driver-dashboard";
-        return "/customer-dashboard";
+        if (role === "agency") return "/agency";
+        if (role === "driver") return "/driver";
+        return "/customer";
       } catch (err) {
         console.error("[OAuthCallback] Role resolution exception:", err);
-        return "/customer-dashboard";
+        return "/customer";
       } finally {
         console.log("[OAuthCallback] ====== ROLE RESOLUTION END ======");
       }
@@ -103,7 +103,7 @@ export default function OAuthCallback() {
       // Ensure we never get an unhandled rejection from the role promise, even if it loses the race.
       const rolePromise = resolveRedirectTarget(userId).catch((err) => {
         console.error("[OAuthCallback] resolveRedirectTarget rejected:", err);
-        return "/customer-dashboard";
+        return "/customer";
       });
 
       let timedOut = false;
@@ -113,7 +113,7 @@ export default function OAuthCallback() {
 
       const target = await Promise.race<string>([
         rolePromise,
-        new Promise<string>((resolve) => setTimeout(() => resolve("/customer-dashboard"), 3000)),
+        new Promise<string>((resolve) => setTimeout(() => resolve("/customer"), 3000)),
       ]);
 
       clearTimeout(timer);
@@ -246,7 +246,7 @@ export default function OAuthCallback() {
           }
 
           console.error("[OAuthCallback] No user after setSession + getSession fallback");
-          safeNavigate("/customer-dashboard");
+          safeNavigate("/customer");
           return;
         }
 

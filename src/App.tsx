@@ -424,6 +424,11 @@ const App = () => {
               <Route path="/~oauth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
               <Route path="/oauth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
               <Route path="/oauth-start" element={<LazyRoute><OAuthStart /></LazyRoute>} />
+
+              {/* Legacy dashboard aliases (avoid 404 loops from old redirects) */}
+              <Route path="/customer-dashboard" element={<Navigate to="/customer" replace />} />
+              <Route path="/driver-dashboard" element={<Navigate to="/driver" replace />} />
+              <Route path="/agency-dashboard" element={<Navigate to="/agency" replace />} />
               
               {/* Customer Routes - Protected */}
               <Route path="/customer" element={<CustomerRoute><LazyRoute><CustomerHome /></LazyRoute></CustomerRoute>} />

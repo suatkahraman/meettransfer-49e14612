@@ -40,6 +40,13 @@ const OAuthCallbackHandler = ({ children }: OAuthCallbackHandlerProps) => {
   };
 
   useEffect(() => {
+    const pathname = window.location.pathname;
+    const isDedicatedCallbackPath = pathname.startsWith('/~oauth/callback') || pathname.startsWith('/oauth/callback');
+
+    // Dedicated OAuth callback page has full control over session + redirects.
+    // Avoid double-processing / race conditions here.
+    if (isDedicatedCallbackPath) return;
+
     const hash = window.location.hash;
     const search = window.location.search;
     const url = new URL(window.location.href);
