@@ -331,19 +331,31 @@ const DriverLoginScreen = () => {
       });
       
       if (error) {
-        console.error('Reset password email error:', {
+        console.error('Reset password email invoke error (generic success fallback):', {
           message: error.message,
           name: error.name,
           status: (error as any).status,
-          details: error
+          details: error,
         });
-        toast.error(error.message || t('resetFailed') || 'Failed to send reset email');
-      } else {
-        console.log('Reset email sent successfully:', data);
+
+        const msg = (error.message || '').toLowerCase();
+        const status = (error as any).status;
+
+        if (msg.includes('rate limit') || status === 429) {
+          toast.error(t('tooManyRequests') || t('resetFailed') || 'Too many requests. Please try again later.');
+          return;
+        }
+
         toast.success(t('resetEmailSent') || 'Password reset email sent! Check your inbox.');
         setViewMode('login');
         setResetEmail('');
+        return;
       }
+
+      console.log('Reset email sent successfully:', data);
+      toast.success(t('resetEmailSent') || 'Password reset email sent! Check your inbox.');
+      setViewMode('login');
+      setResetEmail('');
     } catch (error) {
       console.error('Reset error:', error);
       toast.error(t('resetFailed') || 'Failed to send reset email');

@@ -500,18 +500,30 @@ const LoginScreen = () => {
       });
 
       if (error) {
-        console.error('Password reset error:', {
+        console.error('Password reset invoke error (generic success fallback):', {
           message: error.message,
           name: error.name,
           status: (error as any).status,
-          details: error
+          details: error,
         });
-        toast.error(t('resetFailed'));
-      } else {
-        console.log('Reset email sent successfully:', data);
+
+        const msg = (error.message || '').toLowerCase();
+        const status = (error as any).status;
+
+        // Only surface rate limits; otherwise always show success (prevents enumeration + avoids false negatives)
+        if (msg.includes('rate limit') || status === 429) {
+          toast.error(t('tooManyRequests') || t('resetFailed'));
+          return;
+        }
+
         setResetEmail(validation.email);
         setViewMode('reset-sent');
+        return;
       }
+
+      console.log('Reset email sent successfully:', data);
+      setResetEmail(validation.email);
+      setViewMode('reset-sent');
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
