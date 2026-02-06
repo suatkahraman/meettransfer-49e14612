@@ -360,20 +360,28 @@ const Auth = () => {
     try {
       const validation = resetEmailSchema.parse({ email: email.trim() });
       
+      // Use /login?type=recovery - the standard recovery route
+      const redirectUrl = `${window.location.origin}/login?type=recovery`;
+      
       console.log('Sending reset email to:', validation.email);
-      console.log('Redirect URL:', `${window.location.origin}/auth?type=recovery`);
+      console.log('Redirect URL:', redirectUrl);
       
       // Use custom reset email sender to guarantee link presence across clients
-      const { error } = await supabase.functions.invoke('send-password-reset', {
+      const { error, data } = await supabase.functions.invoke('send-password-reset', {
         body: {
           email: validation.email,
-          redirect_url: `${window.location.origin}/auth?type=recovery`,
+          redirect_url: redirectUrl,
           language,
         },
       });
 
       if (error) {
-        console.error('Reset password email error:', error);
+        console.error('Reset password email error:', {
+          message: error.message,
+          name: error.name,
+          status: (error as any).status,
+          details: error
+        });
         // Don't reveal if email exists for security
         if (error.message.includes('rate limit')) {
           toast.error('Too many requests. Please try again later.');
