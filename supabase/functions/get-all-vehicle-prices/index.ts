@@ -4,6 +4,41 @@ const corsHeaders = {
   "Content-Type": "application/json",
 };
 
+// District mapping for known locations - must match auto-price functions
+const DISTRICT_MAPPING: Record<string, string> = {
+  "alanya": "Alanya", "belek": "Belek", "side": "Side", "kemer": "Kemer",
+  "lara": "Lara", "kundu": "Kundu", "beldibi": "Beldibi", "göynük": "Göynük",
+  "tekirova": "Tekirova", "manavgat": "Manavgat", "taksim": "Taksim",
+  "sultanahmet": "Sultanahmet", "kadikoy": "Kadıköy", "besiktas": "Beşiktaş",
+  "sisli": "Şişli", "levent": "Levent", "atasehir": "Ataşehir",
+  "bakirkoy": "Bakırköy", "bodrum": "Bodrum Merkez", "turgutreis": "Turgutreis",
+  "yalikavak": "Yalıkavak", "gumbet": "Gümbet", "bitez": "Bitez",
+  "fethiye": "Fethiye", "oludeniz": "Ölüdeniz", "marmaris": "Marmaris",
+  "dalyan": "Dalyan", "cesme": "Çeşme", "alacati": "Alaçatı", "kusadasi": "Kuşadası",
+  "ortakoy": "Ortakoy", "bebek": "Bebek", "fatih": "Fatih", "beyoglu": "Beyoglu",
+  "uskudar": "Uskudar", "maltepe": "Maltepe", "pendik": "Pendik",
+  "kartal": "Kartal", "avcilar": "Avcilar", "esenyurt": "Esenyurt",
+  "basaksehir": "Basaksehir", "beylikduzu": "Beylikduzu", "sariyer": "Sariyer",
+  "maslak": "Maslak", "mecidiyekoy": "Mecidiyekoy", "nisantasi": "Nisantasi",
+  "karakoy": "Karakoy", "balat": "Balat", "cihangir": "Cihangir",
+  "eminonu": "Eminonu", "galata": "Galata", "zeytinburnu": "Zeytinburnu",
+  "bagcilar": "Bagcilar", "bahcelievler": "Bahcelievler", "esenler": "Esenler",
+  "gaziosmanpasa": "Gaziosmanpasa", "gungoren": "Gungoren", "eyup": "Eyup",
+  "kucukcekmece": "Kucukcekmece", "arnavutkoy": "Arnavutkoy",
+  "buyukcekmece": "Buyukcekmece", "sultangazi": "Sultangazi",
+  "beykoz": "Beykoz", "cekmekoy": "Cekmekoy", "sancaktepe": "Sancaktepe",
+  "sultanbeyli": "Sultanbeyli", "sile": "Sile", "silivri": "Silivri",
+  "catalca": "Catalca", "tuzla": "Tuzla", "yenikoy": "Yenikoy",
+};
+
+function detectDistrict(text: string): string | null {
+  const lower = text.toLowerCase();
+  for (const [key, value] of Object.entries(DISTRICT_MAPPING)) {
+    if (lower.includes(key)) return value;
+  }
+  return null;
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -42,10 +77,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
       else if (/adnan menderes/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
     }
 
-    const district = pickup.split(",")[0]?.trim() || null;
+    // Detect district from pickup/dropoff text
+    const district = detectDistrict(pickup) || detectDistrict(dropoff);
 
-    // Frontend vehicle types - must match src/lib/vehicleTypes.ts and dubaiVehicleTypes.ts
-    // Each entry maps to possible DB vehicle_type values for price lookup
+    // Frontend vehicle types
     const turkeyVehicles = [
       { 
         value: "sedan", label: "Standart Sedan", passengers: 3, luggage: 2,
@@ -106,25 +141,78 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }), { headers: corsHeaders });
     }
 
-    // Fetch ALL active prices for this city/airport
-    const params = new URLSearchParams({ is_active: "eq.true" });
-    if (city) params.append("city", `eq.${city}`);
-    if (airport) params.append("airport", `eq.${airport}`);
+    // Helper to query region_prices with specific filters
+    async function queryPrices(filters: Record<string, string>): Promise<any[]> {
+      const params = new URLSearchParams({ 
+        is_active: "eq.true",
+        select: "vehicle_type,price,price_currency,district",
+        order: "updated_at.desc",
+        ...filters
+      });
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/region_prices?${params.toString()}&select=vehicle_type,price,price_currency`, {
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/region_prices?${params.toString()}`, {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+        }
+      });
+
+      const contentType = res.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        console.error("Expected JSON but got:", contentType);
+        return [];
       }
-    });
 
-    const regionPrices = await res.json();
+      return res.json();
+    }
+
+    // Hierarchical price matching: District+City+Airport → City+Airport → City → Airport
+    let regionPrices: any[] = [];
+
+    // Strategy 1: District + City + Airport (most specific)
+    if (district && city && airport) {
+      regionPrices = await queryPrices({
+        district: `eq.${district}`,
+        city: `eq.${city}`,
+        airport: `eq.${airport}`,
+      });
+    }
+
+    // Strategy 2: District + City (no airport filter)
+    if (regionPrices.length === 0 && district && city) {
+      regionPrices = await queryPrices({
+        district: `eq.${district}`,
+        city: `eq.${city}`,
+      });
+    }
+
+    // Strategy 3: City + Airport (no district)
+    if (regionPrices.length === 0 && city && airport) {
+      regionPrices = await queryPrices({
+        city: `eq.${city}`,
+        airport: `eq.${airport}`,
+      });
+    }
+
+    // Strategy 4: City only
+    if (regionPrices.length === 0 && city) {
+      regionPrices = await queryPrices({
+        city: `eq.${city}`,
+      });
+    }
+
+    // Strategy 5: Airport only
+    if (regionPrices.length === 0 && airport) {
+      regionPrices = await queryPrices({
+        airport: `eq.${airport}`,
+      });
+    }
 
     // Build prices - match DB prices to frontend vehicle types using aliases
+    // For each vehicle type, find the FIRST match (already ordered by updated_at desc)
     const prices: any[] = [];
     
     for (const vt of vehicleTypes) {
-      // Try all DB aliases for this frontend vehicle type
       let match = null;
       for (const alias of vt.dbAliases) {
         match = regionPrices.find((p: any) => p.vehicle_type === alias);
