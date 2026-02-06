@@ -6,6 +6,7 @@ const corsHeaders = {
 
 // District mapping for known locations - must match auto-price functions
 const DISTRICT_MAPPING: Record<string, string> = {
+  // Turkey
   "alanya": "Alanya", "belek": "Belek", "side": "Side", "kemer": "Kemer",
   "lara": "Lara", "kundu": "Kundu", "beldibi": "Beldibi", "göynük": "Göynük",
   "tekirova": "Tekirova", "manavgat": "Manavgat", "taksim": "Taksim",
@@ -29,6 +30,13 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "beykoz": "Beykoz", "cekmekoy": "Cekmekoy", "sancaktepe": "Sancaktepe",
   "sultanbeyli": "Sultanbeyli", "sile": "Sile", "silivri": "Silivri",
   "catalca": "Catalca", "tuzla": "Tuzla", "yenikoy": "Yenikoy",
+  // Dubai
+  "downtown": "Downtown", "dubai marina": "Dubai Marina", "marina": "Dubai Marina",
+  "palm jumeirah": "Palm Jumeirah", "palm": "Palm Jumeirah",
+  "deira": "Deira", "business bay": "Business Bay",
+  "jbr": "JBR", "jumeirah beach": "JBR",
+  "jumeirah": "Jumeirah", "bur dubai": "Bur Dubai",
+  "al barsha": "Al Barsha", "silicon oasis": "Dubai Silicon Oasis",
 };
 
 function detectDistrict(text: string): string | null {
