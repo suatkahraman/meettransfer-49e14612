@@ -192,60 +192,82 @@ export default function OAuthCallback() {
           console.log("[OAuthCallback] Access token length:", accessToken.length);
           console.log("[OAuthCallback] Refresh token present:", !!refreshToken);
 
-          const startTime = Date.now();
-          const { data, error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken || "",
-          });
-          const duration = Date.now() - startTime;
-
-          console.log("[OAuthCallback] setSession AFTER (", duration, "ms )");
-          console.log("[OAuthCallback] setSession response data:", {
-            hasSession: !!data?.session,
-            hasUser: !!data?.user,
-            userEmail: data?.user?.email || "N/A",
-            userId: data?.user?.id || "N/A",
-            sessionExpiresAt: data?.session?.expires_at || "N/A",
-          });
-
-          if (sessionError) {
-            console.error("[OAuthCallback] ====== SESSION ERROR ======");
-            console.error("[OAuthCallback] setSession error:", sessionError);
-            console.error("[OAuthCallback] Full error details:", {
-              message: sessionError.message,
-              status: sessionError.status,
-              name: sessionError.name,
-              stack: sessionError.stack,
-              code: (sessionError as any).code,
-              cause: (sessionError as any).cause,
+          try {
+            const startTime = Date.now();
+            const { data, error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken || "",
             });
-            setError(
-              `Oturum oluşturulamadı: ${sessionError.message} (Status: ${sessionError.status || "N/A"})`,
-            );
-            return;
+            const duration = Date.now() - startTime;
+
+            console.log("[OAuthCallback] setSession AFTER (", duration, "ms )");
+            console.log("[OAuthCallback] setSession response data:", {
+              hasSession: !!data?.session,
+              hasUser: !!data?.user,
+              userEmail: data?.user?.email || "N/A",
+              userId: data?.user?.id || "N/A",
+              sessionExpiresAt: data?.session?.expires_at || "N/A",
+            });
+
+            if (sessionError) {
+              console.error("[OAuthCallback] ====== SESSION ERROR ======");
+              console.error("[OAuthCallback] setSession error:", sessionError);
+              
+              // Check if this is a network error (Failed to fetch)
+              const isNetworkError = 
+                sessionError.message?.includes("Failed to fetch") ||
+                sessionError.message?.includes("NetworkError") ||
+                sessionError.message?.includes("fetch");
+              
+              if (isNetworkError) {
+                console.warn("[OAuthCallback] Network error detected, will retry getSession...");
+                // Wait a bit and try getSession as fallback
+                await new Promise((r) => setTimeout(r, 1000));
+              } else {
+                setError(
+                  `Oturum oluşturulamadı: ${sessionError.message} (Status: ${sessionError.status || "N/A"})`,
+                );
+                return;
+              }
+            }
+
+            console.log("[OAuthCallback] ====== SESSION SUCCESS ======");
+
+            const userId = data?.user?.id;
+            if (userId) {
+              console.log("[OAuthCallback] Role check START (userId from setSession):", userId);
+              await navigateAfterLogin(userId);
+              return;
+            }
+          } catch (fetchError: any) {
+            console.error("[OAuthCallback] setSession fetch error:", fetchError);
+            console.error("[OAuthCallback] Error type:", fetchError?.name);
+            console.error("[OAuthCallback] Error message:", fetchError?.message);
+            // Continue to getSession fallback
           }
 
-          console.log("[OAuthCallback] ====== SESSION SUCCESS ======");
+          // Fallback: Try getSession if setSession failed or returned no user
+          console.warn("[OAuthCallback] Trying getSession fallback...");
+          
+          // Give the auth system a moment to process
+          await new Promise((r) => setTimeout(r, 500));
+          
+          try {
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
 
-          const userId = data?.user?.id;
-          if (userId) {
-            console.log("[OAuthCallback] Role check START (userId from setSession):", userId);
-            await navigateAfterLogin(userId);
-            return;
+            if (session?.user?.id) {
+              console.log("[OAuthCallback] getSession fallback SUCCESS:", session.user.email);
+              await navigateAfterLogin(session.user.id);
+              return;
+            }
+          } catch (getSessionError) {
+            console.error("[OAuthCallback] getSession fallback error:", getSessionError);
           }
 
-          console.warn("[OAuthCallback] User is null after setSession; trying getSession fallback...");
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-
-          if (session?.user?.id) {
-            console.log("[OAuthCallback] Role check START (userId from getSession):", session.user.id);
-            await navigateAfterLogin(session.user.id);
-            return;
-          }
-
-          console.error("[OAuthCallback] No user after setSession + getSession fallback");
+          // Last resort: Navigate to customer anyway if we got tokens
+          console.warn("[OAuthCallback] All session methods failed, redirecting to /customer as fallback");
           safeNavigate("/customer");
           return;
         }
