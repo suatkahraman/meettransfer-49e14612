@@ -266,9 +266,14 @@ export default function OAuthCallback() {
             console.error("[OAuthCallback] getSession fallback error:", getSessionError);
           }
 
-          // Last resort: Navigate to customer anyway if we got tokens
-          console.warn("[OAuthCallback] All session methods failed, redirecting to /customer as fallback");
-          safeNavigate("/customer");
+          // Last resort: DO NOT navigate to a protected page without a confirmed session.
+          // This causes an infinite bounce (/customer -> ProtectedRoute -> /auth) when the real issue is CORS/network.
+          console.error(
+            "[OAuthCallback] All session methods failed (likely CORS/network). Staying on callback and showing error instead of redirecting.",
+          );
+          setError(
+            "Giriş tamamlanamadı. Tarayıcı backend'e bağlanamıyor (CORS / ağ engeli). Lütfen Lovable Cloud > Authentication Settings > URL Configuration kısmında Site URL ve Redirect URL'leri kontrol edin ve /debug sayfasından 'Backend / Auth Bağlantı Testi'ni çalıştırın.",
+          );
           return;
         }
 
