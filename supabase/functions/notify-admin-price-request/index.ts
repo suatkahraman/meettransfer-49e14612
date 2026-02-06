@@ -6,6 +6,70 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// District mapping for auto-pricing
+const DISTRICT_MAPPING: Record<string, string> = {
+  "alanya": "Alanya",
+  "belek": "Belek",
+  "side": "Side",
+  "kemer": "Kemer",
+  "lara": "Lara",
+  "kundu": "Kundu",
+  "manavgat": "Manavgat",
+  "taksim": "Taksim",
+  "sultanahmet": "Sultanahmet",
+  "kadikoy": "Kadıköy",
+  "besiktas": "Beşiktaş",
+  "bodrum": "Bodrum Merkez",
+  "fethiye": "Fethiye",
+  "marmaris": "Marmaris",
+  "cesme": "Çeşme",
+  "kusadasi": "Kuşadası",
+};
+
+function detectDistrict(text: string): string | null {
+  const lower = text.toLowerCase();
+  for (const [key, value] of Object.entries(DISTRICT_MAPPING)) {
+    if (lower.includes(key)) return value;
+  }
+  return null;
+}
+
+function analyzeLocation(pickup: string, dropoff: string): { airport: string | null; city: string | null; district: string | null } {
+  const s = (pickup + " " + dropoff).toLowerCase();
+
+  let airport: string | null = null;
+  if (/istanbul airport|\bist\b/i.test(s)) airport = "Istanbul Airport (IST)";
+  else if (/sabiha|gokcen|\bsaw\b/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
+  else if (/antalya.*airport|antalya.*havalimanı|\bayt\b/i.test(s)) airport = "Antalya Airport (AYT)";
+  else if (/bodrum|milas|\bbjv\b/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
+  else if (/dalaman|\bdlm\b/i.test(s)) airport = "Dalaman Airport (DLM)";
+  else if (/adnan menderes|\badb\b/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
+
+  let city: string | null = null;
+  if (/istanbul|\bist\b|\bsaw\b/i.test(s)) city = "Istanbul";
+  else if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat/i.test(s)) city = "Antalya";
+  else if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) city = "Bodrum";
+  else if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) city = "Dalaman";
+  else if (/izmir|\badb\b|cesme|alacati|kusadasi/i.test(s)) city = "Izmir";
+
+  const district = detectDistrict(pickup) || detectDistrict(dropoff);
+
+  return { airport, city, district };
+}
+
+async function convertCurrency(amount: number, from: string, to: string): Promise<{ amount: number; rate: number }> {
+  if (from === to) return { amount, rate: 1 };
+  try {
+    const r = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=${to}`);
+    if (r.ok) {
+      const d = await r.json();
+      const rate = d.rates?.[to];
+      if (rate) return { amount: Math.ceil(amount * rate), rate };
+    }
+  } catch {}
+  return { amount, rate: 1 };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -20,40 +84,184 @@ serve(async (req) => {
       customerName,
       customerSessionId,
       language = 'EN',
-      // Additional optional fields for more complete booking
       pickupDate,
       pickupTime,
       customerPhone,
       customerEmail,
       babySeatCount,
       luggageCount,
-      serviceType = 'airport_transfer'
+      serviceType = 'airport_transfer',
+      hasReturnTrip,
+      returnDate,
+      returnTime,
+      priceCurrency = 'EUR'
     } = await req.json();
 
     console.log("Price request notification for route:", pickup, "->", dropoff);
     console.log("Additional data:", { pickupDate, pickupTime, customerPhone, customerEmail, passengers, vehicleType });
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-    if (!RESEND_API_KEY) {
-      console.error("RESEND_API_KEY not configured");
-      throw new Error("Email service not configured");
-    }
-
-    // Initialize Supabase client
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // ============================================
-    // SECURITY: Do NOT store booking requests in database before authentication
-    // Admin notifications are still sent, but no customer data is persisted
-    // Customer data will only be stored after login via create-quick-booking-reservation
+    // AUTO-PRICING: Try to find price before notifying admin
     // ============================================
+    let autoPrice: number | null = null;
+    let autoPriceCurrency: string | null = null;
+    let returnPrice: number | null = null;
+    let autoPriced = false;
+
+    const { airport, city, district } = analyzeLocation(pickup, dropoff);
+    console.log("Location analysis:", { airport, city, district });
+
+    if (city || airport) {
+      const selectedVehicle = vehicleType || 'mercedes-vito';
+      
+      // Try to find price with different strategies
+      const strategies = [
+        // Strategy 1: District + City + Airport
+        district && city && airport ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${city}`, airport: `eq.${airport}`, district: `eq.${district}`, is_active: "eq.true" } : null,
+        // Strategy 2: City + Airport
+        city && airport ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${city}`, airport: `eq.${airport}`, is_active: "eq.true" } : null,
+        // Strategy 3: City only
+        city ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${city}`, is_active: "eq.true" } : null,
+        // Strategy 4: Airport only
+        airport ? { vehicle_type: `eq.${selectedVehicle}`, airport: `eq.${airport}`, is_active: "eq.true" } : null,
+      ].filter(Boolean);
+
+      for (const strategy of strategies) {
+        if (!strategy) continue;
+        
+        let query = supabase.from('region_prices').select('*').eq('is_active', true);
+        
+        if (strategy.vehicle_type) query = query.eq('vehicle_type', selectedVehicle);
+        if (strategy.city) query = query.eq('city', city);
+        if (strategy.airport) query = query.eq('airport', airport);
+        if (strategy.district) query = query.eq('district', district);
+        
+        const { data: prices } = await query.limit(1);
+        
+        if (prices && prices[0]) {
+          const foundPrice = prices[0];
+          const baseCurrency = foundPrice.price_currency || "EUR";
+          
+          // Convert if needed
+          if (priceCurrency !== baseCurrency) {
+            const converted = await convertCurrency(foundPrice.price, baseCurrency, priceCurrency);
+            autoPrice = converted.amount;
+            autoPriceCurrency = priceCurrency;
+          } else {
+            autoPrice = foundPrice.price;
+            autoPriceCurrency = baseCurrency;
+          }
+          
+          // Calculate return price with discount
+          if (hasReturnTrip) {
+            returnPrice = Math.ceil(autoPrice * 0.75);
+          }
+          
+          autoPriced = true;
+          console.log("✅ Auto-price found:", autoPrice, autoPriceCurrency, "from strategy");
+          break;
+        }
+      }
+    }
+
+    // If auto-price found AND we have customerSessionId, create/update quick_booking_requests
     let quickBookingId: string | null = null;
     
-    // Log the request for admin notification purposes only (no PII stored)
-    console.log("Price request notification - route:", pickup, "->", dropoff);
-    console.log("Customer contact info provided:", { hasPhone: !!customerPhone, hasEmail: !!customerEmail });
+    if (autoPriced && customerSessionId) {
+      // Check if quick booking already exists for this session
+      const { data: existingBooking } = await supabase
+        .from('quick_booking_requests')
+        .select('id')
+        .eq('customer_session_id', customerSessionId)
+        .eq('pickup', pickup)
+        .eq('dropoff', dropoff)
+        .maybeSingle();
+      
+      if (existingBooking) {
+        // Update existing
+        await supabase
+          .from('quick_booking_requests')
+          .update({
+            price: autoPrice,
+            price_currency: autoPriceCurrency,
+            return_price: returnPrice,
+            status: 'price_sent',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existingBooking.id);
+        
+        quickBookingId = existingBooking.id;
+        console.log("✅ Updated existing quick booking with auto-price:", quickBookingId);
+      } else {
+        // Create new quick booking with price
+        const { data: newBooking, error: insertError } = await supabase
+          .from('quick_booking_requests')
+          .insert({
+            customer_session_id: customerSessionId,
+            pickup,
+            dropoff,
+            pickup_date: pickupDate || new Date().toISOString().split('T')[0],
+            pickup_time: pickupTime || '10:00',
+            passengers: passengers || 1,
+            vehicle_type: vehicleType || 'mercedes-vito',
+            price: autoPrice,
+            price_currency: autoPriceCurrency,
+            return_price: returnPrice,
+            has_return_trip: hasReturnTrip || false,
+            return_date: returnDate || null,
+            return_time: returnTime || null,
+            status: 'price_sent',
+            service_type: serviceType,
+            customer_name: customerName || null,
+            customer_phone: customerPhone || null,
+            customer_email: customerEmail || null,
+            baby_seat_count: babySeatCount || 0,
+            luggage_count: luggageCount || null,
+            language: language || 'EN',
+          })
+          .select()
+          .single();
+        
+        if (!insertError && newBooking) {
+          quickBookingId = newBooking.id;
+          console.log("✅ Created quick booking with auto-price:", quickBookingId);
+        } else {
+          console.error("Failed to create quick booking:", insertError);
+        }
+      }
+      
+      // If auto-priced successfully, return early - no need to notify admin
+      if (quickBookingId) {
+        console.log("✅ Auto-pricing complete, skipping admin notification");
+        return new Response(JSON.stringify({ 
+          success: true, 
+          autoPriced: true,
+          price: autoPrice,
+          priceCurrency: autoPriceCurrency,
+          returnPrice,
+          quickBookingId,
+          message: "Auto-priced successfully"
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // ============================================
+    // If NO auto-price found, notify admin as before
+    // ============================================
+    console.log("⚠️ No auto-price found, notifying admin...");
+
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY not configured");
+      throw new Error("Email service not configured");
+    }
 
     // Get admin emails
     const { data: adminRoles } = await supabase
@@ -99,8 +307,7 @@ serve(async (req) => {
       ? `🚨 Acil Fiyat Talebi - ${pickup} → ${dropoff}`
       : `🚨 Urgent Price Request - ${pickup} → ${dropoff}`;
 
-    // Link directly to Quick Bookings page (not reservations)
-    const adminPanelUrl = 'https://meettransfer.lovable.app/admin/quick-bookings';
+    const adminPanelUrl = 'https://meettransfer.app/admin/quick-bookings';
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -121,7 +328,6 @@ serve(async (req) => {
           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
           .cta-button { display: inline-block; background: #2563eb; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 20px; }
           .footer { background: #f8fafc; padding: 20px; text-align: center; color: #64748b; font-size: 12px; }
-          .booking-id { background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-family: monospace; }
         </style>
       </head>
       <body>
@@ -135,7 +341,6 @@ serve(async (req) => {
               ${isTurkish 
                 ? 'Müşteri için bu güzergahta fiyat bulunamadı. Lütfen hemen fiyat girin.' 
                 : 'No price found for this route. Please enter a price immediately.'}
-              
             </div>
             
             <div class="route-box">
@@ -228,7 +433,7 @@ serve(async (req) => {
     const emailResult = await emailResponse.json();
     console.log("Email sent:", emailResult);
 
-    // Also create a notification in the database
+    // Create notification in database
     for (const admin of adminRoles) {
       await supabase.from('notifications').insert({
         user_id: admin.user_id,
@@ -242,7 +447,7 @@ serve(async (req) => {
 
     // Send push notification to admins
     try {
-      const { error: pushError } = await supabase.functions.invoke('send-push-notification', {
+      await supabase.functions.invoke('send-push-notification', {
         body: {
           userIds: adminRoles.map(a => a.user_id),
           title: isTurkish ? '🚨 Acil Fiyat Talebi' : '🚨 Urgent Price Request',
@@ -251,21 +456,18 @@ serve(async (req) => {
           tag: 'price-request',
         }
       });
-      
-      if (pushError) {
-        console.error("Push notification error:", pushError);
-      } else {
-        console.log("Push notifications sent to admins");
-      }
+      console.log("Push notifications sent to admins");
     } catch (pushErr) {
       console.error("Failed to send push notifications:", pushErr);
     }
 
     return new Response(JSON.stringify({ 
       success: true, 
+      autoPriced: false,
       emailsSent: adminEmails.length,
       notificationsCreated: adminRoles.length,
-      quickBookingId: quickBookingId
+      quickBookingId: null,
+      message: "Admin notified - manual pricing required"
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
