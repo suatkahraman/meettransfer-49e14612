@@ -27,14 +27,27 @@ export default function OAuthCallback() {
         return;
       }
 
-      // NOTE: We intentionally do NOT clear the URL hash here.
-      // Supabase JS client reads tokens from the hash asynchronously.
-      // Clearing the hash prematurely causes "no session" on iOS PWA.
-      // The URL is cleaned after session is established (below).
+      // Check if we have hash parameters (implicit flow: #access_token=...)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
 
-      // Safety net: if callback arrives with PKCE code but handler hasn't processed for some reason,
-      // exchange here and then wait until a session exists.
-      if (code) {
+      // If we have tokens in hash, set the session manually
+      if (accessToken) {
+        console.log("[OAuthCallback] Found access_token in hash, setting session...");
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || "",
+        });
+        if (sessionError) {
+          console.error("[OAuthCallback] setSession error:", sessionError);
+          setError(sessionError.message || "Oturum oluşturulamadı");
+          return;
+        }
+      }
+      // If we have PKCE code, exchange it for a session
+      else if (code) {
+        console.log("[OAuthCallback] Found code, exchanging for session...");
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
           console.error("[OAuthCallback] code exchange error:", exchangeError);
