@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { loadGoogleMapsScript, isGoogleMapsLoaded, getGoogleMaps } from "@/utils/googleMapsLoader";
 import { PWAHealthPanel } from "@/components/debug/PWAHealthPanel";
+import { AuthConnectivityPanel } from "@/components/debug/AuthConnectivityPanel";
 
 interface LogEntry {
   timestamp: string;
@@ -335,6 +336,9 @@ export default function DebugPage() {
             Tam Raporu Kopyala
           </Button>
         </div>
+
+        {/* Backend/Auth Connectivity */}
+        <AuthConnectivityPanel />
 
         {/* Google Maps Status */}
         <Card>
