@@ -485,19 +485,30 @@ const LoginScreen = () => {
     try {
       const validation = resetEmailSchema.parse({ email: email.trim() });
       
+      const redirectUrl = `${window.location.origin}/login?type=recovery`;
+      
+      console.log('Sending reset email to:', validation.email);
+      console.log('Redirect URL:', redirectUrl);
+      
       // Use custom edge function that sends proper reset email with link
-      const { error } = await supabase.functions.invoke('send-password-reset', {
+      const { error, data } = await supabase.functions.invoke('send-password-reset', {
         body: {
           email: validation.email,
-          redirect_url: `${window.location.origin}/login?type=recovery`,
+          redirect_url: redirectUrl,
           language: language,
         },
       });
 
       if (error) {
-        console.error('Password reset error:', error);
+        console.error('Password reset error:', {
+          message: error.message,
+          name: error.name,
+          status: (error as any).status,
+          details: error
+        });
         toast.error(t('resetFailed'));
       } else {
+        console.log('Reset email sent successfully:', data);
         setResetEmail(validation.email);
         setViewMode('reset-sent');
       }

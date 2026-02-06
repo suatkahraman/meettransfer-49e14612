@@ -322,7 +322,7 @@ const DriverLoginScreen = () => {
     setIsResetLoading(true);
     
     try {
-      const { error } = await supabase.functions.invoke('send-password-reset', {
+      const { error, data } = await supabase.functions.invoke('send-password-reset', {
         body: {
           email: resetEmail.trim(),
           redirect_url: `${window.location.origin}/login?type=recovery`,
@@ -331,8 +331,15 @@ const DriverLoginScreen = () => {
       });
       
       if (error) {
+        console.error('Reset password email error:', {
+          message: error.message,
+          name: error.name,
+          status: (error as any).status,
+          details: error
+        });
         toast.error(error.message || t('resetFailed') || 'Failed to send reset email');
       } else {
+        console.log('Reset email sent successfully:', data);
         toast.success(t('resetEmailSent') || 'Password reset email sent! Check your inbox.');
         setViewMode('login');
         setResetEmail('');

@@ -359,18 +359,32 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
     setIsSendingResetEmail(true);
     
     try {
-      const redirectUrl = `${window.location.origin}/auth?type=recovery`;
+      // Use /login?type=recovery - the standard recovery route
+      const redirectUrl = `${window.location.origin}/login?type=recovery`;
       
       console.log('Sending password reset email to:', user.email);
+      console.log('Redirect URL:', redirectUrl);
 
-      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo: redirectUrl,
+      // Use custom edge function for reliable email delivery
+      const { error, data } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: user.email,
+          redirect_url: redirectUrl,
+          language: 'tr', // Default to Turkish for logged-in users
+        },
       });
 
       if (error) {
-        console.error('Reset email API error:', error);
+        console.error('Reset email API error:', {
+          message: error.message,
+          name: error.name,
+          status: (error as any).status,
+          details: error
+        });
         throw error;
       }
+      
+      console.log('Reset email sent successfully:', data);
 
       recordAttempt();
 
