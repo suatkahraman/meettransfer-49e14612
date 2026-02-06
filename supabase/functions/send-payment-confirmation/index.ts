@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 function generatePaymentSuccessEmail(data: any, lang: string = 'en'): string {
   const title = lang === 'tr' ? 'Ödeme Başarılı!' : 'Payment Successful!';
   const thanks = lang === 'tr' ? 'Ödemeniz başarıyla alındı.' : 'Your payment has been received.';
-  const currencySymbol = { EUR: '€', USD: '$', GBP: '£', TRY: '₺' }[data.currency] || data.currency;
+  const currencySymbol = ({ EUR: '€', USD: '$', GBP: '£', TRY: '₺' } as Record<string, string>)[data.currency] || data.currency;
   
   return `
 <!DOCTYPE html>
