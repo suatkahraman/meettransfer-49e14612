@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
 export type OAuthProvider = "google" | "apple";
@@ -19,8 +20,12 @@ function isCustomDomain(): boolean {
  * Starts OAuth sign-in.
  *
  * IMPORTANT:
- * - Use Lovable Cloud managed OAuth for both Lovable preview domains and custom domains.
- * - On custom domains we explicitly set redirect_uri back to /oauth/callback.
+ * - Custom domains use native Supabase OAuth with skipBrowserRedirect
+ *   because the ~oauth/initiate bridge returns 404 on custom domains.
+ * - Lovable preview domains use managed OAuth (auth-bridge works there).
+ *
+ * For custom domain OAuth to work, Google/Apple OAuth credentials MUST be
+ * configured in Lovable Cloud → Authentication Settings → Sign In Methods.
  */
 export async function startOAuthSignIn(
   provider: OAuthProvider
@@ -28,13 +33,30 @@ export async function startOAuthSignIn(
   try {
     const customDomain = isCustomDomain();
 
-    const result = await lovable.auth.signInWithOAuth(
-      provider,
-      customDomain
-        ? { redirect_uri: `${window.location.origin}/oauth/callback` }
-        : undefined
-    );
+    if (customDomain) {
+      // Custom domains: use native Supabase OAuth, bypass auth-bridge
+      const callbackUrl = `${window.location.origin}/oauth/callback`;
 
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: callbackUrl,
+          skipBrowserRedirect: true,
+        },
+      });
+
+      if (error) return { error };
+
+      // Manually redirect to provider's OAuth page
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+
+      return { error: null };
+    }
+
+    // Lovable preview domains: use managed OAuth (auth-bridge handles ~oauth)
+    const result = await lovable.auth.signInWithOAuth(provider);
     return { error: result?.error ? new Error(result.error.message) : null };
   } catch (e) {
     console.error("[OAuth] Error:", e);
