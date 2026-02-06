@@ -375,13 +375,23 @@ const PasswordChangeCard = ({ isTurkish }: PasswordChangeCardProps) => {
       });
 
       if (error) {
-        console.error('Reset email API error:', {
+        console.error('Reset email API error (generic success fallback):', {
           message: error.message,
           name: error.name,
           status: (error as any).status,
-          details: error
+          details: error,
         });
-        throw error;
+
+        const msg = (error.message || '').toLowerCase();
+        const status = (error as any).status;
+
+        // Only surface rate limits; otherwise proceed with generic success UX
+        if (msg.includes('rate limit') || status === 429) {
+          toast.error(t.tooManyAttempts);
+          return;
+        }
+
+        console.log('Reset email invoke returned error; continuing with generic success UX');
       }
       
       console.log('Reset email sent successfully:', data);
