@@ -160,7 +160,7 @@ serve(async (req) => {
           
           // Calculate return price with discount
           if (hasReturnTrip) {
-            returnPrice = Math.ceil(autoPrice * 0.75);
+            returnPrice = Math.ceil(autoPrice! * 0.75);
           }
           
           autoPriced = true;
