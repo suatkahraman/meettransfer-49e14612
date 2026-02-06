@@ -15,53 +15,97 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const { pickup, dropoff, customerCurrency } = await req.json();
     const s = (pickup + " " + dropoff).toLowerCase();
 
-    // Detect region & city/airport
-    const isDubai = /dubai|uae|dxb/i.test(s);
+    // Detect region
+    const isDubai = /dubai|uae|dxb|dwc|al maktoum/i.test(s);
+    const region = isDubai ? "dubai" : "turkey";
     
     let city: string | null = null;
     let airport: string | null = null;
     
-    if (/istanbul|\bist\b|\bsaw\b/i.test(s)) city = "Istanbul";
-    else if (/antalya|\bayt\b|alanya|belek|side/i.test(s)) city = "Antalya";
-    else if (/bodrum|\bbjv\b/i.test(s)) city = "Bodrum";
-    else if (/dalaman|\bdlm\b|fethiye|marmaris/i.test(s)) city = "Dalaman";
-    else if (/izmir|\badb\b|cesme/i.test(s)) city = "Izmir";
+    if (isDubai) {
+      city = "Dubai";
+      if (/dxb|dubai.*airport|dubai.*international/i.test(s)) airport = "Dubai International Airport (DXB)";
+      else if (/dwc|al maktoum/i.test(s)) airport = "Al Maktoum International Airport (DWC)";
+    } else {
+      if (/istanbul|\bist\b|\bsaw\b/i.test(s)) city = "Istanbul";
+      else if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat/i.test(s)) city = "Antalya";
+      else if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) city = "Bodrum";
+      else if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) city = "Dalaman";
+      else if (/izmir|\badb\b|cesme|alacati/i.test(s)) city = "Izmir";
 
-    if (/istanbul airport/i.test(s)) airport = "Istanbul Airport (IST)";
-    else if (/sabiha|gokcen/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
-    else if (/antalya.*airport/i.test(s)) airport = "Antalya Airport (AYT)";
-    else if (/bodrum|milas/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
-    else if (/dalaman/i.test(s)) airport = "Dalaman Airport (DLM)";
-    else if (/adnan menderes/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
+      if (/istanbul airport/i.test(s)) airport = "Istanbul Airport (IST)";
+      else if (/sabiha|gokcen/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
+      else if (/antalya.*airport|antalya.*havalimanı/i.test(s)) airport = "Antalya Airport (AYT)";
+      else if (/bodrum|milas/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
+      else if (/dalaman/i.test(s)) airport = "Dalaman Airport (DLM)";
+      else if (/adnan menderes/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
+    }
 
     const district = pickup.split(",")[0]?.trim() || null;
 
-    // Vehicle types - matching DB values
-    const vehicleTypes = isDubai ? [
-      { value: "dubai-private-sedan", label: "Dubai Private Sedan", passengers: 3, luggage: 3 },
-      { value: "dubai-suburban-suv", label: "Dubai Suburban SUV", passengers: 5, luggage: 5 },
-      { value: "dubai-v-class", label: "Dubai V-Class", passengers: 6, luggage: 6 },
-      { value: "dubai-premium-van", label: "Dubai Premium Van", passengers: 7, luggage: 7 },
-      { value: "dubai-vip-sprinter", label: "Dubai VIP Sprinter", passengers: 12, luggage: 12 },
-    ] : [
-      { value: "standard_sedan", label: "Standard Sedan", passengers: 3, luggage: 3 },
-      { value: "sedan", label: "Sedan", passengers: 3, luggage: 3 },
-      { value: "mercedes-vito", label: "Mercedes Vito or Similar", passengers: 7, luggage: 7 },
-      { value: "vip-vito", label: "VIP Mercedes Vito", passengers: 7, luggage: 7 },
-      { value: "mercedes-vip-vito", label: "VIP Mercedes Vito", passengers: 7, luggage: 7 },
-      { value: "maybach-minivan", label: "Mercedes Maybach Minivan", passengers: 7, luggage: 7 },
-      { value: "mercedes-sprinter", label: "Mercedes Sprinter or Similar", passengers: 12, luggage: 12 },
-      { value: "minibus", label: "Minibus", passengers: 14, luggage: 14 },
+    // Frontend vehicle types - must match src/lib/vehicleTypes.ts and dubaiVehicleTypes.ts
+    // Each entry maps to possible DB vehicle_type values for price lookup
+    const turkeyVehicles = [
+      { 
+        value: "sedan", label: "Standart Sedan", passengers: 3, luggage: 2,
+        dbAliases: ["sedan", "standard_sedan", "standard-sedan"]
+      },
+      { 
+        value: "mercedes-vito", label: "Mercedes Vito or Similar", passengers: 6, luggage: 6,
+        dbAliases: ["mercedes-vito", "Mercedes Vito or Similar"]
+      },
+      { 
+        value: "vip-mercedes", label: "VIP Mercedes Vito", passengers: 5, luggage: 5,
+        dbAliases: ["vip-mercedes", "vip-vito", "mercedes-vip-vito", "Vip Mercedes Vito", "vip_minivan"]
+      },
+      { 
+        value: "maybach-minibus", label: "Mercedes Maybach Minivan", passengers: 4, luggage: 4,
+        dbAliases: ["maybach-minibus", "maybach-minivan", "Mercedes Maybach Minivan"]
+      },
+      { 
+        value: "minibus", label: "Mercedes Sprinter or Similar", passengers: 16, luggage: 16,
+        dbAliases: ["minibus", "mercedes-sprinter", "Mercedes Sprinter or Similar"]
+      },
     ];
+
+    const dubaiVehicles = [
+      { 
+        value: "dubai-private-sedan", label: "Private Standard Sedan", passengers: 3, luggage: 2,
+        dbAliases: ["dubai-private-sedan"]
+      },
+      { 
+        value: "dubai-v-class", label: "Mercedes V Class", passengers: 6, luggage: 6,
+        dbAliases: ["dubai-v-class", "mercedes_vclass"]
+      },
+      { 
+        value: "dubai-premium-van", label: "Mercedes Premium Van", passengers: 6, luggage: 6,
+        dbAliases: ["dubai-premium-van"]
+      },
+      { 
+        value: "dubai-suburban-suv", label: "Mercedes Suburban SUV", passengers: 6, luggage: 6,
+        dbAliases: ["dubai-suburban-suv"]
+      },
+      { 
+        value: "dubai-vip-sprinter", label: "VIP Mercedes Sprinter", passengers: 12, luggage: 12,
+        dbAliases: ["dubai-vip-sprinter"]
+      },
+    ];
+
+    const vehicleTypes = isDubai ? dubaiVehicles : turkeyVehicles;
 
     if (!city && !airport) {
       return new Response(JSON.stringify({
-        prices: vehicleTypes.map(v => ({ ...v, price: null, currency: customerCurrency || "EUR", available: false })),
-        matched: false
+        prices: vehicleTypes.map(v => ({ 
+          vehicleType: v.value, vehicleLabel: v.label, 
+          price: null, currency: customerCurrency || "EUR", 
+          passengers: v.passengers, luggage: v.luggage, available: false 
+        })),
+        matched: false,
+        region,
       }), { headers: corsHeaders });
     }
 
-    // Fetch prices via REST API
+    // Fetch ALL active prices for this city/airport
     const params = new URLSearchParams({ is_active: "eq.true" });
     if (city) params.append("city", `eq.${city}`);
     if (airport) params.append("airport", `eq.${airport}`);
@@ -75,17 +119,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const regionPrices = await res.json();
 
-    // Build prices - deduplicate by checking if we already have a result for similar labels
-    const seenLabels = new Set<string>();
+    // Build prices - match DB prices to frontend vehicle types using aliases
     const prices: any[] = [];
     
     for (const vt of vehicleTypes) {
-      // Skip if we already have a price for this label
-      if (seenLabels.has(vt.label)) continue;
+      // Try all DB aliases for this frontend vehicle type
+      let match = null;
+      for (const alias of vt.dbAliases) {
+        match = regionPrices.find((p: any) => p.vehicle_type === alias);
+        if (match) break;
+      }
       
-      const match = regionPrices.find((p: any) => p.vehicle_type === vt.value);
       if (match) {
-        seenLabels.add(vt.label);
         prices.push({
           vehicleType: vt.value,
           vehicleLabel: vt.label,
@@ -114,7 +159,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       matchedCity: city,
       matchedDistrict: district,
       matchedAirport: airport,
-      isDubai
+      isDubai,
+      region,
     }), { headers: corsHeaders });
 
   } catch (error) {
