@@ -1,5 +1,5 @@
-import { createLovableAuth } from "@lovable.dev/cloud-auth-js";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
 
 export type OAuthProvider = "google" | "apple";
 
@@ -9,28 +9,28 @@ export type OAuthProvider = "google" | "apple";
 function isCustomDomain(): boolean {
   const host = window.location.hostname;
   // Check for Lovable managed domains
-  const isLovableDomain = 
+  const isLovableDomain =
     host.endsWith(".lovable.app") ||
     host.endsWith(".lovableproject.com") ||
     host === "localhost";
-  
+
   return !isLovableDomain;
 }
 
-/**
- * Allowed OAuth provider hostnames for security validation
- */
-const ALLOWED_OAUTH_HOSTS = [
-  "accounts.google.com",
-  "appleid.apple.com",
-];
+function getBackendHost(): string | null {
+  try {
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    if (!url) return null;
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Starts OAuth sign-in.
- * 
- * On custom domains: Uses Supabase native OAuth with skipBrowserRedirect
- * to bypass the Lovable auth-bridge 404 issue.
- * 
+ *
+ * On custom domains: Uses native OAuth with skipBrowserRedirect to avoid auth-bridge issues.
  * On Lovable domains: Uses Lovable Cloud managed OAuth.
  */
 export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error: Error | null }> {
@@ -45,50 +45,37 @@ export async function startOAuthSignIn(provider: OAuthProvider): Promise<{ error
         provider,
         options: {
           redirectTo: callbackUrl,
-          skipBrowserRedirect: true, // Critical: prevents automatic redirect by auth-bridge
+          skipBrowserRedirect: true,
         },
       });
 
-      if (error) {
-        return { error };
-      }
+      if (error) return { error };
 
-      // Validate OAuth URL before redirect (security: prevent open redirect)
       if (data?.url) {
+        // Security: ensure we only redirect to our own backend auth endpoint
         const oauthUrl = new URL(data.url);
-        if (!ALLOWED_OAUTH_HOSTS.some((host) => oauthUrl.hostname === host)) {
+        const backendHost = getBackendHost();
+
+        if (
+          oauthUrl.protocol !== "https:" ||
+          !backendHost ||
+          oauthUrl.hostname !== backendHost ||
+          !oauthUrl.pathname.startsWith("/auth/v1/authorize")
+        ) {
           return { error: new Error("Invalid OAuth redirect URL") };
         }
-        window.location.href = data.url; // Manually redirect
+
+        window.location.href = data.url;
       }
 
       return { error: null };
     }
 
-    // Lovable domains: use managed OAuth with explicit redirect_uri
-    const lovableAuth = createLovableAuth({});
-    const result = await lovableAuth.signInWithOAuth(provider, {
-      redirect_uri: callbackUrl,
-    });
-
-    if (result.redirected) {
-      return { error: null };
-    }
-
-    if (result.error) {
-      return { error: result.error };
-    }
-
-    if (result.tokens) {
-      try {
-        await supabase.auth.setSession(result.tokens);
-      } catch (e) {
-        return { error: e instanceof Error ? e : new Error(String(e)) };
-      }
-    }
-
-    return { error: null };
+    // Lovable domains: use managed OAuth (do NOT pass redirect_uri; the SDK manages it)
+    const { error } = await lovable.auth.signInWithOAuth(provider);
+    return { error: error ? new Error(error.message) : null };
   } catch (e) {
     return { error: e instanceof Error ? e : new Error(String(e)) };
   }
 }
+
