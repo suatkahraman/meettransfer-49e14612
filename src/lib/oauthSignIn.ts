@@ -1,4 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 
 export type OAuthProvider = "google" | "apple";
@@ -20,9 +19,8 @@ function isCustomDomain(): boolean {
  * Starts OAuth sign-in.
  *
  * IMPORTANT:
- * - Custom domains use native Supabase OAuth with skipBrowserRedirect to bypass
- *   the auth-bridge that can cause 404 errors.
- * - Lovable domains use managed OAuth.
+ * - Use Lovable Cloud managed OAuth for both Lovable preview domains and custom domains.
+ * - On custom domains we explicitly set redirect_uri back to /oauth/callback.
  */
 export async function startOAuthSignIn(
   provider: OAuthProvider
@@ -30,30 +28,13 @@ export async function startOAuthSignIn(
   try {
     const customDomain = isCustomDomain();
 
-    // Custom domains: use native Supabase OAuth to bypass auth-bridge 404 issues
-    if (customDomain) {
-      const callbackUrl = `${window.location.origin}/oauth/callback`;
+    const result = await lovable.auth.signInWithOAuth(
+      provider,
+      customDomain
+        ? { redirect_uri: `${window.location.origin}/oauth/callback` }
+        : undefined
+    );
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: callbackUrl,
-          skipBrowserRedirect: true, // Get OAuth URL directly
-        },
-      });
-
-      if (error) return { error };
-
-      // Manually redirect to the OAuth URL
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-
-      return { error: null };
-    }
-
-    // Lovable domains: use managed OAuth
-    const result = await lovable.auth.signInWithOAuth(provider);
     return { error: result?.error ? new Error(result.error.message) : null };
   } catch (e) {
     console.error("[OAuth] Error:", e);
