@@ -7,7 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useLoginRateLimit } from '@/hooks/useLoginRateLimit';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { lovable } from '@/integrations/lovable/index';
+import { startOAuthSignIn } from '@/lib/oauthSignIn';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -218,10 +218,8 @@ const LoginScreen = () => {
       try {
         const provider = oauthParam as 'google' | 'apple';
 
-        // Always use Lovable managed OAuth - works on all domains including custom domains
-        // NOTE: Do NOT pass redirect_uri explicitly - it breaks state parameter management
-        // for managed OAuth. The library handles this internally.
-        const { error } = await lovable.auth.signInWithOAuth(provider);
+        // Use native Supabase OAuth via startOAuthSignIn
+        const { error } = await startOAuthSignIn(provider);
         if (error) {
           console.error('[LoginScreen] OAuth auto-trigger error:', error);
           toast.error(t('loginFailed'));
