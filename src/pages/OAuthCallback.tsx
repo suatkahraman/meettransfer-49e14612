@@ -58,35 +58,69 @@ export default function OAuthCallback() {
 
         // Case 1: We have access_token - set session directly
         if (accessToken) {
+          console.log("[OAuthCallback] ====== SESSION SETUP START ======");
           console.log("[OAuthCallback] Setting session with access_token...");
+          console.log("[OAuthCallback] Access token length:", accessToken.length);
+          console.log("[OAuthCallback] Refresh token present:", !!refreshToken);
+          console.log("[OAuthCallback] Refresh token length:", refreshToken?.length || 0);
           
+          const startTime = Date.now();
           const { data, error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken || "",
           });
+          const duration = Date.now() - startTime;
+
+          console.log("[OAuthCallback] setSession completed in", duration, "ms");
+          console.log("[OAuthCallback] setSession response data:", {
+            hasSession: !!data?.session,
+            hasUser: !!data?.user,
+            userEmail: data?.user?.email || "N/A",
+            userId: data?.user?.id || "N/A",
+            sessionExpiresAt: data?.session?.expires_at || "N/A",
+          });
 
           if (sessionError) {
+            console.error("[OAuthCallback] ====== SESSION ERROR ======");
             console.error("[OAuthCallback] setSession error:", sessionError);
-            console.error("[OAuthCallback] Error details:", {
+            console.error("[OAuthCallback] Full error details:", {
               message: sessionError.message,
               status: sessionError.status,
               name: sessionError.name,
+              stack: sessionError.stack,
+              code: (sessionError as any).code,
+              cause: (sessionError as any).cause,
             });
-            setError(sessionError.message || "Oturum oluşturulamadı");
+            console.error("[OAuthCallback] Raw error object:", JSON.stringify(sessionError, null, 2));
+            setError(`Oturum oluşturulamadı: ${sessionError.message} (Status: ${sessionError.status || "N/A"})`);
             return;
           }
 
-          console.log("[OAuthCallback] Session set successfully, user:", data?.user?.email);
+          console.log("[OAuthCallback] ====== SESSION SUCCESS ======");
+          console.log("[OAuthCallback] Session set successfully!");
+          console.log("[OAuthCallback] User email:", data?.user?.email);
+          console.log("[OAuthCallback] User ID:", data?.user?.id);
+          console.log("[OAuthCallback] Session expires at:", data?.session?.expires_at);
           
           // Clean up URL
           cleanupUrl(url);
           
           // Redirect based on role
           if (data?.user) {
+            console.log("[OAuthCallback] Proceeding to role-based redirection...");
             await redirectBasedOnRole(data.user.id);
           } else {
-            console.error("[OAuthCallback] User is null after setSession");
-            setError("Oturum açıldı ancak kullanıcı bilgisi alınamadı");
+            console.error("[OAuthCallback] User is null after setSession - this should not happen");
+            console.error("[OAuthCallback] Full data object:", JSON.stringify(data, null, 2));
+            // Fallback: Try to get session from Supabase
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+              console.log("[OAuthCallback] Found session via getSession fallback:", session.user.email);
+              await redirectBasedOnRole(session.user.id);
+            } else {
+              console.log("[OAuthCallback] No session found, redirecting to customer-dashboard as fallback");
+              navigate("/customer-dashboard", { replace: true });
+            }
           }
           return;
         }
@@ -160,42 +194,90 @@ export default function OAuthCallback() {
     };
 
     const redirectBasedOnRole = async (userId: string) => {
+      console.log("[OAuthCallback] ====== ROLE REDIRECT START ======");
+      console.log("[OAuthCallback] User ID for role check:", userId);
+      
       // Check for post-OAuth redirect first
       const postOAuthRedirect = consumePostOAuthRedirect();
       if (postOAuthRedirect) {
-        console.log("[OAuthCallback] Redirecting to stored path:", postOAuthRedirect);
+        console.log("[OAuthCallback] Found stored post-OAuth redirect path:", postOAuthRedirect);
+        console.log("[OAuthCallback] Redirecting to stored path...");
         navigate(postOAuthRedirect, { replace: true });
         return;
       }
 
+      console.log("[OAuthCallback] No stored redirect path, checking user role in database...");
+
       // Fetch user role and redirect accordingly
       try {
-        console.log("[OAuthCallback] Fetching role for user:", userId);
+        console.log("[OAuthCallback] Querying user_roles table for user:", userId);
+        const startTime = Date.now();
+        
         const { data: roleData, error: roleError } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", userId)
           .maybeSingle();
 
+        const duration = Date.now() - startTime;
+        console.log("[OAuthCallback] Role query completed in", duration, "ms");
+        console.log("[OAuthCallback] Role query response:", {
+          hasData: !!roleData,
+          role: roleData?.role || "N/A",
+          hasError: !!roleError,
+        });
+
         if (roleError) {
+          console.error("[OAuthCallback] ====== ROLE FETCH ERROR ======");
           console.error("[OAuthCallback] Role fetch error:", roleError);
+          console.error("[OAuthCallback] Role error details:", {
+            message: roleError.message,
+            code: roleError.code,
+            details: roleError.details,
+            hint: roleError.hint,
+          });
+          console.log("[OAuthCallback] Fallback: Redirecting to /customer-dashboard due to role fetch error");
+          navigate("/customer-dashboard", { replace: true });
+          return;
         }
 
         const role = roleData?.role;
-        console.log("[OAuthCallback] User role:", role);
+        console.log("[OAuthCallback] ====== ROLE DETERMINATION ======");
+        console.log("[OAuthCallback] User role from database:", role || "NO ROLE FOUND");
 
+        if (!role) {
+          console.log("[OAuthCallback] No role found in user_roles table for this user");
+          console.log("[OAuthCallback] Fallback: Redirecting to /customer-dashboard (default for users without role)");
+          navigate("/customer-dashboard", { replace: true });
+          return;
+        }
+
+        console.log("[OAuthCallback] Role found:", role);
+        
         if (role === "admin") {
+          console.log("[OAuthCallback] Admin role detected, redirecting to /admin");
           navigate("/admin", { replace: true });
         } else if (role === "agency") {
+          console.log("[OAuthCallback] Agency role detected, redirecting to /agency-dashboard");
           navigate("/agency-dashboard", { replace: true });
         } else if (role === "driver") {
+          console.log("[OAuthCallback] Driver role detected, redirecting to /driver-dashboard");
           navigate("/driver-dashboard", { replace: true });
         } else {
-          // Customer or no role - redirect to customer dashboard
+          console.log("[OAuthCallback] Customer or unknown role, redirecting to /customer-dashboard");
           navigate("/customer-dashboard", { replace: true });
         }
-      } catch (err) {
-        console.error("[OAuthCallback] Role check failed:", err);
+        
+        console.log("[OAuthCallback] ====== ROLE REDIRECT COMPLETE ======");
+      } catch (err: any) {
+        console.error("[OAuthCallback] ====== ROLE CHECK EXCEPTION ======");
+        console.error("[OAuthCallback] Role check failed with exception:", err);
+        console.error("[OAuthCallback] Exception details:", {
+          message: err?.message,
+          name: err?.name,
+          stack: err?.stack,
+        });
+        console.log("[OAuthCallback] Fallback: Redirecting to /customer-dashboard due to exception");
         navigate("/customer-dashboard", { replace: true });
       }
     };
