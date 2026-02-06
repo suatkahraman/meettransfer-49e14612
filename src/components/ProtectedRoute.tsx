@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useUserRole, AppRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,8 +18,21 @@ const ProtectedRoute = ({
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
 
+  // If the user is signed in but role hasn't resolved yet (transient), don't bounce them to /auth.
+  const [roleGraceExpired, setRoleGraceExpired] = useState(false);
+  useEffect(() => {
+    setRoleGraceExpired(false);
+
+    if (!user) return;
+    if (roleLoading) return;
+    if (role) return;
+
+    const t = window.setTimeout(() => setRoleGraceExpired(true), 3000);
+    return () => window.clearTimeout(t);
+  }, [user, roleLoading, role]);
+
   // Show loading state while checking auth and role
-  if (authLoading || roleLoading) {
+  if (authLoading || roleLoading || (user && !role && !roleGraceExpired)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -32,17 +45,22 @@ const ProtectedRoute = ({
     return <Navigate to="/auth" replace />;
   }
 
+  // If role is still unknown after grace period, fall back to least-privileged area.
+  if (!role) {
+    return <Navigate to="/customer" replace />;
+  }
+
   // Redirect if user doesn't have required role
-  if (!role || !allowedRoles.includes(role)) {
+  if (!allowedRoles.includes(role)) {
     // Redirect to appropriate home page based on role
     const roleRedirects: Record<AppRole, string> = {
       admin: '/admin',
-      driver: '/driver-dashboard',
-      customer: '/customer-dashboard',
-      agency: '/agency-dashboard'
+      driver: '/driver',
+      customer: '/customer',
+      agency: '/agency'
     };
     
-    const redirect = role ? roleRedirects[role] : redirectTo;
+    const redirect = roleRedirects[role] ?? redirectTo;
     return <Navigate to={redirect} replace />;
   }
 
