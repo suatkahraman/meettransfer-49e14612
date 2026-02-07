@@ -9,8 +9,8 @@ function validateInput(data: unknown): { success: boolean; error?: string; data?
   }
   const obj = data as Record<string, unknown>;
   
-  // Required string fields
-  const requiredStrings = ['bookingId', 'pickup', 'dropoff', 'pickupDate', 'pickupTime', 'vehicleType', 'priceCurrency', 'paymentMethod'];
+  // Required string fields - bookingId is now OPTIONAL (direct bookings don't have it)
+  const requiredStrings = ['pickup', 'dropoff', 'pickupDate', 'pickupTime', 'vehicleType', 'priceCurrency', 'paymentMethod'];
   for (const field of requiredStrings) {
     if (!obj[field] || typeof obj[field] !== 'string' || (obj[field] as string).trim().length === 0) {
       return { success: false, error: `${field} is required` };
@@ -20,16 +20,26 @@ function validateInput(data: unknown): { success: boolean; error?: string; data?
     }
   }
   
+  // Optional bookingId validation (for AI-assisted bookings)
+  if (obj.bookingId !== undefined && obj.bookingId !== null) {
+    if (typeof obj.bookingId !== 'string' || (obj.bookingId as string).length > 500) {
+      return { success: false, error: 'bookingId must be a valid string' };
+    }
+  }
+  
   // Required numbers
   if (typeof obj.passengers !== 'number' || obj.passengers < 1 || obj.passengers > 50) {
     return { success: false, error: 'passengers must be between 1 and 50' };
   }
-  if (typeof obj.price !== 'number' || obj.price < 0 || obj.price > 100000) {
-    return { success: false, error: 'price must be between 0 and 100000' };
+  // Price can be null for awaiting-price reservations
+  if (obj.price !== null && obj.price !== undefined) {
+    if (typeof obj.price !== 'number' || obj.price < 0 || obj.price > 100000) {
+      return { success: false, error: 'price must be between 0 and 100000' };
+    }
   }
   
   // Optional string validations
-  const optionalStrings = ['customerName', 'customerPhone', 'customerEmail', 'customerNotes', 'flightNumber', 'returnDate', 'returnTime', 'promoCode', 'customerPassword'];
+  const optionalStrings = ['bookingId', 'customerName', 'customerPhone', 'customerEmail', 'customerNotes', 'flightNumber', 'returnDate', 'returnTime', 'promoCode', 'customerPassword'];
   for (const field of optionalStrings) {
     if (obj[field] !== undefined && obj[field] !== null) {
       if (typeof obj[field] !== 'string') {
@@ -93,14 +103,14 @@ serve(async (req) => {
     }
     
     const requestData = validationResult.data! as {
-      bookingId: string;
+      bookingId?: string; // Now optional - only present for AI-assisted bookings
       pickup: string;
       dropoff: string;
       pickupDate: string;
       pickupTime: string;
       vehicleType: string;
       passengers: number;
-      price: number;
+      price: number | null;
       priceCurrency: string;
       paymentMethod: string;
       hasReturnTrip?: boolean;
@@ -122,7 +132,7 @@ serve(async (req) => {
       isGoogleUser?: boolean;
     };
 
-    console.log("Creating reservation for quick booking:", requestData.bookingId);
+    console.log("Creating reservation:", requestData.bookingId ? `for quick booking ${requestData.bookingId}` : "direct booking");
     console.log("Customer info provided:", {
       name: requestData.customerName,
       email: requestData.customerEmail,
@@ -131,15 +141,20 @@ serve(async (req) => {
       isGoogleUser: requestData.isGoogleUser || false,
     });
 
-    // Fetch the quick booking request to get agency info, luggage/baby seat, and notes
-    const { data: quickBooking, error: fetchError } = await supabase
-      .from("quick_booking_requests")
-      .select("customer_notes, agency_id, agency_user_id, luggage_count, baby_seat_count")
-      .eq("id", requestData.bookingId)
-      .maybeSingle();
+    // Fetch the quick booking request if bookingId is provided (AI-assisted bookings)
+    let quickBooking = null;
+    if (requestData.bookingId) {
+      const { data, error: fetchError } = await supabase
+        .from("quick_booking_requests")
+        .select("customer_notes, agency_id, agency_user_id, luggage_count, baby_seat_count")
+        .eq("id", requestData.bookingId)
+        .maybeSingle();
 
-    if (fetchError) {
-      console.error("Error fetching quick booking:", fetchError);
+      if (fetchError) {
+        console.error("Error fetching quick booking:", fetchError);
+      } else {
+        quickBooking = data;
+      }
     }
 
     // Use request data if provided, otherwise fall back to quick booking data
@@ -389,28 +404,30 @@ serve(async (req) => {
       }
     }
 
-    // Update quick booking status to confirmed with selected vehicle and price
-    const { error: updateError } = await supabase
-      .from("quick_booking_requests")
-      .update({
-        status: "confirmed",
-        confirmed_at: new Date().toISOString(),
-        payment_method: requestData.paymentMethod,
-        vehicle_type: requestData.vehicleType,
-        price: requestData.price,
-        has_return_trip: requestData.hasReturnTrip,
-        return_date: requestData.returnDate || null,
-        return_time: requestData.returnTime || null,
-        return_price: requestData.returnPrice || null,
-        promo_code: requestData.promoCode || null,
-      })
-      .eq("id", requestData.bookingId);
+    // Update quick booking status to confirmed with selected vehicle and price (only if bookingId exists)
+    if (requestData.bookingId) {
+      const { error: updateError } = await supabase
+        .from("quick_booking_requests")
+        .update({
+          status: "confirmed",
+          confirmed_at: new Date().toISOString(),
+          payment_method: requestData.paymentMethod,
+          vehicle_type: requestData.vehicleType,
+          price: requestData.price,
+          has_return_trip: requestData.hasReturnTrip,
+          return_date: requestData.returnDate || null,
+          return_time: requestData.returnTime || null,
+          return_price: requestData.returnPrice || null,
+          promo_code: requestData.promoCode || null,
+        })
+        .eq("id", requestData.bookingId);
 
-    console.log("Quick booking updated with selected vehicle:", requestData.vehicleType, "and price:", requestData.price);
+      console.log("Quick booking updated with selected vehicle:", requestData.vehicleType, "and price:", requestData.price);
 
-    if (updateError) {
-      console.error("Error updating quick booking:", updateError);
-      // Don't fail - reservation is already created
+      if (updateError) {
+        console.error("Error updating quick booking:", updateError);
+        // Don't fail - reservation is already created
+      }
     }
 
     // Notify admin (server-side) so it doesn't depend on the customer's browser/network
