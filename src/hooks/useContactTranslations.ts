@@ -246,6 +246,27 @@ const translations: Record<string, ContactTranslations> = {
     fastestWay: "最速のお問い合わせ方法",
     instantResponses: "WhatsAppでメッセージを送信すると、チームから即座に返信が届きます。送迎のご要望に24時間対応いたします。",
   },
+  pt: {
+    seoTitle: "Contacte-nos | Meet Transfer - Suporte 24/7",
+    seoDesc: "Contacte a Meet Transfer para transfers de aeroporto na Turquia. Suporte WhatsApp, email e telefone disponíveis 24/7. Resposta rápida garantida.",
+    pageTitle: "Contacte-nos",
+    pageSubtitle: "Estamos aqui para o ajudar 24/7",
+    mainTitle: "Entre em Contacto",
+    servingWorldwide: "A servir clientes em todo o mundo com serviços premium de transfer de aeroporto na Turquia e além.",
+    preferredContact: "Tempo de resposta mais rápido",
+    emailDesc: "Para questões detalhadas",
+    support247: "Suporte 24/7",
+    support247Desc: "A nossa equipa está disponível 24 horas por dia para o ajudar com reservas e questões.",
+    instantResponse: "Resposta Instantânea",
+    instantResponseDesc: "Obtenha respostas rápidas às suas questões via WhatsApp ou email.",
+    multiLanguage: "Multilingue",
+    multiLanguageDesc: "Disponibilizamos suporte em vários idiomas para sua conveniência.",
+    globalOfficesDesc: "A nossa presença global garante um serviço fiável onde quer que esteja.",
+    headquarters: "Sede",
+    whatsappOnly: "Apenas WhatsApp",
+    fastestWay: "A Forma Mais Rápida de Nos Contactar",
+    instantResponses: "Envie-nos uma mensagem no WhatsApp e obtenha respostas instantâneas da nossa equipa. Estamos disponíveis 24/7 para as suas necessidades de transfer.",
+  },
 };
 
 export const useContactTranslations = () => {
