@@ -191,7 +191,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border border-green-400/70 bg-gradient-to-r from-green-100 via-emerald-50 to-green-100 shadow-sm shadow-green-200/40 dark:border-green-600/50 dark:from-green-950/40 dark:via-emerald-950/30 dark:to-green-950/40 dark:shadow-green-900/20",
+        "overflow-hidden rounded-xl border border-amber-400/80 bg-gradient-to-r from-amber-100 via-yellow-50 to-amber-100 shadow-sm shadow-amber-200/50 dark:border-amber-600/50 dark:from-amber-950/40 dark:via-yellow-950/30 dark:to-amber-950/40 dark:shadow-amber-900/20",
         className
       )}
       dir={isRTL ? "rtl" : "ltr"}
@@ -201,24 +201,24 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="relative flex h-3 w-3">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-green-600 shadow-sm shadow-green-500/50" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-amber-600 shadow-sm shadow-amber-500/50" />
             </span>
-            <span className="text-xs font-extrabold uppercase tracking-wider text-green-800 dark:text-green-300">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300">
               {t.headline}
             </span>
           </div>
 
-          {/* Live clock: now → ready */}
-          <div className="flex items-center gap-1.5 rounded-full border border-green-400/70 bg-green-200/60 px-2.5 py-1 shadow-inner dark:border-green-600/50 dark:bg-green-900/40">
+          {/* Live clock: now → ready — distinct blue/cyan color */}
+          <div className="flex items-center gap-1.5 rounded-full border border-sky-400/80 bg-sky-100/80 px-2.5 py-1 shadow-inner dark:border-sky-500/50 dark:bg-sky-900/50">
             <span className="text-[11px]" role="img" aria-label="Turkey">🇹🇷</span>
-            <Clock className="h-3 w-3 animate-pulse text-green-700 dark:text-green-300" />
-            <span className="text-[10px] font-semibold tabular-nums text-green-700 dark:text-green-300">
+            <Clock className="h-3 w-3 animate-pulse text-sky-600 dark:text-sky-300" />
+            <span className="text-[10px] font-semibold tabular-nums text-sky-700 dark:text-sky-300">
               {nowLabel} {formattedNow}
             </span>
-            <span className="text-[11px] font-bold text-green-500 dark:text-green-400">→</span>
-            <CarFront className="h-3.5 w-3.5 text-green-700 dark:text-green-300" />
-            <span className="text-[10px] font-extrabold tabular-nums text-green-800 dark:text-green-200">
+            <span className="text-[11px] font-bold text-sky-500 dark:text-sky-400">→</span>
+            <CarFront className="h-3.5 w-3.5 text-sky-700 dark:text-sky-300" />
+            <span className="text-[10px] font-extrabold tabular-nums text-sky-800 dark:text-sky-200">
               {readyLabel} {formattedReady}
             </span>
           </div>
@@ -240,7 +240,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
                     : "translate-y-full scale-95 opacity-0"
                 )}
               >
-                <Icon className="h-4 w-4 flex-shrink-0 text-green-700 dark:text-green-300" />
+                <Icon className="h-4 w-4 flex-shrink-0 text-amber-700 dark:text-amber-300" />
                 <span className="truncate text-xs font-semibold text-foreground/90 sm:text-sm">
                   {item}
                 </span>
@@ -258,8 +258,8 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
               className={cn(
                 "h-1.5 rounded-full transition-all duration-300",
                 idx === activeIndex
-                  ? "w-5 bg-green-600 shadow-sm shadow-green-500/50"
-                  : "w-2 bg-green-300/60 hover:bg-green-400"
+                  ? "w-5 bg-amber-600 shadow-sm shadow-amber-500/50"
+                  : "w-2 bg-amber-300/60 hover:bg-amber-400"
               )}
               aria-label={`Info ${idx + 1}`}
             />
