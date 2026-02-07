@@ -53,7 +53,7 @@ export const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Brand & Description */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold">Meet Transfer</h3>
+            <h2 className="text-2xl font-bold">Meet Transfer</h2>
             <p className="text-primary-foreground/90 text-sm font-medium">{COMPANY_NAME}</p>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
               {t('footerDescription')}
@@ -84,7 +84,7 @@ export const Footer = () => {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">{t('footerQuickLinks')}</h4>
+            <h3 className="font-semibold text-lg">{t('footerQuickLinks')}</h3>
             <ul className="space-y-2 text-primary-foreground/80 text-sm">
               <li><PrefetchLink to={getLocalizedPath("/")} className="hover:text-primary-foreground transition-colors">{t('home')}</PrefetchLink></li>
               <li><PrefetchLink to={getLocalizedPath("/services")} className="hover:text-primary-foreground transition-colors">{t('services')}</PrefetchLink></li>
@@ -98,7 +98,7 @@ export const Footer = () => {
 
           {/* Services */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">{t('services')}</h4>
+            <h3 className="font-semibold text-lg">{t('services')}</h3>
             <ul className="space-y-2 text-primary-foreground/80 text-sm">
               <li><PrefetchLink to={getLocalizedPath("/istanbul-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerIstanbul')}</PrefetchLink></li>
               <li><PrefetchLink to={getLocalizedPath("/antalya-transfer")} className="hover:text-primary-foreground transition-colors">{t('footerAntalya')}</PrefetchLink></li>
@@ -117,7 +117,7 @@ export const Footer = () => {
 
           {/* Contact */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-lg">{t('contact')}</h4>
+            <h3 className="font-semibold text-lg">{t('contact')}</h3>
             <ul className="space-y-3 text-primary-foreground/80 text-sm">
               {/* Email Contact */}
               <li className="flex items-center gap-2">
