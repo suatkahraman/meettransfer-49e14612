@@ -1119,6 +1119,8 @@ const BookingPage = () => {
         "create-quick-booking-reservation",
         {
           body: {
+            // Optional bookingId - only present for AI-assisted bookings with token
+            bookingId: tokenBookingData?.id || undefined,
             // Booking details - use effective values (editable or URL params)
             pickup: isHourlyBooking ? (effectiveCity || urlCity) : effectivePickup,
             dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${effectiveCity || urlCity}` : effectiveDropoff,
