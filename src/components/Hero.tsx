@@ -19,6 +19,9 @@ import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
 import { RideFormContent } from "@/components/hero/RideFormContent";
 import { HourlyFormContent } from "@/components/hero/HourlyFormContent";
 
+// Instant booking info - eagerly loaded for visibility
+import { InstantBookingInfo } from "@/components/hero/InstantBookingInfo";
+
 // Lazy load non-critical visual components - loads after LCP
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
 const PaymentComingSoonBanner = lazy(() => import("@/components/hero/PaymentComingSoonBanner").then(m => ({ default: m.PaymentComingSoonBanner })));
@@ -94,6 +97,7 @@ export const Hero = () => {
               {/* Header inside the card - mobile-first padding */}
               <div className="p-4 pb-2 pt-6 sm:p-5 sm:pb-3 sm:pt-4 md:p-6">
                 <HeroHeader language={language} />
+                <InstantBookingInfo language={language} className="mt-3" />
               </div>
 
               {/* Booking Form Card - Critical for LCP, no Suspense wrapper */}
