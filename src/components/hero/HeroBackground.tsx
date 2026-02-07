@@ -1,9 +1,7 @@
 import { memo } from "react";
 
-// Use public folder path for hero image - enables browser preload matching
-// Multiple formats for next-gen image support
+// Use public folder path for hero image - matches <link rel="preload"> in index.html
 const heroImageWebP = "/hero-bg-futuristic.webp";
-const heroImageAvif = "/hero-bg-futuristic.avif"; // Falls back gracefully if not available
 
 interface HeroBackgroundProps {
   videosLoaded?: boolean;
@@ -19,36 +17,27 @@ export const HeroBackground = memo(({}: HeroBackgroundProps) => {
       {/* Static background - immediate render, mobile-first */}
       <div className="absolute inset-0 z-0 bg-background" />
       
-      {/* Desktop only: Hero background image - hidden on mobile for faster LCP */}
-      <div className="absolute inset-0 z-0 hidden md:block">
-        {/* 
+      {/* Desktop only: Hero background image - hidden on mobile for faster LCP
           LCP Optimization:
-          - Using picture element for AVIF/WebP with fallback
-          - fetchPriority="high" tells browser to load this first
-          - loading="eager" ensures no lazy loading
+          - <link rel="preload"> in index.html pre-fetches this image
+          - fetchpriority="high" + loading="eager" ensures fastest possible load
           - Explicit width/height prevent CLS
-          - decoding="async" allows non-blocking decode
-          - Next-gen formats (AVIF, WebP) for optimal compression
-        */}
-        <picture>
-          {/* AVIF - best compression, newest format */}
-          <source srcSet={heroImageAvif} type="image/avif" />
-          {/* WebP - good compression, wide support */}
-          <source srcSet={heroImageWebP} type="image/webp" />
-          {/* Fallback */}
-          <img
-            src={heroImageWebP}
-            alt=""
-            role="presentation"
-            width={1920}
-            height={1080}
-            // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
-            fetchpriority="high"
-            loading="eager"
-            decoding="async"
-            className="absolute inset-0 w-full h-full object-cover object-right opacity-30"
-          />
-        </picture>
+          - decoding="sync" on desktop ensures image is ready before paint
+          - Removed <picture> wrapper to match preload href exactly (avoids double-fetch)
+      */}
+      <div className="absolute inset-0 z-0 hidden md:block">
+        <img
+          src={heroImageWebP}
+          alt=""
+          role="presentation"
+          width={1920}
+          height={1080}
+          // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+          fetchpriority="high"
+          loading="eager"
+          decoding="sync"
+          className="absolute inset-0 w-full h-full object-cover object-right opacity-30"
+        />
         
         {/* Left fade for form readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
