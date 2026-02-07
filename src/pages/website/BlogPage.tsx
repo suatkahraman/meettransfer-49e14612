@@ -14,6 +14,7 @@ import { getWhatsAppUrl } from "@/lib/contact";
 import BlogHourlyRentalPromo from "@/components/website/BlogHourlyRentalPromo";
 import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import aiChatImage from "@/assets/ai-chat-assistant.png";
+import instantVehicleHero from "@/assets/blog/instant-vehicle-service-hero.jpg";
 
 const InstantBookingInfo = lazy(() => import("@/components/hero/InstantBookingInfo"));
 
@@ -60,6 +61,17 @@ const BlogPage = () => {
   // Blog posts with translation keys - Updated for 2025 SEO
   const blogPosts = useMemo(() => [
     // AI-Optimized Blog Posts for Search Engines & AI Crawlers
+    {
+      id: "instant-vehicle-service-guide",
+      title: language === "TR" ? "Anlık Araç Hizmeti – 20 Dakikada Kapınızda" : "Instant Vehicle Service – At Your Door in 20 Minutes",
+      description: language === "TR" ? "Konumunuzu seçin, aracınızı belirleyin, 20 dakikada kapınızda olsun. Fix fiyat, şoför bilgileri, gidiş-dönüş %25 indirim." : "Select your location, choose your vehicle, at your door in 20 minutes. Fixed price, driver info, round-trip 25% discount.",
+      category: language === "TR" ? "Anlık Hizmet" : "Instant Service",
+      categoryKey: "service",
+      readTime: 8,
+      date: "2026-02-07",
+      image: instantVehicleHero,
+      isStatic: true,
+    },
     {
       id: "agency-partnership-b2b-turkey",
       title: "Turkey Airport Transfer Partner – B2B Partnership for Travel Agencies",
