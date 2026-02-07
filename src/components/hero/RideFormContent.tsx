@@ -1,5 +1,5 @@
 import { memo, useState, useCallback, useMemo } from "react";
-import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, RotateCcw, Plus, Minus } from "lucide-react";
+import { CalendarIcon, Clock, Users, ArrowRight, Loader2, Zap, RotateCcw, Plus, Minus, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TimePickerAMPM } from "@/components/ui/time-picker-ampm";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
@@ -13,6 +13,19 @@ import { VehicleRegion } from "@/lib/vehicleRegions";
 import { format } from "date-fns";
 import { scrollToFirstError } from "@/lib/formValidation";
 
+const returnDiscountTexts: Record<string, string> = {
+  EN: "Add return trip & get 25% off!",
+  TR: "Dönüş ekle ve %25 indirim kazan!",
+  DE: "Rückfahrt hinzufügen & 25% sparen!",
+  FR: "Ajoutez un retour et obtenez 25% de réduction !",
+  RU: "Добавьте обратный трансфер и получите скидку 25%!",
+  IT: "Aggiungi il ritorno e ottieni il 25% di sconto!",
+  ES: "¡Añade regreso y obtén 25% de descuento!",
+  AR: "أضف رحلة العودة واحصل على خصم 25%!",
+  UK: "Додайте зворотній трансфер і отримайте знижку 25%!",
+  JA: "復路を追加して25%割引を獲得！",
+  PT: "Adicione retorno e ganhe 25% de desconto!",
+};
 
 interface RideFormContentProps {
   pickup: string;
@@ -415,6 +428,14 @@ export const RideFormContent = memo(({
 
       {/* Submit Button - Same height as other elements, sticky at bottom on mobile */}
       <div className="mt-auto">
+        {/* Return discount badge */}
+        <div className="mb-2 flex items-center justify-center gap-1.5 rounded-lg border border-amber-300/60 bg-amber-50/80 px-3 py-1.5 dark:border-amber-700/40 dark:bg-amber-900/20">
+          <Tag className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+          <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">
+            {returnDiscountTexts[language.toUpperCase()] || returnDiscountTexts.EN}
+          </span>
+        </div>
+
         <Button 
           onClick={validateAndContinue} 
           disabled={submitting} 
