@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -190,8 +190,11 @@ const BookingPage = () => {
   const [vehiclePrices, setVehiclePrices] = useState<VehiclePrice[]>([]);
   const [hourlyPrices, setHourlyPrices] = useState<HourlyPrice[]>([]);
   const [isPricesLoading, setIsPricesLoading] = useState(false);
+  const [isRefetchingPrices, setIsRefetchingPrices] = useState(false); // Inline loading for re-fetches
   const [submitting, setSubmitting] = useState(false);
   const [detectedRegion, setDetectedRegion] = useState<string | null>(null);
+  const hasFetchedInitialPrices = useRef(false);
+  const googleAuthRef = useRef(searchParams.get("googleAuth") === "true");
   
   // Discount state
   const [discountApplied, setDiscountApplied] = useState(false);
@@ -573,22 +576,27 @@ const BookingPage = () => {
 
   // Fetch vehicle prices for transfer bookings - re-fetch when locations change
   useEffect(() => {
+    let cancelled = false;
+    
     const fetchPrices = async () => {
-      // Use effective values (editable state if changed, otherwise URL params)
       if (isHourlyBooking || !effectivePickup || !effectiveDropoff) return;
       
-      // Skip price fetching entirely if returning from Google OAuth (we're redirecting anyway)
-      const googleAuth = searchParams.get("googleAuth");
-      if (googleAuth === "true") {
-        console.log('[Prices] Skipping fetch - Google OAuth return, will redirect to customer home');
+      // Skip price fetching entirely if returning from Google OAuth
+      if (googleAuthRef.current) {
+        console.log('[Prices] Skipping fetch - Google OAuth return');
         return;
       }
       
-      setIsPricesLoading(true);
+      const isInitialFetch = !hasFetchedInitialPrices.current;
+      
+      if (isInitialFetch) {
+        setIsPricesLoading(true);
+      } else {
+        setIsRefetchingPrices(true);
+      }
+      
       const startTime = Date.now();
-      // Use shorter loading time for re-fetches (when user changes location)
-      const isInitialFetch = vehiclePrices.length === 0;
-      const minLoadingTime = isInitialFetch ? 5000 : 1500; // 5s initial, 1.5s for updates
+      const minLoadingTime = isInitialFetch ? 5000 : 800;
       
       try {
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
@@ -596,15 +604,17 @@ const BookingPage = () => {
             pickup: effectivePickup,
             dropoff: effectiveDropoff,
             customerCurrency: preferredCurrency,
-            pickupDate: effectiveDate || undefined, // Send date for seasonal pricing
+            pickupDate: effectiveDate || undefined,
           },
         });
 
+        if (cancelled) return;
+
         if (data?.prices) {
           setVehiclePrices(data.prices);
+          hasFetchedInitialPrices.current = true;
         }
         
-        // Use region from edge function - this is the authoritative source
         if (data?.region) {
           setDetectedRegion(data.region);
         }
@@ -619,12 +629,17 @@ const BookingPage = () => {
       } catch (error) {
         console.error("Error fetching prices:", error);
       } finally {
-        setIsPricesLoading(false);
+        if (!cancelled) {
+          setIsPricesLoading(false);
+          setIsRefetchingPrices(false);
+        }
       }
     };
 
     fetchPrices();
-  }, [effectivePickup, effectiveDropoff, effectiveDate, preferredCurrency, isHourlyBooking, searchParams]);
+    
+    return () => { cancelled = true; };
+  }, [effectivePickup, effectiveDropoff, effectiveDate, preferredCurrency, isHourlyBooking]);
 
   // Extract city from address for hourly pricing
   const extractCityFromAddress = (address: string): string | null => {
@@ -1888,7 +1903,12 @@ const BookingPage = () => {
                               </span>
                             </div>
                             
-                            {price ? (
+                            {isRefetchingPrices ? (
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                <span className="text-xs sm:text-sm text-muted-foreground">{t("updatingPrice") || "Updating..."}</span>
+                              </div>
+                            ) : price ? (
                               <p className="text-base sm:text-lg font-bold text-primary">
                                 {price} {preferredCurrency}
                                 {isHourlyBooking && <span className="text-xs sm:text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
@@ -1928,21 +1948,21 @@ const BookingPage = () => {
                           // Refetch prices with new currency
                           if (isHourlyBooking) {
                             // For hourly, prices are in DB currency, just update display
-                          } else if (urlPickup && urlDropoff) {
-                            setIsPricesLoading(true);
+                          } else if (effectivePickup && effectiveDropoff) {
+                            setIsRefetchingPrices(true);
                             supabase.functions.invoke("get-all-vehicle-prices", {
                               body: {
-                                pickup: urlPickup,
-                                dropoff: urlDropoff,
+                                pickup: effectivePickup,
+                                dropoff: effectiveDropoff,
                                 customerCurrency: currency.value,
                               },
                             }).then(({ data }) => {
                               if (data?.prices) {
                                 setVehiclePrices(data.prices);
                               }
-                              setIsPricesLoading(false);
+                              setIsRefetchingPrices(false);
                             }).catch(() => {
-                              setIsPricesLoading(false);
+                              setIsRefetchingPrices(false);
                             });
                           }
                         }}
