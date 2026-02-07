@@ -39,8 +39,8 @@ const BottomNavigation = () => {
               to={getLocalizedPath(item.path)}
               className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
                 active
-                  ? "text-accent"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "text-primary font-semibold"
+                  : "text-foreground/70 hover:text-foreground"
               }`}
             >
               <item.icon className="h-5 w-5 sm:h-6 sm:w-6 mb-0.5 sm:mb-1" />

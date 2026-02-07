@@ -395,7 +395,7 @@ export const RideFormContent = memo(({
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-foreground" />
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-foreground/70">
+            <span className="text-xs font-semibold text-foreground/80">
               {t("passengers") || "Passengers"}
             </span>
             <span className="text-lg font-bold">{passengers}</span>
