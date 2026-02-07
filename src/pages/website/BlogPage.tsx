@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Clock, Search, X } from "lucide-react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
@@ -14,6 +14,8 @@ import { getWhatsAppUrl } from "@/lib/contact";
 import BlogHourlyRentalPromo from "@/components/website/BlogHourlyRentalPromo";
 import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import aiChatImage from "@/assets/ai-chat-assistant.png";
+
+const InstantBookingInfo = lazy(() => import("@/components/hero/InstantBookingInfo"));
 
 // Import blog hero images
 import cappadociaHero from "@/assets/blog/cappadocia-transfer-hero.jpg";
@@ -473,6 +475,11 @@ const BlogPage = () => {
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
             {t('blogHeroDesc')}
           </p>
+          
+          {/* Instant Booking Info Banner */}
+          <Suspense fallback={null}>
+            <InstantBookingInfo language={language} className="mt-6 max-w-2xl mx-auto" />
+          </Suspense>
         </div>
       </section>
 

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -5,13 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getWhatsAppUrl } from "@/lib/contact";
 
+const InstantBookingInfo = lazy(() => import("@/components/hero/InstantBookingInfo"));
+
 interface BlogCTAProps {
   destination?: string;
   className?: string;
 }
 
 const BlogCTA = ({ destination = "", className = "" }: BlogCTAProps) => {
-  const { t, getLocalizedPath } = useLanguage();
+  const { t, getLocalizedPath, language } = useLanguage();
 
   const whatsappMessage = destination 
     ? `Hello, I would like to book a transfer to ${destination}.`
@@ -73,6 +76,11 @@ const BlogCTA = ({ destination = "", className = "" }: BlogCTAProps) => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Instant Booking Info */}
+      <Suspense fallback={null}>
+        <InstantBookingInfo language={language} className="mt-4" />
+      </Suspense>
     </div>
   );
 };
