@@ -1,17 +1,17 @@
 {
-  "version": "2.5.2",
-  "releaseDate": "2026-01-31",
-  "buildNumber": 2,
+  "version": "2.6.0",
+  "releaseDate": "2026-02-07",
+  "buildNumber": 3,
   "notes": {
-    "TR": "Google OAuth Lovable Cloud'a taşındı, PWA güncelleme zorlama",
-    "EN": "Google OAuth migrated to Lovable Cloud, PWA update forced",
-    "DE": "Google OAuth zu Lovable Cloud migriert, PWA-Update erzwungen",
-    "FR": "Google OAuth migré vers Lovable Cloud, mise à jour PWA forcée",
-    "RU": "Google OAuth перенесен в Lovable Cloud, принудительное обновление PWA",
-    "IT": "Google OAuth migrato a Lovable Cloud, aggiornamento PWA forzato",
-    "ES": "Google OAuth migrado a Lovable Cloud, actualización PWA forzada",
-    "AR": "تم نقل Google OAuth إلى Lovable Cloud، تم فرض تحديث PWA",
-    "UK": "Google OAuth перенесено до Lovable Cloud, примусове оновлення PWA",
-    "JA": "Google OAuthをLovable Cloudに移行、PWA更新を強制"
+    "TR": "Rezervasyon oluşturma düzeltmesi, fiyat güncelleme iyileştirmesi",
+    "EN": "Booking creation fix, price update improvements",
+    "DE": "Buchungserstellung behoben, Preisaktualisierung verbessert",
+    "FR": "Correction de la création de réservation, amélioration des mises à jour de prix",
+    "RU": "Исправление создания бронирования, улучшение обновления цен",
+    "IT": "Correzione creazione prenotazione, miglioramento aggiornamento prezzi",
+    "ES": "Corrección de creación de reserva, mejora de actualización de precios",
+    "AR": "إصلاح إنشاء الحجز، تحسين تحديث الأسعار",
+    "UK": "Виправлення створення бронювання, покращення оновлення цін",
+    "JA": "予約作成の修正、価格更新の改善"
   }
 }
