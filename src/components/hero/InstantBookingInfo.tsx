@@ -249,20 +249,24 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
           })}
         </div>
 
-        {/* Progress dots */}
-        <div className="mt-2 flex items-center justify-center gap-1.5">
+        {/* Progress dots - min 24px touch targets via padding */}
+        <div className="mt-1 flex items-center justify-center gap-0">
           {t.items.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setActiveIndex(idx)}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                idx === activeIndex
-                  ? "w-5 bg-amber-600 shadow-sm shadow-amber-500/50"
-                  : "w-2 bg-amber-300/60 hover:bg-amber-400"
-              )}
+              className="flex items-center justify-center p-2"
               aria-label={`Info ${idx + 1}`}
-            />
+            >
+              <span
+                className={cn(
+                  "block h-1.5 rounded-full transition-all duration-300",
+                  idx === activeIndex
+                    ? "w-5 bg-amber-600 shadow-sm shadow-amber-500/50"
+                    : "w-2 bg-amber-300/60"
+                )}
+              />
+            </button>
           ))}
         </div>
       </div>
