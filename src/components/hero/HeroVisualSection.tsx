@@ -35,9 +35,9 @@ export const HeroVisualSection = memo(({
             
             {/* Content overlay */}
             <div className="relative z-10 h-full flex flex-col justify-center p-4">
-              <h3 className="text-base font-bold text-foreground mb-2">
+              <p className="text-base font-bold text-foreground mb-2" role="heading" aria-level={2}>
                 {t("premiumFleet")}
-              </h3>
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-1">
                   <Wifi className="h-3 w-3" />

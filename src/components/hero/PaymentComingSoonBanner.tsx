@@ -217,7 +217,7 @@ export const PaymentComingSoonBanner = memo(function PaymentComingSoonBanner({
                 <span className="text-xs font-semibold text-primary">{t.badge}</span>
               </span>
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-foreground">{t.title}</h3>
+            <p className="text-lg md:text-xl font-bold text-foreground" role="heading" aria-level={2}>{t.title}</p>
             <p className="text-sm text-muted-foreground mt-0.5">{t.subtitle}</p>
           </div>
         </div>
