@@ -291,15 +291,15 @@ export function PWAUpdatePrompt() {
             }
 
             if (lastSeenVersionRef.current !== fingerprint) {
-              console.log("[PWA Update] 🔥 version.json changed → checking update", {
+              console.log("[PWA Update] 🔥 version.json changed → forcing hard update!", {
                 from: lastSeenVersionRef.current,
                 to: fingerprint,
               });
               lastSeenVersionRef.current = fingerprint;
 
-              // IMPORTANT: Do NOT do any "hard update" (SW unregister + cache purge + hard reload)
-              // based on version.json changes. We only trigger a normal SW update check.
-              await requestUpdateCheck();
+              // Force hard update: unregister SW + clear caches + hard reload
+              // This is the most reliable way to ensure users get the latest version
+              await forceHardUpdate("version.json changed: " + fingerprint, fingerprint);
             }
           } catch {
             // ignore
