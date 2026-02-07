@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, useMemo } from "react";
 import { Zap, Clock, MapPin, CarFront } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -114,6 +114,39 @@ const translations: Record<string, {
 
 const icons = [Zap, Clock, MapPin, CarFront];
 
+const readyLabels: Record<string, string> = {
+  EN: "Vehicle ready at",
+  TR: "Aracınız hazır",
+  DE: "Fahrzeug bereit um",
+  FR: "Véhicule prêt à",
+  RU: "Авто будет готово в",
+  IT: "Veicolo pronto alle",
+  ES: "Vehículo listo a las",
+  AR: "السيارة جاهزة الساعة",
+  UK: "Авто готове о",
+  JA: "車両準備完了",
+  PT: "Veículo pronto às",
+};
+
+function useReadyTime() {
+  const [readyTime, setReadyTime] = useState(() => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() + 20);
+    return d;
+  });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const d = new Date();
+      d.setMinutes(d.getMinutes() + 20);
+      setReadyTime(d);
+    }, 30_000); // update every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  return readyTime;
+}
+
 export const InstantBookingInfo = memo(function InstantBookingInfo({
   language,
   className,
@@ -122,8 +155,19 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
   const t = translations[lang] || translations.EN;
   const isRTL = language.toUpperCase() === "AR";
 
-  // Rotate through items one at a time
   const [activeIndex, setActiveIndex] = useState(0);
+  const readyTime = useReadyTime();
+
+  const formattedTime = useMemo(
+    () =>
+      readyTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [readyTime]
+  );
+
+  const readyLabel = readyLabels[lang] || readyLabels.EN;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -141,15 +185,27 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="px-3 py-2.5 sm:px-4 sm:py-3">
-        {/* Headline with pulse dot */}
-        <div className="mb-2 flex items-center gap-2">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
-          </span>
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-            {t.headline}
-          </span>
+        {/* Headline + live ready-time */}
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            </span>
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              {t.headline}
+            </span>
+          </div>
+
+          {/* Live clock badge */}
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-300/60 bg-emerald-100/60 px-2.5 py-1 dark:border-emerald-700/40 dark:bg-emerald-900/30">
+            <span className="text-[11px]" role="img" aria-label="Turkey">🇹🇷</span>
+            <CarFront className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <Clock className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-[11px] font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">
+              {readyLabel} {formattedTime}
+            </span>
+          </div>
         </div>
 
         {/* Rotating info items */}
