@@ -191,7 +191,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/80 via-background to-emerald-50/80 dark:from-emerald-950/20 dark:via-background dark:to-emerald-950/20",
+        "overflow-hidden rounded-xl border border-green-400/70 bg-gradient-to-r from-green-100 via-emerald-50 to-green-100 shadow-sm shadow-green-200/40 dark:border-green-600/50 dark:from-green-950/40 dark:via-emerald-950/30 dark:to-green-950/40 dark:shadow-green-900/20",
         className
       )}
       dir={isRTL ? "rtl" : "ltr"}
@@ -200,25 +200,25 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
         {/* Headline + live clock */}
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            <span className="relative flex h-3 w-3">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-green-600 shadow-sm shadow-green-500/50" />
             </span>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-green-800 dark:text-green-300">
               {t.headline}
             </span>
           </div>
 
           {/* Live clock: now → ready */}
-          <div className="flex items-center gap-1 rounded-full border border-emerald-300/60 bg-emerald-100/60 px-2 py-1 dark:border-emerald-700/40 dark:bg-emerald-900/30">
+          <div className="flex items-center gap-1.5 rounded-full border border-green-400/70 bg-green-200/60 px-2.5 py-1 shadow-inner dark:border-green-600/50 dark:bg-green-900/40">
             <span className="text-[11px]" role="img" aria-label="Turkey">🇹🇷</span>
-            <Clock className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-[10px] tabular-nums text-emerald-600 dark:text-emerald-400">
+            <Clock className="h-3 w-3 animate-pulse text-green-700 dark:text-green-300" />
+            <span className="text-[10px] font-semibold tabular-nums text-green-700 dark:text-green-300">
               {nowLabel} {formattedNow}
             </span>
-            <span className="text-[10px] text-emerald-400 dark:text-emerald-500">→</span>
-            <CarFront className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-[10px] font-bold tabular-nums text-emerald-700 dark:text-emerald-300">
+            <span className="text-[11px] font-bold text-green-500 dark:text-green-400">→</span>
+            <CarFront className="h-3.5 w-3.5 text-green-700 dark:text-green-300" />
+            <span className="text-[10px] font-extrabold tabular-nums text-green-800 dark:text-green-200">
               {readyLabel} {formattedReady}
             </span>
           </div>
@@ -232,16 +232,16 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
               <div
                 key={idx}
                 className={cn(
-                  "absolute inset-0 flex items-center gap-2 transition-all duration-500",
+                  "absolute inset-0 flex items-center gap-2 transition-all duration-700 ease-in-out",
                   idx === activeIndex
-                    ? "translate-y-0 opacity-100"
+                    ? "translate-y-0 scale-100 opacity-100"
                     : idx < activeIndex
-                    ? "-translate-y-full opacity-0"
-                    : "translate-y-full opacity-0"
+                    ? "-translate-y-full scale-95 opacity-0"
+                    : "translate-y-full scale-95 opacity-0"
                 )}
               >
-                <Icon className="h-3.5 w-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />
-                <span className="truncate text-xs font-medium text-foreground/80 sm:text-sm">
+                <Icon className="h-4 w-4 flex-shrink-0 text-green-700 dark:text-green-300" />
+                <span className="truncate text-xs font-semibold text-foreground/90 sm:text-sm">
                   {item}
                 </span>
               </div>
@@ -256,10 +256,10 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
               key={idx}
               onClick={() => setActiveIndex(idx)}
               className={cn(
-                "h-1 rounded-full transition-all duration-300",
+                "h-1.5 rounded-full transition-all duration-300",
                 idx === activeIndex
-                  ? "w-4 bg-emerald-500"
-                  : "w-1.5 bg-emerald-300/50 hover:bg-emerald-300"
+                  ? "w-5 bg-green-600 shadow-sm shadow-green-500/50"
+                  : "w-2 bg-green-300/60 hover:bg-green-400"
               )}
               aria-label={`Info ${idx + 1}`}
             />
