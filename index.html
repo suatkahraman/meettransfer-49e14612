@@ -67,12 +67,12 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
-    <!-- Preconnect - only critical origins for initial render -->
+    <!-- Preconnect - only origins needed for first paint (fonts) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://zqykoyugubaeealrspxm.supabase.co" />
     
-    <!-- DNS Prefetch for secondary resources -->
+    <!-- DNS Prefetch for secondary resources (not needed for first paint) -->
+    <link rel="dns-prefetch" href="//zqykoyugubaeealrspxm.supabase.co" />
     <link rel="dns-prefetch" href="//images.unsplash.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
 
@@ -155,58 +155,6 @@
       noscript .noscript-cta{display:inline-flex;padding:0.875rem 1.75rem;background:hsl(var(--primary));color:white;text-decoration:none;font-weight:600;border-radius:0.75rem}
     </style>
 
-    <!-- Structured Data - Organization -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "@id": "https://meettransfer.app/#organization",
-      "name": "Meet Transfer",
-      "alternateName": ["Meet Transfer Turkey", "Meet Transfer VIP", "MeetTransfer"],
-      "url": "https://meettransfer.app",
-      "logo": {"@type": "ImageObject", "url": "https://meettransfer.app/pwa-512x512.png", "width": 512, "height": 512},
-      "description": "Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus.",
-      "foundingDate": "2020",
-      "telephone": "+15558051101",
-      "email": "info@meettransfer.app",
-      "address": {"@type": "PostalAddress", "addressLocality": "Istanbul", "addressCountry": "TR"},
-      "areaServed": [
-        {"@type": "Country", "name": "Turkey"},
-        {"@type": "Country", "name": "United Arab Emirates"},
-        {"@type": "Country", "name": "Cyprus"}
-      ],
-      "sameAs": [
-        "https://www.instagram.com/meettransfer/",
-        "https://m.facebook.com/100095122861655/",
-        "https://x.com/meettransfer",
-        "https://www.youtube.com/@meettransfer",
-        "https://www.linkedin.com/company/meettransfer",
-        "https://www.tripadvisor.com/Profile/meettransfer",
-        "https://www.trustpilot.com/review/meettransfer.app"
-      ],
-      "contactPoint": [
-        {"@type": "ContactPoint", "telephone": "+15558051101", "contactType": "customer service", "availableLanguage": ["English", "Turkish", "German", "French", "Russian", "Arabic", "Spanish", "Italian", "Portuguese"], "areaServed": ["TR", "AE", "CY"]}
-      ],
-      "priceRange": "€€",
-      "paymentAccepted": ["Cash", "Credit Card", "Debit Card", "Bank Transfer"],
-      "currenciesAccepted": ["EUR", "USD", "TRY", "GBP", "AED"]
-    }
-    </script>
-
-    <!-- Structured Data - WebSite -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "@id": "https://meettransfer.app/#website",
-      "name": "Meet Transfer",
-      "url": "https://meettransfer.app",
-      "description": "Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus",
-      "publisher": {"@id": "https://meettransfer.app/#organization"},
-      "inLanguage": ["en", "tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt"],
-      "potentialAction": {"@type": "SearchAction", "target": {"@type": "EntryPoint", "urlTemplate": "https://meettransfer.app/destinations?q={search_term_string}"}, "query-input": "required name=search_term_string"}
-    }
-    </script>
   </head>
 
   <body>
@@ -292,6 +240,14 @@
 
     <!-- Boot recovery watchdog - external, deferred -->
     <script defer src="/boot-recovery.js"></script>
+
+    <!-- Structured Data - moved to body end to reduce head parse time (not render-blocking but reduces TTFB-to-FCP gap) -->
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Organization","@id":"https://meettransfer.app/#organization","name":"Meet Transfer","alternateName":["Meet Transfer Turkey","Meet Transfer VIP","MeetTransfer"],"url":"https://meettransfer.app","logo":{"@type":"ImageObject","url":"https://meettransfer.app/pwa-512x512.png","width":512,"height":512},"description":"Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus.","foundingDate":"2020","telephone":"+15558051101","email":"info@meettransfer.app","address":{"@type":"PostalAddress","addressLocality":"Istanbul","addressCountry":"TR"},"areaServed":[{"@type":"Country","name":"Turkey"},{"@type":"Country","name":"United Arab Emirates"},{"@type":"Country","name":"Cyprus"}],"sameAs":["https://www.instagram.com/meettransfer/","https://m.facebook.com/100095122861655/","https://x.com/meettransfer","https://www.youtube.com/@meettransfer","https://www.linkedin.com/company/meettransfer","https://www.tripadvisor.com/Profile/meettransfer","https://www.trustpilot.com/review/meettransfer.app"],"contactPoint":[{"@type":"ContactPoint","telephone":"+15558051101","contactType":"customer service","availableLanguage":["English","Turkish","German","French","Russian","Arabic","Spanish","Italian","Portuguese"],"areaServed":["TR","AE","CY"]}],"priceRange":"€€","paymentAccepted":["Cash","Credit Card","Debit Card","Bank Transfer"],"currenciesAccepted":["EUR","USD","TRY","GBP","AED"]}
+    </script>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"WebSite","@id":"https://meettransfer.app/#website","name":"Meet Transfer","url":"https://meettransfer.app","description":"Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus","publisher":{"@id":"https://meettransfer.app/#organization"},"inLanguage":["en","tr","de","fr","ru","it","es","ar","uk","ja","pt"],"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://meettransfer.app/destinations?q={search_term_string}"},"query-input":"required name=search_term_string"}}
+    </script>
 
   </body>
 </html>
