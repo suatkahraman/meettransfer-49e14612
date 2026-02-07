@@ -114,37 +114,51 @@ const translations: Record<string, {
 
 const icons = [Zap, Clock, MapPin, CarFront];
 
-const readyLabels: Record<string, string> = {
-  EN: "Vehicle ready at",
-  TR: "Aracınız hazır",
-  DE: "Fahrzeug bereit um",
-  FR: "Véhicule prêt à",
-  RU: "Авто будет готово в",
-  IT: "Veicolo pronto alle",
-  ES: "Vehículo listo a las",
-  AR: "السيارة جاهزة الساعة",
-  UK: "Авто готове о",
-  JA: "車両準備完了",
-  PT: "Veículo pronto às",
+const nowLabels: Record<string, string> = {
+  EN: "Now",
+  TR: "Şimdi",
+  DE: "Jetzt",
+  FR: "Maintenant",
+  RU: "Сейчас",
+  IT: "Ora",
+  ES: "Ahora",
+  AR: "الآن",
+  UK: "Зараз",
+  JA: "現在",
+  PT: "Agora",
 };
 
-function useReadyTime() {
-  const [readyTime, setReadyTime] = useState(() => {
-    const d = new Date();
-    d.setMinutes(d.getMinutes() + 20);
-    return d;
-  });
+const readyLabels: Record<string, string> = {
+  EN: "Ready",
+  TR: "Hazır",
+  DE: "Bereit",
+  FR: "Prêt",
+  RU: "Готово",
+  IT: "Pronto",
+  ES: "Listo",
+  AR: "جاهزة",
+  UK: "Готово",
+  JA: "準備完了",
+  PT: "Pronto",
+};
+
+function useLiveClock() {
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const d = new Date();
-      d.setMinutes(d.getMinutes() + 20);
-      setReadyTime(d);
-    }, 30_000); // update every 30s
+      setNow(new Date());
+    }, 30_000);
     return () => clearInterval(interval);
   }, []);
 
-  return readyTime;
+  const readyTime = useMemo(() => {
+    const d = new Date(now);
+    d.setMinutes(d.getMinutes() + 20);
+    return d;
+  }, [now]);
+
+  return { now, readyTime };
 }
 
 export const InstantBookingInfo = memo(function InstantBookingInfo({
@@ -156,17 +170,15 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
   const isRTL = language.toUpperCase() === "AR";
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const readyTime = useReadyTime();
+  const { now, readyTime } = useLiveClock();
 
-  const formattedTime = useMemo(
-    () =>
-      readyTime.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    [readyTime]
-  );
+  const formatTime = (d: Date) =>
+    d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+  const formattedNow = useMemo(() => formatTime(now), [now]);
+  const formattedReady = useMemo(() => formatTime(readyTime), [readyTime]);
+
+  const nowLabel = nowLabels[lang] || nowLabels.EN;
   const readyLabel = readyLabels[lang] || readyLabels.EN;
 
   useEffect(() => {
@@ -185,7 +197,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
       dir={isRTL ? "rtl" : "ltr"}
     >
       <div className="px-3 py-2.5 sm:px-4 sm:py-3">
-        {/* Headline + live ready-time */}
+        {/* Headline + live clock */}
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
@@ -197,13 +209,17 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
             </span>
           </div>
 
-          {/* Live clock badge */}
-          <div className="flex items-center gap-1.5 rounded-full border border-emerald-300/60 bg-emerald-100/60 px-2.5 py-1 dark:border-emerald-700/40 dark:bg-emerald-900/30">
+          {/* Live clock: now → ready */}
+          <div className="flex items-center gap-1 rounded-full border border-emerald-300/60 bg-emerald-100/60 px-2 py-1 dark:border-emerald-700/40 dark:bg-emerald-900/30">
             <span className="text-[11px]" role="img" aria-label="Turkey">🇹🇷</span>
-            <CarFront className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
             <Clock className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-[11px] font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">
-              {readyLabel} {formattedTime}
+            <span className="text-[10px] tabular-nums text-emerald-600 dark:text-emerald-400">
+              {nowLabel} {formattedNow}
+            </span>
+            <span className="text-[10px] text-emerald-400 dark:text-emerald-500">→</span>
+            <CarFront className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-[10px] font-bold tabular-nums text-emerald-700 dark:text-emerald-300">
+              {readyLabel} {formattedReady}
             </span>
           </div>
         </div>
