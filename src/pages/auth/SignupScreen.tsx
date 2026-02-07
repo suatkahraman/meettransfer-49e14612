@@ -46,7 +46,7 @@ const SignupScreen = () => {
   const navigate = useNavigate();
 
   const handleShare = async () => {
-    const shareUrl = window.location.origin + '/signup/customer';
+    const shareUrl = 'https://meettransfer.app/signup/customer';
     const shareText = t('guestSignupShareText');
     
     if (navigator.share) {
