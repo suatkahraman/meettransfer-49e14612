@@ -76,15 +76,16 @@
     <link rel="dns-prefetch" href="//images.unsplash.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
 
+    <!-- PRELOAD: Desktop hero image for fast LCP (only fetched on md+ screens) -->
+    <link rel="preload" as="image" href="/hero-bg-futuristic.webp" type="image/webp" media="(min-width: 768px)" fetchpriority="high" />
+
     <!-- CRITICAL: Module entry in <head> so browser discovers it during head parse,
          not at line 900+. Module scripts are deferred by default. -->
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Non-blocking font loading -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400&display=optional" media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400&display=optional" /></noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=optional" media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@500;600;700&display=optional" /></noscript>
+    <!-- Non-blocking font loading - single consolidated request -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=optional" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=optional" /></noscript>
 
     <!-- iOS Splash Screens -->
     <link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
