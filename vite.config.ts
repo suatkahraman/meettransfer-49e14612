@@ -5,6 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import { visualizer } from "rollup-plugin-visualizer";
 import { viteVersionPlugin } from "./scripts/vite-version-plugin";
+import { asyncCssPlugin } from "./scripts/vite-async-css-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -16,6 +17,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     mode === "production" && viteVersionPlugin(),
+    mode === "production" && asyncCssPlugin(),
     VitePWA({
       // Auto-update: keep users on the latest published version (no manual prompt).
       registerType: "autoUpdate",
