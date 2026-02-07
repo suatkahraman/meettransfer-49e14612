@@ -1,12 +1,13 @@
 # Meet Transfer Robots.txt
 # https://meettransfer.app
-# Last updated: 2026-01-12
+# Last updated: 2026-02-07
 
 # ===========================================
 # Default rules for all crawlers
 # ===========================================
 User-agent: *
 Allow: /
+Allow: /llms.txt
 
 # Protected routes - not for public indexing
 Disallow: /admin
@@ -29,6 +30,99 @@ Disallow: /customer-portal
 Disallow: /api/
 Disallow: /*?token=
 Disallow: /*?session=
+
+# ===========================================
+# AI Bots - Full access for AI search engines
+# ===========================================
+
+# OpenAI / ChatGPT
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
+Disallow: /auth
+Disallow: /login
+Disallow: /signup
+Disallow: /api/
+Disallow: /*?token=
+Disallow: /*?session=
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
+Disallow: /auth
+Disallow: /api/
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
+Disallow: /auth
+Disallow: /api/
+
+# Anthropic / Claude
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
+Disallow: /auth
+Disallow: /api/
+
+User-agent: anthropic-ai
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
+Disallow: /auth
+Disallow: /api/
+
+# Google AI (Gemini, AI Overviews)
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+
+# Apple AI (Siri, Apple Intelligence)
+User-agent: Applebot-Extended
+Allow: /
+Allow: /llms.txt
+
+# Cohere AI
+User-agent: cohere-ai
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
+Disallow: /auth
+Disallow: /api/
+
+# Meta AI
+User-agent: meta-externalagent
+Allow: /
+Allow: /llms.txt
+Disallow: /admin
+Disallow: /driver
+Disallow: /customer
+Disallow: /agency
+Disallow: /auth
+Disallow: /api/
 
 # ===========================================
 # Social Media Bots - Full access for OG images
@@ -135,14 +229,6 @@ User-agent: BLEXBot
 Crawl-delay: 10
 
 # ===========================================
-# Block bad/aggressive bots
-# ===========================================
-User-agent: AhrefsBot
-User-agent: MJ12bot
-User-agent: SemrushBot
-User-agent: DotBot
-
-# ===========================================
-# Sitemap
+# Sitemap & AI Content
 # ===========================================
 Sitemap: https://meettransfer.app/sitemap.xml
