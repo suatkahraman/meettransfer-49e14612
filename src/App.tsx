@@ -12,24 +12,18 @@ import { AgencyLanguageProvider } from "./contexts/AgencyLanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense, useEffect, useState } from "react";
-import FloatingWhatsApp from "./components/website/FloatingWhatsApp";
-import GeoLanguageInitializer from "./components/GeoLanguageInitializer";
 import HashScroll from "@/components/HashScroll";
 import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
-import { UpdateManager } from "./components/UpdateManager";
-import { PWAInstallPrompt } from "./components/website/PWAInstallPrompt";
 import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
-import AdBlockWarning from "./components/AdBlockWarning";
 import { Button } from "@/components/ui/button";
-import { PWADebugPanel } from "./components/website/PWADebugPanel"; // visible with ?pwa_debug=1
-import OfflineIndicator from "./components/OfflineIndicator";
-import CanonicalManager from "./components/seo/CanonicalManager";
 import { GlobalErrorHandlers } from "./components/GlobalErrorHandlers";
 
-// IMPORTANT: Keep debug page eager-loaded.
+// Non-critical app-shell components — loaded AFTER first paint as a single chunk
+const DeferredAppShell = lazy(() => import("./components/DeferredAppShell"));
+
 // Homepage is now split into its own chunk to reduce initial JS.
 const Index = lazy(() => import("./pages/Index"));
-import DebugPage from "./pages/DebugPage";
+const DebugPage = lazy(() => import("./pages/DebugPage"));
 
 // Critical pages - NotFound can remain lazy
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -307,16 +301,13 @@ const App = () => {
           <LanguageQueryRedirect />
           <OAuthCallbackHandler>
             <LanguageProvider>
-              <GeoLanguageInitializer />
               <PromoProvider>
               <AIChatProvider>
               <AITestProvider>
-              <UpdateManager />
-              <PWAInstallPrompt />
-              <PWADebugPanel />
-              <AdBlockWarning />
-              <CanonicalManager />
-              <OfflineIndicator />
+              {/* Non-critical shell loaded after first paint */}
+              <Suspense fallback={null}>
+                <DeferredAppShell />
+              </Suspense>
               <AuthProvider>
                 <Routes>
               {/* Localized Website Pages - Support all languages */}
@@ -510,12 +501,12 @@ const App = () => {
               {/* SEO Debug Page - Public, localized */}
               {localizedRoutes("/seo-debug", <SEODebugPage />)}
               
-              {/* Debug Page - Public, Eager-loaded for PWA troubleshooting, localized */}
+              {/* Debug Page - Lazy loaded, localized */}
               {localizedRoutes("/debug", <DebugPage />)}
               
                 <Route path="*" element={<LazyRoute><NotFound /></LazyRoute>} />
               </Routes>
-              <FloatingWhatsApp />
+              
             </AuthProvider>
             </AITestProvider>
             </AIChatProvider>
