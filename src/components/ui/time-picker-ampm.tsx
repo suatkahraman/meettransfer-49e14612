@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ScrollWheelColumn } from "@/components/ui/scroll-wheel-column";
 
 interface TimePickerAMPMProps {
   value: string;
@@ -37,12 +37,10 @@ const to24Hour = (hour12: number, period: "AM" | "PM"): number => {
   return hour12 === 12 ? 12 : hour12 + 12;
 };
 
-// Parse time string (HH:MM) to components
+// Parse time string (HH:MM)
 const parseTime = (time: string): { hour24: number; minute: number } => {
   const [hourStr, minuteStr] = time.split(":");
-  const hour24 = parseInt(hourStr) || 0;
-  const minute = parseInt(minuteStr) || 0;
-  return { hour24, minute };
+  return { hour24: parseInt(hourStr) || 0, minute: parseInt(minuteStr) || 0 };
 };
 
 // Format display time based on mode
@@ -54,108 +52,9 @@ const formatDisplayTime = (hour24: number, minute: number, is24h: boolean): stri
   return `${hour}:${minute.toString().padStart(2, "0")} ${period}`;
 };
 
-// All minute options (every 5 minutes)
 const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-const HOURS_24 = Array.from({ length: 24 }, (_, i) => i); // 0-23
+const HOURS_24 = Array.from({ length: 24 }, (_, i) => i);
 const HOURS_12 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-const VISIBLE_ITEMS = 5;
-const CENTER_INDEX = Math.floor(VISIBLE_ITEMS / 2); // 2
-
-// Scroll wheel column component
-const ScrollWheelColumn = React.memo(({
-  items,
-  selectedValue,
-  onSelect,
-  formatItem,
-}: {
-  items: number[];
-  selectedValue: number;
-  onSelect: (value: number) => void;
-  formatItem: (v: number) => string;
-}) => {
-  const selectedIndex = items.indexOf(selectedValue);
-  
-  // Calculate visible window centered on selected item
-  const getVisibleItems = () => {
-    const result: (number | null)[] = [];
-    for (let i = -CENTER_INDEX; i <= CENTER_INDEX; i++) {
-      const idx = selectedIndex + i;
-      if (idx >= 0 && idx < items.length) {
-        result.push(items[idx]);
-      } else {
-        result.push(null); // empty slot for padding
-      }
-    }
-    return result;
-  };
-
-  const visibleItems = getVisibleItems();
-  const canScrollUp = selectedIndex > 0;
-  const canScrollDown = selectedIndex < items.length - 1;
-
-  const scrollUp = () => {
-    if (canScrollUp) onSelect(items[selectedIndex - 1]);
-  };
-
-  const scrollDown = () => {
-    if (canScrollDown) onSelect(items[selectedIndex + 1]);
-  };
-
-  return (
-    <div className="flex flex-col items-center w-20">
-      {/* Up arrow */}
-      <button
-        onClick={scrollUp}
-        disabled={!canScrollUp}
-        className={cn(
-          "p-1 rounded transition-colors",
-          canScrollUp ? "text-foreground hover:bg-muted" : "text-muted-foreground/30"
-        )}
-        aria-label="Scroll up"
-      >
-        <ChevronUp className="h-5 w-5" />
-      </button>
-
-      {/* Items */}
-      <div className="flex flex-col items-center gap-0.5">
-        {visibleItems.map((item, i) => {
-          const isSelected = item !== null && item === selectedValue;
-          return (
-            <button
-              key={`${i}-${item}`}
-              onClick={() => item !== null && onSelect(item)}
-              disabled={item === null}
-              className={cn(
-                "w-14 h-10 flex items-center justify-center rounded-md text-lg font-semibold transition-all",
-                item === null && "invisible",
-                isSelected
-                  ? "bg-amber-400 text-black"
-                  : "text-foreground hover:bg-muted"
-              )}
-            >
-              {item !== null ? formatItem(item) : ""}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Down arrow */}
-      <button
-        onClick={scrollDown}
-        disabled={!canScrollDown}
-        className={cn(
-          "p-1 rounded transition-colors",
-          canScrollDown ? "text-foreground hover:bg-muted" : "text-muted-foreground/30"
-        )}
-        aria-label="Scroll down"
-      >
-        <ChevronDown className="h-5 w-5" />
-      </button>
-    </div>
-  );
-});
-
-ScrollWheelColumn.displayName = "ScrollWheelColumn";
 
 export const TimePickerAMPM = React.memo(({
   value,
@@ -171,20 +70,17 @@ export const TimePickerAMPM = React.memo(({
   const [is24h, setIs24h] = React.useState(true);
 
   const { hour24, minute } = React.useMemo(() => parseTime(value), [value]);
-  
-  // Temporary state for selection before save
+
   const [tempHour24, setTempHour24] = React.useState(hour24);
   const [tempMinute, setTempMinute] = React.useState(minute);
   const [tempPeriod, setTempPeriod] = React.useState<"AM" | "PM">(() => to12Hour(hour24).period);
 
-  // Sync temp state when value changes externally or popover opens
   React.useEffect(() => {
     setTempHour24(hour24);
     setTempMinute(minute);
     setTempPeriod(to12Hour(hour24).period);
   }, [hour24, minute, open]);
 
-  // Get the appropriate hour value for the current mode
   const currentDisplayHour = is24h ? tempHour24 : to12Hour(tempHour24).hour;
   const currentHours = is24h ? HOURS_24 : HOURS_12;
 
@@ -203,8 +99,7 @@ export const TimePickerAMPM = React.memo(({
   };
 
   const handleSave = React.useCallback(() => {
-    const timeStr = `${tempHour24.toString().padStart(2, "0")}:${tempMinute.toString().padStart(2, "0")}`;
-    onValueChange(timeStr);
+    onValueChange(`${tempHour24.toString().padStart(2, "0")}:${tempMinute.toString().padStart(2, "0")}`);
     setOpen(false);
   }, [tempHour24, tempMinute, onValueChange]);
 
@@ -222,20 +117,18 @@ export const TimePickerAMPM = React.memo(({
           {formatDisplayTime(hour24, minute, is24h)}
         </button>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-auto p-0 z-[100] bg-background border-2 border-border shadow-xl rounded-xl" 
+      <PopoverContent
+        className="w-auto p-0 z-[100] bg-background border-2 border-border shadow-xl rounded-xl"
         align="start"
       >
-        <div className="flex flex-col p-3 min-w-[220px]">
+        <div className="flex flex-col p-3 min-w-[200px]">
           {/* 24h / 12h Toggle */}
           <div className="flex gap-0 mb-3 bg-muted rounded-lg p-1">
             <button
               onClick={() => setIs24h(true)}
               className={cn(
                 "flex-1 px-4 py-2 rounded-md text-sm font-bold transition-all",
-                is24h
-                  ? "bg-foreground text-background shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                is24h ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
               24h
@@ -244,9 +137,7 @@ export const TimePickerAMPM = React.memo(({
               onClick={() => setIs24h(false)}
               className={cn(
                 "flex-1 px-4 py-2 rounded-md text-sm font-bold transition-all",
-                !is24h
-                  ? "bg-foreground text-background shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
+                !is24h ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
               12h
@@ -255,7 +146,6 @@ export const TimePickerAMPM = React.memo(({
 
           {/* Scroll Wheels */}
           <div className="flex items-center justify-center">
-            {/* Hours */}
             <ScrollWheelColumn
               items={currentHours}
               selectedValue={currentDisplayHour}
@@ -263,10 +153,8 @@ export const TimePickerAMPM = React.memo(({
               formatItem={(v) => v.toString()}
             />
 
-            {/* Divider */}
-            <div className="w-px h-48 bg-border mx-1" />
+            <div className="w-px h-[220px] bg-border mx-1" />
 
-            {/* Minutes */}
             <ScrollWheelColumn
               items={MINUTES}
               selectedValue={tempMinute}
@@ -274,10 +162,9 @@ export const TimePickerAMPM = React.memo(({
               formatItem={(v) => v.toString().padStart(2, "0")}
             />
 
-            {/* AM/PM toggle (only in 12h mode) */}
             {!is24h && (
               <>
-                <div className="w-px h-48 bg-border mx-1" />
+                <div className="w-px h-[220px] bg-border mx-1" />
                 <div className="flex flex-col items-center gap-1 w-16">
                   {(["AM", "PM"] as const).map((p) => (
                     <button
