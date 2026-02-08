@@ -272,16 +272,17 @@ const PromoBannerCarousel = memo(() => {
             </button>
 
             {/* Dots Navigation */}
-            <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
               {PROMO_BANNERS.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
                   className={cn(
-                    "w-2.5 h-2.5 rounded-full transition-all duration-300",
+                    "p-2 rounded-full transition-all duration-300",
+                    "before:block before:rounded-full before:transition-all before:duration-300",
                     currentIndex === index
-                      ? "bg-white w-8"
-                      : "bg-white/50 hover:bg-white/70"
+                      ? "before:w-8 before:h-2.5 before:bg-white"
+                      : "before:w-2.5 before:h-2.5 before:bg-white/50 hover:before:bg-white/70"
                   )}
                   aria-label={`Go to banner ${index + 1}`}
                 />
