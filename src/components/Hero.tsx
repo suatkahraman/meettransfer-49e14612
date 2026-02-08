@@ -119,21 +119,21 @@ export const Hero = () => {
                   <button 
                     onClick={() => setActiveTab("ride")} 
                     className={cn(
-                      "relative flex flex-1 items-center justify-center gap-1.5 border-r border-amber-200 px-4 py-3.5 text-sm font-medium transition-all",
+                      "relative flex flex-1 items-center justify-center gap-2 border-r border-amber-200 px-4 py-4 text-xl font-bold transition-all",
                       activeTab === "ride" ? "bg-amber-200 text-primary shadow-sm" : "text-muted-foreground hover:bg-amber-100 hover:text-foreground"
                     )}
                   >
-                    <Car className="h-4 w-4" />
+                    <Car className="h-6 w-6" />
                     <span>{tSafe("pointToPoint", "Transfer")}</span>
                   </button>
                   <button 
                     onClick={() => setActiveTab("hourly")} 
                     className={cn(
-                      "flex flex-1 items-center justify-center gap-1.5 px-4 py-3.5 text-sm font-medium transition-all",
+                      "flex flex-1 items-center justify-center gap-2 px-4 py-4 text-xl font-bold transition-all",
                       activeTab === "hourly" ? "bg-amber-200 text-primary shadow-sm" : "text-muted-foreground hover:bg-amber-100 hover:text-foreground"
                     )}
                   >
-                    <Timer className="h-4 w-4" />
+                    <Timer className="h-6 w-6" />
                     <span>{tSafe("perHour", "Hourly")}</span>
                   </button>
                 </div>
