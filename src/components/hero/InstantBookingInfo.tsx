@@ -239,7 +239,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
             {/* Arrow separator */}
             <div className="flex items-center justify-center gap-1 leading-none">
               <span className="text-sm" role="img" aria-label="Turkey">🇹🇷</span>
-              <ChevronRight className="h-4 w-4 animate-pulse text-amber-600 dark:text-amber-400" />
+              <ChevronRight className="h-2.5 w-2.5 animate-pulse text-amber-600 dark:text-amber-400" />
             </div>
 
             {/* READY badge with car */}
