@@ -212,7 +212,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
     >
       <div className="px-3 py-3 sm:px-4 sm:py-3.5">
         {/* Headline + live clock */}
-        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-2.5 flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-2">
             <span className="relative flex h-3.5 w-3.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
@@ -224,9 +224,9 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
           </div>
 
           {/* BOOK NOW + 🇹🇷 + READY */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:gap-3">
             {/* BOOK NOW badge with clock */}
-            <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-2 shadow-lg shadow-amber-500/30 sm:px-4 sm:py-2.5 dark:from-amber-600 dark:to-amber-700">
+            <div className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-2 shadow-lg shadow-amber-500/30 sm:w-auto sm:px-4 sm:py-2.5 dark:from-amber-600 dark:to-amber-700">
               <Clock className="h-5 w-5 animate-pulse text-white sm:h-6 sm:w-6" />
               <span className="text-sm font-extrabold uppercase text-white sm:text-base">
                 {bookNowLabels[lang] || bookNowLabels.EN}
@@ -237,13 +237,13 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
             </div>
 
             {/* Arrow separator */}
-            <div className="flex flex-col items-center justify-center leading-none">
+            <div className="flex items-center justify-center leading-none">
               <span className="text-lg" role="img" aria-label="Turkey">🇹🇷</span>
-              <span className="animate-pulse text-5xl font-black text-amber-600 drop-shadow-lg dark:text-amber-400 sm:text-6xl" style={{ lineHeight: 0.7 }}>⟶</span>
+              <span className="animate-pulse text-5xl font-black text-amber-600 drop-shadow-lg dark:text-amber-400 sm:text-6xl" style={{ lineHeight: 0.8 }}>⟶</span>
             </div>
 
             {/* READY badge with car */}
-            <div className="flex items-center gap-2 rounded-xl border-2 border-sky-400 bg-gradient-to-r from-sky-100 to-sky-50 px-3 py-2 shadow-lg shadow-sky-400/20 sm:px-4 sm:py-2.5 dark:border-sky-500 dark:from-sky-900/60 dark:to-sky-800/40">
+            <div className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-sky-400 bg-gradient-to-r from-sky-100 to-sky-50 px-3 py-2 shadow-lg shadow-sky-400/20 sm:w-auto sm:px-4 sm:py-2.5 dark:border-sky-500 dark:from-sky-900/60 dark:to-sky-800/40">
               <CarFront className="h-6 w-6 text-sky-700 dark:text-sky-300 sm:h-7 sm:w-7" />
               <span className="text-sm font-extrabold uppercase text-sky-800 dark:text-sky-200 sm:text-base">
                 {readyLabel}
