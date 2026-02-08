@@ -224,31 +224,31 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
           </div>
 
           {/* BOOK NOW + 🇹🇷 + READY */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* BOOK NOW badge with clock */}
-            <div className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-2.5 py-1.5 shadow-md sm:px-3 sm:py-2 dark:bg-amber-600">
-              <Clock className="h-4 w-4 animate-pulse text-white sm:h-5 sm:w-5" />
-              <span className="text-xs font-extrabold uppercase text-white sm:text-sm">
+            <div className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-2 shadow-lg shadow-amber-500/30 sm:px-4 sm:py-2.5 dark:from-amber-600 dark:to-amber-700">
+              <Clock className="h-5 w-5 animate-pulse text-white sm:h-6 sm:w-6" />
+              <span className="text-sm font-extrabold uppercase text-white sm:text-base">
                 {bookNowLabels[lang] || bookNowLabels.EN}
               </span>
-              <span className="text-xs font-bold tabular-nums text-amber-100 sm:text-sm">
+              <span className="text-sm font-bold tabular-nums text-amber-100 sm:text-base">
                 {formattedNow}
               </span>
             </div>
 
             {/* Arrow separator */}
-            <div className="flex flex-col items-center">
-              <span className="text-sm" role="img" aria-label="Turkey">🇹🇷</span>
-              <span className="text-lg font-black text-amber-600 dark:text-amber-400 sm:text-xl">⟶</span>
+            <div className="flex flex-col items-center leading-none">
+              <span className="text-base" role="img" aria-label="Turkey">🇹🇷</span>
+              <span className="animate-pulse text-2xl font-black text-amber-600 dark:text-amber-400 sm:text-3xl">⟶</span>
             </div>
 
             {/* READY badge with car */}
-            <div className="flex items-center gap-1.5 rounded-lg border-2 border-sky-400 bg-sky-100/90 px-2.5 py-1.5 shadow-md sm:px-3 sm:py-2 dark:border-sky-500 dark:bg-sky-900/60">
-              <CarFront className="h-5 w-5 text-sky-700 dark:text-sky-300 sm:h-6 sm:w-6" />
-              <span className="text-xs font-extrabold uppercase text-sky-800 dark:text-sky-200 sm:text-sm">
+            <div className="flex items-center gap-2 rounded-xl border-2 border-sky-400 bg-gradient-to-r from-sky-100 to-sky-50 px-3 py-2 shadow-lg shadow-sky-400/20 sm:px-4 sm:py-2.5 dark:border-sky-500 dark:from-sky-900/60 dark:to-sky-800/40">
+              <CarFront className="h-6 w-6 text-sky-700 dark:text-sky-300 sm:h-7 sm:w-7" />
+              <span className="text-sm font-extrabold uppercase text-sky-800 dark:text-sky-200 sm:text-base">
                 {readyLabel}
               </span>
-              <span className="text-xs font-bold tabular-nums text-sky-700 dark:text-sky-300 sm:text-sm">
+              <span className="text-sm font-bold tabular-nums text-sky-700 dark:text-sky-300 sm:text-base">
                 {formattedReady}
               </span>
             </div>
