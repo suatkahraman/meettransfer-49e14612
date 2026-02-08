@@ -621,107 +621,63 @@ const AdminAgencies = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {/* Contact Info Display */}
-                  {(agency.contactEmail || agency.contactPhone) && (
-                    <div className="space-y-1.5 text-sm">
-                      {agency.contactName && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <span className="font-medium">{agency.contactName}</span>
-                        </div>
-                      )}
-                      {agency.contactEmail && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Mail className="h-3.5 w-3.5" />
-                          <span className="truncate">{agency.contactEmail}</span>
-                        </div>
-                      )}
-                      {agency.contactPhone && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Phone className="h-3.5 w-3.5" />
-                          <span>{agency.contactPhone}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Multi-Currency Balances - Only show currencies with non-zero balance */}
-                  {agency.currencyBalances && agency.currencyBalances.filter(cb => cb.netAgencyDebt !== 0 || cb.totalAgencyPrice !== 0).length > 0 && (
-                    <div className="space-y-3">
+                  {/* Simplified Balance Display */}
+                  {agency.currencyBalances && agency.currencyBalances.length > 0 ? (
+                    <div className="space-y-2">
                       {agency.currencyBalances
-                        .filter(cb => cb.netAgencyDebt !== 0 || cb.totalAgencyPrice !== 0)
+                        .filter(cb => cb.totalAgencyPrice !== 0 || cb.calculatedBalance !== 0)
                         .map((cb) => {
                           const symbol = getCurrencySymbol(cb.currency);
-                          const showTryEquivalent = cb.currency !== 'TRY' && cb.calculatedBalance !== 0;
+                          const isDebt = cb.calculatedBalance > 0;
                           return (
-                            <div key={cb.currency} className="space-y-2 p-3 bg-muted rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <Badge variant="secondary" className="font-mono">{cb.currency}</Badge>
-                                {showTryEquivalent && (
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <RefreshCw className="h-3 w-3" />
-                                    1 {cb.currency} = ₺{cb.exchangeRate.toFixed(2)}
-                                  </span>
+                            <div key={cb.currency} className="p-3 bg-muted/50 rounded-lg">
+                              <span className="text-xs text-muted-foreground">
+                                Güncel Bakiye ({cb.currency})
+                              </span>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`text-lg font-bold ${isDebt ? 'text-red-600' : cb.calculatedBalance < 0 ? 'text-green-600' : 'text-foreground'}`}>
+                                  {symbol}{Math.abs(cb.calculatedBalance).toFixed(2)}
+                                </span>
+                                {isDebt && (
+                                  <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                                    Acenta borçlu
+                                  </Badge>
                                 )}
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Acenta Fiyatı</span>
-                                <span className="font-medium">{symbol}{cb.totalAgencyPrice.toFixed(2)}</span>
-                              </div>
-                              {cb.totalPassengerCash > 0 && (
-                                <div className="flex items-center justify-between">
-                                  <span className="text-sm text-muted-foreground">Yolcu Nakit</span>
-                                  <span className="font-medium text-orange-600">-{symbol}{cb.totalPassengerCash.toFixed(2)}</span>
-                                </div>
-                              )}
-                              {cb.totalPayments > 0 && (
-                                <div className="flex items-center justify-between">
-                                  <span className="text-sm text-muted-foreground">Alınan Ödeme</span>
-                                  <span className="font-medium text-green-600">-{symbol}{cb.totalPayments.toFixed(2)}</span>
-                                </div>
-                              )}
-                              <div className="flex items-center justify-between border-t pt-2">
-                                <span className="text-sm font-medium">Bakiye</span>
-                                <div className="text-right">
-                                  <span className={`font-bold ${cb.calculatedBalance > 0 ? 'text-primary' : cb.calculatedBalance < 0 ? 'text-green-600' : ''}`}>
-                                    {symbol}{cb.calculatedBalance.toFixed(2)}
-                                  </span>
-                                  {showTryEquivalent && (
-                                    <div className="text-xs text-muted-foreground">
-                                      ≈ ₺{cb.tryEquivalent.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
-                                    </div>
-                                  )}
-                                </div>
+                                {cb.calculatedBalance < 0 && (
+                                  <Badge className="bg-green-500/20 text-green-700 text-[10px] px-1.5 py-0">
+                                    Alacaklı
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           );
                         })}
                       
-                      {/* Total TRY Equivalent Summary */}
-                      {agency.currencyBalances.filter(cb => cb.currency !== 'TRY' && cb.calculatedBalance !== 0).length > 0 && (
-                        <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">Toplam TRY Karşılığı</span>
-                            <span className={`font-bold text-lg ${agency.totalTryEquivalent > 0 ? 'text-primary' : agency.totalTryEquivalent < 0 ? 'text-green-600' : ''}`}>
-                              ₺{agency.totalTryEquivalent.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
+                      {/* Show zero balance if all currencies are zero */}
+                      {agency.currencyBalances.every(cb => cb.totalAgencyPrice === 0 && cb.calculatedBalance === 0) && (
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                          <span className="text-xs text-muted-foreground">
+                            Güncel Bakiye ({agency.currency})
+                          </span>
+                          <div className="mt-1">
+                            <span className="text-lg font-bold text-foreground">
+                              {getCurrencySymbol(agency.currency)}0.00
                             </span>
                           </div>
                         </div>
                       )}
                     </div>
-                  )}
-
-                  {/* Total Payments Summary - shown only if there are payments not yet grouped by currency */}
-                  {agency.totalPayments > 0 && agency.currencyBalances?.every(cb => cb.totalPayments === 0) && (
-                    <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Toplam Alınan Ödemeler (tüm para birimleri)</span>
-                        <span className="font-medium text-green-600">{getCurrencySymbol(agency.currency)}{agency.totalPayments.toFixed(2)}</span>
+                  ) : (
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <span className="text-xs text-muted-foreground">
+                        Güncel Bakiye ({agency.currency})
+                      </span>
+                      <div className="mt-1">
+                        <span className="text-lg font-bold text-foreground">
+                          {getCurrencySymbol(agency.currency)}0.00
+                        </span>
                       </div>
                     </div>
-                  )}
-
-                  {agency.comments && (
-                    <p className="text-sm text-muted-foreground">{agency.comments}</p>
                   )}
                 </CardContent>
               </Card>
