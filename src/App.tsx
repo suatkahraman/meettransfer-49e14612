@@ -1,5 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -17,6 +15,10 @@ import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
 import { Button } from "@/components/ui/button";
 import { GlobalErrorHandlers } from "./components/GlobalErrorHandlers";
+
+// Toasters are NOT needed for first paint — lazy load to shorten critical chain
+const LazyToaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
+const LazySonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 
 // Non-critical app-shell components — loaded AFTER first paint as a single chunk
 const DeferredAppShell = lazy(() => import("./components/DeferredAppShell"));
@@ -274,8 +276,8 @@ const App = () => {
       <ChunkErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
+            <Suspense fallback={null}><LazyToaster /></Suspense>
+            <Suspense fallback={null}><LazySonner /></Suspense>
             <GlobalErrorHandlers />
             <BrowserRouter>
               <LanguageProvider>
@@ -294,8 +296,8 @@ const App = () => {
   <ChunkErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
+        <Suspense fallback={null}><LazyToaster /></Suspense>
+        <Suspense fallback={null}><LazySonner /></Suspense>
         <GlobalErrorHandlers />
         <BrowserRouter>
           <HashScroll />

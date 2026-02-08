@@ -59,11 +59,8 @@
     <meta name="msapplication-tap-highlight" content="no" />
     <meta name="format-detection" content="telephone=no" />
 
-    <!-- Favicon -->
+    <!-- Favicon - minimal set -->
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
-    <link rel="shortcut icon" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
@@ -87,14 +84,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=optional" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&display=optional" /></noscript>
 
-    <!-- iOS Splash Screens -->
-    <link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
-    <link rel="apple-touch-startup-image" href="/splash-1536x2048.png" media="(min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash-1668x2224.png" media="(min-device-width: 834px) and (max-device-width: 834px) and (-webkit-min-device-pixel-ratio: 2)" />
-    <link rel="apple-touch-startup-image" href="/splash-2048x2732.png" media="(min-device-width: 1024px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2)" />
+    <!-- iOS Splash Screens - deferred, not needed for first paint -->
+    <!-- Loaded via JS after app mount to avoid blocking critical chain -->
 
     <!-- Verification -->
     <meta name="google-site-verification" content="5E5vg9Nq09J8bSMSHsGYPayqJUKIlM5GJvq7kWF60KE" />
@@ -236,6 +227,16 @@
     <!-- Font readiness (non-blocking) -->
     <script>
       if(document.fonts){document.fonts.ready.then(function(){document.body.classList.add('fonts-loaded');});}
+      // Defer iOS splash screens until after app mount (not needed for first paint)
+      window.addEventListener('lovable:app-mounted',function(){
+        var splashes=[
+          ['/splash-640x1136.png','(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)'],
+          ['/splash-750x1334.png','(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)'],
+          ['/splash-1125x2436.png','(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)'],
+          ['/splash-1242x2208.png','(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)']
+        ];
+        splashes.forEach(function(s){var l=document.createElement('link');l.rel='apple-touch-startup-image';l.href=s[0];l.media=s[1];document.head.appendChild(l);});
+      },{once:true});
     </script>
 
     <!-- Boot recovery watchdog - external, deferred -->
@@ -243,10 +244,10 @@
 
     <!-- Structured Data - moved to body end to reduce head parse time (not render-blocking but reduces TTFB-to-FCP gap) -->
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"Organization","@id":"https://meettransfer.app/#organization","name":"Meet Transfer","alternateName":["Meet Transfer Turkey","Meet Transfer VIP","MeetTransfer"],"url":"https://meettransfer.app","logo":{"@type":"ImageObject","url":"https://meettransfer.app/pwa-512x512.png","width":512,"height":512},"description":"Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus.","foundingDate":"2020","telephone":"+15558051101","email":"info@meettransfer.app","address":{"@type":"PostalAddress","addressLocality":"Istanbul","addressCountry":"TR"},"areaServed":[{"@type":"Country","name":"Turkey"},{"@type":"Country","name":"United Arab Emirates"},{"@type":"Country","name":"Cyprus"}],"sameAs":["https://www.instagram.com/meettransfer/","https://m.facebook.com/100095122861655/","https://x.com/meettransfer","https://www.youtube.com/@meettransfer","https://www.linkedin.com/company/meettransfer","https://www.tripadvisor.com/Profile/meettransfer","https://www.trustpilot.com/review/meettransfer.app"],"contactPoint":[{"@type":"ContactPoint","telephone":"+15558051101","contactType":"customer service","availableLanguage":["English","Turkish","German","French","Russian","Arabic","Spanish","Italian","Portuguese"],"areaServed":["TR","AE","CY"]}],"priceRange":"€€","paymentAccepted":["Cash","Credit Card","Debit Card","Bank Transfer"],"currenciesAccepted":["EUR","USD","TRY","GBP","AED"]}
+    {"@context":"https://schema.org","@type":"Organization","@id":"https://meettransfer.app/#organization","name":"Meet Transfer","url":"https://meettransfer.app","logo":{"@type":"ImageObject","url":"https://meettransfer.app/pwa-512x512.png","width":512,"height":512},"description":"Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus.","telephone":"+15558051101","address":{"@type":"PostalAddress","addressLocality":"Istanbul","addressCountry":"TR"},"areaServed":[{"@type":"Country","name":"Turkey"},{"@type":"Country","name":"United Arab Emirates"},{"@type":"Country","name":"Cyprus"}],"sameAs":["https://www.instagram.com/meettransfer/","https://m.facebook.com/100095122861655/","https://x.com/meettransfer"],"contactPoint":[{"@type":"ContactPoint","telephone":"+15558051101","contactType":"customer service","availableLanguage":["English","Turkish","German","Russian","Arabic"],"areaServed":["TR","AE","CY"]}]}
     </script>
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"WebSite","@id":"https://meettransfer.app/#website","name":"Meet Transfer","url":"https://meettransfer.app","description":"Premium VIP airport transfer and private chauffeur service in Turkey, Dubai and Cyprus","publisher":{"@id":"https://meettransfer.app/#organization"},"inLanguage":["en","tr","de","fr","ru","it","es","ar","uk","ja","pt"],"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://meettransfer.app/destinations?q={search_term_string}"},"query-input":"required name=search_term_string"}}
+    {"@context":"https://schema.org","@type":"WebSite","@id":"https://meettransfer.app/#website","name":"Meet Transfer","url":"https://meettransfer.app","publisher":{"@id":"https://meettransfer.app/#organization"},"inLanguage":["en","tr","de","fr","ru"],"potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://meettransfer.app/destinations?q={search_term_string}"},"query-input":"required name=search_term_string"}}
     </script>
 
   </body>
