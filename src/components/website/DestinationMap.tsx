@@ -280,10 +280,14 @@ export const DestinationMap = ({ cityKey }: { cityKey: string }) => {
         `;
 
         el.addEventListener('mouseenter', () => {
-          el.firstElementChild && ((el.firstElementChild as HTMLElement).style.transform = 'scale(1.2)');
+          requestAnimationFrame(() => {
+            el.firstElementChild && ((el.firstElementChild as HTMLElement).style.transform = 'scale(1.2)');
+          });
         });
         el.addEventListener('mouseleave', () => {
-          el.firstElementChild && ((el.firstElementChild as HTMLElement).style.transform = 'scale(1)');
+          requestAnimationFrame(() => {
+            el.firstElementChild && ((el.firstElementChild as HTMLElement).style.transform = 'scale(1)');
+          });
         });
 
         new mapboxgl.Marker(el)

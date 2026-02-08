@@ -195,22 +195,25 @@ export function useAdvancedTracking() {
     if (now - lastScrollRef.current < 200) return; // Throttle
     lastScrollRef.current = now;
 
-    const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+    // Defer geometry reads to rAF to avoid forced reflow
+    requestAnimationFrame(() => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
 
-    // Check which thresholds are crossed
-    for (const threshold of SCROLL_DEPTH_THRESHOLDS) {
-      if (scrollPercent >= threshold && !sessionRef.current.scrollDepthsReached.has(threshold)) {
-        sessionRef.current.scrollDepthsReached.add(threshold);
-        addEvent({
-          type: "scroll",
-          depth: threshold,
-          timestamp: now,
-          page: location.pathname,
-        });
+      // Check which thresholds are crossed
+      for (const threshold of SCROLL_DEPTH_THRESHOLDS) {
+        if (scrollPercent >= threshold && !sessionRef.current!.scrollDepthsReached.has(threshold)) {
+          sessionRef.current!.scrollDepthsReached.add(threshold);
+          addEvent({
+            type: "scroll",
+            depth: threshold,
+            timestamp: now,
+            page: location.pathname,
+          });
+        }
       }
-    }
+    });
   }, [location.pathname, addEvent]);
 
   // Track clicks
