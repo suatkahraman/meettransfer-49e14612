@@ -201,6 +201,13 @@ const SwitzerlandAirportTransferGuide = lazy(() => import("./pages/website/blog/
 const AdanaAirportTransferGuide = lazy(() => import("./pages/website/blog/AdanaAirportTransferGuide"));
 const AnkaraAirportTransferGuide = lazy(() => import("./pages/website/blog/AnkaraAirportTransferGuide"));
 const InstantVehicleServiceGuide = lazy(() => import("./pages/website/blog/InstantVehicleServiceGuide"));
+const KasAirportTransferGuide = lazy(() => import("./pages/website/blog/KasAirportTransferGuide"));
+const AlanyaAirportTransferGuide = lazy(() => import("./pages/website/blog/AlanyaAirportTransferGuide"));
+const BelekAirportTransferGuide = lazy(() => import("./pages/website/blog/BelekAirportTransferGuide"));
+const KemerAirportTransferGuide = lazy(() => import("./pages/website/blog/KemerAirportTransferGuide"));
+const SideAirportTransferGuide = lazy(() => import("./pages/website/blog/SideAirportTransferGuide"));
+const LaraAirportTransferGuide = lazy(() => import("./pages/website/blog/LaraAirportTransferGuide"));
+const BestPrivateTransferTurkey = lazy(() => import("./pages/website/blog/BestPrivateTransferTurkey"));
 const AirportTransferIstanbul = lazy(() => import("./pages/website/AirportTransferIstanbul"));
 const SEODebugPage = lazy(() => import("./pages/SEODebugPage"));
 // DebugPage is now eager-loaded at the top of the file for PWA troubleshooting
@@ -396,6 +403,13 @@ const App = () => {
               {localizedBlogRoutes("/blog/adana-airport-transfer-guide", <AdanaAirportTransferGuide />)}
               {localizedBlogRoutes("/blog/ankara-airport-transfer-guide", <AnkaraAirportTransferGuide />)}
               {localizedBlogRoutes("/blog/instant-vehicle-service-guide", <InstantVehicleServiceGuide />)}
+              {localizedBlogRoutes("/blog/kas-airport-transfer-guide", <KasAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/alanya-airport-transfer-guide", <AlanyaAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/belek-airport-transfer-guide", <BelekAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/kemer-airport-transfer-guide", <KemerAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/side-airport-transfer-guide", <SideAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/lara-airport-transfer-guide", <LaraAirportTransferGuide />)}
+              {localizedBlogRoutes("/blog/best-private-transfer-turkey", <BestPrivateTransferTurkey />)}
               {localizedRoutes("/airporttransfer/istanbul", <AirportTransferIstanbul />)}
               
               {/* Embeddable Form for External Websites - Not localized */}
