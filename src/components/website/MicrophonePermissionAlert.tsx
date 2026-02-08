@@ -204,9 +204,9 @@ export const MicrophonePermissionAlert = memo(function MicrophonePermissionAlert
         </div>
         <Button 
           variant="ghost" 
-          size="sm" 
+          size="icon" 
           onClick={onDismiss} 
-          className="h-6 w-6 p-0 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 flex-shrink-0"
+          className="h-10 w-10 p-0 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 flex-shrink-0"
         >
           <X className="h-4 w-4" />
         </Button>

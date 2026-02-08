@@ -95,7 +95,8 @@ export function PWAInstallBanner() {
               </h4>
               <button 
                 onClick={() => setShowIOSSteps(false)}
-                className="p-1.5 hover:bg-muted rounded-full transition-colors"
+                className="p-2.5 hover:bg-muted rounded-full transition-colors flex items-center justify-center"
+                style={{ minWidth: 44, minHeight: 44 }}
               >
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>

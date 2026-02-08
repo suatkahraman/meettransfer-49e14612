@@ -287,7 +287,7 @@ export function PWADebugPanel() {
                 ) : (
                   <WifiOff className="h-4 w-4 text-destructive" />
                 )}
-                <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-muted rounded">
+                <button onClick={() => setIsOpen(false)} className="p-2.5 hover:bg-muted rounded" style={{ minWidth: 44, minHeight: 44 }}>
                   <X className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
