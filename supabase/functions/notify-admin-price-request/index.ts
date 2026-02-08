@@ -26,8 +26,18 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "kusadasi": "Kuşadası",
 };
 
+function normalizeTurkish(text: string): string {
+  return text
+    .replace(/İ/g, 'I').replace(/ı/g, 'i')
+    .replace(/Ş/g, 'S').replace(/ş/g, 's')
+    .replace(/Ç/g, 'C').replace(/ç/g, 'c')
+    .replace(/Ö/g, 'O').replace(/ö/g, 'o')
+    .replace(/Ü/g, 'U').replace(/ü/g, 'u')
+    .replace(/Ğ/g, 'G').replace(/ğ/g, 'g');
+}
+
 function detectDistrict(text: string): string | null {
-  const lower = text.toLowerCase();
+  const lower = normalizeTurkish(text).toLowerCase();
   for (const [key, value] of Object.entries(DISTRICT_MAPPING)) {
     if (lower.includes(key)) return value;
   }
@@ -35,7 +45,7 @@ function detectDistrict(text: string): string | null {
 }
 
 function analyzeLocation(pickup: string, dropoff: string): { airport: string | null; city: string | null; district: string | null } {
-  const s = (pickup + " " + dropoff).toLowerCase();
+  const s = normalizeTurkish(pickup + " " + dropoff).toLowerCase();
 
   let airport: string | null = null;
   if (/istanbul airport|\bist\b/i.test(s)) airport = "Istanbul Airport (IST)";
