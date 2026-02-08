@@ -440,15 +440,15 @@ export const RideFormContent = memo(({
         <Button 
           onClick={validateAndContinue} 
           disabled={submitting} 
-          className="group h-[75px] w-full touch-manipulation rounded-xl border-0 bg-gradient-to-r from-primary via-primary to-primary/90 text-sm font-bold shadow-lg shadow-primary/30 transition-all duration-300 hover:from-primary/90 hover:to-primary hover:shadow-xl hover:shadow-primary/40 active:from-primary/80 active:to-primary/80"
+           className="group h-[75px] w-full touch-manipulation rounded-xl border-0 bg-gradient-to-r from-primary via-primary to-primary/90 text-xl font-bold shadow-lg shadow-primary/30 transition-all duration-300 hover:from-primary/90 hover:to-primary hover:shadow-xl hover:shadow-primary/40 active:from-primary/80 active:to-primary/80"
         >
           {submitting ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
+            <Loader2 className="h-6 w-6 animate-spin" />
           ) : (
             <>
-              <Zap className="mr-2 h-4 w-4 animate-pulse" />
+              <Zap className="mr-2 h-5 w-5 animate-pulse" />
               <span className="tracking-wide">{t("getQuote")}</span>
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1.5" />
+              <ArrowRight className="ml-2 h-6 w-6 transition-transform duration-300 group-hover:translate-x-1.5" />
             </>
           )}
         </Button>
