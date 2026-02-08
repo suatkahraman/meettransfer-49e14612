@@ -133,6 +133,15 @@ All colors MUST be HSL.
   }
 }
 
+/* Hide scrollbar for scroll wheel pickers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Shake animation for validation errors */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
