@@ -210,45 +210,45 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
       )}
       dir={isRTL ? "rtl" : "ltr"}
     >
-      <div className="px-2 py-2 sm:px-3 sm:py-2.5">
+      <div className="px-2.5 py-2.5 sm:px-3.5 sm:py-3">
         {/* Headline + live clock */}
-        <div className="mb-1.5 flex flex-col items-center gap-1.5 sm:flex-row sm:justify-between">
+        <div className="mb-2 flex flex-col items-center gap-1.5 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="relative flex h-2.5 w-2.5">
+            <span className="relative flex h-3 w-3">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-600 shadow-sm shadow-amber-500/50" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-amber-600 shadow-sm shadow-amber-500/50" />
             </span>
-            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300 sm:text-sm">
+            <span className="text-sm font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300 sm:text-base">
               {t.headline}
             </span>
           </div>
 
           {/* BOOK NOW + ➤ + READY */}
-          <div className="flex w-full flex-col items-center gap-1.5 sm:w-auto sm:flex-row sm:gap-2">
+          <div className="flex w-full flex-col items-center gap-1.5 sm:w-auto sm:flex-row sm:gap-2.5">
             {/* BOOK NOW badge with clock */}
-            <div className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-2 py-1 shadow-md shadow-amber-500/30 sm:w-auto sm:px-3 sm:py-1.5 dark:from-amber-600 dark:to-amber-700">
-              <Clock className="h-3.5 w-3.5 animate-pulse text-white sm:h-4 sm:w-4" />
-              <span className="text-[10px] font-extrabold uppercase text-white sm:text-xs">
+            <div className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-2.5 py-1.5 shadow-md shadow-amber-500/30 sm:w-auto sm:px-3.5 sm:py-2 dark:from-amber-600 dark:to-amber-700">
+              <Clock className="h-4 w-4 animate-pulse text-white sm:h-5 sm:w-5" />
+              <span className="text-xs font-extrabold uppercase text-white sm:text-sm">
                 {bookNowLabels[lang] || bookNowLabels.EN}
               </span>
-              <span className="text-xs font-extrabold tabular-nums text-amber-100 sm:text-sm">
+              <span className="text-sm font-extrabold tabular-nums text-amber-100 sm:text-base">
                 {formattedNow}
               </span>
             </div>
 
             {/* Arrow separator */}
             <div className="flex items-center justify-center gap-1 leading-none">
-              <span className="text-xs" role="img" aria-label="Turkey">🇹🇷</span>
+              <span className="text-sm" role="img" aria-label="Turkey">🇹🇷</span>
               <ChevronRight className="h-6 w-6 animate-pulse text-amber-600 drop-shadow-md dark:text-amber-400 sm:h-7 sm:w-7" strokeWidth={3} />
             </div>
 
             {/* READY badge with car */}
-            <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border-2 border-sky-400 bg-gradient-to-r from-sky-100 to-sky-50 px-2 py-1 shadow-md shadow-sky-400/20 sm:w-auto sm:px-3 sm:py-1.5 dark:border-sky-500 dark:from-sky-900/60 dark:to-sky-800/40">
-              <CarFront className="h-4 w-4 text-sky-700 dark:text-sky-300 sm:h-5 sm:w-5" />
-              <span className="text-[10px] font-extrabold uppercase text-sky-800 dark:text-sky-200 sm:text-xs">
+            <div className="flex w-full items-center justify-center gap-1.5 rounded-lg border-2 border-sky-400 bg-gradient-to-r from-sky-100 to-sky-50 px-2.5 py-1.5 shadow-md shadow-sky-400/20 sm:w-auto sm:px-3.5 sm:py-2 dark:border-sky-500 dark:from-sky-900/60 dark:to-sky-800/40">
+              <CarFront className="h-5 w-5 text-sky-700 dark:text-sky-300 sm:h-6 sm:w-6" />
+              <span className="text-xs font-extrabold uppercase text-sky-800 dark:text-sky-200 sm:text-sm">
                 {readyLabel}
               </span>
-              <span className="text-xs font-extrabold tabular-nums text-sky-700 dark:text-sky-300 sm:text-sm">
+              <span className="text-sm font-extrabold tabular-nums text-sky-700 dark:text-sky-300 sm:text-base">
                 {formattedReady}
               </span>
             </div>
@@ -256,7 +256,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
         </div>
 
         {/* Rotating info items */}
-        <div className="relative h-6 overflow-hidden sm:h-7">
+        <div className="relative h-7 overflow-hidden sm:h-8">
           {t.items.map((item, idx) => {
             const Icon = icons[idx];
             return (
@@ -271,8 +271,8 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
                     : "translate-y-full scale-95 opacity-0"
                 )}
               >
-                <Icon className="h-3.5 w-3.5 flex-shrink-0 text-amber-700 dark:text-amber-300 sm:h-4 sm:w-4" />
-                <span className="truncate text-xs font-bold text-foreground/90 sm:text-sm">
+                <Icon className="h-4 w-4 flex-shrink-0 text-amber-700 dark:text-amber-300 sm:h-5 sm:w-5" />
+                <span className="truncate text-sm font-bold text-foreground/90 sm:text-base">
                   {item}
                 </span>
               </div>
@@ -293,8 +293,8 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
                 className={cn(
                   "block h-1.5 rounded-full transition-all duration-300",
                   idx === activeIndex
-                    ? "w-4 bg-amber-600 shadow-sm shadow-amber-500/50"
-                    : "w-1.5 bg-amber-300/60"
+                    ? "w-5 bg-amber-600 shadow-sm shadow-amber-500/50"
+                    : "w-2 bg-amber-300/60"
                 )}
               />
             </button>
