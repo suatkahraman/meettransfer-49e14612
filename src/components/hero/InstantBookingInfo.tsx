@@ -182,7 +182,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
               <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-amber-600 shadow-sm shadow-amber-500/50" />
             </span>
-            <span className="text-sm font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300 sm:text-base">
+            <span className="text-base font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300 sm:text-lg">
               {t.headline}
             </span>
           </div>
