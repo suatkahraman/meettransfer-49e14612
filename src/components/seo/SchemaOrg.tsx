@@ -1,5 +1,11 @@
 import { useEffect } from 'react';
 import { DEFAULT_RATING, DEFAULT_TOTAL_REVIEWS } from '@/constants/ratings';
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
+
+const languageToISO: Record<Language, string> = {
+  EN: 'en', DE: 'de', FR: 'fr', RU: 'ru', IT: 'it',
+  ES: 'es', AR: 'ar', TR: 'tr', UK: 'uk', JA: 'ja', PT: 'pt',
+};
 
 interface LocalBusinessSchema {
   type: 'LocalBusiness';
@@ -263,7 +269,7 @@ const generateBreadcrumbSchema = (items: { name: string; url: string }[]) => ({
 });
 
 
-const generateArticleSchema = (article: ArticleSchema) => ({
+const generateArticleSchema = (article: ArticleSchema, isoLang: string = 'en') => ({
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: article.headline,
@@ -305,7 +311,7 @@ const generateArticleSchema = (article: ArticleSchema) => ({
     keywords: article.keywords.join(', '),
   }),
   articleSection: 'Travel & Transportation',
-  inLanguage: 'en',
+  inLanguage: isoLang,
 });
 
 const generateWebPageSchema = (webPage: WebPageSchema) => ({
@@ -431,6 +437,9 @@ const generateAIBookingAssistantSchema = () => ({
 });
 
 const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
+  const { language } = useLanguage();
+  const isoLang = languageToISO[language] || 'en';
+
   useEffect(() => {
     let cancelled = false;
 
@@ -537,7 +546,7 @@ const SchemaOrg = ({ schemas }: SchemaOrgProps) => {
             schemaData = generateBreadcrumbSchema((schema as BreadcrumbSchema).items);
             break;
           case 'Article':
-            schemaData = generateArticleSchema(schema as ArticleSchema);
+            schemaData = generateArticleSchema(schema as ArticleSchema, isoLang);
             break;
           case 'WebPage':
             schemaData = generateWebPageSchema(schema as WebPageSchema);
