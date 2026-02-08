@@ -16,6 +16,8 @@ const translations: Record<string, {
     items: [
       "Ready in 20 minutes!",
       "All cities in Turkey",
+      "Fast & reliable drivers",
+      "Book now, ride soon!",
     ],
   },
   TR: {
@@ -23,6 +25,8 @@ const translations: Record<string, {
     items: [
       "20 dakikada hazır!",
       "Türkiye genelinde hizmet",
+      "Hızlı ve güvenilir şoförler",
+      "Hemen rezervasyon yap!",
     ],
   },
   DE: {
@@ -30,6 +34,8 @@ const translations: Record<string, {
     items: [
       "In 20 Minuten bereit!",
       "In der ganzen Türkei",
+      "Schnelle & zuverlässige Fahrer",
+      "Jetzt buchen!",
     ],
   },
   FR: {
@@ -37,6 +43,8 @@ const translations: Record<string, {
     items: [
       "Prêt en 20 minutes !",
       "Dans toute la Turquie",
+      "Chauffeurs rapides & fiables",
+      "Réservez maintenant !",
     ],
   },
   RU: {
@@ -44,6 +52,8 @@ const translations: Record<string, {
     items: [
       "Готово за 20 минут!",
       "По всей Турции",
+      "Быстрые и надёжные водители",
+      "Бронируйте сейчас!",
     ],
   },
   IT: {
@@ -51,6 +61,8 @@ const translations: Record<string, {
     items: [
       "Pronto in 20 minuti!",
       "In tutta la Turchia",
+      "Autisti veloci e affidabili",
+      "Prenota ora!",
     ],
   },
   ES: {
@@ -58,6 +70,8 @@ const translations: Record<string, {
     items: [
       "¡Listo en 20 minutos!",
       "En toda Turquía",
+      "Conductores rápidos y confiables",
+      "¡Reserva ahora!",
     ],
   },
   AR: {
@@ -65,6 +79,8 @@ const translations: Record<string, {
     items: [
       "جاهزة خلال 20 دقيقة!",
       "في جميع مدن تركيا",
+      "سائقون سريعون وموثوقون",
+      "احجز الآن!",
     ],
   },
   UK: {
@@ -72,6 +88,8 @@ const translations: Record<string, {
     items: [
       "Готово за 20 хвилин!",
       "По всій Туреччині",
+      "Швидкі та надійні водії",
+      "Бронюйте зараз!",
     ],
   },
   JA: {
@@ -79,6 +97,8 @@ const translations: Record<string, {
     items: [
       "20分で準備完了！",
       "トルコ全都市対応",
+      "迅速＆確実なドライバー",
+      "今すぐ予約！",
     ],
   },
   PT: {
@@ -86,11 +106,13 @@ const translations: Record<string, {
     items: [
       "Pronto em 20 minutos!",
       "Em toda a Turquia",
+      "Motoristas rápidos e confiáveis",
+      "Reserve agora!",
     ],
   },
 };
 
-const icons = [Zap, MapPin];
+const icons = [Zap, MapPin, CarFront, Clock];
 
 const nowLabels: Record<string, string> = {
   EN: "Now",
@@ -182,7 +204,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
               <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-amber-600 shadow-sm shadow-amber-500/50" />
             </span>
-            <span className="text-base font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300 sm:text-lg">
+            <span className="text-lg font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300 sm:text-xl">
               {t.headline}
             </span>
           </div>
@@ -203,7 +225,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
         </div>
 
         {/* Rotating info items */}
-        <div className="relative h-7 overflow-hidden sm:h-8">
+        <div className="relative h-8 overflow-hidden sm:h-9">
           {t.items.map((item, idx) => {
             const Icon = icons[idx];
             return (
@@ -219,7 +241,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
                 )}
               >
                 <Icon className="h-5 w-5 flex-shrink-0 text-amber-700 dark:text-amber-300 sm:h-6 sm:w-6" />
-                <span className="truncate text-sm font-bold text-foreground/90 sm:text-base">
+                <span className="truncate text-base font-bold text-foreground/90 sm:text-lg">
                   {item}
                 </span>
               </div>
