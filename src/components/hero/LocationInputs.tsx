@@ -53,7 +53,7 @@ const LocationInputsComponent = ({
            language === 'JA' ? '乗車地' :
            'From'}
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-1 items-center gap-2">
           <MapPin className={cn("h-4 w-4 flex-shrink-0", pickupError ? "text-destructive" : "text-foreground")} />
           <GooglePlacesAutocomplete 
             onPlaceSelected={onPickupSelected} 
@@ -69,7 +69,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="bg-transparent border-0 p-0 h-auto text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="h-full w-full flex-1 border-0 bg-transparent p-0 text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={pickup}
             myLocationLabel={t('useMyLocation')}
           />
@@ -102,7 +102,7 @@ const LocationInputsComponent = ({
            language === 'JA' ? '降車地' :
            'To'}
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-1 items-center gap-2">
           <Navigation className={cn("h-4 w-4 flex-shrink-0", dropoffError ? "text-destructive" : "text-foreground")} />
           <GooglePlacesAutocomplete 
             onPlaceSelected={onDropoffSelected} 
@@ -118,7 +118,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="bg-transparent border-0 p-0 h-auto text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="h-full w-full flex-1 border-0 bg-transparent p-0 text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
             value={dropoff}
             myLocationLabel={t('useMyLocation')}
           />
