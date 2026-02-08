@@ -29,8 +29,18 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "al barsha": "Al Barsha", "silicon oasis": "Dubai Silicon Oasis",
 };
 
+function normalizeTurkish(text: string): string {
+  return text
+    .replace(/İ/g, 'I').replace(/ı/g, 'i')
+    .replace(/Ş/g, 'S').replace(/ş/g, 's')
+    .replace(/Ç/g, 'C').replace(/ç/g, 'c')
+    .replace(/Ö/g, 'O').replace(/ö/g, 'o')
+    .replace(/Ü/g, 'U').replace(/ü/g, 'u')
+    .replace(/Ğ/g, 'G').replace(/ğ/g, 'g');
+}
+
 function detectDistrict(text: string): string | null {
-  const lower = text.toLowerCase();
+  const lower = normalizeTurkish(text).toLowerCase();
   for (const [key, value] of Object.entries(DISTRICT_MAPPING)) {
     if (lower.includes(key)) return value;
   }
@@ -39,7 +49,7 @@ function detectDistrict(text: string): string | null {
 
 // ---- Minimal helpers ----
 function analyzeSimple(pickup: string, dropoff: string): { airport: string | null; city: string | null; district: string | null; direction: string; confidence: string } {
-  const s = (pickup + " " + dropoff).toLowerCase();
+  const s = normalizeTurkish(pickup + " " + dropoff).toLowerCase();
 
   let airport: string | null = null;
   if (/istanbul airport|\bist\b/i.test(s)) airport = "Istanbul Airport (IST)";
@@ -49,7 +59,7 @@ function analyzeSimple(pickup: string, dropoff: string): { airport: string | nul
   else if (/dalaman|\bdlm\b/i.test(s)) airport = "Dalaman Airport (DLM)";
   else if (/adnan menderes|\badb\b/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
 
-  const direction = dropoff.toLowerCase().includes("airport") || dropoff.toLowerCase().includes("havalimanı") 
+  const direction = normalizeTurkish(dropoff).toLowerCase().includes("airport") || normalizeTurkish(dropoff).toLowerCase().includes("havalimani") 
     ? "to_airport" 
     : airport ? "from_airport" : "city_to_city";
 

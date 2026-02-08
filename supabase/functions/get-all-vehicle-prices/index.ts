@@ -39,8 +39,19 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "al barsha": "Al Barsha", "silicon oasis": "Dubai Silicon Oasis",
 };
 
+// Normalize Turkish characters to ASCII equivalents for reliable regex matching
+function normalizeTurkish(text: string): string {
+  return text
+    .replace(/İ/g, 'I').replace(/ı/g, 'i')
+    .replace(/Ş/g, 'S').replace(/ş/g, 's')
+    .replace(/Ç/g, 'C').replace(/ç/g, 'c')
+    .replace(/Ö/g, 'O').replace(/ö/g, 'o')
+    .replace(/Ü/g, 'U').replace(/ü/g, 'u')
+    .replace(/Ğ/g, 'G').replace(/ğ/g, 'g');
+}
+
 function detectDistrict(text: string): string | null {
-  const lower = text.toLowerCase();
+  const lower = normalizeTurkish(text).toLowerCase();
   for (const [key, value] of Object.entries(DISTRICT_MAPPING)) {
     if (lower.includes(key)) return value;
   }
@@ -57,7 +68,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     const { pickup, dropoff, customerCurrency } = await req.json();
-    const s = (pickup + " " + dropoff).toLowerCase();
+    const s = normalizeTurkish(pickup + " " + dropoff).toLowerCase();
 
     // Detect region
     const isDubai = /dubai|uae|dxb|dwc|al maktoum/i.test(s);
