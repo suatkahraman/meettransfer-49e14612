@@ -100,18 +100,23 @@ const VehicleCard = ({
             >
               <ChevronRight className="h-5 w-5" />
             </button>
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0">
               {images.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => scrollTo(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === selectedIndex
-                      ? "bg-primary w-4"
-                      : "bg-white/60 hover:bg-white/80"
-                  }`}
+                  className="flex items-center justify-center"
+                  style={{ minWidth: 44, minHeight: 44 }}
                   aria-label={`Go to slide ${index + 1}`}
-                />
+                >
+                  <span
+                    className={`block rounded-full transition-all ${
+                      index === selectedIndex
+                        ? "w-4 h-2 bg-primary"
+                        : "w-2 h-2 bg-white/60"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           </>

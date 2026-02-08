@@ -257,14 +257,19 @@ const CarouselDots = React.forwardRef<
           key={index}
           type="button"
           onClick={() => api?.scrollTo(index)}
-          className={cn(
-            "w-2 h-2 rounded-full transition-all duration-300",
-            selectedIndex === index
-              ? "bg-primary w-4"
-              : "bg-primary/30 hover:bg-primary/50"
-          )}
+          className="flex items-center justify-center"
+          style={{ minWidth: 44, minHeight: 44 }}
           aria-label={`Go to slide ${index + 1}`}
-        />
+        >
+          <span
+            className={cn(
+              "block rounded-full transition-all duration-300",
+              selectedIndex === index
+                ? "w-4 h-2 bg-primary"
+                : "w-2 h-2 bg-primary/30"
+            )}
+          />
+        </button>
       ))}
     </div>
   );
