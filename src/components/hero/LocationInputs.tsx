@@ -36,25 +36,25 @@ const LocationInputsComponent = ({
       <div 
         id="ride-pickup-field"
         className={cn(
-          "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
+          "bg-amber-50 dark:bg-zinc-800 rounded-xl px-3 py-2 h-[75px] flex items-center gap-3 transition-all border border-amber-200 dark:border-zinc-700",
           pickupError 
             ? "ring-2 ring-destructive/30" 
             : "hover:bg-amber-200 dark:hover:bg-zinc-700"
         )}>
-        <label className="block text-xs font-medium text-foreground/70 mb-0.5">
-          {language === 'TR' ? 'Nereden' :
-           language === 'DE' ? 'Von' :
-           language === 'FR' ? 'De' :
-           language === 'RU' ? 'Откуда' :
-           language === 'IT' ? 'Da' :
-           language === 'ES' ? 'Desde' :
-           language === 'AR' ? 'من' :
-           language === 'UK' ? 'Звідки' :
-           language === 'JA' ? '乗車地' :
-           'From'}
-        </label>
-        <div className="flex flex-1 items-center gap-2">
-          <MapPin className={cn("h-4 w-4 flex-shrink-0", pickupError ? "text-destructive" : "text-foreground")} />
+        <MapPin className={cn("h-6 w-6 flex-shrink-0", pickupError ? "text-destructive" : "text-foreground")} />
+        <div className="flex flex-1 flex-col justify-center min-w-0">
+          <label className="block text-[10px] font-medium text-foreground/60 leading-tight">
+            {language === 'TR' ? 'Nereden' :
+             language === 'DE' ? 'Von' :
+             language === 'FR' ? 'De' :
+             language === 'RU' ? 'Откуда' :
+             language === 'IT' ? 'Da' :
+             language === 'ES' ? 'Desde' :
+             language === 'AR' ? 'من' :
+             language === 'UK' ? 'Звідки' :
+             language === 'JA' ? '乗車地' :
+             'From'}
+          </label>
           <GooglePlacesAutocomplete 
             onPlaceSelected={onPickupSelected} 
             placeholder={
@@ -69,41 +69,39 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="h-full w-full flex-1 border-0 bg-transparent p-0 text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="h-8 w-full border-0 bg-transparent p-0 text-xl font-bold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
             value={pickup}
             myLocationLabel={t('useMyLocation')}
           />
         </div>
         {pickupError && (
-          <p className="text-xs text-destructive mt-1 font-medium animate-fade-in">
-            {t('required') || 'Required'}
-          </p>
+          <p className="text-xs text-destructive font-medium animate-fade-in flex-shrink-0">!</p>
         )}
       </div>
       
-      {/* Dropoff - Floating label structure like reference */}
+      {/* Dropoff */}
       <div 
         id="ride-dropoff-field"
         className={cn(
-          "bg-amber-50 dark:bg-zinc-800 rounded-xl p-3 h-[75px] flex flex-col justify-center transition-all border border-amber-200 dark:border-zinc-700",
+          "bg-amber-50 dark:bg-zinc-800 rounded-xl px-3 py-2 h-[75px] flex items-center gap-3 transition-all border border-amber-200 dark:border-zinc-700",
           dropoffError
             ? "ring-2 ring-destructive/30"
             : "hover:bg-amber-200 dark:hover:bg-zinc-700"
         )}>
-        <label className="block text-xs font-medium text-foreground/70 mb-0.5">
-          {language === 'TR' ? 'Nereye' :
-           language === 'DE' ? 'Nach' :
-           language === 'FR' ? 'À' :
-           language === 'RU' ? 'Куда' :
-           language === 'IT' ? 'A' :
-           language === 'ES' ? 'Hasta' :
-           language === 'AR' ? 'إلى' :
-           language === 'UK' ? 'Куди' :
-           language === 'JA' ? '降車地' :
-           'To'}
-        </label>
-        <div className="flex flex-1 items-center gap-2">
-          <Navigation className={cn("h-4 w-4 flex-shrink-0", dropoffError ? "text-destructive" : "text-foreground")} />
+        <Navigation className={cn("h-6 w-6 flex-shrink-0", dropoffError ? "text-destructive" : "text-foreground")} />
+        <div className="flex flex-1 flex-col justify-center min-w-0">
+          <label className="block text-[10px] font-medium text-foreground/60 leading-tight">
+            {language === 'TR' ? 'Nereye' :
+             language === 'DE' ? 'Nach' :
+             language === 'FR' ? 'À' :
+             language === 'RU' ? 'Куда' :
+             language === 'IT' ? 'A' :
+             language === 'ES' ? 'Hasta' :
+             language === 'AR' ? 'إلى' :
+             language === 'UK' ? 'Куди' :
+             language === 'JA' ? '降車地' :
+             'To'}
+          </label>
           <GooglePlacesAutocomplete 
             onPlaceSelected={onDropoffSelected} 
             placeholder={
@@ -118,15 +116,13 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="h-full w-full flex-1 border-0 bg-transparent p-0 text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="h-8 w-full border-0 bg-transparent p-0 text-xl font-bold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
             value={dropoff}
             myLocationLabel={t('useMyLocation')}
           />
         </div>
         {dropoffError && (
-          <p className="text-xs text-destructive mt-1 font-medium animate-fade-in">
-            {t('required') || 'Required'}
-          </p>
+          <p className="text-xs text-destructive font-medium animate-fade-in flex-shrink-0">!</p>
         )}
       </div>
       
