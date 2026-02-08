@@ -312,24 +312,24 @@ export const RideFormContent = memo(({
           type="button"
           onClick={() => setHasReturnTrip(!hasReturnTrip)}
           className={cn(
-            "flex h-[75px] w-full items-center justify-center rounded-xl border text-sm font-bold uppercase tracking-wide transition-all",
+            "flex h-[75px] w-full items-center justify-center rounded-xl border text-lg font-bold uppercase tracking-wide transition-all",
             hasReturnTrip 
               ? "border-green-500 bg-green-100 text-green-700 ring-2 ring-green-500 dark:bg-green-950/50 dark:text-green-400" 
               : "border-amber-200 bg-amber-50 text-foreground hover:bg-amber-200 dark:border-amber-800 dark:bg-amber-950/20 dark:hover:bg-amber-900/30"
           )}
         >
           {hasReturnTrip ? (
-            <span className="flex items-center justify-center gap-2">
-              <RotateCcw className="h-4 w-4" />
-              {t("returnAdded") || "RETURN ADDED"} • {discountPercent}% OFF
+            <span className="flex items-center justify-center gap-2.5">
+              <RotateCcw className="h-6 w-6" />
+              <span className="text-lg">{t("returnAdded") || "RETURN ADDED"} • {discountPercent}% OFF</span>
             </span>
           ) : (
-            <span className="flex flex-col items-center gap-0.5">
-              <span className="flex items-center gap-1.5">
-                <RotateCcw className="h-4 w-4" />
+            <span className="flex flex-col items-center gap-1">
+              <span className="flex items-center gap-2 text-lg">
+                <RotateCcw className="h-6 w-6" />
                 {t("addReturn")?.toUpperCase() || "ADD RETURN"}
               </span>
-              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 normal-case tracking-normal">
+              <span className="text-base font-semibold text-amber-600 dark:text-amber-400 normal-case tracking-normal">
                 %{discountPercent} {returnDiscountLabels[language.toUpperCase()] || returnDiscountLabels.EN}!
               </span>
             </span>
