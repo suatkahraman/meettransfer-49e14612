@@ -30,6 +30,13 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "beykoz": "Beykoz", "cekmekoy": "Cekmekoy", "sancaktepe": "Sancaktepe",
   "sultanbeyli": "Sultanbeyli", "sile": "Sile", "silivri": "Silivri",
   "catalca": "Catalca", "tuzla": "Tuzla", "yenikoy": "Yenikoy",
+  // Ankara
+  "pursaklar": "Pursaklar", "kecioren": "Keçiören", "ulus": "Ulus",
+  "cankaya": "Çankaya Merkez", "mamak": "Mamak", "yenimahalle": "Yenimahalle Merkez",
+  "ostim": "Ostim", "cukurambar": "Çukurambar", "dikmen": "Dikmen",
+  "balgat": "Balgat", "bilkent": "Bilkent", "umitköy": "Ümitköy",
+  "cayyolu": "Çayyolu", "eryaman": "Eryaman", "batikent": "Batıkent",
+  "sincan": "Sincan", "golbasi": "Gölbaşı", "incek": "İncek",
   // Dubai
   "downtown": "Downtown", "dubai marina": "Dubai Marina", "marina": "Dubai Marina",
   "palm jumeirah": "Palm Jumeirah", "palm": "Palm Jumeirah",
@@ -58,6 +65,18 @@ function detectDistrict(text: string): string | null {
   return null;
 }
 
+function detectCity(text: string): string | null {
+  const s = normalizeTurkish(text).toLowerCase();
+  if (/istanbul|\bist\b|\bsaw\b/i.test(s)) return "Istanbul";
+  if (/ankara|\besb\b|esenboga/i.test(s)) return "Ankara";
+  if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat/i.test(s)) return "Antalya";
+  if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) return "Bodrum";
+  if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) return "Dalaman";
+  if (/izmir|\badb\b|cesme|alacati/i.test(s)) return "Izmir";
+  if (/bursa/i.test(s)) return "Bursa";
+  return null;
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -74,30 +93,34 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const isDubai = /dubai|uae|dxb|dwc|al maktoum/i.test(s);
     const region = isDubai ? "dubai" : "turkey";
     
-    let city: string | null = null;
+    // Detect cities from pickup and dropoff separately
+    const pickupCity = detectCity(pickup);
+    const dropoffCity = detectCity(dropoff);
+    const city = pickupCity || dropoffCity;
+    
+    // Detect districts from pickup and dropoff separately
+    const pickupDistrict = detectDistrict(pickup);
+    const dropoffDistrict = detectDistrict(dropoff);
+    const district = pickupDistrict || dropoffDistrict;
+
     let airport: string | null = null;
     
     if (isDubai) {
-      city = "Dubai";
       if (/dxb|dubai.*airport|dubai.*international/i.test(s)) airport = "Dubai International Airport (DXB)";
       else if (/dwc|al maktoum/i.test(s)) airport = "Al Maktoum International Airport (DWC)";
     } else {
-      if (/istanbul|\bist\b|\bsaw\b/i.test(s)) city = "Istanbul";
-      else if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat/i.test(s)) city = "Antalya";
-      else if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) city = "Bodrum";
-      else if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) city = "Dalaman";
-      else if (/izmir|\badb\b|cesme|alacati/i.test(s)) city = "Izmir";
-
       if (/istanbul airport/i.test(s)) airport = "Istanbul Airport (IST)";
       else if (/sabiha|gokcen/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
       else if (/antalya.*airport|antalya.*havalimanı/i.test(s)) airport = "Antalya Airport (AYT)";
       else if (/bodrum|milas/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
       else if (/dalaman/i.test(s)) airport = "Dalaman Airport (DLM)";
       else if (/adnan menderes/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
+      else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
     }
 
-    // Detect district from pickup/dropoff text
-    const district = detectDistrict(pickup) || detectDistrict(dropoff);
+    // Determine if this is an intercity or intra-city transfer without airport
+    const isIntercityTransfer = (pickupCity && dropoffCity && pickupCity !== dropoffCity) || 
+                                 (!airport && pickupDistrict && dropoffDistrict);
 
     // Frontend vehicle types
     const turkeyVehicles = [
@@ -160,16 +183,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }), { headers: corsHeaders });
     }
 
-    // Helper to query region_prices with specific filters
-    async function queryPrices(filters: Record<string, string>): Promise<any[]> {
+    // Helper to query any table with specific filters
+    async function queryTable(table: string, filters: Record<string, string>): Promise<any[]> {
       const params = new URLSearchParams({ 
         is_active: "eq.true",
-        select: "vehicle_type,price,price_currency,district",
+        select: "vehicle_type,price,price_currency",
         order: "updated_at.desc",
         ...filters
       });
 
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/region_prices?${params.toString()}`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params.toString()}`, {
         headers: {
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${SUPABASE_KEY}`,
@@ -185,56 +208,125 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return res.json();
     }
 
-    // Hierarchical price matching: District+City+Airport → City+Airport → City → Airport
+    // ---- INTERCITY / INTRA-CITY PRICE MATCHING (no airport) ----
+    let intercityPrices: any[] = [];
+    let usedIntercity = false;
+
+    if (isIntercityTransfer && !airport) {
+      const fromCity = pickupCity || city!;
+      const toCity = dropoffCity || city!;
+
+      // Strategy I1: from_district + to_district + cities (most specific)
+      if (pickupDistrict && dropoffDistrict) {
+        intercityPrices = await queryTable("intercity_prices", {
+          from_city: `eq.${fromCity}`,
+          to_city: `eq.${toCity}`,
+          from_district: `eq.${pickupDistrict}`,
+          to_district: `eq.${dropoffDistrict}`,
+        });
+
+        // Also try reverse direction
+        if (intercityPrices.length === 0) {
+          intercityPrices = await queryTable("intercity_prices", {
+            from_city: `eq.${toCity}`,
+            to_city: `eq.${fromCity}`,
+            from_district: `eq.${dropoffDistrict}`,
+            to_district: `eq.${pickupDistrict}`,
+          });
+        }
+      }
+
+      // Strategy I2: from_district only + cities
+      if (intercityPrices.length === 0 && pickupDistrict) {
+        intercityPrices = await queryTable("intercity_prices", {
+          from_city: `eq.${fromCity}`,
+          to_city: `eq.${toCity}`,
+          from_district: `eq.${pickupDistrict}`,
+        });
+      }
+
+      // Strategy I3: to_district only + cities
+      if (intercityPrices.length === 0 && dropoffDistrict) {
+        intercityPrices = await queryTable("intercity_prices", {
+          from_city: `eq.${fromCity}`,
+          to_city: `eq.${toCity}`,
+          to_district: `eq.${dropoffDistrict}`,
+        });
+      }
+
+      // Strategy I4: cities only (broadest)
+      if (intercityPrices.length === 0 && fromCity && toCity) {
+        intercityPrices = await queryTable("intercity_prices", {
+          from_city: `eq.${fromCity}`,
+          to_city: `eq.${toCity}`,
+        });
+
+        // Also try reverse
+        if (intercityPrices.length === 0 && fromCity !== toCity) {
+          intercityPrices = await queryTable("intercity_prices", {
+            from_city: `eq.${toCity}`,
+            to_city: `eq.${fromCity}`,
+          });
+        }
+      }
+
+      if (intercityPrices.length > 0) usedIntercity = true;
+    }
+
+    // ---- REGION PRICES MATCHING (airport transfers + fallback) ----
     let regionPrices: any[] = [];
 
-    // Strategy 1: District + City + Airport (most specific)
-    if (district && city && airport) {
-      regionPrices = await queryPrices({
-        district: `eq.${district}`,
-        city: `eq.${city}`,
-        airport: `eq.${airport}`,
-      });
+    if (!usedIntercity) {
+      // Strategy R1: District + City + Airport (most specific)
+      if (district && city && airport) {
+        regionPrices = await queryTable("region_prices", {
+          district: `eq.${district}`,
+          city: `eq.${city}`,
+          airport: `eq.${airport}`,
+        });
+      }
+
+      // Strategy R2: District + City (no airport filter)
+      if (regionPrices.length === 0 && district && city) {
+        regionPrices = await queryTable("region_prices", {
+          district: `eq.${district}`,
+          city: `eq.${city}`,
+        });
+      }
+
+      // Strategy R3: City + Airport (no district)
+      if (regionPrices.length === 0 && city && airport) {
+        regionPrices = await queryTable("region_prices", {
+          city: `eq.${city}`,
+          airport: `eq.${airport}`,
+        });
+      }
+
+      // Strategy R4: City only
+      if (regionPrices.length === 0 && city) {
+        regionPrices = await queryTable("region_prices", {
+          city: `eq.${city}`,
+        });
+      }
+
+      // Strategy R5: Airport only
+      if (regionPrices.length === 0 && airport) {
+        regionPrices = await queryTable("region_prices", {
+          airport: `eq.${airport}`,
+        });
+      }
     }
 
-    // Strategy 2: District + City (no airport filter)
-    if (regionPrices.length === 0 && district && city) {
-      regionPrices = await queryPrices({
-        district: `eq.${district}`,
-        city: `eq.${city}`,
-      });
-    }
-
-    // Strategy 3: City + Airport (no district)
-    if (regionPrices.length === 0 && city && airport) {
-      regionPrices = await queryPrices({
-        city: `eq.${city}`,
-        airport: `eq.${airport}`,
-      });
-    }
-
-    // Strategy 4: City only
-    if (regionPrices.length === 0 && city) {
-      regionPrices = await queryPrices({
-        city: `eq.${city}`,
-      });
-    }
-
-    // Strategy 5: Airport only
-    if (regionPrices.length === 0 && airport) {
-      regionPrices = await queryPrices({
-        airport: `eq.${airport}`,
-      });
-    }
+    // Use whichever source found prices
+    const matchedPrices = usedIntercity ? intercityPrices : regionPrices;
 
     // Build prices - match DB prices to frontend vehicle types using aliases
-    // For each vehicle type, find the FIRST match (already ordered by updated_at desc)
     const prices: any[] = [];
     
     for (const vt of vehicleTypes) {
       let match = null;
       for (const alias of vt.dbAliases) {
-        match = regionPrices.find((p: any) => p.vehicle_type === alias);
+        match = matchedPrices.find((p: any) => p.vehicle_type === alias);
         if (match) break;
       }
       
@@ -265,10 +357,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
       prices,
       matched: prices.some(p => p.available),
       matchedCity: city,
+      matchedPickupDistrict: pickupDistrict,
+      matchedDropoffDistrict: dropoffDistrict,
       matchedDistrict: district,
       matchedAirport: airport,
       isDubai,
       region,
+      priceSource: usedIntercity ? "intercity_prices" : "region_prices",
     }), { headers: corsHeaders });
 
   } catch (error) {
