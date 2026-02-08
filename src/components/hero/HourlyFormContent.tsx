@@ -181,12 +181,12 @@ export const HourlyFormContent = memo(({
         <label className="mb-0.5 block text-xs font-medium text-foreground/70">
           {getPickupLabel()}
         </label>
-        <div className="flex items-center gap-2">
-          <MapPin className={cn("h-4 w-4 flex-shrink-0", errors.city ? "text-destructive" : "text-foreground")} />
+        <div className="flex w-full items-center gap-3">
+          <MapPin className={cn("h-6 w-6 flex-shrink-0", errors.city ? "text-destructive" : "text-foreground")} />
           <GooglePlacesAutocomplete 
             onPlaceSelected={handleCityChange} 
             placeholder={getPickupPlaceholder()} 
-            className="h-auto border-0 bg-transparent p-0 text-lg font-bold text-foreground placeholder:text-foreground/50 focus:ring-0 focus-visible:ring-0"
+            className="h-10 w-full border-0 bg-transparent p-0 text-xl font-bold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
             value={hourlyCity}
             myLocationLabel={t('useMyLocation')}
           />

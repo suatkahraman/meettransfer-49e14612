@@ -42,7 +42,7 @@ const LocationInputsComponent = ({
             : "hover:bg-amber-200 dark:hover:bg-zinc-700"
         )}>
         <MapPin className={cn("h-6 w-6 flex-shrink-0", pickupError ? "text-destructive" : "text-foreground")} />
-        <div className="flex flex-1 flex-col justify-center min-w-0">
+        <div className="flex flex-1 flex-col justify-center min-w-0 w-full">
           <label className="block text-[10px] font-medium text-foreground/60 leading-tight">
             {language === 'TR' ? 'Nereden' :
              language === 'DE' ? 'Von' :
@@ -69,7 +69,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="h-8 w-full border-0 bg-transparent p-0 text-xl font-bold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
+            className="h-10 w-full border-0 bg-transparent p-0 text-xl font-bold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
             value={pickup}
             myLocationLabel={t('useMyLocation')}
           />
@@ -89,7 +89,7 @@ const LocationInputsComponent = ({
             : "hover:bg-amber-200 dark:hover:bg-zinc-700"
         )}>
         <Navigation className={cn("h-6 w-6 flex-shrink-0", dropoffError ? "text-destructive" : "text-foreground")} />
-        <div className="flex flex-1 flex-col justify-center min-w-0">
+        <div className="flex flex-1 flex-col justify-center min-w-0 w-full">
           <label className="block text-[10px] font-medium text-foreground/60 leading-tight">
             {language === 'TR' ? 'Nereye' :
              language === 'DE' ? 'Nach' :
@@ -116,7 +116,7 @@ const LocationInputsComponent = ({
               language === 'JA' ? '住所、空港、ホテル...' :
               'Address, airport, hotel...'
             } 
-            className="h-8 w-full border-0 bg-transparent p-0 text-xl font-bold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
+            className="h-10 w-full border-0 bg-transparent p-0 text-xl font-bold text-foreground placeholder:text-foreground/40 focus:ring-0 focus-visible:ring-0"
             value={dropoff}
             myLocationLabel={t('useMyLocation')}
           />
