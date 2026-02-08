@@ -273,14 +273,39 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const resetUrl = data.properties?.action_link;
+    // Extract the hashed_token from the generateLink response.
+    // Instead of using action_link (which redirects through Supabase's auth
+    // verify endpoint and requires redirect_to to be in the allowlist),
+    // we build a direct URL to our app with the token_hash parameter.
+    // The frontend will then call verifyOtp() to establish the session.
+    const tokenHash = data.properties?.hashed_token;
+    const actionLink = data.properties?.action_link;
 
-    if (!resetUrl) {
-      console.error("No action_link in response:", data);
+    console.log("Generated action_link:", actionLink);
+    console.log("Hashed token available:", !!tokenHash);
+
+    if (!tokenHash && !actionLink) {
+      console.error("No hashed_token or action_link in response:", JSON.stringify(data));
       throw new Error("Failed to generate reset link");
     }
 
-    console.log("Generated reset URL for:", email);
+    // Build the reset URL that points directly to our app
+    let resetUrl: string;
+
+    if (tokenHash) {
+      // Preferred: use hashed_token directly with verifyOtp on the frontend
+      const appUrl = new URL(redirectTo);
+      appUrl.searchParams.set("token_hash", tokenHash);
+      appUrl.searchParams.set("type", "recovery");
+      resetUrl = appUrl.toString();
+      console.log("Built direct app reset URL with token_hash");
+    } else {
+      // Fallback: use the raw action_link (goes through Supabase verify endpoint)
+      resetUrl = actionLink!;
+      console.log("Using raw action_link as fallback");
+    }
+
+    console.log("Final reset URL domain:", new URL(resetUrl).hostname);
 
     // Detect language from email preferences or use provided
     const lang = language || "en";
