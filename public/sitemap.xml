@@ -1799,6 +1799,14 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- Blog listing page -->
+  <url>
+    <loc>https://meettransfer.app/blog</loc>
+    <lastmod>2026-02-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Blog Articles (main language only - SEO handles hreflang via page) -->
   <url>
     <loc>https://meettransfer.app/blog/istanbul-airport-to-city-best-way</loc>
@@ -1983,13 +1991,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://meettransfer.app/blog/how-to-choose-reliable-transfer</loc>
+    <loc>https://meettransfer.app/blog/how-to-choose-reliable-transfer-turkey</loc>
     <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://meettransfer.app/blog/why-meet-transfer-trusted</loc>
+    <loc>https://meettransfer.app/blog/why-meet-transfer-trusted-company</loc>
     <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -2025,7 +2033,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://meettransfer.app/blog/best-vip-transfer-istanbul</loc>
+    <loc>https://meettransfer.app/blog/best-vip-transfer-istanbul-review</loc>
     <lastmod>2026-02-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
