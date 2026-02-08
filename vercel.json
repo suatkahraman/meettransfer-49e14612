@@ -1,50 +1,42 @@
 {
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://accounts.google.com https://apis.google.com https://maps.googleapis.com https://www.googletagmanager.com https://*.supabase.co https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.googleusercontent.com https://*.supabase.co https://maps.gstatic.com https://*.googleapis.com https://www.google.com https://www.google.com.tr https://googleads.g.doubleclick.net https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://*.supabase.co https://maps.googleapis.com https://api.country.is https://freeipapi.com https://ipwho.is https://ipapi.co https://www.google.com https://www.google.com.tr https://googleads.g.doubleclick.net https://www.google-analytics.com https://stats.g.doubleclick.net https://fonts.googleapis.com https://fonts.gstatic.com; frame-src 'self' https://accounts.google.com https://*.supabase.co https://www.googletagmanager.com https://td.doubleclick.net; worker-src 'self' blob:;"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=(self https://maps.googleapis.com)"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=31536000; includeSubDomains; preload"
-        }
-      ]
-    }
-  ],
+  "version": 2,
   "rewrites": [
     {
-      "source": "/((?!.*\\.).*)",
+      "source": "/(.*)",
       "has": [
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(googlebot|bingbot|yandex|baiduspider|twitterbot|facebookexternalhit|whatsapp|discordbot|applebot)"
+          "value": "(.*)googlebot|google-inspectiontool|bingbot|yandex|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora\\ link\\ preview|showyoubot|outbrain|pinterest\\/0\\.|pinterestbot|slackbot|vkShare|W3C_Validator|whatsapp|gptbot|chatgpt-user|applebot|flipboardbot(.*)"
         }
       ],
-      "destination": "https://service.prerender.io/https://%{HTTP_HOST}/:path*"
-    },
+      "destination": "https://service.prerender.io/https://%{HTTP_HOST}/$1"
+    }
+  ],
+  "headers": [
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
+        { "key": "X-DNS-Prefetch-Control", "value": "on" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self' 'unsafe-inline' 'unsafe-eval' *; upgrade-insecure-requests" },
+        { "key": "X-Robots-Tag", "value": "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" }
+      ]
+    },
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     }
   ]
 }
