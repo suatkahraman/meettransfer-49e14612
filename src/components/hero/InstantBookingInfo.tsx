@@ -188,15 +188,15 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
           </div>
 
           {/* Live clock */}
-          <div className="flex items-center gap-1.5 rounded-full border border-sky-400/80 bg-sky-100/80 px-3 py-1.5 shadow-inner dark:border-sky-500/50 dark:bg-sky-900/50">
-            <span className="text-xs" role="img" aria-label="Turkey">🇹🇷</span>
-            <Clock className="h-4 w-4 animate-pulse text-sky-600 dark:text-sky-300" />
-            <span className="text-xs font-semibold tabular-nums text-sky-700 dark:text-sky-300 sm:text-sm">
+          <div className="flex items-center gap-2 rounded-full border border-sky-400/80 bg-sky-100/80 px-3.5 py-2 shadow-inner dark:border-sky-500/50 dark:bg-sky-900/50">
+            <span className="text-sm" role="img" aria-label="Turkey">🇹🇷</span>
+            <Clock className="h-5 w-5 animate-pulse text-sky-600 dark:text-sky-300 sm:h-6 sm:w-6" />
+            <span className="text-sm font-semibold tabular-nums text-sky-700 dark:text-sky-300 sm:text-base">
               {nowLabel} {formattedNow}
             </span>
-            <span className="text-xs font-bold text-sky-500 dark:text-sky-400 sm:text-sm">→</span>
-            <CarFront className="h-4 w-4 text-sky-700 dark:text-sky-300 sm:h-5 sm:w-5" />
-            <span className="text-xs font-extrabold tabular-nums text-sky-800 dark:text-sky-200 sm:text-sm">
+            <span className="text-sm font-bold text-sky-500 dark:text-sky-400 sm:text-base">→</span>
+            <CarFront className="h-6 w-6 text-sky-700 dark:text-sky-300 sm:h-7 sm:w-7" />
+            <span className="text-sm font-extrabold tabular-nums text-sky-800 dark:text-sky-200 sm:text-base">
               {readyLabel} {formattedReady}
             </span>
           </div>
