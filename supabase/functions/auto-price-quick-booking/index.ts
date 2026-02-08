@@ -47,8 +47,25 @@ function detectDistrict(text: string): string | null {
   return null;
 }
 
+function detectCity(text: string): string | null {
+  const s = normalizeTurkish(text).toLowerCase();
+  if (/istanbul|\bist\b|\bsaw\b/i.test(s)) return "Istanbul";
+  if (/ankara|\besb\b|esenboga/i.test(s)) return "Ankara";
+  if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat/i.test(s)) return "Antalya";
+  if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) return "Bodrum";
+  if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) return "Dalaman";
+  if (/izmir|\badb\b|cesme|alacati|kusadasi/i.test(s)) return "Izmir";
+  if (/bursa/i.test(s)) return "Bursa";
+  return null;
+}
+
 // ---- Minimal helpers ----
-function analyzeSimple(pickup: string, dropoff: string): { airport: string | null; city: string | null; district: string | null; direction: string; confidence: string } {
+function analyzeSimple(pickup: string, dropoff: string): { 
+  airport: string | null; city: string | null; 
+  pickupCity: string | null; dropoffCity: string | null;
+  pickupDistrict: string | null; dropoffDistrict: string | null;
+  district: string | null; direction: string; confidence: string 
+} {
   const s = normalizeTurkish(pickup + " " + dropoff).toLowerCase();
 
   let airport: string | null = null;
@@ -58,22 +75,23 @@ function analyzeSimple(pickup: string, dropoff: string): { airport: string | nul
   else if (/bodrum|milas|\bbjv\b/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
   else if (/dalaman|\bdlm\b/i.test(s)) airport = "Dalaman Airport (DLM)";
   else if (/adnan menderes|\badb\b/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
+  else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
 
   const direction = normalizeTurkish(dropoff).toLowerCase().includes("airport") || normalizeTurkish(dropoff).toLowerCase().includes("havalimani") 
     ? "to_airport" 
     : airport ? "from_airport" : "city_to_city";
 
-  let city: string | null = null;
-  if (/istanbul|\bist\b|\bsaw\b/i.test(s)) city = "Istanbul";
-  else if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat/i.test(s)) city = "Antalya";
-  else if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) city = "Bodrum";
-  else if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) city = "Dalaman";
-  else if (/izmir|\badb\b|cesme|alacati|kusadasi/i.test(s)) city = "Izmir";
+  // Detect cities from pickup and dropoff separately
+  const pickupCity = detectCity(pickup);
+  const dropoffCity = detectCity(dropoff);
+  const city = pickupCity || dropoffCity;
 
-  // Detect district from pickup or dropoff
-  const district = detectDistrict(pickup) || detectDistrict(dropoff);
+  // Detect districts from pickup and dropoff separately
+  const pickupDistrict = detectDistrict(pickup);
+  const dropoffDistrict = detectDistrict(dropoff);
+  const district = pickupDistrict || dropoffDistrict;
 
-  return { airport, city, district, direction, confidence: airport && city ? "high" : city ? "medium" : "low" };
+  return { airport, city, pickupCity, dropoffCity, pickupDistrict, dropoffDistrict, district, direction, confidence: airport && city ? "high" : city ? "medium" : "low" };
 }
 
 async function convertCurrency(amount: number, from: string, to: string): Promise<{ amount: number; rate: number }> {
@@ -137,8 +155,88 @@ async function sendManualEmail(booking: Record<string, unknown>, info: { airport
   );
 }
 
-async function findBestPrice(vehicleType: string, city: string | null, airport: string | null, district: string | null): Promise<Record<string, unknown> | null> {
-  // Strategy 1: Try with district if available
+// Find price from intercity_prices table (for non-airport transfers)
+async function findIntercityPrice(
+  vehicleType: string, 
+  pickupCity: string | null, dropoffCity: string | null,
+  pickupDistrict: string | null, dropoffDistrict: string | null
+): Promise<Record<string, unknown> | null> {
+  const fromCity = pickupCity || dropoffCity;
+  const toCity = dropoffCity || pickupCity;
+  if (!fromCity || !toCity) return null;
+
+  // Strategy I1: from_district + to_district + cities
+  if (pickupDistrict && dropoffDistrict) {
+    const prices = await supabaseQuery("intercity_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      from_city: `eq.${fromCity}`,
+      to_city: `eq.${toCity}`,
+      from_district: `eq.${pickupDistrict}`,
+      to_district: `eq.${dropoffDistrict}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (prices?.[0]) return prices[0];
+
+    // Try reverse direction
+    const reverse = await supabaseQuery("intercity_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      from_city: `eq.${toCity}`,
+      to_city: `eq.${fromCity}`,
+      from_district: `eq.${dropoffDistrict}`,
+      to_district: `eq.${pickupDistrict}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (reverse?.[0]) return reverse[0];
+  }
+
+  // Strategy I2: from_district + cities
+  if (pickupDistrict) {
+    const prices = await supabaseQuery("intercity_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      from_city: `eq.${fromCity}`,
+      to_city: `eq.${toCity}`,
+      from_district: `eq.${pickupDistrict}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (prices?.[0]) return prices[0];
+  }
+
+  // Strategy I3: cities only
+  const prices = await supabaseQuery("intercity_prices", {
+    vehicle_type: `eq.${vehicleType}`,
+    from_city: `eq.${fromCity}`,
+    to_city: `eq.${toCity}`,
+    is_active: "eq.true",
+    select: "*",
+    limit: "1",
+  });
+  if (prices?.[0]) return prices[0];
+
+  // Try reverse
+  if (fromCity !== toCity) {
+    const reverse = await supabaseQuery("intercity_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      from_city: `eq.${toCity}`,
+      to_city: `eq.${fromCity}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (reverse?.[0]) return reverse[0];
+  }
+
+  return null;
+}
+
+// Find price from region_prices table (for airport transfers)
+async function findRegionPrice(vehicleType: string, city: string | null, airport: string | null, district: string | null): Promise<Record<string, unknown> | null> {
+  // Strategy R1: District + City + Airport
   if (district && city && airport) {
     const prices = await supabaseQuery("region_prices", {
       vehicle_type: `eq.${vehicleType}`,
@@ -152,7 +250,7 @@ async function findBestPrice(vehicleType: string, city: string | null, airport: 
     if (prices?.[0]) return prices[0];
   }
 
-  // Strategy 2: City + Airport without district
+  // Strategy R2: City + Airport
   if (city && airport) {
     const prices = await supabaseQuery("region_prices", {
       vehicle_type: `eq.${vehicleType}`,
@@ -165,7 +263,20 @@ async function findBestPrice(vehicleType: string, city: string | null, airport: 
     if (prices?.[0]) return prices[0];
   }
 
-  // Strategy 3: City only
+  // Strategy R3: District + City
+  if (district && city) {
+    const prices = await supabaseQuery("region_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      city: `eq.${city}`,
+      district: `eq.${district}`,
+      is_active: "eq.true",
+      select: "*",
+      limit: "1",
+    });
+    if (prices?.[0]) return prices[0];
+  }
+
+  // Strategy R4: City only
   if (city) {
     const prices = await supabaseQuery("region_prices", {
       vehicle_type: `eq.${vehicleType}`,
@@ -177,7 +288,7 @@ async function findBestPrice(vehicleType: string, city: string | null, airport: 
     if (prices?.[0]) return prices[0];
   }
 
-  // Strategy 4: Airport only
+  // Strategy R5: Airport only
   if (airport) {
     const prices = await supabaseQuery("region_prices", {
       vehicle_type: `eq.${vehicleType}`,
@@ -217,19 +328,35 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ matched: false, reason: "agency_booking" }), { headers: corsHeaders });
     }
 
-    const { airport, city, district, direction, confidence } = analyzeSimple(booking.pickup, booking.dropoff);
+    const { airport, city, pickupCity, dropoffCity, pickupDistrict, dropoffDistrict, district, direction, confidence } = analyzeSimple(booking.pickup, booking.dropoff);
 
     if (!city && !airport) {
       await sendManualEmail(booking, { airport, city, district, direction, confidence });
       return new Response(JSON.stringify({ matched: false, reason: "no_location_match" }), { headers: corsHeaders });
     }
 
-    // Find best price with fallback strategies
-    const bestPrice = await findBestPrice(booking.vehicle_type, city, airport, district);
+    // Determine if this is an intercity/intra-city transfer without airport
+    const isIntercityTransfer = (pickupCity && dropoffCity && pickupCity !== dropoffCity) || 
+                                 (!airport && pickupDistrict && dropoffDistrict);
+
+    // Find best price: try intercity_prices first for non-airport, then fallback to region_prices
+    let bestPrice: Record<string, unknown> | null = null;
+    let priceSource = "region_prices";
+
+    if (isIntercityTransfer && !airport) {
+      bestPrice = await findIntercityPrice(booking.vehicle_type, pickupCity, dropoffCity, pickupDistrict, dropoffDistrict);
+      if (bestPrice) priceSource = "intercity_prices";
+    }
+
+    // Fallback to region_prices
+    if (!bestPrice) {
+      bestPrice = await findRegionPrice(booking.vehicle_type, city, airport, district);
+      priceSource = "region_prices";
+    }
 
     if (!bestPrice) {
       await sendManualEmail(booking, { airport, city, district, direction, confidence });
-      return new Response(JSON.stringify({ matched: false, reason: "no_price_found", debug: { city, airport, district, vehicleType: booking.vehicle_type } }), { headers: corsHeaders });
+      return new Response(JSON.stringify({ matched: false, reason: "no_price_found", debug: { city, airport, district, pickupDistrict, dropoffDistrict, vehicleType: booking.vehicle_type } }), { headers: corsHeaders });
     }
 
     // Price logic
@@ -269,7 +396,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    return new Response(JSON.stringify({ matched: true, price: finalPrice, currency: finalCurrency, returnPrice, totalPrice, matchedCity: city, matchedAirport: airport, matchedDistrict: district }), { headers: corsHeaders });
+    return new Response(JSON.stringify({ matched: true, price: finalPrice, currency: finalCurrency, returnPrice, totalPrice, matchedCity: city, matchedAirport: airport, matchedPickupDistrict: pickupDistrict, matchedDropoffDistrict: dropoffDistrict, priceSource }), { headers: corsHeaders });
   } catch (e: unknown) {
     const error = e instanceof Error ? e.message : "Unknown error";
     console.error("auto-price-quick-booking error:", error);
