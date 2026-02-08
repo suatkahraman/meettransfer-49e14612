@@ -515,14 +515,18 @@ export default defineConfig(({ mode }) => ({
       resolveDependencies: (filename: string, deps: string[], { hostId, hostType }: { hostId: string; hostType: 'html' | 'js' }) => {
         // Don't preload heavy/deferred chunks
         return deps.filter((dep: string) => {
-          // Skip preloading these - they're loaded on demand
+          // Skip preloading these — they're loaded on demand or not needed for first paint
           if (dep.includes('vendor-radix-components') ||
               dep.includes('vendor-motion') ||
               dep.includes('vendor-map') ||
               dep.includes('vendor-pdf') ||
               dep.includes('vendor-excel') ||
               dep.includes('vendor-markdown') ||
-              dep.includes('vendor-carousel')) {
+              dep.includes('vendor-carousel') ||
+              dep.includes('vendor-forms') ||
+              dep.includes('vendor-date') ||
+              dep.includes('vendor-supabase') ||
+              dep.includes('translations-')) {
             return false;
           }
           return true;
