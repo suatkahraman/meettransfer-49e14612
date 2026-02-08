@@ -226,7 +226,7 @@ export const RideFormContent = memo(({
         <div 
           id="ride-date-field"
           className={cn(
-            "flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
+            "flex h-[90px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
             shakeFields.date && "animate-shake",
             errors.date && "ring-2 ring-destructive/30"
           )}
@@ -267,7 +267,7 @@ export const RideFormContent = memo(({
         <div 
           id="ride-time-field"
           className={cn(
-            "flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
+            "flex h-[90px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
             shakeFields.time && "animate-shake",
             errors.time && "ring-2 ring-destructive/30"
           )}
@@ -312,7 +312,7 @@ export const RideFormContent = memo(({
           type="button"
           onClick={() => setHasReturnTrip(!hasReturnTrip)}
           className={cn(
-            "flex h-[75px] w-full items-center justify-center rounded-xl border text-lg font-bold uppercase tracking-wide transition-all",
+            "flex h-[90px] w-full items-center justify-center rounded-xl border text-lg font-bold uppercase tracking-wide transition-all",
             hasReturnTrip 
               ? "border-green-500 bg-green-100 text-green-700 ring-2 ring-green-500 dark:bg-green-950/50 dark:text-green-400" 
               : "border-amber-200 bg-amber-50 text-foreground hover:bg-amber-200 dark:border-amber-800 dark:bg-amber-950/20 dark:hover:bg-amber-900/30"
@@ -341,7 +341,7 @@ export const RideFormContent = memo(({
       {hasReturnTrip && setReturnDate && setReturnTime && (
         <div className="grid animate-in slide-in-from-top-2 grid-cols-2 gap-3 duration-200">
           <div 
-            className="flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
+            className="flex h-[90px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
             onClick={(e) => {
               const target = e.target as HTMLElement;
               if (!target.closest('button')) {
@@ -369,7 +369,7 @@ export const RideFormContent = memo(({
             </div>
           </div>
           <div 
-            className="flex h-[75px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
+            className="flex h-[90px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700"
             onClick={(e) => {
               const target = e.target as HTMLElement;
               if (!target.closest('button')) {
@@ -440,7 +440,7 @@ export const RideFormContent = memo(({
         <Button 
           onClick={validateAndContinue} 
           disabled={submitting} 
-           className="group h-[75px] w-full touch-manipulation rounded-xl border-0 bg-gradient-to-r from-primary via-primary to-primary/90 text-xl font-bold shadow-lg shadow-primary/30 transition-all duration-300 hover:from-primary/90 hover:to-primary hover:shadow-xl hover:shadow-primary/40 active:from-primary/80 active:to-primary/80"
+           className="group h-[90px] w-full touch-manipulation rounded-xl border-0 bg-gradient-to-r from-primary via-primary to-primary/90 text-xl font-bold shadow-lg shadow-primary/30 transition-all duration-300 hover:from-primary/90 hover:to-primary hover:shadow-xl hover:shadow-primary/40 active:from-primary/80 active:to-primary/80"
         >
           {submitting ? (
             <Loader2 className="h-6 w-6 animate-spin" />

@@ -36,7 +36,7 @@ const LocationInputsComponent = ({
       <div 
         id="ride-pickup-field"
         className={cn(
-          "bg-amber-50 dark:bg-zinc-800 rounded-xl px-3 py-2 h-[75px] flex items-center gap-3 transition-all border border-amber-200 dark:border-zinc-700",
+          "bg-amber-50 dark:bg-zinc-800 rounded-xl px-3 py-2 h-[90px] flex items-center gap-3 transition-all border border-amber-200 dark:border-zinc-700",
           pickupError 
             ? "ring-2 ring-destructive/30" 
             : "hover:bg-amber-200 dark:hover:bg-zinc-700"
@@ -83,7 +83,7 @@ const LocationInputsComponent = ({
       <div 
         id="ride-dropoff-field"
         className={cn(
-          "bg-amber-50 dark:bg-zinc-800 rounded-xl px-3 py-2 h-[75px] flex items-center gap-3 transition-all border border-amber-200 dark:border-zinc-700",
+          "bg-amber-50 dark:bg-zinc-800 rounded-xl px-3 py-2 h-[90px] flex items-center gap-3 transition-all border border-amber-200 dark:border-zinc-700",
           dropoffError
             ? "ring-2 ring-destructive/30"
             : "hover:bg-amber-200 dark:hover:bg-zinc-700"
