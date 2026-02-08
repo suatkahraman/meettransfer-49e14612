@@ -14,105 +14,83 @@ const translations: Record<string, {
   EN: {
     headline: "Instant Vehicle Service",
     items: [
-      "Book now – your vehicle is ready in 20 minutes!",
-      "Schedule your ride at least 20 minutes ahead",
-      "Available in all cities across Turkey",
-      "Your driver is on the way – fast & reliable",
+      "Ready in 20 minutes!",
+      "All cities in Turkey",
     ],
   },
   TR: {
     headline: "Anında Araç Hizmeti",
     items: [
-      "Hemen rezervasyon yapın – aracınız 20 dakikada hazır!",
-      "Rezervasyonunuzu en az 20 dakika sonrası için yapabilirsiniz",
-      "Türkiye'nin tüm şehirlerinde hizmetinizdeyiz",
-      "Şoförünüz yolda – hızlı ve güvenilir",
+      "20 dakikada hazır!",
+      "Türkiye genelinde hizmet",
     ],
   },
   DE: {
     headline: "Sofortiger Fahrzeugservice",
     items: [
-      "Jetzt buchen – Ihr Fahrzeug ist in 20 Minuten bereit!",
-      "Buchen Sie mindestens 20 Minuten im Voraus",
-      "In allen Städten der Türkei verfügbar",
-      "Ihr Fahrer ist unterwegs – schnell & zuverlässig",
+      "In 20 Minuten bereit!",
+      "In der ganzen Türkei",
     ],
   },
   FR: {
     headline: "Service véhicule instantané",
     items: [
-      "Réservez maintenant – votre véhicule est prêt en 20 minutes !",
-      "Réservez au moins 20 minutes à l'avance",
-      "Disponible dans toutes les villes de Turquie",
-      "Votre chauffeur est en route – rapide et fiable",
+      "Prêt en 20 minutes !",
+      "Dans toute la Turquie",
     ],
   },
   RU: {
     headline: "Мгновенный вызов авто",
     items: [
-      "Забронируйте сейчас – авто будет через 20 минут!",
-      "Бронируйте минимум за 20 минут до поездки",
-      "Доступно во всех городах Турции",
-      "Ваш водитель в пути – быстро и надёжно",
+      "Готово за 20 минут!",
+      "По всей Турции",
     ],
   },
   IT: {
     headline: "Servizio veicolo istantaneo",
     items: [
-      "Prenota ora – il tuo veicolo è pronto in 20 minuti!",
-      "Prenota almeno 20 minuti prima",
-      "Disponibile in tutte le città della Turchia",
-      "Il tuo autista è in arrivo – veloce e affidabile",
+      "Pronto in 20 minuti!",
+      "In tutta la Turchia",
     ],
   },
   ES: {
-    headline: "Servicio de vehículo instantáneo",
+    headline: "Servicio instantáneo",
     items: [
-      "¡Reserva ahora – tu vehículo estará listo en 20 minutos!",
-      "Reserva con al menos 20 minutos de antelación",
-      "Disponible en todas las ciudades de Turquía",
-      "Tu conductor está en camino – rápido y confiable",
+      "¡Listo en 20 minutos!",
+      "En toda Turquía",
     ],
   },
   AR: {
     headline: "خدمة سيارة فورية",
     items: [
-      "احجز الآن – سيارتك جاهزة خلال 20 دقيقة!",
-      "احجز قبل 20 دقيقة على الأقل من موعد رحلتك",
-      "متوفرة في جميع مدن تركيا",
-      "سائقك في الطريق – سريع وموثوق",
+      "جاهزة خلال 20 دقيقة!",
+      "في جميع مدن تركيا",
     ],
   },
   UK: {
     headline: "Миттєвий виклик авто",
     items: [
-      "Бронюйте зараз – авто буде через 20 хвилин!",
-      "Бронюйте мінімум за 20 хвилин до поїздки",
-      "Доступно в усіх містах Туреччини",
-      "Ваш водій у дорозі – швидко та надійно",
+      "Готово за 20 хвилин!",
+      "По всій Туреччині",
     ],
   },
   JA: {
     headline: "即時車両サービス",
     items: [
-      "今すぐ予約 – 20分で車両が準備完了！",
-      "少なくとも20分前にご予約ください",
-      "トルコ全都市で利用可能",
-      "ドライバーが向かっています – 迅速＆確実",
+      "20分で準備完了！",
+      "トルコ全都市対応",
     ],
   },
   PT: {
-    headline: "Serviço de veículo instantâneo",
+    headline: "Serviço instantâneo",
     items: [
-      "Reserve agora – seu veículo estará pronto em 20 minutos!",
-      "Agende sua viagem com pelo menos 20 minutos de antecedência",
-      "Disponível em todas as cidades da Turquia",
-      "Seu motorista está a caminho – rápido e confiável",
+      "Pronto em 20 minutos!",
+      "Em toda a Turquia",
     ],
   },
 };
 
-const icons = [Zap, Clock, MapPin, CarFront];
+const icons = [Zap, MapPin];
 
 const nowLabels: Record<string, string> = {
   EN: "Now",
@@ -196,43 +174,43 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
       )}
       dir={isRTL ? "rtl" : "ltr"}
     >
-      <div className="px-3 py-2.5 sm:px-4 sm:py-3">
+      <div className="px-3 py-3 sm:px-4 sm:py-3.5">
         {/* Headline + live clock */}
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
+            <span className="relative flex h-3.5 w-3.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-amber-600 shadow-sm shadow-amber-500/50" />
+              <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-amber-600 shadow-sm shadow-amber-500/50" />
             </span>
-            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+            <span className="text-sm font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300 sm:text-base">
               {t.headline}
             </span>
           </div>
 
-          {/* Live clock: now → ready — distinct blue/cyan color */}
-          <div className="flex items-center gap-1.5 rounded-full border border-sky-400/80 bg-sky-100/80 px-2.5 py-1 shadow-inner dark:border-sky-500/50 dark:bg-sky-900/50">
-            <span className="text-[11px]" role="img" aria-label="Turkey">🇹🇷</span>
-            <Clock className="h-3 w-3 animate-pulse text-sky-600 dark:text-sky-300" />
-            <span className="text-[10px] font-semibold tabular-nums text-sky-700 dark:text-sky-300">
+          {/* Live clock */}
+          <div className="flex items-center gap-1.5 rounded-full border border-sky-400/80 bg-sky-100/80 px-3 py-1.5 shadow-inner dark:border-sky-500/50 dark:bg-sky-900/50">
+            <span className="text-xs" role="img" aria-label="Turkey">🇹🇷</span>
+            <Clock className="h-4 w-4 animate-pulse text-sky-600 dark:text-sky-300" />
+            <span className="text-xs font-semibold tabular-nums text-sky-700 dark:text-sky-300 sm:text-sm">
               {nowLabel} {formattedNow}
             </span>
-            <span className="text-[11px] font-bold text-sky-500 dark:text-sky-400">→</span>
-            <CarFront className="h-3.5 w-3.5 text-sky-700 dark:text-sky-300" />
-            <span className="text-[10px] font-extrabold tabular-nums text-sky-800 dark:text-sky-200">
+            <span className="text-xs font-bold text-sky-500 dark:text-sky-400 sm:text-sm">→</span>
+            <CarFront className="h-4 w-4 text-sky-700 dark:text-sky-300 sm:h-5 sm:w-5" />
+            <span className="text-xs font-extrabold tabular-nums text-sky-800 dark:text-sky-200 sm:text-sm">
               {readyLabel} {formattedReady}
             </span>
           </div>
         </div>
 
         {/* Rotating info items */}
-        <div className="relative h-6 overflow-hidden">
+        <div className="relative h-7 overflow-hidden sm:h-8">
           {t.items.map((item, idx) => {
             const Icon = icons[idx];
             return (
               <div
                 key={idx}
                 className={cn(
-                  "absolute inset-0 flex items-center gap-2 transition-all duration-700 ease-in-out",
+                  "absolute inset-0 flex items-center gap-2.5 transition-all duration-700 ease-in-out",
                   idx === activeIndex
                     ? "translate-y-0 scale-100 opacity-100"
                     : idx < activeIndex
@@ -240,8 +218,8 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
                     : "translate-y-full scale-95 opacity-0"
                 )}
               >
-                <Icon className="h-4 w-4 flex-shrink-0 text-amber-700 dark:text-amber-300" />
-                <span className="truncate text-xs font-semibold text-foreground/90 sm:text-sm">
+                <Icon className="h-5 w-5 flex-shrink-0 text-amber-700 dark:text-amber-300 sm:h-6 sm:w-6" />
+                <span className="truncate text-sm font-bold text-foreground/90 sm:text-base">
                   {item}
                 </span>
               </div>
@@ -249,8 +227,8 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
           })}
         </div>
 
-        {/* Progress dots - min 24px touch targets via padding */}
-        <div className="mt-1 flex items-center justify-center gap-0">
+        {/* Progress dots */}
+        <div className="mt-1.5 flex items-center justify-center gap-0">
           {t.items.map((_, idx) => (
             <button
               key={idx}
@@ -260,10 +238,10 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
             >
               <span
                 className={cn(
-                  "block h-1.5 rounded-full transition-all duration-300",
+                  "block h-2 rounded-full transition-all duration-300",
                   idx === activeIndex
-                    ? "w-5 bg-amber-600 shadow-sm shadow-amber-500/50"
-                    : "w-2 bg-amber-300/60"
+                    ? "w-6 bg-amber-600 shadow-sm shadow-amber-500/50"
+                    : "w-2.5 bg-amber-300/60"
                 )}
               />
             </button>
