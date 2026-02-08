@@ -399,7 +399,7 @@ export const RideFormContent = memo(({
       )}
 
       {/* Passengers - Compact like other fields */}
-      <div className="flex h-[75px] items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700">
+      <div className="flex h-[90px] items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700">
         <div className="flex items-center gap-3">
           <Users className="h-6 w-6 text-foreground" />
           <div className="flex flex-col">
