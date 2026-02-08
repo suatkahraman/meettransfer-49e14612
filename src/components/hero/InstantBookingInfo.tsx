@@ -115,31 +115,45 @@ const translations: Record<string, {
 const icons = [Zap, MapPin, CarFront, Clock];
 
 const nowLabels: Record<string, string> = {
-  EN: "Now",
-  TR: "Şimdi",
-  DE: "Jetzt",
-  FR: "Maintenant",
-  RU: "Сейчас",
-  IT: "Ora",
-  ES: "Ahora",
+  EN: "NOW",
+  TR: "ŞİMDİ",
+  DE: "JETZT",
+  FR: "MAINTENANT",
+  RU: "СЕЙЧАС",
+  IT: "ORA",
+  ES: "AHORA",
   AR: "الآن",
-  UK: "Зараз",
+  UK: "ЗАРАЗ",
   JA: "現在",
-  PT: "Agora",
+  PT: "AGORA",
 };
 
 const readyLabels: Record<string, string> = {
-  EN: "Ready",
-  TR: "Hazır",
-  DE: "Bereit",
-  FR: "Prêt",
-  RU: "Готово",
-  IT: "Pronto",
-  ES: "Listo",
+  EN: "READY",
+  TR: "HAZIR",
+  DE: "BEREIT",
+  FR: "PRÊT",
+  RU: "ГОТОВО",
+  IT: "PRONTO",
+  ES: "LISTO",
   AR: "جاهزة",
-  UK: "Готово",
+  UK: "ГОТОВО",
   JA: "準備完了",
-  PT: "Pronto",
+  PT: "PRONTO",
+};
+
+const bookNowLabels: Record<string, string> = {
+  EN: "BOOK NOW",
+  TR: "HEMEN REZERVE ET",
+  DE: "JETZT BUCHEN",
+  FR: "RÉSERVER",
+  RU: "ЗАБРОНИРОВАТЬ",
+  IT: "PRENOTA ORA",
+  ES: "RESERVAR",
+  AR: "احجز الآن",
+  UK: "БРОНЮВАТИ",
+  JA: "今すぐ予約",
+  PT: "RESERVE AGORA",
 };
 
 function useLiveClock() {
@@ -209,17 +223,20 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
             </span>
           </div>
 
-          {/* Live clock */}
+          {/* Live clock + Book Now */}
           <div className="flex items-center gap-2 rounded-full border border-sky-400/80 bg-sky-100/80 px-3.5 py-2 shadow-inner dark:border-sky-500/50 dark:bg-sky-900/50">
             <span className="text-sm" role="img" aria-label="Turkey">🇹🇷</span>
             <Clock className="h-5 w-5 animate-pulse text-sky-600 dark:text-sky-300 sm:h-6 sm:w-6" />
-            <span className="text-sm font-semibold tabular-nums text-sky-700 dark:text-sky-300 sm:text-base">
+            <span className="text-sm font-bold uppercase tabular-nums text-sky-700 dark:text-sky-300 sm:text-base">
               {nowLabel} {formattedNow}
             </span>
-            <span className="text-sm font-bold text-sky-500 dark:text-sky-400 sm:text-base">→</span>
+            <span className="text-sm font-extrabold text-sky-500 dark:text-sky-400 sm:text-base">→</span>
             <CarFront className="h-6 w-6 text-sky-700 dark:text-sky-300 sm:h-7 sm:w-7" />
-            <span className="text-sm font-extrabold tabular-nums text-sky-800 dark:text-sky-200 sm:text-base">
+            <span className="text-sm font-extrabold uppercase tabular-nums text-sky-800 dark:text-sky-200 sm:text-base">
               {readyLabel} {formattedReady}
+            </span>
+            <span className="ml-1 rounded-md bg-amber-500 px-2.5 py-1 text-xs font-extrabold uppercase text-white shadow-sm sm:text-sm dark:bg-amber-600">
+              {bookNowLabels[lang] || bookNowLabels.EN}
             </span>
           </div>
         </div>
