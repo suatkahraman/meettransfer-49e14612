@@ -43,7 +43,7 @@ const LocationInputsComponent = ({
         )}>
         <MapPin className={cn("h-6 w-6 flex-shrink-0", pickupError ? "text-destructive" : "text-foreground")} />
         <div className="flex flex-1 flex-col justify-center min-w-0 w-full">
-          <label className="block text-[10px] font-medium text-foreground/60 leading-tight">
+          <label className="block text-base font-semibold text-foreground/70 leading-tight">
             {language === 'TR' ? 'Nereden' :
              language === 'DE' ? 'Von' :
              language === 'FR' ? 'De' :
@@ -90,7 +90,7 @@ const LocationInputsComponent = ({
         )}>
         <Navigation className={cn("h-6 w-6 flex-shrink-0", dropoffError ? "text-destructive" : "text-foreground")} />
         <div className="flex flex-1 flex-col justify-center min-w-0 w-full">
-          <label className="block text-[10px] font-medium text-foreground/60 leading-tight">
+          <label className="block text-base font-semibold text-foreground/70 leading-tight">
             {language === 'TR' ? 'Nereye' :
              language === 'DE' ? 'Nach' :
              language === 'FR' ? 'À' :

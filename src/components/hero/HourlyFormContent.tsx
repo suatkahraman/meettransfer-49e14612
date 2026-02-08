@@ -178,7 +178,7 @@ export const HourlyFormContent = memo(({
           ? "ring-2 ring-destructive/30" 
           : "hover:bg-amber-200 dark:hover:bg-zinc-700"
       )}>
-        <label className="mb-0.5 block text-xs font-medium text-foreground/70">
+        <label className="mb-0.5 block text-base font-semibold text-foreground/70">
           {getPickupLabel()}
         </label>
         <div className="flex w-full items-center gap-3">
