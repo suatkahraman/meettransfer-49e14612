@@ -223,21 +223,35 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
             </span>
           </div>
 
-          {/* Live clock + Book Now */}
-          <div className="flex items-center gap-2 rounded-full border border-sky-400/80 bg-sky-100/80 px-3.5 py-2 shadow-inner dark:border-sky-500/50 dark:bg-sky-900/50">
-            <span className="rounded-md bg-amber-500 px-2.5 py-1 text-xs font-extrabold uppercase text-white shadow-sm sm:text-sm dark:bg-amber-600">
-              {bookNowLabels[lang] || bookNowLabels.EN}
-            </span>
-            <span className="text-sm" role="img" aria-label="Turkey">🇹🇷</span>
-            <Clock className="h-5 w-5 animate-pulse text-sky-600 dark:text-sky-300 sm:h-6 sm:w-6" />
-            <span className="text-sm font-bold uppercase tabular-nums text-sky-700 dark:text-sky-300 sm:text-base">
-              {formattedNow}
-            </span>
-            <span className="text-sm font-extrabold text-sky-500 dark:text-sky-400 sm:text-base">→</span>
-            <CarFront className="h-6 w-6 text-sky-700 dark:text-sky-300 sm:h-7 sm:w-7" />
-            <span className="text-sm font-extrabold uppercase tabular-nums text-sky-800 dark:text-sky-200 sm:text-base">
-              {readyLabel} {formattedReady}
-            </span>
+          {/* BOOK NOW + 🇹🇷 + READY */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* BOOK NOW badge with clock */}
+            <div className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-2.5 py-1.5 shadow-md sm:px-3 sm:py-2 dark:bg-amber-600">
+              <Clock className="h-4 w-4 animate-pulse text-white sm:h-5 sm:w-5" />
+              <span className="text-xs font-extrabold uppercase text-white sm:text-sm">
+                {bookNowLabels[lang] || bookNowLabels.EN}
+              </span>
+              <span className="text-xs font-bold tabular-nums text-amber-100 sm:text-sm">
+                {formattedNow}
+              </span>
+            </div>
+
+            {/* Arrow separator */}
+            <div className="flex flex-col items-center">
+              <span className="text-sm" role="img" aria-label="Turkey">🇹🇷</span>
+              <span className="text-lg font-black text-amber-600 dark:text-amber-400 sm:text-xl">⟶</span>
+            </div>
+
+            {/* READY badge with car */}
+            <div className="flex items-center gap-1.5 rounded-lg border-2 border-sky-400 bg-sky-100/90 px-2.5 py-1.5 shadow-md sm:px-3 sm:py-2 dark:border-sky-500 dark:bg-sky-900/60">
+              <CarFront className="h-5 w-5 text-sky-700 dark:text-sky-300 sm:h-6 sm:w-6" />
+              <span className="text-xs font-extrabold uppercase text-sky-800 dark:text-sky-200 sm:text-sm">
+                {readyLabel}
+              </span>
+              <span className="text-xs font-bold tabular-nums text-sky-700 dark:text-sky-300 sm:text-sm">
+                {formattedReady}
+              </span>
+            </div>
           </div>
         </div>
 
