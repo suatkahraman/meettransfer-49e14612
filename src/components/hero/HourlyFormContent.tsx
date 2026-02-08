@@ -178,7 +178,7 @@ export const HourlyFormContent = memo(({
           ? "ring-2 ring-destructive/30" 
           : "hover:bg-amber-200 dark:hover:bg-zinc-700"
       )}>
-        <label className="mb-0.5 block text-base font-semibold text-foreground/70">
+        <label className="mb-0.5 block text-base font-bold text-foreground">
           {getPickupLabel()}
         </label>
         <div className="flex w-full items-center gap-3">
@@ -205,7 +205,7 @@ export const HourlyFormContent = memo(({
             }
           }}
         >
-          <label className="pointer-events-none mb-0.5 block text-base font-semibold text-foreground/70">
+          <label className="pointer-events-none mb-0.5 block text-base font-bold text-foreground">
             {t("duration") || "Duration"}
           </label>
           <div className="flex min-w-0 items-center gap-3">
@@ -237,7 +237,7 @@ export const HourlyFormContent = memo(({
             }
           }}
         >
-          <label className="pointer-events-none mb-0.5 block text-base font-semibold text-foreground/70">
+          <label className="pointer-events-none mb-0.5 block text-base font-bold text-foreground">
             {t("pickupDate") || "Pickup date"}
           </label>
           <div className="flex min-w-0 items-center gap-3">
@@ -275,7 +275,7 @@ export const HourlyFormContent = memo(({
           }
         }}
       >
-        <label className="pointer-events-none mb-0.5 block text-base font-semibold text-foreground/70">
+        <label className="pointer-events-none mb-0.5 block text-base font-bold text-foreground">
           {t("pickupTime") || "Pickup time"}
         </label>
         <div className="flex items-center gap-3">

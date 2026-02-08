@@ -239,8 +239,8 @@ export const RideFormContent = memo(({
           }}
         >
           <label className={cn(
-            "pointer-events-none mb-0.5 block text-base font-semibold",
-            errors.date ? "text-destructive" : "text-foreground/70"
+            "pointer-events-none mb-0.5 block text-base font-bold",
+            errors.date ? "text-destructive" : "text-foreground"
           )}>
             {t("pickupDate") || "Pickup date"}
           </label>
@@ -280,8 +280,8 @@ export const RideFormContent = memo(({
           }}
         >
           <label className={cn(
-            "pointer-events-none mb-0.5 block text-base font-semibold",
-            errors.time ? "text-destructive" : "text-foreground/70"
+            "pointer-events-none mb-0.5 block text-base font-bold",
+            errors.time ? "text-destructive" : "text-foreground"
           )}>
             {t("pickupTime") || "Pickup time"}
           </label>
@@ -350,7 +350,7 @@ export const RideFormContent = memo(({
               }
             }}
           >
-            <label className="pointer-events-none mb-0.5 block text-base font-semibold text-foreground/70">
+            <label className="pointer-events-none mb-0.5 block text-base font-bold text-foreground">
               {t("returnDate") || "Return date"}
             </label>
             <div className="flex min-w-0 items-center gap-3">
@@ -378,7 +378,7 @@ export const RideFormContent = memo(({
               }
             }}
           >
-            <label className="pointer-events-none mb-0.5 block text-base font-semibold text-foreground/70">
+            <label className="pointer-events-none mb-0.5 block text-base font-bold text-foreground">
               {t("returnTime") || "Return time"}
             </label>
             <div className="flex min-w-0 items-center gap-3">
