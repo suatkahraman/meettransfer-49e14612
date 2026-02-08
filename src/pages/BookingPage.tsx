@@ -1714,7 +1714,7 @@ const BookingPage = () => {
 
           {/* Route Map - Only for transfer bookings - Using Google Maps like Hero */}
           {!effectiveIsHourly && effectivePickup && effectiveDropoff && (
-            <Card className="mb-4 sm:mb-8">
+            <Card className="mb-4 sm:mb-8 border-2">
               <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1736,7 +1736,7 @@ const BookingPage = () => {
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Duration Selection - Only for hourly */}
               {isHourlyBooking && (
-                <Card>
+                <Card className="border-2">
                   <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1769,7 +1769,7 @@ const BookingPage = () => {
               )}
 
               {/* Vehicle Selection */}
-              <Card>
+              <Card className="border-2">
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <Car className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1929,7 +1929,7 @@ const BookingPage = () => {
               </Card>
 
               {/* Currency Selection - Below Vehicle List */}
-              <Card>
+              <Card className="border-2">
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
                     <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1969,7 +1969,7 @@ const BookingPage = () => {
                           }
                         }}
                         className={cn(
-                          "flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-medium transition-all duration-200 text-sm border",
+                          "flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-medium transition-all duration-200 text-sm border-2",
                           preferredCurrency === currency.value
                             ? "bg-primary text-primary-foreground shadow-md scale-105 border-primary"
                             : "bg-background text-foreground hover:bg-muted border-border"
@@ -1985,10 +1985,10 @@ const BookingPage = () => {
 
               {/* Return Trip Option - Show discount promo ONLY for Turkey locations */}
               {!isHourlyBooking && (
-                <Card className={isTurkey 
+                <Card className={cn("border-2", isTurkey 
                   ? "border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20"
                   : "border-muted"
-                }>
+                )}>
                   <CardContent className="p-4 sm:p-6 space-y-4">
                     <div 
                       className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer hover:shadow-lg transition-all ${
@@ -2095,7 +2095,7 @@ const BookingPage = () => {
               )}
 
               {/* Payment Options */}
-              <Card>
+              <Card className="border-2">
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -2140,7 +2140,7 @@ const BookingPage = () => {
               </Card>
 
               {/* Customer Information - Login Required Section */}
-              <Card>
+              <Card className="border-2">
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
                     <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -2170,7 +2170,7 @@ const BookingPage = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        className="w-full h-12 bg-amber-50 hover:bg-amber-100 border-amber-200"
+                        className="w-full h-12 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200"
                         onClick={handleGoogleSignIn}
                         disabled={googleLoading || appleLoading}
                       >
@@ -2191,7 +2191,7 @@ const BookingPage = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        className="w-full h-12 bg-black hover:bg-gray-900 text-white border-black"
+                        className="w-full h-12 bg-black hover:bg-gray-900 text-white border-2 border-black"
                         onClick={handleAppleSignIn}
                         disabled={googleLoading || appleLoading}
                       >
@@ -2209,7 +2209,7 @@ const BookingPage = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        className="w-full h-12 border-primary/50 hover:bg-primary/5"
+                        className="w-full h-12 border-2 border-primary/50 hover:bg-primary/5"
                         onClick={() => setShowManualForm(!showManualForm)}
                       >
                         <User className="h-5 w-5 mr-2" />
@@ -2377,7 +2377,7 @@ const BookingPage = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="w-full border-dashed"
+                            className="w-full border-2 border-dashed"
                             onClick={addPassenger}
                           >
                             <UserPlus className="h-4 w-4 mr-2" />
@@ -2412,7 +2412,7 @@ const BookingPage = () => {
             {/* Sidebar - Price Summary - Hidden on mobile */}
             <div className="lg:col-span-1 hidden lg:block">
               <div className="sticky top-24">
-                <Card className="shadow-xl border-primary/20">
+                <Card className="shadow-xl border-2 border-primary/30">
                   <CardHeader className="bg-primary text-white rounded-t-xl p-4 sm:p-6">
                     <CardTitle className="text-base sm:text-lg">{t("vehicleTotalPrice") || "Vehicle Total Price"}</CardTitle>
                   </CardHeader>
@@ -2578,7 +2578,7 @@ const BookingPage = () => {
                             onClick={handleSubmit}
                             size="lg"
                             variant="outline"
-                            className="w-full h-14 text-lg font-semibold group border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                            className="w-full h-14 text-lg font-semibold group border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                             disabled={submitting}
                           >
                             {submitting ? (
