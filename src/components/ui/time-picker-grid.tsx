@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Clock, X, Maximize2 } from "lucide-react";
+import { Clock, X, ChevronUp, ChevronDown } from "lucide-react";
 
 interface TimePickerGridProps {
   value: string;
@@ -34,67 +34,166 @@ const to24Hour = (hour12: number, period: "AM" | "PM"): number => {
 };
 
 // Parse time string (HH:MM) to components
-const parseTime = (time: string): { hour: number; minute: number; period: "AM" | "PM" } => {
+const parseTime = (time: string): { hour24: number; minute: number } => {
   const [hourStr, minuteStr] = time.split(":");
   const hour24 = parseInt(hourStr) || 0;
   const minute = parseInt(minuteStr) || 0;
+  return { hour24, minute };
+};
+
+// Format display time based on mode
+const formatDisplayTime = (hour24: number, minute: number, is24h: boolean): string => {
+  if (is24h) {
+    return `${hour24.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+  }
   const { hour, period } = to12Hour(hour24);
-  return { hour, minute, period };
-};
-
-// Format time to 24h string
-const formatTime = (hour12: number, minute: number, period: "AM" | "PM"): string => {
-  const hour24 = to24Hour(hour12, period);
-  return `${hour24.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-};
-
-// Format display time (12h format)
-const formatDisplayTime = (hour: number, minute: number, period: "AM" | "PM"): string => {
   return `${hour}:${minute.toString().padStart(2, "0")} ${period}`;
 };
 
-// Square Grid Time Picker Content
-const TimePickerContent = React.memo(({
-  tempHour,
+// All minute options (every 5 minutes)
+const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+const HOURS_24 = Array.from({ length: 24 }, (_, i) => i); // 0-23
+const HOURS_12 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const VISIBLE_ITEMS = 5;
+const CENTER_INDEX = Math.floor(VISIBLE_ITEMS / 2); // 2
+
+// Scroll wheel column component
+const ScrollWheelColumn = React.memo(({
+  items,
+  selectedValue,
+  onSelect,
+  formatItem,
+  isFullscreen,
+}: {
+  items: number[];
+  selectedValue: number;
+  onSelect: (value: number) => void;
+  formatItem: (v: number) => string;
+  isFullscreen?: boolean;
+}) => {
+  const selectedIndex = items.indexOf(selectedValue);
+
+  const getVisibleItems = () => {
+    const result: (number | null)[] = [];
+    for (let i = -CENTER_INDEX; i <= CENTER_INDEX; i++) {
+      const idx = selectedIndex + i;
+      if (idx >= 0 && idx < items.length) {
+        result.push(items[idx]);
+      } else {
+        result.push(null);
+      }
+    }
+    return result;
+  };
+
+  const visibleItems = getVisibleItems();
+  const canScrollUp = selectedIndex > 0;
+  const canScrollDown = selectedIndex < items.length - 1;
+
+  const scrollUp = () => {
+    if (canScrollUp) onSelect(items[selectedIndex - 1]);
+  };
+
+  const scrollDown = () => {
+    if (canScrollDown) onSelect(items[selectedIndex + 1]);
+  };
+
+  const itemSize = isFullscreen ? "w-20 h-14 text-2xl" : "w-14 h-10 text-lg";
+  const arrowSize = isFullscreen ? "h-7 w-7" : "h-5 w-5";
+  const columnWidth = isFullscreen ? "w-28" : "w-20";
+
+  return (
+    <div className={cn("flex flex-col items-center", columnWidth)}>
+      <button
+        onClick={scrollUp}
+        disabled={!canScrollUp}
+        className={cn(
+          "p-1 rounded transition-colors",
+          canScrollUp
+            ? (isFullscreen ? "text-white hover:bg-zinc-700" : "text-foreground hover:bg-muted")
+            : (isFullscreen ? "text-zinc-600" : "text-muted-foreground/30")
+        )}
+        aria-label="Scroll up"
+      >
+        <ChevronUp className={arrowSize} />
+      </button>
+
+      <div className="flex flex-col items-center gap-0.5">
+        {visibleItems.map((item, i) => {
+          const isSelected = item !== null && item === selectedValue;
+          return (
+            <button
+              key={`${i}-${item}`}
+              onClick={() => item !== null && onSelect(item)}
+              disabled={item === null}
+              className={cn(
+                itemSize,
+                "flex items-center justify-center rounded-md font-semibold transition-all",
+                item === null && "invisible",
+                isSelected
+                  ? "bg-amber-400 text-black"
+                  : (isFullscreen ? "text-white hover:bg-zinc-700" : "text-foreground hover:bg-muted")
+              )}
+            >
+              {item !== null ? formatItem(item) : ""}
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={scrollDown}
+        disabled={!canScrollDown}
+        className={cn(
+          "p-1 rounded transition-colors",
+          canScrollDown
+            ? (isFullscreen ? "text-white hover:bg-zinc-700" : "text-foreground hover:bg-muted")
+            : (isFullscreen ? "text-zinc-600" : "text-muted-foreground/30")
+        )}
+        aria-label="Scroll down"
+      >
+        <ChevronDown className={arrowSize} />
+      </button>
+    </div>
+  );
+});
+
+ScrollWheelColumn.displayName = "ScrollWheelColumn";
+
+// Shared content for both popover and fullscreen
+const TimePickerWheelContent = React.memo(({
+  tempHour24,
   tempMinute,
+  is24h,
+  setIs24h,
+  onHourSelect,
+  onMinuteSelect,
   tempPeriod,
-  setTempHour,
-  setTempMinute,
-  setTempPeriod,
+  onPeriodChange,
   onSave,
   onClose,
   isFullscreen,
 }: {
-  tempHour: number;
+  tempHour24: number;
   tempMinute: number;
+  is24h: boolean;
+  setIs24h: (v: boolean) => void;
+  onHourSelect: (h: number) => void;
+  onMinuteSelect: (m: number) => void;
   tempPeriod: "AM" | "PM";
-  setTempHour: (h: number) => void;
-  setTempMinute: (m: number) => void;
-  setTempPeriod: (p: "AM" | "PM") => void;
+  onPeriodChange: (p: "AM" | "PM") => void;
   onSave: () => void;
   onClose?: () => void;
   isFullscreen?: boolean;
 }) => {
-  // Hours 1-12 in 4x3 grid
-  const hours = [
-    [1, 2, 3, 4],
-    [5, 6, 7, 8],
-    [9, 10, 11, 12],
-  ];
-
-  // Minutes 00-55 in 4x3 grid (every 5 min)
-  const minutes = [
-    [0, 5, 10, 15],
-    [20, 25, 30, 35],
-    [40, 45, 50, 55],
-  ];
-
-  const buttonSize = isFullscreen ? "w-16 h-14 text-xl" : "w-11 h-10 text-sm";
+  const currentDisplayHour = is24h ? tempHour24 : to12Hour(tempHour24).hour;
+  const currentHours = is24h ? HOURS_24 : HOURS_12;
+  const dividerHeight = isFullscreen ? "h-64" : "h-48";
 
   return (
     <div className={cn(
-      "flex flex-col bg-zinc-900",
-      isFullscreen && "fixed inset-0 z-[200] p-4 overflow-auto"
+      "flex flex-col",
+      isFullscreen ? "fixed inset-0 z-[200] bg-zinc-900 p-4 overflow-auto" : "p-3 min-w-[220px]"
     )}>
       {/* Header for fullscreen */}
       {isFullscreen && onClose && (
@@ -109,107 +208,98 @@ const TimePickerContent = React.memo(({
         </div>
       )}
 
-      <div className={cn(
-        "flex gap-4",
-        isFullscreen ? "flex-col items-center justify-center flex-1" : "flex-row"
-      )}>
-        {/* Hours Grid */}
-        <div className="flex flex-col items-center">
-          <div className="text-xs font-medium text-zinc-400 mb-2">Hour</div>
-          <div className="grid grid-cols-4 gap-1.5">
-            {hours.flat().map((h) => (
-              <button
-                key={h}
-                onClick={() => setTempHour(h)}
-                className={cn(
-                  buttonSize,
-                  "rounded-lg font-semibold transition-all",
-                  tempHour === h
-                    ? "bg-yellow-500 text-black"
-                    : "bg-zinc-800 text-white hover:bg-zinc-700"
-                )}
-              >
-                {h}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Minutes Grid */}
-        <div className="flex flex-col items-center">
-          <div className="text-xs font-medium text-zinc-400 mb-2">Minute</div>
-          <div className="grid grid-cols-4 gap-1.5">
-            {minutes.flat().map((m) => (
-              <button
-                key={m}
-                onClick={() => setTempMinute(m)}
-                className={cn(
-                  buttonSize,
-                  "rounded-lg font-semibold transition-all",
-                  tempMinute === m
-                    ? "bg-yellow-500 text-black"
-                    : "bg-zinc-800 text-white hover:bg-zinc-700"
-                )}
-              >
-                {m.toString().padStart(2, "0")}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* AM/PM */}
-        <div className="flex flex-col items-center">
-          <div className="text-xs font-medium text-zinc-400 mb-2">&nbsp;</div>
-          <div className={cn("flex gap-1.5", isFullscreen ? "flex-row" : "flex-col")}>
-            {(["AM", "PM"] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setTempPeriod(p)}
-                className={cn(
-                  isFullscreen ? "w-20 h-14 text-xl" : "w-14 h-10 text-sm",
-                  "rounded-lg font-bold transition-all",
-                  tempPeriod === p
-                    ? "bg-yellow-500 text-black"
-                    : "bg-zinc-800 text-white hover:bg-zinc-700"
-                )}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* 24h / 12h Toggle */}
+      <div className="flex gap-1 mb-3">
+        <button
+          onClick={() => setIs24h(true)}
+          className={cn(
+            "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
+            is24h
+              ? (isFullscreen ? "bg-zinc-700 text-white" : "bg-muted text-foreground")
+              : (isFullscreen ? "text-zinc-400 hover:text-white" : "text-muted-foreground hover:text-foreground")
+          )}
+        >
+          24h
+        </button>
+        <button
+          onClick={() => setIs24h(false)}
+          className={cn(
+            "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
+            !is24h
+              ? (isFullscreen ? "bg-zinc-700 text-white" : "bg-muted text-foreground")
+              : (isFullscreen ? "text-zinc-400 hover:text-white" : "text-muted-foreground hover:text-foreground")
+          )}
+        >
+          12h
+        </button>
       </div>
 
-      {/* Current Selection Display */}
+      {/* Scroll Wheels */}
       <div className={cn(
-        "text-center py-3 border-t border-zinc-700",
-        isFullscreen ? "mt-6" : "mt-3"
+        "flex items-center justify-center",
+        isFullscreen && "flex-1"
       )}>
-        <span className={cn(
-          "font-bold text-yellow-500",
-          isFullscreen ? "text-3xl" : "text-xl"
-        )}>
-          {formatDisplayTime(tempHour, tempMinute, tempPeriod)}
-        </span>
+        <ScrollWheelColumn
+          items={currentHours}
+          selectedValue={currentDisplayHour}
+          onSelect={onHourSelect}
+          formatItem={(v) => v.toString()}
+          isFullscreen={isFullscreen}
+        />
+
+        <div className={cn("w-px bg-border mx-1", dividerHeight, isFullscreen && "bg-zinc-700")} />
+
+        <ScrollWheelColumn
+          items={MINUTES}
+          selectedValue={tempMinute}
+          onSelect={onMinuteSelect}
+          formatItem={(v) => v.toString().padStart(2, "0")}
+          isFullscreen={isFullscreen}
+        />
+
+        {!is24h && (
+          <>
+            <div className={cn("w-px bg-border mx-1", dividerHeight, isFullscreen && "bg-zinc-700")} />
+            <div className="flex flex-col items-center gap-1 w-16">
+              {(["AM", "PM"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => onPeriodChange(p)}
+                  className={cn(
+                    "w-14 rounded-md font-bold transition-all",
+                    isFullscreen ? "h-14 text-xl" : "h-10 text-sm",
+                    tempPeriod === p
+                      ? "bg-amber-400 text-black"
+                      : (isFullscreen ? "text-white hover:bg-zinc-700" : "text-foreground hover:bg-muted")
+                  )}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Save Button */}
-      <div className={cn("pt-2", isFullscreen && "pb-4")}>
+      <div className={cn(isFullscreen ? "mt-6 pb-4" : "mt-3")}>
         <button
           onClick={onSave}
           className={cn(
-            "w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-lg transition-all",
-            isFullscreen ? "py-4 text-lg" : "py-2.5"
+            "w-full font-bold rounded-lg transition-all",
+            isFullscreen
+              ? "py-4 text-lg bg-amber-400 hover:bg-amber-300 text-black"
+              : "py-2.5 bg-foreground text-background hover:opacity-90"
           )}
         >
-          OK
+          {isFullscreen ? "OK" : "Save"}
         </button>
       </div>
     </div>
   );
 });
 
-TimePickerContent.displayName = "TimePickerContent";
+TimePickerWheelContent.displayName = "TimePickerWheelContent";
 
 export const TimePickerGrid = React.memo(({
   value,
@@ -222,26 +312,40 @@ export const TimePickerGrid = React.memo(({
 }: TimePickerGridProps) => {
   const [open, setOpen] = React.useState(false);
   const [isFullscreen, setIsFullscreen] = React.useState(false);
-  
-  const { hour, minute, period } = React.useMemo(() => parseTime(value), [value]);
-  
-  // Temporary state for selection before save
-  const [tempHour, setTempHour] = React.useState(hour);
+  const [is24h, setIs24h] = React.useState(true);
+
+  const { hour24, minute } = React.useMemo(() => parseTime(value), [value]);
+
+  const [tempHour24, setTempHour24] = React.useState(hour24);
   const [tempMinute, setTempMinute] = React.useState(minute);
-  const [tempPeriod, setTempPeriod] = React.useState(period);
-  
-  // Sync temp state when value changes externally or popover opens
+  const [tempPeriod, setTempPeriod] = React.useState<"AM" | "PM">(() => to12Hour(hour24).period);
+
   React.useEffect(() => {
-    setTempHour(hour);
+    setTempHour24(hour24);
     setTempMinute(minute);
-    setTempPeriod(period);
-  }, [hour, minute, period, open, isFullscreen]);
+    setTempPeriod(to12Hour(hour24).period);
+  }, [hour24, minute, open, isFullscreen]);
+
+  const handleHourSelect = React.useCallback((h: number) => {
+    if (is24h) {
+      setTempHour24(h);
+    } else {
+      setTempHour24(to24Hour(h, tempPeriod));
+    }
+  }, [is24h, tempPeriod]);
+
+  const handlePeriodChange = React.useCallback((p: "AM" | "PM") => {
+    setTempPeriod(p);
+    const hour12 = to12Hour(tempHour24).hour;
+    setTempHour24(to24Hour(hour12, p));
+  }, [tempHour24]);
 
   const handleSave = React.useCallback(() => {
-    onValueChange(formatTime(tempHour, tempMinute, tempPeriod));
+    const timeStr = `${tempHour24.toString().padStart(2, "0")}:${tempMinute.toString().padStart(2, "0")}`;
+    onValueChange(timeStr);
     setOpen(false);
     setIsFullscreen(false);
-  }, [tempHour, tempMinute, tempPeriod, onValueChange]);
+  }, [tempHour24, tempMinute, onValueChange]);
 
   const handleOpenFullscreen = React.useCallback(() => {
     setOpen(false);
@@ -252,38 +356,39 @@ export const TimePickerGrid = React.memo(({
     setIsFullscreen(false);
   }, []);
 
+  const triggerContent = (
+    <div className={cn(
+      "flex h-[60px] flex-col justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 transition-all hover:bg-amber-100 dark:border-zinc-700 dark:bg-zinc-800",
+      className
+    )}>
+      <label className="text-[10px] font-medium text-muted-foreground flex items-center gap-1">
+        <Clock className="h-3 w-3" />
+        {label}
+      </label>
+      <span className="text-sm font-medium">
+        {formatDisplayTime(hour24, minute, is24h)}
+      </span>
+    </div>
+  );
+
   // Fullscreen modal
   if (isFullscreen) {
     return (
       <>
-        {/* Trigger button (invisible when fullscreen) */}
-        <div className={cn(
-          "flex h-[60px] flex-col justify-center rounded-xl border border-amber-200 bg-amber-50 px-3 transition-all hover:bg-amber-100 dark:border-zinc-700 dark:bg-zinc-800",
-          className
-        )}>
-          <label className="text-[10px] font-medium text-muted-foreground flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {label}
-          </label>
-          <span className="text-sm font-medium">
-            {formatDisplayTime(hour, minute, period)}
-          </span>
-        </div>
-
-        {/* Fullscreen modal */}
-        <div className="fixed inset-0 z-[200] bg-zinc-900">
-          <TimePickerContent
-            tempHour={tempHour}
-            tempMinute={tempMinute}
-            tempPeriod={tempPeriod}
-            setTempHour={setTempHour}
-            setTempMinute={setTempMinute}
-            setTempPeriod={setTempPeriod}
-            onSave={handleSave}
-            onClose={handleCloseFullscreen}
-            isFullscreen
-          />
-        </div>
+        {triggerContent}
+        <TimePickerWheelContent
+          tempHour24={tempHour24}
+          tempMinute={tempMinute}
+          is24h={is24h}
+          setIs24h={setIs24h}
+          onHourSelect={handleHourSelect}
+          onMinuteSelect={setTempMinute}
+          tempPeriod={tempPeriod}
+          onPeriodChange={handlePeriodChange}
+          onSave={handleSave}
+          onClose={handleCloseFullscreen}
+          isFullscreen
+        />
       </>
     );
   }
@@ -305,35 +410,24 @@ export const TimePickerGrid = React.memo(({
             {label}
           </span>
           <span className="text-sm font-medium">
-            {formatDisplayTime(hour, minute, period)}
+            {formatDisplayTime(hour24, minute, is24h)}
           </span>
         </button>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-auto p-3 z-[100] bg-zinc-900 border border-zinc-700 shadow-xl" 
+      <PopoverContent
+        className="w-auto p-0 z-[100] bg-background border-2 border-border shadow-xl rounded-xl"
         align="center"
         sideOffset={8}
       >
-        {/* Fullscreen button */}
-        {allowFullscreen && (
-          <div className="flex justify-end mb-2">
-            <button
-              onClick={handleOpenFullscreen}
-              className="p-1.5 rounded-lg hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
-              title="Fullscreen"
-            >
-              <Maximize2 className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-        
-        <TimePickerContent
-          tempHour={tempHour}
+        <TimePickerWheelContent
+          tempHour24={tempHour24}
           tempMinute={tempMinute}
+          is24h={is24h}
+          setIs24h={setIs24h}
+          onHourSelect={handleHourSelect}
+          onMinuteSelect={setTempMinute}
           tempPeriod={tempPeriod}
-          setTempHour={setTempHour}
-          setTempMinute={setTempMinute}
-          setTempPeriod={setTempPeriod}
+          onPeriodChange={handlePeriodChange}
           onSave={handleSave}
         />
       </PopoverContent>
