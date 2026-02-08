@@ -200,6 +200,7 @@ return (
         onMouseMove={(e) => {
           if (!available || isSelected) return;
           const card = e.currentTarget;
+          // Read geometry once, then defer style write to next frame
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
@@ -207,12 +208,16 @@ return (
           const centerY = rect.height / 2;
           const rotateX = (y - centerY) / 20;
           const rotateY = (centerX - x) / 20;
-          card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+          requestAnimationFrame(() => {
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+          });
         }}
         onMouseLeave={(e) => {
           if (!available || isSelected) return;
           const card = e.currentTarget;
-          card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+          requestAnimationFrame(() => {
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+          });
         }}
       >
         {/* 3D Hover Shine Effect */}
