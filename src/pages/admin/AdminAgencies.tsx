@@ -572,7 +572,7 @@ const AdminAgencies = () => {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {agencies.map((agency) => (
-              <Card key={agency.id} className="hover:shadow-lg transition-shadow">
+              <Card key={agency.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/admin/agency-accounting/${agency.id}`)}>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
@@ -583,7 +583,7 @@ const AdminAgencies = () => {
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        onClick={() => navigate(`/admin/agency-accounting/${agency.id}`)}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/admin/agency-accounting/${agency.id}`); }}
                         title="Muhasebe Görüntüle"
                       >
                         <DollarSign className="h-4 w-4" />
@@ -591,7 +591,7 @@ const AdminAgencies = () => {
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        onClick={() => openExportDialog(agency)}
+                        onClick={(e) => { e.stopPropagation(); openExportDialog(agency); }}
                         title="Rezervasyonları Excel'e Aktar"
                       >
                         <FileSpreadsheet className="h-4 w-4" />
@@ -600,20 +600,20 @@ const AdminAgencies = () => {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          onClick={() => openPasswordDialog(agency)}
+                          onClick={(e) => { e.stopPropagation(); openPasswordDialog(agency); }}
                           title="Şifre Değiştir"
                         >
                           <Key className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" onClick={() => openEditDialog(agency)}>
+                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditDialog(agency); }}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="icon" 
                         className="text-destructive hover:text-destructive"
-                        onClick={() => openDeleteDialog(agency)}
+                        onClick={(e) => { e.stopPropagation(); openDeleteDialog(agency); }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
