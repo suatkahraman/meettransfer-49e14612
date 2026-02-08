@@ -87,6 +87,9 @@ const WebsiteHeader = () => {
                 width={64}
                 height={64}
                 loading="eager"
+                decoding="sync"
+                // @ts-expect-error - fetchpriority not yet in React types
+                fetchpriority="high"
                 className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
               />
             </div>
@@ -206,6 +209,10 @@ const WebsiteHeader = () => {
                 <img 
                   src={meetTransferLogo} 
                   alt="Meet Transfer" 
+                  width={40}
+                  height={40}
+                  loading="lazy"
+                  decoding="async"
                   className="h-10 w-10 object-contain"
                 />
                 <span className="text-white font-bold text-lg">Meet Transfer</span>

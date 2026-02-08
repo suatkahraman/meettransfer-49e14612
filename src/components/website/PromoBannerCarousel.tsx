@@ -212,8 +212,12 @@ const PromoBannerCarousel = memo(() => {
               <img
                 src={currentBanner.image}
                 alt={t(currentBanner.titleKey)}
+                width={1200}
+                height={675}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
                 className="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
               {/* Gradient Overlay */}
               <div className={cn(
