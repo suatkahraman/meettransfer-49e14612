@@ -1,0 +1,435 @@
+# Meet Transfer – LLMs-Full.txt
+# https://meettransfer.app
+# Last updated: 2026-02-08
+# See also: https://meettransfer.app/llms.txt (summary version)
+
+> Meet Transfer is Turkey's leading private airport transfer and chauffeur service. We provide fixed-price, professional door-to-door transfers across Turkey, Dubai, Cyprus, Greece, Switzerland and Germany with licensed drivers and luxury Mercedes vehicles. 50,000+ satisfied customers, 4.7★ Google rating, 11 languages supported.
+
+---
+
+## Company Overview
+
+- **Company**: Meet Travel Transfer Ltd.
+- **Website**: https://meettransfer.app
+- **Founded**: Turkey
+- **Coverage**: 81 cities in Turkey + Dubai (UAE), Cyprus, Greece, Switzerland, Germany
+- **Google Rating**: 4.7★ with 50,000+ satisfied customers
+- **Languages**: English, Turkish, German, French, Russian, Italian, Spanish, Arabic, Ukrainian, Japanese, Portuguese
+- **Phone**: +90 850 307 74 46
+- **Email**: info@meettransfer.com
+
+---
+
+## Core Services
+
+### Airport Transfer Service
+**URL**: https://meettransfer.app/services
+Private airport transfers in Istanbul, Antalya, Bodrum, Izmir, Cappadocia, Ankara, Bursa, Dubai and 81 Turkish cities. Professional meet & greet at arrivals, flight tracking, fixed pricing. Mercedes fleet with sedan, minivan, VIP and Maybach options.
+
+### Instant Vehicle Service
+**URL**: https://meettransfer.app/blog/instant-vehicle-service-guide
+Book a vehicle and get it at your door in 20 minutes with fixed pricing. Select your location, choose your vehicle type, and a professional driver arrives within 20 minutes. Available across Turkey with round-trip 25% discount.
+
+### Intercity Transfer
+**URL**: https://meettransfer.app/blog/intercity-transfer-turkey
+City-to-city private transfers across Turkey. Door-to-door service between any two cities with fixed pricing, professional drivers, and comfortable Mercedes vehicles. Popular routes include Istanbul–Bursa, Istanbul–Ankara, Antalya–Cappadocia.
+
+### Hourly Chauffeur Service
+**URL**: https://meettransfer.app/luxury-chauffeur
+Hire a professional driver with a luxury Mercedes vehicle by the hour. Perfect for city tours, business meetings, shopping trips, and special occasions. Available in all major Turkish cities and Dubai.
+
+### VIP Transfer
+**URL**: https://meettransfer.app/blog/vip-airport-transfer-turkey
+Premium Mercedes Maybach and VIP Vito with starlight ceiling. Ultra-luxury transfer experience with massage seats, champagne cooler, premium sound system. For airports, weddings, corporate events, and VIP occasions.
+
+### WhatsApp Booking
+**URL**: https://meettransfer.app/whatsapp-booking
+Book airport transfers instantly via WhatsApp with AI-powered assistant. Get instant price quotes, confirmation, and driver details. Quick and easy booking for transfers in Turkey, Dubai, and Cyprus.
+
+---
+
+## Key Features
+
+- **Fixed Pricing**: No meters, no surge pricing. The price you see is the price you pay.
+- **25% Round-Trip Discount**: Add a return transfer and save 25% automatically.
+- **Instant Driver Info**: Get driver name, phone, vehicle plate, and photo immediately after booking.
+- **Vehicle at Door in 20 Minutes**: Fast response time for instant bookings.
+- **Flight Tracking**: Automatic flight monitoring ensures driver is always on time, even for delayed flights.
+- **Free Baby Seats**: Complimentary child car seats available on request for family travel.
+- **24/7 Service**: Round-the-clock availability for late-night and early-morning transfers.
+- **GPS Tracking**: Real-time vehicle tracking for safety and peace of mind.
+- **AI Booking Assistant**: 24/7 multilingual AI assistant for instant price quotes and booking.
+- **11 Languages Supported**: EN, TR, DE, FR, RU, IT, ES, AR, UK, JA, PT
+- **4.7★ Google Rating**: 50,000+ satisfied customers
+
+---
+
+## Fleet
+
+| Vehicle | Capacity | Starting Price | Features |
+|---------|----------|---------------|----------|
+| Economy Sedan | 1-3 passengers | from €25 | Professional driver, meet & greet, flight tracking |
+| Mercedes Vito | 1-6 passengers | from €40 | Spacious minivan, luggage space, comfortable seating |
+| VIP Mercedes Vito | 1-6 passengers | from €60 | Starlight ceiling, premium interior, VIP amenities |
+| Mercedes Maybach | 1-3 passengers | from €120 | Massage seats, champagne cooler, ultra-premium luxury |
+| Mercedes Sprinter | 7-16 passengers | from €80 | Large group transfers, ample luggage space |
+
+---
+
+## Destination Pages (Detailed)
+
+### Istanbul Transfer
+**URL**: https://meettransfer.app/istanbul-transfer
+Private airport transfers from Istanbul Airport (IST) and Sabiha Gökçen Airport (SAW) to all Istanbul destinations. Covers Taksim, Sultanahmet, Kadıköy, Beşiktaş, Beyoğlu, Fatih, Üsküdar, Bakırköy, and all districts. Fixed prices, meet & greet, flight tracking.
+
+### Istanbul Airport to Hotel Transfer
+**URL**: https://meettransfer.app/istanbul-airport-hotel-transfer
+Direct door-to-door service from Istanbul Airport to any hotel in the city. Prices from €50. Meet & greet at arrivals, fixed prices, direct delivery to Taksim, Sultanahmet and all Istanbul hotels.
+
+### Istanbul Airport Transfer Service
+**URL**: https://meettransfer.app/istanbul-airport-transfer
+Comprehensive private transfer service from Istanbul Airport (IST). Professional drivers, Mercedes fleet, fixed pricing. Covers all Istanbul neighborhoods and surrounding cities.
+
+### Sabiha Gökçen Private Transfer
+**URL**: https://meettransfer.app/sabiha-gokcen-private-transfer
+Private transfer from Sabiha Gökçen Airport (SAW) to Asian and European side destinations. Kadıköy, Pendik, Üsküdar, Taksim crossings. Fixed prices with meet & greet.
+
+### Istanbul City Center VIP Transfer
+**URL**: https://meettransfer.app/istanbul-city-center-vip-transfer
+VIP transfer service within Istanbul city center. Premium Mercedes vehicles for inter-district travel, business meetings, shopping trips, and special events.
+
+### Istanbul to Bursa Transfer
+**URL**: https://meettransfer.app/istanbul-to-bursa-transfer
+Private Istanbul to Bursa transfer from €175. Professional door-to-door service via scenic Osmangazi Bridge route. Day trips available to Cumalıkızık, Uludağ, Grand Mosque. Luxury Mercedes vehicles, 24/7 service.
+
+### Antalya Transfer
+**URL**: https://meettransfer.app/antalya-transfer
+Private airport transfers from Antalya Airport (AYT) to Belek, Side, Kemer, Lara, Alanya, Manavgat, and all resort towns. Fixed prices, meet & greet, 24/7 service.
+
+### Antalya Airport Transfer Service
+**URL**: https://meettransfer.app/antalya-airport-transfer
+Comprehensive transfer service from Antalya Airport to all Mediterranean resort destinations. Mercedes fleet, professional drivers, flight tracking, baby seats available.
+
+### Bodrum Transfer
+**URL**: https://meettransfer.app/bodrum-transfer
+Private airport transfers from Bodrum Milas Airport (BJV) to Bodrum center, Yalıkavak, Turgutreis, Gümbet, Bitez, and all Bodrum peninsula destinations.
+
+### Bodrum Airport Transfer
+**URL**: https://meettransfer.app/bodrum-airport-transfer
+Private transfer from Bodrum Milas Airport. Fixed prices, Mercedes fleet, meet & greet service for all Bodrum peninsula destinations.
+
+### Izmir Transfer
+**URL**: https://meettransfer.app/izmir-transfer
+Private airport transfers from Izmir Adnan Menderes Airport (ADB) to Çeşme, Alaçatı, Kuşadası, Selçuk, Ephesus, and all Aegean coast destinations.
+
+### Izmir Airport Transfer
+**URL**: https://meettransfer.app/izmir-airport-transfer
+Transfer service from Izmir Airport to city center, Çeşme, Alaçatı, Kuşadası, Ephesus and surrounding areas. Fixed prices, professional drivers.
+
+### Cappadocia Transfer
+**URL**: https://meettransfer.app/cappadocia-transfer
+Private airport transfers from Kayseri Airport (ASR) and Nevşehir Airport (NAV) to Göreme, Ürgüp, Avanos, Uçhisar, and all Cappadocia destinations.
+
+### Cappadocia Airport Transfer
+**URL**: https://meettransfer.app/cappadocia-airport-transfer
+Comprehensive transfer from both Cappadocia airports to all cave hotels and tourism spots. Meet & greet, flight tracking, Mercedes fleet.
+
+### Dalaman Transfer
+**URL**: https://meettransfer.app/dalaman-transfer
+Private transfers from Dalaman Airport (DLM) to Fethiye, Marmaris, Ölüdeniz, Göcek, Dalyan, and all southwestern Turkey destinations.
+
+### Dalaman Airport Transfer
+**URL**: https://meettransfer.app/dalaman-airport-transfer
+Airport transfer service from Dalaman to Fethiye, Marmaris, Ölüdeniz, and surrounding Muğla destinations.
+
+### Dubai Transfer
+**URL**: https://meettransfer.app/dubai-transfer
+Private airport transfers from Dubai International Airport (DXB) and Al Maktoum Airport (DWC) to Downtown, Palm Jumeirah, Dubai Marina, JBR, Business Bay, Burj Khalifa area, and all Dubai destinations.
+
+### Cyprus Transfer
+**URL**: https://meettransfer.app/cyprus-transfer
+Private airport transfers in Cyprus from Larnaca, Paphos, and Ercan airports to Ayia Napa, Limassol, Kyrenia, Nicosia, and all Cyprus destinations.
+
+### Cyprus Airport Transfer Service
+**URL**: https://meettransfer.app/cyprus-airport-transfer
+Comprehensive Cyprus airport transfer from Larnaca, Paphos & Ercan airports. Professional meet & greet, 24/7 service. Fixed prices, no hidden fees.
+
+### North Cyprus Transfer
+**URL**: https://meettransfer.app/north-cyprus-transfer
+Private transfer service in Northern Cyprus from Ercan Airport to Kyrenia (Girne), Famagusta (Gazimağusa), Lefkoşa and all North Cyprus destinations.
+
+### Bursa Transfer
+**URL**: https://meettransfer.app/bursa-transfer
+Private transfer service in Bursa. Airport transfers, intercity travel, day tours to Cumalıkızık village, Uludağ ski resort, and Bursa historical sites.
+
+### Greece Transfer
+**URL**: https://meettransfer.app/greece-transfer
+Private airport transfers in Greece from Athens International Airport and other Greek airports. Professional service to Athens city center, islands, and surrounding areas.
+
+### Frankfurt Transfer
+**URL**: https://meettransfer.app/frankfurt-transfer
+Premium VIP airport transfer from Frankfurt Airport (FRA) to city center, Messe Frankfurt, Financial District and all destinations. Mercedes fleet, professional drivers, 24/7 service.
+
+### Switzerland Transfer
+**URL**: https://meettransfer.app/switzerland-transfer
+Private airport transfers from Zurich, Geneva, Basel airports and Milan Malpensa to Swiss ski resorts, cities and Alpine destinations. St. Moritz, Gstaad, Davos, Zermatt, Verbier transfers.
+
+### Ephesus & Pamukkale
+**URL**: https://meettransfer.app/ephesus-pamukkale
+Private transfer and day tour service to Ephesus Ancient City and Pamukkale thermal pools from Izmir, Kuşadası, and Denizli.
+
+### All Destinations
+**URL**: https://meettransfer.app/destinations
+Complete directory of all available transfer destinations across Turkey, Dubai, Cyprus, Greece, Switzerland and Germany.
+
+---
+
+## Blog Articles & Guides (Detailed)
+
+### Istanbul Airport to City – Best Way Guide
+**URL**: https://meettransfer.app/blog/istanbul-airport-to-city-best-way
+Comprehensive guide comparing all transportation options from Istanbul Airport (IST) to city center. Covers taxi, bus (Havaist), metro, and private transfer options with prices, travel times, and pros/cons. Recommends private transfer for comfort, speed, and fixed pricing.
+
+### Istanbul Airport Transfer Price Guide
+**URL**: https://meettransfer.app/blog/istanbul-airport-transfer-price-guide
+Detailed pricing guide for Istanbul Airport transfers in 2025. Complete price table for sedan, Vito, VIP Vito, Maybach, and Sprinter to all Istanbul districts including Taksim, Sultanahmet, Kadıköy, Beşiktaş, Fatih.
+
+### Private vs Taxi Transfer in Turkey
+**URL**: https://meettransfer.app/blog/private-vs-taxi-transfer-turkey
+Side-by-side comparison of private transfer services vs traditional taxis in Turkey. Analyzes pricing, safety, comfort, reliability, language support, and overall value. Explains why private transfers offer better value for airport transportation.
+
+### Is Private Transfer Worth It in Turkey?
+**URL**: https://meettransfer.app/blog/is-private-transfer-worth-it-turkey
+In-depth analysis of whether private airport transfers are worth the investment in Turkey. Covers cost comparison, time savings, comfort factors, safety considerations, and scenarios where private transfer provides the best value.
+
+### AI Booking Assistant Guide
+**URL**: https://meettransfer.app/blog/ai-booking-assistant-guide
+Guide to Meet Transfer's AI-powered booking assistant. Explains how the 24/7 multilingual AI chatbot provides instant price quotes, handles reservations, and supports customers in 11 languages. Covers capabilities, usage tips, and booking flow.
+
+### Instant Vehicle Service Guide
+**URL**: https://meettransfer.app/blog/instant-vehicle-service-guide
+Complete guide to Meet Transfer's instant vehicle service. How to book a car that arrives at your door in 20 minutes. Covers fixed pricing, driver information, round-trip discounts, and availability across Turkey.
+
+### VIP Airport Transfer Turkey
+**URL**: https://meettransfer.app/blog/vip-airport-transfer-turkey
+Guide to VIP airport transfer services in Turkey. Details Mercedes Maybach and VIP Vito options with starlight ceiling, massage seats, champagne cooler. Covers pricing, booking, and what to expect from premium transfer experiences.
+
+### Luxury Maybach Transfer Turkey
+**URL**: https://meettransfer.app/blog/luxury-maybach-transfer-turkey
+Detailed guide to Mercedes Maybach transfer service in Turkey. Features starlight ceiling, massage seats, champagne cooler. Available for airports, weddings, corporate events, and VIP occasions. Premium chauffeur service across Turkey.
+
+### Best VIP Transfer Istanbul
+**URL**: https://meettransfer.app/blog/best-vip-transfer-istanbul
+Guide to the best VIP transfer services in Istanbul. Compares premium options, Mercedes fleet details, and why Meet Transfer is rated as Istanbul's top VIP transfer provider.
+
+### Family Airport Transfer Turkey
+**URL**: https://meettransfer.app/blog/family-airport-transfer-turkey
+Guide to family-friendly airport transfers in Turkey. Covers free baby seats, spacious vehicles, patient drivers, and tips for traveling with children. Perfect for family vacations to Turkish resorts.
+
+### Safe Night Transfer Turkey
+**URL**: https://meettransfer.app/blog/safe-night-transfer-turkey
+Guide to safe late-night airport transfers in Turkey. Covers 24/7 service availability, GPS tracking, verified drivers, fixed pricing, and safety features for midnight and early-morning flights at Istanbul, Antalya, and Bodrum airports.
+
+### Business Travel Transfer Istanbul
+**URL**: https://meettransfer.app/blog/business-travel-transfer-istanbul
+Guide to executive airport transfers in Istanbul for business travelers. Covers corporate invoicing, Wi-Fi availability, Mercedes Maybach fleet, and reliable service for professionals. Airport to business districts and conference venues.
+
+### Intercity Transfer Turkey
+**URL**: https://meettransfer.app/blog/intercity-transfer-turkey
+Complete guide to city-to-city private transfers across Turkey. Covers popular intercity routes, pricing, travel times, and benefits of private transfer vs bus or train. Door-to-door service between any two Turkish cities.
+
+### How to Choose a Reliable Transfer
+**URL**: https://meettransfer.app/blog/how-to-choose-reliable-transfer
+Expert tips on selecting a trustworthy airport transfer service. Covers what to look for: licensing, reviews, fleet quality, pricing transparency, insurance, and customer support. Red flags to avoid.
+
+### Why Meet Transfer is Trusted
+**URL**: https://meettransfer.app/blog/why-meet-transfer-trusted
+Details why Meet Transfer is Turkey's most trusted transfer service. Covers 4.7★ Google rating, 50,000+ customers, professional drivers, Mercedes fleet, fixed pricing, and customer testimonials.
+
+### Airport Transfer Booking Tips
+**URL**: https://meettransfer.app/blog/airport-transfer-booking-tips
+Practical tips for booking airport transfers. When to book, what information to provide, how to get the best price, round-trip discount strategy, and what to expect on transfer day.
+
+### Antalya Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/antalya-airport-transfer-to-hotels
+Comprehensive guide to transfers from Antalya Airport (AYT) to all resort hotels. Covers routes to Belek, Side, Kemer, Lara Beach, Alanya with pricing tables, travel times, and booking tips.
+
+### Antalya Airport Transfer – Best Service
+**URL**: https://meettransfer.app/blog/antalya-airport-transfer-best-service
+Why Meet Transfer is the best private transfer from Antalya Airport. 4.7★ rating, fixed prices from €50, Mercedes fleet, flight tracking. Comparison of Meet Transfer vs taxi services.
+
+### Bodrum Airport Transfer – Best Service
+**URL**: https://meettransfer.app/blog/bodrum-airport-transfer-best-service
+Why Meet Transfer is the best private transfer from Bodrum Milas Airport. Covers all Bodrum peninsula destinations with pricing, service features, and customer reviews.
+
+### Izmir Airport Transfer – Best Service
+**URL**: https://meettransfer.app/blog/izmir-airport-transfer-best-service
+Why Meet Transfer is the best private transfer from Izmir Adnan Menderes Airport. 4.7★ rating, fixed prices from €40, Mercedes fleet, flight tracking. Covers Çeşme, Kuşadası, Selçuk routes.
+
+### Cappadocia Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/cappadocia-airport-transfer-guide
+Guide to transfers from Kayseri and Nevşehir airports to Cappadocia destinations. Covers Göreme, Ürgüp, Avanos, Uçhisar with pricing and travel times.
+
+### Cappadocia Airport Transfer – Best Service
+**URL**: https://meettransfer.app/blog/cappadocia-airport-transfer-best-service
+Why Meet Transfer is the best transfer from Cappadocia airports. Covers both Kayseri (ASR) and Nevşehir (NAV) airports to all cave hotel destinations.
+
+### Dubai Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/dubai-airport-transfer-guide
+Complete guide to private transfers from Dubai International Airport (DXB) and Al Maktoum Airport (DWC). Routes to Downtown, Palm Jumeirah, Dubai Marina, JBR, Business Bay, and Abu Dhabi. VIP and luxury options available.
+
+### Cyprus Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/cyprus-airport-transfer-guide
+Guide to airport transfers in Cyprus from Larnaca, Paphos, and Ercan airports. Covers routes to Ayia Napa, Limassol, Kyrenia, Nicosia with pricing and service details.
+
+### Ankara Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/ankara-airport-transfer-guide
+Guide to transfers from Ankara Esenboğa Airport to city center, Kızılay, Çankaya, TBMM, and all Ankara districts. Pricing, travel times, and booking information.
+
+### Adana Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/adana-airport-transfer-guide
+Guide to private transfers from Adana Şakirpaşa Airport to city center, Mersin, Tarsus, and surrounding cities. Pricing tables and route information.
+
+### Diyarbakır Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/diyarbakir-airport-transfer-guide
+Guide to transfers from Diyarbakır Airport to city center, Mardin, Midyat, Şanlıurfa, Batman, Siirt, and southeastern Turkey destinations. Pricing and route details.
+
+### Mardin Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/mardin-airport-transfer-guide
+Guide to private transfers from Mardin Airport to Mardin old city, Midyat, Savur, and Mesopotamia destinations. Cultural tour transfer options.
+
+### Midyat Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/midyat-airport-transfer-guide
+Guide to airport transfers to Midyat from Mardin Airport. Visit Mor Gabriel Monastery, stone houses, telkari workshops. Mercedes fleet, English-speaking drivers.
+
+### Aydın Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/aydin-airport-transfer-guide
+Guide to transfers from Izmir Airport to Aydın, Kuşadası, Ephesus, Didim, and Pamukkale. Private transfer pricing and route options.
+
+### Fethiye Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/fethiye-airport-transfer-guide
+Guide to transfers from Dalaman Airport to Fethiye, Ölüdeniz, Hisarönü, Kayaköy. Travel times, pricing, and tips for the Blue Lagoon area.
+
+### Marmaris Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/marmaris-airport-transfer-guide
+Guide to transfers from Dalaman Airport to Marmaris, İçmeler, Datça, and surrounding resorts. Pricing tables and booking tips.
+
+### Muğla Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/mugla-airport-transfer-guide
+Comprehensive guide to transfers from Dalaman Airport to all Muğla province destinations including Bodrum, Marmaris, Fethiye, Datça, and Göcek.
+
+### Ölüdeniz Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/oludeniz-airport-transfer-guide
+Guide to transfers from Dalaman Airport to Ölüdeniz (Blue Lagoon), Hisarönü, and Fethiye. Travel times, pricing, and paragliding transfer options.
+
+### Frankfurt Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/frankfurt-airport-transfer-guide
+Guide to private transfers from Frankfurt Airport (FRA) to city center, Messe Frankfurt, Financial District, Sachsenhausen, and surrounding cities like Heidelberg and Mainz.
+
+### Athens Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/athens-airport-transfer-guide
+Guide to private transfers from Athens International Airport to city center, Piraeus port, Glyfada, Vouliagmeni, and Cape Sounion. Professional Greek-speaking drivers.
+
+### Switzerland Airport Transfer Guide
+**URL**: https://meettransfer.app/blog/switzerland-airport-transfer-guide
+Comprehensive guide to private transfers from Zurich, Geneva, Basel airports and Milan Malpensa to Swiss ski resorts and cities. Covers St. Moritz, Gstaad, Davos, Zermatt, Verbier. Winter transfer with ski equipment transport.
+
+### Istanbul to Bursa Day Tour Guide
+**URL**: https://meettransfer.app/blog/istanbul-bursa-day-tour-guide
+Complete guide to Istanbul to Bursa day trips. Covers Cumalıkızık village, Uludağ cable car, Green Mosque, Grand Mosque, İskender kebab, thermal baths. Private transfer via Osmangazi Bridge with pricing.
+
+### Agency Partnership B2B Guide
+**URL**: https://meettransfer.app/blog/agency-partnership-b2b-turkey
+Information about Meet Transfer's B2B partnership program for travel agencies. Exclusive rates, instant booking API, 24/7 support, commission structure, and how to apply.
+
+---
+
+## Popular Routes & Pricing
+
+### Istanbul Airport (IST)
+- IST → Taksim: from €50 (sedan), €55 (Vito)
+- IST → Sultanahmet: from €50 (sedan), €55 (Vito)
+- IST → Kadıköy: from €55 (sedan), €60 (Vito)
+- IST → Beşiktaş: from €50 (sedan), €55 (Vito)
+
+### Sabiha Gökçen Airport (SAW)
+- SAW → Kadıköy: from €40 (sedan), €45 (Vito)
+- SAW → Pendik: from €25 (sedan), €30 (Vito)
+- SAW → Taksim: from €60 (sedan), €65 (Vito)
+
+### Antalya Airport (AYT)
+- AYT → Belek: from €50 (sedan), €55 (Vito)
+- AYT → Side: from €65 (sedan), €70 (Vito)
+- AYT → Kemer: from €55 (sedan), €60 (Vito)
+- AYT → Alanya: from €90 (sedan), €95 (Vito)
+
+### Bodrum Milas Airport (BJV)
+- BJV → Bodrum Center: from €45 (sedan), €50 (Vito)
+- BJV → Yalıkavak: from €55 (sedan), €60 (Vito)
+- BJV → Turgutreis: from €55 (sedan), €60 (Vito)
+
+### Dalaman Airport (DLM)
+- DLM → Fethiye: from €55 (sedan), €60 (Vito)
+- DLM → Marmaris: from €65 (sedan), €70 (Vito)
+- DLM → Ölüdeniz: from €60 (sedan), €65 (Vito)
+
+### Cappadocia Airports
+- Kayseri/Nevşehir → Göreme: from €40 (sedan), €45 (Vito)
+- Kayseri/Nevşehir → Ürgüp: from €45 (sedan), €50 (Vito)
+
+### Dubai Airport (DXB)
+- DXB → Downtown Dubai: from €50
+- DXB → Palm Jumeirah: from €55
+- DXB → Dubai Marina: from €55
+
+---
+
+## Booking Options
+
+1. **Online Booking**: https://meettransfer.app/book – Instant price quote, vehicle selection, and booking confirmation
+2. **WhatsApp Booking**: https://meettransfer.app/whatsapp-booking – Book via WhatsApp with AI assistant, instant price quotes
+3. **Phone**: +90 850 307 74 46
+4. **Email**: info@meettransfer.com
+
+---
+
+## B2B Partnership
+
+**URL**: https://meettransfer.app/blog/agency-partnership-b2b-turkey
+Travel agencies can become B2B partners with exclusive wholesale rates, instant booking API integration, 24/7 dedicated support, and competitive commission structure. Apply online or contact the partnership team.
+
+---
+
+## Additional Pages
+
+- **About Us**: https://meettransfer.app/about – Company history, mission, team, and values
+- **Reviews**: https://meettransfer.app/reviews – Google reviews and customer testimonials
+- **Contact**: https://meettransfer.app/contact – Contact form, phone, email, and office information
+- **Fleet**: https://meettransfer.app/fleet – Detailed fleet information with photos and specifications
+- **Privacy Policy**: https://meettransfer.app/privacy – Data protection and privacy practices
+- **Terms of Service**: https://meettransfer.app/terms – Service terms and conditions
+- **Blog**: https://meettransfer.app/blog – All articles and guides
+
+---
+
+## Structured Data & Schema
+
+Meet Transfer implements comprehensive structured data including:
+- **LocalBusiness** schema with ratings, address, and service area
+- **TransportationService** schema for transfer services
+- **Article** schema for all blog posts
+- **FAQPage** schema with frequently asked questions
+- **BreadcrumbList** for navigation
+- **Product** schema for vehicle types and pricing
+
+---
+
+## Technical Information
+
+- **Technology**: React, TypeScript, Vite, Tailwind CSS
+- **Hosting**: Lovable Cloud with global CDN
+- **PWA**: Progressive Web App with offline support
+- **Performance**: Optimized for Core Web Vitals
+- **Accessibility**: WCAG compliant with semantic HTML
+- **Sitemap**: https://meettransfer.app/sitemap.xml (2000+ URLs with hreflang for 11 languages)
+- **LLMs.txt**: https://meettransfer.app/llms.txt (summary) | https://meettransfer.app/llms-full.txt (this file)

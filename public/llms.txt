@@ -1,6 +1,7 @@
 # Meet Transfer – LLMs.txt
 # https://meettransfer.app
-# Last updated: 2026-02-07
+# Last updated: 2026-02-08
+# For detailed content, see: https://meettransfer.app/llms-full.txt
 
 > Meet Transfer is Turkey's leading private airport transfer and chauffeur service. We provide fixed-price, professional door-to-door transfers across Turkey and Dubai with licensed drivers and luxury Mercedes vehicles.
 
@@ -60,14 +61,40 @@
 ## Blog & Guides
 
 - [Istanbul Airport to City Guide](https://meettransfer.app/blog/istanbul-airport-to-city-best-way)
+- [Istanbul Transfer Price Guide](https://meettransfer.app/blog/istanbul-airport-transfer-price-guide)
 - [Private vs Taxi in Turkey](https://meettransfer.app/blog/private-vs-taxi-transfer-turkey)
 - [Is Private Transfer Worth It?](https://meettransfer.app/blog/is-private-transfer-worth-it-turkey)
 - [AI Booking Assistant Guide](https://meettransfer.app/blog/ai-booking-assistant-guide)
 - [Instant Vehicle Service](https://meettransfer.app/blog/instant-vehicle-service-guide)
 - [VIP Airport Transfer Turkey](https://meettransfer.app/blog/vip-airport-transfer-turkey)
+- [Luxury Maybach Transfer](https://meettransfer.app/blog/luxury-maybach-transfer-turkey)
 - [Family Airport Transfer Guide](https://meettransfer.app/blog/family-airport-transfer-turkey)
 - [Safe Night Transfer](https://meettransfer.app/blog/safe-night-transfer-turkey)
 - [Business Travel Transfer](https://meettransfer.app/blog/business-travel-transfer-istanbul)
+- [Intercity Transfer Turkey](https://meettransfer.app/blog/intercity-transfer-turkey)
+- [How to Choose Reliable Transfer](https://meettransfer.app/blog/how-to-choose-reliable-transfer)
+- [Why Meet Transfer is Trusted](https://meettransfer.app/blog/why-meet-transfer-trusted)
+- [Airport Transfer Booking Tips](https://meettransfer.app/blog/airport-transfer-booking-tips)
+- [Antalya Airport Transfer Guide](https://meettransfer.app/blog/antalya-airport-transfer-to-hotels)
+- [Bodrum Airport Transfer Best Service](https://meettransfer.app/blog/bodrum-airport-transfer-best-service)
+- [Izmir Airport Transfer Best Service](https://meettransfer.app/blog/izmir-airport-transfer-best-service)
+- [Cappadocia Airport Transfer Guide](https://meettransfer.app/blog/cappadocia-airport-transfer-guide)
+- [Dubai Airport Transfer Guide](https://meettransfer.app/blog/dubai-airport-transfer-guide)
+- [Cyprus Airport Transfer Guide](https://meettransfer.app/blog/cyprus-airport-transfer-guide)
+- [Ankara Airport Transfer Guide](https://meettransfer.app/blog/ankara-airport-transfer-guide)
+- [Diyarbakır Airport Transfer Guide](https://meettransfer.app/blog/diyarbakir-airport-transfer-guide)
+- [Mardin Airport Transfer Guide](https://meettransfer.app/blog/mardin-airport-transfer-guide)
+- [Midyat Airport Transfer Guide](https://meettransfer.app/blog/midyat-airport-transfer-guide)
+- [Fethiye Airport Transfer Guide](https://meettransfer.app/blog/fethiye-airport-transfer-guide)
+- [Marmaris Airport Transfer Guide](https://meettransfer.app/blog/marmaris-airport-transfer-guide)
+- [Ölüdeniz Airport Transfer Guide](https://meettransfer.app/blog/oludeniz-airport-transfer-guide)
+- [Muğla Airport Transfer Guide](https://meettransfer.app/blog/mugla-airport-transfer-guide)
+- [Aydın Airport Transfer Guide](https://meettransfer.app/blog/aydin-airport-transfer-guide)
+- [Adana Airport Transfer Guide](https://meettransfer.app/blog/adana-airport-transfer-guide)
+- [Frankfurt Airport Transfer Guide](https://meettransfer.app/blog/frankfurt-airport-transfer-guide)
+- [Athens Airport Transfer Guide](https://meettransfer.app/blog/athens-airport-transfer-guide)
+- [Switzerland Airport Transfer Guide](https://meettransfer.app/blog/switzerland-airport-transfer-guide)
+- [Istanbul to Bursa Day Tour](https://meettransfer.app/blog/istanbul-bursa-day-tour-guide)
 - [All Blog Posts](https://meettransfer.app/blog)
 
 ## B2B Partnership
