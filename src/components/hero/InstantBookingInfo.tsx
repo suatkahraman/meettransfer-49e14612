@@ -231,7 +231,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
               <span className="text-sm font-extrabold uppercase text-white sm:text-base">
                 {bookNowLabels[lang] || bookNowLabels.EN}
               </span>
-              <span className="text-base font-bold tabular-nums text-amber-100 sm:text-lg">
+              <span className="text-lg font-extrabold tabular-nums text-amber-100 sm:text-xl">
                 {formattedNow}
               </span>
             </div>
@@ -248,7 +248,7 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
               <span className="text-sm font-extrabold uppercase text-sky-800 dark:text-sky-200 sm:text-base">
                 {readyLabel}
               </span>
-              <span className="text-base font-bold tabular-nums text-sky-700 dark:text-sky-300 sm:text-lg">
+              <span className="text-lg font-extrabold tabular-nums text-sky-700 dark:text-sky-300 sm:text-xl">
                 {formattedReady}
               </span>
             </div>
