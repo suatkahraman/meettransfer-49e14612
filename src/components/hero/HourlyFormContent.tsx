@@ -205,17 +205,17 @@ export const HourlyFormContent = memo(({
             }
           }}
         >
-          <label className="pointer-events-none mb-0.5 block text-xs font-medium text-foreground/70">
+          <label className="pointer-events-none mb-0.5 block text-base font-semibold text-foreground/70">
             {t("duration") || "Duration"}
           </label>
-          <div className="flex min-w-0 items-center gap-2">
-            <Timer className="pointer-events-none h-4 w-4 flex-shrink-0 text-foreground" />
+          <div className="flex min-w-0 items-center gap-3">
+            <Timer className="pointer-events-none h-6 w-6 flex-shrink-0 text-foreground" />
             <LazyFloatingLabelSelect 
               label="" 
               value={hourlyDuration} 
               onValueChange={setHourlyDuration} 
               options={durationOptions} 
-              triggerClassName="h-auto justify-start border-0 bg-transparent p-0 text-sm font-bold text-foreground shadow-none hover:bg-transparent focus:ring-0"
+              triggerClassName="h-auto justify-start border-0 bg-transparent p-0 text-xl font-bold text-foreground shadow-none hover:bg-transparent focus:ring-0"
               icon={<span />}
             />
           </div>
@@ -237,11 +237,11 @@ export const HourlyFormContent = memo(({
             }
           }}
         >
-          <label className="pointer-events-none mb-0.5 block text-xs font-medium text-foreground/70">
+          <label className="pointer-events-none mb-0.5 block text-base font-semibold text-foreground/70">
             {t("pickupDate") || "Pickup date"}
           </label>
-          <div className="flex min-w-0 items-center gap-2">
-            <CalendarIcon className="pointer-events-none h-4 w-4 flex-shrink-0 text-foreground" />
+          <div className="flex min-w-0 items-center gap-3">
+            <CalendarIcon className="pointer-events-none h-6 w-6 flex-shrink-0 text-foreground" />
             <div className="min-w-0 flex-1 overflow-hidden">
               <FloatingLabelDatePicker 
                 label="" 
@@ -249,7 +249,7 @@ export const HourlyFormContent = memo(({
                 onSelect={handleDateChange} 
                 disabledDates={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))} 
                 dateFormat="EEE, dd MMM"
-                triggerClassName="h-auto w-full justify-start truncate border-0 bg-transparent p-0 text-sm font-semibold text-foreground shadow-none hover:bg-transparent focus:ring-0"
+                triggerClassName="h-auto w-full justify-start truncate border-0 bg-transparent p-0 text-xl font-bold text-foreground shadow-none hover:bg-transparent focus:ring-0"
                 icon={<span />}
               />
             </div>
@@ -275,15 +275,15 @@ export const HourlyFormContent = memo(({
           }
         }}
       >
-        <label className="pointer-events-none mb-0.5 block text-xs font-medium text-foreground/70">
+        <label className="pointer-events-none mb-0.5 block text-base font-semibold text-foreground/70">
           {t("pickupTime") || "Pickup time"}
         </label>
-        <div className="flex items-center gap-2">
-          <Clock className="pointer-events-none h-4 w-4 flex-shrink-0 text-foreground" />
+        <div className="flex items-center gap-3">
+          <Clock className="pointer-events-none h-6 w-6 flex-shrink-0 text-foreground" />
           <TimePickerAMPM 
             value={hourlyTime} 
             onValueChange={handleTimeChange} 
-            triggerClassName="text-sm font-semibold text-foreground"
+            triggerClassName="text-xl font-bold text-foreground"
             dataTrigger="hourly-time"
             labels={{
               hour: t("timeHour") || "Hour",
