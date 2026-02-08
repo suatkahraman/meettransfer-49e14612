@@ -1,5 +1,5 @@
 import { memo, useEffect, useState, useMemo } from "react";
-import { Zap, Clock, MapPin, CarFront } from "lucide-react";
+import { Zap, Clock, MapPin, CarFront, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface InstantBookingInfoProps {
@@ -237,9 +237,9 @@ export const InstantBookingInfo = memo(function InstantBookingInfo({
             </div>
 
             {/* Arrow separator */}
-            <div className="flex items-center justify-center leading-none">
-              <span className="text-lg" role="img" aria-label="Turkey">🇹🇷</span>
-              <span className="animate-pulse text-sm font-black text-amber-600 dark:text-amber-400 sm:text-base">⟶</span>
+            <div className="flex items-center justify-center gap-1 leading-none">
+              <span className="text-sm" role="img" aria-label="Turkey">🇹🇷</span>
+              <ChevronRight className="h-4 w-4 animate-pulse text-amber-600 dark:text-amber-400" />
             </div>
 
             {/* READY badge with car */}
