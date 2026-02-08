@@ -24,9 +24,9 @@ export const HeroVisualSection = memo(({
       {/* Mobile Visual Section - Stats & Features Only (No Images) */}
       <div className="order-2 md:hidden">
         {/* CLS: lock initial height on mobile so late data (e.g., rating) can't expand the card */}
-        <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border/50 h-[236px]">
+        <div className="rounded-xl overflow-hidden shadow-lg bg-card border border-border/50 h-[260px]">
           {/* Feature highlights - gradient background instead of image */}
-          <div className="relative h-32 bg-gradient-to-br from-primary/10 via-accent/5 to-background overflow-hidden">
+          <div className="relative h-36 bg-gradient-to-br from-primary/10 via-accent/5 to-background overflow-hidden">
             {/* Decorative elements */}
             <div className="absolute inset-0">
               <div className="absolute top-4 left-4 w-20 h-20 rounded-full bg-primary/10 blur-2xl" />
@@ -35,20 +35,20 @@ export const HeroVisualSection = memo(({
             
             {/* Content overlay */}
             <div className="relative z-10 h-full flex flex-col justify-center p-4">
-              <p className="text-base font-bold text-foreground mb-2" role="heading" aria-level={2}>
+              <p className="text-lg font-extrabold text-foreground mb-2.5" role="heading" aria-level={2}>
                 {t("premiumFleet")}
               </p>
-              <div className="flex flex-wrap gap-1.5">
-                <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-1">
-                  <Wifi className="h-3 w-3" />
+              <div className="flex flex-wrap gap-2">
+                <div className="flex items-center gap-1.5 text-sm font-semibold bg-primary/15 text-primary rounded-full px-3 py-1.5">
+                  <Wifi className="h-4 w-4" />
                   <span>{t("freeWifi")}</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-1">
-                  <Baby className="h-3 w-3" />
+                <div className="flex items-center gap-1.5 text-sm font-semibold bg-primary/15 text-primary rounded-full px-3 py-1.5">
+                  <Baby className="h-4 w-4" />
                   <span>{t("babySeatLabel")}</span>
                 </div>
-                <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary rounded-full px-2 py-1">
-                  <Briefcase className="h-3 w-3" />
+                <div className="flex items-center gap-1.5 text-sm font-semibold bg-primary/15 text-primary rounded-full px-3 py-1.5">
+                  <Briefcase className="h-4 w-4" />
                   <span>{t("meetGreet")}</span>
                 </div>
               </div>
