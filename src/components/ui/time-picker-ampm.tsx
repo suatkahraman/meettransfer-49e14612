@@ -228,13 +228,13 @@ export const TimePickerAMPM = React.memo(({
       >
         <div className="flex flex-col p-3 min-w-[220px]">
           {/* 24h / 12h Toggle */}
-          <div className="flex gap-1 mb-3">
+          <div className="flex gap-0 mb-3 bg-muted rounded-lg p-1">
             <button
               onClick={() => setIs24h(true)}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
+                "flex-1 px-4 py-2 rounded-md text-sm font-bold transition-all",
                 is24h
-                  ? "bg-muted text-foreground"
+                  ? "bg-foreground text-background shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -243,9 +243,9 @@ export const TimePickerAMPM = React.memo(({
             <button
               onClick={() => setIs24h(false)}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
+                "flex-1 px-4 py-2 rounded-md text-sm font-bold transition-all",
                 !is24h
-                  ? "bg-muted text-foreground"
+                  ? "bg-foreground text-background shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
