@@ -296,31 +296,31 @@ export const HourlyFormContent = memo(({
 
       {/* Passengers Row */}
       <div className="flex h-[75px] items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700">
-        <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-foreground" />
+        <div className="flex items-center gap-3">
+          <Users className="h-6 w-6 text-foreground" />
           <div className="flex flex-col">
-            <span className="text-xs font-semibold text-foreground/80">
+            <span className="text-base font-semibold text-foreground/80">
               {t("passengers") || "Passengers"}
             </span>
-            <span className="text-lg font-bold">{hourlyPassengers}</span>
+            <span className="text-2xl font-bold">{hourlyPassengers}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={handlePassengerDecrement}
             disabled={parseInt(hourlyPassengers) <= 1}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-lg font-bold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground text-xl font-bold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <Minus className="h-4 w-4" strokeWidth={3} />
+            <Minus className="h-6 w-6" strokeWidth={3} />
           </button>
           <button
             type="button"
             onClick={handlePassengerIncrement}
             disabled={parseInt(hourlyPassengers) >= 18}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-lg font-bold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-12 w-12 items-center justify-center rounded-lg bg-foreground text-xl font-bold text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <Plus className="h-4 w-4" strokeWidth={3} />
+            <Plus className="h-6 w-6" strokeWidth={3} />
           </button>
         </div>
       </div>
