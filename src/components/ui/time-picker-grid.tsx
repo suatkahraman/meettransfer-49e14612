@@ -209,13 +209,13 @@ const TimePickerWheelContent = React.memo(({
       )}
 
       {/* 24h / 12h Toggle */}
-      <div className="flex gap-1 mb-3">
+      <div className={cn("flex gap-0 mb-3 rounded-lg p-1", isFullscreen ? "bg-zinc-800" : "bg-muted")}>
         <button
           onClick={() => setIs24h(true)}
           className={cn(
-            "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
+            "flex-1 px-4 py-2 rounded-md text-sm font-bold transition-all",
             is24h
-              ? (isFullscreen ? "bg-zinc-700 text-white" : "bg-muted text-foreground")
+              ? (isFullscreen ? "bg-white text-black shadow-sm" : "bg-foreground text-background shadow-sm")
               : (isFullscreen ? "text-zinc-400 hover:text-white" : "text-muted-foreground hover:text-foreground")
           )}
         >
@@ -224,9 +224,9 @@ const TimePickerWheelContent = React.memo(({
         <button
           onClick={() => setIs24h(false)}
           className={cn(
-            "px-3 py-1.5 rounded-md text-sm font-semibold transition-all",
+            "flex-1 px-4 py-2 rounded-md text-sm font-bold transition-all",
             !is24h
-              ? (isFullscreen ? "bg-zinc-700 text-white" : "bg-muted text-foreground")
+              ? (isFullscreen ? "bg-white text-black shadow-sm" : "bg-foreground text-background shadow-sm")
               : (isFullscreen ? "text-zinc-400 hover:text-white" : "text-muted-foreground hover:text-foreground")
           )}
         >
