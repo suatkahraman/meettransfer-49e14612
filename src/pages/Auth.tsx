@@ -159,12 +159,14 @@ const Auth = () => {
       const isRecoveryType = params.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
       const hasAccessToken = hashParams.get('access_token');
       const hasCode = params.get('code') || hashParams.get('code');
+      const tokenHash = params.get('token_hash') || hashParams.get('token_hash') || hashParams.get('token');
       const errorDescription = hashParams.get('error_description') || params.get('error_description');
       
       console.log('Recovery check:', { 
         isRecoveryType, 
         hasAccessToken: !!hasAccessToken, 
         hasCode: !!hasCode,
+        hasTokenHash: !!tokenHash,
         errorDescription,
         hash: window.location.hash.substring(0, 50) + '...'
       });
@@ -179,6 +181,31 @@ const Auth = () => {
         // Clean URL
         window.history.replaceState(null, '', '/auth');
         return;
+      }
+
+      // Direct token_hash flow: verify via verifyOtp (bypasses Supabase redirect allowlist)
+      if (tokenHash) {
+        console.log('Recovery token_hash detected, verifying via verifyOtp...');
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        });
+        if (error) {
+          console.error('verifyOtp failed:', error);
+          toast.error('Recovery link has expired or is invalid. Please request a new one.');
+          setViewMode('reset-error');
+          setRecoveryChecked(true);
+          window.history.replaceState(null, '', '/auth');
+          return;
+        }
+        if (data?.session) {
+          console.log('Session established from token_hash verifyOtp');
+          setViewMode('reset');
+          setIsRecoverySession(true);
+          setRecoveryChecked(true);
+          window.history.replaceState(null, '', '/auth?type=recovery');
+          return;
+        }
       }
 
       // PKCE flow: exchange code for session first

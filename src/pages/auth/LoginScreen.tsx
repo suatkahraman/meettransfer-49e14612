@@ -148,7 +148,7 @@ const LoginScreen = () => {
   };
 
 
-  // Check if returning from password reset email and exchange PKCE code if present
+  // Check if returning from password reset email and exchange token/code for session
   useEffect(() => {
     const checkRecoverySession = async () => {
       const type = searchParams.get('type');
@@ -158,7 +158,31 @@ const LoginScreen = () => {
       const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
       const code = url.searchParams.get('code') || hashParams.get('code');
       const hasAccessToken = hashParams.get('access_token');
+      const tokenHash = searchParams.get('token_hash') || hashParams.get('token_hash') || hashParams.get('token');
       
+      // Direct token_hash flow: verify via verifyOtp (bypasses Supabase redirect allowlist)
+      if (tokenHash) {
+        console.log('[LoginScreen] Recovery token_hash detected, verifying via verifyOtp...');
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        });
+        if (error) {
+          console.error('[LoginScreen] verifyOtp failed:', error);
+          toast.error(language === 'TR' 
+            ? 'Bağlantı süresi dolmuş veya geçersiz. Lütfen yeni bir şifre sıfırlama bağlantısı isteyin.'
+            : 'Recovery link expired or invalid. Please request a new one.');
+          window.history.replaceState(null, '', '/login');
+          return;
+        }
+        if (data?.session) {
+          console.log('[LoginScreen] Session established from token_hash verifyOtp');
+          window.history.replaceState(null, '', '/login?type=recovery');
+          setViewMode('reset');
+          return;
+        }
+      }
+
       // PKCE flow: exchange code for session
       if (code) {
         console.log('[LoginScreen] Recovery PKCE code detected, exchanging...');
@@ -168,7 +192,6 @@ const LoginScreen = () => {
           toast.error(language === 'TR' 
             ? 'Bağlantı süresi dolmuş veya geçersiz. Lütfen yeni bir şifre sıfırlama bağlantısı isteyin.'
             : 'Recovery link expired or invalid. Please request a new one.');
-          // Clean URL and stay on login
           window.history.replaceState(null, '', '/login');
           return;
         }
