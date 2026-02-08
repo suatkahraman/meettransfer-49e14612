@@ -273,7 +273,7 @@ const AutocompleteInput = memo(({
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* Icon for non-floating label mode */}
       {icon && (
         <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 text-muted-foreground">
