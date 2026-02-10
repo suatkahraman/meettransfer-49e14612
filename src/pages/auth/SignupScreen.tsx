@@ -73,31 +73,37 @@ const SignupScreen = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-// Role-based redirect after login (Infinite loop fix for password recovery)
-  useEffect(() => {
-    // 1. If in recovery mode, prevent any automatic redirection to stay on reset page
-    if (isRecoverySession || viewMode === 'reset' || viewMode === 'reset-success' || viewMode === 'reset-error') {
-      console.log('Recovery mode active: Automatic redirect suspended to allow password reset.');
-      return; 
-    }
+useEffect(() => {
+  // 1. Recovery Mode Detection: Prevent redirect if user is resetting password
+  const isActualRecovery = 
+    window.location.search.includes('type=recovery') || 
+    window.location.hash.includes('type=recovery') ||
+    window.location.href.includes('recovery');
 
-    // 2. Do not proceed until recovery check is complete or if user/role is missing
-    if (!recoveryChecked || !user || roleLoading || !role) {
-      return;
-    }
+  if (isActualRecovery) {
+    console.log('[Auth] Recovery mode detected: Redirect suspended to allow password reset.');
+    return;
+  }
 
-    // 3. Check for pending booking from quick booking flow
-    const pendingBookingToken = typeof safeLocalGet !== 'undefined' ? safeLocalGet('pending_booking_token') : null;
-    const pendingBookingData = typeof safeLocalGet !== 'undefined' ? safeLocalGet('pending_booking_data') : null;
-    
-    if (pendingBookingToken || pendingBookingData) {
-      console.log('[Auth] Pending booking found, redirecting to /customer');
-      navigate('/customer', { replace: true });
-      return;
-    }
+  // 2. Wait for Authentication and Role Data
+  // Stop if we don't have a user, or if we are still loading the role
+  if (!user || roleLoading) {
+    return;
+  }
 
-    // 4. Normal role-based routing
-    console.log('Login successful, redirecting based on role:', role);
+  // 3. Handle Pending Bookings (if any)
+  const pendingBookingToken = typeof safeLocalGet !== 'undefined' ? safeLocalGet('pending_booking_token') : null;
+  const pendingBookingData = typeof safeLocalGet !== 'undefined' ? safeLocalGet('pending_booking_data') : null;
+  
+  if (pendingBookingToken || pendingBookingData) {
+    console.log('[Auth] Pending booking found, redirecting to /customer');
+    navigate('/customer', { replace: true });
+    return;
+  }
+
+  // 4. Role-Based Routing Logic
+  if (role) {
+    console.log('[Auth] Login successful, redirecting to role path:', role);
     switch (role) {
       case 'admin':
         navigate('/admin', { replace: true });
@@ -111,17 +117,13 @@ const SignupScreen = () => {
       default:
         navigate('/customer', { replace: true });
     }
-  }, [user, role, roleLoading, navigate, isRecoverySession, viewMode, recoveryChecked]);
-
-  // If already logged in, show loading
-  if (authLoading || (user && roleLoading)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
-      </div>
-    );
+  } else {
+    // 5. Fallback for New Users (Google Sign-in / Guest)
+    // If user exists but role is not found in database yet
+    console.log('[Auth] User exists but no role found, redirecting to /customer as default');
+    navigate('/customer', { replace: true });
   }
-
+}, [user, role, roleLoading, navigate]);
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
