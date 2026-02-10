@@ -1,24 +1,37 @@
 {
   "version": 2,
-  "rewrites": [
+ "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/login",
       "has": [
         {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(.*)googlebot|google-inspectiontool|bingbot|yandex|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora\\ link\\ preview|showyoubot|outbrain|pinterest\\/0\\.|pinterestbot|slackbot|vkShare|W3C_Validator|whatsapp|gptbot|chatgpt-user|applebot|flipboardbot(.*)"
+          "type": "query",
+          "key": "type",
+          "value": "recovery"
         }
       ],
-      "destination": "https://service.prerender.io/https://%{HTTP_HOST}/$1"
+      "destination": "/reset-password"
     },
-   {
-  "source": "/auth/v1/(.*)",
-  "destination": "https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/$1"
-},
+    {
+      "source": "/auth/v1/(.*)",
+      "destination": "https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/$1"
+    },
+    {
+      "source": "/rest/v1/(.*)",
+      "destination": "https://lzwwxuxwlssxutwiuxtf.supabase.co/rest/v1/$1"
+    },
     {
       "source": "/oauth/(.*)",
       "destination": "/index.html"
+    },
+    {
+      "source": "(.*)",
+      "destination": "https://service.prerender.io/https://%{HTTP_HOST}/$1",
+      "condition": {
+        "type": "header",
+        "name": "User-Agent",
+        "value": "googlebot|bingbot|yandex|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\\/0\\.|pinterestbot|slackbot|vkShare|W3C_Validator|whatsapp"
+      }
     },
     {
       "source": "/(.*)",
