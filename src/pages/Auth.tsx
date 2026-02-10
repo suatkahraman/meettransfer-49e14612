@@ -49,7 +49,7 @@ const newPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type ViewMode = 'auth' | 'forgot' | 'reset-sent' | 'reset' | 'reset-success' | 'reset-error';
+type ViewMode = 'auth' | 'forgot' | 'reset-sent' | 'reset' | 'update_password' | 'reset-success' | 'reset-error';
 
 // Password strength indicator component
 const PasswordStrengthIndicator = ({ password }: { password: string }) => {
@@ -133,6 +133,15 @@ const PasswordStrengthIndicator = ({ password }: { password: string }) => {
 };
 
 const Auth = () => {
+  // Strict recovery detection from URL – no redirect to dashboard when true (checked on every render)
+  const isRecovery =
+    (typeof window !== 'undefined' &&
+      (window.location.hash.includes('type=recovery') || window.location.search.includes('type=recovery'))) ||
+    false;
+  if (typeof window !== 'undefined') {
+    console.log('[Auth] isRecovery:', isRecovery, { hash: window.location.hash?.slice(0, 80), search: window.location.search });
+  }
+
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>('auth');
@@ -295,10 +304,22 @@ const Auth = () => {
     };
   }, []);
 
-  // Role-based redirect after login (only if not in recovery mode)
+  // When URL indicates recovery, force update_password view and never redirect to dashboard
   useEffect(() => {
-    // Şifre sıfırlama koruması: type=recovery veya reset ekranındayken hiç yönlendirme yapma
-    if (isRecoveryUrl || isRecoverySession || viewMode === 'reset') {
+    if (isRecovery) {
+      setViewMode('update_password');
+      setIsRecoverySession(true);
+    }
+  }, [isRecovery]);
+
+  // Role-based redirect after login – STRICT: if isRecovery, NEVER navigate to any dashboard
+  useEffect(() => {
+    if (isRecovery) {
+      return; // Must not call navigate() to any dashboard route under any circumstances
+    }
+
+    // Şifre sıfırlama koruması: type=recovery veya reset/update_password ekranındayken hiç yönlendirme yapma
+    if (isRecoveryUrl || isRecoverySession || viewMode === 'reset' || viewMode === 'update_password') {
       return;
     }
 
@@ -337,6 +358,7 @@ const Auth = () => {
         navigate('/customer', { replace: true });
     }
   }, [
+    isRecovery,
     user,
     role,
     authLoading,
@@ -706,7 +728,7 @@ const Auth = () => {
     );
   }
 
-  if (viewMode === 'reset') {
+  if (viewMode === 'reset' || viewMode === 'update_password') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
         <Card className="w-full max-w-md">
