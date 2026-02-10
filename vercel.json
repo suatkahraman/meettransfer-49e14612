@@ -1,6 +1,6 @@
 {
   "version": 2,
- "rewrites": [
+  "rewrites": [
     {
       "source": "/login",
       "has": [
@@ -26,17 +26,21 @@
     },
     {
       "source": "(.*)",
-      "destination": "https://service.prerender.io/https://%{HTTP_HOST}/$1",
-      "condition": {
-        "type": "header",
-        "name": "User-Agent",
-        "value": "googlebot|bingbot|yandex|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\\/0\\.|pinterestbot|slackbot|vkShare|W3C_Validator|whatsapp"
-      }
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(.*)googlebot|google-inspectiontool|bingbot|yandex|baiduspider|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora\\ link\\ preview|showyoubot|outbrain|pinterest\\/0\\.|pinterestbot|slackbot|vkShare|W3C_Validator|whatsapp|gptbot|chatgpt-user|applebot|flipboardbot(.*)"
+        }
+      ],
+      "destination": "https://service.prerender.io/https://%{HTTP_HOST}/$1"
     },
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
+  ]
+}
   ],
   "headers": [
     {
