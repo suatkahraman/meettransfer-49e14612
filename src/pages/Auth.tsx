@@ -143,11 +143,17 @@ const Auth = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRecoverySession, setIsRecoverySession] = useState(false);
   const [recoveryChecked, setRecoveryChecked] = useState(false);
-  const { signIn, signUp, user, session } = useAuth();
+  const { signIn, signUp, user, session, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // URL'de type=recovery var mı (şifre sıfırlama koruması için)
+  const isRecoveryUrl = useMemo(
+    () => location.search.includes('type=recovery') || (typeof window !== 'undefined' && window.location.hash.includes('type=recovery')),
+    [location.search, location.hash]
+  );
 
   // Check for password recovery in URL and auth state
   useEffect(() => {
@@ -288,37 +294,56 @@ const Auth = () => {
 
   // Role-based redirect after login (only if not in recovery mode)
   useEffect(() => {
-    if (isRecoverySession || viewMode === 'reset') {
-      // Don't redirect during recovery
+    // Şifre sıfırlama koruması: type=recovery veya reset ekranındayken hiç yönlendirme yapma
+    if (isRecoveryUrl || isRecoverySession || viewMode === 'reset') {
       return;
     }
-    
-    if (user && !roleLoading && role && recoveryChecked) {
-      // Check for pending booking from quick booking flow
-      const pendingBookingToken = safeLocalGet('pending_booking_token');
-      const pendingBookingData = safeLocalGet('pending_booking_data');
-      
-      if (pendingBookingToken || pendingBookingData) {
-        console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
-        navigate('/customer', { replace: true });
-        return;
-      }
-      
-      switch (role) {
-        case 'admin':
-          navigate('/admin', { replace: true });
-          break;
-        case 'driver':
-          navigate('/driver', { replace: true });
-          break;
-        case 'agency':
-          navigate('/agency', { replace: true });
-          break;
-        default:
-          navigate('/customer', { replace: true });
-      }
+
+    // Sonsuz döngü engeli: yüklemeler bitene kadar bekle, yönlendirme tetikleme
+    if (authLoading || roleLoading) {
+      return;
     }
-  }, [user, role, roleLoading, navigate, isRecoverySession, viewMode, recoveryChecked]);
+
+    // Tüm yüklemeler bitti; giriş yapmış kullanıcıyı rolüne göre yönlendir (rol yoksa varsayılan customer)
+    if (!user || !recoveryChecked) {
+      return;
+    }
+
+    // Check for pending booking from quick booking flow
+    const pendingBookingToken = safeLocalGet('pending_booking_token');
+    const pendingBookingData = safeLocalGet('pending_booking_data');
+
+    if (pendingBookingToken || pendingBookingData) {
+      console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
+      navigate('/customer', { replace: true });
+      return;
+    }
+
+    // Rol bazlı yönlendirme (role null ise Google/yeni kullanıcı → varsayılan customer)
+    switch (role ?? 'customer') {
+      case 'admin':
+        navigate('/admin', { replace: true });
+        break;
+      case 'driver':
+        navigate('/driver', { replace: true });
+        break;
+      case 'agency':
+        navigate('/agency', { replace: true });
+        break;
+      default:
+        navigate('/customer', { replace: true });
+    }
+  }, [
+    user,
+    role,
+    authLoading,
+    roleLoading,
+    navigate,
+    isRecoveryUrl,
+    isRecoverySession,
+    viewMode,
+    recoveryChecked,
+  ]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
