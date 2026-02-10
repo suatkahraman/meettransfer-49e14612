@@ -12,10 +12,10 @@
       ],
       "destination": "https://service.prerender.io/https://%{HTTP_HOST}/$1"
     },
-    {
-      "source": "/auth/(.*)",
-      "destination": "/index.html"
-    },
+   {
+  "source": "/auth/v1/(.*)",
+  "destination": "https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/$1"
+},
     {
       "source": "/oauth/(.*)",
       "destination": "/index.html"
