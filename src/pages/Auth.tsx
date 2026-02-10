@@ -149,11 +149,14 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // URL'de type=recovery var mı (şifre sıfırlama koruması için)
-  const isRecoveryUrl = useMemo(
-    () => location.search.includes('type=recovery') || (typeof window !== 'undefined' && window.location.hash.includes('type=recovery')),
-    [location.search, location.hash]
-  );
+  // URL'de recovery var mı – hem search params hem hash kontrol edilir (şifre sıfırlama koruması)
+  const isRecoveryUrl = useMemo(() => {
+    const search = location.search ?? '';
+    const hash = location.hash ?? (typeof window !== 'undefined' ? window.location.hash : '');
+    const fromSearch = search.includes('type=recovery') || search.includes('recovery');
+    const fromHash = hash.includes('type=recovery') || hash.includes('recovery');
+    return fromSearch || fromHash;
+  }, [location.search, location.hash]);
 
   // Check for password recovery in URL and auth state
   useEffect(() => {
