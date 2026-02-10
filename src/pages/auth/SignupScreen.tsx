@@ -73,21 +73,45 @@ const SignupScreen = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Role-based redirect if already logged in
+// Role-based redirect after login (Infinite loop fix for password recovery)
   useEffect(() => {
-    if (user && !roleLoading && role) {
-      switch (role) {
-        case 'admin':
-          navigate('/admin', { replace: true });
-          break;
-        case 'driver':
-          navigate('/driver', { replace: true });
-          break;
-        default:
-          navigate('/customer', { replace: true });
-      }
+    // 1. If in recovery mode, prevent any automatic redirection to stay on reset page
+    if (isRecoverySession || viewMode === 'reset' || viewMode === 'reset-success' || viewMode === 'reset-error') {
+      console.log('Recovery mode active: Automatic redirect suspended to allow password reset.');
+      return; 
     }
-  }, [user, role, roleLoading, navigate]);
+
+    // 2. Do not proceed until recovery check is complete or if user/role is missing
+    if (!recoveryChecked || !user || roleLoading || !role) {
+      return;
+    }
+
+    // 3. Check for pending booking from quick booking flow
+    const pendingBookingToken = typeof safeLocalGet !== 'undefined' ? safeLocalGet('pending_booking_token') : null;
+    const pendingBookingData = typeof safeLocalGet !== 'undefined' ? safeLocalGet('pending_booking_data') : null;
+    
+    if (pendingBookingToken || pendingBookingData) {
+      console.log('[Auth] Pending booking found, redirecting to /customer');
+      navigate('/customer', { replace: true });
+      return;
+    }
+
+    // 4. Normal role-based routing
+    console.log('Login successful, redirecting based on role:', role);
+    switch (role) {
+      case 'admin':
+        navigate('/admin', { replace: true });
+        break;
+      case 'driver':
+        navigate('/driver', { replace: true });
+        break;
+      case 'agency':
+        navigate('/agency', { replace: true });
+        break;
+      default:
+        navigate('/customer', { replace: true });
+    }
+  }, [user, role, roleLoading, navigate, isRecoverySession, viewMode, recoveryChecked]);
 
   // If already logged in, show loading
   if (authLoading || (user && roleLoading)) {
