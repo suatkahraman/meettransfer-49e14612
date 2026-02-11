@@ -329,29 +329,21 @@ const DriverLoginScreen = () => {
           const isTrusted = await checkTrustedDevice(authData.user.id);
 
           if (!isTrusted || require2FADueToFailedAttempts) {
-          keepRedirectSuppressed = true;
-
-          // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
-          setPendingRole(userRole);
-          setViewMode('2fa');
-
-          // Sign out temporarily - user needs to verify via 2FA
-          await supabase.auth.signOut();
-
-          // Device not trusted or suspicious activity - require 2FA
-          const langCode = language === 'TR' ? 'tr' : 'en';
-          const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
-
-          if (result.success) {
-            toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
-            // Clear the flag after initiating 2FA
-            safeLocalRemove(require2FAKey);
-          } else {
-            toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
-            setPendingRole(null);
-            setViewMode('login');
-            keepRedirectSuppressed = false;
-          }
+            keepRedirectSuppressed = true;
+            setPendingRole(userRole);
+            setViewMode('2fa');
+            await supabase.auth.signOut();
+            const langCode = language === 'TR' ? 'tr' : 'en';
+            const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
+            if (result.success) {
+              toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
+              safeLocalRemove(require2FAKey);
+            } else {
+              toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
+              setPendingRole(null);
+              setViewMode('login');
+              keepRedirectSuppressed = false;
+            }
           } else {
             await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
           }

@@ -911,7 +911,7 @@ const AdminDrivers = () => {
                 <p className="text-sm text-destructive">Bu şoförün giriş hesabı (user_id) yok; önce hesap oluşturulmalı.</p>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="driver-new-password">Yeni şifre (en az 6 karakter)</Label>
+                  <Label htmlFor="driver-new-password">Yeni şifre (en az 6 karakter, örn: Sofor24)</Label>
                   <Input
                     id="driver-new-password"
                     type="password"
