@@ -427,7 +427,9 @@ const AdminDrivers = () => {
           new_password: newPassword.trim(),
         },
       });
+      const data = response.data as { success?: boolean; error?: string } | null;
       if (response.error) throw new Error(response.error.message || 'Şifre güncellenemedi');
+      if (data && data.success === false) throw new Error(data.error || 'Şifre güncellenemedi');
       await logAction({
         action: 'UPDATE_PASSWORD',
         table_name: 'drivers',

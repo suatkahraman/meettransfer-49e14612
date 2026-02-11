@@ -162,6 +162,8 @@ interface IntercityPrice {
   price_currency: string;
   is_active: boolean;
   created_at: string;
+  valid_from?: string | null;
+  valid_to?: string | null;
 }
 
 const AdminRegionPrices = () => {
@@ -214,6 +216,9 @@ const AdminRegionPrices = () => {
   const [intercityPrices, setIntercityPrices] = useState<IntercityPrice[]>([]);
   const [intercityLoading, setIntercityLoading] = useState(true);
   const [intercitySearchTerm, setIntercitySearchTerm] = useState('');
+  const [intercityFilterMonth, setIntercityFilterMonth] = useState<string>('all');
+  const [intercityFilterYear] = useState<number>(() => new Date().getFullYear());
+  const [intercityFilterPriceType, setIntercityFilterPriceType] = useState<'all' | 'base' | 'seasonal'>('all');
   const [isIntercityDialogOpen, setIsIntercityDialogOpen] = useState(false);
   const [editingIntercityPrice, setEditingIntercityPrice] = useState<IntercityPrice | null>(null);
   
@@ -596,10 +601,18 @@ const AdminRegionPrices = () => {
   });
 
   const filteredIntercityPrices = intercityPrices.filter(price => {
-    return price.from_city.toLowerCase().includes(intercitySearchTerm.toLowerCase()) ||
+    const matchesSearch = !intercitySearchTerm ||
+      price.from_city.toLowerCase().includes(intercitySearchTerm.toLowerCase()) ||
       price.to_city.toLowerCase().includes(intercitySearchTerm.toLowerCase()) ||
       (price.from_district && price.from_district.toLowerCase().includes(intercitySearchTerm.toLowerCase())) ||
       (price.to_district && price.to_district.toLowerCase().includes(intercitySearchTerm.toLowerCase()));
+    const isBase = !price.valid_from && !price.valid_to;
+    const matchesPriceType = intercityFilterPriceType === 'all' ||
+      (intercityFilterPriceType === 'base' && isBase) ||
+      (intercityFilterPriceType === 'seasonal' && !!price.valid_from);
+    const monthNum = intercityFilterMonth === 'all' ? 0 : parseInt(intercityFilterMonth, 10);
+    const matchesMonth = intercityFilterMonth === 'all' || priceCoversMonth(price, monthNum, intercityFilterYear);
+    return matchesSearch && matchesPriceType && matchesMonth;
   });
 
   const availableAirports = formCity ? (CITIES_DATA as any)[formCity]?.airports || [] : [];
@@ -773,42 +786,42 @@ const AdminRegionPrices = () => {
 
         {/* Tabs for Airport, Intercity, and Seasonal */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'airport' | 'intercity' | 'seasonal')}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="airport" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Havalimanı
+          <TabsList className="grid w-full grid-cols-3 min-w-0 sm:grid-cols-3 h-auto flex-wrap sm:flex-nowrap gap-1 p-1">
+            <TabsTrigger value="airport" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span className="truncate">Havalimanı</span>
             </TabsTrigger>
-            <TabsTrigger value="intercity" className="flex items-center gap-2">
-              <ArrowRightLeft className="h-4 w-4" />
-              Şehirler Arası
+            <TabsTrigger value="intercity" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
+              <ArrowRightLeft className="h-4 w-4 shrink-0" />
+              <span className="truncate">Şehirler Arası</span>
             </TabsTrigger>
-            <TabsTrigger value="seasonal" className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4" />
-              Sezonluk
+            <TabsTrigger value="seasonal" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
+              <CalendarDays className="h-4 w-4 shrink-0" />
+              <span className="truncate">Sezonluk</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Airport Transfers Tab */}
           <TabsContent value="airport">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <MapPin className="h-5 w-5 shrink-0" />
                   Havalimanı Transfer Fiyatları
                 </CardTitle>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setIsMonthlyUpdateDialogOpen(true)}>
-                    <Calendar className="h-4 w-4 mr-2" />
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setIsMonthlyUpdateDialogOpen(true)}>
+                    <Calendar className="h-4 w-4 mr-2 shrink-0" />
                     Aylık Fiyat
                   </Button>
-                  <Button variant="outline" onClick={() => setIsBulkUpdateDialogOpen(true)}>
-                    <Percent className="h-4 w-4 mr-2" />
+                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setIsBulkUpdateDialogOpen(true)}>
+                    <Percent className="h-4 w-4 mr-2 shrink-0" />
                     % Güncelle
                   </Button>
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button onClick={openNewDialog}>
-                        <Plus className="h-4 w-4 mr-2" />
+                      <Button size="sm" className="flex-1 sm:flex-none" onClick={openNewDialog}>
+                        <Plus className="h-4 w-4 mr-2 shrink-0" />
                         Yeni Fiyat Ekle
                       </Button>
                     </DialogTrigger>
@@ -1001,73 +1014,86 @@ const AdminRegionPrices = () => {
                       : 'Arama kriterlerine uygun fiyat bulunamadı.'}
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Şehir</TableHead>
-                          <TableHead>Havalimanı</TableHead>
-                          <TableHead>İlçe/Bölge</TableHead>
-                          <TableHead>Araç</TableHead>
-                          <TableHead>Dönem</TableHead>
-                          <TableHead className="text-right">Fiyat</TableHead>
-                          <TableHead className="text-right">İşlemler</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredPrices.map((price) => {
-                          const isSeasonalPrice = price.valid_from && price.valid_to;
-                          const monthLabel = isSeasonalPrice && price.valid_from
-                            ? MONTHS.find(m => m.value === getMonthFromDate(price.valid_from))?.label
-                            : null;
-                          
-                          return (
-                            <TableRow key={price.id}>
-                              <TableCell className="font-medium">{price.city}</TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {price.airport || '-'}
-                              </TableCell>
-                              <TableCell>{price.district}</TableCell>
-                              <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
-                              <TableCell>
-                                {isSeasonalPrice ? (
-                                  <Badge variant="secondary" className="text-xs">
-                                    {monthLabel} {new Date(price.valid_from!).getFullYear()}
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="outline" className="text-xs">
-                                    Temel Fiyat
-                                  </Badge>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-right font-bold text-accent">
-                                {formatPrice(price.price, price.price_currency)}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => openEditDialog(price)}
-                                  >
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleDelete(price.id)}
-                                    className="text-destructive hover:text-destructive"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
+                  <>
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Şehir</TableHead>
+                            <TableHead>Havalimanı</TableHead>
+                            <TableHead>İlçe/Bölge</TableHead>
+                            <TableHead>Araç</TableHead>
+                            <TableHead>Dönem</TableHead>
+                            <TableHead className="text-right">Fiyat</TableHead>
+                            <TableHead className="text-right">İşlemler</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredPrices.map((price) => {
+                            const isSeasonalPrice = price.valid_from && price.valid_to;
+                            const monthLabel = isSeasonalPrice && price.valid_from
+                              ? MONTHS.find(m => m.value === getMonthFromDate(price.valid_from))?.label
+                              : null;
+                            return (
+                              <TableRow key={price.id}>
+                                <TableCell className="font-medium">{price.city}</TableCell>
+                                <TableCell className="text-muted-foreground">{price.airport || '-'}</TableCell>
+                                <TableCell>{price.district}</TableCell>
+                                <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
+                                <TableCell>
+                                  {isSeasonalPrice ? (
+                                    <Badge variant="secondary" className="text-xs">{monthLabel} {new Date(price.valid_from!).getFullYear()}</Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs">Temel Fiyat</Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right font-bold text-accent">{formatPrice(price.price, price.price_currency)}</TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button variant="ghost" size="icon" onClick={() => openEditDialog(price)}><Pencil className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(price.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    <div className="md:hidden space-y-3">
+                      {filteredPrices.map((price) => {
+                        const isSeasonalPrice = price.valid_from && price.valid_to;
+                        const monthLabel = isSeasonalPrice && price.valid_from
+                          ? MONTHS.find(m => m.value === getMonthFromDate(price.valid_from))?.label
+                          : null;
+                        return (
+                          <Card key={price.id} className="p-4">
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-sm">{price.city}</div>
+                                <div className="text-xs text-muted-foreground mt-0.5">{price.airport || '-'} · {price.district}</div>
+                                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                  <span className="text-xs text-muted-foreground">{getVehicleLabel(price.vehicle_type)}</span>
+                                  {isSeasonalPrice ? (
+                                    <Badge variant="secondary" className="text-xs">{monthLabel} {new Date(price.valid_from!).getFullYear()}</Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs">Temel</Badge>
+                                  )}
                                 </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1 shrink-0">
+                                <span className="font-bold text-accent">{formatPrice(price.price, price.price_currency)}</span>
+                                <div className="flex gap-1">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(price)}><Pencil className="h-4 w-4" /></Button>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(price.id)}><Trash2 className="h-4 w-4" /></Button>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
 
                 {/* Summary */}
@@ -1229,17 +1255,60 @@ const AdminRegionPrices = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Search */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Şehir ara..."
-                      value={intercitySearchTerm}
-                      onChange={(e) => setIntercitySearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
+                {/* Filters: search + month + year + price type */}
+                <div className="flex flex-col gap-4 mb-6">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap">
+                    <div className="relative flex-1 min-w-0">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Şehir ara..."
+                        value={intercitySearchTerm}
+                        onChange={(e) => setIntercitySearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                    <Select value={intercityFilterPriceType} onValueChange={(v) => setIntercityFilterPriceType(v as 'all' | 'base' | 'seasonal')}>
+                      <SelectTrigger className="w-full sm:w-[140px]">
+                        <SelectValue placeholder="Fiyat tipi" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tüm Fiyatlar</SelectItem>
+                        <SelectItem value="base">Temel Fiyat</SelectItem>
+                        <SelectItem value="seasonal">Aylık Fiyat</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={intercityFilterMonth} onValueChange={setIntercityFilterMonth}>
+                      <SelectTrigger className="w-full sm:w-[130px]">
+                        <SelectValue placeholder="Ay" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tüm Aylar</SelectItem>
+                        {MONTHS.map(m => (
+                          <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+                  {(intercityFilterMonth !== 'all' || intercityFilterPriceType !== 'all') && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm text-muted-foreground">Aktif filtreler:</span>
+                      {intercityFilterPriceType !== 'all' && (
+                        <Badge variant="secondary" className="gap-1">
+                          {intercityFilterPriceType === 'base' ? 'Temel' : 'Aylık'} Fiyat
+                          <button type="button" onClick={() => setIntercityFilterPriceType('all')} className="ml-1 hover:text-destructive">×</button>
+                        </Badge>
+                      )}
+                      {intercityFilterMonth !== 'all' && (
+                        <Badge variant="secondary" className="gap-1">
+                          {MONTHS.find(m => m.value.toString() === intercityFilterMonth)?.label} {intercityFilterYear}
+                          <button type="button" onClick={() => setIntercityFilterMonth('all')} className="ml-1 hover:text-destructive">×</button>
+                        </Badge>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => { setIntercityFilterMonth('all'); setIntercityFilterPriceType('all'); setIntercitySearchTerm(''); }}>
+                        Temizle
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Table */}
@@ -1254,69 +1323,118 @@ const AdminRegionPrices = () => {
                       : 'Arama kriterlerine uygun fiyat bulunamadı.'}
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Başlangıç</TableHead>
-                          <TableHead></TableHead>
-                          <TableHead>Varış</TableHead>
-                          <TableHead>Araç</TableHead>
-                          <TableHead className="text-right">Fiyat</TableHead>
-                          <TableHead className="text-right">İşlemler</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredIntercityPrices.map((price) => (
-                          <TableRow key={price.id}>
-                            <TableCell className="font-medium">
-                              <div>{price.from_city}</div>
-                              {price.from_district && (
-                                <div className="text-xs text-muted-foreground">{price.from_district}</div>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <ArrowRightLeft className="h-4 w-4 text-muted-foreground mx-auto" />
-                            </TableCell>
-                            <TableCell className="font-medium">
-                              <div>{price.to_city}</div>
-                              {price.to_district && (
-                                <div className="text-xs text-muted-foreground">{price.to_district}</div>
-                              )}
-                            </TableCell>
-                            <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
-                            <TableCell className="text-right font-bold text-accent">
-                              {formatPrice(price.price, price.price_currency)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => openEditIntercityDialog(price)}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleIntercityDelete(price.id)}
-                                  className="text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
+                  <>
+                    {/* Desktop table */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Başlangıç</TableHead>
+                            <TableHead className="w-8"></TableHead>
+                            <TableHead>Varış</TableHead>
+                            <TableHead>Araç</TableHead>
+                            <TableHead>Dönem</TableHead>
+                            <TableHead className="text-right">Fiyat</TableHead>
+                            <TableHead className="text-right">İşlemler</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredIntercityPrices.map((price) => {
+                            const isSeasonal = !!(price.valid_from && price.valid_to);
+                            const monthLabel = isSeasonal && price.valid_from
+                              ? MONTHS.find(m => m.value === getMonthFromDate(price.valid_from!))?.label
+                              : null;
+                            return (
+                              <TableRow key={price.id}>
+                                <TableCell className="font-medium">
+                                  <div>{price.from_city}</div>
+                                  {price.from_district && <div className="text-xs text-muted-foreground">{price.from_district}</div>}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <ArrowRightLeft className="h-4 w-4 text-muted-foreground mx-auto" />
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  <div>{price.to_city}</div>
+                                  {price.to_district && <div className="text-xs text-muted-foreground">{price.to_district}</div>}
+                                </TableCell>
+                                <TableCell>{getVehicleLabel(price.vehicle_type)}</TableCell>
+                                <TableCell>
+                                  {isSeasonal ? (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {monthLabel} {price.valid_from ? new Date(price.valid_from).getFullYear() : ''}
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs">Temel</Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right font-bold text-accent">
+                                  {formatPrice(price.price, price.price_currency)}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button variant="ghost" size="icon" onClick={() => openEditIntercityDialog(price)}><Pencil className="h-4 w-4" /></Button>
+                                    <Button variant="ghost" size="icon" onClick={() => handleIntercityDelete(price.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    {/* Mobile cards */}
+                    <div className="md:hidden space-y-3">
+                      {filteredIntercityPrices.map((price) => {
+                        const isSeasonal = !!(price.valid_from && price.valid_to);
+                        const monthLabel = isSeasonal && price.valid_from
+                          ? MONTHS.find(m => m.value === getMonthFromDate(price.valid_from!))?.label
+                          : null;
+                        return (
+                          <Card key={price.id} className="p-4">
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-sm">{price.from_city}{price.from_district ? ` · ${price.from_district}` : ''}</div>
+                                <div className="flex items-center gap-1 my-1 text-muted-foreground">
+                                  <ArrowRightLeft className="h-3 w-3" />
+                                  <span className="text-xs">şehirler arası</span>
+                                </div>
+                                <div className="font-medium text-sm">{price.to_city}{price.to_district ? ` · ${price.to_district}` : ''}</div>
+                                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                  <span className="text-xs text-muted-foreground">{getVehicleLabel(price.vehicle_type)}</span>
+                                  {isSeasonal ? (
+                                    <Badge variant="secondary" className="text-xs">{monthLabel} {price.valid_from ? new Date(price.valid_from).getFullYear() : ''}</Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs">Temel</Badge>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1 shrink-0">
+                                <span className="font-bold text-accent">{formatPrice(price.price, price.price_currency)}</span>
+                                <div className="flex gap-1">
+                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditIntercityDialog(price)}><Pencil className="h-4 w-4" /></Button>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleIntercityDelete(price.id)}><Trash2 className="h-4 w-4" /></Button>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
 
                 {/* Summary */}
-                <div className="mt-4 text-sm text-muted-foreground">
-                  Toplam {filteredIntercityPrices.length} şehirler arası fiyat kaydı
+                <div className="mt-4 text-sm text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1">
+                  <span>Toplam {filteredIntercityPrices.length} şehirler arası fiyat kaydı</span>
+                  {(intercityFilterMonth !== 'all' || intercityFilterPriceType !== 'all') && (
+                    <span className="text-xs">
+                      {intercityFilterPriceType !== 'all' && (intercityFilterPriceType === 'base' ? 'Temel' : 'Aylık')}
+                      {intercityFilterMonth !== 'all' && ` · ${MONTHS.find(m => m.value.toString() === intercityFilterMonth)?.label} ${intercityFilterYear}`}
+                    </span>
+                  )}
+                  <span className="text-xs">
+                    Temel: {intercityPrices.filter(p => !p.valid_from).length} | Aylık: {intercityPrices.filter(p => p.valid_from).length}
+                  </span>
                 </div>
               </CardContent>
             </Card>
