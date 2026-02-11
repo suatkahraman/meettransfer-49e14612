@@ -318,15 +318,17 @@ const DriverLoginScreen = () => {
           return;
         }
         
-        // Check if 2FA is required due to previous failed attempts
-        const require2FAKey = `require2FA_${validation.email}`;
-        const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
-        
-        // Check if device is trusted
-        const isTrusted = await checkTrustedDevice(authData.user.id);
-        
-        // Require 2FA if: device not trusted OR there were failed login attempts
-        if (!isTrusted || require2FADueToFailedAttempts) {
+        // Şoförler için 2FA atlanır - yalnızca şifre ile giriş (admin tarafından oluşturulan hesaplar için)
+        if (userRole === 'driver') {
+          await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
+          clearSuppressAuthRedirect();
+          // Kullanıcı girişte kalır, role redirect effect /driver'a yönlendirir
+        } else {
+          const require2FAKey = `require2FA_${validation.email}`;
+          const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
+          const isTrusted = await checkTrustedDevice(authData.user.id);
+
+          if (!isTrusted || require2FADueToFailedAttempts) {
           keepRedirectSuppressed = true;
 
           // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
@@ -350,9 +352,9 @@ const DriverLoginScreen = () => {
             setViewMode('login');
             keepRedirectSuppressed = false;
           }
-        } else {
-          // Device trusted and no suspicious activity - proceed with login
-          await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
+          } else {
+            await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
+          }
         }
       }
     } catch (error) {
