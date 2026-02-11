@@ -30,7 +30,7 @@ import {
   Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus, Share2, Copy, Check, ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired, VehicleTypeInfo } from "@/lib/vehicleTypes";
+import { VEHICLE_TYPE_MAP, getAvailableVehicles, VehicleTypeInfo } from "@/lib/vehicleTypes";
 import { DUBAI_VEHICLE_TYPES, DUBAI_VEHICLE_TYPE_MAP } from "@/lib/dubaiVehicleTypes";
 import { isDubaiLocation, isTurkeyLocation } from "@/lib/locationDetection";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
@@ -121,8 +121,6 @@ const BookingPage = () => {
   const urlDate = searchParams.get("date") || "";
   const urlTime = searchParams.get("time") || "";
   const urlPassengers = searchParams.get("passengers");
-  const urlVehicleType = searchParams.get("vehicleType");
-  
   // Hourly-specific params
   const urlCity = searchParams.get("city") || "";
   const urlDuration = searchParams.get("duration") || "4h";
@@ -163,8 +161,8 @@ const BookingPage = () => {
   } | null>(null);
   const [tokenLoading, setTokenLoading] = useState(!!urlToken);
 
-  // Form state - Hero'dan gelince araç seçili olmaz; diğer kaynaklardan vehicleType varsa kullan
-  const [vehicleType, setVehicleType] = useState(urlVehicleType || "");
+  // Form state - Araç her zaman seçilisiz başlar (fiyat sorgusu, Hero, token dahil)
+  const [vehicleType, setVehicleType] = useState("");
   const [showManualForm, setShowManualForm] = useState(false);
   const [showLoginWarning, setShowLoginWarning] = useState(false);
   const [passengers, setPassengers] = useState(urlPassengers ? parseInt(urlPassengers) : 1);
@@ -202,6 +200,16 @@ const BookingPage = () => {
   const [originalPrice, setOriginalPrice] = useState<number | null>(null);
   const [rejectingPrice, setRejectingPrice] = useState(false);
   const [justSelectedVehicle, setJustSelectedVehicle] = useState<string | null>(null);
+
+  // Section highlight for "Seçim yapın" flow (auto-advance UX)
+  const [highlightSection, setHighlightSection] = useState<string | null>(null);
+  const scrollToSection = useCallback((sectionId: string) => {
+    setHighlightSection(sectionId);
+    setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+    setTimeout(() => setHighlightSection(null), 4000);
+  }, []);
 
   // Logged-in user state
   const [customerName, setCustomerName] = useState("");
@@ -306,30 +314,10 @@ const BookingPage = () => {
   const availableVehicles = isDubai 
     ? DUBAI_VEHICLE_TYPES.map(v => ({ value: v.value, label: v.label }))
     : getAvailableVehicles(passengers, luggageCount);
-  const minibusRequired = isDubai ? false : isMinibusRequired(passengers, luggageCount);
-  
   // Get the correct vehicle map based on location
   const vehicleTypeMap = isDubai ? DUBAI_VEHICLE_TYPE_MAP : VEHICLE_TYPE_MAP;
 
-  // Auto-select vehicle only when: Dubai route, minibus required (7+ pass), or current selection invalid
-  // Hero'dan gelince araç seçili olmaz - kullanıcı book sayfasında seçer
-  useEffect(() => {
-    if (isDubai) {
-      const isDubaiVehicle = vehicleType.startsWith('dubai-');
-      if (!isDubaiVehicle && DUBAI_VEHICLE_TYPES.length > 0) {
-        setVehicleType(DUBAI_VEHICLE_TYPES[0].value);
-      }
-    } else if (minibusRequired && vehicleType !== 'minibus') {
-      setVehicleType('minibus');
-    } else if (!minibusRequired && availableVehicles.length > 0 && vehicleType) {
-      // Sadece seçim geçersizse düzelt - boş bırakma (Hero'dan gelen akış)
-      const currentVehicleAvailable = availableVehicles.some(v => v.value === vehicleType);
-      if (!currentVehicleAvailable) {
-        const mercedesVitoAvailable = availableVehicles.some(v => v.value === 'mercedes-vito');
-        setVehicleType(mercedesVitoAvailable ? 'mercedes-vito' : availableVehicles[0].value);
-      }
-    }
-  }, [minibusRequired, vehicleType, isDubai, availableVehicles]);
+  // Araç otomatik seçimi yok - kullanıcı her zaman kendisi seçer
 
   // Load booking data from token (AI assistant flow)
   useEffect(() => {
@@ -355,8 +343,8 @@ const BookingPage = () => {
         const data = result.data;
         setTokenBookingData(data);
         
-        // Pre-fill form with booking data
-        setVehicleType(data.vehicle_type || "mercedes-vito");
+        // Pre-fill form - araç her zaman seçilisiz başlar
+        setVehicleType("");
         setPassengers(data.passengers || 1);
         setLuggageCount(data.luggage_count || 1);
         setBabySeatCount(data.baby_seat_count || 0);
@@ -1714,7 +1702,13 @@ const BookingPage = () => {
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Duration Selection - Only for hourly */}
               {isHourlyBooking && (
-                <Card className="border-2">
+                <Card id="section-duration" className={cn("border-2 transition-all duration-300", highlightSection === 'section-duration' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                  {highlightSection === 'section-duration' && (
+                    <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                      <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                    </div>
+                  )}
                   <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1729,7 +1723,10 @@ const BookingPage = () => {
                           <button
                             key={duration.value}
                             type="button"
-                            onClick={() => setSelectedDuration(duration.value)}
+                            onClick={() => {
+                              setSelectedDuration(duration.value);
+                              scrollToSection('section-vehicle');
+                            }}
                             className={cn(
                               "px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all border-2 text-sm sm:text-base",
                               isSelected
@@ -1747,7 +1744,13 @@ const BookingPage = () => {
               )}
 
               {/* Vehicle Selection */}
-              <Card className="border-2">
+              <Card id="section-vehicle" className={cn("border-2 transition-all duration-300", highlightSection === 'section-vehicle' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                {highlightSection === 'section-vehicle' && (
+                  <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                  </div>
+                )}
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <Car className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1794,6 +1797,7 @@ const BookingPage = () => {
                                 scalar: 0.8,
                                 zIndex: 9999,
                               });
+                              scrollToSection('section-currency');
                             }
                           }}
                           className={cn(
@@ -1889,10 +1893,37 @@ const BookingPage = () => {
                                 <span className="text-xs sm:text-sm text-muted-foreground">{t("updatingPrice") || "Updating..."}</span>
                               </div>
                             ) : price ? (
-                              <p className="text-base sm:text-lg font-bold text-primary">
-                                {price} {preferredCurrency}
-                                {isHourlyBooking && <span className="text-xs sm:text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
-                              </p>
+                              <div className="space-y-1">
+                                {hasReturnTrip && !isHourlyBooking && isPromoCodeValid && promoDiscountPercent ? (
+                                  <>
+                                    <div className="flex items-center justify-between text-xs gap-2">
+                                      <span className="text-muted-foreground">{language === 'TR' ? 'Gidiş' : 'Outbound'}</span>
+                                      <span className="font-medium">{price} {preferredCurrency}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs gap-2">
+                                      <span className="text-muted-foreground flex items-center gap-1">
+                                        {language === 'TR' ? 'Dönüş' : 'Return'}
+                                        <span className="bg-green-500/20 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded font-semibold">-{promoDiscountPercent}%</span>
+                                      </span>
+                                      <span className="font-medium">
+                                        <span className="line-through text-muted-foreground mr-1">{price}</span>
+                                        {Math.round(price * (100 - promoDiscountPercent) / 100)} {preferredCurrency}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-1 border-t border-border">
+                                      <span className="text-sm font-semibold">{t("grandTotal") || "Total"}</span>
+                                      <span className="text-base font-bold text-primary">
+                                        {price + Math.round(price * (100 - promoDiscountPercent) / 100)} {preferredCurrency}
+                                      </span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <p className="text-base sm:text-lg font-bold text-primary">
+                                    {price} {preferredCurrency}
+                                    {isHourlyBooking && <span className="text-xs sm:text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
+                                  </p>
+                                )}
+                              </div>
                             ) : (
                               <p className="text-xs sm:text-sm text-muted-foreground">
                                 {t("priceOnRequest") || "Price on request"}
@@ -1907,7 +1938,13 @@ const BookingPage = () => {
               </Card>
 
               {/* Currency Selection - Below Vehicle List */}
-              <Card className="border-2">
+              <Card id="section-currency" className={cn("border-2 transition-all duration-300", highlightSection === 'section-currency' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                {highlightSection === 'section-currency' && (
+                  <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                  </div>
+                )}
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
                     <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1925,6 +1962,8 @@ const BookingPage = () => {
                         type="button"
                         onClick={() => {
                           setPreferredCurrency(currency.value);
+                          const nextSection = !isHourlyBooking && isTurkey ? 'section-return' : 'section-payment';
+                          scrollToSection(nextSection);
                           // Refetch prices with new currency
                           if (isHourlyBooking) {
                             // For hourly, prices are in DB currency, just update display
@@ -1966,10 +2005,17 @@ const BookingPage = () => {
 
               {/* Return Trip Option - Show discount promo ONLY for Turkey locations */}
               {!isHourlyBooking && (
-                <Card className={cn("border-2", isTurkey 
+                <Card id="section-return" className={cn("border-2 transition-all duration-300", isTurkey 
                   ? "border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20"
-                  : "border-muted"
+                  : "border-muted",
+                  highlightSection === 'section-return' && "ring-2 ring-primary ring-offset-2 shadow-lg"
                 )}>
+                  {highlightSection === 'section-return' && (
+                    <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                      <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                    </div>
+                  )}
                   <CardContent className="p-4 sm:p-6 space-y-4">
                     <div 
                       className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer hover:shadow-lg transition-all ${
@@ -1988,6 +2034,7 @@ const BookingPage = () => {
                         if (isTurkey && newValue && activePromo.code && !promoCode) {
                           handlePromoCodeChange(activePromo.code);
                         }
+                        if (!newValue) scrollToSection('section-payment');
                       }}
                     >
                       <Checkbox
@@ -2004,6 +2051,7 @@ const BookingPage = () => {
                           if (isTurkey && newValue && activePromo.code && !promoCode) {
                             handlePromoCodeChange(activePromo.code);
                           }
+                          if (!newValue) scrollToSection('section-payment');
                         }}
                         className="h-5 w-5"
                       />
@@ -2049,7 +2097,10 @@ const BookingPage = () => {
                           <FloatingLabelDatePicker
                             label={t("returnDate") || "Return Date"}
                             date={returnDate ? parse(returnDate, 'yyyy-MM-dd', new Date()) : undefined}
-                            onSelect={(date) => setReturnDate(date ? format(date, 'yyyy-MM-dd') : '')}
+                            onSelect={(date) => {
+                              setReturnDate(date ? format(date, 'yyyy-MM-dd') : '');
+                              if (date && returnTime) scrollToSection('section-payment');
+                            }}
                             icon={<Calendar className="h-4 w-4" />}
                             disabledDates={(date) => {
                               const pickupDate = urlDate ? parse(urlDate, 'yyyy-MM-dd', new Date()) : new Date();
@@ -2063,7 +2114,10 @@ const BookingPage = () => {
                         <div>
                           <TimePickerGrid
                             value={returnTime || "10:00"}
-                            onValueChange={setReturnTime}
+                            onValueChange={(v) => {
+                              setReturnTime(v);
+                              if (returnDate && v) scrollToSection('section-payment');
+                            }}
                             label={t("returnTime") || "Return Time"}
                             allowFullscreen
                             className="h-12"
@@ -2076,7 +2130,41 @@ const BookingPage = () => {
               )}
 
               {/* Payment Options */}
-              <Card className="border-2">
+              <Card id="section-payment" className={cn("border-2 transition-all duration-300", highlightSection === 'section-payment' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                {highlightSection === 'section-payment' && (
+                  <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                  </div>
+                )}
+                {/* Dönüş indirim detayı - Return discount summary */}
+                {hasReturnTrip && !isHourlyBooking && isPromoCodeValid && promoDiscountPercent && selectedPrice && (
+                  <div className="mx-4 mt-4 p-3 sm:p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-300 font-semibold mb-2">
+                      <Percent className="h-4 w-4" />
+                      {language === 'TR' ? 'Dönüş İndirimi' : 'Return Discount'}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{language === 'TR' ? 'Gidiş' : 'Outbound'}</span>
+                        <span className="font-medium">{selectedPrice} {preferredCurrency}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          {language === 'TR' ? 'Dönüş' : 'Return'}
+                          <span className="text-green-600 dark:text-green-400">(-{promoDiscountPercent}%)</span>
+                        </span>
+                        <span className="font-medium">
+                          {Math.round(selectedPrice * (100 - promoDiscountPercent) / 100)} {preferredCurrency}
+                        </span>
+                      </div>
+                      <div className="col-span-2 pt-2 mt-1 border-t border-green-200 dark:border-green-800 flex justify-between font-bold">
+                        <span>{t("grandTotal") || "Grand Total"}</span>
+                        <span className="text-primary">{selectedPrice + Math.round(selectedPrice * (100 - promoDiscountPercent) / 100)} {preferredCurrency}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -2086,7 +2174,10 @@ const BookingPage = () => {
                 <CardContent className="p-4 sm:p-6 pt-0">
                   <RadioGroup
                     value={paymentType}
-                    onValueChange={(value) => setPaymentType(value as "cash" | "credit_card" | "online")}
+                    onValueChange={(value) => {
+                      setPaymentType(value as "cash" | "credit_card" | "online");
+                      if (!user) scrollToSection('section-customer');
+                    }}
                     className="space-y-3"
                   >
                     <div className={cn(
@@ -2122,7 +2213,13 @@ const BookingPage = () => {
 
               {/* Customer Information - Sadece giriş yapmamış (ilk defa) müşterilere göster */}
               {!user && (
-              <Card className="border-2">
+              <Card id="section-customer" className={cn("border-2 transition-all duration-300", highlightSection === 'section-customer' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                {highlightSection === 'section-customer' && (
+                  <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                  </div>
+                )}
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
                     <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />

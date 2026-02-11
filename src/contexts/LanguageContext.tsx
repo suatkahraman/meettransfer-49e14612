@@ -779,6 +779,7 @@ const translations: Record<Language, Record<string, string>> = {
     anySpecialRequests: "Any special requests or information...",
     enterDestination: "Enter destination",
     selectVehicle: "Select vehicle",
+    makeSelection: "Make your selection",
     
     // Customer Review Page
     rateYourDriver: "Rate Your Driver",
@@ -12049,6 +12050,7 @@ const translations: Record<Language, Record<string, string>> = {
     anySpecialRequests: "Özel istekler veya bilgi...",
     enterDestination: "Varış noktasını girin",
     selectVehicle: "Araç seçin",
+    makeSelection: "Seçim yapın",
     
     // Customer Review Page
     rateYourDriver: "Şoförünüzü Değerlendirin",
