@@ -248,15 +248,6 @@ const AgencyLoginScreen = () => {
         await logLoginAttempt(validation.email, false, error.message, undefined, 'agency');
         
         if (error.message?.includes('Invalid login credentials')) {
-          // Check if failed attempts require 2FA verification
-          const updatedRateLimit = await checkRateLimit(validation.email);
-          const failedAttempts = updatedRateLimit.failedAttempts || 0;
-          
-          // After 2+ failed attempts, require 2FA on next successful login
-          if (failedAttempts >= 2) {
-            safeLocalSet(`require2FA_${validation.email}`, 'true');
-          }
-          
           setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
         } else if (error.message?.includes('Email not confirmed')) {
           toast.error(t('emailNotConfirmed') || 'Please confirm your email first');
@@ -275,15 +266,10 @@ const AgencyLoginScreen = () => {
         
         const userRole = roleData?.role || 'agency';
         
-        // Check if 2FA is required due to previous failed attempts
-        const require2FAKey = `require2FA_${validation.email}`;
-        const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
-        
-        // Check if device is trusted
+        // 2FA sadece güvenilmeyen (yeni) cihazdan girişte
         const isTrusted = await checkTrustedDevice(authData.user.id);
         
-        // Require 2FA if: device not trusted OR there were failed login attempts
-        if (!isTrusted || require2FADueToFailedAttempts) {
+        if (!isTrusted) {
           keepRedirectSuppressed = true;
 
           // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
@@ -300,8 +286,6 @@ const AgencyLoginScreen = () => {
 
           if (result.success) {
             toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
-            // Clear the flag after initiating 2FA
-            safeLocalRemove(require2FAKey);
           } else {
             // Email sending failed - revert back to login screen
             toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));

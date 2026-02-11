@@ -3,7 +3,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { Footer } from "@/components/Footer";
 import { Link } from "react-router-dom";
-import { ChevronRight, Shield, Clock, Star, Users, Award, CheckCircle, MapPin, Plane, Car, Anchor, Ship, Building, ThumbsUp, Waves } from "lucide-react";
+import { ChevronRight, Shield, Clock, Star, Users, Award, CheckCircle, MapPin, Plane, Car, Anchor, Ship, Building, ThumbsUp, Waves, ArrowLeft } from "lucide-react";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import ShareButtons from "@/components/website/ShareButtons";
@@ -180,9 +180,12 @@ const BodrumAirportTransferBestService = () => {
 
       <ReadingProgressBar />
 
-      {/* Breadcrumb */}
+      {/* Back to Blog + Breadcrumb */}
       <div className="bg-muted/30 border-b">
         <div className="container mx-auto px-4 py-3">
+          <Link to={getLocalizedPath("/blog")} className="mb-3 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Back to Blog
+          </Link>
           <nav className="flex items-center gap-2 text-sm text-muted-foreground">
             <Link to={getLocalizedPath("/")} className="hover:text-foreground transition-colors">Home</Link>
             <ChevronRight className="h-4 w-4" />

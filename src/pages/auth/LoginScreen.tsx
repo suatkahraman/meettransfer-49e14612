@@ -408,15 +408,6 @@ const LoginScreen = () => {
         await logLoginAttempt(validation.email, false, error.message);
         
         if (error.message?.includes('Invalid login credentials')) {
-          // Check if failed attempts require 2FA verification
-          const updatedRateLimit = await checkRateLimit(validation.email);
-          const failedAttempts = updatedRateLimit.failedAttempts || 0;
-          
-          // After 2+ failed attempts, require 2FA on next successful login
-          if (failedAttempts >= 2) {
-            safeLocalSet(`require2FA_${validation.email}`, 'true');
-          }
-          
           setErrors({ password: 'Geçersiz email veya şifre' });
         } else {
           toast.error(error.message);
@@ -431,17 +422,11 @@ const LoginScreen = () => {
         
         const userRole = roleData?.role || 'customer';
         
-        // Check if 2FA is required due to previous failed attempts
-        const require2FAKey = `require2FA_${validation.email}`;
-        const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
-        
-        // Check if device is trusted
+        // Check if device is trusted - 2FA sadece yeni (güvenilmeyen) cihazdan girişte
         const isTrusted = await checkTrustedDevice(authData.user.id);
         
-        console.log('2FA check:', { isTrusted, require2FADueToFailedAttempts, userRole });
-        
-        // Require 2FA if: device not trusted OR there were failed login attempts
-        if (!isTrusted || require2FADueToFailedAttempts) {
+        // 2FA sadece güvenilmeyen cihazda gerekli
+        if (!isTrusted) {
           keepRedirectSuppressed = true;
 
           // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
@@ -467,9 +452,6 @@ const LoginScreen = () => {
             setViewMode('login');
             keepRedirectSuppressed = false;
           }
-
-          // Clear the flag after initiating 2FA
-          safeLocalRemove(require2FAKey);
         } else {
           // Device trusted and no suspicious activity - proceed with login
           await logLoginAttempt(validation.email, true, undefined, undefined, userRole);

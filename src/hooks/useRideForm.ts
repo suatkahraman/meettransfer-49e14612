@@ -301,7 +301,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     params.set("date", format(date!, "yyyy-MM-dd"));
     params.set("time", time);
     params.set("passengers", passengers);
-    params.set("vehicleType", vehicleType);
+    // Araç book sayfasında seçilecek - Hero'dan gönderilmez
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
     
     // Return trip params
@@ -319,7 +319,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     params.set("showVehicleSelection", "true");
     
     navigate(`/book?${params.toString()}`);
-  }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount]);
+  }, [pickup, dropoff, date, time, passengers, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount]);
 
   const handleApplyBooking = useCallback((data: BookingData) => {
     let hasChanges = false;

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
@@ -84,9 +84,10 @@ interface Reservation {
 
 const DriverJobDetails = () => {
   const { id } = useParams();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { driverId } = useUserRole();
   const navigate = useNavigate();
+  const { setHeaderRight } = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
   const { emailAdminTripCompleted } = useEmailNotifications();
   const { t, getPaymentTypeLabel } = useDriverTranslations();
   const [reservation, setReservation] = useState<Reservation | null>(null);
@@ -162,6 +163,17 @@ const DriverJobDetails = () => {
     };
     return statusMap[status] || status;
   };
+
+  useEffect(() => {
+    if (reservation) {
+      setHeaderRight(
+        <Badge className={statusColors[reservation.status] || 'bg-muted'}>
+          {getStatusLabel(reservation.status)}
+        </Badge>
+      );
+    }
+    return () => setHeaderRight(null);
+  }, [reservation, setHeaderRight]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -568,22 +580,7 @@ const DriverJobDetails = () => {
   const driverCurrencySymbol = getCurrencySymbol('TRY');
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/driver')} className="text-primary-foreground hover:bg-primary-foreground/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-serif">{t('jobDetails')}</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <NotificationBell />
-          <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-            {getStatusLabel(reservation.status)}
-          </Badge>
-        </div>
-      </header>
-
+    <div className="h-full min-h-0 overflow-y-auto">
       <main className="container mx-auto py-8 px-4 max-w-2xl space-y-6">
         <Card>
           <CardHeader>

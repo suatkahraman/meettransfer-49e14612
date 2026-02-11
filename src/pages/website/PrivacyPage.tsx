@@ -1,9 +1,11 @@
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { SEOHead, SchemaOrg } from "@/components/seo";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { usePrivacyTranslations } from "@/hooks/usePrivacyTranslations";
 
 const PrivacyPage = () => {
+  const { getLocalizedPath } = useLanguage();
   const { t } = usePrivacyTranslations();
 
   return (
@@ -32,6 +34,7 @@ const PrivacyPage = () => {
       <PageHeader
         title={t("privacyPolicy")}
         subtitle={t("subtitle")}
+        backTo={{ path: getLocalizedPath("/"), label: t("home") || "Home" }}
       />
 
       <div className="max-w-4xl mx-auto px-4 py-8 prose prose-sm max-w-none">

@@ -83,7 +83,13 @@ Deno.serve(async (req) => {
 
     if (updateError) {
       console.error('Error updating password:', updateError)
-      return jsonResponse({ success: false, error: updateError.message })
+      let errMsg = updateError.message
+      if (updateError.message?.toLowerCase().includes('weak') || updateError.message?.toLowerCase().includes('easy to guess')) {
+        errMsg = 'Şifre çok zayıf. En az 6 karakter, büyük/küçük harf ve rakam içeren daha güçlü bir şifre kullanın (örn: Sofor2024!).'
+      } else if (updateError.message?.toLowerCase().includes('pwned') || updateError.message?.toLowerCase().includes('breach')) {
+        errMsg = 'Bu şifre veri ihlallerinde bulundu. Daha benzersiz bir şifre seçin.'
+      }
+      return jsonResponse({ success: false, error: errMsg })
     }
 
     try {

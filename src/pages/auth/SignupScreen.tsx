@@ -17,6 +17,7 @@ import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { scrollToFirstError } from '@/lib/formValidation';
+import { safeLocalGet } from '@/lib/safeStorage';
 
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
@@ -92,8 +93,8 @@ useEffect(() => {
   }
 
   // 3. Handle Pending Bookings (if any)
-  const pendingBookingToken = typeof safeLocalGet !== 'undefined' ? safeLocalGet('pending_booking_token') : null;
-  const pendingBookingData = typeof safeLocalGet !== 'undefined' ? safeLocalGet('pending_booking_data') : null;
+  const pendingBookingToken = safeLocalGet('pending_booking_token');
+  const pendingBookingData = safeLocalGet('pending_booking_data');
   
   if (pendingBookingToken || pendingBookingData) {
     console.log('[Auth] Pending booking found, redirecting to /customer');
@@ -158,9 +159,14 @@ useEffect(() => {
       });
 
       if (signUpError) {
-        if (signUpError.message.includes('already registered')) {
+        const msg = (signUpError.message || '').toLowerCase();
+        if (msg.includes('already registered') || msg.includes('user already registered')) {
           toast.error(t('emailAlreadyRegistered'));
           navigate('/login');
+        } else if (msg.includes('weak') || msg.includes('pwned') || msg.includes('easy to guess')) {
+          toast.error(language === 'TR' ? 'Bu şifre güvenli değil. Daha benzersiz bir şifre seçin (örn. özel karakterler ekleyin).' : 'This password is not secure. Choose a more unique password.');
+        } else if (msg.includes('rate limit') || msg.includes('too many')) {
+          toast.error(language === 'TR' ? 'Çok fazla deneme. Lütfen biraz sonra tekrar deneyin.' : 'Too many attempts. Please try again later.');
         } else {
           toast.error(signUpError.message);
         }
@@ -194,7 +200,12 @@ useEffect(() => {
         });
 
         if (signInError) {
-          toast.error(signInError.message);
+          const msg = (signInError.message || '').toLowerCase();
+          if (msg.includes('email not confirmed')) {
+            toast.info(language === 'TR' ? 'E-posta adresinizi kontrol edin ve hesabınızı onaylayın.' : 'Please check your email and confirm your account.');
+          } else {
+            toast.error(signInError.message);
+          }
           return;
         }
 
@@ -233,7 +244,8 @@ useEffect(() => {
           toast.error(Object.values(fieldErrors)[0]);
         }
       } else {
-        toast.error(t('loginFailed'));
+        const errMsg = error instanceof Error ? error.message : t('loginFailed');
+        toast.error(errMsg);
       }
     } finally {
       setIsLoading(false);

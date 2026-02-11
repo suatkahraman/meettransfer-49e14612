@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate, useParams, useSearchParams, useOutletContext } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
@@ -52,6 +51,7 @@ const DriverJobList = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { driverId } = useUserRole();
+  const { setHeaderRight } = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
   const { t } = useDriverTranslations();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
@@ -164,6 +164,24 @@ const DriverJobList = () => {
       fetchReservations();
     }
   }, [driverId, fetchReservations, filterMonth, filterYear]);
+
+  useEffect(() => {
+    setHeaderRight(
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => {
+          setRefreshing(true);
+          fetchReservations(true);
+        }}
+        disabled={refreshing}
+        className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
+      >
+        <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", refreshing && "animate-spin")} />
+      </Button>
+    );
+    return () => setHeaderRight(null);
+  }, [setHeaderRight, refreshing, fetchReservations]);
 
   // Real-time subscription
   useEffect(() => {
@@ -416,52 +434,11 @@ const DriverJobList = () => {
   return (
     <div 
       ref={containerRef}
-      className="min-h-screen bg-background overflow-auto"
+      className="h-full min-h-0 flex flex-col overflow-auto"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Header */}
-      <header className={cn(
-        "bg-gradient-to-r py-4 px-4 sticky top-0 z-10",
-        config.bgColor
-      )}>
-        <div className="flex items-center gap-3 max-w-lg mx-auto">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/driver')}
-            className="h-10 w-10 rounded-full bg-background/50 hover:bg-background/70"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <PageIcon className={cn("h-6 w-6", config.iconColor)} />
-            <h1 className="text-xl font-bold">
-              {filterMonth !== null && filterYear !== null 
-                ? `${getMonthName(filterMonth - 1)} ${filterYear}` 
-                : config.title}
-            </h1>
-            <Badge variant="secondary" className="ml-1">
-              {reservations.length}
-            </Badge>
-          </div>
-          <div className="flex-1" />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              setRefreshing(true);
-              fetchReservations(true);
-            }}
-            disabled={refreshing}
-            className="h-10 w-10 rounded-full bg-background/50 hover:bg-background/70"
-          >
-            <RefreshCw className={cn("h-5 w-5", refreshing && "animate-spin")} />
-          </Button>
-        </div>
-      </header>
-
       {/* Pull-to-refresh indicator */}
       <AnimatePresence>
         {(pullDistance > 0 || refreshing) && (

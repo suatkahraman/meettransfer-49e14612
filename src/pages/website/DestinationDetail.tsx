@@ -15,7 +15,7 @@ import DestinationGallery from "@/components/website/DestinationGallery";
 import { motion } from "framer-motion";
 import { 
   MapPin, Star, Plane, Users, Luggage, Clock, Shield, 
-  Car, ArrowRight, Sparkles, Tag, Calendar, CheckCircle2
+  Car, ArrowRight, Sparkles, Tag, Calendar, CheckCircle2, ArrowLeft
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -608,6 +608,18 @@ const DestinationDetail = () => {
 
       {/* Hero Header */}
       <div className={`relative bg-gradient-to-br ${destination.gradient} py-16 md:py-24`}>
+        {/* Back Button */}
+        <div className="container px-4 absolute top-4 left-0 right-0 z-20">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(getLocalizedPath("/destinations"))}
+            className="text-white/90 hover:text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {isTR ? "Tüm Rotalar" : "All Destinations"}
+          </Button>
+        </div>
         {/* Pattern Overlay */}
         <div className="absolute inset-0 opacity-20">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">

@@ -288,7 +288,7 @@ const AdminDrivers = () => {
         await logAction({
           action: 'CREATE',
           table_name: 'drivers',
-          record_id: data?.driver_id,
+          record_id: data?.driver_id ?? data?.user_id,
           new_data: {
             name: formData.name.trim(),
             phone: formData.phone.trim(),
@@ -300,7 +300,7 @@ const AdminDrivers = () => {
           },
         });
 
-        toast.success('Şoför başarıyla oluşturuldu!');
+        toast.success(`Şoför oluşturuldu! E-posta: ${formData.email.trim()} — Şifreyi şoförle paylaşın, /login/driver ile giriş yapabilir.`);
         setDialogOpen(false);
         fetchDrivers();
       }
@@ -436,7 +436,7 @@ const AdminDrivers = () => {
         record_id: driverForPassword.id,
         new_data: { password_changed: true },
       });
-      toast.success('Şoför şifresi başarıyla güncellendi');
+      toast.success('Şoför şifresi güncellendi. Şoför /login/driver ile bu şifreyle giriş yapabilir.');
       setPasswordDialogOpen(false);
       setDriverForPassword(null);
       setNewPassword('');
@@ -911,7 +911,7 @@ const AdminDrivers = () => {
                 <p className="text-sm text-destructive">Bu şoförün giriş hesabı (user_id) yok; önce hesap oluşturulmalı.</p>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="driver-new-password">Yeni şifre (en az 6 karakter, örn: Sofor24)</Label>
+                  <Label htmlFor="driver-new-password">Yeni şifre (en az 6 karakter, büyük+küçük harf ve rakam örn: Sofor2024!)</Label>
                   <Input
                     id="driver-new-password"
                     type="password"

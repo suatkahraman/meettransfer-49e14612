@@ -41,6 +41,7 @@ const TermsPage = () => {
       <PageHeader
         title={t("termsAndConditions")}
         subtitle={t("readCarefully")}
+        backTo={{ path: getLocalizedPath("/"), label: t("home") || "Home" }}
       />
 
       <div className="max-w-5xl mx-auto px-4 py-8">

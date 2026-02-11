@@ -125,8 +125,17 @@ Deno.serve(async (req) => {
 
     if (createError) {
       console.error('Error creating auth user:', createError)
+      let errMsg = createError.message
+      // Friendly messages for common Supabase auth errors (weak/pwned password)
+      if (createError.message?.toLowerCase().includes('weak') || createError.message?.toLowerCase().includes('easy to guess')) {
+        errMsg = 'Şifre çok zayıf. En az 6 karakter, büyük/küçük harf ve rakam içeren daha güçlü bir şifre kullanın (örn: Sofor2024!).'
+      } else if (createError.message?.toLowerCase().includes('pwned') || createError.message?.toLowerCase().includes('breach')) {
+        errMsg = 'Bu şifre veri ihlallerinde bulundu. Daha benzersiz bir şifre seçin.'
+      } else if (createError.message?.includes('already registered') || createError.message?.includes('already been registered')) {
+        errMsg = 'Bu e-posta adresi zaten kayıtlı. Farklı bir e-posta kullanın veya mevcut şoförün şifresini güncelleyin.'
+      }
       return new Response(
-        JSON.stringify({ error: createError.message }),
+        JSON.stringify({ error: errMsg }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -167,9 +176,12 @@ Deno.serve(async (req) => {
       }
     }
 
+    let createdDriverId: string | null = null
+
     // If driver, create driver record
     if (role === 'driver') {
-      const { error: driverError } = await supabaseAdmin
+      const vehicle_color = (body as any).vehicle_color || null
+      const { data: driverRow, error: driverError } = await supabaseAdmin
         .from('drivers')
         .insert({
           user_id: newUserId,
@@ -177,10 +189,13 @@ Deno.serve(async (req) => {
           phone,
           plate_number: plate_number || null,
           vehicle_model: vehicle_model || null,
+          vehicle_color: vehicle_color || null,
           region: region || null,
           commission_rate: commission_rate || 10.00,
           active: true
         })
+        .select('id')
+        .single()
 
       if (driverError) {
         console.error('Error creating driver record:', driverError)
@@ -190,7 +205,8 @@ Deno.serve(async (req) => {
         )
       }
 
-      console.log('Driver record created successfully')
+      createdDriverId = driverRow?.id || null
+      console.log('Driver record created successfully, id:', createdDriverId)
     }
 
     // Variable to store agency_id for response
@@ -279,6 +295,7 @@ Deno.serve(async (req) => {
         success: true, 
         message: `${role.charAt(0).toUpperCase() + role.slice(1)} account created successfully`,
         user_id: newUserId,
+        driver_id: createdDriverId,
         agency_id: createdAgencyId || agency_id || null
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2, Baby, Luggage, Minus, Plus, ThumbsDown, Gift } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, ArrowLeft, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2, Baby, Luggage, Minus, Plus, ThumbsDown, Gift } from 'lucide-react';
 import { VehicleSelectionCard } from '@/components/VehicleSelectionCard';
 import { cn } from '@/lib/utils';
 import { CURRENCY_OPTIONS } from '@/lib/currency';
@@ -713,7 +713,16 @@ const ReservationForm = () => {
 
             userId = signInData.user.id;
           } else {
-            throw signUpError;
+            const msg = (signUpError.message || '').toLowerCase();
+            if (msg.includes('weak') || msg.includes('pwned') || msg.includes('easy to guess')) {
+              toast.error(language === 'TR' ? 'Bu şifre güvenli değil. Daha benzersiz bir şifre seçin.' : 'This password is not secure. Choose a more unique password.');
+            } else if (msg.includes('rate limit') || msg.includes('too many')) {
+              toast.error(language === 'TR' ? 'Çok fazla deneme. Lütfen biraz sonra tekrar deneyin.' : 'Too many attempts. Please try again later.');
+            } else {
+              toast.error(signUpError.message || (language === 'TR' ? 'Hesap oluşturulamadı. Lütfen tekrar deneyin.' : 'Failed to create account. Please try again.'));
+            }
+            setIsLoading(false);
+            return;
           }
         } else {
           if (!signUpData.user) {
@@ -732,12 +741,15 @@ const ReservationForm = () => {
             });
 
             if (signInError) {
-              if (signInError.message.includes('Email not confirmed')) {
-                toast.info('Please check your email to confirm your account, then try again.');
+              const sm = (signInError.message || '').toLowerCase();
+              if (sm.includes('email not confirmed')) {
+                toast.info(language === 'TR' ? 'E-posta adresinizi kontrol edin ve hesabınızı onaylayın.' : 'Please check your email to confirm your account.');
                 setIsLoading(false);
                 return;
               }
-              throw signInError;
+              toast.error(signInError.message || (language === 'TR' ? 'Giriş yapılamadı. Lütfen tekrar deneyin.' : 'Sign in failed. Please try again.'));
+              setIsLoading(false);
+              return;
             }
           }
         }
@@ -2026,6 +2038,12 @@ const ReservationForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/80 to-primary/60 py-8 px-4">
+      <div className="max-w-2xl mx-auto mb-4">
+        <Button variant="ghost" size="sm" onClick={() => navigate(getLocalizedPath('/book'))} className="text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {t('back') || 'Back'}
+        </Button>
+      </div>
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-serif">Meet Transfer</CardTitle>

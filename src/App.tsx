@@ -60,6 +60,7 @@ const CustomerProfile = lazy(() => import("./pages/customer/CustomerProfile"));
 const CustomerPayments = lazy(() => import("./pages/customer/CustomerPayments"));
 
 // Driver Pages - lazy loaded
+const DriverLayout = lazy(() => import("./components/driver/DriverLayout").then(m => ({ default: m.DriverLayout })));
 const DriverHome = lazy(() => import("./pages/driver/DriverHome"));
 const DriverJobDetails = lazy(() => import("./pages/driver/DriverJobDetails"));
 const DriverJobList = lazy(() => import("./pages/driver/DriverJobList"));
@@ -451,14 +452,16 @@ const App = () => {
               <Route path="/customer/profile" element={<CustomerRoute><LazyRoute><CustomerProfile /></LazyRoute></CustomerRoute>} />
               <Route path="/customer/payments" element={<CustomerRoute><LazyRoute><CustomerPayments /></LazyRoute></CustomerRoute>} />
               
-              {/* Driver Routes - Protected */}
-              <Route path="/driver" element={<DriverRoute><LazyRoute><DriverHome /></LazyRoute></DriverRoute>} />
-              <Route path="/driver/jobs/:type" element={<DriverRoute><LazyRoute><DriverJobList /></LazyRoute></DriverRoute>} />
-              <Route path="/driver/job/:id" element={<DriverRoute><LazyRoute><DriverJobDetails /></LazyRoute></DriverRoute>} />
-              <Route path="/driver/accounting" element={<DriverRoute><LazyRoute><DriverAccounting /></LazyRoute></DriverRoute>} />
-              <Route path="/driver/monthly-accounting" element={<DriverRoute><LazyRoute><DriverMonthlyAccounting /></LazyRoute></DriverRoute>} />
-              <Route path="/driver/history" element={<DriverRoute><LazyRoute><DriverHistory /></LazyRoute></DriverRoute>} />
-              <Route path="/driver/settings" element={<DriverRoute><LazyRoute><DriverSettings /></LazyRoute></DriverRoute>} />
+              {/* Driver Routes - Protected with Layout */}
+              <Route path="/driver" element={<DriverRoute><LazyRoute><DriverLayout /></LazyRoute></DriverRoute>}>
+                <Route index element={<DriverHome />} />
+                <Route path="jobs/:type" element={<DriverJobList />} />
+                <Route path="job/:id" element={<DriverJobDetails />} />
+                <Route path="accounting" element={<DriverAccounting />} />
+                <Route path="monthly-accounting" element={<DriverMonthlyAccounting />} />
+                <Route path="history" element={<DriverHistory />} />
+                <Route path="settings" element={<DriverSettings />} />
+              </Route>
               
               {/* Admin Routes - Protected */}
               <Route path="/admin" element={<AdminRoute><LazyRoute><AdminDashboard /></LazyRoute></AdminRoute>} />

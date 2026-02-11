@@ -56,9 +56,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // THEN check for existing session (including OAuth callback tokens in URL)
     const initializeAuth = async () => {
       try {
-        // This call will also process any access_token in the URL hash
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
-        
+        let { data: { session: existingSession } } = await supabase.auth.getSession();
+        // iOS WebKit: getSession bazen ilk seferde null döner - birkaç kez kademeli olarak tekrar deneyin
+        const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
+        if (!existingSession && isIOS) {
+          const delays = [100, 250, 500, 1000]; // 4 deneme: 100ms, 250ms, 500ms, 1s
+          for (const delay of delays) {
+            await new Promise(r => setTimeout(r, delay));
+            const retry = await supabase.auth.getSession();
+            existingSession = retry.data.session;
+            if (existingSession) break;
+          }
+        }
         if (isMounted) {
           setSession(existingSession);
           setUser(existingSession?.user ?? null);

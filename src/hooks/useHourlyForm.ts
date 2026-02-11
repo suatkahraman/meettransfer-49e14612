@@ -288,7 +288,7 @@ export function useHourlyForm(
     
     params.set("duration", durationValue);
     params.set("passengers", hourlyPassengers);
-    params.set("vehicleType", hourlyVehicleType);
+    // Araç book sayfasında seçilecek - Hero'dan gönderilmez
     params.set("type", "hourly");
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
     navigate(getLocalizedPath(`/book?${params.toString()}`));

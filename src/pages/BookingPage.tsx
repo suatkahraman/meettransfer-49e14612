@@ -27,7 +27,7 @@ import confetti from "canvas-confetti";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus, Share2, Copy, Check
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus, Share2, Copy, Check, ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired, VehicleTypeInfo } from "@/lib/vehicleTypes";
@@ -163,8 +163,8 @@ const BookingPage = () => {
   } | null>(null);
   const [tokenLoading, setTokenLoading] = useState(!!urlToken);
 
-  // Form state - initialize from URL params if available
-  const [vehicleType, setVehicleType] = useState(urlVehicleType || "mercedes-vito");
+  // Form state - Hero'dan gelince araç seçili olmaz; diğer kaynaklardan vehicleType varsa kullan
+  const [vehicleType, setVehicleType] = useState(urlVehicleType || "");
   const [showManualForm, setShowManualForm] = useState(false);
   const [showLoginWarning, setShowLoginWarning] = useState(false);
   const [passengers, setPassengers] = useState(urlPassengers ? parseInt(urlPassengers) : 1);
@@ -214,7 +214,6 @@ const BookingPage = () => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [appleLoading, setAppleLoading] = useState(false);
   
   // Flight and passenger details
   const [flightNumber, setFlightNumber] = useState("");
@@ -312,31 +311,22 @@ const BookingPage = () => {
   // Get the correct vehicle map based on location
   const vehicleTypeMap = isDubai ? DUBAI_VEHICLE_TYPE_MAP : VEHICLE_TYPE_MAP;
 
-  // Auto-select appropriate vehicle based on location and availability
+  // Auto-select vehicle only when: Dubai route, minibus required (7+ pass), or current selection invalid
+  // Hero'dan gelince araç seçili olmaz - kullanıcı book sayfasında seçer
   useEffect(() => {
     if (isDubai) {
-      // For Dubai, auto-select first Dubai vehicle if current vehicle is not a Dubai type
       const isDubaiVehicle = vehicleType.startsWith('dubai-');
       if (!isDubaiVehicle && DUBAI_VEHICLE_TYPES.length > 0) {
         setVehicleType(DUBAI_VEHICLE_TYPES[0].value);
       }
     } else if (minibusRequired && vehicleType !== 'minibus') {
       setVehicleType('minibus');
-    } else if (!minibusRequired && availableVehicles.length > 0) {
-      // Ensure mercedes-vito is selected if available, otherwise select first available
-      const mercedesVitoAvailable = availableVehicles.some(v => v.value === 'mercedes-vito');
+    } else if (!minibusRequired && availableVehicles.length > 0 && vehicleType) {
+      // Sadece seçim geçersizse düzelt - boş bırakma (Hero'dan gelen akış)
       const currentVehicleAvailable = availableVehicles.some(v => v.value === vehicleType);
-      
       if (!currentVehicleAvailable) {
-        // Current vehicle not in list, select mercedes-vito if available, otherwise first
-        if (mercedesVitoAvailable) {
-          setVehicleType('mercedes-vito');
-        } else {
-          setVehicleType(availableVehicles[0].value);
-        }
-      } else if (!vehicleType && mercedesVitoAvailable) {
-        // No vehicle selected, default to mercedes-vito
-        setVehicleType('mercedes-vito');
+        const mercedesVitoAvailable = availableVehicles.some(v => v.value === 'mercedes-vito');
+        setVehicleType(mercedesVitoAvailable ? 'mercedes-vito' : availableVehicles[0].value);
       }
     }
   }, [minibusRequired, vehicleType, isDubai, availableVehicles]);
@@ -1069,31 +1059,7 @@ const BookingPage = () => {
     }
   };
 
-  // Handle Apple Sign In
-  const handleAppleSignIn = async () => {
-    setAppleLoading(true);
-    try {
-      saveOAuthFormCache();
-      
-      const currentUrl = new URL(window.location.href);
-      currentUrl.searchParams.set('googleAuth', 'true');
-      setPostOAuthRedirect(currentUrl.toString());
-
-      // IMPORTANT (iOS PWA): Do NOT open OAuth in a new Safari tab/window.
-      // Keep the flow in the same PWA window so the auth session persists.
-      if (isIOS && isStandalone) {
-        toast.info(t('redirectingApple') || 'Yönlendiriliyor...');
-      }
-      
-      const { error } = await startOAuthSignIn('apple');
-      
-      if (error) throw error;
-    } catch (err: any) {
-      console.error("Apple sign-in error:", err);
-      toast.error(t("appleSignInError") || "Failed to sign in with Apple");
-      setAppleLoading(false);
-    }
-  };
+  // Apple Sign-In - geçici olarak kaldırıldı
 
   // Handle form submission for guests (create account + reservation)
   const handleGuestSubmit = async () => {
@@ -1639,6 +1605,11 @@ const BookingPage = () => {
     <WebsiteLayout>
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-28 lg:pb-8">
+          {/* Back Button */}
+          <Button variant="ghost" size="sm" onClick={() => navigate(getLocalizedPath("/"))} className="mb-4 -ml-1 text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t("back") || "Back"}
+          </Button>
           {/* Compact Hero with Route Info */}
           <div className="bg-gradient-to-r from-primary via-primary/90 to-primary/80 rounded-xl sm:rounded-2xl p-3 sm:p-6 text-white mb-4 sm:mb-8 shadow-2xl relative">
             {/* Share Button */}
@@ -2149,7 +2120,8 @@ const BookingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Customer Information - Login Required Section */}
+              {/* Customer Information - Sadece giriş yapmamış (ilk defa) müşterilere göster */}
+              {!user && (
               <Card className="border-2">
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
@@ -2176,13 +2148,13 @@ const BookingPage = () => {
                         </div>
                       )}
                       
-                      {/* Google Sign In Button */}
+                      {/* Google Sign In - kayıt + rezervasyon onayı aynı anda */}
                       <Button
                         type="button"
                         variant="outline"
                         className="w-full h-12 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200"
                         onClick={handleGoogleSignIn}
-                        disabled={googleLoading || appleLoading}
+                        disabled={googleLoading}
                       >
                         {googleLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -2194,28 +2166,10 @@ const BookingPage = () => {
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                           </svg>
                         )}
-                        {t("signWithGoogle") || "Sign With Google"}
+                        {t("signWithGoogleAndConfirm") || (language === 'TR' ? "Google ile Giriş ve Onayla" : "Sign with Google and Confirm")}
                       </Button>
                       
-                      {/* Apple Sign In Button */}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full h-12 bg-black hover:bg-gray-900 text-white border-2 border-black"
-                        onClick={handleAppleSignIn}
-                        disabled={googleLoading || appleLoading}
-                      >
-                        {appleLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                          </svg>
-                        )}
-                        {t("signWithApple") || "Sign With Apple"}
-                      </Button>
-                      
-                      {/* Manual Login Button */}
+                      {/* Manuel Giriş ve Onayla */}
                       <Button
                         type="button"
                         variant="outline"
@@ -2225,7 +2179,7 @@ const BookingPage = () => {
                         <User className="h-5 w-5 mr-2" />
                         {showManualForm 
                           ? (language === 'TR' ? "Formu Gizle" : "Hide Form")
-                          : (language === 'TR' ? "Manuel Giriş" : "Manual Login")
+                          : (t("manualLoginAndConfirm") || (language === 'TR' ? "Manuel Giriş ve Onayla" : "Manual Login and Confirm"))
                         }
                       </Button>
                     </div>
@@ -2417,9 +2371,12 @@ const BookingPage = () => {
                   )}
                 </CardContent>
               </Card>
+              )}
+
             </div>
 
-            {/* Sidebar - Price Summary - Hidden on mobile */}
+            {/* Sidebar - Fiyat ve Onay - Sadece giriş yapmış misafirlere */}
+            {user && vehicleType && (
             <div className="lg:col-span-1 hidden lg:block">
               <div className="sticky top-24">
                 <Card className="shadow-xl border-2 border-primary/30">
@@ -2634,11 +2591,13 @@ const BookingPage = () => {
                 </Card>
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
       
-      {/* Mobile Sticky Footer */}
+      {/* Mobile Sticky Footer - Sadece giriş yapmış misafirlere */}
+      {user && vehicleType && (
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t-2 border-primary/20 p-3 sm:p-4 shadow-2xl z-[100]" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="flex-1 min-w-0">
@@ -2699,6 +2658,7 @@ const BookingPage = () => {
           </Button>
         </div>
       </div>
+      )}
       
       {/* Spacer for mobile sticky footer */}
       <div className="lg:hidden h-24" />

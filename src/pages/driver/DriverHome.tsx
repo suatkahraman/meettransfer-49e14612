@@ -1,27 +1,19 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { LogOut, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, RefreshCw, History, Settings, Volume2, Search, Shield, Globe, UserX } from 'lucide-react';
-import UniversalLanguageSelector from '@/components/UniversalLanguageSelector';
-import NotificationBell from '@/components/NotificationBell';
-import { PushNotificationToggle } from '@/components/PushNotificationToggle';
-import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
+import { Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, History } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import ReservationSearch from '@/components/ReservationSearch';
-import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
 import DriverStatsCard from '@/components/driver/DriverStatsCard';
 import JobCategoryCard from '@/components/driver/JobCategoryCard';
 import FutureMonthCard from '@/components/driver/FutureMonthCard';
 import DayJobCard from '@/components/driver/DayJobCard';
+import type { DriverHeaderExtras } from '@/components/driver/DriverLayout';
 
 interface Reservation {
   id: string;
@@ -58,21 +50,20 @@ interface Reservation {
 
 const PULL_THRESHOLD = 80;
 
+interface DriverHomeContext {
+  setHeaderExtras: (extras: DriverHeaderExtras) => void;
+}
+
 const DriverHome = () => {
-  const { signOut } = useAuth();
   const { driverId } = useUserRole();
   const navigate = useNavigate();
   const { t } = useDriverTranslations();
+  const { setHeaderExtras } = useOutletContext<DriverHomeContext>();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { playSound } = useNotificationSound();
-  const [expandedSections, setExpandedSections] = useState({
-    settings: false,
-    notificationSettings: false,
-    search: false
-  });
   
   const pullY = useMotionValue(0);
   const pullProgress = useTransform(pullY, [0, PULL_THRESHOLD], [0, 1]);
@@ -203,10 +194,6 @@ const DriverHome = () => {
     };
   }, [driverId]);
 
-  const toggleSection = (section: 'settings' | 'notificationSettings' | 'search') => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
-
   // Get current date/time for separating upcoming vs past
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -326,191 +313,62 @@ const DriverHome = () => {
   // Count for header badges
   const activeJobsCount = confirmedCurrentMonthJobs.length;
 
-  return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Compact mobile-optimized header */}
-      <header className="bg-primary text-primary-foreground py-2.5 px-3 sm:py-3 sm:px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg safe-area-inset-top">
-        <div className="flex items-center gap-2 min-w-0">
-          <h1 className="text-base sm:text-lg font-serif font-bold truncate">{t('driverPanel')}</h1>
-          {activeJobsCount > 0 && (
-            <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
-              {activeJobsCount}
-            </Badge>
-          )}
-          {pendingJobs.length > 0 && (
-            <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
-              {pendingJobs.length}
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => {
-              setRefreshing(true);
-              fetchReservations(true);
-            }}
-            disabled={refreshing}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-          >
-            <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", refreshing && "animate-spin")} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => toggleSection('search')} 
-            className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10",
-              expandedSections.search && "bg-primary-foreground/20"
-            )}
-          >
-            <Search className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <PushNotificationToggle compact />
-          <NotificationBell />
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/driver/history')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-          >
-            <History className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => toggleSection('notificationSettings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-            title="Bildirim Ayarları"
-          >
-            <Volume2 className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => toggleSection('settings')} 
-            className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10",
-              expandedSections.settings && "bg-primary-foreground/20"
-            )}
-            title={t('updateInfo')}
-          >
-            <Settings className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          {/* Language Selector */}
-          <UniversalLanguageSelector variant="header" />
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/security-settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-            title={t('securitySettings') || 'Güvenlik Ayarları'}
-          >
-            <Shield className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/driver/settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-            title={t('accountSettings') || 'Hesap Ayarları'}
-          >
-            <UserX className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={signOut} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-          >
-            <LogOut className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-        </div>
-      </header>
+  // Pass header extras to DriverLayout
+  useEffect(() => {
+    setHeaderExtras({
+      onRefresh: () => {
+        setRefreshing(true);
+        fetchReservations(true);
+      },
+      refreshing,
+      pendingCount: pendingJobs.length,
+      activeCount: activeJobsCount,
+    });
+  }, [setHeaderExtras, refreshing, pendingJobs.length, activeJobsCount, fetchReservations]);
 
-      <main className="flex-1 overflow-y-auto relative">
-        <div className="pb-8 px-4 max-w-lg mx-auto">
+  return (
+    <div className="h-full min-h-0 flex flex-col overflow-y-auto">
+      <div className="pb-8 px-4 max-w-lg mx-auto flex-1 relative">
         {/* Pull to refresh indicator */}
         <motion.div 
-          className="absolute left-1/2 -translate-x-1/2 -top-12 flex flex-col items-center gap-1"
+          className="absolute left-1/2 -translate-x-1/2 top-2 flex flex-col items-center gap-1 pointer-events-none z-10"
           style={{ opacity: pullOpacity }}
         >
           <motion.div style={{ rotate: pullRotation }}>
-            <RefreshCw className={cn("h-6 w-6 text-primary", refreshing && "animate-spin")} />
+            <Loader2 className={cn("h-6 w-6 text-primary", refreshing && "animate-spin")} />
           </motion.div>
           <span className="text-xs text-muted-foreground">
             {refreshing ? t('loading') : t('refresh')}
           </span>
         </motion.div>
-        {/* Notification Settings Section */}
-        <AnimatePresence>
-          {expandedSections.notificationSettings && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden mb-4"
-            >
-              <NotificationSettingsPanel language="TR" />
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Settings Section - Driver Info Editor */}
-        <AnimatePresence>
-          {expandedSections.settings && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden mb-4 mt-4"
-            >
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleSection('settings')}
-                  className="absolute top-2 right-2 z-10 h-8 w-8 p-0"
-                >
-                  ✕
-                </Button>
-                <DriverInfoEditor onClose={() => toggleSection('settings')} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Search Section */}
-        <AnimatePresence>
-          {expandedSections.search && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden mb-4 mt-4"
-            >
-              <Card>
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs text-muted-foreground">{t('searchByCode') || 'Kod ile Ara'}</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleSection('search')}
-                      className="h-6 w-6 p-0 text-muted-foreground"
-                    >
-                      ✕
-                    </Button>
-                  </div>
-                  <ReservationSearch userType="driver" driverId={driverId || undefined} placeholder="MT123456" />
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Hero Section */}
+        <motion.section
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 rounded-2xl overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-lg"
+        >
+          <div className="px-5 py-6">
+            <h2 className="text-xl sm:text-2xl font-bold font-serif">
+              {t('welcome')}! 👋
+            </h2>
+            <p className="text-sm opacity-90 mt-0.5">
+              {t('driverPanel')}
+            </p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-sm font-medium">
+                <CheckCircle2 className="h-4 w-4" />
+                {t('active')}: {activeJobsCount}
+              </span>
+              {pendingJobs.length > 0 && (
+                <span className="inline-flex items-center gap-1.5 bg-amber-500/30 rounded-full px-3 py-1.5 text-sm font-medium">
+                  <AlertCircle className="h-4 w-4" />
+                  {t('pending')}: {pendingJobs.length}
+                </span>
+              )}
+            </div>
+          </div>
+        </motion.section>
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
@@ -678,8 +536,7 @@ const DriverHome = () => {
 
           </div>
         )}
-        </div>
-      </main>
+      </div>
     </div>
   );
 };

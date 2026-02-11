@@ -3,7 +3,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { Footer } from "@/components/Footer";
 import { Link } from "react-router-dom";
-import { ChevronRight, Shield, Clock, Briefcase, Users, Star, CheckCircle, Wifi, Car, CreditCard, FileText, Building } from "lucide-react";
+import { ChevronRight, Shield, Clock, Briefcase, Users, Star, CheckCircle, Wifi, Car, CreditCard, FileText, Building, ArrowLeft } from "lucide-react";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import ShareButtons from "@/components/website/ShareButtons";

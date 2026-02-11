@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, LogOut, FileText, Wallet } from 'lucide-react';
+import { FileText, Wallet } from 'lucide-react';
 import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { MonthlySummaryCard } from '@/components/accounting/MonthlySummaryCard';
 import { MonthlyAccountingTable } from '@/components/accounting/MonthlyAccountingTable';
@@ -44,7 +43,6 @@ interface DriverPayment {
 
 const DriverMonthlyAccounting = () => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
   const { driverId } = useUserRole();
   const { t } = useDriverTranslations();
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -196,29 +194,7 @@ const DriverMonthlyAccounting = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate('/driver')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-serif">{t('monthlyEarnings')}</h1>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={signOut} 
-          className="text-primary-foreground hover:bg-primary-foreground/10"
-        >
-          <LogOut className="h-5 w-5" />
-        </Button>
-      </header>
-
+    <div className="h-full min-h-0 overflow-y-auto">
       <main className="container mx-auto py-6 px-4 space-y-6 max-w-2xl">
         {/* Month Navigator */}
         <MonthNavigator

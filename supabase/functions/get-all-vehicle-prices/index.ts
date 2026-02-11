@@ -5,8 +5,7 @@ const corsHeaders = {
 };
 
 // District mapping for known locations - must match Admin Panel / intercity_prices exactly
-// Keys: normalized search terms (user may type "Antalya Alanya Hotel", "Kaş" etc.)
-// Values: exact DB district names for Admin Panel matching
+// Values are canonical ASCII form; Admin may store "Kas" or "Kaş" - we try both when querying
 const DISTRICT_MAPPING: Record<string, string> = {
   // Antalya - granular matching for Alanya, Kaş, Belek, etc. (longer keys first to avoid partial matches)
   "alanya": "Alanya", "alanya hotel": "Alanya", "mahmutlar": "Alanya", "konakli": "Alanya", "konaklı": "Alanya",
@@ -310,7 +309,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const fromCity = pickupCity || city!;
       const toCity = dropoffCity || city!;
 
-      // Strategy I1: from_district + to_district + cities (most specific). Case-insensitive match.
+      // STRICT: When BOTH districts are known (e.g. Alanya -> Kaş), ONLY use exact district-to-district match.
+      // Strategy I2/I3 (single district) can return multiple routes (Alanya->Lara, Alanya->Belek, Alanya->Kas)
+      // and pick wrong price (e.g. 111€ instead of 190€ for Alanya->Kaş).
+      const hasExactRouteIntent = pickupDistrict && dropoffDistrict;
+
+      // Strategy I1: from_district + to_district + cities (REQUIRED when both districts known)
       if (pickupDistrict && dropoffDistrict) {
         intercityPrices = await queryTable("intercity_prices", {
           from_city: `ilike.${fromCity}`,
@@ -330,40 +334,34 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
       }
 
-      // Strategy I2: from_district only + cities
-      if (intercityPrices.length === 0 && pickupDistrict) {
-        intercityPrices = await queryTable("intercity_prices", {
-          from_city: `ilike.${fromCity}`,
-          to_city: `ilike.${toCity}`,
-          from_district: `ilike.${pickupDistrict}`,
-        });
-      }
-
-      // Strategy I3: to_district only + cities
-      if (intercityPrices.length === 0 && dropoffDistrict) {
-        intercityPrices = await queryTable("intercity_prices", {
-          from_city: `ilike.${fromCity}`,
-          to_city: `ilike.${toCity}`,
-          to_district: `ilike.${dropoffDistrict}`,
-        });
-      }
-
-      // Strategy I4: cities only (broadest) - SKIP when we have district-level intent but no match
-      // Admin Price Priority: if user searched "Alanya" -> "Kaş", don't fall back to generic Antalya->Antalya
-      // Distance fallback (Google Maps per-km) should only apply when NO admin match
-      const hasGranularIntent = pickupDistrict && dropoffDistrict;
-      if (intercityPrices.length === 0 && fromCity && toCity && !hasGranularIntent) {
-        intercityPrices = await queryTable("intercity_prices", {
-          from_city: `ilike.${fromCity}`,
-          to_city: `ilike.${toCity}`,
-        });
-
-        // Also try reverse
-        if (intercityPrices.length === 0 && fromCity !== toCity) {
+      // Strategy I2/I3: ONLY when we don't have both districts - avoids wrong cross-route price
+      if (!hasExactRouteIntent) {
+        if (intercityPrices.length === 0 && pickupDistrict) {
           intercityPrices = await queryTable("intercity_prices", {
-            from_city: `ilike.${toCity}`,
-            to_city: `ilike.${fromCity}`,
+            from_city: `ilike.${fromCity}`,
+            to_city: `ilike.${toCity}`,
+            from_district: `ilike.${pickupDistrict}`,
           });
+        }
+        if (intercityPrices.length === 0 && dropoffDistrict) {
+          intercityPrices = await queryTable("intercity_prices", {
+            from_city: `ilike.${fromCity}`,
+            to_city: `ilike.${toCity}`,
+            to_district: `ilike.${dropoffDistrict}`,
+          });
+        }
+        // Strategy I4: cities only - SKIP when we have district-level intent
+        if (intercityPrices.length === 0 && fromCity && toCity) {
+          intercityPrices = await queryTable("intercity_prices", {
+            from_city: `ilike.${fromCity}`,
+            to_city: `ilike.${toCity}`,
+          });
+          if (intercityPrices.length === 0 && fromCity !== toCity) {
+            intercityPrices = await queryTable("intercity_prices", {
+              from_city: `ilike.${toCity}`,
+              to_city: `ilike.${fromCity}`,
+            });
+          }
         }
       }
 

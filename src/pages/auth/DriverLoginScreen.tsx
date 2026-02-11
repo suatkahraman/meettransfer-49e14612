@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLoginRateLimit } from '@/hooks/useLoginRateLimit';
-import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,22 +13,29 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
 import { ArrowLeft, Loader2, Car, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
 import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
-import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
+import { normalizePasswordInput } from '@/lib/normalizePasswordInput';
+import { useStorageAvailable } from '@/hooks/useStorageAvailable';
+import { usePWADetect } from '@/hooks/usePWADetect';
 
+// Şoförler için 2FA yok - sadece şifre ile giriş
 const loginSchema = z.object({
   email: z.string().trim().email().max(255),
   password: z.string().min(6).max(100),
 });
 
-// Same strength as LoginScreen to avoid Supabase "weak/pwned" rejections
+// SignupScreen ile aynı güç - Supabase weak/pwned reddini önlemek için (1 büyük, 1 küçük, 4 rakam)
 const newPasswordSchema = z.object({
-  password: z.string().min(6, 'En az 6 karakter').max(100),
-  confirmPassword: z.string().min(6, 'En az 6 karakter').max(100),
+  password: z.string()
+    .min(6, 'En az 6 karakter')
+    .max(100)
+    .regex(/[A-Z]/, 'En az 1 büyük harf gerekli')
+    .regex(/[a-z]/, 'En az 1 küçük harf gerekli')
+    .regex(/\d.*\d.*\d.*\d/, 'En az 4 rakam gerekli'),
+  confirmPassword: z.string().min(6).max(100),
 }).refine((d) => d.password === d.confirmPassword, { message: 'Şifreler eşleşmiyor', path: ['confirmPassword'] });
 
-type ViewMode = 'login' | 'reset' | '2fa' | 'set-password';
+type ViewMode = 'login' | 'reset' | 'set-password';
 
 const DriverLoginScreen = () => {
   const [searchParams] = useSearchParams();
@@ -49,26 +55,13 @@ const DriverLoginScreen = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
-  const [pendingRole, setPendingRole] = useState<string | null>(null);
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { t, language } = useLanguage();
   const { rateLimitStatus, checkRateLimit, logLoginAttempt, formatLockoutTime } = useLoginRateLimit();
-  const { 
-    twoFactorState, 
-    isLoading: is2FALoading, 
-    error: twoFactorError, 
-    initiate2FA, 
-    verify2FA, 
-    resendOTP, 
-    cancel2FA,
-    checkTrustedDevice,
-    registerTrustedDevice,
-    maxAttempts,
-    remainingAttempts,
-    otpSettings
-  } = useTwoFactorAuth();
   const navigate = useNavigate();
+  const { available: storageAvailable, checked: storageChecked } = useStorageAvailable();
+  const { isIOS, isStandalone } = usePWADetect();
 
   // Lockout countdown timer
   useEffect(() => {
@@ -84,9 +77,9 @@ const DriverLoginScreen = () => {
     }
   }, [rateLimitStatus.locked, rateLimitStatus.remainingSeconds]);
 
-  // Role-based redirect after login (only if not pending 2FA or set-password recovery)
+  // Role-based redirect after login (only if not in set-password recovery)
   useEffect(() => {
-    if (!isLoading && user && !roleLoading && role && viewMode !== '2fa' && viewMode !== 'set-password') {
+    if (!isLoading && user && !roleLoading && role && viewMode !== 'set-password') {
       switch (role) {
         case 'admin':
           navigate('/admin', { replace: true });
@@ -159,77 +152,8 @@ const DriverLoginScreen = () => {
     run();
   }, [searchParams, language, recoveryChecked]);
 
-  // Handle 2FA verification success
-  const handle2FAVerify = async (code: string, rememberDevice: boolean = false) => {
-    const result = await verify2FA(code);
-    if (result.success && pendingRole) {
-      // 2FA complete – allow global redirects again
-      clearSuppressAuthRedirect();
-
-      // If user chose to remember device, register it
-      if (rememberDevice && twoFactorState.userId) {
-        try {
-          await registerTrustedDevice(twoFactorState.userId);
-          console.log('Device registered as trusted');
-        } catch (e) {
-          console.error('Failed to register trusted device:', e);
-        }
-      }
-
-      // Log successful login attempt
-      const userEmail = result.email || twoFactorState.email || '';
-      await logLoginAttempt(userEmail, true, undefined, undefined, pendingRole);
-      
-      toast.success(language === 'TR' ? 'Doğrulama başarılı! Giriş yapılıyor...' : 'Verification successful! Signing in...');
-      
-      // Try auto-login with the magic link token
-      if (result.autoLogin && result.tokenHash) {
-        try {
-          const { error: verifyError } = await supabase.auth.verifyOtp({
-            token_hash: result.tokenHash,
-            type: 'magiclink',
-          });
-
-          if (verifyError) {
-            console.error('Auto-login failed:', verifyError);
-          }
-        } catch (e) {
-          console.error('Auto-login error:', e);
-        }
-      }
-      
-      // Navigate to the appropriate page
-      setTimeout(() => {
-        switch (pendingRole) {
-          case 'admin':
-            navigate('/admin', { replace: true });
-            break;
-          case 'driver':
-            navigate('/driver', { replace: true });
-            break;
-          case 'agency':
-            navigate('/agency', { replace: true });
-            break;
-          default:
-            navigate('/customer', { replace: true });
-        }
-      }, 500);
-    }
-  };
-
-  // Handle 2FA cancel
-  const handle2FACancel = async () => {
-    // User aborted 2FA – allow redirects again
-    clearSuppressAuthRedirect();
-
-    cancel2FA();
-    setPendingRole(null);
-    setViewMode('login');
-    await supabase.auth.signOut();
-  };
-
   // If already logged in, show loading (skip when in recovery set-password flow)
-  if (authLoading || (user && roleLoading && viewMode !== '2fa' && viewMode !== 'set-password')) {
+  if (authLoading || (user && roleLoading && viewMode !== 'set-password')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
         <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -242,16 +166,14 @@ const DriverLoginScreen = () => {
     setErrors({});
     setIsLoading(true);
 
-    // We sometimes sign in briefly (to validate password) and then sign out again to enforce 2FA.
-    // During that window, AuthContext must NOT auto-redirect away from this screen.
-    let keepRedirectSuppressed = false;
-
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    const email = (formData.get('email') as string)?.trim() || '';
+    const rawPassword = formData.get('password') as string;
+    // iOS klavyesi alternatif rakam karakterleri girebilir - normalize et (Android/iOS arası uyumluluk)
+    const password = normalizePasswordInput(rawPassword || '');
 
     try {
-      const validation = loginSchema.parse({ email: email.trim(), password });
+      const validation = loginSchema.parse({ email, password });
       
       // Check rate limit before attempting login
       const rateLimit = await checkRateLimit(validation.email);
@@ -270,10 +192,7 @@ const DriverLoginScreen = () => {
         safeLocalRemove('driverSavedEmail');
       }
 
-      // Prevent global auth redirect racing our 2FA flow
-      setSuppressAuthRedirect();
-
-      // Use supabase directly to get the user data for 2FA check
+      // Şoför girişi - 2FA yok
       const { error, data: authData } = await supabase.auth.signInWithPassword({
         email: validation.email,
         password: validation.password,
@@ -283,15 +202,6 @@ const DriverLoginScreen = () => {
         await logLoginAttempt(validation.email, false, error.message, undefined, 'driver');
         
         if (error.message?.includes('Invalid login credentials')) {
-          // Check if failed attempts require 2FA verification
-          const updatedRateLimit = await checkRateLimit(validation.email);
-          const failedAttempts = updatedRateLimit.failedAttempts || 0;
-          
-          // After 2+ failed attempts, require 2FA on next successful login
-          if (failedAttempts >= 2) {
-            safeLocalSet(`require2FA_${validation.email}`, 'true');
-          }
-          
           setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
         } else if (error.message?.includes('Email not confirmed')) {
           toast.error(t('emailNotConfirmed') || 'Please confirm your email first');
@@ -318,36 +228,8 @@ const DriverLoginScreen = () => {
           return;
         }
         
-        // Şoförler için 2FA atlanır - yalnızca şifre ile giriş (admin tarafından oluşturulan hesaplar için)
-        if (userRole === 'driver') {
-          await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
-          clearSuppressAuthRedirect();
-          // Kullanıcı girişte kalır, role redirect effect /driver'a yönlendirir
-        } else {
-          const require2FAKey = `require2FA_${validation.email}`;
-          const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
-          const isTrusted = await checkTrustedDevice(authData.user.id);
-
-          if (!isTrusted || require2FADueToFailedAttempts) {
-            keepRedirectSuppressed = true;
-            setPendingRole(userRole);
-            setViewMode('2fa');
-            await supabase.auth.signOut();
-            const langCode = language === 'TR' ? 'tr' : 'en';
-            const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
-            if (result.success) {
-              toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
-              safeLocalRemove(require2FAKey);
-            } else {
-              toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
-              setPendingRole(null);
-              setViewMode('login');
-              keepRedirectSuppressed = false;
-            }
-          } else {
-            await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
-          }
-        }
+        // Şoförler için 2FA yok - doğrudan giriş
+        await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -363,9 +245,6 @@ const DriverLoginScreen = () => {
         toast.error(t('loginFailed') || 'Login failed. Please try again.');
       }
     } finally {
-      if (!keepRedirectSuppressed) {
-        clearSuppressAuthRedirect();
-      }
       setIsLoading(false);
     }
   };
@@ -446,11 +325,9 @@ const DriverLoginScreen = () => {
         }
         return;
       }
-      toast.success(language === 'TR' ? 'Şifre güncellendi. Giriş yapabilirsiniz.' : 'Password updated. You can sign in.');
-      await signOut();
-      window.history.replaceState(null, '', '/login/driver');
+      toast.success(language === 'TR' ? 'Şifre güncellendi. Yönlendiriliyorsunuz...' : 'Password updated. Redirecting...');
       setNewPasswordValue('');
-      navigate('/login/driver', { replace: true });
+      navigate('/driver', { replace: true });
     } catch (err) {
       if (err instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};
@@ -533,41 +410,6 @@ const DriverLoginScreen = () => {
               </form>
             </CardContent>
           </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // 2FA verification screen
-  if (viewMode === '2fa') {
-    return (
-      <div className="min-h-screen flex flex-col bg-secondary">
-        <header className="sticky top-0 z-50 bg-card border-b border-border safe-area-header">
-          <div className="flex items-center h-14 px-4">
-            <button 
-              onClick={handle2FACancel} 
-              className="flex items-center gap-2 text-foreground"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span className="text-sm">{t("back") || "Geri"}</span>
-            </button>
-          </div>
-        </header>
-        <div className="flex-1 flex items-center justify-center p-4 py-8">
-          <TwoFactorVerification
-            email={twoFactorState.email || ''}
-            role={twoFactorState.role || 'driver'}
-            isLoading={is2FALoading}
-            error={twoFactorError}
-            onVerify={handle2FAVerify}
-            onResend={resendOTP}
-            onCancel={handle2FACancel}
-            maxAttempts={maxAttempts}
-            remainingAttempts={remainingAttempts}
-            otpLength={otpSettings.otpLength}
-            expiryMinutes={otpSettings.expiryMinutes}
-            trustedDeviceDays={otpSettings.trustedDeviceDays}
-          />
         </div>
       </div>
     );
@@ -670,6 +512,26 @@ const DriverLoginScreen = () => {
           </CardHeader>
           
           <CardContent className="space-y-4">
+            {/* iOS/storage uyarısı - localStorage çalışmıyorsa (gizli mod vb.) */}
+            {storageChecked && !storageAvailable && (
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+                  {language === 'TR'
+                    ? 'Oturumunuz kaydedilemiyor. Gizli modu kapatın veya Safari ayarlarında "Çerezleri engelle"yi kapatıp tekrar deneyin.'
+                    : 'Session cannot be saved. Disable private mode or turn off "Block Cookies" in Safari settings and try again.'}
+                </p>
+              </div>
+            )}
+            {/* iOS PWA ipucu */}
+            {isIOS && isStandalone && (
+              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  {language === 'TR'
+                    ? 'Giriş sorunu yaşıyorsanız, Safari\'de siteyi açıp giriş yapmayı deneyin.'
+                    : 'If you have login issues, try opening the site in Safari and signing in.'}
+                </p>
+              </div>
+            )}
             {/* Lockout warning */}
             {lockoutCountdown && (
               <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-center">

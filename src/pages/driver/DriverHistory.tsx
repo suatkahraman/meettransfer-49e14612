@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,6 +57,7 @@ const paymentTypeLabels: Record<string, string> = {
 const DriverHistory = () => {
   const navigate = useNavigate();
   const { driverId } = useUserRole();
+  const { setHeaderRight } = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
   const { t, getPaymentTypeLabel } = useDriverTranslations();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,6 +105,23 @@ const DriverHistory = () => {
     }
   }, [driverId, dateFrom, dateTo]);
 
+  useEffect(() => {
+    setHeaderRight(
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setShowFilters(!showFilters)}
+        className={cn(
+          "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10",
+          showFilters && "bg-primary-foreground/20"
+        )}
+      >
+        <Filter className="h-5 w-5" />
+      </Button>
+    );
+    return () => setHeaderRight(null);
+  }, [setHeaderRight, showFilters]);
+
   // Calculate totals - TL bazlı (driver_earning ve driver_cash_amount)
   const totalTrips = reservations.length;
   const totalEarnings = reservations.reduce((sum, r) => sum + (r.driver_earning || 0), 0);
@@ -115,31 +133,7 @@ const DriverHistory = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-primary text-primary-foreground py-3 px-4 flex items-center gap-3 sticky top-0 z-20 shadow-lg">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate('/driver')} 
-          className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-lg font-serif font-bold flex-1">{t('transferHistory')}</h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowFilters(!showFilters)}
-          className={cn(
-            "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9",
-            showFilters && "bg-primary-foreground/20"
-          )}
-        >
-          <Filter className="h-5 w-5" />
-        </Button>
-      </header>
-
+    <div className="h-full min-h-0 flex flex-col overflow-y-auto">
       {/* Filter Panel */}
       <AnimatePresence>
         {showFilters && (
