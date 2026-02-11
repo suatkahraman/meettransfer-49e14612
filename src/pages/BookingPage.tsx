@@ -1957,6 +1957,7 @@ const BookingPage = () => {
                                 pickup: effectivePickup,
                                 dropoff: effectiveDropoff,
                                 customerCurrency: currency.value,
+                                pickup_date: effectiveDate || undefined,
                               },
                             }).then(({ data }) => {
                               if (data?.prices) {

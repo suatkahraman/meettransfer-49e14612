@@ -451,7 +451,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "The pinnacle of automotive luxury. Our Mercedes Maybach Minivan offers executive rear seating and the smoothest ride for VIP guests and business executives.",
     sprinterName: "Mercedes Sprinter or Similar",
-    sprinterDesc: "Perfect for larger groups, our VIP Sprinter offers airline-style seating for up to 16 passengers with individual screens and premium amenities.",
+    sprinterDesc: "Perfect for larger groups, our VIP Sprinter offers airline-style seating for up to 20 passengers with individual screens and premium amenities.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "Dubai Exclusive Luxury Fleet",
@@ -2294,7 +2294,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Der Gipfel des automobilen Luxus. Unser Mercedes Maybach Minivan bietet Executive-Rücksitze und die sanfteste Fahrt für VIP-Gäste und Geschäftsführer.",
     sprinterName: "Mercedes Sprinter oder Ähnlich",
-    sprinterDesc: "Perfekt für größere Gruppen, unser VIP Sprinter bietet Airline-Sitze für bis zu 16 Passagiere mit individuellen Bildschirmen und Premium-Ausstattung.",
+    sprinterDesc: "Perfekt für größere Gruppen, unser VIP Sprinter bietet Airline-Sitze für bis zu 20 Passagiere mit individuellen Bildschirmen und Premium-Ausstattung.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "Dubai Exklusive Luxusflotte",
@@ -4175,7 +4175,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Le summum du luxe automobile. Notre Mercedes Maybach Minivan offre des sièges arrière executive et le trajet le plus fluide pour les invités VIP.",
     sprinterName: "Mercedes Sprinter ou Similaire",
-    sprinterDesc: "Parfait pour les grands groupes, notre Sprinter VIP offre des sièges style avion pour jusqu'à 16 passagers avec équipements premium.",
+    sprinterDesc: "Parfait pour les grands groupes, notre Sprinter VIP offre des sièges style avion pour jusqu'à 20 passagers avec équipements premium.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "Flotte de Luxe Exclusive Dubai",
@@ -5771,7 +5771,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Вершина автомобильной роскоши. Наш Mercedes Maybach Minivan предлагает представительские задние сиденья и самую плавную поездку для VIP-гостей и руководителей.",
     sprinterName: "Mercedes Sprinter или Аналог",
-    sprinterDesc: "Идеально для больших групп, наш VIP Sprinter предлагает сиденья авиационного класса для до 16 пассажиров с индивидуальными экранами и премиум-удобствами.",
+    sprinterDesc: "Идеально для больших групп, наш VIP Sprinter предлагает сиденья авиационного класса для до 20 пассажиров с индивидуальными экранами и премиум-удобствами.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "Эксклюзивный Люксовый Автопарк Дубая",
@@ -7231,7 +7231,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "L'apice del lusso automobilistico. Il nostro Mercedes Maybach Minivan offre sedili posteriori executive e il viaggio più fluido per ospiti VIP e dirigenti.",
     sprinterName: "Mercedes Sprinter o Simile",
-    sprinterDesc: "Perfetto per gruppi più grandi, il nostro Sprinter VIP offre sedili stile aereo per fino a 16 passeggeri con schermi individuali e comfort premium.",
+    sprinterDesc: "Perfetto per gruppi più grandi, il nostro Sprinter VIP offre sedili stile aereo per fino a 20 passeggeri con schermi individuali e comfort premium.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "Flotta di Lusso Esclusiva Dubai",
@@ -8738,7 +8738,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "La cima del lujo automotriz. Nuestro Mercedes Maybach Minivan ofrece asientos traseros ejecutivos y el viaje más suave para huéspedes VIP y ejecutivos.",
     sprinterName: "Mercedes Sprinter o Similar",
-    sprinterDesc: "Perfecto para grupos más grandes, nuestro Sprinter VIP ofrece asientos estilo avión para hasta 16 pasajeros con pantallas individuales y comodidades premium.",
+    sprinterDesc: "Perfecto para grupos más grandes, nuestro Sprinter VIP ofrece asientos estilo avión para hasta 20 pasajeros con pantallas individuales y comodidades premium.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "Flota de Lujo Exclusiva de Dubai",
@@ -10245,7 +10245,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "مرسيدس مايباخ ميني فان",
     maybachDesc: "قمة الفخامة في السيارات. يقدم مرسيدس مايباخ ميني فان مقاعد تنفيذية خلفية وأسلس قيادة لضيوف VIP ورجال الأعمال.",
     sprinterName: "مرسيدس سبرينتر أو ما شابه",
-    sprinterDesc: "مثالي للمجموعات الكبيرة، يقدم سبرينتر VIP مقاعد بطراز الطائرة لما يصل إلى 16 راكباً مع شاشات فردية ووسائل راحة فاخرة.",
+    sprinterDesc: "مثالي للمجموعات الكبيرة، يقدم سبرينتر VIP مقاعد بطراز الطائرة لما يصل إلى 20 راكباً مع شاشات فردية ووسائل راحة فاخرة.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "أسطول دبي الفاخر الحصري",
@@ -11724,7 +11724,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Otomotiv lüksünün zirvesi. Mercedes Maybach Minivan'ımız VIP misafirler ve iş dünyası yöneticileri için executive arka koltuklar ve en yumuşak sürüş sunar.",
     sprinterName: "Mercedes Sprinter veya Benzeri",
-    sprinterDesc: "Büyük gruplar için mükemmel, VIP Sprinter'ımız bireysel ekranlar ve premium olanaklarla 16 yolcuya kadar uçak tarzı oturma sunar.",
+    sprinterDesc: "Büyük gruplar için mükemmel, VIP Sprinter'ımız bireysel ekranlar ve premium olanaklarla 20 yolcuya kadar uçak tarzı oturma sunar.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "Dubai Özel Lüks Filo",
@@ -13292,7 +13292,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "Mercedes Maybach Minivan",
     maybachDesc: "Вершина автомобільної розкоші. Наш Mercedes Maybach Minivan пропонує представницькі задні сидіння та найплавнішу поїздку для VIP-гостей.",
     sprinterName: "Mercedes Sprinter або Аналог",
-    sprinterDesc: "Ідеально для великих груп, наш VIP Sprinter пропонує сидіння авіаційного класу для до 16 пасажирів з індивідуальними екранами.",
+    sprinterDesc: "Ідеально для великих груп, наш VIP Sprinter пропонує сидіння авіаційного класу для до 20 пасажирів з індивідуальними екранами.",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "Ексклюзивний Люксовий Автопарк Дубая",
@@ -14775,7 +14775,7 @@ const translations: Record<Language, Record<string, string>> = {
     maybachName: "メルセデス・マイバッハ ミニバン",
     maybachDesc: "自動車の高級さの頂点。メルセデス・マイバッハ ミニバンはVIPゲストやビジネスエグゼクティブ向けのエグゼクティブリアシートと最も滑らかな乗り心地を提供します。",
     sprinterName: "Mercedes Sprinterまたは同等",
-    sprinterDesc: "大人数グループに最適。VIPスプリンターは最大16名様まで個別スクリーンとプレミアムアメニティを備えた航空機スタイルのシートを提供します。",
+    sprinterDesc: "大人数グループに最適。VIPスプリンターは最大20名様まで個別スクリーンとプレミアムアメニティを備えた航空機スタイルのシートを提供します。",
     
     // Dubai Exclusive Fleet
     dubaiFleetTitle: "ドバイ限定ラグジュアリーフリート",

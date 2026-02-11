@@ -82,8 +82,8 @@ const FleetPage = () => {
     {
       name: t("sprinterName"),
       description: t("sprinterDesc"),
-      passengers: 16,
-      luggage: 16,
+      passengers: 20,
+      luggage: 20,
       startingPrice: "€80",
       features: ["Leather Seats", "Large luggage space", "WiFi", "USB"],
       images: [

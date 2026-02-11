@@ -276,6 +276,7 @@ const ReservationForm = () => {
             pickup: urlPickup,
             dropoff: urlDropoff,
             customerCurrency: urlCurrency,
+            pickup_date: urlDate || undefined,
           },
         });
         
@@ -336,6 +337,7 @@ const ReservationForm = () => {
             pickup: urlPickup,
             dropoff: urlDropoff,
             customerCurrency: urlCurrency,
+            pickup_date: urlDate || undefined,
           },
         });
         
@@ -626,6 +628,7 @@ const ReservationForm = () => {
             pickup: formData.pickup,
             dropoff: formData.dropoff,
             customerCurrency: preferredCurrency,
+            pickup_date: formData.date || undefined,
           },
         });
 

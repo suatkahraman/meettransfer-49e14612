@@ -66,10 +66,14 @@ const newPasswordSchema = z.object({
 type ViewMode = 'login' | 'forgot' | 'reset' | 'reset-sent' | '2fa';
 
 const LoginScreen = () => {
+  const isResetting = typeof window !== 'undefined' && window.location.href.includes('type=recovery');
+
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [viewMode, setViewMode] = useState<ViewMode>('login');
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    () => (typeof window !== 'undefined' && window.location.href.includes('type=recovery')) ? 'reset' : 'login'
+  );
   const [resetEmail, setResetEmail] = useState('');
   const [rememberMe, setRememberMe] = useState(() => {
     return safeLocalGet('guestRememberMe') === 'true';
@@ -84,7 +88,7 @@ const LoginScreen = () => {
   const [newPasswordValue, setNewPasswordValue] = useState('');
   const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
   const [pendingRole, setPendingRole] = useState<string | null>(null);
-  const { signIn, user, loading: authLoading } = useAuth();
+  const { signIn, signOut, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { isIOS, isStandalone } = usePWADetect();
   const { t, language } = useLanguage();
@@ -256,10 +260,13 @@ const LoginScreen = () => {
     })();
   }, [searchParams, user, authLoading, t]);
 
-  // Role-based redirect after login (only if not pending 2FA)
   useEffect(() => {
-    // During an active login attempt we must not auto-redirect, otherwise we can race
-    // the 2FA flow and never show the OTP entry screen.
+    if (isResetting) setViewMode('reset');
+  }, [isResetting]);
+
+  // Role-based redirect – isResetting (şifre sıfırlama) iken ASLA yönlendirme yapma
+  useEffect(() => {
+    if (isResetting) return;
     if (!isLoading && user && !roleLoading && role && viewMode !== '2fa') {
       switch (role) {
         case 'admin':
@@ -275,7 +282,7 @@ const LoginScreen = () => {
           navigate('/customer', { replace: true });
       }
     }
-  }, [isLoading, user, role, roleLoading, navigate, viewMode]);
+  }, [isResetting, isLoading, user, role, roleLoading, navigate, viewMode]);
 
   // Handle 2FA verification success
   const handle2FAVerify = async (code: string, rememberDevice: boolean = false) => {
@@ -346,8 +353,7 @@ const LoginScreen = () => {
     await supabase.auth.signOut();
   };
 
-  // If already logged in, show loading
-  if (authLoading || (user && roleLoading && viewMode !== '2fa')) {
+  if (!isResetting && (authLoading || (user && roleLoading && viewMode !== '2fa'))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
         <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -618,7 +624,8 @@ const LoginScreen = () => {
         }
       } else {
         toast.success(t('passwordUpdated'));
-        setViewMode('login');
+        await signOut();
+        window.history.replaceState(null, '', '/login');
         navigate('/login', { replace: true });
       }
     } catch (error) {

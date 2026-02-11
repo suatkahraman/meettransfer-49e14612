@@ -4,12 +4,22 @@ const corsHeaders = {
   "Content-Type": "application/json",
 };
 
-// District mapping for known locations - must match auto-price functions
+// District mapping for known locations - must match Admin Panel / intercity_prices exactly
+// Keys: normalized search terms (user may type "Antalya Alanya Hotel", "Kaş" etc.)
+// Values: exact DB district names for Admin Panel matching
 const DISTRICT_MAPPING: Record<string, string> = {
-  // Turkey
-  "alanya": "Alanya", "belek": "Belek", "side": "Side", "kemer": "Kemer",
-  "lara": "Lara", "kundu": "Kundu", "beldibi": "Beldibi", "göynük": "Göynük",
-  "tekirova": "Tekirova", "manavgat": "Manavgat", "taksim": "Taksim",
+  // Antalya - granular matching for Alanya, Kaş, Belek, etc. (longer keys first to avoid partial matches)
+  "alanya": "Alanya", "alanya hotel": "Alanya", "mahmutlar": "Alanya", "konakli": "Alanya", "konaklı": "Alanya",
+  "okurcalar": "Alanya", "avsallar": "Alanya", "incekum": "Alanya",
+  "kas": "Kas", "kaş": "Kas", "patara": "Kas",
+  "kalkan": "Kalkan", "saklikent": "Kalkan", "saklıkent": "Kalkan",
+  "belek": "Belek", "side": "Side", "kemer": "Kemer", "manavgat": "Manavgat",
+  "lara": "Lara", "kundu": "Kundu", "beldibi": "Beldibi", "goynuk": "Göynük", "göynük": "Göynük",
+  "tekirova": "Tekirova", "cirali": "Cirali", "çıralı": "Cirali", "olympos": "Olympos", "olimpos": "Olympos",
+  "kaleici": "Kaleici", "kaleiçi": "Kaleici", "konyaalti": "Konyaalti", "konyaaltı": "Konyaalti",
+  "kadriye": "Kadriye", "serik": "Serik",
+  // Istanbul
+  "taksim": "Taksim",
   "sultanahmet": "Sultanahmet", "kadikoy": "Kadıköy", "besiktas": "Beşiktaş",
   "sisli": "Şişli", "levent": "Levent", "atasehir": "Ataşehir",
   "bakirkoy": "Bakırköy", "bodrum": "Bodrum Merkez", "turgutreis": "Turgutreis",
@@ -57,9 +67,26 @@ function normalizeTurkish(text: string): string {
     .replace(/Ğ/g, 'G').replace(/ğ/g, 'g');
 }
 
+/** Sanitize and normalize user search input for price matching */
+function sanitizeSearchQuery(text: string): string {
+  if (!text || typeof text !== "string") return "";
+  return normalizeTurkish(text)
+    .toLowerCase()
+    .replace(/[,.\-_\/\\#&()]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Detect district from search text. Uses "contains" logic (fuzzy):
+ * e.g. "Antalya Alanya Hotel" -> matches "alanya" -> returns "Alanya"
+ * Keys are tried by length descending so "alanya hotel" matches before "alanya"
+ */
 function detectDistrict(text: string): string | null {
-  const lower = normalizeTurkish(text).toLowerCase();
-  for (const [key, value] of Object.entries(DISTRICT_MAPPING)) {
+  const lower = sanitizeSearchQuery(text);
+  // Sort keys by length desc so longer phrases match first (e.g. "alanya hotel" before "alanya")
+  const entries = Object.entries(DISTRICT_MAPPING).sort((a, b) => b[0].length - a[0].length);
+  for (const [key, value] of entries) {
     if (lower.includes(key)) return value;
   }
   return null;
@@ -69,7 +96,7 @@ function detectCity(text: string): string | null {
   const s = normalizeTurkish(text).toLowerCase();
   if (/istanbul|\bist\b|\bsaw\b/i.test(s)) return "Istanbul";
   if (/ankara|\besb\b|esenboga/i.test(s)) return "Ankara";
-  if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat/i.test(s)) return "Antalya";
+  if (/antalya|\bayt\b|alanya|belek|side|kemer|manavgat|kas|kaş|kalkan/i.test(s)) return "Antalya";
   if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) return "Bodrum";
   if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) return "Dalaman";
   if (/izmir|\badb\b|cesme|alacati/i.test(s)) return "Izmir";
@@ -86,8 +113,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const { pickup, dropoff, customerCurrency } = await req.json();
-    const s = normalizeTurkish(pickup + " " + dropoff).toLowerCase();
+    const body = await req.json();
+    const { pickup, dropoff, customerCurrency } = body;
+    const pickupDateParam = body.pickup_date ?? body.pickupDate;
+    const pickupSanitized = sanitizeSearchQuery(pickup || "");
+    const dropoffSanitized = sanitizeSearchQuery(dropoff || "");
+    const s = pickupSanitized + " " + dropoffSanitized;
+
+    // Strict monthly/seasonal matching: use pickup date to select correct price (valid_from/valid_to)
+    const pickupDateStr =
+      pickupDateParam && (typeof pickupDateParam === "string" || typeof pickupDateParam === "number")
+        ? new Date(pickupDateParam).toISOString().split("T")[0]
+        : null;
 
     // Detect region
     const isDubai = /dubai|uae|dxb|dwc|al maktoum/i.test(s);
@@ -98,7 +135,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const dropoffCity = detectCity(dropoff);
     const city = pickupCity || dropoffCity;
     
-    // Detect districts from pickup and dropoff separately
+    // Detect districts from pickup and dropoff separately (granular matching: District or Full Address)
     const pickupDistrict = detectDistrict(pickup);
     const dropoffDistrict = detectDistrict(dropoff);
     const district = pickupDistrict || dropoffDistrict;
@@ -118,9 +155,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
       else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
     }
 
-    // Determine if this is an intercity or intra-city transfer without airport
-    const isIntercityTransfer = (pickupCity && dropoffCity && pickupCity !== dropoffCity) || 
-                                 (!airport && pickupDistrict && dropoffDistrict);
+    // Determine if this is an intercity transfer (no airport):
+    // - Different cities, OR same city with different districts (e.g. Antalya Alanya -> Antalya Kaş)
+    const isIntercityTransfer =
+      (pickupCity && dropoffCity && pickupCity !== dropoffCity) ||
+      (!airport && pickupDistrict && dropoffDistrict);
 
     // Frontend vehicle types
     const turkeyVehicles = [
@@ -141,7 +180,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         dbAliases: ["maybach-minibus", "maybach-minivan", "Mercedes Maybach Minivan"]
       },
       { 
-        value: "minibus", label: "Mercedes Sprinter or Similar", passengers: 16, luggage: 16,
+        value: "minibus", label: "Mercedes Sprinter or Similar", passengers: 20, luggage: 20,
         dbAliases: ["minibus", "mercedes-sprinter", "Mercedes Sprinter or Similar"]
       },
     ];
@@ -183,20 +222,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }), { headers: corsHeaders });
     }
 
-    // Helper to query any table with specific filters
+    // Helper to query any table with specific filters (includes valid_from, valid_to for seasonal)
     async function queryTable(table: string, filters: Record<string, string>): Promise<any[]> {
-      const params = new URLSearchParams({ 
+      const params = new URLSearchParams({
         is_active: "eq.true",
-        select: "vehicle_type,price,price_currency",
+        select: "vehicle_type,price,price_currency,valid_from,valid_to",
         order: "updated_at.desc",
-        ...filters
+        ...filters,
       });
 
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params.toString()}`, {
         headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-        }
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
       });
 
       const contentType = res.headers.get("content-type");
@@ -208,6 +247,29 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return res.json();
     }
 
+    // Strict monthly/seasonal: pick the row that applies to pickup_date. If a specific price exists
+    // for the route and month, use it; do not let base price override seasonal.
+    function applySeasonalFilter(rows: any[], dateStr: string | null): any[] {
+      if (!rows.length) return rows;
+      if (!dateStr) return rows;
+
+      const byVehicle = new Map<string, any>();
+      const seasonalFirst = rows.filter(
+        (r) => r.valid_from && r.valid_to && dateStr >= String(r.valid_from).split("T")[0] && dateStr <= String(r.valid_to).split("T")[0]
+      );
+      const baseRows = rows.filter((r) => !r.valid_from && !r.valid_to);
+
+      for (const row of seasonalFirst) {
+        const vt = row.vehicle_type;
+        if (!byVehicle.has(vt)) byVehicle.set(vt, row);
+      }
+      for (const row of baseRows) {
+        const vt = row.vehicle_type;
+        if (!byVehicle.has(vt)) byVehicle.set(vt, row);
+      }
+      return Array.from(byVehicle.values());
+    }
+
     // ---- INTERCITY / INTRA-CITY PRICE MATCHING (no airport) ----
     let intercityPrices: any[] = [];
     let usedIntercity = false;
@@ -216,22 +278,22 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const fromCity = pickupCity || city!;
       const toCity = dropoffCity || city!;
 
-      // Strategy I1: from_district + to_district + cities (most specific)
+      // Strategy I1: from_district + to_district + cities (most specific). Case-insensitive match.
       if (pickupDistrict && dropoffDistrict) {
         intercityPrices = await queryTable("intercity_prices", {
-          from_city: `eq.${fromCity}`,
-          to_city: `eq.${toCity}`,
-          from_district: `eq.${pickupDistrict}`,
-          to_district: `eq.${dropoffDistrict}`,
+          from_city: `ilike.${fromCity}`,
+          to_city: `ilike.${toCity}`,
+          from_district: `ilike.${pickupDistrict}`,
+          to_district: `ilike.${dropoffDistrict}`,
         });
 
         // Also try reverse direction
         if (intercityPrices.length === 0) {
           intercityPrices = await queryTable("intercity_prices", {
-            from_city: `eq.${toCity}`,
-            to_city: `eq.${fromCity}`,
-            from_district: `eq.${dropoffDistrict}`,
-            to_district: `eq.${pickupDistrict}`,
+            from_city: `ilike.${toCity}`,
+            to_city: `ilike.${fromCity}`,
+            from_district: `ilike.${dropoffDistrict}`,
+            to_district: `ilike.${pickupDistrict}`,
           });
         }
       }
@@ -239,33 +301,36 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // Strategy I2: from_district only + cities
       if (intercityPrices.length === 0 && pickupDistrict) {
         intercityPrices = await queryTable("intercity_prices", {
-          from_city: `eq.${fromCity}`,
-          to_city: `eq.${toCity}`,
-          from_district: `eq.${pickupDistrict}`,
+          from_city: `ilike.${fromCity}`,
+          to_city: `ilike.${toCity}`,
+          from_district: `ilike.${pickupDistrict}`,
         });
       }
 
       // Strategy I3: to_district only + cities
       if (intercityPrices.length === 0 && dropoffDistrict) {
         intercityPrices = await queryTable("intercity_prices", {
-          from_city: `eq.${fromCity}`,
-          to_city: `eq.${toCity}`,
-          to_district: `eq.${dropoffDistrict}`,
+          from_city: `ilike.${fromCity}`,
+          to_city: `ilike.${toCity}`,
+          to_district: `ilike.${dropoffDistrict}`,
         });
       }
 
-      // Strategy I4: cities only (broadest)
-      if (intercityPrices.length === 0 && fromCity && toCity) {
+      // Strategy I4: cities only (broadest) - SKIP when we have district-level intent but no match
+      // Admin Price Priority: if user searched "Alanya" -> "Kaş", don't fall back to generic Antalya->Antalya
+      // Distance fallback (Google Maps per-km) should only apply when NO admin match
+      const hasGranularIntent = pickupDistrict && dropoffDistrict;
+      if (intercityPrices.length === 0 && fromCity && toCity && !hasGranularIntent) {
         intercityPrices = await queryTable("intercity_prices", {
-          from_city: `eq.${fromCity}`,
-          to_city: `eq.${toCity}`,
+          from_city: `ilike.${fromCity}`,
+          to_city: `ilike.${toCity}`,
         });
 
         // Also try reverse
         if (intercityPrices.length === 0 && fromCity !== toCity) {
           intercityPrices = await queryTable("intercity_prices", {
-            from_city: `eq.${toCity}`,
-            to_city: `eq.${fromCity}`,
+            from_city: `ilike.${toCity}`,
+            to_city: `ilike.${fromCity}`,
           });
         }
       }
@@ -273,15 +338,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (intercityPrices.length > 0) usedIntercity = true;
     }
 
+    // Apply strict monthly/seasonal filter: use price for pickup_date only
+    if (usedIntercity && pickupDateStr) {
+      intercityPrices = applySeasonalFilter(intercityPrices, pickupDateStr);
+    }
+
     // ---- REGION PRICES MATCHING (airport transfers + fallback) ----
     let regionPrices: any[] = [];
 
     if (!usedIntercity) {
-      // Strategy R1: District + City + Airport (most specific)
+      // Strategy R1: District + City + Airport (most specific). Case-insensitive for district/city.
       if (district && city && airport) {
         regionPrices = await queryTable("region_prices", {
-          district: `eq.${district}`,
-          city: `eq.${city}`,
+          district: `ilike.${district}`,
+          city: `ilike.${city}`,
           airport: `eq.${airport}`,
         });
       }
@@ -289,15 +359,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // Strategy R2: District + City (no airport filter)
       if (regionPrices.length === 0 && district && city) {
         regionPrices = await queryTable("region_prices", {
-          district: `eq.${district}`,
-          city: `eq.${city}`,
+          district: `ilike.${district}`,
+          city: `ilike.${city}`,
         });
       }
 
       // Strategy R3: City + Airport (no district)
       if (regionPrices.length === 0 && city && airport) {
         regionPrices = await queryTable("region_prices", {
-          city: `eq.${city}`,
+          city: `ilike.${city}`,
           airport: `eq.${airport}`,
         });
       }
@@ -305,7 +375,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // Strategy R4: City only
       if (regionPrices.length === 0 && city) {
         regionPrices = await queryTable("region_prices", {
-          city: `eq.${city}`,
+          city: `ilike.${city}`,
         });
       }
 
@@ -317,7 +387,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
 
-    // Use whichever source found prices
+    // Apply strict monthly/seasonal filter for region prices
+    if (!usedIntercity && pickupDateStr && regionPrices.length > 0) {
+      regionPrices = applySeasonalFilter(regionPrices, pickupDateStr);
+    }
+
+    // Use whichever source found prices (validation: specific route+month price is used, no generic override)
     const matchedPrices = usedIntercity ? intercityPrices : regionPrices;
 
     // Build prices - match DB prices to frontend vehicle types using aliases

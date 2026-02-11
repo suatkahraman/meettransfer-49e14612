@@ -264,6 +264,7 @@ const CustomerHome = () => {
             pickup: formData.pickup,
             dropoff: formData.dropoff,
             customerCurrency: selectedCurrency,
+            pickup_date: formData.date || undefined,
           },
         });
 

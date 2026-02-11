@@ -1061,7 +1061,7 @@ export const blogTranslations: Record<Language, Record<string, string>> = {
     blogFethiyeFaq3Q: "Can I book a transfer to Ölüdeniz from Dalaman?",
     blogFethiyeFaq3A: "Yes, we offer direct transfers to Ölüdeniz, Hisarönü, and all surrounding areas. The journey takes about 60-70 minutes.",
     blogFethiyeFaq4Q: "What vehicles are available for Fethiye transfers?",
-    blogFethiyeFaq4A: "We offer Mercedes Vito (up to 6 passengers), Mercedes Vito VIP, and Mercedes Sprinter (up to 16 passengers) for larger groups.",
+    blogFethiyeFaq4A: "We offer Mercedes Vito (up to 6 passengers), Mercedes Vito VIP, and Mercedes Sprinter (up to 20 passengers) for larger groups.",
     blogFethiyeFaq5Q: "Do you offer transfers to Göcek marina?",
     blogFethiyeFaq5A: "Yes, Göcek is only 25km from Dalaman Airport, making it one of our quickest transfers at just 25-30 minutes.",
     blogFethiyeFaq6Q: "Can I book a return transfer from Fethiye to Dalaman?",

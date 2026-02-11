@@ -133,14 +133,7 @@ const PasswordStrengthIndicator = ({ password }: { password: string }) => {
 };
 
 const Auth = () => {
-  // Strict recovery detection from URL – no redirect to dashboard when true (checked on every render)
-  const isRecovery =
-    (typeof window !== 'undefined' &&
-      (window.location.hash.includes('type=recovery') || window.location.search.includes('type=recovery'))) ||
-    false;
-  if (typeof window !== 'undefined') {
-    console.log('[Auth] isRecovery:', isRecovery, { hash: window.location.hash?.slice(0, 80), search: window.location.search });
-  }
+  const isResetting = typeof window !== 'undefined' && window.location.href.includes('type=recovery');
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -152,7 +145,7 @@ const Auth = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRecoverySession, setIsRecoverySession] = useState(false);
   const [recoveryChecked, setRecoveryChecked] = useState(false);
-  const { signIn, signUp, user, session, loading: authLoading } = useAuth();
+  const { signIn, signUp, user, session, loading: authLoading, signOut } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -166,6 +159,14 @@ const Auth = () => {
     const fromHash = hash.includes('type=recovery') || hash.includes('recovery');
     return fromSearch || fromHash;
   }, [location.search, location.hash]);
+
+  useEffect(() => {
+    if (isResetting) {
+      setViewMode('update_password');
+      setIsRecoverySession(true);
+      setRecoveryChecked(true);
+    }
+  }, [isResetting]);
 
   // Check for password recovery in URL and auth state
   useEffect(() => {
@@ -304,21 +305,10 @@ const Auth = () => {
     };
   }, []);
 
-  // When URL indicates recovery, force update_password view and never redirect to dashboard
+  // Role-based redirect – isResetting true ise ASLA yönlendirme yapma (Maps/customer vb.)
   useEffect(() => {
-    if (isRecovery) {
-      setViewMode('update_password');
-      setIsRecoverySession(true);
-    }
-  }, [isRecovery]);
+    if (isResetting) return;
 
-  // Role-based redirect after login – STRICT: if isRecovery, NEVER navigate to any dashboard
-  useEffect(() => {
-    if (isRecovery) {
-      return; // Must not call navigate() to any dashboard route under any circumstances
-    }
-
-    // Şifre sıfırlama koruması: type=recovery veya reset/update_password ekranındayken hiç yönlendirme yapma
     if (isRecoveryUrl || isRecoverySession || viewMode === 'reset' || viewMode === 'update_password') {
       return;
     }
@@ -358,7 +348,7 @@ const Auth = () => {
         navigate('/customer', { replace: true });
     }
   }, [
-    isRecovery,
+    isResetting,
     user,
     role,
     authLoading,
@@ -527,22 +517,15 @@ const Auth = () => {
       }
 
       console.log('Password updated successfully');
-      
-      // Show success state
-      setViewMode('reset-success');
-      setIsRecoverySession(false);
-      
-      // Clear URL params
+      toast.success('Şifre güncellendi. Yeni şifrenizle giriş yapabilirsiniz.');
+
+      await signOut();
       window.history.replaceState(null, '', '/auth');
-      
-      toast.success('Password updated successfully!');
-      
-      // Redirect to login after delay
-      setTimeout(() => {
-        setViewMode('auth');
-        setNewPassword('');
-        setConfirmPassword('');
-      }, 3000);
+      navigate('/auth', { replace: true });
+      setViewMode('auth');
+      setNewPassword('');
+      setConfirmPassword('');
+      setIsRecoverySession(false);
       
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -557,7 +540,7 @@ const Auth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [newPassword, confirmPassword]);
+  }, [newPassword, confirmPassword, signOut, navigate]);
 
   const passwordsMatch = useMemo(() => {
     return newPassword.length > 0 && confirmPassword.length > 0 && newPassword === confirmPassword;
@@ -567,8 +550,7 @@ const Auth = () => {
     return confirmPassword.length > 0 && newPassword !== confirmPassword;
   }, [newPassword, confirmPassword]);
 
-  // Loading state while checking recovery
-  if (!recoveryChecked) {
+  if (!recoveryChecked && !isResetting) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60">
         <Card className="w-full max-w-md">
@@ -580,7 +562,86 @@ const Auth = () => {
     );
   }
 
-  // Reset Error View
+  if (isResetting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <KeyRound className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl font-serif">Şifre Güncelleme</CardTitle>
+            <CardDescription>Yeni şifrenizi aşağıya girin</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password-reset">Yeni Şifre</Label>
+                <div className="relative">
+                  <Input
+                    id="new-password-reset"
+                    name="password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <PasswordStrengthIndicator password={newPassword} />
+                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password-reset">Şifre Tekrar</Label>
+                <div className="relative">
+                  <Input
+                    id="confirm-password-reset"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`pr-10 ${passwordsDontMatch ? 'border-destructive focus-visible:ring-destructive' : passwordsMatch ? 'border-green-500 focus-visible:ring-green-500' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
+              </div>
+              <Button type="submit" variant="accent" className="w-full" disabled={isLoading || !passwordsMatch}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Güncelleniyor...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    Kaydet
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (viewMode === 'reset-error') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">

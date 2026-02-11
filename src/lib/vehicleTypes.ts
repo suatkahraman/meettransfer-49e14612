@@ -259,8 +259,8 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       ja: 'Mercedes Sprinterまたは同等',
       pt: 'Mercedes Sprinter ou Similar',
     },
-    passengers: 16,
-    luggage: 16,
+    passengers: 20,
+    luggage: 20,
     description: 'Spacious VIP minibus perfect for large groups, corporate events, and airport transfers. Premium comfort with entertainment and ample luggage space.',
     descriptionTr: 'Büyük gruplar, kurumsal etkinlikler ve havalimanı transferleri için ideal geniş VIP minibüs. Eğlence sistemi ve bol bagaj alanı ile premium konfor.',
     features: [

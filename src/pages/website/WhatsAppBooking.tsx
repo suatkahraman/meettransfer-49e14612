@@ -137,8 +137,8 @@ const vehicleData = {
       { src: sprinterInteriorNeon, alt: "Mercedes Sprinter neon interior party atmosphere" },
       { src: sprinterAirportNight, alt: "Mercedes Sprinter night airport transfer service" },
     ],
-    passengers: 16,
-    luggage: 16,
+    passengers: 20,
+    luggage: 20,
   },
 };
 const vehicleTypes = Object.keys(vehicleData);
