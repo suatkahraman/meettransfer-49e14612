@@ -248,6 +248,8 @@ const BookingPage = () => {
   // Editable location state - initialized from URL/token data
   const [editablePickup, setEditablePickup] = useState("");
   const [editableDropoff, setEditableDropoff] = useState("");
+  const [pickupPlaceId, setPickupPlaceId] = useState<string | null>(null);
+  const [dropoffPlaceId, setDropoffPlaceId] = useState<string | null>(null);
   
   // Initialize editable locations from URL params on mount
   useEffect(() => {
@@ -277,20 +279,23 @@ const BookingPage = () => {
   const effectiveCity = tokenBookingData?.city || urlCity;
   const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
 
-  // Place selection handlers
+  // Place selection handlers - store address and Place ID for accurate price matching
   const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {
     if (details?.formattedAddress) {
       setEditablePickup(details.formattedAddress);
+      setPickupPlaceId(details.place_id || null);
     } else if (value) {
       setEditablePickup(value);
+      setPickupPlaceId(null);
     }
   }, []);
-  
   const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => {
     if (details?.formattedAddress) {
       setEditableDropoff(details.formattedAddress);
+      setDropoffPlaceId(details.place_id || null);
     } else if (value) {
       setEditableDropoff(value);
+      setDropoffPlaceId(null);
     }
   }, []);
 
@@ -603,8 +608,10 @@ const BookingPage = () => {
           body: {
             pickup: effectivePickup,
             dropoff: effectiveDropoff,
+            pickup_place_id: pickupPlaceId || undefined,
+            dropoff_place_id: dropoffPlaceId || undefined,
             customerCurrency: preferredCurrency,
-            pickupDate: effectiveDate || undefined,
+            pickup_date: effectiveDate || undefined,
           },
         });
 
@@ -639,7 +646,7 @@ const BookingPage = () => {
     fetchPrices();
     
     return () => { cancelled = true; };
-  }, [effectivePickup, effectiveDropoff, effectiveDate, preferredCurrency, isHourlyBooking]);
+  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, effectiveDate, preferredCurrency, isHourlyBooking]);
 
   // Extract city from address for hourly pricing
   const extractCityFromAddress = (address: string): string | null => {
@@ -1956,6 +1963,8 @@ const BookingPage = () => {
                               body: {
                                 pickup: effectivePickup,
                                 dropoff: effectiveDropoff,
+                                pickup_place_id: pickupPlaceId || undefined,
+                                dropoff_place_id: dropoffPlaceId || undefined,
                                 customerCurrency: currency.value,
                                 pickup_date: effectiveDate || undefined,
                               },

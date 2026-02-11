@@ -114,7 +114,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     const body = await req.json();
-    const { pickup, dropoff, customerCurrency } = body;
+    const { pickup, dropoff, customerCurrency, pickup_place_id: pickupPlaceId, dropoff_place_id: dropoffPlaceId } = body;
     const pickupDateParam = body.pickup_date ?? body.pickupDate;
     const pickupSanitized = sanitizeSearchQuery(pickup || "");
     const dropoffSanitized = sanitizeSearchQuery(dropoff || "");
@@ -222,11 +222,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }), { headers: corsHeaders });
     }
 
-    // Helper to query any table with specific filters (includes valid_from, valid_to for seasonal)
-    async function queryTable(table: string, filters: Record<string, string>): Promise<any[]> {
+    // Helper to query any table with specific filters (includes valid_from, valid_to, place_ids for Place ID matching)
+    async function queryTable(table: string, filters: Record<string, string>, selectExtra = ""): Promise<any[]> {
+      const baseSelect = "vehicle_type,price,price_currency,valid_from,valid_to" + selectExtra;
       const params = new URLSearchParams({
         is_active: "eq.true",
-        select: "vehicle_type,price,price_currency,valid_from,valid_to",
+        select: baseSelect,
         order: "updated_at.desc",
         ...filters,
       });
@@ -270,11 +271,42 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return Array.from(byVehicle.values());
     }
 
-    // ---- INTERCITY / INTRA-CITY PRICE MATCHING (no airport) ----
+    // ---- PLACE ID MATCHING (preferred when both IDs provided - Google Place from Autocomplete) ----
     let intercityPrices: any[] = [];
+    let regionPrices: any[] = [];
     let usedIntercity = false;
+    let usedPlaceId = false;
 
-    if (isIntercityTransfer && !airport) {
+    if (pickupPlaceId && dropoffPlaceId) {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/intercity_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&or=(and(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)}),and(pickup_place_id.eq.${encodeURIComponent(dropoffPlaceId)},dropoff_place_id.eq.${encodeURIComponent(pickupPlaceId)}))&order=updated_at.desc`,
+        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.length > 0) {
+          intercityPrices = data;
+          usedIntercity = true;
+          usedPlaceId = true;
+        }
+      }
+      if (!usedPlaceId) {
+        const res2 = await fetch(
+          `${SUPABASE_URL}/rest/v1/region_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&and=(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)})&order=updated_at.desc`,
+          { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+        );
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (data2?.length > 0) {
+            regionPrices = data2;
+            usedPlaceId = true;
+          }
+        }
+      }
+    }
+
+    // ---- INTERCITY / INTRA-CITY PRICE MATCHING (text-based, when no Place ID match) ----
+    if (!usedPlaceId && isIntercityTransfer && !airport) {
       const fromCity = pickupCity || city!;
       const toCity = dropoffCity || city!;
 
@@ -338,15 +370,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (intercityPrices.length > 0) usedIntercity = true;
     }
 
-    // Apply strict monthly/seasonal filter: use price for pickup_date only
+    // IMPORTANT: When intercity intent (different districts, e.g. Alanya->Kas) but NO intercity match,
+    // do NOT fall back to region_prices - that would wrongly use airport->district price (e.g. 111€) for a long route.
+    const hasGranularIntercityIntent = pickupDistrict && dropoffDistrict && !airport;
+    const skipRegionFallback = hasGranularIntercityIntent && usedIntercity === false && intercityPrices.length === 0;
+
+    // Apply strict monthly/seasonal filter: use price for pickup_date only (Place ID + text results)
     if (usedIntercity && pickupDateStr) {
       intercityPrices = applySeasonalFilter(intercityPrices, pickupDateStr);
     }
 
-    // ---- REGION PRICES MATCHING (airport transfers + fallback) ----
-    let regionPrices: any[] = [];
-
-    if (!usedIntercity) {
+    // ---- REGION PRICES MATCHING (airport transfers + fallback, skip when wrong intercity fallback) ----
+    if (!usedPlaceId && !usedIntercity && !skipRegionFallback) {
       // Strategy R1: District + City + Airport (most specific). Case-insensitive for district/city.
       if (district && city && airport) {
         regionPrices = await queryTable("region_prices", {

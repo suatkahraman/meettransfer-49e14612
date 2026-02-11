@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "migrate:place-ids": "tsx scripts/migrate-place-ids.ts",
+    "migrate:place-ids": "node --env-file=.env ./node_modules/tsx/dist/cli.mjs scripts/migrate-place-ids.ts",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

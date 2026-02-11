@@ -142,6 +142,7 @@ export interface PlaceDetails {
   displayText: string;
   lat: number | null;
   lng: number | null;
+  place_id?: string;
 }
 
 export interface LazyGooglePlacesAutocompleteProps {
@@ -499,6 +500,7 @@ export const LazyGooglePlacesAutocomplete = memo(({
             displayText,
             lat,
             lng,
+            place_id: place.place_id || undefined,
           };
 
           input.value = placeName || formattedAddress;
@@ -574,19 +576,18 @@ export const LazyGooglePlacesAutocomplete = memo(({
               if (status === 'OK' && results[0]) {
                 const place = results[0];
                 const formattedAddress = place.formatted_address || '';
-                
-                // Update input value
+                const placeId = (place as any).place_id;
                 if (inputRef.current) {
                   inputRef.current.value = formattedAddress;
                   setHasValue(true);
                 }
-
                 const details: PlaceDetails = {
                   placeName: '',
                   formattedAddress,
                   displayText: formattedAddress,
                   lat: latitude,
                   lng: longitude,
+                  place_id: placeId,
                 };
 
                 onPlaceSelectedRef.current?.(formattedAddress, details);
