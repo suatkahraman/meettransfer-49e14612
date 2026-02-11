@@ -45,16 +45,37 @@ serve(async (req) => {
       );
     }
 
+    // sautkahraman@gmail.com sadece admin - diger roller yok sayilir
+    const ADMIN_EMAIL = "sautkahraman@gmail.com";
+    if (user.email === ADMIN_EMAIL) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          role: "admin",
+          driverId: null,
+          agencyId: null,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+      );
+    }
+
     // Service role ile user_roles - RLS bypass
-    let { data: roleData } = await supabaseAdmin
+    // Coklu rol durumunda maybeSingle hata verir - tum roller al, oncelige gore sec
+    const { data: rolesData } = await supabaseAdmin
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
-      .maybeSingle();
+      .eq("user_id", user.id);
+    const roles = (rolesData || []).map((r) => r.role as AppRole);
+    const roleFromUserRoles =
+      roles.includes("admin") ? "admin" as AppRole :
+      roles.includes("driver") ? "driver" as AppRole :
+      roles.includes("agency") ? "agency" as AppRole :
+      roles.includes("customer") ? "customer" as AppRole :
+      null;
 
-    // user_roles boşsa drivers/agencies tablosundan rol çöz (kayıt uyumsuzluğu fallback)
-    let role: AppRole = (roleData?.role as AppRole) || "customer";
-    if (!roleData?.role) {
+    // user_roles boşsa veya hataliysa drivers/agencies tablosundan rol çöz (kayıt uyumsuzluğu fallback)
+    let role: AppRole = roleFromUserRoles || "customer";
+    if (!roleFromUserRoles) {
       const { data: driverRow } = await supabaseAdmin
         .from("drivers")
         .select("id")
@@ -62,7 +83,6 @@ serve(async (req) => {
         .maybeSingle();
       if (driverRow?.id) {
         role = "driver";
-        roleData = { role: "driver" };
       } else {
         const { data: agencyRow } = await supabaseAdmin
           .from("agencies")
@@ -71,7 +91,6 @@ serve(async (req) => {
           .maybeSingle();
         if (agencyRow?.id) {
           role = "agency";
-          roleData = { role: "agency" };
         }
       }
     }

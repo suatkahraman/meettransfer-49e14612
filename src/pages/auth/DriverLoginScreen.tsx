@@ -211,17 +211,21 @@ const DriverLoginScreen = () => {
           toast.error(error.message || t('loginFailed') || 'Login failed');
         }
       } else if (authData?.user) {
-        // Check user role
-        const { data: roleData } = await supabase
+        // Rol kontrolu: user_roles (coklu rol olabilir) veya drivers tablosu fallback
+        const { data: rolesData } = await supabase
           .from('user_roles')
           .select('role')
+          .eq('user_id', authData.user.id);
+        const roles = (rolesData || []).map((r) => r.role);
+        const hasDriverRole = roles.includes('driver');
+        const { data: driverRow } = await supabase
+          .from('drivers')
+          .select('id')
           .eq('user_id', authData.user.id)
-          .single();
+          .maybeSingle();
+        const isDriver = hasDriverRole || !!driverRow?.id;
         
-        const userRole = roleData?.role || 'driver';
-        
-        // Verify this is actually a driver account
-        if (userRole !== 'driver') {
+        if (!isDriver) {
           toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil' : 'This is not a driver account');
           await supabase.auth.signOut();
           setIsLoading(false);
@@ -229,7 +233,7 @@ const DriverLoginScreen = () => {
         }
         
         // Şoförler için 2FA yok - doğrudan giriş
-        await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
+        await logLoginAttempt(validation.email, true, undefined, undefined, 'driver');
         // Sayfa yenilemesi ile panele git - AuthContext/useUserRole senkronizasyon sorununu kesin çözer
         window.location.replace('/driver');
         return;
