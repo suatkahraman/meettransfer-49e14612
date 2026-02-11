@@ -11,7 +11,7 @@ import meetTransferLogo from "@/assets/meet-transfer-logo-new.png";
 const WebsiteHeader = () => {
   const { t, getLocalizedPath } = useLanguage();
   const { user, signOut } = useAuth();
-  const { role: userRole } = useUserRole();
+  const { role: userRole, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
@@ -72,6 +72,18 @@ const WebsiteHeader = () => {
     if (userRole === 'driver') return '/driver';
     if (userRole === 'agency') return '/agency';
     return '/customer';
+  };
+
+  const handleMyAccountClick = () => {
+    if (roleLoading) return;
+    const path = getAccountPath();
+    if (!path) return;
+    // Full reload for role dashboards - ensures AuthContext/useUserRole sync (fixes driver panel access)
+    if (['/driver', '/admin', '/agency'].includes(path)) {
+      window.location.href = path;
+      return;
+    }
+    navigate(path);
   };
 
   return (
@@ -138,16 +150,16 @@ const WebsiteHeader = () => {
           <div className="hidden sm:flex items-center gap-2">
             {user ? (
               <>
-                <Link to={getAccountPath()}>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-white/80 hover:text-white hover:bg-white/10"
-                  >
-                    <User className="h-4 w-4 mr-1.5" />
-                    {t("myAccount") || "My Account"}
-                  </Button>
-                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-white/80 hover:text-white hover:bg-white/10"
+                  onClick={handleMyAccountClick}
+                  disabled={roleLoading}
+                >
+                  <User className="h-4 w-4 mr-1.5" />
+                  {roleLoading ? (t("loading") || "Loading...") : (t("myAccount") || "My Account")}
+                </Button>
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -245,14 +257,17 @@ const WebsiteHeader = () => {
               <div className="pt-3 mt-2 border-t border-white/10">
                 {user ? (
                   <>
-                    <Link
-                      to={getAccountPath()}
-                      className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleMyAccountClick();
+                      }}
+                      disabled={roleLoading}
+                      className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors w-full text-left disabled:opacity-50"
                     >
                       <User className="h-5 w-5" />
-                      <span className="font-medium">{t("myAccount") || "My Account"}</span>
-                    </Link>
+                      <span className="font-medium">{roleLoading ? (t("loading") || "Loading...") : (t("myAccount") || "My Account")}</span>
+                    </button>
                     <button
                       onClick={handleSignOut}
                       className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors w-full text-left"
