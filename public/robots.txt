@@ -34,11 +34,25 @@ Disallow: /*?session=
 # ===========================================
 # AI Bots - Full access for AI search engines
 # ===========================================
+# Özel İzin (Allow): GPTBot, ChatGPT-User, PerplexityBot – sitemiz indekslenebilir.
+# Ana dil Türkçe; küresel transfer hizmeti (Türkiye, Dubai, Kıbrıs, İsviçre, Almanya, dünya geneli).
 
-# OpenAI / ChatGPT
+# OpenAI / ChatGPT – Explicit Allow (İzin Ver)
 User-agent: GPTBot
 Allow: /
 Allow: /llms.txt
+Allow: /tr
+Allow: /tr/
+Allow: /destinations
+Allow: /istanbul-airport-transfer
+Allow: /antalya-airport-transfer
+Allow: /bodrum-airport-transfer
+Allow: /dubai-transfer
+Allow: /cyprus-transfer
+Allow: /fleet
+Allow: /about
+Allow: /contact
+Allow: /blog
 Disallow: /admin
 Disallow: /driver
 Disallow: /customer
@@ -53,6 +67,18 @@ Disallow: /*?session=
 User-agent: ChatGPT-User
 Allow: /
 Allow: /llms.txt
+Allow: /tr
+Allow: /tr/
+Allow: /destinations
+Allow: /istanbul-airport-transfer
+Allow: /antalya-airport-transfer
+Allow: /bodrum-airport-transfer
+Allow: /dubai-transfer
+Allow: /cyprus-transfer
+Allow: /fleet
+Allow: /about
+Allow: /contact
+Allow: /blog
 Disallow: /admin
 Disallow: /driver
 Disallow: /customer
@@ -60,10 +86,22 @@ Disallow: /agency
 Disallow: /auth
 Disallow: /api/
 
-# Perplexity
+# Perplexity – Explicit Allow (İzin Ver)
 User-agent: PerplexityBot
 Allow: /
 Allow: /llms.txt
+Allow: /tr
+Allow: /tr/
+Allow: /destinations
+Allow: /istanbul-airport-transfer
+Allow: /antalya-airport-transfer
+Allow: /bodrum-airport-transfer
+Allow: /dubai-transfer
+Allow: /cyprus-transfer
+Allow: /fleet
+Allow: /about
+Allow: /contact
+Allow: /blog
 Disallow: /admin
 Disallow: /driver
 Disallow: /customer
