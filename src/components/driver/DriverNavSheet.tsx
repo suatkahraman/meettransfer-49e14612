@@ -2,7 +2,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import {
-  SheetContent,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
@@ -24,7 +23,6 @@ import {
 import { cn } from '@/lib/utils';
 
 interface DriverNavSheetProps {
-  open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenSearch?: () => void;
   onOpenNotificationSettings?: () => void;
@@ -40,7 +38,6 @@ const navItems = [
 ];
 
 export const DriverNavSheet = ({
-  open,
   onOpenChange,
   onOpenSearch,
   onOpenNotificationSettings,
@@ -62,10 +59,7 @@ export const DriverNavSheet = ({
   };
 
   return (
-    <SheetContent
-      side="left"
-      className="w-[280px] sm:w-[300px] p-0 flex flex-col border-r"
-    >
+    <>
       <SheetHeader className="p-4 border-b text-left">
         <SheetTitle className="text-lg font-serif">{t('driverPanel')}</SheetTitle>
       </SheetHeader>
@@ -150,6 +144,6 @@ export const DriverNavSheet = ({
           </button>
         </div>
       </nav>
-    </SheetContent>
+    </>
   );
 };

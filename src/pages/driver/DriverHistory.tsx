@@ -57,7 +57,8 @@ const paymentTypeLabels: Record<string, string> = {
 const DriverHistory = () => {
   const navigate = useNavigate();
   const { driverId } = useUserRole();
-  const { setHeaderRight } = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
+  const context = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
+  const setHeaderRight = context?.setHeaderRight ?? (() => {});
   const { t, getPaymentTypeLabel } = useDriverTranslations();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);

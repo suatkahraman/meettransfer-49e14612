@@ -131,13 +131,14 @@ export const DriverLayout = () => {
 
       {/* Hamburger Menu */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <DriverNavSheet
-          open={menuOpen}
-          onOpenChange={setMenuOpen}
-          onOpenSearch={() => setUtilityPanel('search')}
-          onOpenNotificationSettings={() => setUtilityPanel('notification')}
-          onOpenDriverInfo={() => setUtilityPanel('driverinfo')}
-        />
+        <SheetContent side="left" className="w-[280px] sm:w-[300px] p-0 flex flex-col border-r">
+          <DriverNavSheet
+            onOpenChange={setMenuOpen}
+            onOpenSearch={() => setUtilityPanel('search')}
+            onOpenNotificationSettings={() => setUtilityPanel('notification')}
+            onOpenDriverInfo={() => setUtilityPanel('driverinfo')}
+          />
+        </SheetContent>
       </Sheet>
 
       {/* Utility Panels (Search, Notification Settings, Driver Info) */}

@@ -51,7 +51,8 @@ const DriverJobList = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { driverId } = useUserRole();
-  const { setHeaderRight } = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
+  const context = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
+  const setHeaderRight = context?.setHeaderRight ?? (() => {});
   const { t } = useDriverTranslations();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});

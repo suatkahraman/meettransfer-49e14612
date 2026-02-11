@@ -87,7 +87,8 @@ const DriverJobDetails = () => {
   const { user } = useAuth();
   const { driverId } = useUserRole();
   const navigate = useNavigate();
-  const { setHeaderRight } = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
+  const context = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
+  const setHeaderRight = context?.setHeaderRight ?? (() => {});
   const { emailAdminTripCompleted } = useEmailNotifications();
   const { t, getPaymentTypeLabel } = useDriverTranslations();
   const [reservation, setReservation] = useState<Reservation | null>(null);

@@ -58,7 +58,8 @@ const DriverHome = () => {
   const { driverId } = useUserRole();
   const navigate = useNavigate();
   const { t } = useDriverTranslations();
-  const { setHeaderExtras } = useOutletContext<DriverHomeContext>();
+  const context = useOutletContext<DriverHomeContext>();
+  const setHeaderExtras = context?.setHeaderExtras ?? (() => {});
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);

@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { initWebVitals } from "@/utils/webVitals";
+import { runVersionCheck } from "@/lib/versionCheck";
 
 // Load CSS synchronously - critical for preventing FOUC (Flash of Unstyled Content)
 // This ensures styles are applied before React renders
@@ -22,24 +23,24 @@ if (import.meta.env.DEV) {
   setTimeout(startWebVitals, 2500);
 }
 
-// Signal mounting BEFORE render starts (boot watchdog safety)
-try {
-  console.log("[Boot] Starting React render");
-} catch {
-  // ignore
+async function boot() {
+  const proceed = await runVersionCheck();
+  if (!proceed) return;
+  try {
+    console.log("[Boot] Starting React render");
+  } catch {
+    /* ignore */
+  }
+  createRoot(document.getElementById("root")!).render(<App />);
+  try {
+    (window as any).__APP_MOUNTED__ = true;
+    window.dispatchEvent(new Event("lovable:app-mounted"));
+    console.log("[Boot] React app mounted successfully");
+  } catch {
+    /* ignore */
+  }
 }
-
-createRoot(document.getElementById("root")!).render(<App />);
-
-// Signal that the React app has mounted (used by index.html boot recovery watchdog)
-try {
-  (window as any).__APP_MOUNTED__ = true;
-  // Also emit an event so the watchdog UI can dismiss itself if it already showed.
-  window.dispatchEvent(new Event("lovable:app-mounted"));
-  console.log("[Boot] React app mounted successfully");
-} catch {
-  // ignore
-}
+boot();
 
 // PWA service worker is registered by the app (prompt mode) and will
 // show an in-app "Yeni Sürüm Hazır" banner when an update is available.

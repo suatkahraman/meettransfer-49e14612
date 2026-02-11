@@ -1,5 +1,5 @@
 import { Component, ReactNode } from "react";
-import { RefreshCw, AlertTriangle, Wifi } from "lucide-react";
+import { RefreshCw, AlertTriangle, Wifi, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -199,25 +199,38 @@ class ChunkErrorBoundary extends Component<Props, State> {
               </p>
             </div>
 
-            {/* Refresh Button */}
-            <Button
-              onClick={this.handleManualRefresh}
-              disabled={this.state.isRefreshing}
-              className="w-full h-12 text-base gap-2"
-              size="lg"
-            >
-              {this.state.isRefreshing ? (
-                <>
-                  <RefreshCw className="h-5 w-5 animate-spin" />
-                  Yenileniyor...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-5 w-5" />
-                  Sayfayı Yenile
-                </>
-              )}
-            </Button>
+            {/* Actions */}
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={this.handleManualRefresh}
+                disabled={this.state.isRefreshing}
+                className="w-full h-12 text-base gap-2"
+                size="lg"
+              >
+                {this.state.isRefreshing ? (
+                  <>
+                    <RefreshCw className="h-5 w-5 animate-spin" />
+                    Yenileniyor...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-5 w-5" />
+                    Sayfayı Yenile
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                asChild
+                className="w-full h-12 text-base gap-2"
+                size="lg"
+              >
+                <a href="/auth">
+                  <Home className="h-5 w-5" />
+                  Giriş Sayfasına Dön
+                </a>
+              </Button>
+            </div>
 
           </div>
         </div>
