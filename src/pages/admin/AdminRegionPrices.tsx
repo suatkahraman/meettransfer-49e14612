@@ -28,6 +28,19 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays } from 'lucide-react';
+
+function priceCoversMonth(price: { valid_from?: string | null; valid_to?: string | null }, month: number, year: number): boolean {
+  if (!price.valid_from || !price.valid_to) return true;
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+  try {
+    const from = new Date(price.valid_from);
+    const to = new Date(price.valid_to);
+    return from <= lastDay && to >= firstDay;
+  } catch {
+    return false;
+  }
+}
 import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
 import MonthlyPriceUpdateDialog from "@/components/admin/MonthlyPriceUpdateDialog";
 import SeasonalPricesManager from "@/components/admin/SeasonalPricesManager";
@@ -161,6 +174,7 @@ const AdminRegionPrices = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCity, setFilterCity] = useState<string>('all');
   const [filterMonth, setFilterMonth] = useState<string>('all');
+  const [filterYear] = useState<number>(() => new Date().getFullYear());
   const [filterPriceType, setFilterPriceType] = useState<'all' | 'base' | 'seasonal'>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
@@ -567,15 +581,16 @@ const AdminRegionPrices = () => {
     
     const matchesCity = filterCity === 'all' || price.city === filterCity;
     
-    // Filter by price type (base or seasonal)
     const isSeasonalPrice = price.valid_from && price.valid_to;
+    // Seçilen ay varsa temel fiyatları her zaman göster; böylece fiyat olmayan aylarda da temel listelenir
     const matchesPriceType = filterPriceType === 'all' || 
       (filterPriceType === 'base' && !isSeasonalPrice) ||
-      (filterPriceType === 'seasonal' && isSeasonalPrice);
+      (filterPriceType === 'seasonal' && isSeasonalPrice) ||
+      (filterMonth !== 'all' && !isSeasonalPrice);
     
-    // Filter by month
-    const matchesMonth = filterMonth === 'all' || 
-      (isSeasonalPrice && getMonthFromDate(price.valid_from) === parseInt(filterMonth));
+    // Ay: seçilen ayı kapsayan sezonluk fiyatlar (valid_from..valid_to aralığı) veya temel fiyatlar (hepsi)
+    const monthNum = filterMonth === 'all' ? 0 : parseInt(filterMonth, 10);
+    const matchesMonth = filterMonth === 'all' || priceCoversMonth(price, monthNum, filterYear);
     
     return matchesSearch && matchesCity && matchesPriceType && matchesMonth;
   });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
-import { ArrowLeft, Loader2, Car, KeyRound } from 'lucide-react';
+import { ArrowLeft, Loader2, Car, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
 import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
@@ -23,13 +23,24 @@ const loginSchema = z.object({
   password: z.string().min(6).max(100),
 });
 
-type ViewMode = 'login' | 'reset' | '2fa';
+// Same strength as LoginScreen to avoid Supabase "weak/pwned" rejections
+const newPasswordSchema = z.object({
+  password: z.string().min(6, 'En az 6 karakter').max(100),
+  confirmPassword: z.string().min(6, 'En az 6 karakter').max(100),
+}).refine((d) => d.password === d.confirmPassword, { message: 'Şifreler eşleşmiyor', path: ['confirmPassword'] });
+
+type ViewMode = 'login' | 'reset' | '2fa' | 'set-password';
 
 const DriverLoginScreen = () => {
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [resetEmail, setResetEmail] = useState('');
+  const [newPasswordValue, setNewPasswordValue] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [recoveryChecked, setRecoveryChecked] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => {
     return safeLocalGet('driverRememberMe') === 'true';
   });
@@ -39,7 +50,7 @@ const DriverLoginScreen = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [lockoutCountdown, setLockoutCountdown] = useState<number | null>(null);
   const [pendingRole, setPendingRole] = useState<string | null>(null);
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { t, language } = useLanguage();
   const { rateLimitStatus, checkRateLimit, logLoginAttempt, formatLockoutTime } = useLoginRateLimit();
@@ -73,11 +84,9 @@ const DriverLoginScreen = () => {
     }
   }, [rateLimitStatus.locked, rateLimitStatus.remainingSeconds]);
 
-  // Role-based redirect after login (only if not pending 2FA)
+  // Role-based redirect after login (only if not pending 2FA or set-password recovery)
   useEffect(() => {
-    // During an active login attempt we must not auto-redirect, otherwise we can race
-    // the 2FA flow and never show the OTP entry screen.
-    if (!isLoading && user && !roleLoading && role && viewMode !== '2fa') {
+    if (!isLoading && user && !roleLoading && role && viewMode !== '2fa' && viewMode !== 'set-password') {
       switch (role) {
         case 'admin':
           navigate('/admin', { replace: true });
@@ -93,6 +102,62 @@ const DriverLoginScreen = () => {
       }
     }
   }, [isLoading, user, role, roleLoading, navigate, viewMode]);
+
+  // Handle recovery link: token_hash or code → verify session → show set-password form
+  useEffect(() => {
+    const type = searchParams.get('type');
+    if (type !== 'recovery' || recoveryChecked) return;
+
+    const run = async () => {
+      const url = new URL(window.location.href);
+      const hashParams = new URLSearchParams((url.hash || '').replace(/^#/, ''));
+      const tokenHash = searchParams.get('token_hash') || hashParams.get('token_hash') || hashParams.get('token');
+      const code = searchParams.get('code') || hashParams.get('code');
+      const hasAccessToken = hashParams.get('access_token');
+
+      if (tokenHash) {
+        const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' });
+        if (error) {
+          toast.error(language === 'TR' ? 'Bağlantı süresi dolmuş veya geçersiz. Yeni bir şifre sıfırlama bağlantısı isteyin.' : 'Recovery link expired or invalid. Request a new one.');
+          window.history.replaceState(null, '', '/login/driver');
+          setRecoveryChecked(true);
+          return;
+        }
+        if (data?.session) {
+          window.history.replaceState(null, '', '/login/driver?type=recovery');
+          setViewMode('set-password');
+        }
+        setRecoveryChecked(true);
+        return;
+      }
+
+      if (code) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          toast.error(language === 'TR' ? 'Bağlantı süresi dolmuş veya geçersiz.' : 'Recovery link expired or invalid.');
+          window.history.replaceState(null, '', '/login/driver');
+          setRecoveryChecked(true);
+          return;
+        }
+        if (data?.session) {
+          window.history.replaceState(null, '', '/login/driver?type=recovery');
+          setViewMode('set-password');
+        }
+        setRecoveryChecked(true);
+        return;
+      }
+
+      if (hasAccessToken) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          window.history.replaceState(null, '', '/login/driver?type=recovery');
+          setViewMode('set-password');
+        }
+      }
+      setRecoveryChecked(true);
+    };
+    run();
+  }, [searchParams, language, recoveryChecked]);
 
   // Handle 2FA verification success
   const handle2FAVerify = async (code: string, rememberDevice: boolean = false) => {
@@ -163,8 +228,8 @@ const DriverLoginScreen = () => {
     await supabase.auth.signOut();
   };
 
-  // If already logged in, show loading
-  if (authLoading || (user && roleLoading && viewMode !== '2fa')) {
+  // If already logged in, show loading (skip when in recovery set-password flow)
+  if (authLoading || (user && roleLoading && viewMode !== '2fa' && viewMode !== 'set-password')) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
         <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -325,7 +390,7 @@ const DriverLoginScreen = () => {
       const { error, data } = await supabase.functions.invoke('send-password-reset', {
         body: {
           email: resetEmail.trim(),
-          redirect_url: `${window.location.origin}/login?type=recovery`,
+          redirect_url: `${window.location.origin}/login/driver?type=recovery`,
           language,
         },
       });
@@ -363,6 +428,121 @@ const DriverLoginScreen = () => {
       setIsResetLoading(false);
     }
   };
+
+  const handleSetNewPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrors({});
+    setIsLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+    try {
+      const validation = newPasswordSchema.parse({ password, confirmPassword });
+      let { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession) {
+        toast.error(language === 'TR' ? 'Oturum bulunamadı. Yeni bir şifre sıfırlama bağlantısı isteyin.' : 'Session missing. Request a new reset link.');
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: validation.password });
+      if (error) {
+        if (error.message.toLowerCase().includes('weak') || error.message.toLowerCase().includes('easy to guess') || error.message.toLowerCase().includes('pwned')) {
+          toast.error(language === 'TR' ? 'Bu şifre veri ihlallerinde bulundu. Daha benzersiz bir şifre seçin (örn. özel karakterler ekleyin).' : 'This password was found in data breaches. Choose a more unique password.');
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
+      toast.success(language === 'TR' ? 'Şifre güncellendi. Giriş yapabilirsiniz.' : 'Password updated. You can sign in.');
+      await signOut();
+      window.history.replaceState(null, '', '/login/driver');
+      setNewPasswordValue('');
+      navigate('/login/driver', { replace: true });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        err.errors.forEach((er) => {
+          const p = er.path[0]?.toString();
+          if (p) fieldErrors[p] = er.message;
+        });
+        setErrors(fieldErrors);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Set new password (after clicking recovery link in email)
+  if (viewMode === 'set-password') {
+    return (
+      <div className="min-h-screen flex flex-col bg-secondary">
+        <header className="sticky top-0 z-50 bg-card border-b border-border safe-area-header">
+          <div className="flex items-center h-14 px-4">
+            <span className="text-sm text-muted-foreground">{t('resetPassword') || 'Şifre Sıfırla'}</span>
+          </div>
+        </header>
+        <div className="flex-1 flex items-center justify-center p-4 py-8">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center space-y-2">
+              <div className="mx-auto w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-2">
+                <KeyRound className="h-6 w-6 text-accent" />
+              </div>
+              <CardTitle className="text-2xl font-serif">
+                {language === 'TR' ? 'Yeni şifre belirleyin' : 'Set new password'}
+              </CardTitle>
+              <CardDescription>
+                {language === 'TR' ? 'Yeni şifrenizi girin ve kaydedin.' : 'Enter and save your new password.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSetNewPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">{t('newPassword') || 'Yeni şifre'}</Label>
+                  <div className="relative">
+                    <Input
+                      id="new-password"
+                      name="password"
+                      type={showNewPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      required
+                      className="h-12 pr-12"
+                      autoComplete="new-password"
+                      value={newPasswordValue}
+                      onChange={(e) => setNewPasswordValue(e.target.value)}
+                    />
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10" onClick={() => setShowNewPassword(!showNewPassword)}>
+                      {showNewPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
+                    </Button>
+                  </div>
+                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">{t('confirmPassword') || 'Şifre tekrar'}</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirm-password"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      required
+                      className="h-12 pr-12"
+                      autoComplete="new-password"
+                    />
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                      {showConfirmPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
+                    </Button>
+                  </div>
+                  {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
+                </div>
+                <Button type="submit" variant="accent" className="w-full h-12" disabled={isLoading}>
+                  {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{language === 'TR' ? 'Kaydediliyor...' : 'Saving...'}</> : (language === 'TR' ? 'Kaydet ve giriş yap' : 'Save and sign in')}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   // 2FA verification screen
   if (viewMode === '2fa') {

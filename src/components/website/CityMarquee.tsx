@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Plane, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, memo, useEffect } from "react";
+import { safeDestinationSlug } from "@/utils/slug";
 
 // City data with lazy-loaded image paths
 // Images are dynamically imported only when component mounts
@@ -152,11 +153,12 @@ const cities = [
 type CityType = typeof cities[0];
 
 const CityMarquee = () => {
-  const { language } = useLanguage();
+  const { language, getLocalizedPath } = useLanguage();
   const navigate = useNavigate();
 
   const handleCityClick = (city: CityType) => {
-    navigate(`/destinations/${city.name.toLowerCase()}`);
+    const slug = safeDestinationSlug(city.name);
+    if (slug) navigate(getLocalizedPath(`/destinations/${slug}`));
   };
 
   return (

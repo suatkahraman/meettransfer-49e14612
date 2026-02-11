@@ -1,6 +1,14 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/favicon.ico", "destination": "/favicon.ico" },
+    { "source": "/favicon.png", "destination": "/favicon.png" },
+    { "source": "/apple-touch-icon.png", "destination": "/apple-touch-icon.png" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/manifest.webmanifest", "destination": "/manifest.webmanifest" },
+    { "source": "/llms.txt", "destination": "/llms.txt" },
+    { "source": "/version.json", "destination": "/version.json" },
     {
       "source": "/login",
       "has": [

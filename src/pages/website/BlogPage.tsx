@@ -5,6 +5,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { Footer } from "@/components/Footer";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { safeBlogSlug } from "@/utils/slug";
 import { useBlogT } from "@/components/blog/BlogLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -570,7 +571,7 @@ const BlogPage = () => {
               {filteredPosts.map((post) => (
                 <Link 
                   key={post.id} 
-                  to={getLocalizedPath(`/blog/${post.id}`)}
+                  to={getLocalizedPath(`/blog/${safeBlogSlug(post.id)}`)}
                   className="group"
                 >
                   <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50">

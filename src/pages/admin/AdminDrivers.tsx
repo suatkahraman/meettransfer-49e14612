@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star, Mail, Palette, Search, X, Filter } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star, Mail, Palette, Search, X, Filter, KeyRound } from 'lucide-react';
 
 // Shared constants - synchronized with DriverInfoEditor
 const vehicleTypes = [
@@ -101,6 +101,10 @@ const AdminDrivers = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [viewingDriverEmail, setViewingDriverEmail] = useState<string | null>(null);
   const [loadingDriverEmail, setLoadingDriverEmail] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [driverForPassword, setDriverForPassword] = useState<Driver | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [updatingPassword, setUpdatingPassword] = useState(false);
   
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -396,6 +400,51 @@ const AdminDrivers = () => {
     setFilterStatus('all');
   };
 
+  const openPasswordDialog = (driver: Driver) => {
+    setDriverForPassword(driver);
+    setNewPassword('');
+    setPasswordDialogOpen(true);
+  };
+
+  const handleUpdateDriverPassword = async () => {
+    if (!driverForPassword?.user_id) {
+      toast.error('Bu şoförün giriş hesabı yok');
+      return;
+    }
+    if (!newPassword.trim()) {
+      toast.error('Yeni şifre girin');
+      return;
+    }
+    if (newPassword.trim().length < 6) {
+      toast.error('Şifre en az 6 karakter olmalıdır');
+      return;
+    }
+    setUpdatingPassword(true);
+    try {
+      const response = await supabase.functions.invoke('update-user-password', {
+        body: {
+          user_id: driverForPassword.user_id,
+          new_password: newPassword.trim(),
+        },
+      });
+      if (response.error) throw new Error(response.error.message || 'Şifre güncellenemedi');
+      await logAction({
+        action: 'UPDATE_PASSWORD',
+        table_name: 'drivers',
+        record_id: driverForPassword.id,
+        new_data: { password_changed: true },
+      });
+      toast.success('Şoför şifresi başarıyla güncellendi');
+      setPasswordDialogOpen(false);
+      setDriverForPassword(null);
+      setNewPassword('');
+    } catch (err: any) {
+      toast.error(err.message || 'Şifre güncellenemedi');
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
   const hasActiveFilters = searchQuery || filterRegion !== 'all' || filterStatus !== 'all';
 
   return (
@@ -465,6 +514,15 @@ const AdminDrivers = () => {
       </header>
 
       <main className="container mx-auto py-6 px-4">
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardContent className="py-3 px-4 flex flex-wrap items-center gap-2">
+            <KeyRound className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium">Şoför şifresi oluşturma:</span>
+            <span className="text-sm text-muted-foreground">
+              Her şoför kartındaki anahtar simgesine tıklayarak o şoförün giriş şifresini oluşturabilir veya güncelleyebilirsiniz. Şoför bu şifre ile sürücü paneline giriş yapar.
+            </span>
+          </CardContent>
+        </Card>
         {loading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => <DriverCardSkeleton key={i} />)}
@@ -493,7 +551,7 @@ const AdminDrivers = () => {
                         {driver.active ? 'Aktif' : 'Pasif'}
                       </Badge>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap">
                       <Button 
                         variant="outline" 
                         size="icon"
@@ -501,6 +559,14 @@ const AdminDrivers = () => {
                         title="Detayları Gör"
                       >
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={() => openPasswordDialog(driver)}
+                        title="Şifre Oluştur / Güncelle"
+                      >
+                        <KeyRound className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="outline" 
@@ -821,6 +887,60 @@ const AdminDrivers = () => {
               Düzenle
             </Button>
             <Button onClick={() => setViewDialogOpen(false)}>Kapat</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Şoför şifresi oluştur / güncelle */}
+      <Dialog open={passwordDialogOpen} onOpenChange={(open) => { setPasswordDialogOpen(open); if (!open) { setDriverForPassword(null); setNewPassword(''); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5" />
+              Şoför Şifresi Oluştur / Güncelle
+            </DialogTitle>
+          </DialogHeader>
+          {driverForPassword && (
+            <>
+              <p className="text-sm text-muted-foreground">
+                <strong>{driverForPassword.name}</strong> için giriş şifresini belirleyin veya güncelleyin. Şoför bu şifre ile sürücü paneline giriş yapabilir.
+              </p>
+              {!driverForPassword.user_id ? (
+                <p className="text-sm text-destructive">Bu şoförün giriş hesabı (user_id) yok; önce hesap oluşturulmalı.</p>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="driver-new-password">Yeni şifre (en az 6 karakter)</Label>
+                  <Input
+                    id="driver-new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="new-password"
+                  />
+                </div>
+              )}
+            </>
+          )}
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => { setPasswordDialogOpen(false); setDriverForPassword(null); setNewPassword(''); }} disabled={updatingPassword}>
+              İptal
+            </Button>
+            {driverForPassword?.user_id && (
+              <Button onClick={handleUpdateDriverPassword} disabled={updatingPassword || newPassword.trim().length < 6}>
+                {updatingPassword ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Güncelleniyor...
+                  </>
+                ) : (
+                  <>
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    Kaydet
+                  </>
+                )}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

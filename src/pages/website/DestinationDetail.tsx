@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
+import { safeDestinationSlug } from "@/utils/slug";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -553,7 +554,9 @@ const DestinationDetail = () => {
   const { promoCode, loading: promoLoading } = usePromo();
   const navigate = useNavigate();
 
-  const destination = cityName ? destinationData[cityName.toLowerCase()] : null;
+  // Only allow ASCII path segment (a-z, 0-9, hyphen) to avoid 400 from Turkish chars or malformed URLs
+  const safeCityKey = safeDestinationSlug(cityName);
+  const destination = safeCityKey ? destinationData[safeCityKey] ?? null : null;
 
   if (!destination) {
     return (
@@ -594,7 +597,7 @@ const DestinationDetail = () => {
         title={`${destination.name} Airport Transfer | VIP Transfers from ${destination.airports.join(" & ")} | Meet Transfer`}
         description={destination.description.en}
         keywords={`${destination.name} airport transfer, ${destination.airports.join(", ")} transfer, VIP transfer ${destination.name}, private chauffeur ${destination.name}`}
-        canonicalPath={`/destinations/${cityName}`}
+        canonicalPath={`/destinations/${safeCityKey}`}
       />
       <SchemaOrg
         schemas={[
@@ -707,7 +710,7 @@ const DestinationDetail = () => {
         <FeatureList />
 
         {/* City Map & Popular Locations */}
-        <LazyDestinationMap cityKey={cityName || ''} />
+        <LazyDestinationMap cityKey={safeCityKey} />
 
         {/* Locations Grid */}
         <motion.section
@@ -801,7 +804,7 @@ const DestinationDetail = () => {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.entries(destinationData)
-              .filter(([key]) => key !== cityName?.toLowerCase())
+              .filter(([key]) => key !== safeCityKey)
               .slice(0, 4)
               .map(([key, dest]) => (
                 <Link
