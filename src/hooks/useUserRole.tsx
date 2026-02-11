@@ -23,8 +23,8 @@ export const useUserRole = () => {
 
       try {
         // 1) Önce edge function ile dene - RLS bypass, driver panel giriş sorununu kesin çözer
-        const { data: session } = await supabase.auth.getSession();
-        const token = session.data.session?.access_token;
+        const { data } = await supabase.auth.getSession();
+        const token = data?.session?.access_token;
         if (token) {
           const { data: fnData } = await supabase.functions.invoke('get-user-role', {
             headers: { Authorization: `Bearer ${token}` },

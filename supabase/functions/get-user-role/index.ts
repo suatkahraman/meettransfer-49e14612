@@ -46,13 +46,35 @@ serve(async (req) => {
     }
 
     // Service role ile user_roles - RLS bypass
-    const { data: roleData } = await supabaseAdmin
+    let { data: roleData } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .maybeSingle();
 
-    const role = (roleData?.role as AppRole) || "customer";
+    // user_roles boşsa drivers/agencies tablosundan rol çöz (kayıt uyumsuzluğu fallback)
+    let role: AppRole = (roleData?.role as AppRole) || "customer";
+    if (!roleData?.role) {
+      const { data: driverRow } = await supabaseAdmin
+        .from("drivers")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (driverRow?.id) {
+        role = "driver";
+        roleData = { role: "driver" };
+      } else {
+        const { data: agencyRow } = await supabaseAdmin
+          .from("agencies")
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (agencyRow?.id) {
+          role = "agency";
+          roleData = { role: "agency" };
+        }
+      }
+    }
 
     let driverId: string | null = null;
     let agencyId: string | null = null;
