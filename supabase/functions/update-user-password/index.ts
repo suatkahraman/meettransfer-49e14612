@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     }
 
     if (new_password.length < 6) {
-      return jsonResponse({ success: false, error: 'Şifre en az 6 karakter olmalıdır' })
+      return jsonResponse({ success: false, error: 'Şifre en az 6 karakter olmalıdır (örn: Sofor2024!)' })
     }
 
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user_id, {

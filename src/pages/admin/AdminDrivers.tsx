@@ -211,14 +211,17 @@ const AdminDrivers = () => {
       toast.error('Lütfen bir bölge seçin');
       return;
     }
+    let driverPassword = formData.password;
     if (!editingDriver) {
       if (!formData.email.trim()) {
         toast.error('E-posta gereklidir');
         return;
       }
-      if (!formData.password || formData.password.length < 6) {
-        toast.error('Şifre en az 6 karakter olmalıdır');
-        return;
+      // Boş veya kısa şifre: otomatik oluştur (Sofor1234! - büyük harf, rakam, sembol, 8+ karakter)
+      if (!driverPassword || driverPassword.length < 6) {
+        driverPassword = 'Sofor' + Math.floor(1000 + Math.random() * 9000) + '!';
+        setFormData(prev => ({ ...prev, password: driverPassword }));
+        toast.info(`Şifre otomatik oluşturuldu. Şoförle paylaşın: ${driverPassword}`);
       }
     }
 
@@ -271,7 +274,7 @@ const AdminDrivers = () => {
         const { data, error } = await supabase.functions.invoke('create-user-account', {
           body: {
             email: formData.email.trim(),
-            password: formData.password,
+            password: driverPassword,
             role: 'driver',
             name: formData.name.trim(),
             phone: formData.phone.trim(),
@@ -282,8 +285,8 @@ const AdminDrivers = () => {
           },
         });
 
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
+        if (error) throw new Error(error.message || 'Şoför oluşturulamadı');
+        if (!data?.success || data?.error) throw new Error(data?.error || 'Şoför oluşturulamadı');
 
         await logAction({
           action: 'CREATE',
@@ -761,12 +764,12 @@ const AdminDrivers = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Şifre *</Label>
+                    <Label>Şifre (boş bırakırsanız otomatik oluşturulur)</Label>
                     <Input
                       type="password"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      placeholder="Min. 6 karakter"
+                      placeholder="Örn: Sofor2024! veya boş bırakın"
                     />
                   </div>
                 </div>
@@ -911,7 +914,7 @@ const AdminDrivers = () => {
                 <p className="text-sm text-destructive">Bu şoförün giriş hesabı (user_id) yok; önce hesap oluşturulmalı.</p>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="driver-new-password">Yeni şifre (en az 6 karakter, büyük+küçük harf ve rakam örn: Sofor2024!)</Label>
+                  <Label htmlFor="driver-new-password">Yeni şifre (en az 6 karakter, örn: Sofor2024!)</Label>
                   <Input
                     id="driver-new-password"
                     type="password"

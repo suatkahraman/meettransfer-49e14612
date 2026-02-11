@@ -89,28 +89,30 @@ Deno.serve(async (req) => {
 
     console.log(`Creating ${role} account for: ${email}`)
 
+    // Helper: return 200 with success:false so client always receives JSON body (avoids 4xx parse issues)
+    const err = (msg: string) => new Response(
+      JSON.stringify({ success: false, error: msg }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+
     // Validate required fields
     if (!email || !password || !role || !phone) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields: email, password, role, phone' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return err('Eksik alanlar: e-posta, şifre, rol ve telefon gerekli')
     }
 
     // Validate role
     if (!['admin', 'driver', 'customer', 'agency'].includes(role)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid role. Must be admin, driver, customer, or agency' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return err('Geçersiz rol')
     }
 
     // Validate agency requirements
     if (role === 'agency' && !agency_id && !agency_name) {
-      return new Response(
-        JSON.stringify({ error: 'agency_id or agency_name is required for agency role' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return err('Agency için agency_id veya agency_name gerekli')
+    }
+
+    // Şoför şifresi: en az 6 karakter (Supabase minimum). Karmaşık kurallar admin tarafında kaldırıldı.
+    if (password.length < 6) {
+      return err('Şifre en az 6 karakter olmalıdır')
     }
 
     // Create auth user using admin client
@@ -126,17 +128,17 @@ Deno.serve(async (req) => {
     if (createError) {
       console.error('Error creating auth user:', createError)
       let errMsg = createError.message
-      // Friendly messages for common Supabase auth errors (weak/pwned password)
+      // Supabase Auth: weak/pwned gibi kurallar proje ayarlarından gelir
       if (createError.message?.toLowerCase().includes('weak') || createError.message?.toLowerCase().includes('easy to guess')) {
-        errMsg = 'Şifre çok zayıf. En az 6 karakter, büyük/küçük harf ve rakam içeren daha güçlü bir şifre kullanın (örn: Sofor2024!).'
+        errMsg = 'Şifre çok zayıf. Örn: Sofor2024! veya Sifre123! gibi büyük harf, rakam ve en az 8 karakter kullanın.'
       } else if (createError.message?.toLowerCase().includes('pwned') || createError.message?.toLowerCase().includes('breach')) {
-        errMsg = 'Bu şifre veri ihlallerinde bulundu. Daha benzersiz bir şifre seçin.'
+        errMsg = 'Bu şifre veri ihlallerinde bulundu. Daha benzersiz bir şifre seçin (örn: Sofor2024!).'
       } else if (createError.message?.includes('already registered') || createError.message?.includes('already been registered')) {
         errMsg = 'Bu e-posta adresi zaten kayıtlı. Farklı bir e-posta kullanın veya mevcut şoförün şifresini güncelleyin.'
       }
       return new Response(
-        JSON.stringify({ error: errMsg }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: errMsg }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
@@ -169,10 +171,7 @@ Deno.serve(async (req) => {
 
       if (roleInsertError) {
         console.error('Error setting role:', roleInsertError)
-        return new Response(
-          JSON.stringify({ error: 'User created but failed to set role: ' + roleInsertError.message }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return err('Kullanıcı oluşturuldu ancak rol atanamadı: ' + roleInsertError.message)
       }
     }
 
@@ -199,10 +198,7 @@ Deno.serve(async (req) => {
 
       if (driverError) {
         console.error('Error creating driver record:', driverError)
-        return new Response(
-          JSON.stringify({ error: 'User created but failed to create driver record: ' + driverError.message }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return err('Kullanıcı oluşturuldu ancak şoför kaydı eklenemedi: ' + driverError.message)
       }
 
       createdDriverId = driverRow?.id || null
@@ -231,10 +227,7 @@ Deno.serve(async (req) => {
 
         if (createAgencyError) {
           console.error('Error creating agency record:', createAgencyError)
-          return new Response(
-            JSON.stringify({ error: 'User created but failed to create agency: ' + createAgencyError.message }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return err('Kullanıcı oluşturuldu ancak ajans kaydı eklenemedi: ' + createAgencyError.message)
         }
 
         createdAgencyId = newAgency.id
@@ -248,10 +241,7 @@ Deno.serve(async (req) => {
 
         if (agencyError) {
           console.error('Error linking agency user:', agencyError)
-          return new Response(
-            JSON.stringify({ error: 'User created but failed to link to agency: ' + agencyError.message }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return err('Kullanıcı oluşturuldu ancak ajansa bağlanamadı: ' + agencyError.message)
         }
 
         createdAgencyId = agency_id

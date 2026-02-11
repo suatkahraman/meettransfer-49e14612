@@ -1022,6 +1022,11 @@ const BookingPage = () => {
 
   // Handle Google Sign In
   const handleGoogleSignIn = async () => {
+    if (!vehicleType) {
+      toast.error(language === 'TR' ? 'Lütfen önce bir araç seçin' : 'Please select a vehicle first');
+      scrollToSection('section-vehicle');
+      return;
+    }
     setGoogleLoading(true);
     try {
       saveOAuthFormCache();

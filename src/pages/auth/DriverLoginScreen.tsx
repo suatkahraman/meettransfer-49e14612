@@ -230,8 +230,8 @@ const DriverLoginScreen = () => {
         
         // Şoförler için 2FA yok - doğrudan giriş
         await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
-        // Hemen panele yönlendir - useEffect'e güvenmeyelim (AuthContext/useUserRole zamanlama yarışı)
-        navigate('/driver', { replace: true });
+        // Sayfa yenilemesi ile panele git - AuthContext/useUserRole senkronizasyon sorununu kesin çözer
+        window.location.replace('/driver');
         return;
       }
     } catch (error) {

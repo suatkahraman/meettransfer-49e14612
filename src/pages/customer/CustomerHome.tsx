@@ -12,12 +12,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { 
   LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
-  Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
+  Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, Menu,
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
   Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle,
   Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv,
-  Award, Zap, Tag, Heart, HeartOff, Route, Percent
+  Award, Zap, Tag, Heart, HeartOff, Route, Percent, CalendarCheck
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,6 +45,9 @@ import { Calendar as DayPickerCalendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
 import { useActivePromoCode } from '@/hooks/useActivePromoCode';
+import { useCustomerPayments } from '@/hooks/useCustomerPayments';
+import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
+import { formatCurrency } from '@/lib/currency';
 
 // Time options for 30-minute intervals
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
@@ -102,8 +105,10 @@ const CustomerHome = () => {
   
   // Return transfer promo code hook
   const { promoCode: returnPromoCode, loading: promoLoading } = useActivePromoCode('return_transfer');
+  const { stats: paymentStats } = useCustomerPayments({ language: language === 'TR' ? 'TR' : 'EN' });
   
   // State - organized by purpose
+  const [menuOpen, setMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Start with loading true
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -138,9 +143,7 @@ const CustomerHome = () => {
     hasReview?: boolean;
   }>>([]);
   const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string; reservationCode?: string} | null>(null);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [recentSearches, setRecentSearches] = useState<{pickup: string; dropoff: string}[]>([]);
   const [favoriteRoutes, setFavoriteRoutes] = useState<Array<{
     id: string;
@@ -467,9 +470,6 @@ const CustomerHome = () => {
           const customerPhone = sessionBookingData.customerPhone || profile?.phone || 'N/A'; // Allow reservation without phone, user can add later
           const customerEmail = user.email || '';
           
-          // Clear the pending booking data immediately to prevent duplicate processing
-          PendingBookingStorage.clear();
-          
           setIsCreatingReservation(true);
           
           // Determine initial status based on whether we have a price
@@ -482,6 +482,15 @@ const CustomerHome = () => {
             passengerNamesArray = [customerName];
           }
           
+          // Map paymentMethod: Book page uses 'credit_card' but reservations allows ('cash','payment_link','agency_pay','none','online')
+          const rawPayment = sessionBookingData.paymentMethod || 'cash';
+          const paymentType = rawPayment === 'credit_card' ? 'online' : (['cash','payment_link','agency_pay','none','online'].includes(rawPayment) ? rawPayment : 'cash');
+          // vehicle_type: DB expects internal format (mercedes-vito), not display label. Support Dubai types too.
+          const validVehicleTypes = ['sedan','mercedes-vito','vip-mercedes','maybach-minibus','minibus'];
+          const vehicleType = sessionBookingData.vehicleType && (validVehicleTypes.includes(sessionBookingData.vehicleType) || sessionBookingData.vehicleType.startsWith('dubai-'))
+            ? sessionBookingData.vehicleType
+            : 'mercedes-vito';
+
           // Create main reservation directly
           const reservationData = {
             customer_id: user.id,
@@ -491,13 +500,13 @@ const CustomerHome = () => {
             dropoff: sessionBookingData.dropoff!,
             pickup_date: sessionBookingData.date || new Date().toISOString().split('T')[0],
             pickup_time: sessionBookingData.time || '10:00',
-            vehicle_type: sessionBookingData.vehicleType || 'Mercedes Vito',
+            vehicle_type: vehicleType,
             passengers: sessionBookingData.passengers || 1,
             price: sessionBookingData.estimatedPrice || null,
             price_currency: sessionBookingData.currency || 'EUR',
             status: initialStatus,
-            payment_method: sessionBookingData.paymentMethod || 'cash',
-            payment_type: sessionBookingData.paymentMethod || 'cash',
+            payment_method: rawPayment,
+            payment_type: paymentType,
             luggage_count: sessionBookingData.luggageCount || 1,
             baby_seat_count: sessionBookingData.babySeatCount || 0,
             customer_notes: sessionBookingData.customerNotes || null,
@@ -522,6 +531,7 @@ const CustomerHome = () => {
           }
           
           console.log('[CustomerHome] Reservation created successfully:', reservation?.reservation_code);
+          PendingBookingStorage.clear(); // Clear only after successful insert
           
           // Create return trip if requested
           if (sessionBookingData.hasReturnTrip && sessionBookingData.returnDate && sessionBookingData.returnTime) {
@@ -533,13 +543,13 @@ const CustomerHome = () => {
               dropoff: sessionBookingData.pickup!, // Swap
               pickup_date: sessionBookingData.returnDate,
               pickup_time: sessionBookingData.returnTime,
-              vehicle_type: sessionBookingData.vehicleType || 'Mercedes Vito',
+              vehicle_type: vehicleType,
               passengers: sessionBookingData.passengers || 1,
               price: sessionBookingData.returnPrice || sessionBookingData.estimatedPrice || null,
               price_currency: sessionBookingData.currency || 'EUR',
               status: initialStatus,
-              payment_method: sessionBookingData.paymentMethod || 'cash',
-              payment_type: sessionBookingData.paymentMethod || 'cash',
+              payment_method: rawPayment,
+              payment_type: paymentType,
               luggage_count: sessionBookingData.luggageCount || 1,
               baby_seat_count: sessionBookingData.babySeatCount || 0,
               customer_notes: sessionBookingData.customerNotes || null,
@@ -783,6 +793,14 @@ const CustomerHome = () => {
       if (!passengerNamesArray || passengerNamesArray.length === 0) {
         passengerNamesArray = [customerName];
       }
+
+      // Map paymentMethod: 'credit_card' -> 'online' (reservations constraint)
+      const rawPayment = sessionData.paymentMethod || 'cash';
+      const paymentType = rawPayment === 'credit_card' ? 'online' : (['cash','payment_link','agency_pay','none','online'].includes(rawPayment) ? rawPayment : 'cash');
+      const validVehicleTypes = ['sedan','mercedes-vito','vip-mercedes','maybach-minibus','minibus'];
+      const vehicleType = sessionData.vehicleType && (validVehicleTypes.includes(sessionData.vehicleType) || sessionData.vehicleType.startsWith('dubai-'))
+        ? sessionData.vehicleType
+        : 'mercedes-vito';
       
       // Create main reservation
       const reservationData = {
@@ -793,13 +811,13 @@ const CustomerHome = () => {
         dropoff: sessionData.dropoff!,
         pickup_date: sessionData.date || new Date().toISOString().split('T')[0],
         pickup_time: sessionData.time || '10:00',
-        vehicle_type: sessionData.vehicleType || 'Mercedes Vito',
+        vehicle_type: vehicleType,
         passengers: sessionData.passengers || 1,
         price: sessionData.estimatedPrice || null,
         price_currency: sessionData.currency || 'EUR',
         status: initialStatus,
-        payment_method: sessionData.paymentMethod || 'cash',
-        payment_type: sessionData.paymentMethod || 'cash',
+        payment_method: rawPayment,
+        payment_type: paymentType,
         luggage_count: sessionData.luggageCount || 1,
         baby_seat_count: sessionData.babySeatCount || 0,
         customer_notes: sessionData.customerNotes || null,
@@ -834,13 +852,13 @@ const CustomerHome = () => {
           dropoff: sessionData.pickup!, // Swap
           pickup_date: sessionData.returnDate,
           pickup_time: sessionData.returnTime,
-          vehicle_type: sessionData.vehicleType || 'Mercedes Vito',
+          vehicle_type: vehicleType,
           passengers: sessionData.passengers || 1,
           price: sessionData.returnPrice || sessionData.estimatedPrice || null,
           price_currency: sessionData.currency || 'EUR',
           status: initialStatus,
-          payment_method: sessionData.paymentMethod || 'cash',
-          payment_type: sessionData.paymentMethod || 'cash',
+          payment_method: rawPayment,
+          payment_type: paymentType,
           luggage_count: sessionData.luggageCount || 1,
           baby_seat_count: sessionData.babySeatCount || 0,
           customer_notes: sessionData.customerNotes || null,
@@ -930,31 +948,6 @@ const CustomerHome = () => {
       supabase.removeChannel(channel);
     };
   }, [user?.id, language, fetchData]);
-
-  const handleSaveProfile = async () => {
-    if (!user?.id) return;
-    
-    setIsSavingProfile(true);
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          full_name: profileData.full_name.trim(),
-          phone: profileData.phone.trim(),
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
-      toast.success(t('profileUpdatedMsg'));
-      setIsEditingProfile(false);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
-    } finally {
-      setIsSavingProfile(false);
-    }
-  };
 
   // Favorite routes functions
   const handleAddFavoriteRoute = async () => {
@@ -1350,233 +1343,23 @@ const CustomerHome = () => {
             
             <NotificationBell />
           
-          {/* Settings Sheet */}
-          <Sheet>
+          {/* Hamburger Menu */}
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10"
               >
-                <Settings className="h-4 w-4 sm:h-6 sm:w-6" />
+                <Menu className="h-4 w-4 sm:h-6 sm:w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  {t('settingsTitle')}
-                </SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 space-y-6">
-                {/* Profile Section - Premium Design */}
-                <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(var(--primary),0.1),_transparent_50%)]" />
-                  <CardHeader className="pb-3 relative z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <motion.div 
-                          className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center"
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          <User className="h-6 w-6 text-primary" />
-                        </motion.div>
-                        <div>
-                          <CardTitle className="text-lg font-semibold">
-                            {t('profileInfoTitle')}
-                          </CardTitle>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {t('accountDetailsDesc')}
-                          </p>
-                        </div>
-                      </div>
-                      {!isEditingProfile ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setIsEditingProfile(true)}
-                          className="gap-1"
-                        >
-                          <Edit2 className="h-3.5 w-3.5" />
-                          {t('editBtn')}
-                        </Button>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setIsEditingProfile(false)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            onClick={handleSaveProfile}
-                            disabled={isSavingProfile}
-                            className="gap-1"
-                          >
-                            {isSavingProfile ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Save className="h-3.5 w-3.5" />
-                            )}
-                            {t('save')}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="relative z-10 space-y-4 pt-2">
-                    {/* Name Field */}
-                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">
-                        {t('fullNameLabel')}
-                      </Label>
-                      {isEditingProfile ? (
-                        <Input
-                          value={profileData.full_name}
-                          onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
-                          placeholder={t('yourNamePlaceholder')}
-                          className="mt-1 bg-background"
-                        />
-                      ) : (
-                        <p className="text-base font-semibold mt-1 flex items-center gap-2">
-                          {profileData.full_name || (
-                            <span className="text-muted-foreground italic">
-                              {t('notSpecified')}
-                            </span>
-                          )}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Phone Field */}
-                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {t('phoneLabel')}
-                      </Label>
-                      {isEditingProfile ? (
-                        <PhoneInput
-                          value={profileData.phone}
-                          onChange={(value) => setProfileData({ ...profileData, phone: value })}
-                          className="mt-1"
-                        />
-                      ) : (
-                        <p className="text-base font-semibold mt-1">
-                          {profileData.phone || (
-                            <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                              <span className="inline-flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                              {t('pleaseAdd')}
-                            </span>
-                          )}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Email Field */}
-                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">Email</Label>
-                      <p className="text-base font-semibold mt-1 flex items-center gap-2">
-                        {user?.email}
-                        <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
-                          {t('verified')}
-                        </Badge>
-                      </p>
-                    </div>
-
-                    {/* Member Since */}
-                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                      <span className="text-xs text-muted-foreground">
-                        {t('memberSince')}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">
-                        <Star className="h-3 w-3 mr-1" />
-                        VIP
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Language Selector */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      {t('languageLabel')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <UniversalLanguageSelector variant="default" />
-                  </CardContent>
-                </Card>
-
-                {/* Notification Settings */}
-                <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
-
-                {/* WhatsApp Support */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
-                  onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank')}
-                >
-                  <span className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                    <MessageCircle className="h-4 w-4" />
-                    {t('whatsAppSupport')}
-                  </span>
-                  <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </Button>
-
-                {/* Emergency Call */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
-                  onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
-                >
-                  <span className="flex items-center gap-2 text-red-700 dark:text-red-300">
-                    <PhoneCall className="h-4 w-4" />
-                    {t('emergencyHotline')}
-                  </span>
-                  <span className="text-xs text-red-600 dark:text-red-400 font-mono">{EMERGENCY_PHONE.replace('+90', '+90 ')}</span>
-                </Button>
-
-                {/* Edit Profile */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between"
-                  onClick={() => navigate('/customer/profile')}
-                >
-                  <span className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    {t('editProfile')}
-                  </span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-
-                {/* Security Settings */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between"
-                  onClick={() => navigate('/security-settings')}
-                >
-                  <span className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    {t('securitySettingsMenu')}
-                  </span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-
-                {/* Logout */}
-                <Button 
-                  variant="destructive" 
-                  className="w-full"
-                  onClick={signOut}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  {t('logoutBtn')}
-                </Button>
-              </div>
+            <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto p-0 flex flex-col">
+              <CustomerNavSheet
+                onOpenChange={setMenuOpen}
+                profileData={profileData}
+                onProfileUpdate={setProfileData}
+              />
             </SheetContent>
           </Sheet>
           </div>
@@ -1630,58 +1413,43 @@ const CustomerHome = () => {
           </div>
         </motion.div>
 
-        {/* Dashboard Summary Cards */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-3 gap-2 sm:gap-3 mb-4"
-        >
-          {/* Active Reservations */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
-            onClick={() => navigate('/customer/bookings')}
+        {/* Ödeme Özeti */}
+        {paymentStats.totalReservations > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4"
           >
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-2">
-                <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-primary">{activeBookingsCount}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('activeCount')}</p>
-            </CardContent>
-          </Card>
-
-          {/* Completed Transfers */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20"
-            onClick={() => navigate('/customer/bookings#past-reservations')}
-          >
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-green-500/20 flex items-center justify-center mb-2">
-                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-green-600">{completedReservations.length}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('completedCount')}</p>
-            </CardContent>
-          </Card>
-
-          {/* Favorite Routes */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20"
-            onClick={() => {
-              const favSection = document.getElementById('favorite-routes-section');
-              favSection?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-2">
-                <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-accent">{favoriteRoutes.length}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('favoritesCount') || t('favorites')}</p>
-            </CardContent>
-          </Card>
-        </motion.div>
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-all border-primary/20 overflow-hidden"
+              onClick={() => navigate('/customer/payments')}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {language === 'TR' ? 'Ödeme Özeti' : 'Payment Summary'}
+                      </p>
+                      <p className="text-lg font-bold">
+                        {language === 'TR' ? 'Ödenen' : 'Paid'}: {formatCurrency(paymentStats.totalPaid, 'EUR')}
+                        {(paymentStats.totalUnpaid > 0) && (
+                          <span className="text-amber-600 font-normal text-base ml-1">
+                            | {language === 'TR' ? 'Bekleyen' : 'Pending'}: {formatCurrency(paymentStats.totalUnpaid, 'EUR')}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
 
         {/* Missing Phone Warning */}
@@ -1845,84 +1613,6 @@ const CustomerHome = () => {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
-        </motion.div>
-
-        {/* Quick Support & Navigation Actions - More compact on mobile */}
-        <motion.div 
-          initial={false}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-4 sm:mb-6"
-        >
-          {/* Home */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40"
-              onClick={() => navigate('/')}
-            >
-              <Home className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span className="text-[9px] sm:text-xs font-medium">
-                {t('homeBtn')}
-              </span>
-            </Button>
-          </motion.div>
-          
-          {/* Payments */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 hover:border-blue-500/40"
-              onClick={() => navigate('/customer/payments')}
-            >
-              <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
-                {language === 'TR' ? 'Ödemeler' : 'Payments'}
-              </span>
-            </Button>
-          </motion.div>
-          
-          {/* WhatsApp */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 hover:border-green-500/40"
-              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank')}
-            >
-              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
-                WhatsApp
-              </span>
-            </Button>
-          </motion.div>
-          
-          {/* Emergency Call */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20 hover:border-red-500/40"
-              onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
-            >
-              <PhoneCall className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
-              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
-                {t('emergencyBtn')}
-              </span>
-            </Button>
-          </motion.div>
-          
-          {/* Security */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40"
-              onClick={() => navigate('/security-settings')}
-            >
-              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
-              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
-                {t('securityBtn')}
-              </span>
-            </Button>
           </motion.div>
         </motion.div>
 
@@ -3299,13 +2989,17 @@ const CustomerHome = () => {
         </motion.div>
 
         {/* Sticky FABs - Smaller on mobile */}
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col gap-2 sm:gap-3">
-          {/* WhatsApp Support Button */}
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2 sm:gap-3">
+          {/* WhatsApp Chat Button */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+            className="flex flex-col items-center gap-1"
           >
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">
+              {language === 'TR' ? 'Sohbet' : 'Chat'}
+            </span>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
                 type="button"
@@ -3322,21 +3016,22 @@ const CustomerHome = () => {
             </motion.div>
           </motion.div>
 
-          {/* My Bookings Button */}
+          {/* Reservations Button */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+            className="flex flex-col items-center gap-1"
           >
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
                 type="button"
                 onClick={() => navigate('/customer/bookings')}
                 size="lg"
-                className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+                className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-neutral-950 dark:hover:bg-neutral-900"
                 title={t('myBookingsTooltip')}
               >
-                <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6" />
+                <CalendarCheck className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
             </motion.div>
           </motion.div>
