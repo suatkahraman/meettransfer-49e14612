@@ -18,7 +18,7 @@ const ProtectedRoute = ({
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
 
-  // If the user is signed in but role hasn't resolved yet (transient), don't bounce them to /auth.
+  // Driver panel: Role çözülene kadar bekle - 5 saniye grace period
   const [roleGraceExpired, setRoleGraceExpired] = useState(false);
   useEffect(() => {
     setRoleGraceExpired(false);
@@ -27,7 +27,7 @@ const ProtectedRoute = ({
     if (roleLoading) return;
     if (role) return;
 
-    const t = window.setTimeout(() => setRoleGraceExpired(true), 3000);
+    const t = window.setTimeout(() => setRoleGraceExpired(true), 5000);
     return () => window.clearTimeout(t);
   }, [user, roleLoading, role]);
 

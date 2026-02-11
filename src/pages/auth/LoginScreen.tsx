@@ -264,9 +264,10 @@ const LoginScreen = () => {
     if (isResetting) setViewMode('reset');
   }, [isResetting]);
 
-  // Role-based redirect – isResetting (şifre sıfırlama) iken ASLA yönlendirme yapma
+  // Role-based redirect – şifre sıfırlama (link tıklayıp yeni şifre formu) iken ASLA yönlendirme yapma
   useEffect(() => {
     if (isResetting) return;
+    if (viewMode === 'reset') return; // Yeni şifre oluşturma ekranındayken panele gitme
     if (!isLoading && user && !roleLoading && role && viewMode !== '2fa') {
       switch (role) {
         case 'admin':
@@ -605,10 +606,23 @@ const LoginScreen = () => {
           toast.error(error.message);
         }
       } else {
-        toast.success(t('passwordUpdated'));
-        await signOut();
-        window.history.replaceState(null, '', '/login');
-        navigate('/login', { replace: true });
+        toast.success(language === 'TR' ? 'Şifre güncellendi. Yönlendiriliyorsunuz...' : 'Password updated. Redirecting...');
+        await supabase.auth.refreshSession();
+        const { data: session } = await supabase.auth.getSession();
+        const token = session?.session?.access_token;
+        let path = '/customer';
+        if (token) {
+          const { data } = await supabase.functions.invoke('get-user-role', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (data?.success && data?.role) {
+            const paths: Record<string, string> = {
+              driver: '/driver', agency: '/agency', admin: '/admin', customer: '/customer',
+            };
+            path = paths[data.role as string] ?? '/customer';
+          }
+        }
+        window.location.replace(path);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

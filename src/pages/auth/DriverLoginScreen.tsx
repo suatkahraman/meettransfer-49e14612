@@ -330,7 +330,8 @@ const DriverLoginScreen = () => {
       }
       toast.success(language === 'TR' ? 'Şifre güncellendi. Yönlendiriliyorsunuz...' : 'Password updated. Redirecting...');
       setNewPasswordValue('');
-      navigate('/driver', { replace: true });
+      await supabase.auth.refreshSession();
+      window.location.replace('/driver');
     } catch (err) {
       if (err instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};

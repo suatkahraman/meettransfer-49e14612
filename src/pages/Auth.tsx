@@ -517,15 +517,24 @@ const Auth = () => {
       }
 
       console.log('Password updated successfully');
-      toast.success('Şifre güncellendi. Yeni şifrenizle giriş yapabilirsiniz.');
+      toast.success('Şifre güncellendi. Yönlendiriliyorsunuz...');
 
-      await signOut();
-      window.history.replaceState(null, '', '/auth');
-      navigate('/auth', { replace: true });
-      setViewMode('auth');
-      setNewPassword('');
-      setConfirmPassword('');
-      setIsRecoverySession(false);
+      await supabase.auth.refreshSession();
+      const { data: session } = await supabase.auth.getSession();
+      const token = session?.session?.access_token;
+      let path = '/customer';
+      if (token) {
+        const { data } = await supabase.functions.invoke('get-user-role', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (data?.success && data?.role) {
+          const paths: Record<string, string> = {
+            driver: '/driver', agency: '/agency', admin: '/admin', customer: '/customer',
+          };
+          path = paths[data.role as string] ?? '/customer';
+        }
+      }
+      window.location.replace(path);
       
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -540,7 +549,7 @@ const Auth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [newPassword, confirmPassword, signOut, navigate]);
+  }, [newPassword, confirmPassword]);
 
   const passwordsMatch = useMemo(() => {
     return newPassword.length > 0 && confirmPassword.length > 0 && newPassword === confirmPassword;
