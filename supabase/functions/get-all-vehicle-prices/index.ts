@@ -67,6 +67,53 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
 const EDGE_FETCH_TIMEOUT_MS = 8000;
+const KM_PRICING_COUNTRY_CODE = "TR";
+const KM_PRICING_MAX_DISTANCE_KM = 85;
+const KM_GLOBAL_VEHICLE_TOKEN = "__all__";
+const KM_FLAT_MODE = "flat_base";
+const KM_INCREMENTAL_MODE = "incremental_per_km";
+const KM_BASE_MAX_DISTANCE = 50;
+const KM_TIER_ONE_START = 51;
+const KM_TIER_ONE_END = 70;
+const KM_TIER_TWO_START = 71;
+
+const TURKEY_KM_ELIGIBLE_CITIES = new Set([
+  "Istanbul",
+  "Ankara",
+  "Antalya",
+  "Bodrum",
+  "Dalaman",
+  "Izmir",
+  "Bursa",
+  "Alanya",
+  "Aydin",
+  "Mugla",
+  "Denizli",
+  "Adana",
+  "Cappadocia",
+]);
+
+const TURKEY_AIRPORTS = new Set([
+  "Istanbul Airport (IST)",
+  "Sabiha Gokcen Airport (SAW)",
+  "Antalya Airport (AYT)",
+  "Bodrum-Milas Airport (BJV)",
+  "Dalaman Airport (DLM)",
+  "Izmir Adnan Menderes Airport (ADB)",
+  "Ankara Esenboga Airport (ESB)",
+]);
+
+type DistancePricingRule = {
+  city: string | null;
+  country: string;
+  km_from: number;
+  km_to: number;
+  month: number | null;
+  price_amount: number;
+  price_currency: string;
+  pricing_mode: string;
+  vehicle_type: string;
+};
 
 function isSameCity(a: string | null, b: string | null): boolean {
   if (!a || !b) return false;
@@ -164,6 +211,28 @@ function inferCityFromDistrict(district: string | null): string | null {
   return null;
 }
 
+function isTurkeyRoute(params: {
+  searchText: string;
+  pickupCity: string | null;
+  dropoffCity: string | null;
+  fallbackCity: string | null;
+  airport: string | null;
+  isDubai: boolean;
+}): boolean {
+  if (params.isDubai) return false;
+  const normalizedText = normalizeTurkish(params.searchText).toLowerCase();
+  if (/\bturkiye\b|\bturkey\b/.test(normalizedText)) return true;
+
+  if (params.airport && TURKEY_AIRPORTS.has(params.airport)) return true;
+
+  const cityCandidates = [params.pickupCity, params.dropoffCity, params.fallbackCity];
+  return cityCandidates.some((cityName) => !!cityName && TURKEY_KM_ELIGIBLE_CITIES.has(cityName));
+}
+
+function roundKmPrice(amount: number): number {
+  return Math.round(amount * 100) / 100;
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -172,6 +241,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const GOOGLE_DISTANCE_API_KEY =
+      Deno.env.get("GOOGLE_DISTANCE_API_KEY") ||
+      Deno.env.get("GOOGLE_MAPS_API_KEY") ||
+      Deno.env.get("GOOGLE_PLACES_API_KEY") ||
+      "";
 
     const body = await req.json();
     const { pickup, dropoff, customerCurrency, pickup_place_id: pickupPlaceId, dropoff_place_id: dropoffPlaceId } = body;
@@ -188,6 +262,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const pickupDateStr =
       pickupDateCandidate && !Number.isNaN(pickupDateCandidate.getTime())
         ? pickupDateCandidate.toISOString().split("T")[0]
+        : null;
+    const pickupMonth =
+      pickupDateCandidate && !Number.isNaN(pickupDateCandidate.getTime())
+        ? pickupDateCandidate.getUTCMonth() + 1
         : null;
 
     // Detect region
@@ -231,6 +309,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       else if (/adnan menderes/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
       else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
     }
+
+    const routeIsTurkey = isTurkeyRoute({
+      searchText: s,
+      pickupCity: resolvedPickupCity,
+      dropoffCity: resolvedDropoffCity,
+      fallbackCity: city,
+      airport,
+      isDubai,
+    });
 
     const isIntracityAddressTransfer =
       !airport &&
@@ -371,6 +458,213 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
 
+    async function fetchRouteDistanceKm(): Promise<number | null> {
+      if (!GOOGLE_DISTANCE_API_KEY) return null;
+      const origin = pickupPlaceId ? `place_id:${pickupPlaceId}` : pickup;
+      const destination = dropoffPlaceId ? `place_id:${dropoffPlaceId}` : dropoff;
+      if (!origin || !destination) return null;
+
+      const params = new URLSearchParams({
+        origins: origin,
+        destinations: destination,
+        mode: "driving",
+        language: "tr",
+        key: GOOGLE_DISTANCE_API_KEY,
+      });
+
+      try {
+        const distanceRes = await fetchWithTimeout(
+          `https://maps.googleapis.com/maps/api/distancematrix/json?${params.toString()}`,
+        );
+        if (!distanceRes.ok) return null;
+        const payload = await distanceRes.json();
+        const element = payload?.rows?.[0]?.elements?.[0];
+        const meters = Number(element?.distance?.value);
+        if (payload?.status !== "OK" || element?.status !== "OK" || !Number.isFinite(meters) || meters <= 0) {
+          return null;
+        }
+        return Math.max(1, Math.ceil(meters / 1000));
+      } catch (distanceError) {
+        console.error("Distance Matrix lookup failed", String(distanceError));
+        return null;
+      }
+    }
+
+    function getRuleScopeScore(
+      rule: DistancePricingRule,
+      targetCity: string | null,
+      targetMonth: number | null,
+    ): number | null {
+      let score = 0;
+      if (rule.city) {
+        if (!targetCity || !isSameCity(rule.city, targetCity)) return null;
+        score += 2;
+      }
+      if (rule.month !== null && rule.month !== undefined) {
+        if (!targetMonth || Number(rule.month) !== Number(targetMonth)) return null;
+        score += 1;
+      }
+      return score;
+    }
+
+    function selectBestDistanceRule(
+      candidates: DistancePricingRule[],
+      targetCity: string | null,
+      targetMonth: number | null,
+      vehicleType: string,
+    ): DistancePricingRule | null {
+      const requestedVehicle = vehicleType.trim().toLowerCase();
+      let best: DistancePricingRule | null = null;
+      let bestScope = -1;
+      let bestVehicleRank = -1;
+      let bestRangeSpan = Number.POSITIVE_INFINITY;
+
+      for (const rule of candidates) {
+        const scope = getRuleScopeScore(rule, targetCity, targetMonth);
+        if (scope === null) continue;
+
+        const normalizedRuleVehicle = (rule.vehicle_type || "").trim().toLowerCase();
+        const vehicleRank =
+          normalizedRuleVehicle === requestedVehicle
+            ? 2
+            : normalizedRuleVehicle === KM_GLOBAL_VEHICLE_TOKEN
+            ? 1
+            : 0;
+        if (vehicleRank === 0) continue;
+
+        const rangeSpan = Math.max(0, Number(rule.km_to) - Number(rule.km_from));
+        const isBetter =
+          scope > bestScope ||
+          (scope === bestScope && vehicleRank > bestVehicleRank) ||
+          (scope === bestScope && vehicleRank === bestVehicleRank && rangeSpan < bestRangeSpan);
+
+        if (isBetter) {
+          best = rule;
+          bestScope = scope;
+          bestVehicleRank = vehicleRank;
+          bestRangeSpan = rangeSpan;
+        }
+      }
+
+      return best;
+    }
+
+    async function fetchDistancePricingRules(): Promise<DistancePricingRule[]> {
+      try {
+        const params = new URLSearchParams({
+          country: `eq.${KM_PRICING_COUNTRY_CODE}`,
+          is_active: "eq.true",
+          select: "country,city,month,km_from,km_to,vehicle_type,pricing_mode,price_amount,price_currency",
+          order: "updated_at.desc",
+        });
+        const res = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/distance_pricing_rules?${params.toString()}`, {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+          },
+        });
+        if (!res.ok) return [];
+        const payload = await res.json();
+        if (!Array.isArray(payload)) return [];
+        return payload
+          .map((row: any) => ({
+            country: String(row.country || KM_PRICING_COUNTRY_CODE),
+            city: row.city ? String(row.city) : null,
+            month: row.month === null || row.month === undefined ? null : Number(row.month),
+            km_from: Number(row.km_from),
+            km_to: Number(row.km_to),
+            vehicle_type: String(row.vehicle_type || KM_GLOBAL_VEHICLE_TOKEN),
+            pricing_mode: String(row.pricing_mode || ""),
+            price_amount: Number(row.price_amount),
+            price_currency: String(row.price_currency || "EUR"),
+          }))
+          .filter(
+            (row: DistancePricingRule) =>
+              Number.isFinite(row.km_from) &&
+              Number.isFinite(row.km_to) &&
+              row.km_from >= 1 &&
+              row.km_to >= row.km_from &&
+              Number.isFinite(row.price_amount) &&
+              row.price_amount > 0 &&
+              !!row.pricing_mode,
+          );
+      } catch (pricingRuleError) {
+        console.error("Failed to fetch distance pricing rules", String(pricingRuleError));
+        return [];
+      }
+    }
+
+    function calculateKmPriceForVehicle(
+      vehicleType: string,
+      distanceKm: number,
+      rules: DistancePricingRule[],
+      targetCity: string | null,
+      targetMonth: number | null,
+    ): { price: number; currency: string } | null {
+      if (!Number.isFinite(distanceKm) || distanceKm < 1 || distanceKm > KM_PRICING_MAX_DISTANCE_KM) {
+        return null;
+      }
+
+      const baseTargetKm = Math.min(distanceKm, KM_BASE_MAX_DISTANCE);
+      const baseRuleCandidates = rules.filter(
+        (rule) =>
+          rule.pricing_mode === KM_FLAT_MODE &&
+          rule.km_from <= baseTargetKm &&
+          rule.km_to >= baseTargetKm,
+      );
+      const baseRule = selectBestDistanceRule(baseRuleCandidates, targetCity, targetMonth, vehicleType);
+      if (!baseRule || !Number.isFinite(baseRule.price_amount) || baseRule.price_amount <= 0) {
+        return null;
+      }
+
+      let total = Number(baseRule.price_amount);
+      const currency = baseRule.price_currency || "EUR";
+
+      if (distanceKm > KM_TIER_ONE_START) {
+        const tierOneTargetKm = Math.min(distanceKm, KM_TIER_ONE_END);
+        const tierOneCandidates = rules.filter(
+          (rule) =>
+            rule.pricing_mode === KM_INCREMENTAL_MODE &&
+            rule.km_from <= tierOneTargetKm &&
+            rule.km_to >= tierOneTargetKm,
+        );
+        const tierOneRule = selectBestDistanceRule(tierOneCandidates, targetCity, targetMonth, vehicleType);
+        if (!tierOneRule || !Number.isFinite(tierOneRule.price_amount) || tierOneRule.price_amount <= 0) {
+          return null;
+        }
+        if ((tierOneRule.price_currency || "EUR") !== currency) return null;
+
+        const tierOneBillableKm = Math.max(
+          0,
+          tierOneTargetKm - Math.max(Number(tierOneRule.km_from), KM_TIER_ONE_START),
+        );
+        total += tierOneBillableKm * Number(tierOneRule.price_amount);
+      }
+
+      if (distanceKm > KM_TIER_TWO_START) {
+        const tierTwoTargetKm = Math.min(distanceKm, KM_PRICING_MAX_DISTANCE_KM);
+        const tierTwoCandidates = rules.filter(
+          (rule) =>
+            rule.pricing_mode === KM_INCREMENTAL_MODE &&
+            rule.km_from <= tierTwoTargetKm &&
+            rule.km_to >= tierTwoTargetKm,
+        );
+        const tierTwoRule = selectBestDistanceRule(tierTwoCandidates, targetCity, targetMonth, vehicleType);
+        if (!tierTwoRule || !Number.isFinite(tierTwoRule.price_amount) || tierTwoRule.price_amount <= 0) {
+          return null;
+        }
+        if ((tierTwoRule.price_currency || "EUR") !== currency) return null;
+
+        const tierTwoBillableKm = Math.max(
+          0,
+          tierTwoTargetKm - Math.max(Number(tierTwoRule.km_from), KM_TIER_TWO_START),
+        );
+        total += tierTwoBillableKm * Number(tierTwoRule.price_amount);
+      }
+
+      return { price: roundKmPrice(total), currency };
+    }
+
     // Strict monthly/seasonal: pick the row that applies to pickup_date. If a specific price exists
     // for the route and month, use it; do not let base price override seasonal.
     function applySeasonalFilter(rows: any[], dateStr: string | null): any[] {
@@ -472,11 +766,59 @@ Deno.serve(async (req: Request): Promise<Response> => {
     let usedIntercity = false;
     let usedPlaceId = false;
     let usedIntracityAirportDiscount = false;
+    let usedKmPricing = false;
+    let kmPricedRows: any[] = [];
+    let distanceKm: number | null = null;
+
+    const kmPricingCity =
+      intracityCity ||
+      fallbackSharedCity ||
+      resolvedPickupCity ||
+      resolvedDropoffCity ||
+      city ||
+      null;
+
+    if (routeIsTurkey) {
+      distanceKm = await fetchRouteDistanceKm();
+    }
+
+    if (routeIsTurkey && distanceKm !== null && distanceKm <= KM_PRICING_MAX_DISTANCE_KM) {
+      const kmRules = await fetchDistancePricingRules();
+      if (kmRules.length > 0) {
+        kmPricedRows = vehicleTypes
+          .map((vehicle) => {
+            const kmPrice = calculateKmPriceForVehicle(
+              vehicle.value,
+              distanceKm!,
+              kmRules,
+              kmPricingCity,
+              pickupMonth,
+            );
+            if (!kmPrice) return null;
+            return {
+              vehicle_type: vehicle.value,
+              price: kmPrice.price,
+              price_currency: kmPrice.currency,
+            };
+          })
+          .filter((row): row is { vehicle_type: string; price: number; price_currency: string } => !!row);
+
+        // Enable KM pricing only when all visible vehicle options are covered.
+        if (kmPricedRows.length === vehicleTypes.length) {
+          usedKmPricing = true;
+        }
+      }
+    }
 
     // Şehir içi adresten adrese kuralı:
     // hedef semtin havalimanı fiyatını baz alıp %10 daha ucuz hesapla.
     const intracityReferenceCity = intracityCity || fallbackSharedCity;
-    if (isIntracityAddressTransfer && intracityReferenceCity) {
+    if (
+      !usedKmPricing &&
+      isIntracityAddressTransfer &&
+      intracityReferenceCity &&
+      (distanceKm === null || distanceKm <= KM_PRICING_MAX_DISTANCE_KM)
+    ) {
       intracityReferencePrices = await fetchIntracityAirportReferencePrices(
         intracityReferenceCity,
         pickupDistrict,
@@ -487,7 +829,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
 
-    if (!usedIntracityAirportDiscount && !isIntracityAddressTransfer && pickupPlaceId && dropoffPlaceId) {
+    if (!usedKmPricing && !usedIntracityAirportDiscount && !isIntracityAddressTransfer && pickupPlaceId && dropoffPlaceId) {
       try {
         const res = await fetchWithTimeout(
           `${SUPABASE_URL}/rest/v1/intercity_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&or=(and(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)}),and(pickup_place_id.eq.${encodeURIComponent(dropoffPlaceId)},dropoff_place_id.eq.${encodeURIComponent(pickupPlaceId)}))&order=updated_at.desc`,
@@ -525,7 +867,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // ---- INTERCITY / INTRA-CITY PRICE MATCHING (text-based, when no Place ID match) ----
-    if (!usedIntracityAirportDiscount && !usedPlaceId && isIntercityTransfer && !airport) {
+    if (!usedKmPricing && !usedIntracityAirportDiscount && !usedPlaceId && isIntercityTransfer && !airport) {
       const fromCity = resolvedPickupCity || city!;
       const toCity = resolvedDropoffCity || city!;
       const sameRouteCity = isSameCity(fromCity, toCity) || sameResolvedCity;
@@ -606,7 +948,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // ---- REGION PRICES MATCHING (airport transfers + fallback, skip when wrong intercity fallback) ----
-    if (!usedIntracityAirportDiscount && !usedPlaceId && !usedIntercity && !skipRegionFallback) {
+    if (!usedKmPricing && !usedIntracityAirportDiscount && !usedPlaceId && !usedIntercity && !skipRegionFallback) {
       // Strategy R1: District + City + Airport (most specific). Case-insensitive for district/city.
       if (district && city && airport) {
         regionPrices = await queryTable("region_prices", {
@@ -648,7 +990,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Apply strict monthly/seasonal filter for region prices
-    if (!usedIntracityAirportDiscount && !usedIntercity && pickupDateStr && regionPrices.length > 0) {
+    if (!usedKmPricing && !usedIntracityAirportDiscount && !usedIntercity && pickupDateStr && regionPrices.length > 0) {
       regionPrices = applySeasonalFilter(regionPrices, pickupDateStr);
     }
 
@@ -660,7 +1002,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
       : [];
 
     // Use whichever source found prices (validation: specific route+month price is used, no generic override)
-    const matchedPrices = usedIntracityAirportDiscount
+    const matchedPrices = usedKmPricing
+      ? kmPricedRows
+      : usedIntracityAirportDiscount
       ? intracityDiscountedPrices
       : usedIntercity
       ? intercityPrices
@@ -679,10 +1023,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const normalizedMatchPrice = Number(match?.price);
 
       if (match && Number.isFinite(normalizedMatchPrice) && normalizedMatchPrice > 0) {
+        const outputPrice = usedKmPricing
+          ? roundKmPrice(normalizedMatchPrice)
+          : Math.ceil(normalizedMatchPrice);
         prices.push({
           vehicleType: vt.value,
           vehicleLabel: vt.label,
-          price: Math.ceil(normalizedMatchPrice),
+          price: outputPrice,
           currency: match.price_currency || customerCurrency || "EUR",
           passengers: vt.passengers,
           luggage: vt.luggage,
@@ -718,12 +1065,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       matchedAirport: airport,
       isDubai,
       region,
-      priceSource: usedIntracityAirportDiscount
+      priceSource: usedKmPricing
+        ? "km_pricing"
+        : usedIntracityAirportDiscount
         ? "intracity_airport_discount"
         : usedIntercity
         ? "intercity_prices"
         : "region_prices",
-      intracityDiscountApplied: usedIntracityAirportDiscount,
+      intracityDiscountApplied: usedIntracityAirportDiscount && !usedKmPricing,
+      distanceKm,
       message: hasAvailablePrice ? null : "Fiyat Bulunamadı",
     }), { headers: corsHeaders });
 

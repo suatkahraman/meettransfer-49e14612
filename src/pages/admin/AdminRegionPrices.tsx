@@ -27,7 +27,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays, Route } from 'lucide-react';
 
 function priceCoversMonth(price: { valid_from?: string | null; valid_to?: string | null }, month: number, year: number): boolean {
   if (!price.valid_from || !price.valid_to) return true;
@@ -44,6 +44,7 @@ function priceCoversMonth(price: { valid_from?: string | null; valid_to?: string
 import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
 import MonthlyPriceUpdateDialog from "@/components/admin/MonthlyPriceUpdateDialog";
 import SeasonalPricesManager from "@/components/admin/SeasonalPricesManager";
+import KmPricingManager from "@/components/admin/KmPricingManager";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -177,7 +178,7 @@ interface IntercityPrice {
 
 const AdminRegionPrices = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'airport' | 'intercity' | 'seasonal'>('airport');
+  const [activeTab, setActiveTab] = useState<'airport' | 'intercity' | 'seasonal' | 'km'>('airport');
   
   // Airport transfer prices state
   const [prices, setPrices] = useState<RegionPrice[]>([]);
@@ -645,11 +646,42 @@ const AdminRegionPrices = () => {
     
     setTesting(true);
     try {
-      const result = await testPriceMatch(testPickup, testDropoff, testVehicle);
-      setTestResult(result);
+      const analysisResult = await testPriceMatch(testPickup, testDropoff, testVehicle);
+      const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
+        body: {
+          pickup: testPickup,
+          dropoff: testDropoff,
+          customerCurrency: "EUR",
+        },
+      });
+      if (error) throw error;
+
+      const selectedVehiclePrice = Array.isArray(data?.prices)
+        ? data.prices.find((priceRow: any) => priceRow.vehicleType === testVehicle && !!priceRow.available)
+        : null;
+
+      const mergedResult: MatchResult = selectedVehiclePrice
+        ? {
+            found: true,
+            price: Number(selectedVehiclePrice.price),
+            currency: selectedVehiclePrice.currency || "EUR",
+            matchedCity: data?.matchedCity || undefined,
+            matchedDistrict: data?.matchedDistrict || undefined,
+            matchedAirport: data?.matchedAirport || undefined,
+            confidence: "high",
+            matchType: "exact",
+          }
+        : {
+            found: false,
+          };
+
+      setTestResult({
+        result: mergedResult,
+        analysis: analysisResult.analysis,
+      });
       
-      if (result.result.found) {
-        toast.success(`Fiyat bulundu: ${formatPrice(result.result.price!, result.result.currency!)}`);
+      if (mergedResult.found) {
+        toast.success(`Fiyat bulundu: ${formatPrice(mergedResult.price!, mergedResult.currency!)}`);
       } else {
         toast.warning('Bu güzergah için fiyat bulunamadı');
       }
@@ -794,8 +826,8 @@ const AdminRegionPrices = () => {
         </Card>
 
         {/* Tabs for Airport, Intercity, and Seasonal */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'airport' | 'intercity' | 'seasonal')}>
-          <TabsList className="grid w-full grid-cols-3 min-w-0 sm:grid-cols-3 h-auto flex-wrap sm:flex-nowrap gap-1 p-1">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'airport' | 'intercity' | 'seasonal' | 'km')}>
+          <TabsList className="grid w-full grid-cols-2 min-w-0 sm:grid-cols-4 h-auto flex-wrap sm:flex-nowrap gap-1 p-1">
             <TabsTrigger value="airport" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
               <MapPin className="h-4 w-4 shrink-0" />
               <span className="truncate">Havalimanı</span>
@@ -807,6 +839,10 @@ const AdminRegionPrices = () => {
             <TabsTrigger value="seasonal" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
               <CalendarDays className="h-4 w-4 shrink-0" />
               <span className="truncate">Sezonluk</span>
+            </TabsTrigger>
+            <TabsTrigger value="km" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
+              <Route className="h-4 w-4 shrink-0" />
+              <span className="truncate">KM Fiyatları</span>
             </TabsTrigger>
           </TabsList>
 
@@ -1453,6 +1489,15 @@ const AdminRegionPrices = () => {
           <TabsContent value="seasonal" className="space-y-6">
             <SeasonalPricesManager priceType="region" />
             <SeasonalPricesManager priceType="intercity" />
+          </TabsContent>
+
+          {/* KM Pricing Tab */}
+          <TabsContent value="km">
+            <KmPricingManager
+              cities={Object.keys(CITIES_DATA)}
+              vehicleTypes={VEHICLE_TYPES}
+              currencies={CURRENCIES}
+            />
           </TabsContent>
         </Tabs>
 

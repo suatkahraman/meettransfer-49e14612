@@ -651,6 +651,57 @@ export type Database = {
         }
         Relationships: []
       }
+      distance_pricing_rules: {
+        Row: {
+          city: string | null
+          country: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          km_from: number
+          km_to: number
+          month: number | null
+          price_amount: number
+          price_currency: string
+          pricing_mode: string
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          km_from: number
+          km_to: number
+          month?: number | null
+          price_amount: number
+          price_currency?: string
+          pricing_mode?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          km_from?: number
+          km_to?: number
+          month?: number | null
+          price_amount?: number
+          price_currency?: string
+          pricing_mode?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
       favorite_routes: {
         Row: {
           created_at: string

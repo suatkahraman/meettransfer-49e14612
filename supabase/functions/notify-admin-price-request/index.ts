@@ -37,6 +37,54 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 ]);
 
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
+const EDGE_FETCH_TIMEOUT_MS = 8000;
+const KM_PRICING_COUNTRY_CODE = "TR";
+const KM_PRICING_MAX_DISTANCE_KM = 85;
+const KM_GLOBAL_VEHICLE_TOKEN = "__all__";
+const KM_FLAT_MODE = "flat_base";
+const KM_INCREMENTAL_MODE = "incremental_per_km";
+const KM_BASE_MAX_DISTANCE = 50;
+const KM_TIER_ONE_START = 51;
+const KM_TIER_ONE_END = 70;
+const KM_TIER_TWO_START = 71;
+
+const TURKEY_KM_ELIGIBLE_CITIES = new Set([
+  "Istanbul",
+  "Ankara",
+  "Antalya",
+  "Bodrum",
+  "Dalaman",
+  "Izmir",
+  "Bursa",
+  "Alanya",
+  "Aydin",
+  "Mugla",
+  "Denizli",
+  "Adana",
+  "Cappadocia",
+]);
+
+const TURKEY_AIRPORTS = new Set([
+  "Istanbul Airport (IST)",
+  "Sabiha Gokcen Airport (SAW)",
+  "Antalya Airport (AYT)",
+  "Bodrum-Milas Airport (BJV)",
+  "Dalaman Airport (DLM)",
+  "Izmir Adnan Menderes Airport (ADB)",
+  "Ankara Esenboga Airport (ESB)",
+]);
+
+type DistancePricingRule = {
+  city: string | null;
+  country: string;
+  km_from: number;
+  km_to: number;
+  month: number | null;
+  price_amount: number;
+  price_currency: string;
+  pricing_mode: string;
+  vehicle_type: string;
+};
 
 function isSameCity(a: string | null, b: string | null): boolean {
   if (!a || !b) return false;
@@ -96,6 +144,191 @@ function inferCityFromDistrict(district: string | null): string | null {
   return null;
 }
 
+function isTurkeyRoute(params: {
+  pickup: string;
+  dropoff: string;
+  pickupCity: string | null;
+  dropoffCity: string | null;
+  fallbackCity: string | null;
+  airport: string | null;
+}): boolean {
+  const combined = normalizeTurkish(`${params.pickup} ${params.dropoff}`).toLowerCase();
+  if (/dubai|uae|emirates/.test(combined)) return false;
+  if (/\bturkiye\b|\bturkey\b/.test(combined)) return true;
+
+  if (params.airport && TURKEY_AIRPORTS.has(params.airport)) return true;
+  const cityCandidates = [params.pickupCity, params.dropoffCity, params.fallbackCity];
+  return cityCandidates.some((cityName) => !!cityName && TURKEY_KM_ELIGIBLE_CITIES.has(cityName));
+}
+
+function roundKmPrice(amount: number): number {
+  return Math.round(amount * 100) / 100;
+}
+
+async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), EDGE_FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function fetchRouteDistanceKm(pickup: string, dropoff: string): Promise<number | null> {
+  const googleApiKey =
+    Deno.env.get("GOOGLE_DISTANCE_API_KEY") ||
+    Deno.env.get("GOOGLE_MAPS_API_KEY") ||
+    Deno.env.get("GOOGLE_PLACES_API_KEY") ||
+    "";
+  if (!googleApiKey || !pickup || !dropoff) return null;
+
+  const params = new URLSearchParams({
+    origins: pickup,
+    destinations: dropoff,
+    mode: "driving",
+    language: "tr",
+    key: googleApiKey,
+  });
+
+  try {
+    const res = await fetchWithTimeout(`https://maps.googleapis.com/maps/api/distancematrix/json?${params.toString()}`);
+    if (!res.ok) return null;
+    const payload = await res.json();
+    const element = payload?.rows?.[0]?.elements?.[0];
+    const meters = Number(element?.distance?.value);
+    if (payload?.status !== "OK" || element?.status !== "OK" || !Number.isFinite(meters) || meters <= 0) {
+      return null;
+    }
+    return Math.max(1, Math.ceil(meters / 1000));
+  } catch (distanceError) {
+    console.error("Distance Matrix lookup failed", String(distanceError));
+    return null;
+  }
+}
+
+function getRuleScopeScore(
+  rule: DistancePricingRule,
+  targetCity: string | null,
+  targetMonth: number | null,
+): number | null {
+  let score = 0;
+  if (rule.city) {
+    if (!targetCity || !isSameCity(rule.city, targetCity)) return null;
+    score += 2;
+  }
+  if (rule.month !== null && rule.month !== undefined) {
+    if (!targetMonth || Number(rule.month) !== Number(targetMonth)) return null;
+    score += 1;
+  }
+  return score;
+}
+
+function selectBestDistanceRule(
+  candidates: DistancePricingRule[],
+  targetCity: string | null,
+  targetMonth: number | null,
+  vehicleType: string,
+): DistancePricingRule | null {
+  const requestedVehicle = vehicleType.trim().toLowerCase();
+  let best: DistancePricingRule | null = null;
+  let bestScope = -1;
+  let bestVehicleRank = -1;
+  let bestRangeSpan = Number.POSITIVE_INFINITY;
+
+  for (const rule of candidates) {
+    const scope = getRuleScopeScore(rule, targetCity, targetMonth);
+    if (scope === null) continue;
+
+    const normalizedRuleVehicle = (rule.vehicle_type || "").trim().toLowerCase();
+    const vehicleRank =
+      normalizedRuleVehicle === requestedVehicle
+        ? 2
+        : normalizedRuleVehicle === KM_GLOBAL_VEHICLE_TOKEN
+        ? 1
+        : 0;
+    if (vehicleRank === 0) continue;
+
+    const rangeSpan = Math.max(0, Number(rule.km_to) - Number(rule.km_from));
+    const isBetter =
+      scope > bestScope ||
+      (scope === bestScope && vehicleRank > bestVehicleRank) ||
+      (scope === bestScope && vehicleRank === bestVehicleRank && rangeSpan < bestRangeSpan);
+
+    if (isBetter) {
+      best = rule;
+      bestScope = scope;
+      bestVehicleRank = vehicleRank;
+      bestRangeSpan = rangeSpan;
+    }
+  }
+
+  return best;
+}
+
+function calculateKmPriceForVehicle(
+  vehicleType: string,
+  distanceKm: number,
+  rules: DistancePricingRule[],
+  targetCity: string | null,
+  targetMonth: number | null,
+): { price: number; currency: string } | null {
+  if (!Number.isFinite(distanceKm) || distanceKm < 1 || distanceKm > KM_PRICING_MAX_DISTANCE_KM) return null;
+
+  const baseTargetKm = Math.min(distanceKm, KM_BASE_MAX_DISTANCE);
+  const baseRuleCandidates = rules.filter(
+    (rule) =>
+      rule.pricing_mode === KM_FLAT_MODE &&
+      rule.km_from <= baseTargetKm &&
+      rule.km_to >= baseTargetKm,
+  );
+  const baseRule = selectBestDistanceRule(baseRuleCandidates, targetCity, targetMonth, vehicleType);
+  if (!baseRule || !Number.isFinite(baseRule.price_amount) || baseRule.price_amount <= 0) return null;
+
+  let total = Number(baseRule.price_amount);
+  const currency = baseRule.price_currency || "EUR";
+
+  if (distanceKm > KM_TIER_ONE_START) {
+    const tierOneTargetKm = Math.min(distanceKm, KM_TIER_ONE_END);
+    const tierOneCandidates = rules.filter(
+      (rule) =>
+        rule.pricing_mode === KM_INCREMENTAL_MODE &&
+        rule.km_from <= tierOneTargetKm &&
+        rule.km_to >= tierOneTargetKm,
+    );
+    const tierOneRule = selectBestDistanceRule(tierOneCandidates, targetCity, targetMonth, vehicleType);
+    if (!tierOneRule || !Number.isFinite(tierOneRule.price_amount) || tierOneRule.price_amount <= 0) return null;
+    if ((tierOneRule.price_currency || "EUR") !== currency) return null;
+
+    const tierOneBillableKm = Math.max(
+      0,
+      tierOneTargetKm - Math.max(Number(tierOneRule.km_from), KM_TIER_ONE_START),
+    );
+    total += tierOneBillableKm * Number(tierOneRule.price_amount);
+  }
+
+  if (distanceKm > KM_TIER_TWO_START) {
+    const tierTwoTargetKm = Math.min(distanceKm, KM_PRICING_MAX_DISTANCE_KM);
+    const tierTwoCandidates = rules.filter(
+      (rule) =>
+        rule.pricing_mode === KM_INCREMENTAL_MODE &&
+        rule.km_from <= tierTwoTargetKm &&
+        rule.km_to >= tierTwoTargetKm,
+    );
+    const tierTwoRule = selectBestDistanceRule(tierTwoCandidates, targetCity, targetMonth, vehicleType);
+    if (!tierTwoRule || !Number.isFinite(tierTwoRule.price_amount) || tierTwoRule.price_amount <= 0) return null;
+    if ((tierTwoRule.price_currency || "EUR") !== currency) return null;
+
+    const tierTwoBillableKm = Math.max(
+      0,
+      tierTwoTargetKm - Math.max(Number(tierTwoRule.km_from), KM_TIER_TWO_START),
+    );
+    total += tierTwoBillableKm * Number(tierTwoRule.price_amount);
+  }
+
+  return { price: roundKmPrice(total), currency };
+}
+
 function analyzeLocation(pickup: string, dropoff: string): {
   airport: string | null;
   city: string | null;
@@ -114,6 +347,7 @@ function analyzeLocation(pickup: string, dropoff: string): {
   else if (/\bbjv\b|bodrum.*airport|milas.*airport|bodrum.*havalimani|milas.*havalimani/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
   else if (/\bdlm\b|dalaman.*airport|dalaman.*havalimani/i.test(s)) airport = "Dalaman Airport (DLM)";
   else if (/adnan menderes|\badb\b/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
+  else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
 
   const pickupCity = detectCity(pickup);
   const dropoffCity = detectCity(dropoff);
@@ -199,8 +433,34 @@ serve(async (req) => {
         : null;
     console.log("Location analysis:", { airport, city: resolvedCity, pickupCity: resolvedPickupCity, dropoffCity: resolvedDropoffCity, pickupDistrict, dropoffDistrict, district });
 
-    if (resolvedCity || airport) {
+    const routeIsTurkey = isTurkeyRoute({
+      pickup,
+      dropoff,
+      pickupCity: resolvedPickupCity,
+      dropoffCity: resolvedDropoffCity,
+      fallbackCity: resolvedCity,
+      airport,
+    });
+
+    if (resolvedCity || airport || routeIsTurkey) {
       const selectedVehicle = vehicleType || 'mercedes-vito';
+      const parsedPickupDate = pickupDate ? new Date(pickupDate) : null;
+      const pickupMonth =
+        parsedPickupDate && !Number.isNaN(parsedPickupDate.getTime())
+          ? parsedPickupDate.getUTCMonth() + 1
+          : null;
+      const kmPricingCity =
+        intracityCity ||
+        fallbackSharedCity ||
+        resolvedPickupCity ||
+        resolvedDropoffCity ||
+        resolvedCity ||
+        null;
+      const hasDifferentResolvedCities =
+        !!resolvedPickupCity &&
+        !!resolvedDropoffCity &&
+        !isSameCity(resolvedPickupCity, resolvedDropoffCity);
+      let distanceKm: number | null = null;
 
       const isTurkeyIntracityAddressTransfer =
         !airport &&
@@ -210,7 +470,71 @@ serve(async (req) => {
           !!fallbackSharedCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(fallbackSharedCity)
         ));
 
-      if (isTurkeyIntracityAddressTransfer) {
+      if (routeIsTurkey) {
+        distanceKm = await fetchRouteDistanceKm(pickup, dropoff);
+        if (distanceKm !== null && distanceKm <= KM_PRICING_MAX_DISTANCE_KM) {
+          const { data: kmRulesRaw } = await supabase
+            .from('distance_pricing_rules')
+            .select('country,city,month,km_from,km_to,vehicle_type,pricing_mode,price_amount,price_currency')
+            .eq('country', KM_PRICING_COUNTRY_CODE)
+            .eq('is_active', true)
+            .order('updated_at', { ascending: false });
+
+          const kmRules = (kmRulesRaw || [])
+            .map((row: any) => ({
+              country: String(row.country || KM_PRICING_COUNTRY_CODE),
+              city: row.city ? String(row.city) : null,
+              month: row.month === null || row.month === undefined ? null : Number(row.month),
+              km_from: Number(row.km_from),
+              km_to: Number(row.km_to),
+              vehicle_type: String(row.vehicle_type || KM_GLOBAL_VEHICLE_TOKEN),
+              pricing_mode: String(row.pricing_mode || ''),
+              price_amount: Number(row.price_amount),
+              price_currency: String(row.price_currency || 'EUR'),
+            }))
+            .filter((row: DistancePricingRule) =>
+              Number.isFinite(row.km_from) &&
+              Number.isFinite(row.km_to) &&
+              row.km_from >= 1 &&
+              row.km_to >= row.km_from &&
+              Number.isFinite(row.price_amount) &&
+              row.price_amount > 0 &&
+              !!row.pricing_mode
+            );
+
+          const kmPrice = calculateKmPriceForVehicle(
+            selectedVehicle,
+            distanceKm,
+            kmRules,
+            kmPricingCity,
+            pickupMonth,
+          );
+
+          if (kmPrice) {
+            if (priceCurrency !== kmPrice.currency) {
+              const converted = await convertCurrency(kmPrice.price, kmPrice.currency, priceCurrency);
+              autoPrice = converted.amount;
+              autoPriceCurrency = priceCurrency;
+            } else {
+              autoPrice = kmPrice.price;
+              autoPriceCurrency = kmPrice.currency;
+            }
+
+            if (hasReturnTrip) {
+              returnPrice = Math.ceil(autoPrice! * 0.75);
+            }
+
+            autoPriced = true;
+            console.log("✅ KM auto-price found:", { distanceKm, price: autoPrice, currency: autoPriceCurrency });
+          }
+        }
+      }
+
+      if (
+        !autoPriced &&
+        isTurkeyIntracityAddressTransfer &&
+        (distanceKm === null || distanceKm <= KM_PRICING_MAX_DISTANCE_KM)
+      ) {
         const referenceCity = intracityCity || fallbackSharedCity || resolvedCity;
         const districtCandidates = [pickupDistrict, dropoffDistrict].filter(
           (candidate, index, arr): candidate is string => !!candidate && arr.indexOf(candidate) === index,
@@ -254,63 +578,116 @@ serve(async (req) => {
         }
 
         if (foundPrice) {
-            const intracityDiscountedPrice = applyIntracityAirportDiscount(Number(foundPrice.price));
-            const baseCurrency = foundPrice.price_currency || "EUR";
+          const intracityDiscountedPrice = applyIntracityAirportDiscount(Number(foundPrice.price));
+          const baseCurrency = foundPrice.price_currency || "EUR";
 
-            if (priceCurrency !== baseCurrency) {
-              const converted = await convertCurrency(intracityDiscountedPrice, baseCurrency, priceCurrency);
-              autoPrice = converted.amount;
-              autoPriceCurrency = priceCurrency;
-            } else {
-              autoPrice = intracityDiscountedPrice;
-              autoPriceCurrency = baseCurrency;
-            }
+          if (priceCurrency !== baseCurrency) {
+            const converted = await convertCurrency(intracityDiscountedPrice, baseCurrency, priceCurrency);
+            autoPrice = converted.amount;
+            autoPriceCurrency = priceCurrency;
+          } else {
+            autoPrice = intracityDiscountedPrice;
+            autoPriceCurrency = baseCurrency;
+          }
 
-            if (hasReturnTrip) {
-              returnPrice = Math.ceil(autoPrice! * 0.75);
-            }
+          if (hasReturnTrip) {
+            returnPrice = Math.ceil(autoPrice! * 0.75);
+          }
 
-            autoPriced = true;
-            console.log("✅ Intracity auto-price found:", {
-              city: referenceCity,
-              pickupDistrict,
-              dropoffDistrict,
-              basePrice: foundPrice.price,
-              discountedPrice: intracityDiscountedPrice,
-              currency: autoPriceCurrency,
-            });
+          autoPriced = true;
+          console.log("✅ Intracity auto-price found:", {
+            city: referenceCity,
+            pickupDistrict,
+            dropoffDistrict,
+            basePrice: foundPrice.price,
+            discountedPrice: intracityDiscountedPrice,
+            currency: autoPriceCurrency,
+          });
         }
       }
-      
-      // Try to find price with different strategies
+
+      if (!autoPriced && !airport && hasDifferentResolvedCities) {
+        let intercityFound: any = null;
+
+        if (pickupDistrict && dropoffDistrict && resolvedPickupCity && resolvedDropoffCity) {
+          const { data: exactIntercity } = await supabase
+            .from('intercity_prices')
+            .select('*')
+            .eq('is_active', true)
+            .eq('vehicle_type', selectedVehicle)
+            .eq('from_city', resolvedPickupCity)
+            .eq('to_city', resolvedDropoffCity)
+            .eq('from_district', pickupDistrict)
+            .eq('to_district', dropoffDistrict)
+            .limit(1);
+          if (exactIntercity && exactIntercity[0]) intercityFound = exactIntercity[0];
+        }
+
+        if (!intercityFound && resolvedPickupCity && resolvedDropoffCity) {
+          const { data: cityIntercity } = await supabase
+            .from('intercity_prices')
+            .select('*')
+            .eq('is_active', true)
+            .eq('vehicle_type', selectedVehicle)
+            .eq('from_city', resolvedPickupCity)
+            .eq('to_city', resolvedDropoffCity)
+            .limit(1);
+          if (cityIntercity && cityIntercity[0]) intercityFound = cityIntercity[0];
+        }
+
+        if (!intercityFound && resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity !== resolvedDropoffCity) {
+          const { data: reverseIntercity } = await supabase
+            .from('intercity_prices')
+            .select('*')
+            .eq('is_active', true)
+            .eq('vehicle_type', selectedVehicle)
+            .eq('from_city', resolvedDropoffCity)
+            .eq('to_city', resolvedPickupCity)
+            .limit(1);
+          if (reverseIntercity && reverseIntercity[0]) intercityFound = reverseIntercity[0];
+        }
+
+        if (intercityFound) {
+          const baseCurrency = intercityFound.price_currency || "EUR";
+          if (priceCurrency !== baseCurrency) {
+            const converted = await convertCurrency(Number(intercityFound.price), baseCurrency, priceCurrency);
+            autoPrice = converted.amount;
+            autoPriceCurrency = priceCurrency;
+          } else {
+            autoPrice = Number(intercityFound.price);
+            autoPriceCurrency = baseCurrency;
+          }
+          if (hasReturnTrip) {
+            returnPrice = Math.ceil(autoPrice! * 0.75);
+          }
+          autoPriced = true;
+          console.log("✅ Intercity auto-price found:", { price: autoPrice, currency: autoPriceCurrency });
+        }
+      }
+
+      // Try to find price with different region strategies
       const strategies = autoPriced ? [] : [
-        // Strategy 1: District + City + Airport
         district && resolvedCity && airport ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${resolvedCity}`, airport: `eq.${airport}`, district: `eq.${district}`, is_active: "eq.true" } : null,
-        // Strategy 2: City + Airport
         resolvedCity && airport ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${resolvedCity}`, airport: `eq.${airport}`, is_active: "eq.true" } : null,
-        // Strategy 3: City only
         resolvedCity ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${resolvedCity}`, is_active: "eq.true" } : null,
-        // Strategy 4: Airport only
         airport ? { vehicle_type: `eq.${selectedVehicle}`, airport: `eq.${airport}`, is_active: "eq.true" } : null,
       ].filter(Boolean);
 
       for (const strategy of strategies) {
         if (!strategy) continue;
-        
+
         let query = supabase.from('region_prices').select('*').eq('is_active', true);
-        
         if (strategy.vehicle_type) query = query.eq('vehicle_type', selectedVehicle);
         if (strategy.city) query = query.eq('city', resolvedCity);
         if (strategy.airport) query = query.eq('airport', airport);
         if (strategy.district) query = query.eq('district', district);
-        
+
         const { data: prices } = await query.limit(1);
-        
+
         if (prices && prices[0]) {
           const foundPrice = prices[0];
           const baseCurrency = foundPrice.price_currency || "EUR";
-          
-          // Convert if needed
+
           if (priceCurrency !== baseCurrency) {
             const converted = await convertCurrency(foundPrice.price, baseCurrency, priceCurrency);
             autoPrice = converted.amount;
@@ -319,14 +696,13 @@ serve(async (req) => {
             autoPrice = foundPrice.price;
             autoPriceCurrency = baseCurrency;
           }
-          
-          // Calculate return price with discount
+
           if (hasReturnTrip) {
             returnPrice = Math.ceil(autoPrice! * 0.75);
           }
-          
+
           autoPriced = true;
-          console.log("✅ Auto-price found:", autoPrice, autoPriceCurrency, "from strategy");
+          console.log("✅ Auto-price found:", autoPrice, autoPriceCurrency, "from region strategy");
           break;
         }
       }
