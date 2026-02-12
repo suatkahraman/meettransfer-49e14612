@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
 import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
 import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
+import { ensureSessionPersistence, signOutAndClearClientAuth } from '@/lib/authSession';
 
 const loginSchema = z.object({
   email: z.string().trim().email().max(255),
@@ -190,7 +191,7 @@ const AgencyLoginScreen = () => {
     cancel2FA();
     setPendingRole(null);
     setViewMode('login');
-    await supabase.auth.signOut();
+    await signOutAndClearClientAuth();
   };
 
   // If already logged in, show loading
@@ -257,6 +258,19 @@ const AgencyLoginScreen = () => {
           toast.error(error.message || t('loginFailed') || 'Login failed');
         }
       } else if (authData?.user && authData?.session) {
+        const persisted = await ensureSessionPersistence(authData.session);
+        if (!persisted) {
+          await signOutAndClearClientAuth();
+          toast.error(
+            language === 'TR'
+              ? 'Oturum kaydedilemedi. Çerez/storage izinlerini kontrol edip tekrar deneyin.'
+              : 'Session could not be saved. Please check cookies/storage permissions and try again.'
+          );
+          setIsLoading(false);
+          clearSuppressAuthRedirect();
+          return;
+        }
+
         // RLS bypass: get-user-role - ayni cihaz 2. giris retry
         const token = authData.session.access_token;
         let userRole = 'agency';
@@ -271,7 +285,7 @@ const AgencyLoginScreen = () => {
           }
         }
         if (userRole !== 'agency') {
-          await supabase.auth.signOut();
+          await signOutAndClearClientAuth();
           toast.error(language === 'TR' ? 'Bu hesap bir acenta hesabı değil' : 'This is not an agency account');
           setIsLoading(false);
           clearSuppressAuthRedirect();
@@ -290,7 +304,7 @@ const AgencyLoginScreen = () => {
           setViewMode('2fa');
 
           // Sign out temporarily - user needs to verify via 2FA
-          await supabase.auth.signOut();
+          await signOutAndClearClientAuth();
 
           // Device not trusted or suspicious activity - require 2FA
           const langCode = language === 'TR' ? 'tr' : 'en';

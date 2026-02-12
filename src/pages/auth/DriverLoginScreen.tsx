@@ -18,6 +18,7 @@ import { normalizePasswordInput } from '@/lib/normalizePasswordInput';
 import { useStorageAvailable } from '@/hooks/useStorageAvailable';
 import { usePWADetect } from '@/hooks/usePWADetect';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
+import { ensureSessionPersistence, signOutAndClearClientAuth } from '@/lib/authSession';
 
 // Şoförler için 2FA yok - sadece şifre ile giriş
 const loginSchema = z.object({
@@ -213,6 +214,18 @@ const DriverLoginScreen = () => {
           toast.error(error.message || t('loginFailed') || 'Login failed');
         }
       } else if (authData?.user && authData?.session) {
+        const persisted = await ensureSessionPersistence(authData.session);
+        if (!persisted) {
+          await signOutAndClearClientAuth();
+          toast.error(
+            language === 'TR'
+              ? 'Oturum kaydedilemedi. Çerez/storage izinlerini kontrol edip tekrar deneyin.'
+              : 'Session could not be saved. Please check cookies/storage permissions and try again.'
+          );
+          setIsLoading(false);
+          return;
+        }
+
         // RLS bypass: get-user-role - ayni cihazdan 2. giris icin retry
         const token = authData.session.access_token;
         let roleData: { success?: boolean; role?: string } | null = null;
@@ -230,7 +243,7 @@ const DriverLoginScreen = () => {
 
         if (!isDriver) {
           toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil' : 'This is not a driver account');
-          await supabase.auth.signOut();
+          await signOutAndClearClientAuth();
           setIsLoading(false);
           return;
         }

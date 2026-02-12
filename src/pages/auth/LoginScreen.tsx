@@ -24,6 +24,7 @@ import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { scrollToFirstError } from '@/lib/formValidation';
 import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
 import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
+import { ensureSessionPersistence, signOutAndClearClientAuth } from '@/lib/authSession';
 
 
 
@@ -352,7 +353,7 @@ const LoginScreen = () => {
     cancel2FA();
     setPendingRole(null);
     setViewMode('login');
-    await supabase.auth.signOut();
+    await signOutAndClearClientAuth();
   };
 
   if (!isResetting && (authLoading || (user && roleLoading && viewMode !== '2fa'))) {
@@ -429,25 +430,38 @@ const LoginScreen = () => {
           toast.error(error.message);
         }
       } else if (authData?.user) {
+        const persisted = await ensureSessionPersistence(authData?.session ?? null);
+        if (!persisted) {
+          await signOutAndClearClientAuth();
+          toast.error(
+            language === 'TR'
+              ? 'Oturum kaydedilemedi. Çerez/storage izinlerini kontrol edip tekrar deneyin.'
+              : 'Session could not be saved. Please check cookies/storage permissions and try again.'
+          );
+          setIsLoading(false);
+          clearSuppressAuthRedirect();
+          return;
+        }
+
         const userRole = await resolveUserRole(authData.user.id, authData?.session?.access_token);
 
         // Rol dogrulama - giris bolumuyle eslesmeli
         if (expectedRole === 'driver' && userRole !== 'driver') {
-          await supabase.auth.signOut();
+          await signOutAndClearClientAuth();
           toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil. Sürücü girişi için doğru hesabı kullanın.' : 'This is not a driver account. Use the correct account for driver login.');
           setIsLoading(false);
           clearSuppressAuthRedirect();
           return;
         }
         if (expectedRole === 'agency' && userRole !== 'agency') {
-          await supabase.auth.signOut();
+          await signOutAndClearClientAuth();
           toast.error(language === 'TR' ? 'Bu hesap bir acenta hesabı değil. Acenta girişi için doğru hesabı kullanın.' : 'This is not an agency account. Use the correct account for agency login.');
           setIsLoading(false);
           clearSuppressAuthRedirect();
           return;
         }
         if (expectedRole === 'customer' && userRole !== 'customer') {
-          await supabase.auth.signOut();
+          await signOutAndClearClientAuth();
           const msg = userRole === 'admin'
             ? (language === 'TR' ? 'Admin girişi için /auth sayfasını kullanın.' : 'Use /auth for admin login.')
             : (language === 'TR' ? 'Bu hesap bir müşteri hesabı değil. Müşteri girişi için doğru hesabı kullanın.' : 'This is not a customer account. Use the correct account.');
@@ -475,7 +489,7 @@ const LoginScreen = () => {
           keepRedirectSuppressed = true;
           setPendingRole(userRole);
           setViewMode('2fa');
-          await supabase.auth.signOut();
+          await signOutAndClearClientAuth();
           const langCode = language === 'TR' ? 'tr' : 'en';
           const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
           if (result.success) {

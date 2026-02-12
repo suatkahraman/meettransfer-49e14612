@@ -4,6 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { startOAuthSignIn } from '@/lib/oauthSignIn';
+import {
+  clearClientAuthStorage,
+  ensureSessionPersistence,
+  signOutAndClearClientAuth,
+} from '@/lib/authSession';
 
 interface AuthContextType {
   user: User | null;
@@ -38,6 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.log('[AuthContext] User signed out, clearing state');
           setSession(null);
           setUser(null);
+          clearClientAuthStorage();
           return;
         }
         
@@ -47,8 +53,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Do not auto-redirect on sign-in here.
         // Redirecting is handled by dedicated pages (OAuthCallback) and login screens.
-        if (event === 'SIGNED_IN') {
-          return;
+        if (
+          currentSession &&
+          (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')
+        ) {
+          ensureSessionPersistence(currentSession).then((persisted) => {
+            if (!persisted) {
+              console.warn('[AuthContext] Session persistence check failed after auth event:', event);
+            }
+          }).catch((error) => {
+            console.warn('[AuthContext] Session persistence check error:', error);
+          });
         }
       }
     );
@@ -72,6 +87,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setSession(existingSession);
           setUser(existingSession?.user ?? null);
         }
+        if (existingSession) {
+          ensureSessionPersistence(existingSession).catch((error) => {
+            console.warn('[AuthContext] Initial session persistence check error:', error);
+          });
+        }
       } catch (error) {
         console.error('Auth initialization error:', error);
       } finally {
@@ -89,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -97,6 +117,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) {
         toast.error(error.message);
         return { error };
+      }
+
+      const persisted = await ensureSessionPersistence(data?.session ?? null);
+      if (!persisted) {
+        clearClientAuthStorage();
+        const persistenceError = new Error('Auth session could not be persisted');
+        toast.error('Session could not be saved. Please enable cookies/storage and try again.');
+        return { error: persistenceError };
       }
       
       toast.success('Welcome back!');
@@ -164,17 +192,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setSession(null);
       
-      // Use scope: 'global' to sign out from all tabs/windows
-      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      // Global sign out first (server token revocation), then local cleanup.
+      const { error } = await signOutAndClearClientAuth({ global: true, clearRememberedLogin: true });
       
       if (error) {
         console.error('[AuthContext] Sign out error:', error);
-        toast.error('Error signing out');
-        return;
+        // Local cleanup is still done; continue to login page.
+        toast.error('Signed out locally, but global session revocation failed.');
+      } else {
+        console.log('[AuthContext] Signed out successfully');
+        toast.success('Signed out successfully');
       }
-      
-      console.log('[AuthContext] Signed out successfully');
-      toast.success('Signed out successfully');
       navigate('/auth', { replace: true });
     } catch (error) {
       console.error('[AuthContext] Sign out exception:', error);

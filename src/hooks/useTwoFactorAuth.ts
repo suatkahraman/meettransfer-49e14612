@@ -153,6 +153,10 @@ const normalizeOtpCode = (input: string): string => {
   return mapped;
 };
 
+const getBaseFingerprint = (fingerprint: string) => {
+  return (fingerprint || '').split('-')[0] || '';
+};
+
 export const useTwoFactorAuth = () => {
   const [twoFactorState, setTwoFactorState] = useState<TwoFactorState>({
     isPending: false,
@@ -226,12 +230,41 @@ export const useTwoFactorAuth = () => {
         body: { userId, deviceFingerprint },
       });
 
+      if (!invokeError && data?.trusted === true) {
+        return true;
+      }
+
+      // Edge function failed or returned untrusted.
+      // Fallback: check directly from trusted_devices for authenticated sessions.
       if (invokeError) {
-        console.error('Error checking trusted device:', invokeError);
+        console.warn('check-trusted-device invoke failed, trying DB fallback:', invokeError);
+      }
+
+      const baseFingerprint = getBaseFingerprint(deviceFingerprint);
+      if (!baseFingerprint) return false;
+
+      const { data: devices, error: dbError } = await supabase
+        .from('trusted_devices')
+        .select('id, device_fingerprint')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('last_used_at', { ascending: false })
+        .limit(10);
+
+      if (dbError) {
+        console.error('Trusted device DB fallback failed:', dbError);
         return false;
       }
 
-      return data?.trusted === true;
+      const matching = devices?.find((d) => getBaseFingerprint(d.device_fingerprint) === baseFingerprint);
+      if (!matching) return false;
+
+      await supabase
+        .from('trusted_devices')
+        .update({ last_used_at: new Date().toISOString() })
+        .eq('id', matching.id);
+
+      return true;
     } catch (err) {
       console.error('Error checking trusted device:', err);
       return false;
@@ -249,12 +282,52 @@ export const useTwoFactorAuth = () => {
         },
       });
 
+      if (!invokeError && data?.success === true) {
+        return true;
+      }
+
+      // Fallback for cases where edge function/JWT policy fails:
+      // use RPC (preferred) and then upsert.
       if (invokeError) {
-        console.error('Error registering trusted device:', invokeError);
+        console.warn('register-trusted-device invoke failed, trying DB fallback:', invokeError);
+      }
+
+      const { data: rpcData, error: rpcError } = await supabase.rpc('register_trusted_device', {
+        p_user_id: userId,
+        p_device_fingerprint: deviceFingerprint,
+        p_ip_address: null,
+        p_user_agent: navigator.userAgent,
+        p_device_name: deviceName,
+      });
+
+      if (!rpcError && !!rpcData) {
+        return true;
+      }
+
+      if (rpcError) {
+        console.warn('register_trusted_device RPC fallback failed, trying upsert fallback:', rpcError);
+      }
+
+      const { error: upsertError } = await supabase
+        .from('trusted_devices')
+        .upsert(
+          {
+            user_id: userId,
+            device_fingerprint: deviceFingerprint,
+            user_agent: navigator.userAgent,
+            device_name: deviceName,
+            last_used_at: new Date().toISOString(),
+            is_active: true,
+          },
+          { onConflict: 'user_id,device_fingerprint' }
+        );
+
+      if (upsertError) {
+        console.error('Error registering trusted device with upsert fallback:', upsertError);
         return false;
       }
 
-      return data?.success === true;
+      return true;
     } catch (err) {
       console.error('Error registering trusted device:', err);
       return false;
