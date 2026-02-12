@@ -314,12 +314,12 @@ const DriverLoginScreen = () => {
         console.error('Reset password email invoke error (generic success fallback):', {
           message: error.message,
           name: error.name,
-          status: (error as any).status,
+          status: (error as { status?: number }).status,
           details: error,
         });
 
         const msg = (error.message || '').toLowerCase();
-        const status = (error as any).status;
+        const status = (error as { status?: number }).status;
 
         if (msg.includes('rate limit') || status === 429) {
           toast.error(t('tooManyRequests') || t('resetFailed') || 'Too many requests. Please try again later.');
@@ -353,7 +353,7 @@ const DriverLoginScreen = () => {
     const confirmPassword = formData.get('confirmPassword') as string;
     try {
       const validation = newPasswordSchema.parse({ password, confirmPassword });
-      let { data: { session: currentSession } } = await supabase.auth.getSession();
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
       if (!currentSession) {
         toast.error(language === 'TR' ? 'Oturum bulunamadı. Yeni bir şifre sıfırlama bağlantısı isteyin.' : 'Session missing. Request a new reset link.');
         return;

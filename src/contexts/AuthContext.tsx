@@ -13,9 +13,9 @@ import {
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: unknown }>;
+  signInWithGoogle: () => Promise<{ error: unknown }>;
   signOut: () => Promise<void>;
   loading: boolean;
 }
@@ -136,7 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast.success('Welcome back!');
       // Navigation handled by Auth page based on role
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error('An error occurred during sign in');
       return { error };
     }
@@ -165,7 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast.success('Account created successfully!');
       // Navigation handled by Auth page based on role
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error('An error occurred during sign up');
       return { error };
     }
@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google login error:', error);
       toast.error('Google ile giriş yapılırken hata oluştu');
       return { error };

@@ -6,6 +6,7 @@ export type AppRole = 'admin' | 'driver' | 'customer' | 'agency';
 
 export const useUserRole = () => {
   const { user, session, loading: authLoading } = useAuth();
+  const userId = user?.id ?? null;
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [driverId, setDriverId] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export const useUserRole = () => {
     const fetchRole = async () => {
       if (authLoading) return;
 
-      if (!user) {
+      if (!userId) {
         if (!isActive) return;
         setRole(null);
         setDriverId(null);
@@ -71,7 +72,7 @@ export const useUserRole = () => {
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .maybeSingle();
 
         if (roleError || !roleData?.role) {
@@ -79,7 +80,7 @@ export const useUserRole = () => {
           const { data: driverRow } = await supabase
             .from('drivers')
             .select('id')
-            .eq('user_id', user.id)
+            .eq('user_id', userId)
             .maybeSingle();
           if (!isActive) return;
           if (driverRow?.id) {
@@ -97,7 +98,7 @@ export const useUserRole = () => {
             const { data: driverData } = await supabase
               .from('drivers')
               .select('id')
-              .eq('user_id', user.id)
+              .eq('user_id', userId)
               .maybeSingle();
             if (!isActive) return;
             setDriverId(driverData?.id || null);
@@ -107,7 +108,7 @@ export const useUserRole = () => {
             const { data: agencyData } = await supabase
               .from('agencies')
               .select('id')
-              .eq('user_id', user.id)
+              .eq('user_id', userId)
               .maybeSingle();
             if (!isActive) return;
             setAgencyId(agencyData?.id || null);
@@ -127,7 +128,7 @@ export const useUserRole = () => {
     return () => {
       isActive = false;
     };
-  }, [authLoading, user?.id, session?.access_token]);
+  }, [authLoading, userId, session?.access_token]);
 
   return { role, loading, driverId, agencyId };
 };
