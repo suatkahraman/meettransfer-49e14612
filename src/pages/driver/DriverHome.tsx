@@ -50,6 +50,41 @@ interface Reservation {
 }
 
 const PULL_THRESHOLD = 80;
+const LIST_RESERVATION_SELECT = `
+  id,
+  customer_id,
+  customer_name,
+  customer_phone,
+  pickup,
+  dropoff,
+  pickup_date,
+  pickup_time,
+  flight_number,
+  vehicle_type,
+  payment_type,
+  payment_status,
+  price,
+  price_currency,
+  passenger_cash_amount,
+  passenger_cash_currency,
+  driver_cash_amount,
+  reservation_code,
+  status,
+  driver_confirmed,
+  agency_id,
+  luggage_count,
+  baby_seat_count,
+  pickup_place_name,
+  dropoff_place_name,
+  agencies (id, agency_name)
+`;
+
+const sortByPickupDateTime = (items: Reservation[]) =>
+  [...items].sort((a, b) => {
+    const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
+    const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
+    return dateTimeA.getTime() - dateTimeB.getTime();
+  });
 
 interface DriverHomeContext {
   setHeaderExtras: (extras: DriverHeaderExtras) => void;
@@ -81,24 +116,35 @@ const DriverHome = () => {
       return;
     }
 
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('*, agencies (id, agency_name)')
-      .eq('driver_id', driverId)
-      .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency', 'no_show'])
-      .order('pickup_date', { ascending: true })
-      .order('pickup_time', { ascending: true });
+    const now = new Date();
+    const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const lastDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
-    if (error) {
-      console.error('Error:', error);
+    const [actionableQuery, completedQuery] = await Promise.all([
+      supabase
+        .from('reservations')
+        .select(LIST_RESERVATION_SELECT)
+        .eq('driver_id', driverId)
+        .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active'])
+        .order('pickup_date', { ascending: true })
+        .order('pickup_time', { ascending: true }),
+      supabase
+        .from('reservations')
+        .select(LIST_RESERVATION_SELECT)
+        .eq('driver_id', driverId)
+        .eq('status', 'completed')
+        .gte('pickup_date', firstDayOfCurrentMonth)
+        .lte('pickup_date', lastDayOfCurrentMonth)
+        .order('pickup_date', { ascending: true })
+        .order('pickup_time', { ascending: true }),
+    ]);
+
+    if (actionableQuery.error || completedQuery.error) {
+      console.error('Error:', actionableQuery.error || completedQuery.error);
       if (showToast) toast.error(t('failedToRefresh'));
     } else {
-      // Sort by combined date and time for accurate ordering
-      const sortedData = (data || []).sort((a, b) => {
-        const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-        const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
-        return dateTimeA.getTime() - dateTimeB.getTime();
-      });
+      const mergedRows = [...(actionableQuery.data || []), ...(completedQuery.data || [])];
+      const sortedData = sortByPickupDateTime(mergedRows as Reservation[]);
       setReservations(sortedData);
       
       // Fetch admin notes for all reservations
@@ -116,6 +162,8 @@ const DriverHome = () => {
           });
           setAdminNotesMap(notesObj);
         }
+      } else {
+        setAdminNotesMap({});
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
@@ -154,15 +202,10 @@ const DriverHome = () => {
           
           if (payload.eventType === 'INSERT') {
             const newReservation = payload.new as Reservation;
-            if (['sent_to_driver', 'assigned', 'active', 'completed'].includes(newReservation.status)) {
+            if (['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed'].includes(newReservation.status)) {
               setReservations(prev => {
                 const updated = [...prev, newReservation];
-                // Re-sort by date/time
-                return updated.sort((a, b) => {
-                  const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-                  const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
-                  return dateTimeA.getTime() - dateTimeB.getTime();
-                });
+                return sortByPickupDateTime(updated);
               });
               playSound();
               toast.success(t('newJobAssigned'), {
@@ -173,15 +216,10 @@ const DriverHome = () => {
           } else if (payload.eventType === 'UPDATE') {
             const updatedReservation = payload.new as Reservation;
             // Keep the reservation visible if it's in valid statuses
-            if (['sent_to_driver', 'assigned', 'active', 'completed'].includes(updatedReservation.status)) {
+            if (['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed'].includes(updatedReservation.status)) {
               setReservations(prev => {
                 const updated = prev.map(r => r.id === updatedReservation.id ? updatedReservation : r);
-                // Re-sort after update
-                return updated.sort((a, b) => {
-                  const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-                  const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
-                  return dateTimeA.getTime() - dateTimeB.getTime();
-                });
+                return sortByPickupDateTime(updated);
               });
             } else {
               // Remove if status changed to something we don't track
@@ -202,7 +240,6 @@ const DriverHome = () => {
 
   // Get current date/time for separating upcoming vs past
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
@@ -318,6 +355,7 @@ const DriverHome = () => {
 
   // Count for header badges
   const activeJobsCount = confirmedCurrentMonthJobs.length;
+  const completedJobsCount = completedJobs.length;
 
   // Pass header extras to DriverLayout
   useEffect(() => {
@@ -355,23 +393,19 @@ const DriverHome = () => {
           className="mb-4 rounded-2xl overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-lg"
         >
           <div className="px-5 py-6">
-            <h2 className="text-xl sm:text-2xl font-bold font-serif">
-              {t('welcome')}! 👋
-            </h2>
-            <p className="text-sm opacity-90 mt-0.5">
-              {t('driverPanel')}
-            </p>
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-sm font-medium">
                 <CheckCircle2 className="h-4 w-4" />
                 {t('active')}: {activeJobsCount}
               </span>
-              {pendingJobs.length > 0 && (
-                <span className="inline-flex items-center gap-1.5 bg-amber-500/30 rounded-full px-3 py-1.5 text-sm font-medium">
-                  <AlertCircle className="h-4 w-4" />
-                  {t('pending')}: {pendingJobs.length}
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1.5 bg-emerald-500/30 rounded-full px-3 py-1.5 text-sm font-medium">
+                <CheckCircle2 className="h-4 w-4" />
+                {t('completed')}: {completedJobsCount}
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-amber-500/30 rounded-full px-3 py-1.5 text-sm font-medium">
+                <AlertCircle className="h-4 w-4" />
+                {t('pending')}: {pendingJobs.length}
+              </span>
             </div>
           </div>
         </motion.section>
@@ -425,10 +459,10 @@ const DriverHome = () => {
             )}
 
             {/* Quick Actions Row */}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
-                className="flex-1 h-10 gap-2 text-sm"
+                className="w-full flex-1 h-10 gap-2 text-sm"
                 onClick={() => navigate('/driver/monthly-accounting')}
               >
                 <Calculator className="h-4 w-4" />
@@ -436,7 +470,7 @@ const DriverHome = () => {
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 h-10 gap-2 text-sm"
+                className="w-full flex-1 h-10 gap-2 text-sm"
                 onClick={() => navigate('/driver/history')}
               >
                 <History className="h-4 w-4" />

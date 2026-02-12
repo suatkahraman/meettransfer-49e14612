@@ -1,11 +1,10 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams, useOutletContext } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Loader2, AlertCircle, Car, CheckCircle2, RefreshCw, ArrowDown } from 'lucide-react';
+import { Loader2, AlertCircle, Car, CheckCircle2, RefreshCw, ArrowDown } from 'lucide-react';
 import SwipeableJobCard from '@/components/driver/SwipeableJobCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -46,6 +45,42 @@ interface Reservation {
 
 type JobType = 'pending' | 'active' | 'completed';
 
+const LIST_RESERVATION_SELECT = `
+  id,
+  customer_id,
+  customer_name,
+  customer_phone,
+  pickup,
+  dropoff,
+  pickup_date,
+  pickup_time,
+  flight_number,
+  vehicle_type,
+  payment_type,
+  payment_status,
+  price,
+  price_currency,
+  passenger_cash_amount,
+  passenger_cash_currency,
+  driver_cash_amount,
+  reservation_code,
+  status,
+  driver_confirmed,
+  agency_id,
+  luggage_count,
+  baby_seat_count,
+  pickup_place_name,
+  dropoff_place_name,
+  agencies (id, agency_name)
+`;
+
+const sortByPickupDateTime = (items: Reservation[]) =>
+  [...items].sort((a, b) => {
+    const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
+    const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
+    return dateTimeA.getTime() - dateTimeB.getTime();
+  });
+
 const DriverJobList = () => {
   const { type } = useParams<{ type: JobType }>();
   const [searchParams] = useSearchParams();
@@ -64,6 +99,7 @@ const DriverJobList = () => {
   const [isPulling, setIsPulling] = useState(false);
   const touchStartY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const driverMetaRef = useRef<{ name: string; plateNumber: string; vehicleModel: string } | null>(null);
   const PULL_THRESHOLD = 80;
 
   const jobType = type as JobType || 'pending';
@@ -71,15 +107,6 @@ const DriverJobList = () => {
   // Get month/year filter from URL params (for future months filtering)
   const filterMonth = searchParams.get('month') ? parseInt(searchParams.get('month')!) : null;
   const filterYear = searchParams.get('year') ? parseInt(searchParams.get('year')!) : null;
-
-  // Get month name helper
-  const getMonthName = (month: number): string => {
-    const monthKeys = [
-      'january', 'february', 'march', 'april', 'may', 'june',
-      'july', 'august', 'september', 'october', 'november', 'december'
-    ];
-    return t(monthKeys[month]) || monthKeys[month];
-  };
 
   const getStatusFilter = useCallback(() => {
     switch (jobType) {
@@ -98,48 +125,60 @@ const DriverJobList = () => {
   }, [jobType]);
 
   const fetchReservations = useCallback(async (showToast = false) => {
-    if (!driverId) return;
-
-    const statusFilter = getStatusFilter();
-    let query = supabase
-      .from('reservations')
-      .select('*, agencies (id, agency_name)')
-      .eq('driver_id', driverId)
-      .in('status', statusFilter)
-      .order('pickup_date', { ascending: true })
-      .order('pickup_time', { ascending: true });
-
-    // For completed, only show current month
-    if (jobType === 'completed') {
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+    if (!driverId) {
+      setReservations([]);
+      setAdminNotesMap({});
+      setLoading(false);
+      setRefreshing(false);
+      return;
     }
 
-    // Apply month/year filter if present (for future months)
-    if (filterMonth !== null && filterYear !== null) {
-      const firstDay = new Date(filterYear, filterMonth - 1, 1).toISOString().split('T')[0];
-      const lastDay = new Date(filterYear, filterMonth, 0).toISOString().split('T')[0];
-      query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
-    }
+    try {
+      const statusFilter = getStatusFilter();
+      let query = supabase
+        .from('reservations')
+        .select(LIST_RESERVATION_SELECT)
+        .eq('driver_id', driverId);
 
-    const { data, error } = await query;
+      if (jobType === 'pending') {
+        query = query.or('status.in.(pending,pending_admin_review,sent_to_driver,assigned),and(status.eq.confirmed,driver_confirmed.eq.false)');
+      } else {
+        query = query.in('status', statusFilter);
+      }
 
-    if (error) {
-      console.error('Error:', error);
-      if (showToast) toast.error(t('failedToRefresh'));
-    } else {
-      const sortedData = (data || []).sort((a, b) => {
-        const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-        const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
-        return dateTimeA.getTime() - dateTimeB.getTime();
-      });
+      query = query
+        .order('pickup_date', { ascending: true })
+        .order('pickup_time', { ascending: true });
+
+      // For completed, only show current month
+      if (jobType === 'completed') {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+        query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+      }
+
+      // Apply month/year filter if present (for future months)
+      if (filterMonth !== null && filterYear !== null) {
+        const firstDay = new Date(filterYear, filterMonth - 1, 1).toISOString().split('T')[0];
+        const lastDay = new Date(filterYear, filterMonth, 0).toISOString().split('T')[0];
+        query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error:', error);
+        if (showToast) toast.error(t('failedToRefresh'));
+        return;
+      }
+
+      const sortedData = sortByPickupDateTime((data || []) as Reservation[]);
       setReservations(sortedData);
 
       // Fetch admin notes
       if (sortedData.length > 0) {
-        const ids = sortedData.map(r => r.id);
+        const ids = sortedData.map((r) => r.id);
         const { data: notesData } = await supabase
           .from('reservation_admin_notes')
           .select('reservation_id, notes')
@@ -147,24 +186,29 @@ const DriverJobList = () => {
         
         if (notesData) {
           const notesObj: Record<string, string> = {};
-          notesData.forEach(n => {
+          notesData.forEach((n) => {
             if (n.notes) notesObj[n.reservation_id] = n.notes;
           });
           setAdminNotesMap(notesObj);
+        } else {
+          setAdminNotesMap({});
         }
+      } else {
+        setAdminNotesMap({});
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-    setLoading(false);
-    setRefreshing(false);
   }, [driverId, jobType, getStatusFilter, t, filterMonth, filterYear]);
 
   useEffect(() => {
     if (driverId) {
       fetchReservations();
     }
-  }, [driverId, fetchReservations, filterMonth, filterYear]);
+  }, [driverId, fetchReservations]);
 
   useEffect(() => {
     setHeaderRight(
@@ -173,7 +217,7 @@ const DriverJobList = () => {
         size="icon"
         onClick={() => {
           setRefreshing(true);
-          fetchReservations(true);
+          void fetchReservations(true);
         }}
         disabled={refreshing}
         className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
@@ -206,13 +250,10 @@ const DriverJobList = () => {
               setReservations(prev => {
                 const existing = prev.find(r => r.id === updatedRes.id);
                 if (existing) {
-                  return prev.map(r => r.id === updatedRes.id ? updatedRes : r);
+                  const next = prev.map(r => r.id === updatedRes.id ? updatedRes : r);
+                  return sortByPickupDateTime(next);
                 }
-                return [...prev, updatedRes].sort((a, b) => {
-                  const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-                  const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
-                  return dateTimeA.getTime() - dateTimeB.getTime();
-                });
+                return sortByPickupDateTime([...prev, updatedRes]);
               });
             } else {
               setReservations(prev => prev.filter(r => r.id !== updatedRes.id));
@@ -229,8 +270,111 @@ const DriverJobList = () => {
     };
   }, [driverId, jobType, getStatusFilter]);
 
+  const getDriverMeta = useCallback(async () => {
+    if (driverMetaRef.current) return driverMetaRef.current;
+    if (!driverId) return null;
+
+    const { data: driverData } = await supabase
+      .from('drivers')
+      .select('name, plate_number, vehicle_model')
+      .eq('id', driverId)
+      .maybeSingle();
+
+    const meta = {
+      name: driverData?.name || 'Your driver',
+      plateNumber: driverData?.plate_number || '',
+      vehicleModel: driverData?.vehicle_model || '',
+    };
+    driverMetaRef.current = meta;
+    return meta;
+  }, [driverId]);
+
+  const runAcceptNotifications = useCallback(async (reservation: Reservation, reservationId: string) => {
+    try {
+      const driverMeta = await getDriverMeta();
+      if (!driverMeta) return;
+
+      const vehicleInfo = driverMeta.vehicleModel
+        ? `\n🚗 ${driverMeta.vehicleModel}${driverMeta.plateNumber ? ` (${driverMeta.plateNumber})` : ''}`
+        : '';
+
+      await supabase.from('notifications').insert({
+        user_id: reservation.customer_id,
+        reservation_id: reservationId,
+        type: 'driver_accepted',
+        title: '✅ Driver Confirmed',
+        message: `Your driver: ${driverMeta.name}${vehicleInfo}`,
+      });
+
+      await supabase.functions.invoke('create-notification', {
+        body: {
+          type: 'driver_accepted',
+          title: '✅ Driver Accepted Job',
+          message: `${driverMeta.name} has accepted job #${reservationId.slice(0, 8)}.`,
+          notify_admins: true,
+          reservation_id: reservationId,
+        }
+      });
+    } catch (e) {
+      console.error('Notification error:', e);
+    }
+  }, [getDriverMeta]);
+
+  const runCompletionSideEffects = useCallback(async (reservation: Reservation, reservationId: string) => {
+    try {
+      const driverMeta = await getDriverMeta();
+      const driverName = driverMeta?.name || 'Your driver';
+
+      let customerEmail = '';
+      if (reservation.customer_id) {
+        const { data: emailData } = await supabase.functions.invoke('get-customer-email', {
+          body: { customer_id: reservation.customer_id },
+        });
+        customerEmail = emailData?.email || '';
+
+        await supabase.from('notifications').insert({
+          user_id: reservation.customer_id,
+          reservation_id: reservationId,
+          type: 'trip_completed',
+          title: '🎉 Trip Completed',
+          message: 'Your trip has been completed. Thank you for choosing Meet Transfer!',
+        });
+      }
+
+      await supabase.functions.invoke('send-review-request', {
+        body: {
+          reservationId: reservationId,
+          customerEmail,
+          customerName: reservation.customer_name,
+          driverName,
+          reservationCode: reservation.reservation_code || reservationId.slice(0, 8).toUpperCase(),
+          pickupDate: reservation.pickup_date,
+          pickup: reservation.pickup,
+          dropoff: reservation.dropoff,
+          pickupPlaceName: reservation.pickup_place_name,
+          dropoffPlaceName: reservation.dropoff_place_name,
+        }
+      });
+
+      await supabase.functions.invoke('create-notification', {
+        body: {
+          type: 'trip_completed',
+          title: '✅ Trip Completed',
+          message: `${reservation.reservation_code || reservationId.slice(0, 8)} transfer completed by ${driverName}.`,
+          notify_admins: true,
+          reservation_id: reservationId,
+        }
+      });
+    } catch (e) {
+      console.error('Error sending completion side effects:', e);
+    }
+  }, [getDriverMeta]);
+
   const handleAcceptJob = async (id: string) => {
     const reservation = reservations.find(r => r.id === id);
+    if (!reservation) return;
+
+    setReservations((prev) => prev.filter((r) => r.id !== id));
     
     const { error } = await supabase
       .from('reservations')
@@ -239,49 +383,14 @@ const DriverJobList = () => {
 
     if (error) {
       toast.error(t('failedToAccept'));
+      setReservations((prev) => sortByPickupDateTime([...prev, reservation]));
       return;
     }
 
     toast.success(t('jobAccepted'));
-    
-    // Remove from pending list since it's now active
-    setReservations(prev => prev.filter(r => r.id !== id));
 
-    // Notifications...
-    if (reservation) {
-      try {
-        const { data: driverData } = await supabase
-          .from('drivers')
-          .select('name, plate_number, vehicle_model')
-          .eq('id', driverId)
-          .maybeSingle();
-
-        const driverName = driverData?.name || 'Your driver';
-        const plateNumber = driverData?.plate_number || '';
-        const vehicleModel = driverData?.vehicle_model || '';
-        const vehicleInfo = vehicleModel ? `\n🚗 ${vehicleModel}${plateNumber ? ` (${plateNumber})` : ''}` : '';
-
-        await supabase.from('notifications').insert({
-          user_id: reservation.customer_id,
-          reservation_id: id,
-          type: 'driver_accepted',
-          title: '✅ Driver Confirmed',
-          message: `Your driver: ${driverName}${vehicleInfo}`
-        });
-
-        await supabase.functions.invoke('create-notification', {
-          body: {
-            type: 'driver_accepted',
-            title: '✅ Driver Accepted Job',
-            message: `${driverName} has accepted job #${id.slice(0, 8)}.`,
-            notify_admins: true,
-            reservation_id: id,
-          }
-        });
-      } catch (e) {
-        console.error('Notification error:', e);
-      }
-    }
+    // Do not block UI on notification pipeline.
+    void runAcceptNotifications(reservation, id);
   };
 
   const handleCompleteJob = async (id: string) => {
@@ -296,7 +405,9 @@ const DriverJobList = () => {
       toast.error(validation.reason || t('cannotCompleteNow'));
       return;
     }
-    
+
+    setReservations((prev) => prev.filter((r) => r.id !== id));
+
     const { error } = await supabase
       .from('reservations')
       .update({ status: 'completed', updated_at: new Date().toISOString() })
@@ -304,64 +415,13 @@ const DriverJobList = () => {
 
     if (error) {
       toast.error(t('failedToComplete'));
-    } else {
-      toast.success(t('jobCompleted'));
-      // Remove from active list since it's now completed
-      setReservations(prev => prev.filter(r => r.id !== id));
-
-      // Send review request email to customer
-      try {
-        // Get driver info
-        const { data: driverData } = await supabase
-          .from('drivers')
-          .select('name')
-          .eq('id', driverId)
-          .maybeSingle();
-
-        // Get customer email from profiles or user_roles
-        let customerEmail = '';
-        if (reservation.customer_id) {
-          const { data: userData } = await supabase.auth.admin.getUserById(reservation.customer_id);
-          if (userData?.user?.email) {
-            customerEmail = userData.user.email;
-          }
-        }
-
-        // If we couldn't get email from auth, try getting it from a different source
-        // For now, we'll use the notification email function which handles this
-        if (customerEmail || reservation.customer_id) {
-          await supabase.functions.invoke('send-review-request', {
-            body: {
-              reservationId: id,
-              customerEmail: customerEmail,
-              customerName: reservation.customer_name,
-              driverName: driverData?.name || 'Your driver',
-              reservationCode: reservation.reservation_code || id.slice(0, 8).toUpperCase(),
-              pickupDate: reservation.pickup_date,
-              pickup: reservation.pickup,
-              dropoff: reservation.dropoff,
-              pickupPlaceName: reservation.pickup_place_name,
-              dropoffPlaceName: reservation.dropoff_place_name,
-            }
-          });
-          console.log('Review request email sent for reservation:', id);
-        }
-
-        // Send completion notification to admins
-        await supabase.functions.invoke('create-notification', {
-          body: {
-            type: 'trip_completed',
-            title: '✅ Trip Completed',
-            message: `${reservation.reservation_code || id.slice(0, 8)} transfer completed by ${driverData?.name || 'driver'}.`,
-            notify_admins: true,
-            reservation_id: id,
-          }
-        });
-      } catch (e) {
-        console.error('Error sending review request:', e);
-        // Don't show error to driver, as the job was completed successfully
-      }
+      setReservations((prev) => sortByPickupDateTime([...prev, reservation]));
+      return;
     }
+
+    toast.success(t('jobCompleted'));
+    // Do not block UI on non-critical side effects.
+    void runCompletionSideEffects(reservation, id);
   };
 
   const getPageConfig = () => {
@@ -426,7 +486,7 @@ const DriverJobList = () => {
   const handleTouchEnd = () => {
     if (pullDistance >= PULL_THRESHOLD && !refreshing) {
       setRefreshing(true);
-      fetchReservations(true);
+      void fetchReservations(true);
     }
     setPullDistance(0);
     setIsPulling(false);

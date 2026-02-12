@@ -14,11 +14,11 @@ export const MonthNavigator = ({
   onNextMonth
 }: MonthNavigatorProps) => {
   return (
-    <div className="flex items-center justify-center gap-4 py-4">
+    <div className="flex items-center justify-between sm:justify-center gap-2 sm:gap-4 py-4">
       <Button variant="outline" size="icon" onClick={onPreviousMonth}>
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <span className="text-lg font-semibold min-w-[160px] text-center">
+      <span className="text-sm sm:text-lg font-semibold min-w-0 sm:min-w-[160px] text-center">
         {format(currentMonth, 'MMMM yyyy')}
       </span>
       <Button variant="outline" size="icon" onClick={onNextMonth}>

@@ -44,7 +44,7 @@ export const MonthlySummaryCard = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalTransfers}</div>
+          <div className="text-xl sm:text-2xl font-bold">{totalTransfers}</div>
         </CardContent>
       </Card>
 
@@ -56,7 +56,7 @@ export const MonthlySummaryCard = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-primary">
+          <div className="text-xl sm:text-2xl font-bold text-primary">
             ₺{totalPrice.toFixed(2)}
           </div>
         </CardContent>
@@ -70,7 +70,7 @@ export const MonthlySummaryCard = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          <div className="text-xl sm:text-2xl font-bold">
             ₺{totalCashCollected.toFixed(2)}
           </div>
         </CardContent>
@@ -84,7 +84,7 @@ export const MonthlySummaryCard = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${balanceStatus.color}`}>
+          <div className={`text-xl sm:text-2xl font-bold ${balanceStatus.color}`}>
             ₺{Math.abs(balance).toFixed(2)}
           </div>
           <p className="text-xs text-muted-foreground mt-1">{balanceStatus.text}</p>

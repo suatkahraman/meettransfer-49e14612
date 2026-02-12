@@ -91,16 +91,16 @@ export const DriverLayout = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          <h1 className="text-base sm:text-lg font-serif font-bold truncate">
+          <h1 className="text-sm sm:text-lg font-serif font-bold truncate max-w-[130px] sm:max-w-none">
             {t(titleKey)}
           </h1>
           {isHome && activeCount > 0 && (
-            <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
+            <Badge variant="secondary" className="hidden sm:inline-flex bg-green-500 text-white hover:bg-green-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
               {activeCount}
             </Badge>
           )}
           {isHome && pendingCount > 0 && (
-            <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
+            <Badge variant="secondary" className="hidden sm:inline-flex bg-amber-500 text-white hover:bg-amber-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
               {pendingCount}
             </Badge>
           )}

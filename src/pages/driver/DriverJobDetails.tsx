@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useParams, useOutletContext } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompletionValidation } from '@/hooks/useCompletionValidation';
@@ -15,10 +14,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import { ArrowLeft, MapPin, Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2, Briefcase, Baby, MessageCircle } from 'lucide-react';
+import { Calendar, Clock, User, Users, Phone, Plane, Car, CreditCard, CheckCircle, Save, Loader2, Map, ClipboardCopy, AlertCircle, Banknote, RefreshCw, MessageSquare, Building2, Briefcase, Baby, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import NotificationBell from '@/components/NotificationBell';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -41,6 +39,7 @@ const vehicleTypeLabels: Record<string, string> = {
 
 interface Reservation {
   id: string;
+  customer_id: string | null;
   reservation_code: string | null;
   customer_name: string;
   customer_phone: string;
@@ -82,15 +81,52 @@ interface Reservation {
   } | null;
 }
 
+const DRIVER_RESERVATION_DETAIL_SELECT = `
+  id,
+  customer_id,
+  reservation_code,
+  customer_name,
+  customer_phone,
+  pickup,
+  dropoff,
+  pickup_date,
+  pickup_time,
+  flight_number,
+  flight_arrival_time,
+  flight_status,
+  vehicle_type,
+  payment_type,
+  payment_status,
+  price,
+  price_currency,
+  status,
+  driver_confirmed,
+  driver_earning,
+  driver_cash_amount,
+  driver_notes,
+  passenger_names,
+  passenger_cash_amount,
+  passenger_cash_currency,
+  customer_notes,
+  agency_id,
+  luggage_count,
+  baby_seat_count,
+  pickup_place_name,
+  pickup_lat,
+  pickup_lng,
+  dropoff_place_name,
+  dropoff_lat,
+  dropoff_lng,
+  agencies (id, agency_name)
+`;
+
 const DriverJobDetails = () => {
   const { id } = useParams();
-  const { user } = useAuth();
   const { driverId } = useUserRole();
-  const navigate = useNavigate();
   const context = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
   const setHeaderRight = context?.setHeaderRight ?? (() => {});
   const { emailAdminTripCompleted } = useEmailNotifications();
-  const { t, getPaymentTypeLabel } = useDriverTranslations();
+  const { t } = useDriverTranslations();
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -180,12 +216,19 @@ const DriverJobDetails = () => {
     const fetchData = async () => {
       if (!id) return;
 
-      // Fetch reservation with agency
-      const { data: resData, error: resError } = await supabase
-        .from('reservations')
-        .select('*, agencies (id, agency_name)')
-        .eq('id', id)
-        .maybeSingle();
+      // Fetch reservation with agency + admin notes in parallel.
+      const [{ data: resData, error: resError }, { data: notesData }] = await Promise.all([
+        supabase
+          .from('reservations')
+          .select(DRIVER_RESERVATION_DETAIL_SELECT)
+          .eq('id', id)
+          .maybeSingle(),
+        supabase
+          .from('reservation_admin_notes')
+          .select('notes')
+          .eq('reservation_id', id)
+          .maybeSingle()
+      ]);
 
       if (resError) {
         console.error('Error:', resError);
@@ -206,15 +249,10 @@ const DriverJobDetails = () => {
           setDriverNotes(resData.driver_notes || '');
         }
 
-        // Fetch admin notes
-        const { data: notesData } = await supabase
-          .from('reservation_admin_notes')
-          .select('notes')
-          .eq('reservation_id', resData.id)
-          .maybeSingle();
-
         if (notesData?.notes) {
           setAdminNotes(notesData.notes);
+        } else {
+          setAdminNotes(null);
         }
       }
       setLoading(false);
@@ -259,12 +297,6 @@ const DriverJobDetails = () => {
       };
     }
   }, [id]);
-
-  const formatPrice = (price: number | null, currency: string | null) => {
-    if (price === null) return '-';
-    const symbol = getCurrencySymbol(currency);
-    return `${symbol}${price}`;
-  };
 
   const confirmJob = async () => {
     if (!id) return;
@@ -323,6 +355,89 @@ const DriverJobDetails = () => {
   // Completion validation hook
   const completionValidation = useCompletionValidation(reservation);
 
+  const runCompletionSideEffects = useCallback(async (completedReservation: Reservation) => {
+    if (!id) return;
+
+    try {
+      const { data: driverData } = await supabase
+        .from('drivers')
+        .select('name')
+        .eq('id', driverId)
+        .maybeSingle();
+
+      if (completedReservation.customer_id) {
+        await supabase.from('notifications').insert({
+          user_id: completedReservation.customer_id,
+          reservation_id: id,
+          type: 'trip_completed',
+          title: '🎉 Trip Completed',
+          message: 'Your trip has been completed. Thank you for choosing Meet Transfer!'
+        });
+
+        try {
+          await supabase.functions.invoke('send-push-notification', {
+            body: {
+              user_id: completedReservation.customer_id,
+              title: '🎉 Trip Completed',
+              body: 'Your trip has been completed. Thank you for choosing Meet Transfer!',
+              data: { reservation_id: id }
+            }
+          });
+        } catch (pushError) {
+          console.log('Push notification failed:', pushError);
+        }
+
+        const { data: emailData } = await supabase.functions.invoke('get-customer-email', {
+          body: { customer_id: completedReservation.customer_id }
+        });
+
+        await supabase.functions.invoke('send-review-request', {
+          body: {
+            reservationId: id,
+            customerEmail: emailData?.email || '',
+            customerName: completedReservation.customer_name || 'Customer',
+            driverName: driverData?.name || 'Your Driver',
+            reservationCode: completedReservation.reservation_code || id.slice(0, 8),
+            pickupDate: completedReservation.pickup_date,
+            pickup: completedReservation.pickup,
+            dropoff: completedReservation.dropoff,
+            pickupPlaceName: completedReservation.pickup_place_name,
+            dropoffPlaceName: completedReservation.dropoff_place_name,
+          }
+        });
+      }
+
+      if (completedReservation.agency_id) {
+        try {
+          await supabase.functions.invoke('deduct-agency-balance', {
+            body: { reservation_id: id }
+          });
+        } catch (balanceError) {
+          console.error('Balance deduction failed:', balanceError);
+        }
+      }
+
+      await supabase.functions.invoke('create-notification', {
+        body: {
+          type: 'trip_completed',
+          title: '✅ Trip Completed',
+          message: `${driverData?.name || 'Driver'} completed trip #${id.slice(0, 8)}.`,
+          notify_admins: true,
+          reservation_id: id,
+          send_push: true
+        }
+      });
+
+      try {
+        await emailAdminTripCompleted(id, driverData?.name);
+      } catch (emailError) {
+        console.error('Failed to send trip completed email:', emailError);
+      }
+    } catch (notifyError) {
+      console.error('Failed to send completion side effects:', notifyError);
+    }
+  }, [driverId, emailAdminTripCompleted, id]);
+
   const updateStatus = async (newStatus: string, driverCash?: boolean) => {
     if (!id || !reservation) return;
     
@@ -357,124 +472,13 @@ const DriverJobDetails = () => {
       toast.error(t('failedToComplete'));
     } else {
       toast.success(`${t('statusUpdated')}: ${getStatusLabel(newStatus)}`);
-      setReservation(prev => prev ? { ...prev, status: newStatus } : null);
+      const updatedReservation = { ...reservation, status: newStatus };
+      setReservation(updatedReservation);
       setShowCashDialog(false);
 
-      // Notify customer when trip is completed
+      // Keep driver UI responsive; run external integrations in the background.
       if (newStatus === 'completed') {
-        try {
-          // Get driver name
-          const { data: driverData } = await supabase
-            .from('drivers')
-            .select('name')
-            .eq('id', driverId)
-            .maybeSingle();
-
-          // Create notification for customer
-          const { data: resData } = await supabase
-            .from('reservations')
-            .select('customer_id, agency_id, reservation_code, pickup_date, pickup, dropoff')
-            .eq('id', id)
-            .single();
-
-          if (resData?.customer_id) {
-            await supabase.from('notifications').insert({
-              user_id: resData.customer_id,
-              reservation_id: id,
-              type: 'trip_completed',
-              title: '🎉 Trip Completed',
-              message: 'Your trip has been completed. Thank you for choosing Meet Transfer!'
-            });
-
-            // Try to send push notification
-            try {
-              await supabase.functions.invoke('send-push-notification', {
-                body: {
-                  user_id: resData.customer_id,
-                  title: '🎉 Trip Completed',
-                  body: 'Your trip has been completed. Thank you for choosing Meet Transfer!',
-                  data: { reservation_id: id }
-                }
-              });
-            } catch (pushError) {
-              console.log('Push notification failed:', pushError);
-            }
-
-            // Send review request email to customer
-            try {
-              // Get customer email from profiles
-              const { data: profileData } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', resData.customer_id)
-                .maybeSingle();
-              
-              // Get customer email via secure edge function
-              let customerEmail = '';
-              if (resData.customer_id) {
-                const { data: emailData } = await supabase.functions.invoke('get-customer-email', {
-                  body: { customer_id: resData.customer_id }
-                });
-                customerEmail = emailData?.email || '';
-              }
-              
-              // Send review request
-              await supabase.functions.invoke('send-review-request', {
-                body: {
-                  reservationId: id,
-                  customerEmail: customerEmail,
-                  customerName: reservation?.customer_name || profileData?.full_name || 'Customer',
-                  driverName: driverData?.name || 'Your Driver',
-                  reservationCode: resData.reservation_code || id.slice(0, 8),
-                  pickupDate: resData.pickup_date,
-                  pickup: resData.pickup,
-                  dropoff: resData.dropoff
-                }
-              });
-              console.log('Review request email sent');
-            } catch (emailError) {
-              console.log('Review request email failed:', emailError);
-            }
-          }
-
-          // If agency reservation, deduct balance
-          if (resData?.agency_id) {
-            try {
-              await supabase.functions.invoke('deduct-agency-balance', {
-                body: { reservation_id: id }
-              });
-              console.log('Agency balance deduction triggered');
-            } catch (balanceError) {
-              console.error('Balance deduction failed:', balanceError);
-            }
-          }
-
-          // Driver earnings are calculated from completed reservations (price - cash)
-          // No driver_payment inserted here - payments are only for admin-initiated transactions
-          console.log(`Job completed. Earning calculated from reservation: price=${reservation?.price}, cash=${reservation?.driver_cash_amount}`);
-
-          // Notify admins (in-app + push)
-          await supabase.functions.invoke('create-notification', {
-            body: {
-              type: 'trip_completed',
-              title: '✅ Trip Completed',
-              message: `${driverData?.name || 'Driver'} completed trip #${id.slice(0, 8)}.`,
-              notify_admins: true,
-              reservation_id: id,
-              send_push: true
-            }
-          });
-
-          // Send email to admin about trip completion
-          try {
-            await emailAdminTripCompleted(id, driverData?.name);
-            console.log('Trip completed email sent to admin');
-          } catch (emailError) {
-            console.error('Failed to send trip completed email:', emailError);
-          }
-        } catch (notifyError) {
-          console.error('Failed to send notifications:', notifyError);
-        }
+        void runCompletionSideEffects(updatedReservation);
       }
     }
     setUpdating(false);
@@ -795,7 +799,7 @@ const DriverJobDetails = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-black text-4xl text-white drop-shadow-lg">
+                      <div className="font-black text-2xl sm:text-4xl text-white drop-shadow-lg break-all">
                         {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
                       </div>
                       {/* TL equivalent */}
@@ -943,7 +947,7 @@ const DriverJobDetails = () => {
         </Card>
 
         {/* Copy & Share Buttons */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Button
             variant="outline"
             size="lg"
@@ -1053,7 +1057,7 @@ const DriverJobDetails = () => {
           <p className="py-4">
             {t('didYouCollectCash')}
           </p>
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 flex-col-reverse sm:flex-row">
             <Button variant="outline" onClick={() => updateStatus('completed', false)} disabled={updating}>
               {t('noDidNotCollect')}
             </Button>
