@@ -53,7 +53,7 @@ export const MonthlyAccountingTable = ({ reservations, showActions, onEdit }: Mo
 
   return (
     <div className="overflow-x-auto">
-      <Table>
+      <Table className="min-w-[760px]">
         <TableHeader>
           <TableRow>
             <TableHead>Tarih</TableHead>

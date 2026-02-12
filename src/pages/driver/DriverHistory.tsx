@@ -5,10 +5,9 @@ import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowLeft, Calendar as CalendarIcon, MapPin, Clock, User, Car, CreditCard, CheckCircle2, Loader2, Filter, X } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Car, CreditCard, CheckCircle2, Loader2, Filter, X } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -46,14 +45,6 @@ interface Reservation {
   driver_cash_amount: number | null; // Şoförün aldığı nakit (TRY)
 }
 
-
-const paymentTypeLabels: Record<string, string> = {
-  cash: 'Nakit',
-  card: 'Kart',
-  online: 'Online',
-  none: 'Yok',
-};
-
 const DriverHistory = () => {
   const navigate = useNavigate();
   const { driverId } = useUserRole();
@@ -77,7 +68,7 @@ const DriverHistory = () => {
 
     let query = supabase
       .from('reservations')
-      .select('*')
+      .select('id, customer_name, customer_phone, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, vehicle_type, payment_type, price, price_currency, driver_earning, status, driver_cash_amount')
       .eq('driver_id', driverId)
       .eq('status', 'completed')
       .order('pickup_date', { ascending: false })
@@ -154,7 +145,7 @@ const DriverHistory = () => {
                   </Button>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* Date From */}
                 <Popover>
                   <PopoverTrigger asChild>
@@ -211,29 +202,29 @@ const DriverHistory = () => {
       </AnimatePresence>
 
       {/* Summary Cards */}
-      <div className="p-4 grid grid-cols-3 gap-3">
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold text-primary">{totalTrips}</p>
+            <p className="text-xl sm:text-2xl font-bold text-primary">{totalTrips}</p>
             <p className="text-xs text-muted-foreground">{t('totalTransfers')}</p>
           </CardContent>
         </Card>
         <Card className="bg-green-500/5 border-green-500/20">
           <CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold text-green-600">₺{totalEarnings.toLocaleString('tr-TR')}</p>
+            <p className="text-xl sm:text-2xl font-bold text-green-600">₺{totalEarnings.toLocaleString('tr-TR')}</p>
             <p className="text-xs text-muted-foreground">{t('earnings')}</p>
           </CardContent>
         </Card>
         <Card className="bg-blue-500/5 border-blue-500/20">
           <CardContent className="p-3 text-center">
-            <p className="text-2xl font-bold text-blue-600">₺{totalCashCollected.toLocaleString('tr-TR')}</p>
+            <p className="text-xl sm:text-2xl font-bold text-blue-600">₺{totalCashCollected.toLocaleString('tr-TR')}</p>
             <p className="text-xs text-muted-foreground">{t('cashCollected')}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Trip List */}
-      <main className="px-4 pb-8 max-w-lg mx-auto">
+      <main className="px-4 pb-8 max-w-lg mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -297,8 +288,8 @@ const DriverHistory = () => {
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t">
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Car className="h-3 w-3" />
                           <span>{vehicleTypeLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>

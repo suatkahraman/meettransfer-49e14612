@@ -2,10 +2,8 @@ import { useEffect, useState } from 'react';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase, DollarSign, Banknote } from 'lucide-react';
-import { getCurrencySymbol } from '@/lib/currency';
 
 interface AccountingData {
   totalJobs: number;

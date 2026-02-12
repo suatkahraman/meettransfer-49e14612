@@ -54,6 +54,7 @@ interface SwipeableJobCardProps {
 }
 
 const SWIPE_THRESHOLD = 100;
+const tryAmountCache = new Map<string, number>();
 
 export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete, onClick }: SwipeableJobCardProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -62,6 +63,14 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   const [tryAmount, setTryAmount] = useState<number | null>(null);
   const { t, getPaymentTypeLabel } = useDriverTranslations();
   const x = useMotionValue(0);
+  const shouldFetchFlightStatus = useMemo(() => {
+    if (!reservation.flight_number) return false;
+    const pickupDateTime = new Date(`${reservation.pickup_date}T${reservation.pickup_time}`);
+    const now = new Date();
+    const diffInDays = Math.abs(pickupDateTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+    // Avoid hitting the flight-status endpoint for far dates in card lists.
+    return diffInDays <= 2;
+  }, [reservation.flight_number, reservation.pickup_date, reservation.pickup_time]);
 
   // Fetch TL equivalent when cash amount is not in TRY
   useEffect(() => {
@@ -72,6 +81,13 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
         reservation.passenger_cash_currency &&
         reservation.passenger_cash_currency !== 'TRY'
       ) {
+        const cacheKey = `${reservation.passenger_cash_currency}-${reservation.passenger_cash_amount}`;
+        const cached = tryAmountCache.get(cacheKey);
+        if (cached !== undefined) {
+          setTryAmount(cached);
+          return;
+        }
+
         try {
           const { data, error } = await supabase.functions.invoke('get-exchange-rate', {
             body: {
@@ -81,11 +97,15 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
             }
           });
           if (!error && data?.converted_amount) {
-            setTryAmount(Math.round(data.converted_amount));
+            const rounded = Math.round(data.converted_amount);
+            tryAmountCache.set(cacheKey, rounded);
+            setTryAmount(rounded);
           }
         } catch (err) {
           console.error('Failed to fetch TRY amount:', err);
         }
+      } else {
+        setTryAmount(null);
       }
     };
     fetchTryAmount();
@@ -384,19 +404,20 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                       <span>{t('cancel')}</span>
                     </div>
                   )}
-                  {/* Hidden FlightStatus for fetching data */}
-                  <FlightStatus
-                    flightNumber={reservation.flight_number}
-                    date={reservation.pickup_date}
-                    compact
-                    refreshIntervalMs={0}
-                    className="hidden"
-                    onStatusChange={(status) => {
-                      const d = status.arrival?.delay || status.departure?.delay || 0;
-                      setFlightDelay(d);
-                      setFlightStatusValue(status.status?.toLowerCase() || null);
-                    }}
-                  />
+                  {shouldFetchFlightStatus && (
+                    <FlightStatus
+                      flightNumber={reservation.flight_number}
+                      date={reservation.pickup_date}
+                      compact
+                      refreshIntervalMs={0}
+                      className="hidden"
+                      onStatusChange={(status) => {
+                        const d = status.arrival?.delay || status.departure?.delay || 0;
+                        setFlightDelay(d);
+                        setFlightStatusValue(status.status?.toLowerCase() || null);
+                      }}
+                    />
+                  )}
                 </>
               )}
               <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">

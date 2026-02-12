@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,44 +30,43 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
   const { t } = useDriverTranslations();
   const [stats, setStats] = useState<DriverStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const refreshTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!driverId) return;
+      if (!driverId) {
+        setLoading(false);
+        return;
+      }
 
       const now = new Date();
       const monthStart = format(startOfMonth(now), 'yyyy-MM-dd');
       const monthEnd = format(endOfMonth(now), 'yyyy-MM-dd');
 
-      // Fetch driver info with rating
-      const { data: driverData } = await supabase
-        .from('drivers')
-        .select('name, average_rating, total_reviews')
-        .eq('id', driverId)
-        .single();
-
-      // Fetch monthly completed reservations
-      const { data: monthlyRes } = await supabase
-        .from('reservations')
-        .select('id, driver_earning, driver_cash_amount')
-        .eq('driver_id', driverId)
-        .eq('status', 'completed')
-        .gte('pickup_date', monthStart)
-        .lte('pickup_date', monthEnd);
-
-      // Not using driver_balances anymore, calculating from monthly reservations
-
-      // Fetch next upcoming job
-      const { data: nextJobData } = await supabase
-        .from('reservations')
-        .select('pickup_date, pickup_time, pickup, pickup_place_name')
-        .eq('driver_id', driverId)
-        .in('status', ['sent_to_driver', 'assigned', 'active'])
-        .gte('pickup_date', format(now, 'yyyy-MM-dd'))
-        .order('pickup_date', { ascending: true })
-        .order('pickup_time', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+      const [{ data: driverData }, { data: monthlyRes }, { data: nextJobData }] = await Promise.all([
+        supabase
+          .from('drivers')
+          .select('name, average_rating, total_reviews')
+          .eq('id', driverId)
+          .single(),
+        supabase
+          .from('reservations')
+          .select('id, driver_earning, driver_cash_amount')
+          .eq('driver_id', driverId)
+          .eq('status', 'completed')
+          .gte('pickup_date', monthStart)
+          .lte('pickup_date', monthEnd),
+        supabase
+          .from('reservations')
+          .select('pickup_date, pickup_time, pickup, pickup_place_name')
+          .eq('driver_id', driverId)
+          .in('status', ['sent_to_driver', 'assigned', 'active'])
+          .gte('pickup_date', format(now, 'yyyy-MM-dd'))
+          .order('pickup_date', { ascending: true })
+          .order('pickup_time', { ascending: true })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
       const totalEarnings = monthlyRes?.reduce((sum, r) => sum + (r.driver_earning || 0), 0) || 0;
       const totalCash = monthlyRes?.reduce((sum, r) => sum + (r.driver_cash_amount || 0), 0) || 0;
@@ -95,6 +94,15 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
 
     fetchStats();
 
+    const scheduleRefresh = () => {
+      if (refreshTimeoutRef.current !== null) {
+        window.clearTimeout(refreshTimeoutRef.current);
+      }
+      refreshTimeoutRef.current = window.setTimeout(() => {
+        fetchStats();
+      }, 250);
+    };
+
     // Subscribe to realtime updates
     const channel = supabase
       .channel('driver-stats-realtime')
@@ -106,11 +114,14 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
           table: 'reservations',
           filter: `driver_id=eq.${driverId}`
         },
-        () => fetchStats()
+        scheduleRefresh
       )
       .subscribe();
 
     return () => {
+      if (refreshTimeoutRef.current !== null) {
+        window.clearTimeout(refreshTimeoutRef.current);
+      }
       supabase.removeChannel(channel);
     };
   }, [driverId]);
@@ -141,7 +152,7 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
           {/* Driver Name & Rating */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-lg">{t('welcome') || 'Hoş geldin'}, {stats.name.split(' ')[0]}!</h3>
+              <h3 className="font-bold text-lg">{t('thisMonth') || 'Bu Ay'} {t('summary') || 'Özet'}</h3>
               <p className="text-sm text-muted-foreground">
                 {format(new Date(), 'EEEE, d MMMM', { locale: tr })}
               </p>
@@ -164,7 +175,7 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
           </div>
 
           {/* Quick Stats Grid */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {/* This Month Completed */}
             <div className="bg-green-500/10 rounded-lg p-3 text-center">
               <CheckCircle className="h-5 w-5 text-green-600 mx-auto mb-1" />
@@ -175,14 +186,14 @@ export const DriverStatsCard = ({ driverId }: DriverStatsCardProps) => {
             {/* This Month Earnings */}
             <div className="bg-blue-500/10 rounded-lg p-3 text-center">
               <TrendingUp className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-blue-600">₺{stats.totalEarningsThisMonth.toLocaleString('tr-TR')}</p>
+              <p className="text-base sm:text-lg font-bold text-blue-600">₺{stats.totalEarningsThisMonth.toLocaleString('tr-TR')}</p>
               <p className="text-[10px] text-muted-foreground">{t('earnings')}</p>
             </div>
 
             {/* Cash Collected */}
             <div className="bg-emerald-500/10 rounded-lg p-3 text-center">
               <Wallet className="h-5 w-5 text-emerald-600 mx-auto mb-1" />
-              <p className="text-lg font-bold text-emerald-600">₺{stats.totalCashThisMonth.toLocaleString('tr-TR')}</p>
+              <p className="text-base sm:text-lg font-bold text-emerald-600">₺{stats.totalCashThisMonth.toLocaleString('tr-TR')}</p>
               <p className="text-[10px] text-muted-foreground">{t('cashCollected')}</p>
             </div>
           </div>

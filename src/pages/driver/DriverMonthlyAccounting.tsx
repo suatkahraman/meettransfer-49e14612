@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Wallet } from 'lucide-react';
@@ -61,53 +60,56 @@ const DriverMonthlyAccounting = () => {
       const monthStart = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
       const monthEnd = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
 
-      // Fetch reservations - exclude cancelled and deleted
-      const { data: reservationsData } = await supabase
-        .from('reservations')
-        .select('*')
-        .eq('driver_id', driverId)
-        .gte('pickup_date', monthStart)
-        .lte('pickup_date', monthEnd)
-        .not('status', 'in', '("cancelled","deleted")')
-        .order('pickup_date', { ascending: true });
+      const [
+        { data: reservationsData },
+        { data: paymentsData },
+        { data: allPaymentsData },
+        { data: allCompletedReservations }
+      ] = await Promise.all([
+        supabase
+          .from('reservations')
+          .select('id, pickup_date, pickup_time, pickup, dropoff, price, price_currency, driver_earning, driver_cash_amount, passenger_cash_amount, passenger_cash_currency, status, customer_name')
+          .eq('driver_id', driverId)
+          .gte('pickup_date', monthStart)
+          .lte('pickup_date', monthEnd)
+          .not('status', 'in', '("cancelled","deleted")')
+          .order('pickup_date', { ascending: true }),
+        supabase
+          .from('driver_payments')
+          .select('id, driver_id, amount, payment_date, payment_type, notes, created_at')
+          .eq('driver_id', driverId)
+          .gte('payment_date', monthStart)
+          .lte('payment_date', monthEnd)
+          .order('payment_date', { ascending: false }),
+        supabase
+          .from('driver_payments')
+          .select('id, driver_id, amount, payment_date, payment_type, notes, created_at')
+          .eq('driver_id', driverId)
+          .lte('payment_date', monthEnd) // Only payments up to end of selected month
+          .order('payment_date', { ascending: false }),
+        supabase
+          .from('reservations')
+          .select('driver_earning, driver_cash_amount, pickup_date, status')
+          .eq('driver_id', driverId)
+          .lte('pickup_date', monthEnd) // Include all up to end of selected month
+          .eq('status', 'completed')
+      ]);
 
       if (reservationsData) {
         setReservations(reservationsData);
+      } else {
+        setReservations([]);
       }
-
-      // Fetch payments for this month
-      const { data: paymentsData } = await supabase
-        .from('driver_payments')
-        .select('*')
-        .eq('driver_id', driverId)
-        .gte('payment_date', monthStart)
-        .lte('payment_date', monthEnd)
-        .order('payment_date', { ascending: false });
-
       if (paymentsData) {
         setPayments(paymentsData);
+      } else {
+        setPayments([]);
       }
-
-      // Fetch ALL payments for carry-over calculation
-      const { data: allPaymentsData } = await supabase
-        .from('driver_payments')
-        .select('*')
-        .eq('driver_id', driverId)
-        .lte('payment_date', monthEnd) // Only payments up to end of selected month
-        .order('payment_date', { ascending: false });
-
       if (allPaymentsData) {
         setAllPayments(allPaymentsData);
+      } else {
+        setAllPayments([]);
       }
-
-      // Fetch all completed reservations UP TO AND INCLUDING current month for carry-over
-      // Exclude cancelled and deleted
-      const { data: allCompletedReservations } = await supabase
-        .from('reservations')
-        .select('driver_earning, driver_cash_amount, pickup_date, status')
-        .eq('driver_id', driverId)
-        .lte('pickup_date', monthEnd) // Include all up to end of selected month
-        .eq('status', 'completed');
 
       // Calculate all-time earnings up to selected month (driver_earning - cash collected) - TL bazlı
       let allTimeEarnings = 0;
@@ -216,12 +218,12 @@ const DriverMonthlyAccounting = () => {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="reservations" className="gap-2">
+              <TabsList className="grid w-full grid-cols-2 h-auto">
+                <TabsTrigger value="reservations" className="gap-2 text-xs sm:text-sm px-2">
                   <FileText className="h-4 w-4" />
                   {t('transfers')}
                 </TabsTrigger>
-                <TabsTrigger value="payments" className="gap-2">
+                <TabsTrigger value="payments" className="gap-2 text-xs sm:text-sm px-2">
                   <Wallet className="h-4 w-4" />
                   {t('payments')}
                 </TabsTrigger>
@@ -260,16 +262,16 @@ const DriverMonthlyAccounting = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <div className="text-sm text-muted-foreground">{t('receivedFromCompany')}</div>
-                        <div className="text-2xl font-bold text-green-600">
+                        <div className="text-xl sm:text-2xl font-bold text-green-600">
                           {getCurrencySymbol('TRY')}{thisMonthPaymentsToDriver.toFixed(2)}
                         </div>
                       </div>
                       <div>
                         <div className="text-sm text-muted-foreground">{t('paidToCompany')}</div>
-                        <div className="text-2xl font-bold text-blue-600">
+                        <div className="text-xl sm:text-2xl font-bold text-blue-600">
                           {getCurrencySymbol('TRY')}{thisMonthPaymentsFromDriver.toFixed(2)}
                         </div>
                       </div>
