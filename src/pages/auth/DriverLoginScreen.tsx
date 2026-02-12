@@ -17,6 +17,7 @@ import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
 import { normalizePasswordInput } from '@/lib/normalizePasswordInput';
 import { useStorageAvailable } from '@/hooks/useStorageAvailable';
 import { usePWADetect } from '@/hooks/usePWADetect';
+import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 
 // Şoförler için 2FA yok - sadece şifre ile giriş
 const loginSchema = z.object({
@@ -62,6 +63,7 @@ const DriverLoginScreen = () => {
   const navigate = useNavigate();
   const { available: storageAvailable, checked: storageChecked } = useStorageAvailable();
   const { isIOS, isStandalone } = usePWADetect();
+  const { registerTrustedDevice } = useTwoFactorAuth();
 
   // Lockout countdown timer
   useEffect(() => {
@@ -210,31 +212,35 @@ const DriverLoginScreen = () => {
         } else {
           toast.error(error.message || t('loginFailed') || 'Login failed');
         }
-      } else if (authData?.user) {
-        // Rol kontrolu: user_roles (coklu rol olabilir) veya drivers tablosu fallback
-        const { data: rolesData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', authData.user.id);
-        const roles = (rolesData || []).map((r) => r.role);
-        const hasDriverRole = roles.includes('driver');
-        const { data: driverRow } = await supabase
-          .from('drivers')
-          .select('id')
-          .eq('user_id', authData.user.id)
-          .maybeSingle();
-        const isDriver = hasDriverRole || !!driverRow?.id;
-        
+      } else if (authData?.user && authData?.session) {
+        // RLS bypass: get-user-role - ayni cihazdan 2. giris icin retry
+        const token = authData.session.access_token;
+        let roleData: { success?: boolean; role?: string } | null = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (attempt > 0) await new Promise((r) => setTimeout(r, 300 * attempt));
+          const { data } = await supabase.functions.invoke('get-user-role', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (data?.success && data?.role) {
+            roleData = data;
+            break;
+          }
+        }
+        const isDriver = roleData?.success && roleData?.role === 'driver';
+
         if (!isDriver) {
           toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil' : 'This is not a driver account');
           await supabase.auth.signOut();
           setIsLoading(false);
           return;
         }
-        
-        // Şoförler için 2FA yok - doğrudan giriş
+
         await logLoginAttempt(validation.email, true, undefined, undefined, 'driver');
-        // Sayfa yenilemesi ile panele git - AuthContext/useUserRole senkronizasyon sorununu kesin çözer
+        // Driver icin otomatik cihaza guven - mevcut driverlar sorun yasamasin
+        registerTrustedDevice(authData.user.id).catch(() => {});
+        await supabase.auth.refreshSession();
+        // Session localStorage'a yazilsin
+        await new Promise((r) => setTimeout(r, 150));
         window.location.replace('/driver');
         return;
       }

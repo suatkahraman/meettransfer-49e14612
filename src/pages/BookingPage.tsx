@@ -49,6 +49,7 @@ import { z } from "zod";
 
 // Session storage key for caching booking form state during Google OAuth
 const GOOGLE_AUTH_CACHE_KEY = 'google_auth_booking_cache';
+const GOOGLE_AUTH_CACHE_BACKUP_KEY = 'google_auth_booking_cache_backup';
 
 interface VehiclePrice {
   vehicleType: string;
@@ -465,7 +466,8 @@ const BookingPage = () => {
           let cachedPaymentType: 'cash' | 'credit_card' | 'online' = 'cash';
           
           try {
-            const cachedData = sessionStorage.getItem(GOOGLE_AUTH_CACHE_KEY);
+            let cachedData = sessionStorage.getItem(GOOGLE_AUTH_CACHE_KEY);
+            if (!cachedData) cachedData = localStorage.getItem(GOOGLE_AUTH_CACHE_BACKUP_KEY);
             if (cachedData) {
               const parsed = JSON.parse(cachedData);
               console.log('[GoogleAuth] Found cached booking data:', parsed);
@@ -511,6 +513,7 @@ const BookingPage = () => {
               
               // Clear the cache after restoring
               sessionStorage.removeItem(GOOGLE_AUTH_CACHE_KEY);
+              try { localStorage.removeItem(GOOGLE_AUTH_CACHE_BACKUP_KEY); } catch {}
             }
           } catch (e) {
             console.error('[GoogleAuth] Error reading cached data:', e);
@@ -1015,7 +1018,9 @@ const BookingPage = () => {
       paymentType,
       preferredCurrency,
     };
-    sessionStorage.setItem(GOOGLE_AUTH_CACHE_KEY, JSON.stringify(cacheData));
+    const json = JSON.stringify(cacheData);
+    sessionStorage.setItem(GOOGLE_AUTH_CACHE_KEY, json);
+    try { localStorage.setItem(GOOGLE_AUTH_CACHE_BACKUP_KEY, json); } catch {}
     console.log('[OAuth] Saved COMPLETE form cache before OAuth redirect:', cacheData);
     return cacheData;
   };

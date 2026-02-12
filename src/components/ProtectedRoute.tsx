@@ -18,7 +18,7 @@ const ProtectedRoute = ({
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
 
-  // Driver panel: Role çözülene kadar bekle - 5 saniye grace period
+  // Driver/Customer/Agency: Role çözülene kadar bekle - 10 sn grace (aynı cihaz 2. giriş)
   const [roleGraceExpired, setRoleGraceExpired] = useState(false);
   useEffect(() => {
     setRoleGraceExpired(false);
@@ -27,7 +27,7 @@ const ProtectedRoute = ({
     if (roleLoading) return;
     if (role) return;
 
-    const t = window.setTimeout(() => setRoleGraceExpired(true), 5000);
+    const t = window.setTimeout(() => setRoleGraceExpired(true), 10000);
     return () => window.clearTimeout(t);
   }, [user, roleLoading, role]);
 
@@ -40,9 +40,9 @@ const ProtectedRoute = ({
     );
   }
 
-  // Redirect to auth if not logged in
+  // Redirect to appropriate login page if not logged in
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to={redirectTo} replace />;
   }
 
   // If role is still unknown after grace period, fall back to least-privileged area.
@@ -67,27 +67,27 @@ const ProtectedRoute = ({
   return <>{children}</>;
 };
 
-// Convenience components for specific roles
+// Convenience components - her rol kendi giriş sayfasına yönlendirilir
 export const AdminRoute = ({ children }: { children: ReactNode }) => (
-  <ProtectedRoute allowedRoles={['admin']}>
+  <ProtectedRoute allowedRoles={['admin']} redirectTo="/auth">
     {children}
   </ProtectedRoute>
 );
 
 export const DriverRoute = ({ children }: { children: ReactNode }) => (
-  <ProtectedRoute allowedRoles={['driver']}>
+  <ProtectedRoute allowedRoles={['driver']} redirectTo="/login/driver">
     {children}
   </ProtectedRoute>
 );
 
 export const CustomerRoute = ({ children }: { children: ReactNode }) => (
-  <ProtectedRoute allowedRoles={['customer']}>
+  <ProtectedRoute allowedRoles={['customer']} redirectTo="/login">
     {children}
   </ProtectedRoute>
 );
 
 export const AgencyRoute = ({ children }: { children: ReactNode }) => (
-  <ProtectedRoute allowedRoles={['agency']}>
+  <ProtectedRoute allowedRoles={['agency']} redirectTo="/login/agency">
     {children}
   </ProtectedRoute>
 );

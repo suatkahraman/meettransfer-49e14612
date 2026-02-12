@@ -22,24 +22,29 @@ export const useUserRole = () => {
       }
 
       try {
-        // 1) Önce edge function ile dene - RLS bypass, driver panel giriş sorununu kesin çözer
+        // 1) Edge function (RLS bypass) - retry ile ayni cihazdan tekrar giris garantisi
         const { data } = await supabase.auth.getSession();
         const token = data?.session?.access_token;
+        // Ayni cihazdan 2. giris: retry ile get-user-role guvencesi (cold start, network)
         if (token) {
-          const { data: fnData } = await supabase.functions.invoke('get-user-role', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (fnData?.success && fnData?.role) {
-            const detectedRole = fnData.role as AppRole;
-            setRole(detectedRole);
-            setDriverId(fnData.driverId || null);
-            setAgencyId(fnData.agencyId || null);
-            setLoading(false);
-            return;
+          const delays = [0, 400, 800, 1200];
+          for (let attempt = 0; attempt < delays.length; attempt++) {
+            if (attempt > 0) await new Promise((r) => setTimeout(r, delays[attempt]));
+            const { data: fnData } = await supabase.functions.invoke('get-user-role', {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (fnData?.success && fnData?.role) {
+              const detectedRole = fnData.role as AppRole;
+              setRole(detectedRole);
+              setDriverId(fnData.driverId || null);
+              setAgencyId(fnData.agencyId || null);
+              setLoading(false);
+              return;
+            }
           }
         }
 
-        // 2) Fallback: Direkt user_roles + drivers/agencies sorgusu
+        // 2) Fallback: Direkt user_roles + drivers/agencies sorgusu (RLS gerekir)
         const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')

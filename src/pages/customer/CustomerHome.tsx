@@ -454,12 +454,11 @@ const CustomerHome = () => {
       const pendingToken = localStorage.getItem('pending_booking_token');
       const pendingData = localStorage.getItem('pending_booking_data');
       
-      // If we have session booking data from Google OAuth, AUTO-CREATE reservation
+      // If we have session booking data from Google OAuth, AUTO-CREATE via edge function (RLS bypass)
       if (sessionBookingData && sessionBookingData.pickup && sessionBookingData.dropoff) {
-        console.log('[CustomerHome] Found pending booking from sessionStorage, creating reservation...', sessionBookingData);
+        console.log('[CustomerHome] Found pending booking (session/localStorage), creating via edge function...', sessionBookingData);
         
         try {
-          // Get user profile info
           const { data: profile } = await supabase
             .from('profiles')
             .select('full_name, phone')
@@ -467,62 +466,53 @@ const CustomerHome = () => {
             .single();
           
           const customerName = sessionBookingData.customerName || profile?.full_name || user.user_metadata?.full_name || 'Customer';
-          const customerPhone = sessionBookingData.customerPhone || profile?.phone || 'N/A'; // Allow reservation without phone, user can add later
+          const customerPhone = sessionBookingData.customerPhone || profile?.phone || '';
           const customerEmail = user.email || '';
           
-          setIsCreatingReservation(true);
+          const rawPayment = sessionBookingData.paymentMethod || 'cash';
+          const paymentMethod = rawPayment === 'credit_card' ? 'online' : (['cash','payment_link','agency_pay','none','online'].includes(rawPayment) ? rawPayment : 'cash');
+          const validVehicleTypes = ['sedan','mercedes-vito','vip-mercedes','maybach-minibus','minibus'];
+          const vehicleType = sessionBookingData.vehicleType && (validVehicleTypes.includes(sessionBookingData.vehicleType) || sessionBookingData.vehicleType.startsWith('dubai-'))
+            ? sessionBookingData.vehicleType
+            : 'mercedes-vito';
           
-          // Determine initial status based on whether we have a price
-          const hasPrice = sessionBookingData.estimatedPrice && sessionBookingData.estimatedPrice > 0;
-          const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
-          
-          // Build passenger names array
           let passengerNamesArray = sessionBookingData.passengerNames;
           if (!passengerNamesArray || passengerNamesArray.length === 0) {
             passengerNamesArray = [customerName];
           }
           
-          // Map paymentMethod: Book page uses 'credit_card' but reservations allows ('cash','payment_link','agency_pay','none','online')
-          const rawPayment = sessionBookingData.paymentMethod || 'cash';
-          const paymentType = rawPayment === 'credit_card' ? 'online' : (['cash','payment_link','agency_pay','none','online'].includes(rawPayment) ? rawPayment : 'cash');
-          // vehicle_type: DB expects internal format (mercedes-vito), not display label. Support Dubai types too.
-          const validVehicleTypes = ['sedan','mercedes-vito','vip-mercedes','maybach-minibus','minibus'];
-          const vehicleType = sessionBookingData.vehicleType && (validVehicleTypes.includes(sessionBookingData.vehicleType) || sessionBookingData.vehicleType.startsWith('dubai-'))
-            ? sessionBookingData.vehicleType
-            : 'mercedes-vito';
-
-          // Create main reservation directly
-          const reservationData = {
-            customer_id: user.id,
-            customer_name: customerName,
-            customer_phone: customerPhone,
-            pickup: sessionBookingData.pickup!,
-            dropoff: sessionBookingData.dropoff!,
-            pickup_date: sessionBookingData.date || new Date().toISOString().split('T')[0],
-            pickup_time: sessionBookingData.time || '10:00',
-            vehicle_type: vehicleType,
+          setIsCreatingReservation(true);
+          
+          const body = {
+            customerId: user.id,
+            pickup: sessionBookingData.pickup,
+            dropoff: sessionBookingData.dropoff,
+            pickupDate: sessionBookingData.date || new Date().toISOString().split('T')[0],
+            pickupTime: sessionBookingData.time || '10:00',
+            vehicleType,
             passengers: sessionBookingData.passengers || 1,
-            price: sessionBookingData.estimatedPrice || null,
-            price_currency: sessionBookingData.currency || 'EUR',
-            status: initialStatus,
-            payment_method: rawPayment,
-            payment_type: paymentType,
-            luggage_count: sessionBookingData.luggageCount || 1,
-            baby_seat_count: sessionBookingData.babySeatCount || 0,
-            customer_notes: sessionBookingData.customerNotes || null,
-            flight_number: sessionBookingData.flightNumber || null,
-            passenger_names: passengerNamesArray,
-            promo_code: sessionBookingData.promoCode || null,
+            price: sessionBookingData.estimatedPrice && sessionBookingData.estimatedPrice > 0 ? sessionBookingData.estimatedPrice : null,
+            priceCurrency: sessionBookingData.currency || 'EUR',
+            paymentMethod,
+            customerName,
+            customerPhone,
+            customerEmail,
+            customerNotes: sessionBookingData.customerNotes || undefined,
+            flightNumber: sessionBookingData.flightNumber || undefined,
+            passengerNames: passengerNamesArray,
+            luggageCount: sessionBookingData.luggageCount ?? 1,
+            babySeatCount: sessionBookingData.babySeatCount ?? 0,
+            promoCode: sessionBookingData.promoCode || undefined,
+            hasReturnTrip: sessionBookingData.hasReturnTrip || false,
+            returnDate: sessionBookingData.returnDate || undefined,
+            returnTime: sessionBookingData.returnTime || undefined,
+            returnPrice: sessionBookingData.returnPrice && sessionBookingData.hasReturnTrip ? sessionBookingData.returnPrice : undefined,
           };
           
-          const { data: reservation, error: reservationError } = await supabase
-            .from('reservations')
-            .insert([reservationData])
-            .select()
-            .single();
+          const { data: result, error: fnError } = await supabase.functions.invoke('create-quick-booking-reservation', { body });
           
-          if (reservationError) {
-            console.error('[CustomerHome] Failed to create reservation:', reservationError);
+          if (fnError || !result?.success) {
+            console.error('[CustomerHome] Edge function failed:', fnError || result?.error);
             toast.error(language === 'TR' 
               ? 'Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.'
               : 'Failed to create reservation. Please try again.');
@@ -530,55 +520,18 @@ const CustomerHome = () => {
             return;
           }
           
-          console.log('[CustomerHome] Reservation created successfully:', reservation?.reservation_code);
-          PendingBookingStorage.clear(); // Clear only after successful insert
-          
-          // Create return trip if requested
-          if (sessionBookingData.hasReturnTrip && sessionBookingData.returnDate && sessionBookingData.returnTime) {
-            const returnData = {
-              customer_id: user.id,
-              customer_name: customerName,
-              customer_phone: customerPhone,
-              pickup: sessionBookingData.dropoff!, // Swap
-              dropoff: sessionBookingData.pickup!, // Swap
-              pickup_date: sessionBookingData.returnDate,
-              pickup_time: sessionBookingData.returnTime,
-              vehicle_type: vehicleType,
-              passengers: sessionBookingData.passengers || 1,
-              price: sessionBookingData.returnPrice || sessionBookingData.estimatedPrice || null,
-              price_currency: sessionBookingData.currency || 'EUR',
-              status: initialStatus,
-              payment_method: rawPayment,
-              payment_type: paymentType,
-              luggage_count: sessionBookingData.luggageCount || 1,
-              baby_seat_count: sessionBookingData.babySeatCount || 0,
-              customer_notes: sessionBookingData.customerNotes || null,
-              passenger_names: passengerNamesArray,
-              promo_code: sessionBookingData.promoCode || null,
-              is_return_trip: true,
-              original_reservation_id: reservation?.id,
-            };
-            
-            const { error: returnError } = await supabase
-              .from('reservations')
-              .insert([returnData]);
-            
-            if (returnError) {
-              console.error('[CustomerHome] Failed to create return reservation:', returnError);
-            } else {
-              console.log('[CustomerHome] Return reservation created successfully');
-            }
-          }
+          const reservationCode = result?.reservation?.reservationCode;
+          console.log('[CustomerHome] Reservation created via edge function:', reservationCode);
+          PendingBookingStorage.clear();
           
           toast.success(language === 'TR' 
-            ? `Rezervasyonunuz oluşturuldu! Kod: ${reservation?.reservation_code}`
-            : `Your reservation has been created! Code: ${reservation?.reservation_code}`);
+            ? `Rezervasyonunuz oluşturuldu! Kod: ${reservationCode}`
+            : `Your reservation has been created! Code: ${reservationCode}`);
           
-          // Refresh data to show the new reservation
           fetchData();
           
         } catch (err) {
-          console.error('[CustomerHome] Error creating reservation from sessionStorage:', err);
+          console.error('[CustomerHome] Error creating reservation:', err);
           toast.error(language === 'TR' 
             ? 'Bir hata oluştu. Lütfen tekrar deneyin.'
             : 'An error occurred. Please try again.');

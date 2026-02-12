@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { z } from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check, ShieldAlert, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, CheckCircle, AlertCircle, Share2, Check, ShieldAlert, Eye, EyeOff, User, Car, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 import TwoFactorVerification from '@/components/auth/TwoFactorVerification';
@@ -64,11 +64,19 @@ const newPasswordSchema = z.object({
 });
 
 type ViewMode = 'login' | 'forgot' | 'reset' | 'reset-sent' | '2fa';
+type LoginSection = 'customer' | 'driver' | 'agency';
 
 const LoginScreen = () => {
   const isResetting = typeof window !== 'undefined' && window.location.href.includes('type=recovery');
-
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const roleParam = searchParams.get('role') as LoginSection | null;
+  const [loginSection, setLoginSection] = useState<LoginSection | null>(() => {
+    if (roleParam && ['customer', 'driver', 'agency'].includes(roleParam)) return roleParam;
+    return null;
+  });
+  useEffect(() => {
+    if (roleParam && ['customer', 'driver', 'agency'].includes(roleParam)) setLoginSection(roleParam);
+  }, [roleParam]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>(
@@ -264,6 +272,12 @@ const LoginScreen = () => {
     if (isResetting) setViewMode('reset');
   }, [isResetting]);
 
+  useEffect(() => {
+    if (roleParam && ['customer', 'driver', 'agency'].includes(roleParam)) {
+      setLoginSection(roleParam);
+    }
+  }, [roleParam]);
+
   // Role-based redirect – şifre sıfırlama (link tıklayıp yeni şifre formu) iken ASLA yönlendirme yapma
   useEffect(() => {
     if (isResetting) return;
@@ -324,22 +338,9 @@ const LoginScreen = () => {
         }
       }
       
-      // Redirect based on role
-      setTimeout(() => {
-        switch (pendingRole) {
-          case 'admin':
-            navigate('/admin', { replace: true });
-            break;
-          case 'driver':
-            navigate('/driver', { replace: true });
-            break;
-          case 'agency':
-            navigate('/agency', { replace: true });
-            break;
-          default:
-            navigate('/customer', { replace: true });
-        }
-      }, 500);
+      // Tam sayfa yonlendirme - AuthContext/useUserRole senkronizasyonu icin
+      const path = pendingRole === 'admin' ? '/admin' : pendingRole === 'agency' ? '/agency' : '/customer';
+      window.location.replace(path);
     }
   };
 
@@ -362,13 +363,33 @@ const LoginScreen = () => {
     );
   }
 
+  const resolveUserRole = async (userId: string, accessToken?: string): Promise<string> => {
+    if (accessToken) {
+      const { data } = await supabase.functions.invoke('get-user-role', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (data?.success && data?.role) return data.role;
+    }
+    const { data: rolesData } = await supabase.from('user_roles').select('role').eq('user_id', userId);
+    const roles = (rolesData || []).map((r) => r.role);
+    if (roles.includes('admin')) return 'admin';
+    if (roles.includes('driver')) return 'driver';
+    if (roles.includes('agency')) return 'agency';
+    if (roles.includes('customer')) return 'customer';
+    const { data: driverRow } = await supabase.from('drivers').select('id').eq('user_id', userId).maybeSingle();
+    if (driverRow?.id) return 'driver';
+    const { data: agencyRow } = await supabase.from('agencies').select('id').eq('user_id', userId).maybeSingle();
+    if (agencyRow?.id) return 'agency';
+    return 'customer';
+  };
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
+    const expectedRole = loginSection || 'customer';
 
     // We sometimes sign in briefly (to validate password) and then sign out again to enforce 2FA.
-    // During that window, AuthContext must NOT auto-redirect away from this screen.
     let keepRedirectSuppressed = false;
 
     const formData = new FormData(e.currentTarget);
@@ -378,7 +399,6 @@ const LoginScreen = () => {
     try {
       const validation = loginSchema.parse({ email: email.trim(), password });
       
-      // Check rate limit before attempting login
       const rateLimit = await checkRateLimit(validation.email);
       if (rateLimit.locked) {
         toast.error(`Hesabınız geçici olarak kilitlendi. ${formatLockoutTime(rateLimit.remainingSeconds || 0)} sonra tekrar deneyin.`);
@@ -386,7 +406,6 @@ const LoginScreen = () => {
         return;
       }
       
-      // Save remember me preference
       if (rememberMe) {
         safeLocalSet('guestRememberMe', 'true');
         safeLocalSet('guestSavedEmail', validation.email);
@@ -395,66 +414,79 @@ const LoginScreen = () => {
         safeLocalRemove('guestSavedEmail');
       }
 
-      // Prevent global auth redirect racing our 2FA flow
       setSuppressAuthRedirect();
       
-      // Use supabase directly to get the user data for 2FA check
       const { error, data: authData } = await supabase.auth.signInWithPassword({
         email: validation.email,
         password: validation.password,
       });
       
       if (error) {
-        // Log failed login attempt
         await logLoginAttempt(validation.email, false, error.message);
-        
         if (error.message?.includes('Invalid login credentials')) {
-          setErrors({ password: 'Geçersiz email veya şifre' });
+          setErrors({ password: language === 'TR' ? 'Geçersiz email veya şifre' : 'Invalid email or password' });
         } else {
           toast.error(error.message);
         }
       } else if (authData?.user) {
-        // Check user role to determine if 2FA is needed
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', authData.user.id)
-          .single();
-        
-        const userRole = roleData?.role || 'customer';
-        
-        // Check if device is trusted - 2FA sadece yeni (güvenilmeyen) cihazdan girişte
+        const userRole = await resolveUserRole(authData.user.id, authData?.session?.access_token);
+
+        // Rol dogrulama - giris bolumuyle eslesmeli
+        if (expectedRole === 'driver' && userRole !== 'driver') {
+          await supabase.auth.signOut();
+          toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil. Sürücü girişi için doğru hesabı kullanın.' : 'This is not a driver account. Use the correct account for driver login.');
+          setIsLoading(false);
+          clearSuppressAuthRedirect();
+          return;
+        }
+        if (expectedRole === 'agency' && userRole !== 'agency') {
+          await supabase.auth.signOut();
+          toast.error(language === 'TR' ? 'Bu hesap bir acenta hesabı değil. Acenta girişi için doğru hesabı kullanın.' : 'This is not an agency account. Use the correct account for agency login.');
+          setIsLoading(false);
+          clearSuppressAuthRedirect();
+          return;
+        }
+        if (expectedRole === 'customer' && userRole !== 'customer') {
+          await supabase.auth.signOut();
+          const msg = userRole === 'admin'
+            ? (language === 'TR' ? 'Admin girişi için /auth sayfasını kullanın.' : 'Use /auth for admin login.')
+            : (language === 'TR' ? 'Bu hesap bir müşteri hesabı değil. Müşteri girişi için doğru hesabı kullanın.' : 'This is not a customer account. Use the correct account.');
+          toast.error(msg);
+          setIsLoading(false);
+          clearSuppressAuthRedirect();
+          return;
+        }
+
+        // Driver: 2FA yok, dogrudan panele - ayni cihaz 2. giris guvencesi
+        if (userRole === 'driver' || expectedRole === 'driver') {
+          await logLoginAttempt(validation.email, true, undefined, undefined, 'driver');
+          registerTrustedDevice(authData.user.id).catch(() => {});
+          clearSuppressAuthRedirect();
+          await supabase.auth.refreshSession();
+          await new Promise((r) => setTimeout(r, 150));
+          window.location.replace('/driver');
+          return;
+        }
+
+        // Customer/Agency: 2FA kontrolu
         const isTrusted = await checkTrustedDevice(authData.user.id);
         
-        // 2FA sadece güvenilmeyen cihazda gerekli
         if (!isTrusted) {
           keepRedirectSuppressed = true;
-
-          // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
           setPendingRole(userRole);
           setViewMode('2fa');
-
-          // Sign out temporarily - user needs to verify via 2FA
           await supabase.auth.signOut();
-
-          // Device not trusted or suspicious activity - require 2FA
           const langCode = language === 'TR' ? 'tr' : 'en';
-          console.log('Initiating 2FA for:', validation.email);
-
           const result = await initiate2FA(authData.user.id, validation.email, userRole, langCode);
-
           if (result.success) {
             toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
           } else {
-            console.error('2FA initiation failed:', result.error);
             toast.error(result.error || 'Doğrulama kodu gönderilemedi');
-            // Revert back to login if failed
             setPendingRole(null);
             setViewMode('login');
             keepRedirectSuppressed = false;
           }
         } else {
-          // Device trusted and no suspicious activity - proceed with login
           await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
         }
       }
@@ -853,42 +885,77 @@ const LoginScreen = () => {
         );
 
       default:
-        return (
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-2xl md:text-3xl font-serif">{t('welcomeBack')}</CardTitle>
-              <CardDescription>{t('signInToManage')}</CardDescription>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              {/* iOS PWA Notice */}
-              {showIOSWarning && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
-                  <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-amber-600 dark:text-amber-400">{t('iosAppNotice')}</p>
-                    <p className="text-muted-foreground mt-1">
-                      {t('iosGoogleLoginNotice')}
-                    </p>
+        // Rol secimi veya form gosterimi
+        if (loginSection === null) {
+          return (
+            <Card className="w-full max-w-md">
+              <CardHeader className="text-center space-y-2">
+                <CardTitle className="text-2xl md:text-3xl font-serif">{t('welcomeBack')}</CardTitle>
+                <CardDescription>{language === 'TR' ? 'Giriş yapmak için hesap türünü seçin' : 'Select account type to sign in'}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {showIOSWarning && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+                    <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-amber-600 dark:text-amber-400">{t('iosAppNotice')}</p>
+                      <p className="text-muted-foreground mt-1">{t('iosGoogleLoginNotice')}</p>
+                    </div>
+                  </div>
+                )}
+                <SocialAuthButtons disabled={isLoading} mode="login" />
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">{t('or')}</span>
                   </div>
                 </div>
-              )}
-
-              {/* Social Sign-In Buttons */}
-              <SocialAuthButtons
-                disabled={isLoading}
-                mode="login"
-              />
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
+                <div className="grid gap-3">
+                  <Button type="button" variant="outline" className="h-12 w-full justify-start gap-3" onClick={() => setLoginSection('customer')}>
+                    <User className="h-5 w-5" />
+                    {language === 'TR' ? 'Müşteri Girişi' : 'Customer Login'}
+                  </Button>
+                  <Button type="button" variant="outline" className="h-12 w-full justify-start gap-3" onClick={() => setLoginSection('driver')}>
+                    <Car className="h-5 w-5" />
+                    {language === 'TR' ? 'Sürücü Girişi' : 'Driver Login'}
+                  </Button>
+                  <Button type="button" variant="outline" className="h-12 w-full justify-start gap-3" onClick={() => setLoginSection('agency')}>
+                    <Building2 className="h-5 w-5" />
+                    {language === 'TR' ? 'Acenta Girişi' : 'Agency Login'}
+                  </Button>
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">{t('or')}</span>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-2">
+                <div className="text-center text-sm text-muted-foreground">{t('dontHaveAccount')}</div>
+                <div className="flex gap-2 w-full">
+                  <Link to="/signup/customer" className="flex-1">
+                    <Button variant="outline" className="w-full h-12 rounded-xl">{t('guestRegistration')}</Button>
+                  </Link>
+                  <Link to="/signup/agency" className="flex-1">
+                    <Button variant="secondary" className="w-full h-12 rounded-xl">{t('agencyRegistration')}</Button>
+                  </Link>
                 </div>
-              </div>
-
+              </CardFooter>
+            </Card>
+          );
+        }
+        return (
+          <Card className="w-full max-w-md">
+            <CardHeader className="relative text-center space-y-2">
+              <Button variant="ghost" size="sm" className="absolute left-0 top-0" onClick={() => setLoginSection(null)}>
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                {t('back')}
+              </Button>
+              <CardTitle className="text-2xl font-serif">
+                {loginSection === 'customer' && (language === 'TR' ? 'Müşteri Girişi' : 'Customer Login')}
+                {loginSection === 'driver' && (language === 'TR' ? 'Sürücü Girişi' : 'Driver Login')}
+                {loginSection === 'agency' && (language === 'TR' ? 'Acenta Girişi' : 'Agency Login')}
+              </CardTitle>
+              <CardDescription>{t('signInToManage')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">{t('email')}</Label>
@@ -973,6 +1040,15 @@ const LoginScreen = () => {
             </CardContent>
             
             <CardFooter className="flex flex-col gap-4">
+              {(loginSection === 'driver' || loginSection === 'agency') && (
+                <p className="text-center text-xs text-muted-foreground">
+                  {loginSection === 'driver' ? (
+                    <Link to="/login/driver" className="text-accent hover:underline">{language === 'TR' ? 'Sürücü giriş sayfası' : 'Driver login page'}</Link>
+                  ) : (
+                    <Link to="/login/agency" className="text-accent hover:underline">{language === 'TR' ? 'Acenta giriş sayfası' : 'Agency login page'}</Link>
+                  )}
+                </p>
+              )}
               <div className="text-center text-sm text-muted-foreground">
                 {t('dontHaveAccount')}
               </div>

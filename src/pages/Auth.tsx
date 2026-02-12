@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -1013,6 +1013,15 @@ const Auth = () => {
             </TabsContent>
           </Tabs>
         </CardContent>
+        <CardFooter className="flex flex-col gap-2 pt-0">
+          <p className="text-center text-xs text-muted-foreground">
+            <Link to="/login" className="text-accent hover:underline">Customer login</Link>
+            {' · '}
+            <Link to="/login/driver" className="text-accent hover:underline">Driver</Link>
+            {' · '}
+            <Link to="/login/agency" className="text-accent hover:underline">Agency</Link>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );

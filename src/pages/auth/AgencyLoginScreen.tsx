@@ -256,15 +256,27 @@ const AgencyLoginScreen = () => {
         } else {
           toast.error(error.message || t('loginFailed') || 'Login failed');
         }
-      } else if (authData?.user) {
-        // Check user role
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', authData.user.id)
-          .single();
-        
-        const userRole = roleData?.role || 'agency';
+      } else if (authData?.user && authData?.session) {
+        // RLS bypass: get-user-role - ayni cihaz 2. giris retry
+        const token = authData.session.access_token;
+        let userRole = 'agency';
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (attempt > 0) await new Promise((r) => setTimeout(r, 300 * attempt));
+          const { data } = await supabase.functions.invoke('get-user-role', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (data?.success && data?.role) {
+            userRole = data.role;
+            break;
+          }
+        }
+        if (userRole !== 'agency') {
+          await supabase.auth.signOut();
+          toast.error(language === 'TR' ? 'Bu hesap bir acenta hesabı değil' : 'This is not an agency account');
+          setIsLoading(false);
+          clearSuppressAuthRedirect();
+          return;
+        }
         
         // 2FA sadece güvenilmeyen (yeni) cihazdan girişte
         const isTrusted = await checkTrustedDevice(authData.user.id);
@@ -294,8 +306,11 @@ const AgencyLoginScreen = () => {
             keepRedirectSuppressed = false;
           }
         } else {
-          // Device trusted and no suspicious activity - proceed with login
           await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
+          await supabase.auth.refreshSession();
+          await new Promise((r) => setTimeout(r, 150));
+          window.location.replace('/agency');
+          return;
         }
       }
     } catch (error) {
