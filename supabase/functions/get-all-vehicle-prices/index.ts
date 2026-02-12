@@ -466,10 +466,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return pickLowestPricePerVehicle(cityRows);
     }
 
-    // ---- KM-BASED PRICING (ABSOLUTE HIGHEST PRIORITY - ALWAYS CHECKED FIRST) ----
-    // KM-based price is the #1 rule. If the admin defined a km price for this city+month, it overrides everything.
-    // When distance_km is provided: match exact km range
-    // When distance_km is NOT provided: use the lowest km range (base price) for the city+month
+    // ---- TIERED KM-BASED PRICING (TURKEY ONLY, ABSOLUTE HIGHEST PRIORITY) ----
+    // distance_pricing_rules: fixed base + per_km surcharge tiers
+    // 1-50 km: fixed base price
+    // 51-70 km: +per_km surcharge
+    // 71-85 km: +per_km surcharge
+    // 86+ km or no rules: fallback to intercity/region
     let kmBasedPrices: any[] = [];
     let usedKmBased = false;
     const distanceKm = typeof distanceKmParam === "number" && Number.isFinite(distanceKmParam) && distanceKmParam > 0
@@ -479,57 +481,123 @@ Deno.serve(async (req: Request): Promise<Response> => {
       ? pickupDateCandidate.getMonth() + 1
       : new Date().getMonth() + 1;
 
-    async function fetchKmBasedPrices(filterParams: Record<string, string>): Promise<any[]> {
-      const kmParams = new URLSearchParams({
+    // Only apply KM pricing for Turkey routes
+    const isTurkeyRoute = !isDubai && region === "turkey";
+
+    async function fetchDistancePricingRules(country: string, vehicleType: string, cityFilter?: string): Promise<any[]> {
+      // Build filter: country match, optional city match (NULL city = country-wide)
+      // Also match month (NULL month = all months)
+      const params = new URLSearchParams({
         is_active: "eq.true",
-        select: "vehicle_type,price,price_currency,city,month,km_from,km_to",
-        order: "km_from.asc,price.asc",
-        ...filterParams,
+        select: "id,country,city,month,km_from,km_to,vehicle_type,pricing_mode,price_amount,price_currency",
+        country: `eq.${country}`,
+        vehicle_type: `eq.${vehicleType}`,
+        order: "km_from.asc",
       });
+      // We fetch all rules and filter city/month in code for flexibility (NULL = wildcard)
       try {
-        const kmRes = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/km_based_prices?${kmParams.toString()}`, {
+        const res = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/distance_pricing_rules?${params.toString()}`, {
           headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
         });
-        if (kmRes.ok) {
-          const kmData = await kmRes.json();
-          return Array.isArray(kmData) ? kmData : [];
+        if (res.ok) {
+          const data = await res.json();
+          if (!Array.isArray(data)) return [];
+          // Filter: city match (NULL = all cities) and month match (NULL = all months)
+          return data.filter((r: any) => {
+            const cityMatch = !r.city || (cityFilter && r.city.toLowerCase() === cityFilter.toLowerCase());
+            const monthMatch = !r.month || r.month === pickupMonth;
+            return cityMatch && monthMatch;
+          });
         }
       } catch (err) {
-        console.error("KM-based pricing fetch error", String(err));
+        console.error("distance_pricing_rules fetch error", String(err));
       }
       return [];
     }
 
-    if (city) {
+    function calculateTieredPrice(rules: any[], distKm: number): number | null {
+      // Find the fixed base rule
+      const fixedRule = rules.find((r: any) => r.pricing_mode === "fixed");
+      if (!fixedRule) return null;
+
+      let total = Number(fixedRule.price_amount);
+      const baseKmTo = Number(fixedRule.km_to); // e.g. 50
+
+      if (distKm <= baseKmTo) return total;
+
+      // Get per_km tiers sorted by km_from
+      const perKmTiers = rules
+        .filter((r: any) => r.pricing_mode === "per_km")
+        .sort((a: any, b: any) => Number(a.km_from) - Number(b.km_from));
+
+      for (const tier of perKmTiers) {
+        const tierFrom = Number(tier.km_from);
+        const tierTo = Number(tier.km_to);
+        const rate = Number(tier.price_amount);
+        if (distKm < tierFrom) break; // distance doesn't reach this tier
+        const effectiveFrom = Math.max(tierFrom, baseKmTo + 1);
+        const effectiveTo = Math.min(distKm, tierTo);
+        if (effectiveTo >= effectiveFrom) {
+          const kmInTier = effectiveTo - effectiveFrom + 1;
+          total += kmInTier * rate;
+        }
+      }
+
+      return Math.round(total * 100) / 100;
+    }
+
+    if (isTurkeyRoute && city) {
       try {
-        let kmRows: any[] = [];
+        for (const vt of vehicleTypes) {
+          // Fetch rules: try city-specific first, then country-wide
+          let rules = await fetchDistancePricingRules("TR", vt.value, city);
+          if (rules.length === 0) {
+            rules = await fetchDistancePricingRules("TR", vt.value);
+          }
+          // Also try DB aliases
+          if (rules.length === 0) {
+            for (const alias of vt.dbAliases) {
+              if (alias === vt.value) continue;
+              rules = await fetchDistancePricingRules("TR", alias, city);
+              if (rules.length === 0) rules = await fetchDistancePricingRules("TR", alias);
+              if (rules.length > 0) break;
+            }
+          }
 
-        if (distanceKm) {
-          // Exact match: find km range that covers this distance
-          kmRows = await fetchKmBasedPrices({
-            city: `ilike.${city}`,
-            month: `eq.${pickupMonth}`,
-            km_from: `lte.${distanceKm}`,
-            km_to: `gte.${distanceKm}`,
-          });
-        }
+          if (rules.length > 0) {
+            const fixedRule = rules.find((r: any) => r.pricing_mode === "fixed");
+            if (fixedRule) {
+              const maxTierKm = Math.max(...rules.map((r: any) => Number(r.km_to)));
+              const effectiveDistance = distanceKm || 0;
 
-        // If no exact distance match (or no distance provided), use lowest km range as base price
-        if (kmRows.length === 0) {
-          kmRows = await fetchKmBasedPrices({
-            city: `ilike.${city}`,
-            month: `eq.${pickupMonth}`,
-          });
-        }
+              // If distance > max tier (e.g. 86+ km), skip KM pricing → use fallback
+              if (effectiveDistance > maxTierKm && distanceKm) {
+                continue; // skip this vehicle, let fallback handle it
+              }
 
-        if (kmRows.length > 0) {
-          kmBasedPrices = pickLowestPricePerVehicle(kmRows);
-          if (kmBasedPrices.length > 0) {
-            usedKmBased = true;
+              let price: number;
+              if (distanceKm && distanceKm > 0) {
+                const calc = calculateTieredPrice(rules, distanceKm);
+                price = calc ?? Number(fixedRule.price_amount);
+              } else {
+                // No distance known yet → use base fixed price
+                price = Number(fixedRule.price_amount);
+              }
+
+              kmBasedPrices.push({
+                vehicle_type: vt.value,
+                price: price,
+                price_currency: fixedRule.price_currency || "EUR",
+              });
+            }
           }
         }
+
+        if (kmBasedPrices.length > 0) {
+          usedKmBased = true;
+        }
       } catch (error) {
-        console.error("KM-based pricing query failed", String(error));
+        console.error("Tiered KM pricing failed", String(error));
       }
     }
 

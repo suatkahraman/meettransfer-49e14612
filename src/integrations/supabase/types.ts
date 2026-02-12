@@ -723,15 +723,17 @@ export type Database = {
         }
         Relationships: []
       }
-      km_based_prices: {
+      distance_pricing_rules: {
         Row: {
           id: string
-          city: string
-          month: number
+          country: string
+          city: string | null
+          month: number | null
           km_from: number
           km_to: number
           vehicle_type: string
-          price: number
+          pricing_mode: string
+          price_amount: number
           price_currency: string
           is_active: boolean
           created_by: string | null
@@ -740,12 +742,14 @@ export type Database = {
         }
         Insert: {
           id?: string
-          city: string
-          month: number
-          km_from: number
-          km_to: number
+          country?: string
+          city?: string | null
+          month?: number | null
+          km_from?: number
+          km_to?: number
           vehicle_type?: string
-          price: number
+          pricing_mode?: string
+          price_amount: number
           price_currency?: string
           is_active?: boolean
           created_by?: string | null
@@ -754,12 +758,14 @@ export type Database = {
         }
         Update: {
           id?: string
-          city?: string
-          month?: number
+          country?: string
+          city?: string | null
+          month?: number | null
           km_from?: number
           km_to?: number
           vehicle_type?: string
-          price?: number
+          pricing_mode?: string
+          price_amount?: number
           price_currency?: string
           is_active?: boolean
           created_by?: string | null

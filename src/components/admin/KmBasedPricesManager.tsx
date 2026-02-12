@@ -28,50 +28,27 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Ruler, Search, Shield } from "lucide-react";
+import { Plus, Pencil, Trash2, Ruler, Search, Calculator } from "lucide-react";
 import { MoneyInput } from "@/components/ui/money-input";
 import { VEHICLE_TYPE_OPTIONS as VEHICLE_TYPES } from "@/lib/vehicleTypes";
 
-const MONTHS = [
-  { value: 1, label: "Ocak" },
-  { value: 2, label: "Şubat" },
-  { value: 3, label: "Mart" },
-  { value: 4, label: "Nisan" },
-  { value: 5, label: "Mayıs" },
-  { value: 6, label: "Haziran" },
-  { value: 7, label: "Temmuz" },
-  { value: 8, label: "Ağustos" },
-  { value: 9, label: "Eylül" },
-  { value: 10, label: "Ekim" },
-  { value: 11, label: "Kasım" },
-  { value: 12, label: "Aralık" },
-];
-
 const CURRENCIES = [
-  { value: 'EUR', label: '€ EUR' },
-  { value: 'USD', label: '$ USD' },
-  { value: 'TRY', label: '₺ TRY' },
-  { value: 'GBP', label: '£ GBP' },
+  { value: "EUR", label: "€ EUR" },
+  { value: "USD", label: "$ USD" },
+  { value: "TRY", label: "₺ TRY" },
+  { value: "GBP", label: "£ GBP" },
 ];
 
-// Default KM ranges
-const DEFAULT_KM_RANGES = [
-  { from: 1, to: 50, label: "1 - 50 km (Sabit Baz Fiyat)" },
-  { from: 51, to: 100, label: "51 - 100 km" },
-  { from: 101, to: 150, label: "101 - 150 km" },
-  { from: 151, to: 200, label: "151 - 200 km" },
-  { from: 201, to: 300, label: "201 - 300 km" },
-  { from: 301, to: 500, label: "301 - 500 km" },
-];
-
-interface KmBasedPrice {
+interface DistancePricingRule {
   id: string;
-  city: string;
-  month: number;
+  country: string;
+  city: string | null;
+  month: number | null;
   km_from: number;
   km_to: number;
   vehicle_type: string;
-  price: number;
+  pricing_mode: string; // 'fixed' | 'per_km'
+  price_amount: number;
   price_currency: string;
   is_active: boolean;
   created_at: string;
@@ -83,83 +60,99 @@ interface KmBasedPricesManagerProps {
 }
 
 const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
-  const [prices, setPrices] = useState<KmBasedPrice[]>([]);
+  const [rules, setRules] = useState<DistancePricingRule[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterCity, setFilterCity] = useState<string>("all");
-  const [filterMonth, setFilterMonth] = useState<string>("all");
+  const [filterVehicle, setFilterVehicle] = useState<string>("all");
 
-  // Dialog state
+  // Add/Edit dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingPrice, setEditingPrice] = useState<KmBasedPrice | null>(null);
+  const [editingRule, setEditingRule] = useState<DistancePricingRule | null>(null);
   const [saving, setSaving] = useState(false);
-
-  // Form state
-  const [formCity, setFormCity] = useState("");
-  const [formMonth, setFormMonth] = useState<string>("");
+  const [formCountry, setFormCountry] = useState("TR");
+  const [formCity, setFormCity] = useState<string>("");
   const [formKmFrom, setFormKmFrom] = useState("");
   const [formKmTo, setFormKmTo] = useState("");
+  const [formPricingMode, setFormPricingMode] = useState<string>("fixed");
   const [formCurrency, setFormCurrency] = useState("EUR");
-  // Multi-vehicle prices
-  const [formPrices, setFormPrices] = useState<Record<string, string>>({
-    'sedan': '',
-    'mercedes-vito': '',
-    'vip-mercedes': '',
-    'maybach-minibus': '',
-    'minibus': '',
-  });
+  // Per-vehicle price amounts
+  const [formAmounts, setFormAmounts] = useState<Record<string, string>>({});
 
-  // Base price dialog state
-  const [isBasePriceDialogOpen, setIsBasePriceDialogOpen] = useState(false);
-  const [basePriceCity, setBasePriceCity] = useState("");
-  const [basePriceMonth, setBasePriceMonth] = useState<string>("");
-  const [basePriceCurrency, setBasePriceCurrency] = useState("EUR");
-  const [basePriceValues, setBasePriceValues] = useState<Record<string, string>>({
-    'sedan': '',
-    'mercedes-vito': '',
-    'vip-mercedes': '',
-    'maybach-minibus': '',
-    'minibus': '',
-  });
-  const [basePriceSaving, setBasePriceSaving] = useState(false);
+  // Test calculator
+  const [testDistance, setTestDistance] = useState("");
+  const [testVehicle, setTestVehicle] = useState("mercedes-vito");
+  const [testResult, setTestResult] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPrices();
+    fetchRules();
   }, []);
 
-  const fetchPrices = async () => {
+  const fetchRules = async () => {
     try {
       const { data, error } = await supabase
-        .from("km_based_prices")
+        .from("distance_pricing_rules")
         .select("*")
-        .order("city", { ascending: true })
-        .order("month", { ascending: true })
-        .order("km_from", { ascending: true });
+        .order("country")
+        .order("km_from", { ascending: true })
+        .order("vehicle_type");
 
       if (error) throw error;
-      setPrices(data || []);
-    } catch (error) {
-      console.error("Error fetching km-based prices:", error);
-      toast.error("KM bazlı fiyatlar yüklenirken hata oluştu");
+      setRules(data || []);
+    } catch (error: any) {
+      console.error("Error fetching distance pricing rules:", error);
+      toast.error("KM fiyat kuralları yüklenirken hata: " + (error?.message || ""));
     } finally {
       setLoading(false);
     }
   };
 
+  // Group rules by country/city/kmRange/mode for display
+  const groupedRules = useMemo(() => {
+    const groups: Record<string, {
+      key: string;
+      country: string;
+      city: string | null;
+      km_from: number;
+      km_to: number;
+      pricing_mode: string;
+      rules: DistancePricingRule[];
+    }> = {};
+
+    rules.forEach((r) => {
+      const key = `${r.country}-${r.city || "ALL"}-${r.km_from}-${r.km_to}-${r.pricing_mode}`;
+      if (!groups[key]) {
+        groups[key] = { key, country: r.country, city: r.city, km_from: r.km_from, km_to: r.km_to, pricing_mode: r.pricing_mode, rules: [] };
+      }
+      groups[key].rules.push(r);
+    });
+
+    return Object.values(groups);
+  }, [rules]);
+
+  const filteredGroups = groupedRules.filter((g) => {
+    if (filterVehicle === "all") return true;
+    return g.rules.some((r) => r.vehicle_type === filterVehicle);
+  });
+
+  const getVehicleLabel = (type: string) =>
+    VEHICLE_TYPES.find((v) => v.value === type)?.label || type;
+
+  const formatAmount = (amount: number, currency: string, mode: string) => {
+    const sym: Record<string, string> = { EUR: "€", USD: "$", TRY: "₺", GBP: "£" };
+    const s = sym[currency] || currency;
+    if (mode === "per_km") return `+${s}${amount}/km`;
+    return `${s}${amount}`;
+  };
+
+  // ---- Add / Edit ----
   const resetForm = () => {
+    setEditingRule(null);
+    setFormCountry("TR");
     setFormCity("");
-    setFormMonth("");
     setFormKmFrom("");
     setFormKmTo("");
+    setFormPricingMode("fixed");
     setFormCurrency("EUR");
-    setFormPrices({
-      'sedan': '',
-      'mercedes-vito': '',
-      'vip-mercedes': '',
-      'maybach-minibus': '',
-      'minibus': '',
-    });
-    setEditingPrice(null);
+    setFormAmounts({});
   };
 
   const openNewDialog = () => {
@@ -167,386 +160,149 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
     setIsDialogOpen(true);
   };
 
-  const openEditDialog = (price: KmBasedPrice) => {
-    setEditingPrice(price);
-    setFormCity(price.city);
-    setFormMonth(price.month.toString());
-    setFormKmFrom(price.km_from.toString());
-    setFormKmTo(price.km_to.toString());
-    setFormCurrency(price.price_currency);
-
-    // Load all vehicle prices for this route/range
-    const routePrices: Record<string, string> = {
-      'sedan': '',
-      'mercedes-vito': '',
-      'vip-mercedes': '',
-      'maybach-minibus': '',
-      'minibus': '',
-    };
-
-    prices
-      .filter(
-        (p) =>
-          p.city === price.city &&
-          p.month === price.month &&
-          p.km_from === price.km_from &&
-          p.km_to === price.km_to
-      )
-      .forEach((p) => {
-        routePrices[p.vehicle_type] = p.price.toString();
-      });
-
-    setFormPrices(routePrices);
+  const openEditDialog = (group: typeof groupedRules[0]) => {
+    setEditingRule(group.rules[0]);
+    setFormCountry(group.country);
+    setFormCity(group.city || "");
+    setFormKmFrom(group.km_from.toString());
+    setFormKmTo(group.km_to.toString());
+    setFormPricingMode(group.pricing_mode);
+    setFormCurrency(group.rules[0]?.price_currency || "EUR");
+    const amounts: Record<string, string> = {};
+    group.rules.forEach((r) => { amounts[r.vehicle_type] = r.price_amount.toString(); });
+    setFormAmounts(amounts);
     setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
-    const hasAnyPrice = Object.values(formPrices).some(
-      (p) => p && parseFloat(p) > 0
-    );
-    if (!formCity || !formMonth || !formKmFrom || !formKmTo || !hasAnyPrice) {
-      toast.error(
-        "Lütfen tüm zorunlu alanları doldurun ve en az bir araç fiyatı girin"
-      );
+    const hasAny = Object.values(formAmounts).some((v) => v && parseFloat(v) > 0);
+    if (!formCountry || !formKmFrom || !formKmTo || !formPricingMode || !hasAny) {
+      toast.error("Lütfen tüm zorunlu alanları doldurun ve en az bir araç fiyatı girin");
       return;
     }
-
     const kmFrom = parseInt(formKmFrom);
     const kmTo = parseInt(formKmTo);
-    
-    if (isNaN(kmFrom) || isNaN(kmTo)) {
-      toast.error("Geçerli KM değerleri girin");
-      return;
-    }
-    if (kmTo <= kmFrom) {
+    if (isNaN(kmFrom) || isNaN(kmTo) || kmTo <= kmFrom) {
       toast.error("KM bitiş değeri başlangıçtan büyük olmalı");
-      return;
-    }
-
-    const monthNum = parseInt(formMonth);
-    if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
-      toast.error("Geçerli bir ay seçin");
       return;
     }
 
     setSaving(true);
     try {
-      let savedCount = 0;
-      for (const vehicleType of VEHICLE_TYPES) {
-        const priceValue = parseFloat(formPrices[vehicleType.value] || "0") || 0;
-
-        // Check if a price already exists for this combination
-        const existingPrice = prices.find(
-          (p) =>
-            p.city === formCity &&
-            p.month === monthNum &&
-            p.km_from === kmFrom &&
-            p.km_to === kmTo &&
-            p.vehicle_type === vehicleType.value
+      let saved = 0;
+      for (const vt of VEHICLE_TYPES) {
+        const amount = parseFloat(formAmounts[vt.value] || "0") || 0;
+        const existing = rules.find(
+          (r) =>
+            r.country === formCountry &&
+            (r.city || "") === (formCity || "") &&
+            r.km_from === kmFrom &&
+            r.km_to === kmTo &&
+            r.pricing_mode === formPricingMode &&
+            r.vehicle_type === vt.value
         );
 
-        if (priceValue > 0) {
-          const priceData = {
-            city: formCity,
-            month: monthNum,
+        if (amount > 0) {
+          const row = {
+            country: formCountry,
+            city: formCity || null,
+            month: null as number | null,
             km_from: kmFrom,
             km_to: kmTo,
-            vehicle_type: vehicleType.value,
-            price: priceValue,
+            vehicle_type: vt.value,
+            pricing_mode: formPricingMode,
+            price_amount: amount,
             price_currency: formCurrency,
             is_active: true,
           };
 
-          if (existingPrice) {
+          if (existing) {
             const { error } = await supabase
-              .from("km_based_prices")
-              .update({ ...priceData, updated_at: new Date().toISOString() })
-              .eq("id", existingPrice.id);
-            if (error) {
-              console.error("Update error:", error);
-              throw new Error(`Güncelleme hatası: ${error.message}`);
-            }
-            savedCount++;
+              .from("distance_pricing_rules")
+              .update({ ...row, updated_at: new Date().toISOString() })
+              .eq("id", existing.id);
+            if (error) throw new Error(error.message);
           } else {
             const { error } = await supabase
-              .from("km_based_prices")
-              .insert([priceData]);
-            if (error) {
-              // Duplicate key is OK (upsert behavior)
-              if (error.code === "23505") {
-                // Try update instead
-                const { error: updateErr } = await supabase
-                  .from("km_based_prices")
-                  .update({ price: priceValue, price_currency: formCurrency, is_active: true, updated_at: new Date().toISOString() })
-                  .eq("city", formCity)
-                  .eq("month", monthNum)
-                  .eq("km_from", kmFrom)
-                  .eq("km_to", kmTo)
-                  .eq("vehicle_type", vehicleType.value);
-                if (updateErr) {
-                  console.error("Upsert fallback error:", updateErr);
-                  throw new Error(`Kayıt hatası: ${updateErr.message}`);
-                }
-              } else {
-                console.error("Insert error:", error);
-                throw new Error(`Ekleme hatası: ${error.message}`);
-              }
-            }
-            savedCount++;
+              .from("distance_pricing_rules")
+              .insert([row]);
+            if (error) throw new Error(error.message);
           }
-        } else if (existingPrice) {
-          const { error } = await supabase
-            .from("km_based_prices")
-            .delete()
-            .eq("id", existingPrice.id);
-          if (error) {
-            console.error("Delete error:", error);
-          }
+          saved++;
+        } else if (existing) {
+          await supabase.from("distance_pricing_rules").delete().eq("id", existing.id);
         }
       }
 
-      toast.success(`${savedCount} araç fiyatı kaydedildi (${formCity}, ${kmFrom}-${kmTo} km)`);
+      toast.success(`${saved} araç kuralı kaydedildi (${kmFrom}-${kmTo} km, ${formPricingMode === "fixed" ? "sabit" : "km başı"})`);
       setIsDialogOpen(false);
       resetForm();
-      fetchPrices();
+      fetchRules();
     } catch (error: any) {
-      console.error("Error saving km-based prices:", error);
-      toast.error(error?.message || "Fiyatlar kaydedilirken hata oluştu");
+      console.error("Save error:", error);
+      toast.error(error?.message || "Kayıt hatası");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (price: KmBasedPrice) => {
-    if (!confirm("Bu fiyatı silmek istediğinizden emin misiniz?")) return;
-
+  const handleDeleteGroup = async (group: typeof groupedRules[0]) => {
+    if (!confirm(`${group.km_from}-${group.km_to} km ${group.pricing_mode === "fixed" ? "sabit" : "km başı"} kuralını silmek istediğinize emin misiniz?`)) return;
     try {
-      // Delete all vehicle types for this km range
-      const { error } = await supabase
-        .from("km_based_prices")
-        .delete()
-        .eq("city", price.city)
-        .eq("month", price.month)
-        .eq("km_from", price.km_from)
-        .eq("km_to", price.km_to);
-
-      if (error) throw error;
-      toast.success("KM bazlı fiyat silindi");
-      fetchPrices();
-    } catch (error) {
-      console.error("Error deleting km-based price:", error);
-      toast.error("Fiyat silinirken hata oluştu");
+      for (const r of group.rules) {
+        await supabase.from("distance_pricing_rules").delete().eq("id", r.id);
+      }
+      toast.success("Kural silindi");
+      fetchRules();
+    } catch (error: any) {
+      toast.error("Silme hatası: " + (error?.message || ""));
     }
   };
 
-  // Base price (1-50 km) management
-  const openBasePriceDialog = () => {
-    setBasePriceCity("");
-    setBasePriceMonth("");
-    setBasePriceCurrency("EUR");
-    setBasePriceValues({
-      'sedan': '',
-      'mercedes-vito': '',
-      'vip-mercedes': '',
-      'maybach-minibus': '',
-      'minibus': '',
-    });
-    setIsBasePriceDialogOpen(true);
-  };
+  // ---- Test Calculator ----
+  const runTest = () => {
+    const dist = parseInt(testDistance);
+    if (!dist || dist <= 0) { toast.error("Geçerli bir mesafe girin"); return; }
 
-  const loadBasePrices = (city: string, month: string) => {
-    if (!city || !month) return;
-    const monthNum = parseInt(month);
-    const routePrices: Record<string, string> = {
-      'sedan': '',
-      'mercedes-vito': '',
-      'vip-mercedes': '',
-      'maybach-minibus': '',
-      'minibus': '',
-    };
-
-    prices
-      .filter(
-        (p) =>
-          p.city === city &&
-          p.month === monthNum &&
-          p.km_from === 1 &&
-          p.km_to === 50
-      )
-      .forEach((p) => {
-        routePrices[p.vehicle_type] = p.price.toString();
-      });
-
-    setBasePriceValues(routePrices);
-
-    // Also load the currency from existing prices if available
-    const existingBasePrice = prices.find(
-      (p) =>
-        p.city === city &&
-        p.month === monthNum &&
-        p.km_from === 1 &&
-        p.km_to === 50
+    // Filter rules for test vehicle
+    const vehicleRules = rules.filter(
+      (r) => r.vehicle_type === testVehicle && r.is_active && r.country === "TR"
     );
-    if (existingBasePrice) {
-      setBasePriceCurrency(existingBasePrice.price_currency);
-    }
-  };
+    const fixedRule = vehicleRules.find((r) => r.pricing_mode === "fixed");
+    if (!fixedRule) { setTestResult("Bu araç için sabit baz fiyat kuralı bulunamadı."); return; }
 
-  const handleBasePriceSave = async () => {
-    const hasAnyPrice = Object.values(basePriceValues).some(
-      (p) => p && parseFloat(p) > 0
-    );
-    if (!basePriceCity || !basePriceMonth || !hasAnyPrice) {
-      toast.error(
-        "Lütfen şehir, ay ve en az bir araç fiyatı girin"
-      );
+    const maxKm = Math.max(...vehicleRules.map((r) => r.km_to));
+    if (dist > maxKm) {
+      setTestResult(`${dist} km > max tier (${maxKm} km) → Mevcut intercity/region fallback fiyatı kullanılır.`);
       return;
     }
 
-    setBasePriceSaving(true);
-    try {
-      const monthNum = parseInt(basePriceMonth);
-      let savedCount = 0;
+    let total = fixedRule.price_amount;
+    const baseKmTo = fixedRule.km_to;
+    const parts: string[] = [`Baz (1-${baseKmTo} km): ${fixedRule.price_currency === "EUR" ? "€" : fixedRule.price_currency}${fixedRule.price_amount}`];
 
-      for (const vehicleType of VEHICLE_TYPES) {
-        const priceValue =
-          parseFloat(basePriceValues[vehicleType.value] || "0") || 0;
+    if (dist > baseKmTo) {
+      const tiers = vehicleRules
+        .filter((r) => r.pricing_mode === "per_km")
+        .sort((a, b) => a.km_from - b.km_from);
 
-        const existingPrice = prices.find(
-          (p) =>
-            p.city === basePriceCity &&
-            p.month === monthNum &&
-            p.km_from === 1 &&
-            p.km_to === 50 &&
-            p.vehicle_type === vehicleType.value
-        );
-
-        if (priceValue > 0) {
-          const priceData = {
-            city: basePriceCity,
-            month: monthNum,
-            km_from: 1,
-            km_to: 50,
-            vehicle_type: vehicleType.value,
-            price: priceValue,
-            price_currency: basePriceCurrency,
-            is_active: true,
-          };
-
-          if (existingPrice) {
-            const { error } = await supabase
-              .from("km_based_prices")
-              .update({ ...priceData, updated_at: new Date().toISOString() })
-              .eq("id", existingPrice.id);
-            if (error) {
-              console.error("Base price update error:", error);
-              throw new Error(`Güncelleme hatası: ${error.message}`);
-            }
-            savedCount++;
-          } else {
-            const { error } = await supabase
-              .from("km_based_prices")
-              .insert([priceData]);
-            if (error) {
-              if (error.code === "23505") {
-                // Duplicate: update instead
-                const { error: updateErr } = await supabase
-                  .from("km_based_prices")
-                  .update({ price: priceValue, price_currency: basePriceCurrency, is_active: true, updated_at: new Date().toISOString() })
-                  .eq("city", basePriceCity)
-                  .eq("month", monthNum)
-                  .eq("km_from", 1)
-                  .eq("km_to", 50)
-                  .eq("vehicle_type", vehicleType.value);
-                if (updateErr) throw new Error(`Kayıt hatası: ${updateErr.message}`);
-              } else {
-                console.error("Base price insert error:", error);
-                throw new Error(`Ekleme hatası: ${error.message}`);
-              }
-            }
-            savedCount++;
-          }
-        } else if (existingPrice) {
-          await supabase
-            .from("km_based_prices")
-            .delete()
-            .eq("id", existingPrice.id);
+      for (const tier of tiers) {
+        if (dist < tier.km_from) break;
+        const from = Math.max(tier.km_from, baseKmTo + 1);
+        const to = Math.min(dist, tier.km_to);
+        if (to >= from) {
+          const kmCount = to - from + 1;
+          const surcharge = Math.round(kmCount * tier.price_amount * 100) / 100;
+          total += surcharge;
+          const sym = tier.price_currency === "EUR" ? "€" : tier.price_currency;
+          parts.push(`${tier.km_from}-${tier.km_to} km: ${kmCount} km × ${sym}${tier.price_amount} = ${sym}${surcharge}`);
         }
       }
-
-      toast.success(`Baz fiyat kaydedildi (${basePriceCity}, 1-50 km, ${savedCount} araç)`);
-      setIsBasePriceDialogOpen(false);
-      fetchPrices();
-    } catch (error: any) {
-      console.error("Error saving base price:", error);
-      toast.error(error?.message || "Baz fiyat kaydedilirken hata oluştu");
-    } finally {
-      setBasePriceSaving(false);
     }
-  };
 
-  const getVehicleLabel = (type: string) => {
-    return VEHICLE_TYPES.find((v) => v.value === type)?.label || type;
-  };
-
-  const formatPrice = (price: number, currency: string) => {
-    const symbols: Record<string, string> = {
-      EUR: "€",
-      USD: "$",
-      TRY: "₺",
-      GBP: "£",
-    };
-    return `${symbols[currency] || currency} ${price.toLocaleString()}`;
-  };
-
-  // Group prices by city/month/km_range for display
-  const groupedPrices = useMemo(() => {
-    const groups: Record<
-      string,
-      { key: string; city: string; month: number; km_from: number; km_to: number; prices: KmBasedPrice[] }
-    > = {};
-
-    prices.forEach((p) => {
-      const key = `${p.city}-${p.month}-${p.km_from}-${p.km_to}`;
-      if (!groups[key]) {
-        groups[key] = {
-          key,
-          city: p.city,
-          month: p.month,
-          km_from: p.km_from,
-          km_to: p.km_to,
-          prices: [],
-        };
-      }
-      groups[key].prices.push(p);
-    });
-
-    return Object.values(groups);
-  }, [prices]);
-
-  const filteredGroups = groupedPrices.filter((group) => {
-    const matchesSearch =
-      !searchTerm ||
-      group.city.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCity = filterCity === "all" || group.city === filterCity;
-    const matchesMonth =
-      filterMonth === "all" || group.month === parseInt(filterMonth);
-    return matchesSearch && matchesCity && matchesMonth;
-  });
-
-  const setKmRange = (rangeStr: string) => {
-    if (rangeStr === "custom") {
-      setFormKmFrom("");
-      setFormKmTo("");
-      return;
-    }
-    const range = DEFAULT_KM_RANGES.find(
-      (r) => `${r.from}-${r.to}` === rangeStr
-    );
-    if (range) {
-      setFormKmFrom(range.from.toString());
-      setFormKmTo(range.to.toString());
-    }
+    total = Math.round(total * 100) / 100;
+    const sym = fixedRule.price_currency === "EUR" ? "€" : fixedRule.price_currency;
+    setTestResult(`${getVehicleLabel(testVehicle)} | ${dist} km\n${parts.join("\n")}\n───────────────\nToplam: ${sym}${total}`);
   };
 
   return (
@@ -555,585 +311,244 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
         <div>
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Ruler className="h-5 w-5 shrink-0" />
-            KM Bazlı Fiyatlandırma
+            KM Bazlı Fiyatlandırma Kuralları
           </CardTitle>
           <CardDescription className="mt-1">
-            Şehir, ay ve km aralığına göre fiyat belirleyin. KM fiyatı tüm fiyatlandırma kurallarında en yüksek önceliğe sahiptir.
+            Türkiye için mesafe bazlı fiyat kuralları. Sabit baz fiyat + km başı ek ücret tiers.
+            Bu fiyat tüm diğer fiyatlandırma tablolarından önceliklidir.
           </CardDescription>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 sm:flex-none"
-            onClick={openBasePriceDialog}
-          >
-            <Shield className="h-4 w-4 mr-2 shrink-0" />
-            Baz Fiyat (1-50 km)
-          </Button>
-          <Button
-            size="sm"
-            className="flex-1 sm:flex-none"
-            onClick={openNewDialog}
-          >
-            <Plus className="h-4 w-4 mr-2 shrink-0" />
-            Yeni KM Fiyatı
-          </Button>
-        </div>
+        <Button size="sm" onClick={openNewDialog}>
+          <Plus className="h-4 w-4 mr-2" />
+          Yeni Kural
+        </Button>
       </CardHeader>
       <CardContent>
-        {/* Filters */}
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Şehir ara..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={filterCity} onValueChange={setFilterCity}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Şehir filtrele" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tüm Şehirler</SelectItem>
-                {cities.map((city) => (
-                  <SelectItem key={city} value={city}>
-                    {city}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filterMonth} onValueChange={setFilterMonth}>
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue placeholder="Ay filtrele" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tüm Aylar</SelectItem>
-                {MONTHS.map((m) => (
-                  <SelectItem key={m.value} value={m.value.toString()}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Active filters */}
-          {(filterCity !== "all" || filterMonth !== "all") && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-muted-foreground">
-                Aktif filtreler:
-              </span>
-              {filterCity !== "all" && (
-                <Badge variant="secondary" className="gap-1">
-                  Şehir: {filterCity}
-                  <button
-                    onClick={() => setFilterCity("all")}
-                    className="ml-1 hover:text-destructive"
-                  >
-                    ×
-                  </button>
-                </Badge>
-              )}
-              {filterMonth !== "all" && (
-                <Badge variant="secondary" className="gap-1">
-                  {MONTHS.find((m) => m.value.toString() === filterMonth)?.label}
-                  <button
-                    onClick={() => setFilterMonth("all")}
-                    className="ml-1 hover:text-destructive"
-                  >
-                    ×
-                  </button>
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setFilterCity("all");
-                  setFilterMonth("all");
-                  setSearchTerm("");
-                }}
-              >
-                Temizle
-              </Button>
-            </div>
-          )}
+        {/* Filter */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <Select value={filterVehicle} onValueChange={setFilterVehicle}>
+            <SelectTrigger className="w-full sm:w-[220px]">
+              <SelectValue placeholder="Araç filtrele" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tüm Araçlar</SelectItem>
+              {VEHICLE_TYPES.map((v) => (
+                <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Table */}
+        {/* Rules Table */}
         {loading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         ) : filteredGroups.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            {groupedPrices.length === 0
-              ? "Henüz KM bazlı fiyat eklenmemiş. Yeni fiyat eklemek için butona tıklayın."
-              : "Arama kriterlerine uygun fiyat bulunamadı."}
+            Henüz KM fiyat kuralı yok. Migration çalıştırıldıktan sonra varsayılan TR kuralları otomatik oluşturulacaktır.
           </div>
         ) : (
           <>
-            {/* Desktop table */}
+            {/* Desktop */}
             <div className="hidden md:block overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Şehir</TableHead>
-                    <TableHead>Ay</TableHead>
+                    <TableHead>Ülke</TableHead>
                     <TableHead>KM Aralığı</TableHead>
+                    <TableHead>Mod</TableHead>
                     <TableHead>Araç Fiyatları</TableHead>
-                    <TableHead className="text-right">İşlemler</TableHead>
+                    <TableHead className="text-right">İşlem</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredGroups.map((group) => {
-                    const isBasePrice =
-                      group.km_from === 1 && group.km_to === 50;
-                    return (
-                      <TableRow key={group.key}>
-                        <TableCell className="font-medium">
-                          {group.city}
-                        </TableCell>
-                        <TableCell>
-                          {MONTHS.find((m) => m.value === group.month)?.label}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span>
-                              {group.km_from} - {group.km_to} km
-                            </span>
-                            {isBasePrice && (
-                              <Badge
-                                variant="default"
-                                className="text-xs bg-amber-500 hover:bg-amber-600"
-                              >
-                                Baz Fiyat
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-2">
-                            {group.prices.map((p) => (
-                              <Badge
-                                key={p.id}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {getVehicleLabel(p.vehicle_type).split(' ')[0]}:{" "}
-                                {formatPrice(p.price, p.price_currency)}
+                  {filteredGroups.map((g) => (
+                    <TableRow key={g.key}>
+                      <TableCell className="font-medium">
+                        {g.country}{g.city ? ` / ${g.city}` : ""}
+                      </TableCell>
+                      <TableCell>{g.km_from} – {g.km_to} km</TableCell>
+                      <TableCell>
+                        <Badge variant={g.pricing_mode === "fixed" ? "default" : "secondary"}>
+                          {g.pricing_mode === "fixed" ? "Sabit Fiyat" : "KM Başı Ek"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {g.rules
+                            .filter((r) => filterVehicle === "all" || r.vehicle_type === filterVehicle)
+                            .map((r) => (
+                              <Badge key={r.id} variant="outline" className="text-xs">
+                                {getVehicleLabel(r.vehicle_type).split(" ")[0]}:{" "}
+                                {formatAmount(r.price_amount, r.price_currency, r.pricing_mode)}
                               </Badge>
                             ))}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openEditDialog(group.prices[0])}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(group.prices[0])}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(g)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteGroup(g)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>
 
-            {/* Mobile cards */}
+            {/* Mobile */}
             <div className="md:hidden space-y-3">
-              {filteredGroups.map((group) => {
-                const isBasePrice = group.km_from === 1 && group.km_to === 50;
-                return (
-                  <Card key={group.key} className="p-4">
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium text-sm">
-                            {group.city}
-                          </span>
-                          <Badge variant="secondary" className="text-xs">
-                            {MONTHS.find((m) => m.value === group.month)?.label}
-                          </Badge>
-                          {isBasePrice && (
-                            <Badge
-                              variant="default"
-                              className="text-xs bg-amber-500 hover:bg-amber-600"
-                            >
-                              Baz Fiyat
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {group.km_from} - {group.km_to} km
-                        </div>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {group.prices.map((p) => (
-                            <Badge
-                              key={p.id}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {getVehicleLabel(p.vehicle_type).split(' ')[0]}:{" "}
-                              {formatPrice(p.price, p.price_currency)}
-                            </Badge>
-                          ))}
-                        </div>
+              {filteredGroups.map((g) => (
+                <Card key={g.key} className="p-4">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{g.country}{g.city ? ` / ${g.city}` : ""}</span>
+                        <Badge variant={g.pricing_mode === "fixed" ? "default" : "secondary"} className="text-xs">
+                          {g.pricing_mode === "fixed" ? "Sabit" : "+/km"}
+                        </Badge>
                       </div>
-                      <div className="flex gap-1 shrink-0">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => openEditDialog(group.prices[0])}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive"
-                          onClick={() => handleDelete(group.prices[0])}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <div className="text-xs text-muted-foreground mt-1">{g.km_from} – {g.km_to} km</div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {g.rules.map((r) => (
+                          <Badge key={r.id} variant="outline" className="text-xs">
+                            {getVehicleLabel(r.vehicle_type).split(" ")[0]}: {formatAmount(r.price_amount, r.price_currency, r.pricing_mode)}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
-                  </Card>
-                );
-              })}
+                    <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(g)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteGroup(g)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           </>
         )}
 
-        {/* Summary */}
-        <div className="mt-4 text-sm text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span>Toplam {filteredGroups.length} KM aralığı kaydı</span>
-          <span className="text-xs">
-            Baz Fiyat (1-50 km):{" "}
-            {
-              groupedPrices.filter(
-                (g) => g.km_from === 1 && g.km_to === 50
-              ).length
-            }{" "}
-            | Diğer:{" "}
-            {
-              groupedPrices.filter(
-                (g) => !(g.km_from === 1 && g.km_to === 50)
-              ).length
-            }
-          </span>
+        {/* Test Calculator */}
+        <div className="mt-6 p-4 rounded-lg border bg-muted/30">
+          <h4 className="font-medium flex items-center gap-2 mb-3">
+            <Calculator className="h-4 w-4" /> Fiyat Hesaplama Testi
+          </h4>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Input
+              type="number"
+              placeholder="Mesafe (km)"
+              value={testDistance}
+              onChange={(e) => setTestDistance(e.target.value)}
+              className="w-full sm:w-[140px]"
+            />
+            <Select value={testVehicle} onValueChange={setTestVehicle}>
+              <SelectTrigger className="w-full sm:w-[220px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {VEHICLE_TYPES.map((v) => (
+                  <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={runTest} variant="outline" size="sm">Hesapla</Button>
+          </div>
+          {testResult && (
+            <pre className="mt-3 p-3 rounded bg-background text-sm whitespace-pre-wrap font-mono">{testResult}</pre>
+          )}
         </div>
       </CardContent>
 
-      {/* Add/Edit KM Price Dialog */}
+      {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {editingPrice ? "KM Fiyat Düzenle" : "Yeni KM Bazlı Fiyat"}
-            </DialogTitle>
+            <DialogTitle>{editingRule ? "Kural Düzenle" : "Yeni KM Fiyat Kuralı"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            {/* City */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Ülke *</Label>
+                <Select value={formCountry} onValueChange={setFormCountry}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TR">Türkiye</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Şehir (boş = tüm ülke)</Label>
+                <Select value={formCity || "__all__"} onValueChange={(v) => setFormCity(v === "__all__" ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="Tüm şehirler" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Tüm Şehirler</SelectItem>
+                    {cities.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label>Şehir *</Label>
-              <Select
-                value={formCity}
-                onValueChange={setFormCity}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Şehir seçin" />
-                </SelectTrigger>
+              <Label>Fiyat Modu *</Label>
+              <Select value={formPricingMode} onValueChange={setFormPricingMode}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {cities.map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {city}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="fixed">Sabit Fiyat (baz fiyat)</SelectItem>
+                  <SelectItem value="per_km">KM Başı Ek Ücret (+€/km)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Month */}
-            <div className="space-y-2">
-              <Label>Ay *</Label>
-              <Select value={formMonth} onValueChange={setFormMonth}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Ay seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MONTHS.map((m) => (
-                    <SelectItem key={m.value} value={m.value.toString()}>
-                      {m.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* KM Range - Quick select */}
-            <div className="space-y-2">
-              <Label>KM Aralığı *</Label>
-              <Select
-                value={
-                  formKmFrom && formKmTo
-                    ? DEFAULT_KM_RANGES.find(
-                        (r) =>
-                          r.from.toString() === formKmFrom &&
-                          r.to.toString() === formKmTo
-                      )
-                      ? `${formKmFrom}-${formKmTo}`
-                      : "custom"
-                    : ""
-                }
-                onValueChange={setKmRange}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="KM aralığı seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {DEFAULT_KM_RANGES.map((range) => (
-                    <SelectItem
-                      key={`${range.from}-${range.to}`}
-                      value={`${range.from}-${range.to}`}
-                    >
-                      {range.label}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="custom">Özel Aralık</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Custom KM range inputs */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">
-                  KM Başlangıç
-                </Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={formKmFrom}
-                  onChange={(e) => setFormKmFrom(e.target.value)}
-                  min="0"
-                />
+                <Label className="text-xs text-muted-foreground">KM Başlangıç *</Label>
+                <Input type="number" placeholder="1" value={formKmFrom} onChange={(e) => setFormKmFrom(e.target.value)} min="0" />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">
-                  KM Bitiş
-                </Label>
-                <Input
-                  type="number"
-                  placeholder="50"
-                  value={formKmTo}
-                  onChange={(e) => setFormKmTo(e.target.value)}
-                  min="1"
-                />
+                <Label className="text-xs text-muted-foreground">KM Bitiş *</Label>
+                <Input type="number" placeholder="50" value={formKmTo} onChange={(e) => setFormKmTo(e.target.value)} min="1" />
               </div>
             </div>
 
-            {/* Vehicle Prices */}
             <div className="space-y-3">
-              <Label>Araç Fiyatları *</Label>
+              <Label>{formPricingMode === "fixed" ? "Araç Sabit Fiyatları *" : "Araç KM Başı Ek Ücretleri *"}</Label>
               <div className="grid grid-cols-2 gap-3">
                 {VEHICLE_TYPES.map((v) => (
                   <div key={v.value} className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">
-                      {v.label}
-                    </Label>
+                    <Label className="text-xs text-muted-foreground">{v.label}</Label>
                     <MoneyInput
-                      value={formPrices[v.value]}
-                      onValueChange={(val) =>
-                        setFormPrices((prev) => ({
-                          ...prev,
-                          [v.value]: val,
-                        }))
-                      }
-                      placeholder="0"
+                      value={formAmounts[v.value] || ""}
+                      onValueChange={(val) => setFormAmounts((prev) => ({ ...prev, [v.value]: val }))}
+                      placeholder={formPricingMode === "fixed" ? "50" : "1.30"}
                     />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Currency */}
             <div className="space-y-2">
               <Label>Para Birimi</Label>
               <Select value={formCurrency} onValueChange={setFormCurrency}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {CURRENCIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
+                  {CURRENCIES.map((c) => (<SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              İptal
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Kaydediliyor..." : "Kaydet"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Base Price (1-50 km) Dialog */}
-      <Dialog
-        open={isBasePriceDialogOpen}
-        onOpenChange={setIsBasePriceDialogOpen}
-      >
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-amber-500" />
-              Sabit Baz Fiyat (1 - 50 km)
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            1 ile 50 km arasındaki sabit baz fiyatı burada belirleyebilirsiniz.
-            Bu fiyat, şehir içi kısa mesafe transferlerin temel fiyatını
-            oluşturur.
-          </p>
-          <div className="space-y-4 py-4">
-            {/* City */}
-            <div className="space-y-2">
-              <Label>Şehir *</Label>
-              <Select
-                value={basePriceCity}
-                onValueChange={(val) => {
-                  setBasePriceCity(val);
-                  if (basePriceMonth) loadBasePrices(val, basePriceMonth);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Şehir seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {city}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Month */}
-            <div className="space-y-2">
-              <Label>Ay *</Label>
-              <Select
-                value={basePriceMonth}
-                onValueChange={(val) => {
-                  setBasePriceMonth(val);
-                  if (basePriceCity) loadBasePrices(basePriceCity, val);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Ay seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {MONTHS.map((m) => (
-                    <SelectItem key={m.value} value={m.value.toString()}>
-                      {m.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* KM range info */}
-            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
-                <Shield className="h-4 w-4 shrink-0" />
-                <span className="text-sm font-medium">
-                  KM Aralığı: 1 - 50 km (Sabit)
-                </span>
-              </div>
-              <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
-                Bu aralık sabit baz fiyat olarak kullanılır ve değiştirilemez.
-              </p>
-            </div>
-
-            {/* Vehicle Prices */}
-            <div className="space-y-3">
-              <Label>Araç Baz Fiyatları *</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {VEHICLE_TYPES.map((v) => (
-                  <div key={v.value} className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">
-                      {v.label}
-                    </Label>
-                    <MoneyInput
-                      value={basePriceValues[v.value]}
-                      onValueChange={(val) =>
-                        setBasePriceValues((prev) => ({
-                          ...prev,
-                          [v.value]: val,
-                        }))
-                      }
-                      placeholder="0"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Currency */}
-            <div className="space-y-2">
-              <Label>Para Birimi</Label>
-              <Select
-                value={basePriceCurrency}
-                onValueChange={setBasePriceCurrency}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CURRENCIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsBasePriceDialogOpen(false)}
-            >
-              İptal
-            </Button>
-            <Button onClick={handleBasePriceSave} disabled={basePriceSaving}>
-              {basePriceSaving ? "Kaydediliyor..." : "Baz Fiyat Kaydet"}
-            </Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>İptal</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? "Kaydediliyor..." : "Kaydet"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

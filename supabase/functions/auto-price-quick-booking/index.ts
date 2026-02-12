@@ -451,31 +451,30 @@ Deno.serve(async (req) => {
       !isTurkeyIntracityAddressTransfer &&
       hasDifferentResolvedCities;
 
-    // ---- KM-BASED PRICING (ABSOLUTE HIGHEST PRIORITY - ALWAYS CHECKED FIRST) ----
-    // If admin defined a km-based price for this city+month, it overrides everything.
+    // ---- TIERED KM PRICING (TURKEY ONLY, ABSOLUTE HIGHEST PRIORITY) ----
     let bestPrice: Record<string, unknown> | null = null;
     let priceSource = "region_prices";
 
     if (resolvedCity) {
       try {
-        const pickupMonth = booking.pickup_date
-          ? new Date(booking.pickup_date).getMonth() + 1
-          : new Date().getMonth() + 1;
-        const kmPrices = await supabaseQuery("km_based_prices", {
-          city: `ilike.${resolvedCity}`,
-          month: `eq.${pickupMonth}`,
+        const kmRules = await supabaseQuery("distance_pricing_rules", {
+          country: "eq.TR",
           vehicle_type: `eq.${booking.vehicle_type}`,
+          pricing_mode: "eq.fixed",
           is_active: "eq.true",
           select: "*",
           order: "km_from.asc",
-          limit: "1",
+          limit: "10",
         });
-        if (kmPrices?.[0]) {
-          bestPrice = kmPrices[0];
-          priceSource = "km_based_prices";
+        const cityMatch = kmRules?.find((r: any) => r.city && r.city.toLowerCase() === resolvedCity!.toLowerCase());
+        const countryMatch = kmRules?.find((r: any) => !r.city);
+        const fixedRule = cityMatch || countryMatch;
+        if (fixedRule) {
+          bestPrice = { ...fixedRule, price: fixedRule.price_amount, price_currency: fixedRule.price_currency };
+          priceSource = "distance_pricing_rules";
         }
       } catch (e) {
-        console.error("km_based_prices lookup failed", e);
+        console.error("distance_pricing_rules lookup failed", e);
       }
     }
 

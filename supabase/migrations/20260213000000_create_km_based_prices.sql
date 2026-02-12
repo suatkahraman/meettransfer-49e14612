@@ -1,57 +1,84 @@
--- Create km_based_prices table for regional KM-based pricing
--- Admin can define prices based on city, month, km range, and vehicle type
--- Admin has full freedom to set any km range (no artificial limits)
--- This table's prices have HIGHEST priority over all other price tables
+-- ============================================================
+-- distance_pricing_rules: Tiered KM-based pricing for Turkey
+-- ============================================================
+-- pricing_mode:
+--   'fixed'  → price_amount is the flat price for the range
+--   'per_km' → price_amount is the surcharge per km above km_from
+--
+-- Engine logic (Turkey only, distance ≤ 85 km):
+--   1) Start with the 'fixed' base row (e.g. 1-50 km)
+--   2) For each 'per_km' tier that the distance crosses, add:
+--        (min(distance, km_to) - km_from) * price_amount
+--   3) If distance > 85 km or no rules → fallback to intercity/region
 
-CREATE TABLE IF NOT EXISTS public.km_based_prices (
+DROP TABLE IF EXISTS public.km_based_prices;
+
+CREATE TABLE IF NOT EXISTS public.distance_pricing_rules (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  city text NOT NULL,
-  month integer NOT NULL CHECK (month >= 1 AND month <= 12),
+  country text NOT NULL DEFAULT 'TR',
+  city text,                           -- NULL = applies to entire country
+  month integer CHECK (month IS NULL OR (month >= 1 AND month <= 12)),  -- NULL = all months
   km_from integer NOT NULL DEFAULT 0,
   km_to integer NOT NULL DEFAULT 50,
   vehicle_type text NOT NULL DEFAULT 'mercedes-vito',
-  price numeric NOT NULL CHECK (price >= 0),
+  pricing_mode text NOT NULL DEFAULT 'fixed' CHECK (pricing_mode IN ('fixed', 'per_km')),
+  price_amount numeric NOT NULL CHECK (price_amount >= 0),
   price_currency text NOT NULL DEFAULT 'EUR',
   is_active boolean NOT NULL DEFAULT true,
   created_by uuid REFERENCES auth.users(id),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT km_range_valid CHECK (km_to > km_from),
-  CONSTRAINT unique_km_price UNIQUE (city, month, km_from, km_to, vehicle_type)
+  CONSTRAINT km_range_valid CHECK (km_to > km_from)
 );
 
 -- Enable RLS
-ALTER TABLE public.km_based_prices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.distance_pricing_rules ENABLE ROW LEVEL SECURITY;
 
--- Allow anyone to read (needed for pricing lookups)
-CREATE POLICY "km_based_prices_select" ON public.km_based_prices
+CREATE POLICY "distance_pricing_rules_select" ON public.distance_pricing_rules
   FOR SELECT USING (true);
 
--- Allow authenticated users with admin role to insert/update/delete
-CREATE POLICY "km_based_prices_insert" ON public.km_based_prices
+CREATE POLICY "distance_pricing_rules_insert" ON public.distance_pricing_rules
   FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.user_roles
-      WHERE user_id = auth.uid() AND role = 'admin'
-    )
+    EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
   );
 
-CREATE POLICY "km_based_prices_update" ON public.km_based_prices
+CREATE POLICY "distance_pricing_rules_update" ON public.distance_pricing_rules
   FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM public.user_roles
-      WHERE user_id = auth.uid() AND role = 'admin'
-    )
+    EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
   );
 
-CREATE POLICY "km_based_prices_delete" ON public.km_based_prices
+CREATE POLICY "distance_pricing_rules_delete" ON public.distance_pricing_rules
   FOR DELETE USING (
-    EXISTS (
-      SELECT 1 FROM public.user_roles
-      WHERE user_id = auth.uid() AND role = 'admin'
-    )
+    EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'admin')
   );
 
--- Create index for fast lookups
-CREATE INDEX idx_km_based_prices_city_month ON public.km_based_prices (city, month);
-CREATE INDEX idx_km_based_prices_lookup ON public.km_based_prices (city, month, vehicle_type, km_from, km_to);
+CREATE INDEX idx_dpr_country_city ON public.distance_pricing_rules (country, city);
+CREATE INDEX idx_dpr_lookup ON public.distance_pricing_rules (country, vehicle_type, km_from, km_to, is_active);
+
+-- ============================================================
+-- Seed default Turkey rules (all cities, all months)
+-- ============================================================
+
+-- Fixed base prices: 1-50 km
+INSERT INTO public.distance_pricing_rules (country, city, month, km_from, km_to, vehicle_type, pricing_mode, price_amount, price_currency) VALUES
+  ('TR', NULL, NULL, 1, 50, 'sedan',          'fixed', 46, 'EUR'),
+  ('TR', NULL, NULL, 1, 50, 'mercedes-vito',  'fixed', 50, 'EUR'),
+  ('TR', NULL, NULL, 1, 50, 'vip-mercedes',   'fixed', 55, 'EUR'),
+  ('TR', NULL, NULL, 1, 50, 'maybach-minibus', 'fixed', 65, 'EUR'),
+  ('TR', NULL, NULL, 1, 50, 'minibus',        'fixed', 90, 'EUR');
+
+-- Per-KM surcharge: 51-70 km → +1.30 €/km
+INSERT INTO public.distance_pricing_rules (country, city, month, km_from, km_to, vehicle_type, pricing_mode, price_amount, price_currency) VALUES
+  ('TR', NULL, NULL, 51, 70, 'sedan',          'per_km', 1.30, 'EUR'),
+  ('TR', NULL, NULL, 51, 70, 'mercedes-vito',  'per_km', 1.30, 'EUR'),
+  ('TR', NULL, NULL, 51, 70, 'vip-mercedes',   'per_km', 1.30, 'EUR'),
+  ('TR', NULL, NULL, 51, 70, 'maybach-minibus', 'per_km', 1.30, 'EUR'),
+  ('TR', NULL, NULL, 51, 70, 'minibus',        'per_km', 1.30, 'EUR');
+
+-- Per-KM surcharge: 71-85 km → +1.50 €/km
+INSERT INTO public.distance_pricing_rules (country, city, month, km_from, km_to, vehicle_type, pricing_mode, price_amount, price_currency) VALUES
+  ('TR', NULL, NULL, 71, 85, 'sedan',          'per_km', 1.50, 'EUR'),
+  ('TR', NULL, NULL, 71, 85, 'mercedes-vito',  'per_km', 1.50, 'EUR'),
+  ('TR', NULL, NULL, 71, 85, 'vip-mercedes',   'per_km', 1.50, 'EUR'),
+  ('TR', NULL, NULL, 71, 85, 'maybach-minibus', 'per_km', 1.50, 'EUR'),
+  ('TR', NULL, NULL, 71, 85, 'minibus',        'per_km', 1.50, 'EUR');

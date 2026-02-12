@@ -773,61 +773,66 @@ export async function matchPrice(
     
     console.log('🚗 Transfer info:', { airport, city, district });
 
-    // ---- KM-BASED PRICING (ABSOLUTE HIGHEST PRIORITY - ALWAYS CHECKED FIRST) ----
-    if (city) {
-      const currentMonth = new Date().getMonth() + 1;
-      
-      // If distance is provided, match exact km range
-      if (distanceKm && distanceKm > 0) {
-        const roundedKm = Math.round(distanceKm);
-        const { data: kmMatch, error: kmError } = await supabase
-          .from('km_based_prices')
-          .select('*')
-          .ilike('city', city)
-          .eq('month', currentMonth)
-          .lte('km_from', roundedKm)
-          .gte('km_to', roundedKm)
-          .eq('vehicle_type', vehicleType)
-          .eq('is_active', true)
-          .order('km_from', { ascending: true })
-          .limit(1);
-        
-        if (!kmError && kmMatch && kmMatch.length > 0) {
-          console.log('✅ KM-based price found (exact distance):', kmMatch[0]);
-          return {
-            found: true,
-            price: kmMatch[0].price,
-            currency: kmMatch[0].price_currency,
-            matchedCity: kmMatch[0].city,
-            matchedDistrict: `${kmMatch[0].km_from}-${kmMatch[0].km_to} km`,
-            confidence: 'high',
-            matchType: 'exact',
-          };
-        }
-      }
-
-      // Even without distance: if ANY km-based price exists for this city+month, use lowest range as base
-      const { data: kmBase, error: kmBaseError } = await supabase
-        .from('km_based_prices')
+    // ---- TIERED KM PRICING (TURKEY ONLY, ABSOLUTE HIGHEST PRIORITY) ----
+    // Fetch distance_pricing_rules for TR + vehicle type, calculate tiered price
+    {
+      const { data: rules, error: rulesError } = await supabase
+        .from('distance_pricing_rules')
         .select('*')
-        .ilike('city', city)
-        .eq('month', currentMonth)
+        .eq('country', 'TR')
         .eq('vehicle_type', vehicleType)
         .eq('is_active', true)
-        .order('km_from', { ascending: true })
-        .limit(1);
-      
-      if (!kmBaseError && kmBase && kmBase.length > 0) {
-        console.log('✅ KM-based base price found:', kmBase[0]);
-        return {
-          found: true,
-          price: kmBase[0].price,
-          currency: kmBase[0].price_currency,
-          matchedCity: kmBase[0].city,
-          matchedDistrict: `${kmBase[0].km_from}-${kmBase[0].km_to} km (baz)`,
-          confidence: 'high',
-          matchType: 'exact',
-        };
+        .order('km_from', { ascending: true });
+
+      if (!rulesError && rules && rules.length > 0) {
+        // Filter by city (NULL = country-wide) and month (NULL = all months)
+        const currentMonth = new Date().getMonth() + 1;
+        const filtered = rules.filter(r => {
+          const cityMatch = !r.city || (city && r.city.toLowerCase() === city.toLowerCase());
+          const monthMatch = !r.month || r.month === currentMonth;
+          return cityMatch && monthMatch;
+        });
+
+        const fixedRule = filtered.find(r => r.pricing_mode === 'fixed');
+        if (fixedRule) {
+          const maxTierKm = Math.max(...filtered.map(r => r.km_to));
+          const roundedKm = distanceKm ? Math.round(distanceKm) : 0;
+
+          // If distance > max tier, skip KM pricing (fallback to region/intercity)
+          if (roundedKm > maxTierKm && roundedKm > 0) {
+            console.log('⏭️ Distance exceeds max KM tier, using fallback pricing');
+          } else {
+            let total = Number(fixedRule.price_amount);
+            const baseKmTo = Number(fixedRule.km_to);
+
+            if (roundedKm > baseKmTo) {
+              const perKmTiers = filtered
+                .filter(r => r.pricing_mode === 'per_km')
+                .sort((a, b) => a.km_from - b.km_from);
+
+              for (const tier of perKmTiers) {
+                if (roundedKm < tier.km_from) break;
+                const effectiveFrom = Math.max(tier.km_from, baseKmTo + 1);
+                const effectiveTo = Math.min(roundedKm, tier.km_to);
+                if (effectiveTo >= effectiveFrom) {
+                  total += (effectiveTo - effectiveFrom + 1) * Number(tier.price_amount);
+                }
+              }
+            }
+
+            const finalPrice = Math.round(total * 100) / 100;
+            console.log('✅ Tiered KM price calculated:', { distance: roundedKm, price: finalPrice, vehicle: vehicleType });
+            return {
+              found: true,
+              price: finalPrice,
+              currency: fixedRule.price_currency,
+              matchedCity: city || 'TR',
+              matchedDistrict: roundedKm > 0 ? `${roundedKm} km (KM hesaplama)` : `Baz fiyat (1-${baseKmTo} km)`,
+              confidence: 'high',
+              matchType: 'exact',
+            };
+          }
+        }
       }
     }
     
