@@ -72,7 +72,13 @@ const DriverHome = () => {
   const pullOpacity = useTransform(pullY, [0, 40, PULL_THRESHOLD], [0, 0.5, 1]);
 
   const fetchReservations = useCallback(async (showToast = false) => {
-    if (!driverId) return;
+    if (!driverId) {
+      setReservations([]);
+      setAdminNotesMap({});
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
 
     const { data, error } = await supabase
       .from('reservations')
@@ -115,7 +121,7 @@ const DriverHome = () => {
     }
     setLoading(false);
     setRefreshing(false);
-  }, [driverId]);
+  }, [driverId, t]);
 
   const handlePullEnd = async (_: any, info: PanInfo) => {
     if (info.offset.y > PULL_THRESHOLD && !refreshing) {
@@ -125,10 +131,8 @@ const DriverHome = () => {
   };
 
   useEffect(() => {
-    if (driverId) {
-      fetchReservations();
-    }
-  }, [driverId]);
+    fetchReservations();
+  }, [driverId, fetchReservations]);
 
   // Real-time subscription for new job assignments
   useEffect(() => {
