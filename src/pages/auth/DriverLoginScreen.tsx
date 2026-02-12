@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserRole } from '@/hooks/useUserRole';
+import { primeUserRoleCache, useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLoginRateLimit } from '@/hooks/useLoginRateLimit';
 import { supabase } from '@/integrations/supabase/client';
@@ -163,40 +163,39 @@ const DriverLoginScreen = () => {
     );
   }
 
-  const isDriverAccount = async (userId: string, accessToken?: string): Promise<boolean> => {
+  const isDriverAccount = async (
+    userId: string,
+    accessToken?: string
+  ): Promise<{ isDriver: boolean; driverId: string | null }> => {
     // 1) Primary path: edge function (RLS bypass)
     if (accessToken) {
-      const delays = [0, 300, 600];
-      for (let attempt = 0; attempt < delays.length; attempt++) {
-        if (attempt > 0) await new Promise((r) => setTimeout(r, delays[attempt]));
-        const { data } = await supabase.functions.invoke('get-user-role', {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (data?.success && data?.role === 'driver') {
-          return true;
-        }
+      const { data } = await supabase.functions.invoke('get-user-role', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (data?.success && data?.role === 'driver') {
+        return { isDriver: true, driverId: data.driverId ?? null };
       }
     }
 
-    // 2) Fallback: direct user_roles read (new self-read RLS policy)
-    const { data: roleRows } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
+    // 2) Fallbacks in parallel for speed.
+    const [{ data: roleRows }, { data: driverRow }] = await Promise.all([
+      supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId),
+      supabase
+        .from('drivers')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle(),
+    ]);
 
     const roles = (roleRows ?? []).map((r) => r.role);
     if (roles.includes('driver')) {
-      return true;
+      return { isDriver: true, driverId: driverRow?.id ?? null };
     }
 
-    // 3) Last fallback: drivers table existence
-    const { data: driverRow } = await supabase
-      .from('drivers')
-      .select('id')
-      .eq('user_id', userId)
-      .maybeSingle();
-
-    return !!driverRow?.id;
+    return { isDriver: !!driverRow?.id, driverId: driverRow?.id ?? null };
   };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -250,12 +249,12 @@ const DriverLoginScreen = () => {
         }
       } else if (authData?.user && authData?.session) {
         // Yeni auth/RLS duzeninde false-negative'i onlemek icin coklu fallback kullan.
-        const isDriver = await isDriverAccount(
+        const roleCheck = await isDriverAccount(
           authData.user.id,
           authData.session.access_token
         );
 
-        if (!isDriver) {
+        if (!roleCheck.isDriver) {
           toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil' : 'This is not a driver account');
           await supabase.auth.signOut();
           setIsLoading(false);
@@ -263,11 +262,15 @@ const DriverLoginScreen = () => {
         }
 
         await logLoginAttempt(validation.email, true, undefined, undefined, 'driver');
+        primeUserRoleCache({
+          userId: authData.user.id,
+          role: 'driver',
+          driverId: roleCheck.driverId,
+          agencyId: null,
+        });
         // Driver icin otomatik cihaza guven - mevcut driverlar sorun yasamasin
         registerTrustedDevice(authData.user.id).catch(() => {});
-        await supabase.auth.refreshSession();
-        // Session localStorage'a yazilsin
-        await new Promise((r) => setTimeout(r, 150));
+        // Session is already established by signInWithPassword.
         window.location.replace('/driver');
         return;
       }

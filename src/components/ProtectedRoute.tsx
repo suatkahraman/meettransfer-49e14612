@@ -11,6 +11,8 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
+const ROLE_GRACE_MS = 4000;
+
 const ProtectedRoute = ({ 
   children, 
   allowedRoles, 
@@ -107,7 +109,7 @@ const ProtectedRoute = ({
     if (fallbackLoading) return;
     if (role || fallbackRole) return;
 
-    const t = window.setTimeout(() => setRoleGraceExpired(true), 10000);
+    const t = window.setTimeout(() => setRoleGraceExpired(true), ROLE_GRACE_MS);
     return () => window.clearTimeout(t);
   }, [userId, roleLoading, role, fallbackLoading, fallbackRole]);
 
