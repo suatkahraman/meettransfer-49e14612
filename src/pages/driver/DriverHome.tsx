@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';

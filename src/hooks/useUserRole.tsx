@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export type AppRole = 'admin' | 'driver' | 'customer' | 'agency';
+type LookupResult = { id: string | null; hasError: boolean };
 
 export const useUserRole = () => {
   const { user } = useAuth();
@@ -24,26 +25,32 @@ export const useUserRole = () => {
       return null;
     };
 
-    const fetchDriverId = async (userId: string): Promise<string | null> => {
+    const fetchDriverId = async (userId: string): Promise<LookupResult> => {
       const { data, error } = await supabase
         .from('drivers')
         .select('id')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (error) return null;
-      return data?.id ?? null;
+      if (error) {
+        console.warn('[useUserRole] drivers fallback error:', error.message);
+        return { id: null, hasError: true };
+      }
+      return { id: data?.id ?? null, hasError: false };
     };
 
-    const fetchAgencyId = async (userId: string): Promise<string | null> => {
+    const fetchAgencyId = async (userId: string): Promise<LookupResult> => {
       const { data, error } = await supabase
         .from('agencies')
         .select('id')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (error) return null;
-      return data?.id ?? null;
+      if (error) {
+        console.warn('[useUserRole] agencies fallback error:', error.message);
+        return { id: null, hasError: true };
+      }
+      return { id: data?.id ?? null, hasError: false };
     };
 
     const fetchRole = async () => {
@@ -80,11 +87,13 @@ export const useUserRole = () => {
                 let resolvedAgencyId = fnData.agencyId || null;
 
                 if (detectedRole === 'driver' && !resolvedDriverId) {
-                  resolvedDriverId = await fetchDriverId(user.id);
+                  const driverLookup = await fetchDriverId(user.id);
+                  resolvedDriverId = driverLookup.id;
                 }
 
                 if (detectedRole === 'agency' && !resolvedAgencyId) {
-                  resolvedAgencyId = await fetchAgencyId(user.id);
+                  const agencyLookup = await fetchAgencyId(user.id);
+                  resolvedAgencyId = agencyLookup.id;
                 }
 
                 setRole(detectedRole);
@@ -109,36 +118,55 @@ export const useUserRole = () => {
         }
 
         let resolvedRole = resolveAppRole((roleRows ?? []).map((r) => r.role));
+        let hadLookupError = !!roleError;
         let resolvedDriverId: string | null = null;
         let resolvedAgencyId: string | null = null;
 
         if (resolvedRole === 'driver') {
-          resolvedDriverId = await fetchDriverId(user.id);
+          const driverLookup = await fetchDriverId(user.id);
+          resolvedDriverId = driverLookup.id;
+          hadLookupError = hadLookupError || driverLookup.hasError;
         }
 
         if (resolvedRole === 'agency') {
-          resolvedAgencyId = await fetchAgencyId(user.id);
+          const agencyLookup = await fetchAgencyId(user.id);
+          resolvedAgencyId = agencyLookup.id;
+          hadLookupError = hadLookupError || agencyLookup.hasError;
         }
 
         // user_roles kaydi yoksa veya rol stale ise tablo varligindan rol cikar
         if (!resolvedRole) {
-          resolvedDriverId = await fetchDriverId(user.id);
+          const driverLookup = await fetchDriverId(user.id);
+          resolvedDriverId = driverLookup.id;
+          hadLookupError = hadLookupError || driverLookup.hasError;
+
           if (resolvedDriverId) {
             resolvedRole = 'driver';
           } else {
-            resolvedAgencyId = await fetchAgencyId(user.id);
+            const agencyLookup = await fetchAgencyId(user.id);
+            resolvedAgencyId = agencyLookup.id;
+            hadLookupError = hadLookupError || agencyLookup.hasError;
             if (resolvedAgencyId) {
               resolvedRole = 'agency';
             }
           }
         }
 
-        setRole(resolvedRole ?? 'customer');
-        setDriverId((resolvedRole ?? 'customer') === 'driver' ? resolvedDriverId : null);
-        setAgencyId((resolvedRole ?? 'customer') === 'agency' ? resolvedAgencyId : null);
+        // Lookup hatasi varsa customer'a zorla dusme; role belirsiz kalsin.
+        if (!resolvedRole && hadLookupError) {
+          setRole(null);
+          setDriverId(null);
+          setAgencyId(null);
+          return;
+        }
+
+        const finalRole = resolvedRole ?? 'customer';
+        setRole(finalRole);
+        setDriverId(finalRole === 'driver' ? resolvedDriverId : null);
+        setAgencyId(finalRole === 'agency' ? resolvedAgencyId : null);
       } catch (error) {
         console.error('[useUserRole] Error:', error);
-        setRole('customer');
+        setRole(null);
         setDriverId(null);
         setAgencyId(null);
       } finally {
