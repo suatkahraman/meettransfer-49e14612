@@ -73,6 +73,8 @@ const LIST_RESERVATION_SELECT = `
   dropoff_place_name,
   agencies (id, agency_name)
 `;
+const PENDING_BASE_STATUSES = ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned'] as const;
+const PENDING_PAGE_SIZE = 12;
 
 const sortByPickupDateTime = (items: Reservation[]) =>
   [...items].sort((a, b) => {
@@ -93,18 +95,23 @@ const DriverJobList = () => {
   const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [hasMorePending, setHasMorePending] = useState(false);
+  const [loadingMorePending, setLoadingMorePending] = useState(false);
   
   // Pull-to-refresh state
   const [pullDistance, setPullDistance] = useState(0);
   const [isPulling, setIsPulling] = useState(false);
   const touchStartY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
   const driverMetaRef = useRef<{ name: string; plateNumber: string; vehicleModel: string } | null>(null);
+  const pendingPageRef = useRef(0);
   const PULL_THRESHOLD = 80;
 
   const jobType = type as JobType || 'pending';
   
   // Get month/year filter from URL params (for future months filtering)
+  const filterDate = searchParams.get('date');
   const filterMonth = searchParams.get('month') ? parseInt(searchParams.get('month')!) : null;
   const filterYear = searchParams.get('year') ? parseInt(searchParams.get('year')!) : null;
 
@@ -124,48 +131,124 @@ const DriverJobList = () => {
     }
   }, [jobType]);
 
-  const fetchReservations = useCallback(async (showToast = false) => {
+  const fetchReservations = useCallback(async (options?: { showToast?: boolean; append?: boolean }) => {
+    const showToast = options?.showToast ?? false;
+    const append = options?.append ?? false;
+
     if (!driverId) {
       setReservations([]);
       setAdminNotesMap({});
+      pendingPageRef.current = 0;
+      setHasMorePending(false);
       setLoading(false);
       setRefreshing(false);
+      setLoadingMorePending(false);
       return;
     }
 
     try {
       const statusFilter = getStatusFilter();
-      let query = supabase
-        .from('reservations')
-        .select(LIST_RESERVATION_SELECT)
-        .eq('driver_id', driverId);
+      let data: Reservation[] = [];
+      let error: Error | null = null;
 
       if (jobType === 'pending') {
-        query = query.or('status.in.(pending,pending_admin_review,sent_to_driver,assigned),and(status.eq.confirmed,driver_confirmed.eq.false)');
+        const nextPage = append ? pendingPageRef.current + 1 : 0;
+        const from = nextPage * PENDING_PAGE_SIZE;
+        const to = from + PENDING_PAGE_SIZE;
+
+        let query = supabase
+          .from('reservations')
+          .select(LIST_RESERVATION_SELECT)
+          .eq('driver_id', driverId)
+          .or('status.in.(pending,pending_admin_review,sent_to_driver,assigned),and(status.eq.confirmed,driver_confirmed.eq.false)')
+          .order('pickup_date', { ascending: true })
+          .order('pickup_time', { ascending: true });
+
+        if (filterDate) {
+          query = query.eq('pickup_date', filterDate);
+        } else if (filterMonth !== null && filterYear !== null) {
+          const firstDay = new Date(filterYear, filterMonth - 1, 1).toISOString().split('T')[0];
+          const lastDay = new Date(filterYear, filterMonth, 0).toISOString().split('T')[0];
+          query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+        }
+
+        const response = await query.range(from, to);
+        const rows = (response.data || []) as Reservation[];
+        error = response.error as Error | null;
+
+        if (!error) {
+          const pageRows = sortByPickupDateTime(rows.slice(0, PENDING_PAGE_SIZE));
+          const hasMoreRows = rows.length > PENDING_PAGE_SIZE;
+
+          setHasMorePending(hasMoreRows);
+          pendingPageRef.current = nextPage;
+
+          if (append) {
+            setReservations((prev) => {
+              const byId = new Map(prev.map((item) => [item.id, item]));
+              pageRows.forEach((row) => byId.set(row.id, row));
+              return sortByPickupDateTime(Array.from(byId.values()));
+            });
+          } else {
+            setReservations(pageRows);
+            setAdminNotesMap({});
+          }
+
+          if (pageRows.length > 0) {
+            const ids = pageRows.map((r) => r.id);
+            void supabase
+              .from('reservation_admin_notes')
+              .select('reservation_id, notes')
+              .in('reservation_id', ids)
+              .then(({ data: notesData }) => {
+                if (!notesData) return;
+                const notesObj: Record<string, string> = {};
+                notesData.forEach((n) => {
+                  if (n.notes) notesObj[n.reservation_id] = n.notes;
+                });
+
+                if (append) {
+                  setAdminNotesMap((prev) => ({ ...prev, ...notesObj }));
+                } else {
+                  setAdminNotesMap(notesObj);
+                }
+              });
+          } else if (!append) {
+            setAdminNotesMap({});
+          }
+        }
       } else {
-        query = query.in('status', statusFilter);
+        let query = supabase
+          .from('reservations')
+          .select(LIST_RESERVATION_SELECT)
+          .eq('driver_id', driverId)
+          .in('status', statusFilter)
+          .order('pickup_date', { ascending: true })
+          .order('pickup_time', { ascending: true });
+
+        // For completed, only show current month
+        if (jobType === 'completed') {
+          const now = new Date();
+          const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+          const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+          query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+        }
+
+        if (filterDate) {
+          query = query.eq('pickup_date', filterDate);
+        }
+
+        // Apply month/year filter if present (for future months)
+        if (!filterDate && filterMonth !== null && filterYear !== null) {
+          const firstDay = new Date(filterYear, filterMonth - 1, 1).toISOString().split('T')[0];
+          const lastDay = new Date(filterYear, filterMonth, 0).toISOString().split('T')[0];
+          query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+        }
+
+        const response = await query;
+        data = (response.data || []) as Reservation[];
+        error = response.error as Error | null;
       }
-
-      query = query
-        .order('pickup_date', { ascending: true })
-        .order('pickup_time', { ascending: true });
-
-      // For completed, only show current month
-      if (jobType === 'completed') {
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-        query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
-      }
-
-      // Apply month/year filter if present (for future months)
-      if (filterMonth !== null && filterYear !== null) {
-        const firstDay = new Date(filterYear, filterMonth - 1, 1).toISOString().split('T')[0];
-        const lastDay = new Date(filterYear, filterMonth, 0).toISOString().split('T')[0];
-        query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('Error:', error);
@@ -173,40 +256,43 @@ const DriverJobList = () => {
         return;
       }
 
-      const sortedData = sortByPickupDateTime((data || []) as Reservation[]);
-      setReservations(sortedData);
-
-      // Fetch admin notes
-      if (sortedData.length > 0) {
-        const ids = sortedData.map((r) => r.id);
-        const { data: notesData } = await supabase
-          .from('reservation_admin_notes')
-          .select('reservation_id, notes')
-          .in('reservation_id', ids);
-        
-        if (notesData) {
-          const notesObj: Record<string, string> = {};
-          notesData.forEach((n) => {
-            if (n.notes) notesObj[n.reservation_id] = n.notes;
-          });
-          setAdminNotesMap(notesObj);
-        } else {
-          setAdminNotesMap({});
-        }
-      } else {
+      if (jobType !== 'pending') {
+        const sortedData = sortByPickupDateTime(data);
+        setReservations(sortedData);
         setAdminNotesMap({});
+        pendingPageRef.current = 0;
+        setHasMorePending(false);
+
+        // Fetch admin notes in background so list UI is not blocked.
+        if (sortedData.length > 0) {
+          const ids = sortedData.map((r) => r.id);
+          void supabase
+            .from('reservation_admin_notes')
+            .select('reservation_id, notes')
+            .in('reservation_id', ids)
+            .then(({ data: notesData }) => {
+              if (!notesData) return;
+              const notesObj: Record<string, string> = {};
+              notesData.forEach((n) => {
+                if (n.notes) notesObj[n.reservation_id] = n.notes;
+              });
+              setAdminNotesMap(notesObj);
+            });
+        }
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setLoadingMorePending(false);
     }
-  }, [driverId, jobType, getStatusFilter, t, filterMonth, filterYear]);
+  }, [driverId, jobType, getStatusFilter, t, filterMonth, filterYear, filterDate]);
 
   useEffect(() => {
     if (driverId) {
-      fetchReservations();
+      setLoading(true);
+      void fetchReservations();
     }
   }, [driverId, fetchReservations]);
 
@@ -217,16 +303,16 @@ const DriverJobList = () => {
         size="icon"
         onClick={() => {
           setRefreshing(true);
-          void fetchReservations(true);
+          void fetchReservations({ showToast: true });
         }}
-        disabled={refreshing}
+        disabled={refreshing || loadingMorePending}
         className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
       >
-        <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", refreshing && "animate-spin")} />
+        <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", (refreshing || loadingMorePending) && "animate-spin")} />
       </Button>
     );
     return () => setHeaderRight(null);
-  }, [setHeaderRight, refreshing, fetchReservations]);
+  }, [setHeaderRight, refreshing, fetchReservations, loadingMorePending]);
 
   // Real-time subscription
   useEffect(() => {
@@ -246,7 +332,28 @@ const DriverJobList = () => {
         (payload) => {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             const updatedRes = payload.new as Reservation;
-            if (statusFilter.includes(updatedRes.status)) {
+            const pickupDate = updatedRes.pickup_date;
+            const matchesDateFilter = filterDate
+              ? pickupDate === filterDate
+              : (
+                  filterMonth !== null && filterYear !== null
+                    ? (() => {
+                        const d = new Date(pickupDate);
+                        return d.getFullYear() === filterYear && d.getMonth() === filterMonth - 1;
+                      })()
+                    : true
+                );
+            const includeInList = jobType === 'pending'
+              ? (
+                  matchesDateFilter &&
+                  (
+                    PENDING_BASE_STATUSES.includes(updatedRes.status as (typeof PENDING_BASE_STATUSES)[number]) ||
+                    (updatedRes.status === 'confirmed' && updatedRes.driver_confirmed === false)
+                  )
+                )
+              : (matchesDateFilter && statusFilter.includes(updatedRes.status));
+
+            if (includeInList) {
               setReservations(prev => {
                 const existing = prev.find(r => r.id === updatedRes.id);
                 if (existing) {
@@ -268,7 +375,37 @@ const DriverJobList = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [driverId, jobType, getStatusFilter]);
+  }, [driverId, jobType, getStatusFilter, filterDate, filterMonth, filterYear]);
+
+  const loadNextPendingPage = useCallback(() => {
+    if (jobType !== 'pending') return;
+    if (!hasMorePending || loadingMorePending || refreshing || loading) return;
+    setLoadingMorePending(true);
+    void fetchReservations({ append: true });
+  }, [jobType, hasMorePending, loadingMorePending, refreshing, loading, fetchReservations]);
+
+  useEffect(() => {
+    if (jobType !== 'pending' || !hasMorePending) return;
+    const rootElement = containerRef.current;
+    const sentinel = loadMoreSentinelRef.current;
+    if (!rootElement || !sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadNextPendingPage();
+        }
+      },
+      {
+        root: rootElement,
+        rootMargin: '220px 0px 220px 0px',
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [jobType, hasMorePending, loadNextPendingPage, reservations.length]);
 
   const getDriverMeta = useCallback(async () => {
     if (driverMetaRef.current) return driverMetaRef.current;
@@ -473,7 +610,7 @@ const DriverJobList = () => {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isPulling || refreshing) return;
+    if (!isPulling || refreshing || loadingMorePending) return;
     
     const currentY = e.touches[0].clientY;
     const distance = Math.max(0, currentY - touchStartY.current);
@@ -484,9 +621,9 @@ const DriverJobList = () => {
   };
 
   const handleTouchEnd = () => {
-    if (pullDistance >= PULL_THRESHOLD && !refreshing) {
+    if (pullDistance >= PULL_THRESHOLD && !refreshing && !loadingMorePending) {
       setRefreshing(true);
-      void fetchReservations(true);
+      void fetchReservations({ showToast: true });
     }
     setPullDistance(0);
     setIsPulling(false);
@@ -495,7 +632,7 @@ const DriverJobList = () => {
   return (
     <div 
       ref={containerRef}
-      className="h-full min-h-0 flex flex-col overflow-auto"
+      className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -544,7 +681,7 @@ const DriverJobList = () => {
       </AnimatePresence>
 
       {/* Content */}
-      <main className="px-4 py-4 max-w-lg mx-auto">
+      <main className="px-3 sm:px-4 py-4 max-w-lg mx-auto w-full overflow-x-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -567,7 +704,7 @@ const DriverJobList = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ duration: 0.16, delay: Math.min(index, 2) * 0.02 }}
                 >
                   <SwipeableJobCard
                     reservation={reservation}
@@ -578,6 +715,16 @@ const DriverJobList = () => {
                   />
                 </motion.div>
               ))}
+
+              {jobType === 'pending' && hasMorePending && (
+                <div ref={loadMoreSentinelRef} className="h-2 w-full" />
+              )}
+              {jobType === 'pending' && loadingMorePending && (
+                <div className="flex items-center justify-center py-2 text-muted-foreground text-sm gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{t('loading') || 'Yükleniyor...'}</span>
+                </div>
+              )}
             </div>
           </AnimatePresence>
         )}

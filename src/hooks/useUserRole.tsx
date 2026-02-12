@@ -4,6 +4,64 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type AppRole = 'admin' | 'driver' | 'customer' | 'agency';
 type LookupResult = { id: string | null; hasError: boolean };
+type CachedRolePayload = {
+  userId: string;
+  role: AppRole;
+  driverId: string | null;
+  agencyId: string | null;
+  expiresAt: number;
+};
+
+const ROLE_CACHE_KEY = 'mt_user_role_cache_v1';
+const ROLE_CACHE_TTL_MS = 30 * 60 * 1000;
+
+const isAppRole = (value: unknown): value is AppRole =>
+  value === 'admin' || value === 'driver' || value === 'agency' || value === 'customer';
+
+const readUserRoleCache = (userId: string): CachedRolePayload | null => {
+  try {
+    const raw = localStorage.getItem(ROLE_CACHE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<CachedRolePayload>;
+    if (parsed.userId !== userId) return null;
+    if (!isAppRole(parsed.role)) return null;
+    if (typeof parsed.expiresAt !== 'number' || parsed.expiresAt < Date.now()) {
+      localStorage.removeItem(ROLE_CACHE_KEY);
+      return null;
+    }
+
+    return {
+      userId: parsed.userId,
+      role: parsed.role,
+      driverId: typeof parsed.driverId === 'string' ? parsed.driverId : null,
+      agencyId: typeof parsed.agencyId === 'string' ? parsed.agencyId : null,
+      expiresAt: parsed.expiresAt,
+    };
+  } catch {
+    return null;
+  }
+};
+
+export const primeUserRoleCache = (payload: {
+  userId: string;
+  role: AppRole;
+  driverId?: string | null;
+  agencyId?: string | null;
+}) => {
+  try {
+    const cacheValue: CachedRolePayload = {
+      userId: payload.userId,
+      role: payload.role,
+      driverId: payload.driverId ?? null,
+      agencyId: payload.agencyId ?? null,
+      expiresAt: Date.now() + ROLE_CACHE_TTL_MS,
+    };
+    localStorage.setItem(ROLE_CACHE_KEY, JSON.stringify(cacheValue));
+  } catch {
+    // Storage can be unavailable in some iOS/private contexts.
+  }
+};
 
 export const useUserRole = () => {
   const { user } = useAuth();
@@ -62,46 +120,54 @@ export const useUserRole = () => {
         return;
       }
 
-      try {
+      const cachedRole = readUserRoleCache(user.id);
+      if (cachedRole) {
+        setRole(cachedRole.role);
+        setDriverId(cachedRole.role === 'driver' ? cachedRole.driverId : null);
+        setAgencyId(cachedRole.role === 'agency' ? cachedRole.agencyId : null);
+        setLoading(false);
+      } else {
         setLoading(true);
+      }
 
-        // 1) Edge function (RLS bypass) - retry ile ayni cihazdan tekrar giris garantisi
+      try {
+        // 1) Edge function (RLS bypass) - single fast attempt
         const { data } = await supabase.auth.getSession();
         const token = data?.session?.access_token;
-        // Ayni cihazdan 2. giris: retry ile get-user-role guvencesi (cold start, network)
-        // Not: Edge function "customer" dondururse hemen kabul etmiyoruz.
-        // Yeni policy yapisinda dogrudan tablo fallback'i ile tekrar dogruluyoruz.
         if (token) {
-          const delays = [0, 400, 800, 1200];
-          for (let attempt = 0; attempt < delays.length; attempt++) {
-            if (attempt > 0) await new Promise((r) => setTimeout(r, delays[attempt]));
-            const { data: fnData } = await supabase.functions.invoke('get-user-role', {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            if (fnData?.success && fnData?.role) {
-              const detectedRole = resolveAppRole([fnData.role]);
-              // Edge function'in stale olmasi durumunda false-negative customer
-              // donusunu dogrudan kabul etmeyip DB fallback ile yeniden teyit edecegiz.
-              if (detectedRole && detectedRole !== 'customer') {
-                let resolvedDriverId = fnData.driverId || null;
-                let resolvedAgencyId = fnData.agencyId || null;
+          const { data: fnData } = await supabase.functions.invoke('get-user-role', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-                if (detectedRole === 'driver' && !resolvedDriverId) {
-                  const driverLookup = await fetchDriverId(user.id);
-                  resolvedDriverId = driverLookup.id;
-                }
+          if (fnData?.success && fnData?.role) {
+            const detectedRole = resolveAppRole([fnData.role]);
+            // Edge function stale "customer" false-negative olabilir; o yüzden customer
+            // sonucunu DB fallback ile teyit etmeye devam ediyoruz.
+            if (detectedRole && detectedRole !== 'customer') {
+              let resolvedDriverId = fnData.driverId || null;
+              let resolvedAgencyId = fnData.agencyId || null;
 
-                if (detectedRole === 'agency' && !resolvedAgencyId) {
-                  const agencyLookup = await fetchAgencyId(user.id);
-                  resolvedAgencyId = agencyLookup.id;
-                }
-
-                setRole(detectedRole);
-                setDriverId(detectedRole === 'driver' ? resolvedDriverId : null);
-                setAgencyId(detectedRole === 'agency' ? resolvedAgencyId : null);
-                setLoading(false);
-                return;
+              if (detectedRole === 'driver' && !resolvedDriverId) {
+                const driverLookup = await fetchDriverId(user.id);
+                resolvedDriverId = driverLookup.id;
               }
+
+              if (detectedRole === 'agency' && !resolvedAgencyId) {
+                const agencyLookup = await fetchAgencyId(user.id);
+                resolvedAgencyId = agencyLookup.id;
+              }
+
+              setRole(detectedRole);
+              setDriverId(detectedRole === 'driver' ? resolvedDriverId : null);
+              setAgencyId(detectedRole === 'agency' ? resolvedAgencyId : null);
+              primeUserRoleCache({
+                userId: user.id,
+                role: detectedRole,
+                driverId: resolvedDriverId,
+                agencyId: resolvedAgencyId,
+              });
+              setLoading(false);
+              return;
             }
           }
         }
@@ -164,11 +230,19 @@ export const useUserRole = () => {
         setRole(finalRole);
         setDriverId(finalRole === 'driver' ? resolvedDriverId : null);
         setAgencyId(finalRole === 'agency' ? resolvedAgencyId : null);
+        primeUserRoleCache({
+          userId: user.id,
+          role: finalRole,
+          driverId: resolvedDriverId,
+          agencyId: resolvedAgencyId,
+        });
       } catch (error) {
         console.error('[useUserRole] Error:', error);
-        setRole(null);
-        setDriverId(null);
-        setAgencyId(null);
+        if (!cachedRole) {
+          setRole(null);
+          setDriverId(null);
+          setAgencyId(null);
+        }
       } finally {
         setLoading(false);
       }

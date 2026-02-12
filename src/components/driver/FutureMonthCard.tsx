@@ -44,8 +44,8 @@ const FutureMonthCard = ({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <h3 className="font-semibold text-foreground text-sm">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-0.5">
+          <h3 className="font-semibold text-foreground text-sm min-w-0">
             {monthName} {year}
           </h3>
           <Badge className="text-xs font-bold px-2 py-0.5 bg-purple-500/20 text-purple-700 dark:text-purple-400">
@@ -54,7 +54,7 @@ const FutureMonthCard = ({
         </div>
         
         {firstJobDate && firstJobRoute && (
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-xs text-muted-foreground truncate min-w-0">
             {firstJobDate} • {firstJobRoute}
           </p>
         )}
@@ -62,7 +62,7 @@ const FutureMonthCard = ({
 
       {/* Arrow */}
       <div className={cn(
-        "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0",
+        "hidden sm:flex w-7 h-7 rounded-full items-center justify-center flex-shrink-0",
         "bg-background/50"
       )}>
         <ChevronRight className="h-4 w-4 text-muted-foreground" />

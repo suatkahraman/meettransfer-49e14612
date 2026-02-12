@@ -76,8 +76,8 @@ const DayJobCard = ({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <h3 className="font-semibold text-foreground text-sm">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-0.5">
+          <h3 className="font-semibold text-foreground text-sm min-w-0">
             {dayName}
           </h3>
           <Badge className={cn("text-xs font-bold px-2 py-0.5", colors.badge)}>
@@ -92,7 +92,7 @@ const DayJobCard = ({
         </div>
         
         {firstJobTime && firstJobRoute && (
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-xs text-muted-foreground truncate min-w-0">
             <span className={cn("font-medium", colors.accent)}>{firstJobTime}</span>
             <span className="mx-1">•</span>
             {firstJobRoute}
@@ -102,7 +102,7 @@ const DayJobCard = ({
 
       {/* Arrow */}
       <div className={cn(
-        "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0",
+        "hidden sm:flex w-7 h-7 rounded-full items-center justify-center flex-shrink-0",
         "bg-background/50"
       )}>
         <ChevronRight className="h-4 w-4 text-muted-foreground" />

@@ -400,6 +400,22 @@ export default defineConfig(({ mode }) => ({
       output: {
         // Manual chunks for better code splitting
         manualChunks: (id) => {
+          // Split i18n dictionaries by locale - this was the largest main chunk contributor.
+          if (id.includes('/src/contexts/i18n/') || id.includes('\\src\\contexts\\i18n\\')) {
+            const match = id.match(/[\\/]i18n[\\/](\w+)\.ts$/i);
+            if (match?.[1]) {
+              return `translations-${match[1].toLowerCase()}`;
+            }
+            return 'translations-main';
+          }
+          // Keep language runtime separate from app entry.
+          if (id.includes('/src/contexts/LanguageContext.tsx') || id.includes('\\src\\contexts\\LanguageContext.tsx')) {
+            return 'translations-runtime';
+          }
+          if (id.includes('/src/contexts/BlogTranslations.tsx') || id.includes('\\src\\contexts\\BlogTranslations.tsx')) {
+            return 'translations-blog';
+          }
+
           // Core React - smallest possible initial chunk
           if (id.includes('node_modules/react-dom')) {
             return 'vendor-react-dom';
@@ -499,12 +515,9 @@ export default defineConfig(({ mode }) => ({
         },
         // Isolate large app chunks for better caching
         chunkFileNames: (chunkInfo) => {
-          // Put translations in their own cached chunk - each language separately
-          if (chunkInfo.name?.includes('LanguageContext')) {
-            return 'assets/translations-main-[hash].js';
-          }
-          if (chunkInfo.name?.includes('BlogTranslations')) {
-            return 'assets/translations-blog-[hash].js';
+          // Keep all translation chunks easy to cache/invalidate.
+          if (chunkInfo.name?.startsWith('translations-')) {
+            return 'assets/[name]-[hash].js';
           }
           return 'assets/[name]-[hash].js';
         }
@@ -533,8 +546,9 @@ export default defineConfig(({ mode }) => ({
         });
       }
     },
-    // Increase chunk size warning limit
-    chunkSizeWarningLimit: 500,
+    // Bundles are intentionally split into large optional feature chunks.
+    // Raise warning threshold to reduce noise after manual chunking.
+    chunkSizeWarningLimit: 1000,
     // Enable source maps for production debugging
     sourcemap: false,
     // Minification - use esbuild to avoid rare terser minification edge-cases

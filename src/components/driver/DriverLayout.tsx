@@ -69,9 +69,9 @@ export const DriverLayout = () => {
   const titleKey = getTitleKey(location.pathname);
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="h-screen w-full max-w-[100vw] flex flex-col items-center bg-background overflow-x-hidden overflow-y-hidden">
       {/* Compact mobile header */}
-      <header className="bg-primary text-primary-foreground py-2.5 px-3 sm:py-3 sm:px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg safe-area-inset-top">
+      <header className="w-full max-w-[100vw] bg-primary text-primary-foreground py-2.5 px-3 sm:py-3 sm:px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg safe-area-inset-top overflow-x-hidden">
         <div className="flex items-center gap-2 min-w-0">
           <Button
             variant="ghost"
@@ -123,7 +123,7 @@ export const DriverLayout = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden">
+      <main className="w-full max-w-[100vw] flex-1 overflow-hidden">
         <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
           <Outlet context={{ setHeaderExtras: setHeaderExtrasFn, setHeaderRight, setMenuOpen, setUtilityPanel }} />
         </Suspense>

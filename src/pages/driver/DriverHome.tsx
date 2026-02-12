@@ -1,18 +1,16 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
+import { readDriverBootstrapCache, writeDriverBootstrapCache } from '@/lib/driverBootstrapCache';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, History } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import DriverStatsCard from '@/components/driver/DriverStatsCard';
+import { motion } from 'framer-motion';
 import JobCategoryCard from '@/components/driver/JobCategoryCard';
-import FutureMonthCard from '@/components/driver/FutureMonthCard';
 import DayJobCard from '@/components/driver/DayJobCard';
 import type { DriverHeaderExtras } from '@/components/driver/DriverLayout';
 
@@ -49,7 +47,6 @@ interface Reservation {
   } | null;
 }
 
-const PULL_THRESHOLD = 80;
 const LIST_RESERVATION_SELECT = `
   id,
   customer_id,
@@ -86,31 +83,63 @@ const sortByPickupDateTime = (items: Reservation[]) =>
     return dateTimeA.getTime() - dateTimeB.getTime();
   });
 
+type DayJobGroup = {
+  pickupDate: string;
+  date: Date;
+  jobs: Reservation[];
+  firstJob: Reservation;
+  activeJobs: number;
+};
+
+const buildDayGroups = (jobs: Reservation[]): DayJobGroup[] => {
+  const grouped: Record<string, { date: Date; jobs: Reservation[] }> = {};
+
+  jobs.forEach((job) => {
+    const key = job.pickup_date;
+    if (!grouped[key]) {
+      grouped[key] = {
+        date: new Date(job.pickup_date),
+        jobs: [],
+      };
+    }
+    grouped[key].jobs.push(job);
+  });
+
+  return Object.entries(grouped)
+    .map(([pickupDate, group]) => {
+      const sortedJobs = [...group.jobs].sort((a, b) => a.pickup_time.localeCompare(b.pickup_time));
+      return {
+        pickupDate,
+        date: group.date,
+        jobs: sortedJobs,
+        firstJob: sortedJobs[0],
+        activeJobs: sortedJobs.filter((item) => item.status === 'active').length,
+      };
+    })
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+};
+
 interface DriverHomeContext {
   setHeaderExtras: (extras: DriverHeaderExtras) => void;
 }
 
 const DriverHome = () => {
+  const { user } = useAuth();
   const { driverId } = useUserRole();
+  const userId = user?.id ?? null;
   const navigate = useNavigate();
   const { t } = useDriverTranslations();
   const context = useOutletContext<DriverHomeContext>();
   const setHeaderExtras = context?.setHeaderExtras ?? (() => {});
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { playSound } = useNotificationSound();
-  
-  const pullY = useMotionValue(0);
-  const pullProgress = useTransform(pullY, [0, PULL_THRESHOLD], [0, 1]);
-  const pullRotation = useTransform(pullY, [0, PULL_THRESHOLD], [0, 180]);
-  const pullOpacity = useTransform(pullY, [0, 40, PULL_THRESHOLD], [0, 0.5, 1]);
+  const cacheHydratedRef = useRef(false);
 
   const fetchReservations = useCallback(async (showToast = false) => {
     if (!driverId) {
       setReservations([]);
-      setAdminNotesMap({});
       setLoading(false);
       setRefreshing(false);
       return;
@@ -146,38 +175,35 @@ const DriverHome = () => {
       const mergedRows = [...(actionableQuery.data || []), ...(completedQuery.data || [])];
       const sortedData = sortByPickupDateTime(mergedRows as Reservation[]);
       setReservations(sortedData);
-      
-      // Fetch admin notes for all reservations
-      if (sortedData.length > 0) {
-        const ids = sortedData.map(r => r.id);
-        const { data: notesData } = await supabase
-          .from('reservation_admin_notes')
-          .select('reservation_id, notes')
-          .in('reservation_id', ids);
-        
-        if (notesData) {
-          const notesObj: Record<string, string> = {};
-          notesData.forEach(n => {
-            if (n.notes) notesObj[n.reservation_id] = n.notes;
-          });
-          setAdminNotesMap(notesObj);
-        }
-      } else {
-        setAdminNotesMap({});
+
+      if (userId && driverId) {
+        writeDriverBootstrapCache({
+          userId,
+          driverId,
+          reservations: sortedData,
+          adminNotesMap: {},
+        });
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
     }
     setLoading(false);
     setRefreshing(false);
-  }, [driverId, t]);
+  }, [driverId, t, userId]);
 
-  const handlePullEnd = async (_: any, info: PanInfo) => {
-    if (info.offset.y > PULL_THRESHOLD && !refreshing) {
-      setRefreshing(true);
-      await fetchReservations(true);
-    }
-  };
+  useEffect(() => {
+    cacheHydratedRef.current = false;
+  }, [driverId, userId]);
+
+  useEffect(() => {
+    if (!driverId || !userId || cacheHydratedRef.current) return;
+    const cached = readDriverBootstrapCache(userId, driverId);
+    if (!cached) return;
+
+    cacheHydratedRef.current = true;
+    setReservations(sortByPickupDateTime(cached.reservations as Reservation[]));
+    setLoading(false);
+  }, [driverId, userId]);
 
   useEffect(() => {
     fetchReservations();
@@ -198,8 +224,6 @@ const DriverHome = () => {
           filter: `driver_id=eq.${driverId}`
         },
         (payload) => {
-          console.log('Realtime update:', payload);
-          
           if (payload.eventType === 'INSERT') {
             const newReservation = payload.new as Reservation;
             if (['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed'].includes(newReservation.status)) {
@@ -295,28 +319,10 @@ const DriverHome = () => {
   };
 
   // Group current month confirmed jobs by day
-  const currentMonthDayCards = useMemo(() => {
-    const grouped: Record<string, { date: Date; jobs: Reservation[] }> = {};
-    
-    confirmedCurrentMonthJobs.forEach(job => {
-      const pickupDate = new Date(job.pickup_date);
-      const key = job.pickup_date; // YYYY-MM-DD format
-      
-      if (!grouped[key]) {
-        grouped[key] = {
-          date: pickupDate,
-          jobs: []
-        };
-      }
-      grouped[key].jobs.push(job);
-    });
+  const currentMonthDayCards = useMemo(() => buildDayGroups(confirmedCurrentMonthJobs), [confirmedCurrentMonthJobs]);
 
-    // Convert to array and sort by date
-    return Object.values(grouped).sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [confirmedCurrentMonthJobs]);
-
-  // Future months reservations (active/confirmed jobs for months after current month)
-  const futureMonthsData = useMemo(() => {
+  // Future reservations grouped by month, then by day
+  const futureMonthDayGroups = useMemo(() => {
     const futureJobs = reservations.filter(r => {
       if (r.status !== 'active' && !(r.status === 'confirmed' && r.driver_confirmed === true)) return false;
       const pickupDate = new Date(r.pickup_date);
@@ -329,7 +335,6 @@ const DriverHome = () => {
       return false;
     });
 
-    // Group by month-year
     const grouped: Record<string, { month: number; year: number; jobs: Reservation[] }> = {};
     
     futureJobs.forEach(job => {
@@ -346,11 +351,15 @@ const DriverHome = () => {
       grouped[key].jobs.push(job);
     });
 
-    // Sort by date and convert to array
     return Object.values(grouped).sort((a, b) => {
       if (a.year !== b.year) return a.year - b.year;
       return a.month - b.month;
-    });
+    }).map((monthGroup) => ({
+      month: monthGroup.month,
+      year: monthGroup.year,
+      totalJobs: monthGroup.jobs.length,
+      days: buildDayGroups(sortByPickupDateTime(monthGroup.jobs)),
+    }));
   }, [reservations, currentMonth, currentYear]);
 
   // Count for header badges
@@ -371,26 +380,13 @@ const DriverHome = () => {
   }, [setHeaderExtras, refreshing, pendingJobs.length, activeJobsCount, fetchReservations]);
 
   return (
-    <div className="h-full min-h-0 flex flex-col overflow-y-auto">
-      <div className="pb-8 px-4 max-w-lg mx-auto flex-1 relative">
-        {/* Pull to refresh indicator */}
-        <motion.div 
-          className="absolute left-1/2 -translate-x-1/2 top-2 flex flex-col items-center gap-1 pointer-events-none z-10"
-          style={{ opacity: pullOpacity }}
-        >
-          <motion.div style={{ rotate: pullRotation }}>
-            <Loader2 className={cn("h-6 w-6 text-primary", refreshing && "animate-spin")} />
-          </motion.div>
-          <span className="text-xs text-muted-foreground">
-            {refreshing ? t('loading') : t('refresh')}
-          </span>
-        </motion.div>
-
+    <div className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto">
+      <div className="pb-8 px-3 sm:px-4 w-full max-w-lg mx-auto flex-1 overflow-x-hidden">
         {/* Hero Section */}
         <motion.section
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 rounded-2xl overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-lg"
+          className="mb-4 w-full rounded-2xl overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-lg"
         >
           <div className="px-5 py-6">
             <div className="flex flex-wrap gap-2">
@@ -420,12 +416,6 @@ const DriverHome = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16 space-y-6"
           >
-            {/* Stats Card even when no jobs */}
-            {driverId && (
-              <div className="mb-6">
-                <DriverStatsCard driverId={driverId} />
-              </div>
-            )}
             <Car className="h-16 w-16 mx-auto text-muted-foreground" />
             <div>
               <p className="text-lg text-muted-foreground">{t('noJobsAssigned')}</p>
@@ -453,11 +443,6 @@ const DriverHome = () => {
           </motion.div>
         ) : (
           <div className="space-y-4 pt-4">
-            {/* Driver Stats Card */}
-            {driverId && (
-              <DriverStatsCard driverId={driverId} />
-            )}
-
             {/* Quick Actions Row */}
             <div className="flex flex-col sm:flex-row gap-2">
               <Button
@@ -517,20 +502,17 @@ const DriverHome = () => {
                 </h3>
                 <div className="space-y-2">
                   {currentMonthDayCards.map((dayData) => {
-                    const firstJob = dayData.jobs.sort((a, b) => a.pickup_time.localeCompare(b.pickup_time))[0];
-                    const activeCount = dayData.jobs.filter(j => j.status === 'active').length;
-                    
                     return (
                       <DayJobCard
-                        key={dayData.date.toISOString()}
+                        key={dayData.pickupDate}
                         dayNumber={dayData.date.getDate()}
                         monthName={getMonthName(dayData.date.getMonth())}
                         dayName={getDayName(dayData.date)}
                         totalJobs={dayData.jobs.length}
-                        activeJobs={activeCount}
-                        firstJobTime={firstJob.pickup_time.slice(0, 5)}
-                        firstJobRoute={`${firstJob.pickup_place_name || firstJob.pickup.slice(0, 15)} → ${firstJob.dropoff_place_name || firstJob.dropoff.slice(0, 15)}`}
-                        onClick={() => navigate(`/driver/jobs/active?date=${dayData.jobs[0].pickup_date}`)}
+                        activeJobs={dayData.activeJobs}
+                        firstJobTime={dayData.firstJob.pickup_time.slice(0, 5)}
+                        firstJobRoute={`${dayData.firstJob.pickup_place_name || dayData.firstJob.pickup.slice(0, 15)} → ${dayData.firstJob.dropoff_place_name || dayData.firstJob.dropoff.slice(0, 15)}`}
+                        onClick={() => navigate(`/driver/jobs/active?date=${dayData.pickupDate}`)}
                       />
                     );
                   })}
@@ -538,36 +520,39 @@ const DriverHome = () => {
               </div>
             )}
 
-            {/* 4. Future Months Section */}
-            {futureMonthsData.length > 0 && (
-              <div className="mt-4 space-y-3">
+            {/* 4. Future Reservations grouped by month/day */}
+            {futureMonthDayGroups.length > 0 && (
+              <div className="mt-4 space-y-4">
                 <h3 className="text-sm font-semibold text-muted-foreground px-1">
                   {t('futureReservations') || 'İleri Tarihli Rezervasyonlar'}
                 </h3>
-                <div className="space-y-2">
-                  {futureMonthsData.map((monthData) => {
-                    const firstJob = monthData.jobs[0];
-                    const firstJobDate = firstJob ? new Date(firstJob.pickup_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : undefined;
-                    const firstJobRoute = firstJob ? `${firstJob.pickup_place_name || firstJob.pickup.slice(0, 15)} → ${firstJob.dropoff_place_name || firstJob.dropoff.slice(0, 15)}` : undefined;
-                    
-                    return (
-                      <FutureMonthCard
-                        key={`${monthData.year}-${monthData.month}`}
-                        monthName={getMonthName(monthData.month)}
-                        year={monthData.year}
-                        count={monthData.jobs.length}
-                        firstJobDate={firstJobDate}
-                        firstJobRoute={firstJobRoute}
-                        onClick={() => navigate(`/driver/jobs/active?month=${monthData.month + 1}&year=${monthData.year}`)}
-                      />
-                    );
-                  })}
-                </div>
+                {futureMonthDayGroups.map((monthData) => (
+                  <div key={`${monthData.year}-${monthData.month}`} className="space-y-2">
+                    <h4 className="text-sm font-semibold text-muted-foreground/90 px-1">
+                      {getMonthName(monthData.month)} {monthData.year} ({monthData.totalJobs})
+                    </h4>
+                    <div className="space-y-2">
+                      {monthData.days.map((dayData) => (
+                        <DayJobCard
+                          key={`${monthData.year}-${monthData.month}-${dayData.pickupDate}`}
+                          dayNumber={dayData.date.getDate()}
+                          monthName={getMonthName(dayData.date.getMonth())}
+                          dayName={getDayName(dayData.date)}
+                          totalJobs={dayData.jobs.length}
+                          activeJobs={dayData.activeJobs}
+                          firstJobTime={dayData.firstJob.pickup_time.slice(0, 5)}
+                          firstJobRoute={`${dayData.firstJob.pickup_place_name || dayData.firstJob.pickup.slice(0, 15)} → ${dayData.firstJob.dropoff_place_name || dayData.firstJob.dropoff.slice(0, 15)}`}
+                          onClick={() => navigate(`/driver/jobs/active?date=${dayData.pickupDate}`)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
             {/* Empty state when no jobs at all */}
-            {pendingJobs.length === 0 && completedJobs.length === 0 && currentMonthDayCards.length === 0 && futureMonthsData.length === 0 && (
+            {pendingJobs.length === 0 && completedJobs.length === 0 && currentMonthDayCards.length === 0 && futureMonthDayGroups.length === 0 && (
               <div className="text-center py-8">
                 <Car className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
                 <p className="text-sm text-muted-foreground">{t('noJobsAssigned')}</p>
