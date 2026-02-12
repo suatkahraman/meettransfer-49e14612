@@ -466,8 +466,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return pickLowestPricePerVehicle(cityRows);
     }
 
-    // ---- KM-BASED PRICING (HIGHEST PRIORITY) ----
-    // When distance_km is provided and km_based_prices are defined for the city+month, use them first.
+    // ---- KM-BASED PRICING (ABSOLUTE HIGHEST PRIORITY - ALWAYS CHECKED FIRST) ----
+    // KM-based price is the #1 rule. If the admin defined a km price for this city+month, it overrides everything.
+    // When distance_km is provided: match exact km range
+    // When distance_km is NOT provided: use the lowest km range (base price) for the city+month
     let kmBasedPrices: any[] = [];
     let usedKmBased = false;
     const distanceKm = typeof distanceKmParam === "number" && Number.isFinite(distanceKmParam) && distanceKmParam > 0
@@ -477,40 +479,53 @@ Deno.serve(async (req: Request): Promise<Response> => {
       ? pickupDateCandidate.getMonth() + 1
       : new Date().getMonth() + 1;
 
-    if (distanceKm && city) {
+    async function fetchKmBasedPrices(filterParams: Record<string, string>): Promise<any[]> {
+      const kmParams = new URLSearchParams({
+        is_active: "eq.true",
+        select: "vehicle_type,price,price_currency,city,month,km_from,km_to",
+        order: "km_from.asc,price.asc",
+        ...filterParams,
+      });
       try {
-        // Direct query for km_based_prices (different schema - no valid_from/valid_to, uses month column)
-        const kmParams = new URLSearchParams({
-          is_active: "eq.true",
-          select: "vehicle_type,price,price_currency,city,month,km_from,km_to",
-          city: `ilike.${city}`,
-          month: `eq.${pickupMonth}`,
-          km_from: `lte.${distanceKm}`,
-          km_to: `gte.${distanceKm}`,
-          order: "price.asc",
+        const kmRes = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/km_based_prices?${kmParams.toString()}`, {
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
         });
-
-        let kmRes: Response;
-        try {
-          kmRes = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/km_based_prices?${kmParams.toString()}`, {
-            headers: {
-              apikey: SUPABASE_KEY,
-              Authorization: `Bearer ${SUPABASE_KEY}`,
-            },
-          });
-        } catch (err) {
-          console.error("KM-based pricing fetch timeout", String(err));
-          kmRes = new Response("[]", { status: 200 });
-        }
-
         if (kmRes.ok) {
           const kmData = await kmRes.json();
-          const kmRows = Array.isArray(kmData) ? kmData : [];
-          if (kmRows.length > 0) {
-            kmBasedPrices = pickLowestPricePerVehicle(kmRows);
-            if (kmBasedPrices.length > 0) {
-              usedKmBased = true;
-            }
+          return Array.isArray(kmData) ? kmData : [];
+        }
+      } catch (err) {
+        console.error("KM-based pricing fetch error", String(err));
+      }
+      return [];
+    }
+
+    if (city) {
+      try {
+        let kmRows: any[] = [];
+
+        if (distanceKm) {
+          // Exact match: find km range that covers this distance
+          kmRows = await fetchKmBasedPrices({
+            city: `ilike.${city}`,
+            month: `eq.${pickupMonth}`,
+            km_from: `lte.${distanceKm}`,
+            km_to: `gte.${distanceKm}`,
+          });
+        }
+
+        // If no exact distance match (or no distance provided), use lowest km range as base price
+        if (kmRows.length === 0) {
+          kmRows = await fetchKmBasedPrices({
+            city: `ilike.${city}`,
+            month: `eq.${pickupMonth}`,
+          });
+        }
+
+        if (kmRows.length > 0) {
+          kmBasedPrices = pickLowestPricePerVehicle(kmRows);
+          if (kmBasedPrices.length > 0) {
+            usedKmBased = true;
           }
         }
       } catch (error) {

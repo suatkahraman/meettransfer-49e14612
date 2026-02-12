@@ -202,7 +202,7 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
 
   const handleSave = async () => {
     const hasAnyPrice = Object.values(formPrices).some(
-      (p) => parseFloat(p) > 0
+      (p) => p && parseFloat(p) > 0
     );
     if (!formCity || !formMonth || !formKmFrom || !formKmTo || !hasAnyPrice) {
       toast.error(
@@ -213,21 +213,33 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
 
     const kmFrom = parseInt(formKmFrom);
     const kmTo = parseInt(formKmTo);
+    
+    if (isNaN(kmFrom) || isNaN(kmTo)) {
+      toast.error("Geçerli KM değerleri girin");
+      return;
+    }
     if (kmTo <= kmFrom) {
       toast.error("KM bitiş değeri başlangıçtan büyük olmalı");
       return;
     }
 
+    const monthNum = parseInt(formMonth);
+    if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+      toast.error("Geçerli bir ay seçin");
+      return;
+    }
+
     setSaving(true);
     try {
+      let savedCount = 0;
       for (const vehicleType of VEHICLE_TYPES) {
-        const priceValue = parseFloat(formPrices[vehicleType.value]) || 0;
+        const priceValue = parseFloat(formPrices[vehicleType.value] || "0") || 0;
 
         // Check if a price already exists for this combination
         const existingPrice = prices.find(
           (p) =>
             p.city === formCity &&
-            p.month === parseInt(formMonth) &&
+            p.month === monthNum &&
             p.km_from === kmFrom &&
             p.km_to === kmTo &&
             p.vehicle_type === vehicleType.value
@@ -236,7 +248,7 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
         if (priceValue > 0) {
           const priceData = {
             city: formCity,
-            month: parseInt(formMonth),
+            month: monthNum,
             km_from: kmFrom,
             km_to: kmTo,
             vehicle_type: vehicleType.value,
@@ -250,29 +262,56 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
               .from("km_based_prices")
               .update({ ...priceData, updated_at: new Date().toISOString() })
               .eq("id", existingPrice.id);
-            if (error) throw error;
+            if (error) {
+              console.error("Update error:", error);
+              throw new Error(`Güncelleme hatası: ${error.message}`);
+            }
+            savedCount++;
           } else {
             const { error } = await supabase
               .from("km_based_prices")
               .insert([priceData]);
-            if (error && error.code !== "23505") throw error;
+            if (error) {
+              // Duplicate key is OK (upsert behavior)
+              if (error.code === "23505") {
+                // Try update instead
+                const { error: updateErr } = await supabase
+                  .from("km_based_prices")
+                  .update({ price: priceValue, price_currency: formCurrency, is_active: true, updated_at: new Date().toISOString() })
+                  .eq("city", formCity)
+                  .eq("month", monthNum)
+                  .eq("km_from", kmFrom)
+                  .eq("km_to", kmTo)
+                  .eq("vehicle_type", vehicleType.value);
+                if (updateErr) {
+                  console.error("Upsert fallback error:", updateErr);
+                  throw new Error(`Kayıt hatası: ${updateErr.message}`);
+                }
+              } else {
+                console.error("Insert error:", error);
+                throw new Error(`Ekleme hatası: ${error.message}`);
+              }
+            }
+            savedCount++;
           }
         } else if (existingPrice) {
           const { error } = await supabase
             .from("km_based_prices")
             .delete()
             .eq("id", existingPrice.id);
-          if (error) throw error;
+          if (error) {
+            console.error("Delete error:", error);
+          }
         }
       }
 
-      toast.success("KM bazlı fiyatlar kaydedildi");
+      toast.success(`${savedCount} araç fiyatı kaydedildi (${formCity}, ${kmFrom}-${kmTo} km)`);
       setIsDialogOpen(false);
       resetForm();
       fetchPrices();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving km-based prices:", error);
-      toast.error("Fiyatlar kaydedilirken hata oluştu");
+      toast.error(error?.message || "Fiyatlar kaydedilirken hata oluştu");
     } finally {
       setSaving(false);
     }
@@ -355,7 +394,7 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
 
   const handleBasePriceSave = async () => {
     const hasAnyPrice = Object.values(basePriceValues).some(
-      (p) => parseFloat(p) > 0
+      (p) => p && parseFloat(p) > 0
     );
     if (!basePriceCity || !basePriceMonth || !hasAnyPrice) {
       toast.error(
@@ -367,10 +406,11 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
     setBasePriceSaving(true);
     try {
       const monthNum = parseInt(basePriceMonth);
+      let savedCount = 0;
 
       for (const vehicleType of VEHICLE_TYPES) {
         const priceValue =
-          parseFloat(basePriceValues[vehicleType.value]) || 0;
+          parseFloat(basePriceValues[vehicleType.value] || "0") || 0;
 
         const existingPrice = prices.find(
           (p) =>
@@ -398,28 +438,48 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
               .from("km_based_prices")
               .update({ ...priceData, updated_at: new Date().toISOString() })
               .eq("id", existingPrice.id);
-            if (error) throw error;
+            if (error) {
+              console.error("Base price update error:", error);
+              throw new Error(`Güncelleme hatası: ${error.message}`);
+            }
+            savedCount++;
           } else {
             const { error } = await supabase
               .from("km_based_prices")
               .insert([priceData]);
-            if (error && error.code !== "23505") throw error;
+            if (error) {
+              if (error.code === "23505") {
+                // Duplicate: update instead
+                const { error: updateErr } = await supabase
+                  .from("km_based_prices")
+                  .update({ price: priceValue, price_currency: basePriceCurrency, is_active: true, updated_at: new Date().toISOString() })
+                  .eq("city", basePriceCity)
+                  .eq("month", monthNum)
+                  .eq("km_from", 1)
+                  .eq("km_to", 50)
+                  .eq("vehicle_type", vehicleType.value);
+                if (updateErr) throw new Error(`Kayıt hatası: ${updateErr.message}`);
+              } else {
+                console.error("Base price insert error:", error);
+                throw new Error(`Ekleme hatası: ${error.message}`);
+              }
+            }
+            savedCount++;
           }
         } else if (existingPrice) {
-          const { error } = await supabase
+          await supabase
             .from("km_based_prices")
             .delete()
             .eq("id", existingPrice.id);
-          if (error) throw error;
         }
       }
 
-      toast.success("Sabit baz fiyat (1-50 km) kaydedildi");
+      toast.success(`Baz fiyat kaydedildi (${basePriceCity}, 1-50 km, ${savedCount} araç)`);
       setIsBasePriceDialogOpen(false);
       fetchPrices();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving base price:", error);
-      toast.error("Baz fiyat kaydedilirken hata oluştu");
+      toast.error(error?.message || "Baz fiyat kaydedilirken hata oluştu");
     } finally {
       setBasePriceSaving(false);
     }
@@ -498,7 +558,7 @@ const KmBasedPricesManager = ({ cities }: KmBasedPricesManagerProps) => {
             KM Bazlı Fiyatlandırma
           </CardTitle>
           <CardDescription className="mt-1">
-            Şehir, ay ve km aralığına göre fiyat belirleyin. 1-50 km sabit baz fiyat olarak kullanılır.
+            Şehir, ay ve km aralığına göre fiyat belirleyin. KM fiyatı tüm fiyatlandırma kurallarında en yüksek önceliğe sahiptir.
           </CardDescription>
         </div>
         <div className="flex flex-wrap gap-2">

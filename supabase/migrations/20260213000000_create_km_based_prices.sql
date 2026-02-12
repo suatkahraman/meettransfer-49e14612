@@ -1,13 +1,14 @@
 -- Create km_based_prices table for regional KM-based pricing
 -- Admin can define prices based on city, month, km range, and vehicle type
--- The 1-50 km range serves as the fixed base price
+-- Admin has full freedom to set any km range (no artificial limits)
+-- This table's prices have HIGHEST priority over all other price tables
 
 CREATE TABLE IF NOT EXISTS public.km_based_prices (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   city text NOT NULL,
   month integer NOT NULL CHECK (month >= 1 AND month <= 12),
-  km_from integer NOT NULL CHECK (km_from >= 0),
-  km_to integer NOT NULL CHECK (km_to > 0),
+  km_from integer NOT NULL DEFAULT 0,
+  km_to integer NOT NULL DEFAULT 50,
   vehicle_type text NOT NULL DEFAULT 'mercedes-vito',
   price numeric NOT NULL CHECK (price >= 0),
   price_currency text NOT NULL DEFAULT 'EUR',

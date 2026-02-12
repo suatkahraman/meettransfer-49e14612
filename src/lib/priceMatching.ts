@@ -773,30 +773,58 @@ export async function matchPrice(
     
     console.log('🚗 Transfer info:', { airport, city, district });
 
-    // ---- KM-BASED PRICING (HIGHEST PRIORITY) ----
-    if (city && distanceKm && distanceKm > 0) {
+    // ---- KM-BASED PRICING (ABSOLUTE HIGHEST PRIORITY - ALWAYS CHECKED FIRST) ----
+    if (city) {
       const currentMonth = new Date().getMonth() + 1;
-      const roundedKm = Math.round(distanceKm);
       
-      const { data: kmMatch, error: kmError } = await supabase
+      // If distance is provided, match exact km range
+      if (distanceKm && distanceKm > 0) {
+        const roundedKm = Math.round(distanceKm);
+        const { data: kmMatch, error: kmError } = await supabase
+          .from('km_based_prices')
+          .select('*')
+          .ilike('city', city)
+          .eq('month', currentMonth)
+          .lte('km_from', roundedKm)
+          .gte('km_to', roundedKm)
+          .eq('vehicle_type', vehicleType)
+          .eq('is_active', true)
+          .order('km_from', { ascending: true })
+          .limit(1);
+        
+        if (!kmError && kmMatch && kmMatch.length > 0) {
+          console.log('✅ KM-based price found (exact distance):', kmMatch[0]);
+          return {
+            found: true,
+            price: kmMatch[0].price,
+            currency: kmMatch[0].price_currency,
+            matchedCity: kmMatch[0].city,
+            matchedDistrict: `${kmMatch[0].km_from}-${kmMatch[0].km_to} km`,
+            confidence: 'high',
+            matchType: 'exact',
+          };
+        }
+      }
+
+      // Even without distance: if ANY km-based price exists for this city+month, use lowest range as base
+      const { data: kmBase, error: kmBaseError } = await supabase
         .from('km_based_prices')
         .select('*')
         .ilike('city', city)
         .eq('month', currentMonth)
-        .lte('km_from', roundedKm)
-        .gte('km_to', roundedKm)
         .eq('vehicle_type', vehicleType)
         .eq('is_active', true)
+        .order('km_from', { ascending: true })
         .limit(1);
       
-      if (!kmError && kmMatch && kmMatch.length > 0) {
-        console.log('✅ KM-based price found:', kmMatch[0]);
+      if (!kmBaseError && kmBase && kmBase.length > 0) {
+        console.log('✅ KM-based base price found:', kmBase[0]);
         return {
           found: true,
-          price: kmMatch[0].price,
-          currency: kmMatch[0].price_currency,
-          matchedCity: kmMatch[0].city,
-          matchedDistrict: `${kmMatch[0].km_from}-${kmMatch[0].km_to} km`,
+          price: kmBase[0].price,
+          currency: kmBase[0].price_currency,
+          matchedCity: kmBase[0].city,
+          matchedDistrict: `${kmBase[0].km_from}-${kmBase[0].km_to} km (baz)`,
           confidence: 'high',
           matchType: 'exact',
         };

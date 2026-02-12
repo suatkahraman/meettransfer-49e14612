@@ -372,23 +372,25 @@ Deno.serve(async (req) => {
         !!fallbackSharedCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(fallbackSharedCity)
       ));
 
-    // ---- KM-BASED PRICING (highest priority when available) ----
-    // Use pickup_date month + city to check km_based_prices (base 1-50 km)
+    // ---- KM-BASED PRICING (ABSOLUTE HIGHEST PRIORITY - ALWAYS CHECKED FIRST) ----
+    // If admin defined a km-based price for this city+month, it overrides everything.
+    // Use the lowest km range (base price) since we don't have exact distance here.
     let bestPrice: Record<string, unknown> | null = null;
     let priceSource = "region_prices";
 
-    if (resolvedCity && reservation.pickup_date) {
+    if (resolvedCity) {
       try {
-        const pickupMonth = new Date(reservation.pickup_date).getMonth() + 1;
-        // Try base price (1-50 km) from km_based_prices as a city+month pricing
+        const pickupMonth = reservation.pickup_date
+          ? new Date(reservation.pickup_date).getMonth() + 1
+          : new Date().getMonth() + 1;
+        // Fetch ANY km_based_price for this city+month+vehicle, ordered by km_from asc (lowest range first)
         const kmPrices = await supabaseQuery("km_based_prices", {
           city: `ilike.${resolvedCity}`,
           month: `eq.${pickupMonth}`,
-          km_from: "eq.1",
-          km_to: "eq.50",
           vehicle_type: `eq.${reservation.vehicle_type}`,
           is_active: "eq.true",
           select: "*",
+          order: "km_from.asc",
           limit: "1",
         });
         if (kmPrices?.[0]) {
