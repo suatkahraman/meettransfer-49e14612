@@ -7,10 +7,9 @@ import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { readDriverBootstrapCache, writeDriverBootstrapCache } from '@/lib/driverBootstrapCache';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, History } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion } from 'framer-motion';
 import JobCategoryCard from '@/components/driver/JobCategoryCard';
 import DayJobCard from '@/components/driver/DayJobCard';
 import type { DriverHeaderExtras } from '@/components/driver/DriverLayout';
@@ -48,7 +47,6 @@ interface Reservation {
   } | null;
 }
 
-const PULL_THRESHOLD = 80;
 const LIST_RESERVATION_SELECT = `
   id,
   customer_id,
@@ -134,21 +132,14 @@ const DriverHome = () => {
   const context = useOutletContext<DriverHomeContext>();
   const setHeaderExtras = context?.setHeaderExtras ?? (() => {});
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { playSound } = useNotificationSound();
   const cacheHydratedRef = useRef(false);
-  
-  const pullY = useMotionValue(0);
-  const pullProgress = useTransform(pullY, [0, PULL_THRESHOLD], [0, 1]);
-  const pullRotation = useTransform(pullY, [0, PULL_THRESHOLD], [0, 180]);
-  const pullOpacity = useTransform(pullY, [0, 40, PULL_THRESHOLD], [0, 0.5, 1]);
 
   const fetchReservations = useCallback(async (showToast = false) => {
     if (!driverId) {
       setReservations([]);
-      setAdminNotesMap({});
       setLoading(false);
       setRefreshing(false);
       return;
@@ -184,7 +175,6 @@ const DriverHome = () => {
       const mergedRows = [...(actionableQuery.data || []), ...(completedQuery.data || [])];
       const sortedData = sortByPickupDateTime(mergedRows as Reservation[]);
       setReservations(sortedData);
-      setAdminNotesMap({});
 
       if (userId && driverId) {
         writeDriverBootstrapCache({
@@ -193,32 +183,6 @@ const DriverHome = () => {
           reservations: sortedData,
           adminNotesMap: {},
         });
-      }
-
-      // Fetch admin notes in background to keep first render snappy.
-      if (sortedData.length > 0) {
-        const ids = sortedData.map((r) => r.id);
-        void supabase
-          .from('reservation_admin_notes')
-          .select('reservation_id, notes')
-          .in('reservation_id', ids)
-          .then(({ data: notesData }) => {
-            if (!notesData) return;
-            const notesObj: Record<string, string> = {};
-            notesData.forEach((n) => {
-              if (n.notes) notesObj[n.reservation_id] = n.notes;
-            });
-            setAdminNotesMap(notesObj);
-
-            if (userId && driverId) {
-              writeDriverBootstrapCache({
-                userId,
-                driverId,
-                reservations: sortedData,
-                adminNotesMap: notesObj,
-              });
-            }
-          });
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
@@ -238,16 +202,8 @@ const DriverHome = () => {
 
     cacheHydratedRef.current = true;
     setReservations(sortByPickupDateTime(cached.reservations as Reservation[]));
-    setAdminNotesMap(cached.adminNotesMap);
     setLoading(false);
   }, [driverId, userId]);
-
-  const handlePullEnd = async (_: any, info: PanInfo) => {
-    if (info.offset.y > PULL_THRESHOLD && !refreshing) {
-      setRefreshing(true);
-      await fetchReservations(true);
-    }
-  };
 
   useEffect(() => {
     fetchReservations();
@@ -268,8 +224,6 @@ const DriverHome = () => {
           filter: `driver_id=eq.${driverId}`
         },
         (payload) => {
-          console.log('Realtime update:', payload);
-          
           if (payload.eventType === 'INSERT') {
             const newReservation = payload.new as Reservation;
             if (['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed'].includes(newReservation.status)) {
@@ -426,26 +380,13 @@ const DriverHome = () => {
   }, [setHeaderExtras, refreshing, pendingJobs.length, activeJobsCount, fetchReservations]);
 
   return (
-    <div className="h-full min-h-0 flex flex-col overflow-y-auto">
-      <div className="pb-8 px-4 max-w-lg mx-auto flex-1 relative">
-        {/* Pull to refresh indicator */}
-        <motion.div 
-          className="absolute left-1/2 -translate-x-1/2 top-2 flex flex-col items-center gap-1 pointer-events-none z-10"
-          style={{ opacity: pullOpacity }}
-        >
-          <motion.div style={{ rotate: pullRotation }}>
-            <Loader2 className={cn("h-6 w-6 text-primary", refreshing && "animate-spin")} />
-          </motion.div>
-          <span className="text-xs text-muted-foreground">
-            {refreshing ? t('loading') : t('refresh')}
-          </span>
-        </motion.div>
-
+    <div className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto">
+      <div className="pb-8 px-3 sm:px-4 w-full max-w-lg mx-auto flex-1 overflow-x-hidden">
         {/* Hero Section */}
         <motion.section
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-4 rounded-2xl overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-lg"
+          className="mb-4 w-full rounded-2xl overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-lg"
         >
           <div className="px-5 py-6">
             <div className="flex flex-wrap gap-2">

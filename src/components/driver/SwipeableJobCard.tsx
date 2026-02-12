@@ -177,7 +177,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   const canSwipeLeft = !isCancelledOrInactive && reservation.status === 'active' && onComplete && completionValidation.canComplete;
 
   return (
-    <div className="relative overflow-hidden rounded-xl">
+    <div className="relative w-full max-w-full overflow-hidden rounded-xl">
       {/* Left background (Accept) */}
       {canSwipeRight && (
         <motion.div 
@@ -242,7 +242,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
           {isCancelledOrInactive && reservation.status !== 'completed' && (
             <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-transparent pointer-events-none z-10" />
           )}
-          <CardContent className={cn("p-4 space-y-3", isCancelledOrInactive && reservation.status !== 'completed' && "relative")}>
+          <CardContent className={cn("p-4 space-y-3 overflow-x-hidden break-words", isCancelledOrInactive && reservation.status !== 'completed' && "relative")}>
             {/* Header: Date, Time & Status */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
               <div className="space-y-1 min-w-0">

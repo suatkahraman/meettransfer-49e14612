@@ -103,6 +103,7 @@ const DriverJobList = () => {
   const [isPulling, setIsPulling] = useState(false);
   const touchStartY = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
   const driverMetaRef = useRef<{ name: string; plateNumber: string; vehicleModel: string } | null>(null);
   const pendingPageRef = useRef(0);
   const PULL_THRESHOLD = 80;
@@ -376,6 +377,36 @@ const DriverJobList = () => {
     };
   }, [driverId, jobType, getStatusFilter, filterDate, filterMonth, filterYear]);
 
+  const loadNextPendingPage = useCallback(() => {
+    if (jobType !== 'pending') return;
+    if (!hasMorePending || loadingMorePending || refreshing || loading) return;
+    setLoadingMorePending(true);
+    void fetchReservations({ append: true });
+  }, [jobType, hasMorePending, loadingMorePending, refreshing, loading, fetchReservations]);
+
+  useEffect(() => {
+    if (jobType !== 'pending' || !hasMorePending) return;
+    const rootElement = containerRef.current;
+    const sentinel = loadMoreSentinelRef.current;
+    if (!rootElement || !sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadNextPendingPage();
+        }
+      },
+      {
+        root: rootElement,
+        rootMargin: '220px 0px 220px 0px',
+        threshold: 0.01,
+      }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [jobType, hasMorePending, loadNextPendingPage, reservations.length]);
+
   const getDriverMeta = useCallback(async () => {
     if (driverMetaRef.current) return driverMetaRef.current;
     if (!driverId) return null;
@@ -601,7 +632,7 @@ const DriverJobList = () => {
   return (
     <div 
       ref={containerRef}
-      className="h-full min-h-0 flex flex-col overflow-auto"
+      className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -650,7 +681,7 @@ const DriverJobList = () => {
       </AnimatePresence>
 
       {/* Content */}
-      <main className="px-4 py-4 max-w-lg mx-auto w-full">
+      <main className="px-3 sm:px-4 py-4 max-w-lg mx-auto w-full overflow-x-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -686,26 +717,12 @@ const DriverJobList = () => {
               ))}
 
               {jobType === 'pending' && hasMorePending && (
-                <div className="pt-1">
-                  <Button
-                    variant="outline"
-                    className="w-full h-11 gap-2"
-                    onClick={() => {
-                      if (loadingMorePending || refreshing) return;
-                      setLoadingMorePending(true);
-                      void fetchReservations({ append: true });
-                    }}
-                    disabled={loadingMorePending || refreshing}
-                  >
-                    {loadingMorePending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        {t('loading') || 'Yükleniyor...'}
-                      </>
-                    ) : (
-                      t('loadMore') || 'Daha Fazla Yükle'
-                    )}
-                  </Button>
+                <div ref={loadMoreSentinelRef} className="h-2 w-full" />
+              )}
+              {jobType === 'pending' && loadingMorePending && (
+                <div className="flex items-center justify-center py-2 text-muted-foreground text-sm gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{t('loading') || 'Yükleniyor...'}</span>
                 </div>
               )}
             </div>
