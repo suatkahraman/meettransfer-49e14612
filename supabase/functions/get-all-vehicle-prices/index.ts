@@ -175,6 +175,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const body = await req.json();
     const { pickup, dropoff, customerCurrency, pickup_place_id: pickupPlaceId, dropoff_place_id: dropoffPlaceId } = body;
+    const distanceKmParam = body.distance_km ?? body.distanceKm ?? null;
     const pickupDateParam = body.pickup_date ?? body.pickupDate;
     const pickupSanitized = sanitizeSearchQuery(pickup || "");
     const dropoffSanitized = sanitizeSearchQuery(dropoff || "");
@@ -465,6 +466,58 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return pickLowestPricePerVehicle(cityRows);
     }
 
+    // ---- KM-BASED PRICING (HIGHEST PRIORITY) ----
+    // When distance_km is provided and km_based_prices are defined for the city+month, use them first.
+    let kmBasedPrices: any[] = [];
+    let usedKmBased = false;
+    const distanceKm = typeof distanceKmParam === "number" && Number.isFinite(distanceKmParam) && distanceKmParam > 0
+      ? Math.round(distanceKmParam)
+      : null;
+    const pickupMonth = pickupDateCandidate && !Number.isNaN(pickupDateCandidate.getTime())
+      ? pickupDateCandidate.getMonth() + 1
+      : new Date().getMonth() + 1;
+
+    if (distanceKm && city) {
+      try {
+        // Direct query for km_based_prices (different schema - no valid_from/valid_to, uses month column)
+        const kmParams = new URLSearchParams({
+          is_active: "eq.true",
+          select: "vehicle_type,price,price_currency,city,month,km_from,km_to",
+          city: `ilike.${city}`,
+          month: `eq.${pickupMonth}`,
+          km_from: `lte.${distanceKm}`,
+          km_to: `gte.${distanceKm}`,
+          order: "price.asc",
+        });
+
+        let kmRes: Response;
+        try {
+          kmRes = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/km_based_prices?${kmParams.toString()}`, {
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: `Bearer ${SUPABASE_KEY}`,
+            },
+          });
+        } catch (err) {
+          console.error("KM-based pricing fetch timeout", String(err));
+          kmRes = new Response("[]", { status: 200 });
+        }
+
+        if (kmRes.ok) {
+          const kmData = await kmRes.json();
+          const kmRows = Array.isArray(kmData) ? kmData : [];
+          if (kmRows.length > 0) {
+            kmBasedPrices = pickLowestPricePerVehicle(kmRows);
+            if (kmBasedPrices.length > 0) {
+              usedKmBased = true;
+            }
+          }
+        }
+      } catch (error) {
+        console.error("KM-based pricing query failed", String(error));
+      }
+    }
+
     // ---- PLACE ID MATCHING (preferred when both IDs provided - Google Place from Autocomplete) ----
     let intercityPrices: any[] = [];
     let regionPrices: any[] = [];
@@ -475,8 +528,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // Şehir içi adresten adrese kuralı:
     // hedef semtin havalimanı fiyatını baz alıp %10 daha ucuz hesapla.
+    // SKIP all other lookups if km_based_prices already matched
     const intracityReferenceCity = intracityCity || fallbackSharedCity;
-    if (isIntracityAddressTransfer && intracityReferenceCity) {
+    if (!usedKmBased && isIntracityAddressTransfer && intracityReferenceCity) {
       intracityReferencePrices = await fetchIntracityAirportReferencePrices(
         intracityReferenceCity,
         pickupDistrict,
@@ -487,7 +541,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
 
-    if (!usedIntracityAirportDiscount && !isIntracityAddressTransfer && pickupPlaceId && dropoffPlaceId) {
+    if (!usedKmBased && !usedIntracityAirportDiscount && !isIntracityAddressTransfer && pickupPlaceId && dropoffPlaceId) {
       try {
         const res = await fetchWithTimeout(
           `${SUPABASE_URL}/rest/v1/intercity_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&or=(and(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)}),and(pickup_place_id.eq.${encodeURIComponent(dropoffPlaceId)},dropoff_place_id.eq.${encodeURIComponent(pickupPlaceId)}))&order=updated_at.desc`,
@@ -525,7 +579,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // ---- INTERCITY / INTRA-CITY PRICE MATCHING (text-based, when no Place ID match) ----
-    if (!usedIntracityAirportDiscount && !usedPlaceId && isIntercityTransfer && !airport) {
+    if (!usedKmBased && !usedIntracityAirportDiscount && !usedPlaceId && isIntercityTransfer && !airport) {
       const fromCity = resolvedPickupCity || city!;
       const toCity = resolvedDropoffCity || city!;
       const sameRouteCity = isSameCity(fromCity, toCity) || sameResolvedCity;
@@ -606,7 +660,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // ---- REGION PRICES MATCHING (airport transfers + fallback, skip when wrong intercity fallback) ----
-    if (!usedIntracityAirportDiscount && !usedPlaceId && !usedIntercity && !skipRegionFallback) {
+    if (!usedKmBased && !usedIntracityAirportDiscount && !usedPlaceId && !usedIntercity && !skipRegionFallback) {
       // Strategy R1: District + City + Airport (most specific). Case-insensitive for district/city.
       if (district && city && airport) {
         regionPrices = await queryTable("region_prices", {
@@ -660,7 +714,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
       : [];
 
     // Use whichever source found prices (validation: specific route+month price is used, no generic override)
-    const matchedPrices = usedIntracityAirportDiscount
+    // PRIORITY ORDER: km_based_prices > intracity_discount > intercity_prices > region_prices
+    const matchedPrices = usedKmBased
+      ? kmBasedPrices
+      : usedIntracityAirportDiscount
       ? intracityDiscountedPrices
       : usedIntercity
       ? intercityPrices
@@ -718,11 +775,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
       matchedAirport: airport,
       isDubai,
       region,
-      priceSource: usedIntracityAirportDiscount
+      priceSource: usedKmBased
+        ? "km_based_prices"
+        : usedIntracityAirportDiscount
         ? "intracity_airport_discount"
         : usedIntercity
         ? "intercity_prices"
         : "region_prices",
+      kmBasedPriceUsed: usedKmBased,
+      distanceKm: distanceKm || null,
       intracityDiscountApplied: usedIntracityAirportDiscount,
       message: hasAvailablePrice ? null : "Fiyat Bulunamadı",
     }), { headers: corsHeaders });

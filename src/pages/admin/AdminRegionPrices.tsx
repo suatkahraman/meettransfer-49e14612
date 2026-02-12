@@ -27,7 +27,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays, Ruler } from 'lucide-react';
 
 function priceCoversMonth(price: { valid_from?: string | null; valid_to?: string | null }, month: number, year: number): boolean {
   if (!price.valid_from || !price.valid_to) return true;
@@ -44,6 +44,7 @@ function priceCoversMonth(price: { valid_from?: string | null; valid_to?: string
 import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
 import MonthlyPriceUpdateDialog from "@/components/admin/MonthlyPriceUpdateDialog";
 import SeasonalPricesManager from "@/components/admin/SeasonalPricesManager";
+import KmBasedPricesManager from "@/components/admin/KmBasedPricesManager";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MoneyInput } from '@/components/ui/money-input';
@@ -177,7 +178,7 @@ interface IntercityPrice {
 
 const AdminRegionPrices = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'airport' | 'intercity' | 'seasonal'>('airport');
+  const [activeTab, setActiveTab] = useState<'airport' | 'intercity' | 'seasonal' | 'km-based'>('airport');
   
   // Airport transfer prices state
   const [prices, setPrices] = useState<RegionPrice[]>([]);
@@ -794,8 +795,8 @@ const AdminRegionPrices = () => {
         </Card>
 
         {/* Tabs for Airport, Intercity, and Seasonal */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'airport' | 'intercity' | 'seasonal')}>
-          <TabsList className="grid w-full grid-cols-3 min-w-0 sm:grid-cols-3 h-auto flex-wrap sm:flex-nowrap gap-1 p-1">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'airport' | 'intercity' | 'seasonal' | 'km-based')}>
+          <TabsList className="grid w-full grid-cols-4 min-w-0 sm:grid-cols-4 h-auto flex-wrap sm:flex-nowrap gap-1 p-1">
             <TabsTrigger value="airport" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
               <MapPin className="h-4 w-4 shrink-0" />
               <span className="truncate">Havalimanı</span>
@@ -803,6 +804,10 @@ const AdminRegionPrices = () => {
             <TabsTrigger value="intercity" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
               <ArrowRightLeft className="h-4 w-4 shrink-0" />
               <span className="truncate">Şehirler Arası</span>
+            </TabsTrigger>
+            <TabsTrigger value="km-based" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
+              <Ruler className="h-4 w-4 shrink-0" />
+              <span className="truncate">KM Bazlı</span>
             </TabsTrigger>
             <TabsTrigger value="seasonal" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm py-2 px-2 sm:px-4">
               <CalendarDays className="h-4 w-4 shrink-0" />
@@ -1447,6 +1452,11 @@ const AdminRegionPrices = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* KM-Based Prices Tab */}
+          <TabsContent value="km-based">
+            <KmBasedPricesManager cities={Object.keys(CITIES_DATA)} />
           </TabsContent>
 
           {/* Seasonal Prices Tab */}
