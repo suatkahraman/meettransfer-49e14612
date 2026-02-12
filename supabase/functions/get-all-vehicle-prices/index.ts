@@ -66,6 +66,7 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 ]);
 
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
+const EDGE_FETCH_TIMEOUT_MS = 8000;
 
 const ISTANBUL_DISTRICTS = new Set([
   "taksim", "sultanahmet", "kadikoy", "besiktas", "sisli", "levent", "atasehir", "bakirkoy",
@@ -175,9 +176,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const s = pickupSanitized + " " + dropoffSanitized;
 
     // Strict monthly/seasonal matching: use pickup date to select correct price (valid_from/valid_to)
-    const pickupDateStr =
+    const pickupDateCandidate =
       pickupDateParam && (typeof pickupDateParam === "string" || typeof pickupDateParam === "number")
-        ? new Date(pickupDateParam).toISOString().split("T")[0]
+        ? new Date(pickupDateParam)
+        : null;
+    const pickupDateStr =
+      pickupDateCandidate && !Number.isNaN(pickupDateCandidate.getTime())
+        ? pickupDateCandidate.toISOString().split("T")[0]
         : null;
 
     // Detect region
@@ -293,6 +298,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }), { headers: corsHeaders });
     }
 
+    async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), EDGE_FETCH_TIMEOUT_MS);
+      try {
+        return await fetch(url, { ...init, signal: controller.signal });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
     // Helper to query any table with specific filters (includes valid_from, valid_to, place_ids for Place ID matching)
     async function queryTable(
       table: string,
@@ -308,12 +323,24 @@ Deno.serve(async (req: Request): Promise<Response> => {
         ...filters,
       });
 
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params.toString()}`, {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-      });
+      let res: Response;
+      try {
+        res = await fetchWithTimeout(`${SUPABASE_URL}/rest/v1/${table}?${params.toString()}`, {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${SUPABASE_KEY}`,
+          },
+        });
+      } catch (error) {
+        console.error(`Query timeout/error for ${table}`, { filters, error: String(error) });
+        return [];
+      }
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        console.error(`Query failed for ${table}`, { status: res.status, filters, errText });
+        return [];
+      }
 
       const contentType = res.headers.get("content-type");
       if (!contentType?.includes("application/json")) {
@@ -321,7 +348,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
         return [];
       }
 
-      return res.json();
+      try {
+        const payload = await res.json();
+        return Array.isArray(payload) ? payload : [];
+      } catch (error) {
+        console.error(`Invalid JSON response for ${table}`, String(error));
+        return [];
+      }
     }
 
     // Strict monthly/seasonal: pick the row that applies to pickup_date. If a specific price exists
@@ -440,29 +473,38 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     if (!usedIntracityAirportDiscount && !isIntracityAddressTransfer && pickupPlaceId && dropoffPlaceId) {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/intercity_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&or=(and(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)}),and(pickup_place_id.eq.${encodeURIComponent(dropoffPlaceId)},dropoff_place_id.eq.${encodeURIComponent(pickupPlaceId)}))&order=updated_at.desc`,
-        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.length > 0) {
-          intercityPrices = data;
-          usedIntercity = true;
-          usedPlaceId = true;
-        }
-      }
-      if (!usedPlaceId) {
-        const res2 = await fetch(
-          `${SUPABASE_URL}/rest/v1/region_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&and=(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)})&order=updated_at.desc`,
+      try {
+        const res = await fetchWithTimeout(
+          `${SUPABASE_URL}/rest/v1/intercity_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&or=(and(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)}),and(pickup_place_id.eq.${encodeURIComponent(dropoffPlaceId)},dropoff_place_id.eq.${encodeURIComponent(pickupPlaceId)}))&order=updated_at.desc`,
           { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
         );
-        if (res2.ok) {
-          const data2 = await res2.json();
-          if (data2?.length > 0) {
-            regionPrices = data2;
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.length > 0) {
+            intercityPrices = data;
+            usedIntercity = true;
             usedPlaceId = true;
           }
+        }
+      } catch (error) {
+        console.error("Place ID intercity query failed", String(error));
+      }
+
+      if (!usedPlaceId) {
+        try {
+          const res2 = await fetchWithTimeout(
+            `${SUPABASE_URL}/rest/v1/region_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&and=(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)})&order=updated_at.desc`,
+            { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+          );
+          if (res2.ok) {
+            const data2 = await res2.json();
+            if (data2?.length > 0) {
+              regionPrices = data2;
+              usedPlaceId = true;
+            }
+          }
+        } catch (error) {
+          console.error("Place ID region query failed", String(error));
         }
       }
     }
@@ -612,12 +654,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
         if (match) break;
       }
       
-      if (match) {
+      const normalizedMatchPrice = Number(match?.price);
+
+      if (match && Number.isFinite(normalizedMatchPrice) && normalizedMatchPrice > 0) {
         prices.push({
           vehicleType: vt.value,
           vehicleLabel: vt.label,
-          price: Math.ceil(match.price),
-          currency: match.price_currency,
+          price: Math.ceil(normalizedMatchPrice),
+          currency: match.price_currency || customerCurrency || "EUR",
           passengers: vt.passengers,
           luggage: vt.luggage,
           available: true
@@ -635,9 +679,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
     }
 
+    const hasAvailablePrice = prices.some(
+      (priceRow) =>
+        priceRow.available &&
+        typeof priceRow.price === "number" &&
+        Number.isFinite(priceRow.price),
+    );
+
     return new Response(JSON.stringify({
       prices,
-      matched: prices.some(p => p.available),
+      matched: hasAvailablePrice,
       matchedCity: city,
       matchedPickupDistrict: pickupDistrict,
       matchedDropoffDistrict: dropoffDistrict,
@@ -651,6 +702,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         ? "intercity_prices"
         : "region_prices",
       intracityDiscountApplied: usedIntracityAirportDiscount,
+      message: hasAvailablePrice ? null : "Fiyat Bulunamadı",
     }), { headers: corsHeaders });
 
   } catch (error) {
