@@ -59,7 +59,11 @@ const CITIES_DATA = {
   },
   'Antalya': {
     airports: ['Antalya Airport (AYT)'],
-    districts: ['Kaleici', 'Konyaalti', 'Lara', 'Belek', 'Side', 'Alanya', 'Kemer', 'Kas', 'Kalkan', 'Fethiye', 'Manavgat', 'Serik', 'Kundu', 'Beldibi', 'Goynuk', 'Tekirova', 'Cirali', 'Olympos', 'Kadriye', 'Bogazkent', 'Kumkoy', 'Colakli', 'Evrenseki', 'Titreyengol', 'Mahmutlar', 'Okurcalar', 'Avsallar', 'Konakli', 'Incekum', 'Demre', 'Finike', 'Kumluca', 'Elmali', 'Akseki', 'Gazipasa', 'Korkuteli']
+    districts: ['Kaleici', 'Konyaalti', 'Lara', 'Belek', 'Side', 'Kemer', 'Kas', 'Kalkan', 'Fethiye', 'Manavgat', 'Serik', 'Kundu', 'Beldibi', 'Goynuk', 'Tekirova', 'Cirali', 'Olympos', 'Kadriye', 'Bogazkent', 'Kumkoy', 'Colakli', 'Evrenseki', 'Titreyengol', 'Demre', 'Finike', 'Kumluca', 'Elmali', 'Akseki', 'Korkuteli']
+  },
+  'Alanya': {
+    airports: ['Antalya Airport (AYT)', 'Gazipasa-Alanya Airport (GZP)'],
+    districts: ['Alanya', 'Mahmutlar', 'Kestel', 'Tosmur', 'Oba', 'Cikcilli', 'Konakli', 'Payallar', 'Turkler', 'Avsallar', 'Incekum', 'Okurcalar', 'Kargicak', 'Demirtas', 'Gazipasa']
   },
   'Bodrum': {
     airports: ['Bodrum-Milas Airport (BJV)'],
