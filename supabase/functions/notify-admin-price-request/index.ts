@@ -38,6 +38,13 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
 
+const ISTANBUL_DISTRICTS = new Set(["taksim", "sultanahmet", "kadikoy", "besiktas", "bakirkoy"]);
+const ANKARA_DISTRICTS = new Set(["pursaklar", "kecioren", "ulus", "cankaya merkez", "mamak", "yenimahalle merkez"]);
+const ANTALYA_DISTRICTS = new Set(["alanya", "belek", "side", "kemer", "lara", "kundu", "manavgat"]);
+const BODRUM_DISTRICTS = new Set(["bodrum merkez", "turgutreis"]);
+const DALAMAN_DISTRICTS = new Set(["fethiye", "oludeniz", "marmaris", "dalyan"]);
+const IZMIR_DISTRICTS = new Set(["cesme", "kusadasi"]);
+
 function normalizeTurkish(text: string): string {
   return text
     .replace(/İ/g, 'I').replace(/ı/g, 'i')
@@ -70,6 +77,18 @@ function detectCity(text: string): string | null {
 
 function applyIntracityAirportDiscount(price: number): number {
   return Math.max(1, Math.ceil(price * (1 - INTRACITY_AIRPORT_DISCOUNT_RATE)));
+}
+
+function inferCityFromDistrict(district: string | null): string | null {
+  if (!district) return null;
+  const normalizedDistrict = normalizeTurkish(district).toLowerCase();
+  if (ISTANBUL_DISTRICTS.has(normalizedDistrict)) return "Istanbul";
+  if (ANKARA_DISTRICTS.has(normalizedDistrict)) return "Ankara";
+  if (ANTALYA_DISTRICTS.has(normalizedDistrict)) return "Antalya";
+  if (BODRUM_DISTRICTS.has(normalizedDistrict)) return "Bodrum";
+  if (DALAMAN_DISTRICTS.has(normalizedDistrict)) return "Dalaman";
+  if (IZMIR_DISTRICTS.has(normalizedDistrict)) return "Izmir";
+  return null;
 }
 
 function analyzeLocation(pickup: string, dropoff: string): {
@@ -160,56 +179,69 @@ serve(async (req) => {
     let autoPriced = false;
 
     const { airport, city, pickupCity, dropoffCity, pickupDistrict, dropoffDistrict, district } = analyzeLocation(pickup, dropoff);
-    console.log("Location analysis:", { airport, city, pickupCity, dropoffCity, pickupDistrict, dropoffDistrict, district });
+    const pickupDistrictCity = inferCityFromDistrict(pickupDistrict);
+    const dropoffDistrictCity = inferCityFromDistrict(dropoffDistrict);
+    const resolvedPickupCity = pickupCity || pickupDistrictCity;
+    const resolvedDropoffCity = dropoffCity || dropoffDistrictCity;
+    const resolvedCity = resolvedPickupCity || resolvedDropoffCity || city;
+    const intracityCity =
+      resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity === resolvedDropoffCity
+        ? resolvedPickupCity
+        : null;
+    console.log("Location analysis:", { airport, city: resolvedCity, pickupCity: resolvedPickupCity, dropoffCity: resolvedDropoffCity, pickupDistrict, dropoffDistrict, district });
 
-    if (city || airport) {
+    if (resolvedCity || airport) {
       const selectedVehicle = vehicleType || 'mercedes-vito';
 
       const isTurkeyIntracityAddressTransfer =
         !airport &&
-        !!pickupCity &&
-        !!dropoffCity &&
-        pickupCity === dropoffCity &&
-        !!pickupDistrict &&
-        !!dropoffDistrict &&
-        TURKEY_INTRACITY_DISCOUNT_CITIES.has(pickupCity);
+        !!intracityCity &&
+        TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity);
 
       if (isTurkeyIntracityAddressTransfer) {
-        const targetDistrict = dropoffDistrict || district;
-        if (!targetDistrict) {
-          console.warn("Intracity discount skipped: no target district");
-        } else {
-          let { data: intracityReferencePrices } = await supabase
-            .from('region_prices')
-            .select('*')
-            .eq('is_active', true)
-            .eq('vehicle_type', selectedVehicle)
-            .eq('city', pickupCity)
-            .eq('district', targetDistrict)
-            .not('airport', 'is', null)
-            .order('price', { ascending: true })
-            .limit(1);
+        const referenceCity = intracityCity || resolvedCity;
+        const districtCandidates = [pickupDistrict, dropoffDistrict].filter(
+          (candidate, index, arr): candidate is string => !!candidate && arr.indexOf(candidate) === index,
+        );
+        let foundPrice: any = null;
 
-          const normalizedTargetDistrict = normalizeTurkish(targetDistrict);
-          if (
-            (!intracityReferencePrices || intracityReferencePrices.length === 0) &&
-            normalizedTargetDistrict.toLowerCase() !== targetDistrict.toLowerCase()
-          ) {
-            const { data: normalizedDistrictPrices } = await supabase
+        for (const targetDistrict of districtCandidates) {
+          const lookupDistricts = [targetDistrict, normalizeTurkish(targetDistrict)];
+          for (const lookupDistrict of lookupDistricts) {
+            const { data: districtPrices } = await supabase
               .from('region_prices')
               .select('*')
               .eq('is_active', true)
               .eq('vehicle_type', selectedVehicle)
-              .eq('city', pickupCity)
-              .eq('district', normalizedTargetDistrict)
+              .ilike('city', referenceCity!)
+              .ilike('district', lookupDistrict)
               .not('airport', 'is', null)
               .order('price', { ascending: true })
               .limit(1);
-            intracityReferencePrices = normalizedDistrictPrices;
+            if (districtPrices && districtPrices[0]) {
+              foundPrice = districtPrices[0];
+              break;
+            }
           }
+          if (foundPrice) break;
+        }
 
-          if (intracityReferencePrices && intracityReferencePrices[0]) {
-            const foundPrice = intracityReferencePrices[0];
+        if (!foundPrice) {
+          const { data: cityAirportPrices } = await supabase
+            .from('region_prices')
+            .select('*')
+            .eq('is_active', true)
+            .eq('vehicle_type', selectedVehicle)
+            .ilike('city', referenceCity!)
+            .not('airport', 'is', null)
+            .order('price', { ascending: true })
+            .limit(1);
+          if (cityAirportPrices && cityAirportPrices[0]) {
+            foundPrice = cityAirportPrices[0];
+          }
+        }
+
+        if (foundPrice) {
             const intracityDiscountedPrice = applyIntracityAirportDiscount(Number(foundPrice.price));
             const baseCurrency = foundPrice.price_currency || "EUR";
 
@@ -228,24 +260,24 @@ serve(async (req) => {
 
             autoPriced = true;
             console.log("✅ Intracity auto-price found:", {
-              city: pickupCity,
-              targetDistrict,
+              city: referenceCity,
+              pickupDistrict,
+              dropoffDistrict,
               basePrice: foundPrice.price,
               discountedPrice: intracityDiscountedPrice,
               currency: autoPriceCurrency,
             });
-          }
         }
       }
       
       // Try to find price with different strategies
       const strategies = autoPriced ? [] : [
         // Strategy 1: District + City + Airport
-        district && city && airport ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${city}`, airport: `eq.${airport}`, district: `eq.${district}`, is_active: "eq.true" } : null,
+        district && resolvedCity && airport ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${resolvedCity}`, airport: `eq.${airport}`, district: `eq.${district}`, is_active: "eq.true" } : null,
         // Strategy 2: City + Airport
-        city && airport ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${city}`, airport: `eq.${airport}`, is_active: "eq.true" } : null,
+        resolvedCity && airport ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${resolvedCity}`, airport: `eq.${airport}`, is_active: "eq.true" } : null,
         // Strategy 3: City only
-        city ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${city}`, is_active: "eq.true" } : null,
+        resolvedCity ? { vehicle_type: `eq.${selectedVehicle}`, city: `eq.${resolvedCity}`, is_active: "eq.true" } : null,
         // Strategy 4: Airport only
         airport ? { vehicle_type: `eq.${selectedVehicle}`, airport: `eq.${airport}`, is_active: "eq.true" } : null,
       ].filter(Boolean);
@@ -256,7 +288,7 @@ serve(async (req) => {
         let query = supabase.from('region_prices').select('*').eq('is_active', true);
         
         if (strategy.vehicle_type) query = query.eq('vehicle_type', selectedVehicle);
-        if (strategy.city) query = query.eq('city', city);
+        if (strategy.city) query = query.eq('city', resolvedCity);
         if (strategy.airport) query = query.eq('airport', airport);
         if (strategy.district) query = query.eq('district', district);
         

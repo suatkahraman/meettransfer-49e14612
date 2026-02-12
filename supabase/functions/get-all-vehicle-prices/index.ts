@@ -67,6 +67,31 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
 
+const ISTANBUL_DISTRICTS = new Set([
+  "taksim", "sultanahmet", "kadikoy", "besiktas", "sisli", "levent", "atasehir", "bakirkoy",
+  "ortakoy", "bebek", "fatih", "beyoglu", "uskudar", "maltepe", "pendik", "kartal",
+  "avcilar", "esenyurt", "basaksehir", "beylikduzu", "sariyer", "maslak", "mecidiyekoy",
+  "nisantasi", "karakoy", "balat", "cihangir", "eminonu", "galata", "zeytinburnu", "bagcilar",
+  "bahcelievler", "esenler", "gaziosmanpasa", "gungoren", "eyup", "kucukcekmece", "arnavutkoy",
+  "buyukcekmece", "sultangazi", "beykoz", "cekmekoy", "sancaktepe", "sultanbeyli", "sile",
+  "silivri", "catalca", "tuzla", "yenikoy",
+]);
+
+const ANKARA_DISTRICTS = new Set([
+  "pursaklar", "kecioren", "ulus", "cankaya merkez", "mamak", "yenimahalle merkez", "ostim",
+  "cukurambar", "dikmen", "balgat", "bilkent", "umitkoy", "cayyolu", "eryaman", "batikent",
+  "sincan", "golbasi", "incek",
+]);
+
+const ANTALYA_DISTRICTS = new Set([
+  "alanya", "kas", "kalkan", "belek", "side", "kemer", "manavgat", "lara", "kundu", "beldibi",
+  "goynuk", "tekirova", "cirali", "olympos", "kaleici", "konyaalti", "kadriye", "serik",
+]);
+
+const BODRUM_DISTRICTS = new Set(["bodrum merkez", "turgutreis", "yalikavak", "gumbet", "bitez"]);
+const DALAMAN_DISTRICTS = new Set(["fethiye", "oludeniz", "marmaris", "dalyan"]);
+const IZMIR_DISTRICTS = new Set(["cesme", "alacati", "kusadasi"]);
+
 // Normalize Turkish characters to ASCII equivalents for reliable regex matching
 function normalizeTurkish(text: string): string {
   return text
@@ -121,6 +146,18 @@ function applyIntracityAirportDiscount(price: number): number {
   return Math.max(1, Math.ceil(price * (1 - INTRACITY_AIRPORT_DISCOUNT_RATE)));
 }
 
+function inferCityFromDistrict(district: string | null): string | null {
+  if (!district) return null;
+  const normalizedDistrict = normalizeTurkish(district).toLowerCase();
+  if (ISTANBUL_DISTRICTS.has(normalizedDistrict)) return "Istanbul";
+  if (ANKARA_DISTRICTS.has(normalizedDistrict)) return "Ankara";
+  if (ANTALYA_DISTRICTS.has(normalizedDistrict)) return "Antalya";
+  if (BODRUM_DISTRICTS.has(normalizedDistrict)) return "Bodrum";
+  if (DALAMAN_DISTRICTS.has(normalizedDistrict)) return "Dalaman";
+  if (IZMIR_DISTRICTS.has(normalizedDistrict)) return "Izmir";
+  return null;
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -150,12 +187,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // Detect cities from pickup and dropoff separately
     const pickupCity = detectCity(pickup);
     const dropoffCity = detectCity(dropoff);
-    const city = pickupCity || dropoffCity;
     
     // Detect districts from pickup and dropoff separately (granular matching: District or Full Address)
     const pickupDistrict = detectDistrict(pickup);
     const dropoffDistrict = detectDistrict(dropoff);
     const district = pickupDistrict || dropoffDistrict;
+    const pickupDistrictCity = inferCityFromDistrict(pickupDistrict);
+    const dropoffDistrictCity = inferCityFromDistrict(dropoffDistrict);
+    const resolvedPickupCity = pickupCity || pickupDistrictCity;
+    const resolvedDropoffCity = dropoffCity || dropoffDistrictCity;
+    const city = resolvedPickupCity || resolvedDropoffCity;
+    const intracityCity =
+      resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity === resolvedDropoffCity
+        ? resolvedPickupCity
+        : null;
 
     let airport: string | null = null;
     
@@ -174,18 +219,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const isIntracityAddressTransfer =
       !airport &&
-      !!pickupCity &&
-      !!dropoffCity &&
-      pickupCity === dropoffCity &&
-      !!pickupDistrict &&
-      !!dropoffDistrict &&
-      TURKEY_INTRACITY_DISCOUNT_CITIES.has(pickupCity);
+      !!intracityCity &&
+      TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity);
 
     // Determine if this is an intercity transfer (no airport):
     // - Different cities, OR same city with different districts (e.g. Antalya Alanya -> Antalya Kaş)
     const isIntercityTransfer =
-      (pickupCity && dropoffCity && pickupCity !== dropoffCity) ||
-      (!airport && pickupDistrict && dropoffDistrict);
+      !airport &&
+      !isIntracityAddressTransfer &&
+      (
+        (resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity !== resolvedDropoffCity) ||
+        (!!pickupDistrict && !!dropoffDistrict)
+      );
 
     // Frontend vehicle types
     const turkeyVehicles = [
@@ -249,12 +294,17 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Helper to query any table with specific filters (includes valid_from, valid_to, place_ids for Place ID matching)
-    async function queryTable(table: string, filters: Record<string, string>, selectExtra = ""): Promise<any[]> {
+    async function queryTable(
+      table: string,
+      filters: Record<string, string>,
+      selectExtra = "",
+      orderBy = "updated_at.desc",
+    ): Promise<any[]> {
       const baseSelect = "vehicle_type,price,price_currency,valid_from,valid_to" + selectExtra;
       const params = new URLSearchParams({
         is_active: "eq.true",
         select: baseSelect,
-        order: "updated_at.desc",
+        order: orderBy,
         ...filters,
       });
 
@@ -297,6 +347,77 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return Array.from(byVehicle.values());
     }
 
+    function pickLowestPricePerVehicle(rows: any[]): any[] {
+      if (!rows.length) return rows;
+      const byVehicle = new Map<string, any>();
+      for (const row of rows) {
+        const vehicleType = row.vehicle_type;
+        const price = Number(row.price);
+        if (!vehicleType || !Number.isFinite(price)) continue;
+        const current = byVehicle.get(vehicleType);
+        if (!current || price < Number(current.price)) {
+          byVehicle.set(vehicleType, row);
+        }
+      }
+      return Array.from(byVehicle.values());
+    }
+
+    async function fetchIntracityAirportReferencePrices(
+      intracityCityName: string,
+      primaryDistrict: string | null,
+      secondaryDistrict: string | null,
+    ): Promise<any[]> {
+      const queriedDistricts = new Set<string>();
+      const districtCandidates = [primaryDistrict, secondaryDistrict].filter((district): district is string => !!district);
+
+      for (const districtCandidate of districtCandidates) {
+        const normalizedCandidate = normalizeTurkish(districtCandidate);
+        const lookupKeys = [districtCandidate, normalizedCandidate];
+        let districtRows: any[] = [];
+
+        for (const lookupDistrict of lookupKeys) {
+          const dedupeKey = lookupDistrict.toLowerCase();
+          if (queriedDistricts.has(dedupeKey)) continue;
+          queriedDistricts.add(dedupeKey);
+
+          const rows = await queryTable(
+            "region_prices",
+            {
+              city: `ilike.${intracityCityName}`,
+              district: `ilike.${lookupDistrict}`,
+              airport: "not.is.null",
+            },
+            "",
+            "price.asc",
+          );
+          districtRows = districtRows.concat(rows);
+        }
+
+        if (pickupDateStr && districtRows.length > 0) {
+          districtRows = applySeasonalFilter(districtRows, pickupDateStr);
+        }
+
+        const districtLowest = pickLowestPricePerVehicle(districtRows);
+        if (districtLowest.length > 0) return districtLowest;
+      }
+
+      let cityRows = await queryTable(
+        "region_prices",
+        {
+          city: `ilike.${intracityCityName}`,
+          airport: "not.is.null",
+        },
+        "",
+        "price.asc",
+      );
+
+      if (pickupDateStr && cityRows.length > 0) {
+        cityRows = applySeasonalFilter(cityRows, pickupDateStr);
+      }
+
+      return pickLowestPricePerVehicle(cityRows);
+    }
+
     // ---- PLACE ID MATCHING (preferred when both IDs provided - Google Place from Autocomplete) ----
     let intercityPrices: any[] = [];
     let regionPrices: any[] = [];
@@ -307,36 +428,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // Şehir içi adresten adrese kuralı:
     // hedef semtin havalimanı fiyatını baz alıp %10 daha ucuz hesapla.
-    if (isIntracityAddressTransfer && city && dropoffDistrict) {
-      const normalizedTargetDistrict = normalizeTurkish(dropoffDistrict);
-
-      intracityReferencePrices = await queryTable("region_prices", {
-        city: `ilike.${city}`,
-        district: `ilike.${dropoffDistrict}`,
-        airport: "not.is.null",
-      });
-
-      if (
-        intracityReferencePrices.length === 0 &&
-        normalizedTargetDistrict.toLowerCase() !== dropoffDistrict.toLowerCase()
-      ) {
-        intracityReferencePrices = await queryTable("region_prices", {
-          city: `ilike.${city}`,
-          district: `ilike.${normalizedTargetDistrict}`,
-          airport: "not.is.null",
-        });
-      }
-
-      if (pickupDateStr && intracityReferencePrices.length > 0) {
-        intracityReferencePrices = applySeasonalFilter(intracityReferencePrices, pickupDateStr);
-      }
-
+    if (isIntracityAddressTransfer && intracityCity) {
+      intracityReferencePrices = await fetchIntracityAirportReferencePrices(
+        intracityCity,
+        pickupDistrict,
+        dropoffDistrict,
+      );
       if (intracityReferencePrices.length > 0) {
         usedIntracityAirportDiscount = true;
       }
     }
 
-    if (!usedIntracityAirportDiscount && pickupPlaceId && dropoffPlaceId) {
+    if (!usedIntracityAirportDiscount && !isIntracityAddressTransfer && pickupPlaceId && dropoffPlaceId) {
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/intercity_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&or=(and(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)}),and(pickup_place_id.eq.${encodeURIComponent(dropoffPlaceId)},dropoff_place_id.eq.${encodeURIComponent(pickupPlaceId)}))&order=updated_at.desc`,
         { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
@@ -366,8 +469,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // ---- INTERCITY / INTRA-CITY PRICE MATCHING (text-based, when no Place ID match) ----
     if (!usedIntracityAirportDiscount && !usedPlaceId && isIntercityTransfer && !airport) {
-      const fromCity = pickupCity || city!;
-      const toCity = dropoffCity || city!;
+      const fromCity = resolvedPickupCity || city!;
+      const toCity = resolvedDropoffCity || city!;
 
       // STRICT: When BOTH districts are known (e.g. Alanya -> Kaş), ONLY use exact district-to-district match.
       // Strategy I2/I3 (single district) can return multiple routes (Alanya->Lara, Alanya->Belek, Alanya->Kas)
