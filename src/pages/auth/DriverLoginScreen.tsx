@@ -163,6 +163,42 @@ const DriverLoginScreen = () => {
     );
   }
 
+  const isDriverAccount = async (userId: string, accessToken?: string): Promise<boolean> => {
+    // 1) Primary path: edge function (RLS bypass)
+    if (accessToken) {
+      const delays = [0, 300, 600];
+      for (let attempt = 0; attempt < delays.length; attempt++) {
+        if (attempt > 0) await new Promise((r) => setTimeout(r, delays[attempt]));
+        const { data } = await supabase.functions.invoke('get-user-role', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (data?.success && data?.role === 'driver') {
+          return true;
+        }
+      }
+    }
+
+    // 2) Fallback: direct user_roles read (new self-read RLS policy)
+    const { data: roleRows } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId);
+
+    const roles = (roleRows ?? []).map((r) => r.role);
+    if (roles.includes('driver')) {
+      return true;
+    }
+
+    // 3) Last fallback: drivers table existence
+    const { data: driverRow } = await supabase
+      .from('drivers')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    return !!driverRow?.id;
+  };
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
@@ -213,20 +249,11 @@ const DriverLoginScreen = () => {
           toast.error(error.message || t('loginFailed') || 'Login failed');
         }
       } else if (authData?.user && authData?.session) {
-        // RLS bypass: get-user-role - ayni cihazdan 2. giris icin retry
-        const token = authData.session.access_token;
-        let roleData: { success?: boolean; role?: string } | null = null;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          if (attempt > 0) await new Promise((r) => setTimeout(r, 300 * attempt));
-          const { data } = await supabase.functions.invoke('get-user-role', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (data?.success && data?.role) {
-            roleData = data;
-            break;
-          }
-        }
-        const isDriver = roleData?.success && roleData?.role === 'driver';
+        // Yeni auth/RLS duzeninde false-negative'i onlemek icin coklu fallback kullan.
+        const isDriver = await isDriverAccount(
+          authData.user.id,
+          authData.session.access_token
+        );
 
         if (!isDriver) {
           toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil' : 'This is not a driver account');

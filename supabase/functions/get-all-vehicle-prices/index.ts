@@ -55,6 +55,18 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "al barsha": "Al Barsha", "silicon oasis": "Dubai Silicon Oasis",
 };
 
+const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
+  "Istanbul",
+  "Ankara",
+  "Antalya",
+  "Bodrum",
+  "Dalaman",
+  "Izmir",
+  "Bursa",
+]);
+
+const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
+
 // Normalize Turkish characters to ASCII equivalents for reliable regex matching
 function normalizeTurkish(text: string): string {
   return text
@@ -84,9 +96,11 @@ function sanitizeSearchQuery(text: string): string {
 function detectDistrict(text: string): string | null {
   const lower = sanitizeSearchQuery(text);
   // Sort keys by length desc so longer phrases match first (e.g. "alanya hotel" before "alanya")
-  const entries = Object.entries(DISTRICT_MAPPING).sort((a, b) => b[0].length - a[0].length);
+  const entries = Object.entries(DISTRICT_MAPPING).sort(
+    (a, b) => sanitizeSearchQuery(b[0]).length - sanitizeSearchQuery(a[0]).length,
+  );
   for (const [key, value] of entries) {
-    if (lower.includes(key)) return value;
+    if (lower.includes(sanitizeSearchQuery(key))) return value;
   }
   return null;
 }
@@ -101,6 +115,10 @@ function detectCity(text: string): string | null {
   if (/izmir|\badb\b|cesme|alacati/i.test(s)) return "Izmir";
   if (/bursa/i.test(s)) return "Bursa";
   return null;
+}
+
+function applyIntracityAirportDiscount(price: number): number {
+  return Math.max(1, Math.ceil(price * (1 - INTRACITY_AIRPORT_DISCOUNT_RATE)));
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
@@ -147,12 +165,21 @@ Deno.serve(async (req: Request): Promise<Response> => {
     } else {
       if (/istanbul airport/i.test(s)) airport = "Istanbul Airport (IST)";
       else if (/sabiha|gokcen/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
-      else if (/antalya.*airport|antalya.*havalimanı/i.test(s)) airport = "Antalya Airport (AYT)";
-      else if (/bodrum|milas/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
-      else if (/dalaman/i.test(s)) airport = "Dalaman Airport (DLM)";
+      else if (/antalya.*airport|antalya.*havalimani/i.test(s)) airport = "Antalya Airport (AYT)";
+      else if (/\bbjv\b|bodrum.*airport|milas.*airport|bodrum.*havalimani|milas.*havalimani/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
+      else if (/\bdlm\b|dalaman.*airport|dalaman.*havalimani/i.test(s)) airport = "Dalaman Airport (DLM)";
       else if (/adnan menderes/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
       else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
     }
+
+    const isIntracityAddressTransfer =
+      !airport &&
+      !!pickupCity &&
+      !!dropoffCity &&
+      pickupCity === dropoffCity &&
+      !!pickupDistrict &&
+      !!dropoffDistrict &&
+      TURKEY_INTRACITY_DISCOUNT_CITIES.has(pickupCity);
 
     // Determine if this is an intercity transfer (no airport):
     // - Different cities, OR same city with different districts (e.g. Antalya Alanya -> Antalya Kaş)
@@ -273,10 +300,43 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // ---- PLACE ID MATCHING (preferred when both IDs provided - Google Place from Autocomplete) ----
     let intercityPrices: any[] = [];
     let regionPrices: any[] = [];
+    let intracityReferencePrices: any[] = [];
     let usedIntercity = false;
     let usedPlaceId = false;
+    let usedIntracityAirportDiscount = false;
 
-    if (pickupPlaceId && dropoffPlaceId) {
+    // Şehir içi adresten adrese kuralı:
+    // hedef semtin havalimanı fiyatını baz alıp %10 daha ucuz hesapla.
+    if (isIntracityAddressTransfer && city && dropoffDistrict) {
+      const normalizedTargetDistrict = normalizeTurkish(dropoffDistrict);
+
+      intracityReferencePrices = await queryTable("region_prices", {
+        city: `ilike.${city}`,
+        district: `ilike.${dropoffDistrict}`,
+        airport: "not.is.null",
+      });
+
+      if (
+        intracityReferencePrices.length === 0 &&
+        normalizedTargetDistrict.toLowerCase() !== dropoffDistrict.toLowerCase()
+      ) {
+        intracityReferencePrices = await queryTable("region_prices", {
+          city: `ilike.${city}`,
+          district: `ilike.${normalizedTargetDistrict}`,
+          airport: "not.is.null",
+        });
+      }
+
+      if (pickupDateStr && intracityReferencePrices.length > 0) {
+        intracityReferencePrices = applySeasonalFilter(intracityReferencePrices, pickupDateStr);
+      }
+
+      if (intracityReferencePrices.length > 0) {
+        usedIntracityAirportDiscount = true;
+      }
+    }
+
+    if (!usedIntracityAirportDiscount && pickupPlaceId && dropoffPlaceId) {
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/intercity_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&or=(and(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)}),and(pickup_place_id.eq.${encodeURIComponent(dropoffPlaceId)},dropoff_place_id.eq.${encodeURIComponent(pickupPlaceId)}))&order=updated_at.desc`,
         { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
@@ -305,7 +365,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // ---- INTERCITY / INTRA-CITY PRICE MATCHING (text-based, when no Place ID match) ----
-    if (!usedPlaceId && isIntercityTransfer && !airport) {
+    if (!usedIntracityAirportDiscount && !usedPlaceId && isIntercityTransfer && !airport) {
       const fromCity = pickupCity || city!;
       const toCity = dropoffCity || city!;
 
@@ -379,7 +439,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // ---- REGION PRICES MATCHING (airport transfers + fallback, skip when wrong intercity fallback) ----
-    if (!usedPlaceId && !usedIntercity && !skipRegionFallback) {
+    if (!usedIntracityAirportDiscount && !usedPlaceId && !usedIntercity && !skipRegionFallback) {
       // Strategy R1: District + City + Airport (most specific). Case-insensitive for district/city.
       if (district && city && airport) {
         regionPrices = await queryTable("region_prices", {
@@ -421,12 +481,23 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Apply strict monthly/seasonal filter for region prices
-    if (!usedIntercity && pickupDateStr && regionPrices.length > 0) {
+    if (!usedIntracityAirportDiscount && !usedIntercity && pickupDateStr && regionPrices.length > 0) {
       regionPrices = applySeasonalFilter(regionPrices, pickupDateStr);
     }
 
+    const intracityDiscountedPrices = usedIntracityAirportDiscount
+      ? intracityReferencePrices.map((row: any) => ({
+          ...row,
+          price: applyIntracityAirportDiscount(Number(row.price)),
+        }))
+      : [];
+
     // Use whichever source found prices (validation: specific route+month price is used, no generic override)
-    const matchedPrices = usedIntercity ? intercityPrices : regionPrices;
+    const matchedPrices = usedIntracityAirportDiscount
+      ? intracityDiscountedPrices
+      : usedIntercity
+      ? intercityPrices
+      : regionPrices;
 
     // Build prices - match DB prices to frontend vehicle types using aliases
     const prices: any[] = [];
@@ -471,7 +542,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
       matchedAirport: airport,
       isDubai,
       region,
-      priceSource: usedIntercity ? "intercity_prices" : "region_prices",
+      priceSource: usedIntracityAirportDiscount
+        ? "intracity_airport_discount"
+        : usedIntercity
+        ? "intercity_prices"
+        : "region_prices",
+      intracityDiscountApplied: usedIntracityAirportDiscount,
     }), { headers: corsHeaders });
 
   } catch (error) {

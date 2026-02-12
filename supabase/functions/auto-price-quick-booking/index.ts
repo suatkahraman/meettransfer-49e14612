@@ -29,6 +29,18 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "al barsha": "Al Barsha", "silicon oasis": "Dubai Silicon Oasis",
 };
 
+const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
+  "Istanbul",
+  "Ankara",
+  "Antalya",
+  "Bodrum",
+  "Dalaman",
+  "Izmir",
+  "Bursa",
+]);
+
+const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
+
 function normalizeTurkish(text: string): string {
   return text
     .replace(/İ/g, 'I').replace(/ı/g, 'i')
@@ -42,7 +54,7 @@ function normalizeTurkish(text: string): string {
 function detectDistrict(text: string): string | null {
   const lower = normalizeTurkish(text).toLowerCase();
   for (const [key, value] of Object.entries(DISTRICT_MAPPING)) {
-    if (lower.includes(key)) return value;
+    if (lower.includes(normalizeTurkish(key).toLowerCase())) return value;
   }
   return null;
 }
@@ -59,6 +71,10 @@ function detectCity(text: string): string | null {
   return null;
 }
 
+function applyIntracityAirportDiscount(price: number): number {
+  return Math.max(1, Math.ceil(price * (1 - INTRACITY_AIRPORT_DISCOUNT_RATE)));
+}
+
 // ---- Minimal helpers ----
 function analyzeSimple(pickup: string, dropoff: string): { 
   airport: string | null; city: string | null; 
@@ -71,9 +87,9 @@ function analyzeSimple(pickup: string, dropoff: string): {
   let airport: string | null = null;
   if (/istanbul airport|\bist\b/i.test(s)) airport = "Istanbul Airport (IST)";
   else if (/sabiha|gokcen|\bsaw\b/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
-  else if (/antalya.*airport|antalya.*havalimanı|\bayt\b/i.test(s)) airport = "Antalya Airport (AYT)";
-  else if (/bodrum|milas|\bbjv\b/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
-  else if (/dalaman|\bdlm\b/i.test(s)) airport = "Dalaman Airport (DLM)";
+  else if (/antalya.*airport|antalya.*havalimani|\bayt\b/i.test(s)) airport = "Antalya Airport (AYT)";
+  else if (/\bbjv\b|bodrum.*airport|milas.*airport|bodrum.*havalimani|milas.*havalimani/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
+  else if (/\bdlm\b|dalaman.*airport|dalaman.*havalimani/i.test(s)) airport = "Dalaman Airport (DLM)";
   else if (/adnan menderes|\badb\b/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
   else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
 
@@ -303,6 +319,43 @@ async function findRegionPrice(vehicleType: string, city: string | null, airport
   return null;
 }
 
+async function findIntracityAirportReferencePrice(
+  vehicleType: string,
+  city: string | null,
+  targetDistrict: string | null,
+): Promise<Record<string, unknown> | null> {
+  if (!city || !targetDistrict) return null;
+
+  let prices = await supabaseQuery("region_prices", {
+    vehicle_type: `eq.${vehicleType}`,
+    city: `ilike.${city}`,
+    district: `ilike.${targetDistrict}`,
+    airport: "not.is.null",
+    is_active: "eq.true",
+    select: "*",
+    order: "price.asc",
+    limit: "1",
+  });
+  if (prices?.[0]) return prices[0];
+
+  const normalizedTargetDistrict = normalizeTurkish(targetDistrict);
+  if (normalizedTargetDistrict.toLowerCase() !== targetDistrict.toLowerCase()) {
+    prices = await supabaseQuery("region_prices", {
+      vehicle_type: `eq.${vehicleType}`,
+      city: `ilike.${city}`,
+      district: `ilike.${normalizedTargetDistrict}`,
+      airport: "not.is.null",
+      is_active: "eq.true",
+      select: "*",
+      order: "price.asc",
+      limit: "1",
+    });
+  }
+  if (prices?.[0]) return prices[0];
+
+  return null;
+}
+
 // ---- HANDLER ----
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -335,6 +388,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ matched: false, reason: "no_location_match" }), { headers: corsHeaders });
     }
 
+    const isTurkeyIntracityAddressTransfer =
+      !airport &&
+      !!pickupCity &&
+      !!dropoffCity &&
+      pickupCity === dropoffCity &&
+      !!pickupDistrict &&
+      !!dropoffDistrict &&
+      TURKEY_INTRACITY_DISCOUNT_CITIES.has(pickupCity);
+
     // Determine if this is an intercity/intra-city transfer without airport
     const isIntercityTransfer = (pickupCity && dropoffCity && pickupCity !== dropoffCity) || 
                                  (!airport && pickupDistrict && dropoffDistrict);
@@ -343,7 +405,24 @@ Deno.serve(async (req) => {
     let bestPrice: Record<string, unknown> | null = null;
     let priceSource = "region_prices";
 
-    if (isIntercityTransfer && !airport) {
+    if (isTurkeyIntracityAddressTransfer) {
+      const referencePrice = await findIntracityAirportReferencePrice(
+        booking.vehicle_type,
+        pickupCity || dropoffCity,
+        dropoffDistrict || district,
+      );
+      if (referencePrice) {
+        const basePrice = Number(referencePrice.price || 0);
+        bestPrice = {
+          ...referencePrice,
+          price: applyIntracityAirportDiscount(basePrice),
+          intracity_reference_price: basePrice,
+        };
+        priceSource = "intracity_airport_discount";
+      }
+    }
+
+    if (!bestPrice && isIntercityTransfer && !airport) {
       bestPrice = await findIntercityPrice(booking.vehicle_type, pickupCity, dropoffCity, pickupDistrict, dropoffDistrict);
       if (bestPrice) priceSource = "intercity_prices";
     }
@@ -396,7 +475,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    return new Response(JSON.stringify({ matched: true, price: finalPrice, currency: finalCurrency, returnPrice, totalPrice, matchedCity: city, matchedAirport: airport, matchedPickupDistrict: pickupDistrict, matchedDropoffDistrict: dropoffDistrict, priceSource }), { headers: corsHeaders });
+    return new Response(JSON.stringify({
+      matched: true,
+      price: finalPrice,
+      currency: finalCurrency,
+      returnPrice,
+      totalPrice,
+      matchedCity: city,
+      matchedAirport: airport,
+      matchedPickupDistrict: pickupDistrict,
+      matchedDropoffDistrict: dropoffDistrict,
+      priceSource,
+      intracityDiscountApplied: priceSource === "intracity_airport_discount",
+    }), { headers: corsHeaders });
   } catch (e: unknown) {
     const error = e instanceof Error ? e.message : "Unknown error";
     console.error("auto-price-quick-booking error:", error);
