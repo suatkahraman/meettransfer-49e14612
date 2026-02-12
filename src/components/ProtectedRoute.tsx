@@ -20,14 +20,18 @@ const ProtectedRoute = ({
   const { role, loading: roleLoading } = useUserRole();
   const [fallbackRole, setFallbackRole] = useState<AppRole | null>(null);
   const [fallbackLoading, setFallbackLoading] = useState(false);
+  const userId = user?.id;
   const allowedRolesKey = allowedRoles.join('|');
 
   // If role lookup fails or times out, verify the currently requested area directly.
   useEffect(() => {
     let isActive = true;
+    const allowedRoleList = (allowedRolesKey
+      ? allowedRolesKey.split('|')
+      : []) as AppRole[];
 
     const verifyFallbackRole = async () => {
-      if (!user || roleLoading || role) {
+      if (!userId || roleLoading || role) {
         setFallbackRole(null);
         setFallbackLoading(false);
         return;
@@ -35,11 +39,11 @@ const ProtectedRoute = ({
 
       setFallbackLoading(true);
       try {
-        if (allowedRoles.includes('driver')) {
+        if (allowedRoleList.includes('driver')) {
           const { data: driverRow } = await supabase
             .from('drivers')
             .select('id')
-            .eq('user_id', user.id)
+            .eq('user_id', userId)
             .maybeSingle();
 
           if (isActive && driverRow?.id) {
@@ -48,11 +52,11 @@ const ProtectedRoute = ({
           }
         }
 
-        if (allowedRoles.includes('agency')) {
+        if (allowedRoleList.includes('agency')) {
           const { data: agencyRow } = await supabase
             .from('agencies')
             .select('id')
-            .eq('user_id', user.id)
+            .eq('user_id', userId)
             .maybeSingle();
 
           if (isActive && agencyRow?.id) {
@@ -61,11 +65,11 @@ const ProtectedRoute = ({
           }
         }
 
-        if (allowedRoles.includes('admin')) {
+        if (allowedRoleList.includes('admin')) {
           const { data: adminRoleRow } = await supabase
             .from('user_roles')
             .select('role')
-            .eq('user_id', user.id)
+            .eq('user_id', userId)
             .eq('role', 'admin')
             .maybeSingle();
 
@@ -77,7 +81,7 @@ const ProtectedRoute = ({
 
         if (isActive) {
           // Customer area is the least-privileged authenticated fallback.
-          setFallbackRole(allowedRoles.includes('customer') ? 'customer' : null);
+          setFallbackRole(allowedRoleList.includes('customer') ? 'customer' : null);
         }
       } catch (error) {
         console.warn('[ProtectedRoute] fallback role check failed:', error);
@@ -91,21 +95,21 @@ const ProtectedRoute = ({
     return () => {
       isActive = false;
     };
-  }, [user?.id, role, roleLoading, allowedRolesKey]);
+  }, [userId, role, roleLoading, allowedRolesKey]);
 
   // Driver/Customer/Agency: Role çözülene kadar bekle - 10 sn grace (aynı cihaz 2. giriş)
   const [roleGraceExpired, setRoleGraceExpired] = useState(false);
   useEffect(() => {
     setRoleGraceExpired(false);
 
-    if (!user) return;
+    if (!userId) return;
     if (roleLoading) return;
     if (fallbackLoading) return;
     if (role || fallbackRole) return;
 
     const t = window.setTimeout(() => setRoleGraceExpired(true), 10000);
     return () => window.clearTimeout(t);
-  }, [user, roleLoading, role, fallbackLoading, fallbackRole]);
+  }, [userId, roleLoading, role, fallbackLoading, fallbackRole]);
 
   // Show loading state while checking auth and role
   if (authLoading || roleLoading || fallbackLoading || (user && !role && !fallbackRole && !roleGraceExpired)) {
