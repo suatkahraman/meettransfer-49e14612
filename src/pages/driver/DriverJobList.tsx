@@ -73,6 +73,7 @@ const LIST_RESERVATION_SELECT = `
   dropoff_place_name,
   agencies (id, agency_name)
 `;
+const PENDING_BASE_STATUSES = ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned'] as const;
 
 const sortByPickupDateTime = (items: Reservation[]) =>
   [...items].sort((a, b) => {
@@ -135,37 +136,64 @@ const DriverJobList = () => {
 
     try {
       const statusFilter = getStatusFilter();
-      let query = supabase
-        .from('reservations')
-        .select(LIST_RESERVATION_SELECT)
-        .eq('driver_id', driverId);
+      let data: Reservation[] = [];
+      let error: Error | null = null;
 
       if (jobType === 'pending') {
-        query = query.or('status.in.(pending,pending_admin_review,sent_to_driver,assigned),and(status.eq.confirmed,driver_confirmed.eq.false)');
+        const [basePendingQuery, confirmedUpdatesQuery] = await Promise.all([
+          supabase
+            .from('reservations')
+            .select(LIST_RESERVATION_SELECT)
+            .eq('driver_id', driverId)
+            .in('status', [...PENDING_BASE_STATUSES])
+            .order('pickup_date', { ascending: true })
+            .order('pickup_time', { ascending: true }),
+          supabase
+            .from('reservations')
+            .select(LIST_RESERVATION_SELECT)
+            .eq('driver_id', driverId)
+            .eq('status', 'confirmed')
+            .eq('driver_confirmed', false)
+            .order('pickup_date', { ascending: true })
+            .order('pickup_time', { ascending: true }),
+        ]);
+
+        if (basePendingQuery.error || confirmedUpdatesQuery.error) {
+          error = (basePendingQuery.error || confirmedUpdatesQuery.error) as Error;
+        } else {
+          data = [
+            ...((basePendingQuery.data || []) as Reservation[]),
+            ...((confirmedUpdatesQuery.data || []) as Reservation[]),
+          ];
+        }
       } else {
-        query = query.in('status', statusFilter);
+        let query = supabase
+          .from('reservations')
+          .select(LIST_RESERVATION_SELECT)
+          .eq('driver_id', driverId)
+          .in('status', statusFilter)
+          .order('pickup_date', { ascending: true })
+          .order('pickup_time', { ascending: true });
+
+        // For completed, only show current month
+        if (jobType === 'completed') {
+          const now = new Date();
+          const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+          const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+          query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+        }
+
+        // Apply month/year filter if present (for future months)
+        if (filterMonth !== null && filterYear !== null) {
+          const firstDay = new Date(filterYear, filterMonth - 1, 1).toISOString().split('T')[0];
+          const lastDay = new Date(filterYear, filterMonth, 0).toISOString().split('T')[0];
+          query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
+        }
+
+        const response = await query;
+        data = (response.data || []) as Reservation[];
+        error = response.error as Error | null;
       }
-
-      query = query
-        .order('pickup_date', { ascending: true })
-        .order('pickup_time', { ascending: true });
-
-      // For completed, only show current month
-      if (jobType === 'completed') {
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-        query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
-      }
-
-      // Apply month/year filter if present (for future months)
-      if (filterMonth !== null && filterYear !== null) {
-        const firstDay = new Date(filterYear, filterMonth - 1, 1).toISOString().split('T')[0];
-        const lastDay = new Date(filterYear, filterMonth, 0).toISOString().split('T')[0];
-        query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('Error:', error);
@@ -173,28 +201,25 @@ const DriverJobList = () => {
         return;
       }
 
-      const sortedData = sortByPickupDateTime((data || []) as Reservation[]);
+      const sortedData = sortByPickupDateTime(data);
       setReservations(sortedData);
+      setAdminNotesMap({});
 
-      // Fetch admin notes
+      // Fetch admin notes in background so list UI is not blocked.
       if (sortedData.length > 0) {
         const ids = sortedData.map((r) => r.id);
-        const { data: notesData } = await supabase
+        void supabase
           .from('reservation_admin_notes')
           .select('reservation_id, notes')
-          .in('reservation_id', ids);
-        
-        if (notesData) {
-          const notesObj: Record<string, string> = {};
-          notesData.forEach((n) => {
-            if (n.notes) notesObj[n.reservation_id] = n.notes;
+          .in('reservation_id', ids)
+          .then(({ data: notesData }) => {
+            if (!notesData) return;
+            const notesObj: Record<string, string> = {};
+            notesData.forEach((n) => {
+              if (n.notes) notesObj[n.reservation_id] = n.notes;
+            });
+            setAdminNotesMap(notesObj);
           });
-          setAdminNotesMap(notesObj);
-        } else {
-          setAdminNotesMap({});
-        }
-      } else {
-        setAdminNotesMap({});
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
@@ -246,7 +271,14 @@ const DriverJobList = () => {
         (payload) => {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             const updatedRes = payload.new as Reservation;
-            if (statusFilter.includes(updatedRes.status)) {
+            const includeInList = jobType === 'pending'
+              ? (
+                  PENDING_BASE_STATUSES.includes(updatedRes.status as (typeof PENDING_BASE_STATUSES)[number]) ||
+                  (updatedRes.status === 'confirmed' && updatedRes.driver_confirmed === false)
+                )
+              : statusFilter.includes(updatedRes.status);
+
+            if (includeInList) {
               setReservations(prev => {
                 const existing = prev.find(r => r.id === updatedRes.id);
                 if (existing) {
@@ -544,7 +576,7 @@ const DriverJobList = () => {
       </AnimatePresence>
 
       {/* Content */}
-      <main className="px-4 py-4 max-w-lg mx-auto">
+      <main className="px-4 py-4 max-w-lg mx-auto w-full">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -567,7 +599,7 @@ const DriverJobList = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ duration: 0.16, delay: Math.min(index, 2) * 0.02 }}
                 >
                   <SwipeableJobCard
                     reservation={reservation}

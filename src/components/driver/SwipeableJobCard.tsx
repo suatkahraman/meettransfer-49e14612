@@ -1,18 +1,16 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, AlertTriangle, FileText, Building2, Banknote, Luggage, Baby, RefreshCw } from 'lucide-react';
+import { Calendar, Clock, User, Plane, Car, CreditCard, CheckCircle, Play, AlertCircle, Loader2, Ban, FileText, Building2, Banknote, Luggage, Baby, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
 import { toast } from 'sonner';
-import { FlightStatus } from '@/components/ui/flight-status';
 import { LocationDisplay } from '@/components/ui/location-display';
-import { getCurrencySymbol, formatCurrency } from '@/lib/currency';
+import { getCurrencySymbol } from '@/lib/currency';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
-import { supabase } from '@/integrations/supabase/client';
 import { PaymentStatusBadge } from '@/components/payments/PaymentStatusBadge';
 interface Reservation {
   id: string;
@@ -54,62 +52,11 @@ interface SwipeableJobCardProps {
 }
 
 const SWIPE_THRESHOLD = 100;
-const tryAmountCache = new Map<string, number>();
 
 export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete, onClick }: SwipeableJobCardProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [flightDelay, setFlightDelay] = useState<number | null>(null);
-  const [flightStatusValue, setFlightStatusValue] = useState<string | null>(null);
-  const [tryAmount, setTryAmount] = useState<number | null>(null);
   const { t, getPaymentTypeLabel } = useDriverTranslations();
   const x = useMotionValue(0);
-  const shouldFetchFlightStatus = useMemo(() => {
-    if (!reservation.flight_number) return false;
-    const pickupDateTime = new Date(`${reservation.pickup_date}T${reservation.pickup_time}`);
-    const now = new Date();
-    const diffInDays = Math.abs(pickupDateTime.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-    // Avoid hitting the flight-status endpoint for far dates in card lists.
-    return diffInDays <= 2;
-  }, [reservation.flight_number, reservation.pickup_date, reservation.pickup_time]);
-
-  // Fetch TL equivalent when cash amount is not in TRY
-  useEffect(() => {
-    const fetchTryAmount = async () => {
-      if (
-        reservation.passenger_cash_amount &&
-        reservation.passenger_cash_amount > 0 &&
-        reservation.passenger_cash_currency &&
-        reservation.passenger_cash_currency !== 'TRY'
-      ) {
-        const cacheKey = `${reservation.passenger_cash_currency}-${reservation.passenger_cash_amount}`;
-        const cached = tryAmountCache.get(cacheKey);
-        if (cached !== undefined) {
-          setTryAmount(cached);
-          return;
-        }
-
-        try {
-          const { data, error } = await supabase.functions.invoke('get-exchange-rate', {
-            body: {
-              from_currency: reservation.passenger_cash_currency,
-              to_currency: 'TRY',
-              amount: reservation.passenger_cash_amount
-            }
-          });
-          if (!error && data?.converted_amount) {
-            const rounded = Math.round(data.converted_amount);
-            tryAmountCache.set(cacheKey, rounded);
-            setTryAmount(rounded);
-          }
-        } catch (err) {
-          console.error('Failed to fetch TRY amount:', err);
-        }
-      } else {
-        setTryAmount(null);
-      }
-    };
-    fetchTryAmount();
-  }, [reservation.passenger_cash_amount, reservation.passenger_cash_currency]);
   
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
@@ -198,11 +145,6 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   const leftBgOpacity = useTransform(x, [50, 150], [0, 1]);
   const rightIconScale = useTransform(x, [-150, -80], [1.2, 0.8]);
   const leftIconScale = useTransform(x, [80, 150], [0.8, 1.2]);
-
-  const formatPriceLocal = (price: number | null, currency: string | null) => {
-    if (price === null || price === undefined) return t('none');
-    return `${getCurrencySymbol(currency)}${price.toLocaleString('tr-TR')}`;
-  };
 
   const handleDragEnd = async (_: any, info: PanInfo) => {
     const offset = info.offset.x;
@@ -302,27 +244,27 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
           )}
           <CardContent className={cn("p-4 space-y-3", isCancelledOrInactive && reservation.status !== 'completed' && "relative")}>
             {/* Header: Date, Time & Status */}
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-medium">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+              <div className="space-y-1 min-w-0">
+                <div className="flex items-center gap-2 text-xs sm:text-sm font-medium min-w-0">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{format(new Date(reservation.pickup_date), 'EEEE, d MMMM', { locale: tr })}</span>
+                  <span className="truncate">{format(new Date(reservation.pickup_date), 'EEE, d MMM', { locale: tr })}</span>
                 </div>
-                <div className="flex items-center gap-2 text-lg font-bold">
+                <div className="flex items-center gap-2 text-base sm:text-lg font-bold">
                   <Clock className="h-4 w-4 text-primary" />
                   <span>{reservation.pickup_time}</span>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1.5">
+              <div className="flex flex-col sm:items-end gap-1.5">
                 {/* Update Available Badge - Show when confirmed but driver hasn't re-confirmed */}
                 {reservation.status === 'confirmed' && reservation.driver_confirmed === false && (
-                  <Badge className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg shadow-amber-500/30 animate-pulse font-bold">
+                  <Badge className="w-fit flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-lg shadow-amber-500/30 animate-pulse font-bold text-xs">
                     <RefreshCw className="h-4 w-4 animate-spin" style={{ animationDuration: '3s' }} />
                     <span>Güncelleme var!</span>
                   </Badge>
                 )}
                 <Badge className={cn(
-                  "flex items-center gap-1 px-3 py-1",
+                  "w-fit flex items-center gap-1 px-2.5 py-1 text-xs",
                   (reservation.status === 'pending') && "bg-gray-500/20 text-gray-700 border-gray-500",
                   (reservation.status === 'pending_admin_review') && "bg-purple-500/20 text-purple-700 border-purple-500",
                   (reservation.status === 'sent_to_driver' || reservation.status === 'assigned') && "bg-orange-500/20 text-orange-700 border-orange-500",
@@ -341,30 +283,30 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
 
             {/* Agency or Guest Badge */}
             {reservation.agency_id || reservation.agencies ? (
-              <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-950/40 dark:to-indigo-950/40 border border-purple-300 dark:border-purple-700 rounded-lg px-3 py-2 shadow-sm">
+              <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-indigo-100 dark:from-purple-950/40 dark:to-indigo-950/40 border border-purple-300 dark:border-purple-700 rounded-lg px-3 py-2 shadow-sm min-w-0">
                 <div className="bg-purple-500 p-1.5 rounded-full">
                   <Building2 className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-sm font-bold text-purple-800 dark:text-purple-200">
+                <span className="text-sm font-bold text-purple-800 dark:text-purple-200 truncate">
                   {t('agencyReservation')}: {reservation.agencies?.agency_name || 'Acenta'}
                 </span>
               </div>
             ) : (
-              <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2 shadow-sm">
+              <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-950/40 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2 shadow-sm min-w-0">
                 <div className="bg-blue-500 p-1.5 rounded-full">
                   <User className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-sm font-bold text-blue-800 dark:text-blue-200">
+                <span className="text-sm font-bold text-blue-800 dark:text-blue-200 truncate">
                   {t('guestReservation') || 'Misafir Rezervasyonu'}
                 </span>
               </div>
             )}
 
             {/* Customer Info */}
-            <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 bg-muted/50 rounded-lg px-3 py-2 min-w-0">
               <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              <span className="font-medium truncate">{reservation.customer_name}</span>
-              <span className="text-muted-foreground text-sm ml-auto">{reservation.customer_phone}</span>
+              <span className="font-medium truncate sm:max-w-[55%]">{reservation.customer_name}</span>
+              <span className="text-muted-foreground text-sm sm:ml-auto truncate">{reservation.customer_phone}</span>
             </div>
 
             {/* Route */}
@@ -391,33 +333,6 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
                     <Plane className="h-3 w-3" />
                     <span>{reservation.flight_number}</span>
                   </div>
-                  {/* Flight delay badge */}
-                  {flightDelay && flightDelay > 0 && (
-                    <div className="flex items-center gap-1 bg-amber-500/20 border border-amber-500/50 px-2 py-1 rounded text-xs text-amber-700">
-                      <AlertTriangle className="h-3 w-3" />
-                      <span>+{flightDelay} min</span>
-                    </div>
-                  )}
-                  {flightStatusValue === 'cancelled' && (
-                    <div className="flex items-center gap-1 bg-destructive/20 border border-destructive/50 px-2 py-1 rounded text-xs text-destructive">
-                      <AlertTriangle className="h-3 w-3" />
-                      <span>{t('cancel')}</span>
-                    </div>
-                  )}
-                  {shouldFetchFlightStatus && (
-                    <FlightStatus
-                      flightNumber={reservation.flight_number}
-                      date={reservation.pickup_date}
-                      compact
-                      refreshIntervalMs={0}
-                      className="hidden"
-                      onStatusChange={(status) => {
-                        const d = status.arrival?.delay || status.departure?.delay || 0;
-                        setFlightDelay(d);
-                        setFlightStatusValue(status.status?.toLowerCase() || null);
-                      }}
-                    />
-                  )}
                 </>
               )}
               <div className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs text-red-600">
@@ -469,23 +384,17 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
             {/* Passenger Cash Amount - Prominent Display */}
             {reservation.passenger_cash_amount && reservation.passenger_cash_amount > 0 && (
               <div className="bg-gradient-to-r from-emerald-500 to-green-600 dark:from-emerald-600 dark:to-green-700 rounded-xl px-4 py-3 shadow-lg">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <div className="bg-white/20 p-2 rounded-full">
                       <Banknote className="h-5 w-5 text-white" />
                     </div>
                     <span className="text-sm text-white/90 font-medium">{t('cashToCollect')}</span>
                   </div>
-                  <div className="text-right">
+                  <div className="text-left sm:text-right">
                     <div className="font-black text-2xl text-white drop-shadow-sm">
                       {getCurrencySymbol(reservation.passenger_cash_currency)}{reservation.passenger_cash_amount.toLocaleString('tr-TR')}
                     </div>
-                    {/* TL equivalent */}
-                    {tryAmount && reservation.passenger_cash_currency !== 'TRY' && (
-                      <div className="text-sm text-white/80 font-medium">
-                        ≈ ₺{tryAmount.toLocaleString('tr-TR')}
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -506,7 +415,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
 
             {/* Swipe hints - No price shown to drivers */}
             <div className="pt-2 border-t">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 {canSwipeRight && (
                   <span className="text-xs text-green-600 flex items-center gap-1">
                     <Play className="h-3 w-3" />

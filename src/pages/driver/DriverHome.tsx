@@ -151,31 +151,41 @@ const DriverHome = () => {
       const mergedRows = [...(actionableQuery.data || []), ...(completedQuery.data || [])];
       const sortedData = sortByPickupDateTime(mergedRows as Reservation[]);
       setReservations(sortedData);
-
-      const notesObj: Record<string, string> = {};
-      // Fetch admin notes for all reservations
-      if (sortedData.length > 0) {
-        const ids = sortedData.map(r => r.id);
-        const { data: notesData } = await supabase
-          .from('reservation_admin_notes')
-          .select('reservation_id, notes')
-          .in('reservation_id', ids);
-        
-        if (notesData) {
-          notesData.forEach(n => {
-            if (n.notes) notesObj[n.reservation_id] = n.notes;
-          });
-        }
-      }
-      setAdminNotesMap(notesObj);
+      setAdminNotesMap({});
 
       if (userId && driverId) {
         writeDriverBootstrapCache({
           userId,
           driverId,
           reservations: sortedData,
-          adminNotesMap: notesObj,
+          adminNotesMap: {},
         });
+      }
+
+      // Fetch admin notes in background to keep first render snappy.
+      if (sortedData.length > 0) {
+        const ids = sortedData.map((r) => r.id);
+        void supabase
+          .from('reservation_admin_notes')
+          .select('reservation_id, notes')
+          .in('reservation_id', ids)
+          .then(({ data: notesData }) => {
+            if (!notesData) return;
+            const notesObj: Record<string, string> = {};
+            notesData.forEach((n) => {
+              if (n.notes) notesObj[n.reservation_id] = n.notes;
+            });
+            setAdminNotesMap(notesObj);
+
+            if (userId && driverId) {
+              writeDriverBootstrapCache({
+                userId,
+                driverId,
+                reservations: sortedData,
+                adminNotesMap: notesObj,
+              });
+            }
+          });
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
