@@ -103,6 +103,50 @@ function detectCity(text: string): string | null {
   return null;
 }
 
+function endpointMentionsWord(text: string, word: string): boolean {
+  return new RegExp(`\\b${word}\\b`, "i").test(text);
+}
+
+const ANTALYA_CENTER_DISTRICTS = new Set([
+  "",
+  "antalya",
+  "antalya merkez",
+  "merkez",
+  "kaleici",
+  "muratpasa",
+]);
+
+function isAntalyaCenterEndpoint(city: string | null, district: string | null, sanitizedText: string): boolean {
+  const hasAntalyaWord = endpointMentionsWord(sanitizedText, "antalya");
+  if (city !== "Antalya" && !hasAntalyaWord) return false;
+
+  const districtNorm = sanitizeSearchQuery(district || "");
+  return ANTALYA_CENTER_DISTRICTS.has(districtNorm);
+}
+
+function isAlanyaEndpoint(district: string | null, sanitizedText: string): boolean {
+  return district === "Alanya" || endpointMentionsWord(sanitizedText, "alanya");
+}
+
+function isAntalyaCenterDistrictValue(value: string | null): boolean {
+  const normalized = sanitizeSearchQuery(value || "");
+  return ANTALYA_CENTER_DISTRICTS.has(normalized);
+}
+
+function isAntalyaAlanyaIntercityRecord(row: any): boolean {
+  const fromDistrict = sanitizeSearchQuery(String(row?.from_district || ""));
+  const toDistrict = sanitizeSearchQuery(String(row?.to_district || ""));
+  const fromHasAlanya = endpointMentionsWord(fromDistrict, "alanya");
+  const toHasAlanya = endpointMentionsWord(toDistrict, "alanya");
+
+  if (!fromHasAlanya && !toHasAlanya) return false;
+
+  if (fromHasAlanya && isAntalyaCenterDistrictValue(row?.to_district ?? null)) return true;
+  if (toHasAlanya && isAntalyaCenterDistrictValue(row?.from_district ?? null)) return true;
+
+  return false;
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -138,6 +182,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const pickupDistrict = detectDistrict(pickup);
     const dropoffDistrict = detectDistrict(dropoff);
     const district = pickupDistrict || dropoffDistrict;
+    const isAntalyaAlanyaRouteCandidate =
+      (isAlanyaEndpoint(pickupDistrict, pickupSanitized) && isAntalyaCenterEndpoint(dropoffCity, dropoffDistrict, dropoffSanitized)) ||
+      (isAlanyaEndpoint(dropoffDistrict, dropoffSanitized) && isAntalyaCenterEndpoint(pickupCity, pickupDistrict, pickupSanitized));
 
     let airport: string | null = null;
     
@@ -154,11 +201,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
       else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
     }
 
+    const isAntalyaAlanyaIntercityRoute = !airport && isAntalyaAlanyaRouteCandidate;
+
     // Determine if this is an intercity transfer (no airport):
     // - Different cities, OR same city with different districts (e.g. Antalya Alanya -> Antalya Kaş)
     const isIntercityTransfer =
       (pickupCity && dropoffCity && pickupCity !== dropoffCity) ||
-      (!airport && pickupDistrict && dropoffDistrict);
+      (!airport && pickupDistrict && dropoffDistrict) ||
+      (!airport && isAntalyaAlanyaIntercityRoute);
 
     // Frontend vehicle types
     const turkeyVehicles = [
@@ -289,7 +339,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           usedPlaceId = true;
         }
       }
-      if (!usedPlaceId) {
+      if (!usedPlaceId && !isAntalyaAlanyaIntercityRoute) {
         const res2 = await fetch(
           `${SUPABASE_URL}/rest/v1/region_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&and=(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)})&order=updated_at.desc`,
           { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
@@ -365,13 +415,21 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
       }
 
+      // Dedicated guard: Antalya(center) <-> Alanya must only use intercity rows for that exact pair.
+      if (isAntalyaAlanyaIntercityRoute) {
+        intercityPrices = intercityPrices.filter((row) => isAntalyaAlanyaIntercityRecord(row));
+      }
+
       if (intercityPrices.length > 0) usedIntercity = true;
     }
 
     // IMPORTANT: When intercity intent (different districts, e.g. Alanya->Kas) but NO intercity match,
     // do NOT fall back to region_prices - that would wrongly use airport->district price (e.g. 111€) for a long route.
     const hasGranularIntercityIntent = pickupDistrict && dropoffDistrict && !airport;
-    const skipRegionFallback = hasGranularIntercityIntent && usedIntercity === false && intercityPrices.length === 0;
+    const skipRegionFallback =
+      (hasGranularIntercityIntent || isAntalyaAlanyaIntercityRoute) &&
+      usedIntercity === false &&
+      intercityPrices.length === 0;
 
     // Apply strict monthly/seasonal filter: use price for pickup_date only (Place ID + text results)
     if (usedIntercity && pickupDateStr) {
