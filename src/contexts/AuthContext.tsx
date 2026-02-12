@@ -4,6 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { startOAuthSignIn } from '@/lib/oauthSignIn';
+import {
+  clearSupabaseAuthArtifacts,
+  consumeAuthSessionSyncHint,
+  waitForPersistedSession,
+} from '@/lib/supabaseAuthSession';
 
 interface AuthContextType {
   user: User | null;
@@ -26,6 +31,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
+    const applySessionState = (nextSession: Session | null) => {
+      if (!isMounted) return;
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+    };
+
+    const resolveHydratedSession = async (
+      initialSession: Session | null,
+      source: string,
+    ): Promise<Session | null> => {
+      if (initialSession?.user) return initialSession;
+
+      const hasOAuthOrRecoveryParams = (() => {
+        try {
+          const url = new URL(window.location.href);
+          const hash = url.hash || '';
+          return (
+            hash.includes('access_token=') ||
+            url.searchParams.has('code') ||
+            url.searchParams.get('type') === 'recovery'
+          );
+        } catch {
+          return false;
+        }
+      })();
+
+      const hadRecentSyncHint = consumeAuthSessionSyncHint();
+      const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
+
+      if (!hasOAuthOrRecoveryParams && !hadRecentSyncHint && !isIOS) {
+        return initialSession;
+      }
+
+      const timeoutMs = hasOAuthOrRecoveryParams || hadRecentSyncHint ? 5000 : 2500;
+      const hydrated = await waitForPersistedSession({ timeoutMs, intervalMs: 150 });
+      if (!hydrated && (hasOAuthOrRecoveryParams || hadRecentSyncHint)) {
+        console.warn(`[AuthContext] Session hydration timed out (${source})`);
+      }
+
+      return hydrated ?? initialSession;
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
@@ -36,42 +83,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Handle sign out - ensure clean state
         if (event === 'SIGNED_OUT') {
           console.log('[AuthContext] User signed out, clearing state');
-          setSession(null);
-          setUser(null);
+          applySessionState(null);
+          clearSupabaseAuthArtifacts();
           return;
         }
-        
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        // INITIAL auth load controls loading; onAuthStateChange should not.
 
-        // Do not auto-redirect on sign-in here.
-        // Redirecting is handled by dedicated pages (OAuthCallback) and login screens.
-        if (event === 'SIGNED_IN') {
-          return;
+        let resolvedSession = currentSession ?? null;
+
+        // Rare race: event received before session is fully persisted.
+        if (!resolvedSession && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+          resolvedSession = await resolveHydratedSession(resolvedSession, `event:${event}`);
         }
+
+        if (!isMounted) return;
+        applySessionState(resolvedSession);
       }
     );
 
     // THEN check for existing session (including OAuth callback tokens in URL)
     const initializeAuth = async () => {
       try {
-        let { data: { session: existingSession } } = await supabase.auth.getSession();
-        // iOS WebKit: getSession bazen ilk seferde null döner - birkaç kez kademeli olarak tekrar deneyin
-        const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
-        if (!existingSession && isIOS) {
-          const delays = [100, 250, 500, 1000]; // 4 deneme: 100ms, 250ms, 500ms, 1s
-          for (const delay of delays) {
-            await new Promise(r => setTimeout(r, delay));
-            const retry = await supabase.auth.getSession();
-            existingSession = retry.data.session;
-            if (existingSession) break;
-          }
-        }
-        if (isMounted) {
-          setSession(existingSession);
-          setUser(existingSession?.user ?? null);
-        }
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        const hydratedSession = await resolveHydratedSession(existingSession ?? null, 'initialize');
+        applySessionState(hydratedSession ?? null);
       } catch (error) {
         console.error('Auth initialization error:', error);
       } finally {
@@ -79,13 +113,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     
-    initializeAuth();
+    void initializeAuth();
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -158,9 +192,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    let signOutError: unknown = null;
+
     try {
       console.log('[AuthContext] Signing out...');
-      // Clear state immediately before calling signOut
+      // Clear state immediately to unblock UI.
       setUser(null);
       setSession(null);
       
@@ -168,18 +204,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       
       if (error) {
-        console.error('[AuthContext] Sign out error:', error);
-        toast.error('Error signing out');
-        return;
+        signOutError = error;
       }
-      
-      console.log('[AuthContext] Signed out successfully');
-      toast.success('Signed out successfully');
-      navigate('/auth', { replace: true });
     } catch (error) {
-      console.error('[AuthContext] Sign out exception:', error);
-      toast.error('Error signing out');
+      signOutError = error;
+    } finally {
+      clearSupabaseAuthArtifacts();
+      navigate('/auth', { replace: true });
     }
+
+    if (signOutError) {
+      console.error('[AuthContext] Sign out error:', signOutError);
+      toast.error('Error signing out');
+      return;
+    }
+
+    console.log('[AuthContext] Signed out successfully');
+    toast.success('Signed out successfully');
   };
 
   return (

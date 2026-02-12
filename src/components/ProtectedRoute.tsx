@@ -45,9 +45,9 @@ const ProtectedRoute = ({
     return <Navigate to={redirectTo} replace />;
   }
 
-  // If role is still unknown after grace period, fall back to least-privileged area.
+  // If role is still unknown after grace period, force re-auth for the current area.
   if (!role) {
-    return <Navigate to="/customer" replace />;
+    return <Navigate to={redirectTo} replace />;
   }
 
   // Redirect if user doesn't have required role

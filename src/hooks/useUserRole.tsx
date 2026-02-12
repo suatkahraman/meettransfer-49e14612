@@ -5,15 +5,20 @@ import { supabase } from '@/integrations/supabase/client';
 export type AppRole = 'admin' | 'driver' | 'customer' | 'agency';
 
 export const useUserRole = () => {
-  const { user } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [driverId, setDriverId] = useState<string | null>(null);
   const [agencyId, setAgencyId] = useState<string | null>(null);
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchRole = async () => {
+      if (authLoading) return;
+
       if (!user) {
+        if (!isActive) return;
         setRole(null);
         setDriverId(null);
         setAgencyId(null);
@@ -21,11 +26,28 @@ export const useUserRole = () => {
         return;
       }
 
+      if (isActive) {
+        setLoading(true);
+        setDriverId(null);
+        setAgencyId(null);
+      }
+
       try {
-        // 1) Edge function (RLS bypass) - retry ile ayni cihazdan tekrar giris garantisi
-        const { data } = await supabase.auth.getSession();
-        const token = data?.session?.access_token;
-        // Ayni cihazdan 2. giris: retry ile get-user-role guvencesi (cold start, network)
+        // Prefer AuthContext session first; fall back to getSession only when needed.
+        let token = session?.access_token ?? null;
+        if (!token) {
+          const retryDelays = [120, 260, 420];
+          for (const delay of retryDelays) {
+            await new Promise((r) => setTimeout(r, delay));
+            const { data } = await supabase.auth.getSession();
+            if (data?.session?.access_token) {
+              token = data.session.access_token;
+              break;
+            }
+          }
+        }
+
+        // 1) Edge function (RLS bypass) - retry with small backoff
         if (token) {
           const delays = [0, 400, 800, 1200];
           for (let attempt = 0; attempt < delays.length; attempt++) {
@@ -35,6 +57,7 @@ export const useUserRole = () => {
             });
             if (fnData?.success && fnData?.role) {
               const detectedRole = fnData.role as AppRole;
+              if (!isActive) return;
               setRole(detectedRole);
               setDriverId(fnData.driverId || null);
               setAgencyId(fnData.agencyId || null);
@@ -58,6 +81,7 @@ export const useUserRole = () => {
             .select('id')
             .eq('user_id', user.id)
             .maybeSingle();
+          if (!isActive) return;
           if (driverRow?.id) {
             setRole('driver');
             setDriverId(driverRow.id);
@@ -66,6 +90,7 @@ export const useUserRole = () => {
           }
         } else {
           const detectedRole = (roleData.role as AppRole) || 'customer';
+          if (!isActive) return;
           setRole(detectedRole);
 
           if (roleData?.role === 'driver') {
@@ -74,6 +99,7 @@ export const useUserRole = () => {
               .select('id')
               .eq('user_id', user.id)
               .maybeSingle();
+            if (!isActive) return;
             setDriverId(driverData?.id || null);
           }
 
@@ -83,19 +109,25 @@ export const useUserRole = () => {
               .select('id')
               .eq('user_id', user.id)
               .maybeSingle();
+            if (!isActive) return;
             setAgencyId(agencyData?.id || null);
           }
         }
       } catch (error) {
         console.error('[useUserRole] Error:', error);
+        if (!isActive) return;
         setRole('customer');
       } finally {
-        setLoading(false);
+        if (isActive) setLoading(false);
       }
     };
 
-    fetchRole();
-  }, [user]);
+    void fetchRole();
+
+    return () => {
+      isActive = false;
+    };
+  }, [authLoading, user?.id, session?.access_token]);
 
   return { role, loading, driverId, agencyId };
 };
