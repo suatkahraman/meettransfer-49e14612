@@ -41,6 +41,15 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
 
+const ISTANBUL_DISTRICTS = new Set([
+  "taksim", "sultanahmet", "kadikoy", "besiktas", "sisli", "levent", "atasehir", "bakirkoy",
+]);
+const ANKARA_DISTRICTS = new Set(["pursaklar", "kecioren", "ulus", "cankaya merkez", "mamak", "yenimahalle merkez"]);
+const ANTALYA_DISTRICTS = new Set(["alanya", "belek", "side", "kemer", "lara", "kundu", "manavgat"]);
+const BODRUM_DISTRICTS = new Set(["bodrum merkez", "turgutreis", "yalikavak", "gumbet", "bitez"]);
+const DALAMAN_DISTRICTS = new Set(["fethiye", "oludeniz", "marmaris", "dalyan"]);
+const IZMIR_DISTRICTS = new Set(["cesme", "alacati", "kusadasi"]);
+
 function normalizeTurkish(text: string): string {
   return text
     .replace(/İ/g, 'I').replace(/ı/g, 'i')
@@ -73,6 +82,18 @@ function detectCity(text: string): string | null {
 
 function applyIntracityAirportDiscount(price: number): number {
   return Math.max(1, Math.ceil(price * (1 - INTRACITY_AIRPORT_DISCOUNT_RATE)));
+}
+
+function inferCityFromDistrict(district: string | null): string | null {
+  if (!district) return null;
+  const normalizedDistrict = normalizeTurkish(district).toLowerCase();
+  if (ISTANBUL_DISTRICTS.has(normalizedDistrict)) return "Istanbul";
+  if (ANKARA_DISTRICTS.has(normalizedDistrict)) return "Ankara";
+  if (ANTALYA_DISTRICTS.has(normalizedDistrict)) return "Antalya";
+  if (BODRUM_DISTRICTS.has(normalizedDistrict)) return "Bodrum";
+  if (DALAMAN_DISTRICTS.has(normalizedDistrict)) return "Dalaman";
+  if (IZMIR_DISTRICTS.has(normalizedDistrict)) return "Izmir";
+  return null;
 }
 
 // ---- Minimal helpers ----
@@ -233,36 +254,42 @@ async function findBestPrice(vehicleType: string, city: string | null, airport: 
 async function findIntracityAirportReferencePrice(
   vehicleType: string,
   city: string | null,
-  targetDistrict: string | null,
+  pickupDistrict: string | null,
+  dropoffDistrict: string | null,
 ): Promise<Record<string, unknown> | null> {
-  if (!city || !targetDistrict) return null;
+  if (!city) return null;
 
-  let prices = await supabaseQuery("region_prices", {
+  const districtCandidates = [pickupDistrict, dropoffDistrict].filter(
+    (district, index, arr): district is string => !!district && arr.indexOf(district) === index,
+  );
+
+  for (const targetDistrict of districtCandidates) {
+    const lookupDistricts = [targetDistrict, normalizeTurkish(targetDistrict)];
+    for (const lookupDistrict of lookupDistricts) {
+      const prices = await supabaseQuery("region_prices", {
+        vehicle_type: `eq.${vehicleType}`,
+        city: `ilike.${city}`,
+        district: `ilike.${lookupDistrict}`,
+        airport: "not.is.null",
+        is_active: "eq.true",
+        select: "*",
+        order: "price.asc",
+        limit: "1",
+      });
+      if (prices?.[0]) return prices[0];
+    }
+  }
+
+  const cityAirportPrices = await supabaseQuery("region_prices", {
     vehicle_type: `eq.${vehicleType}`,
     city: `ilike.${city}`,
-    district: `ilike.${targetDistrict}`,
     airport: "not.is.null",
     is_active: "eq.true",
     select: "*",
     order: "price.asc",
     limit: "1",
   });
-  if (prices?.[0]) return prices[0];
-
-  const normalizedTargetDistrict = normalizeTurkish(targetDistrict);
-  if (normalizedTargetDistrict.toLowerCase() !== targetDistrict.toLowerCase()) {
-    prices = await supabaseQuery("region_prices", {
-      vehicle_type: `eq.${vehicleType}`,
-      city: `ilike.${city}`,
-      district: `ilike.${normalizedTargetDistrict}`,
-      airport: "not.is.null",
-      is_active: "eq.true",
-      select: "*",
-      order: "price.asc",
-      limit: "1",
-    });
-  }
-  if (prices?.[0]) return prices[0];
+  if (cityAirportPrices?.[0]) return cityAirportPrices[0];
 
   return null;
 }
@@ -313,20 +340,25 @@ Deno.serve(async (req) => {
       direction,
       confidence,
     } = analyzeSimple(reservation.pickup, reservation.dropoff);
+    const pickupDistrictCity = inferCityFromDistrict(pickupDistrict);
+    const dropoffDistrictCity = inferCityFromDistrict(dropoffDistrict);
+    const resolvedPickupCity = pickupCity || pickupDistrictCity;
+    const resolvedDropoffCity = dropoffCity || dropoffDistrictCity;
+    const resolvedCity = resolvedPickupCity || resolvedDropoffCity || city;
+    const intracityCity =
+      resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity === resolvedDropoffCity
+        ? resolvedPickupCity
+        : null;
 
-    if (!city && !airport) {
+    if (!resolvedCity && !airport) {
       await sendManualEmail(reservation, { airport, city, district, direction, confidence });
       return new Response(JSON.stringify({ matched: false, reason: "no_location_match" }), { headers: corsHeaders });
     }
 
     const isTurkeyIntracityAddressTransfer =
       !airport &&
-      !!pickupCity &&
-      !!dropoffCity &&
-      pickupCity === dropoffCity &&
-      !!pickupDistrict &&
-      !!dropoffDistrict &&
-      TURKEY_INTRACITY_DISCOUNT_CITIES.has(pickupCity);
+      !!intracityCity &&
+      TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity);
 
     // Find best price with fallback strategies
     let bestPrice: Record<string, unknown> | null = null;
@@ -335,8 +367,9 @@ Deno.serve(async (req) => {
     if (isTurkeyIntracityAddressTransfer) {
       const referencePrice = await findIntracityAirportReferencePrice(
         reservation.vehicle_type,
-        pickupCity || dropoffCity,
-        dropoffDistrict || district,
+        intracityCity || resolvedCity,
+        pickupDistrict,
+        dropoffDistrict,
       );
       if (referencePrice) {
         const basePrice = Number(referencePrice.price || 0);
@@ -350,13 +383,13 @@ Deno.serve(async (req) => {
     }
 
     if (!bestPrice) {
-      bestPrice = await findBestPrice(reservation.vehicle_type, city, airport, district);
+      bestPrice = await findBestPrice(reservation.vehicle_type, resolvedCity, airport, district);
       priceSource = "region_prices";
     }
 
     if (!bestPrice) {
       await sendManualEmail(reservation, { airport, city, district, direction, confidence });
-      return new Response(JSON.stringify({ matched: false, reason: "no_price_found", debug: { city, airport, district, vehicleType: reservation.vehicle_type } }), { headers: corsHeaders });
+      return new Response(JSON.stringify({ matched: false, reason: "no_price_found", debug: { city: resolvedCity, airport, district, vehicleType: reservation.vehicle_type } }), { headers: corsHeaders });
     }
 
     const baseCurrency = (bestPrice.price_currency as string) || "EUR";
@@ -389,7 +422,7 @@ Deno.serve(async (req) => {
       matched: true,
       price: finalPrice,
       currency: finalCurrency,
-      matchedCity: city,
+      matchedCity: resolvedCity,
       matchedAirport: airport,
       matchedDistrict: district,
       matchedPickupDistrict: pickupDistrict,
