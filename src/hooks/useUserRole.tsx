@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 export type AppRole = 'admin' | 'driver' | 'customer' | 'agency';
 
 export const useUserRole = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [driverId, setDriverId] = useState<string | null>(null);
@@ -22,9 +22,8 @@ export const useUserRole = () => {
       }
 
       try {
-        // 1) Edge function (RLS bypass) - retry ile ayni cihazdan tekrar giris garantisi
-        const { data } = await supabase.auth.getSession();
-        const token = data?.session?.access_token;
+        // 1) Edge function (RLS bypass) - token AuthContext'ten gelir (getUser ile doğrulanmış)
+        const token = session?.access_token;
         // Ayni cihazdan 2. giris: retry ile get-user-role guvencesi (cold start, network)
         if (token) {
           const delays = [0, 400, 800, 1200];
@@ -95,7 +94,7 @@ export const useUserRole = () => {
     };
 
     fetchRole();
-  }, [user]);
+  }, [user?.id, session?.access_token]);
 
   return { role, loading, driverId, agencyId };
 };

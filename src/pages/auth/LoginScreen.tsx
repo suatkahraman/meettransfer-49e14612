@@ -414,6 +414,12 @@ const LoginScreen = () => {
         safeLocalRemove('guestSavedEmail');
       }
 
+      // Clean start: stale auth state can survive in browser storage and break repeat logins.
+      const { error: cleanupError } = await supabase.auth.signOut({ scope: 'local' });
+      if (cleanupError) {
+        console.warn('[LoginScreen] pre-login signOut warning:', cleanupError.message);
+      }
+
       setSuppressAuthRedirect();
       
       const { error, data: authData } = await supabase.auth.signInWithPassword({

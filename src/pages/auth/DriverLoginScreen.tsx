@@ -194,6 +194,12 @@ const DriverLoginScreen = () => {
         safeLocalRemove('driverSavedEmail');
       }
 
+      // Clean start: stale auth storage/cookie artifacts can block second login on same device.
+      const { error: cleanupError } = await supabase.auth.signOut({ scope: 'local' });
+      if (cleanupError) {
+        console.warn('[DriverLoginScreen] pre-login signOut warning:', cleanupError.message);
+      }
+
       // Şoför girişi - 2FA yok
       const { error, data: authData } = await supabase.auth.signInWithPassword({
         email: validation.email,

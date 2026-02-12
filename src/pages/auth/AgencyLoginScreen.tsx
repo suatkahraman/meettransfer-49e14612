@@ -235,6 +235,12 @@ const AgencyLoginScreen = () => {
         safeLocalRemove('agencySavedEmail');
       }
 
+      // Clean start: remove stale local auth state before attempting a fresh login.
+      const { error: cleanupError } = await supabase.auth.signOut({ scope: 'local' });
+      if (cleanupError) {
+        console.warn('[AgencyLoginScreen] pre-login signOut warning:', cleanupError.message);
+      }
+
       // Prevent global auth redirect racing our 2FA flow
       setSuppressAuthRedirect();
 

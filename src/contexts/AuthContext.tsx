@@ -25,53 +25,134 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let isMounted = true;
+    let syncRunId = 0;
+
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const getSessionWithRetry = async (allowIOSRetry = false): Promise<Session | null> => {
+      let { data: { session: existingSession } } = await supabase.auth.getSession();
+
+      // iOS WebKit: getSession bazen ilk seferde null döner - kademeli tekrar dene
+      if (!existingSession && allowIOSRetry) {
+        const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
+        if (isIOS) {
+          const delays = [100, 250, 500, 1000];
+          for (const delay of delays) {
+            await wait(delay);
+            const retry = await supabase.auth.getSession();
+            existingSession = retry.data.session;
+            if (existingSession) break;
+          }
+        }
+      }
+
+      return existingSession;
+    };
+
+    // Next.js middleware kullanmayan bu istemcide, session'ı server tarafında doğrulamak
+    // için getSession + getUser kombinasyonunu zorunlu tutuyoruz.
+    const syncValidatedSession = async (
+      reason: string,
+      incomingSession?: Session | null,
+      options?: { allowIOSRetry?: boolean }
+    ) => {
+      const runId = ++syncRunId;
+
+      try {
+        let candidateSession = incomingSession ?? null;
+        if (!candidateSession) {
+          candidateSession = await getSessionWithRetry(Boolean(options?.allowIOSRetry));
+        }
+
+        if (!candidateSession) {
+          if (isMounted && runId === syncRunId) {
+            setSession(null);
+            setUser(null);
+          }
+          return;
+        }
+
+        const validationDelays = [0, 150, 300];
+        let verifiedUser: User | null = null;
+        for (const delay of validationDelays) {
+          if (delay > 0) {
+            await wait(delay);
+          }
+
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          if (userData?.user) {
+            verifiedUser = userData.user;
+            break;
+          }
+
+          const errorMessage = (userError?.message || '').toLowerCase();
+          const tokenLikelyInvalid = userError?.status === 401
+            || errorMessage.includes('jwt')
+            || errorMessage.includes('token')
+            || errorMessage.includes('session');
+
+          if (tokenLikelyInvalid) {
+            break;
+          }
+        }
+
+        if (!verifiedUser) {
+          console.warn(`[AuthContext] ${reason}: getUser validation failed, clearing local auth state.`);
+          await supabase.auth.signOut({ scope: 'local' });
+          if (isMounted && runId === syncRunId) {
+            setSession(null);
+            setUser(null);
+          }
+          return;
+        }
+
+        // Fresh object refs ensure SIGNED_IN/TOKEN_REFRESHED always propagate to listeners.
+        const normalizedUser = { ...verifiedUser } as User;
+        const normalizedSession = {
+          ...candidateSession,
+          user: normalizedUser,
+        } as Session;
+
+        if (isMounted && runId === syncRunId) {
+          setSession(normalizedSession);
+          setUser(normalizedUser);
+        }
+      } catch (error) {
+        console.error(`[AuthContext] ${reason} sync error:`, error);
+        if (isMounted && runId === syncRunId) {
+          setSession(null);
+          setUser(null);
+        }
+      }
+    };
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         if (!isMounted) return;
-        
+
         console.log('[AuthContext] onAuthStateChange event:', event);
-        
-        // Handle sign out - ensure clean state
+
         if (event === 'SIGNED_OUT') {
           console.log('[AuthContext] User signed out, clearing state');
           setSession(null);
           setUser(null);
           return;
         }
-        
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        // INITIAL auth load controls loading; onAuthStateChange should not.
 
-        // Do not auto-redirect on sign-in here.
-        // Redirecting is handled by dedicated pages (OAuthCallback) and login screens.
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          await syncValidatedSession(`onAuthStateChange:${event}`, currentSession);
           return;
         }
+
+        await syncValidatedSession(`onAuthStateChange:${event}`, currentSession);
       }
     );
 
     // THEN check for existing session (including OAuth callback tokens in URL)
     const initializeAuth = async () => {
       try {
-        let { data: { session: existingSession } } = await supabase.auth.getSession();
-        // iOS WebKit: getSession bazen ilk seferde null döner - birkaç kez kademeli olarak tekrar deneyin
-        const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
-        if (!existingSession && isIOS) {
-          const delays = [100, 250, 500, 1000]; // 4 deneme: 100ms, 250ms, 500ms, 1s
-          for (const delay of delays) {
-            await new Promise(r => setTimeout(r, delay));
-            const retry = await supabase.auth.getSession();
-            existingSession = retry.data.session;
-            if (existingSession) break;
-          }
-        }
-        if (isMounted) {
-          setSession(existingSession);
-          setUser(existingSession?.user ?? null);
-        }
+        await syncValidatedSession('initializeAuth', null, { allowIOSRetry: true });
       } catch (error) {
         console.error('Auth initialization error:', error);
       } finally {
@@ -89,6 +170,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Clean start: drop potentially stale local auth token before a new login attempt.
+      const { error: cleanupError } = await supabase.auth.signOut({ scope: 'local' });
+      if (cleanupError) {
+        console.warn('[AuthContext] pre-login signOut warning:', cleanupError.message);
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
