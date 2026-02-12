@@ -291,14 +291,6 @@ const WebsiteHeader = () => {
                         <span className="font-medium">{label}</span>
                       </Link>
                     ))}
-                    <Link
-                      to="/auth"
-                      className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <LogIn className="h-5 w-5" />
-                      <span className="font-medium">{t("admin") || "Admin Girişi"}</span>
-                    </Link>
                   </>
                 )}
               </div>
