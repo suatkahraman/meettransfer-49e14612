@@ -111,6 +111,15 @@ const CITIES_DATA = {
   }
 };
 
+const ANTALYA_INTERCITY_ONLY_DISTRICTS = new Set([
+  'Alanya',
+  'Mahmutlar',
+  'Okurcalar',
+  'Avsallar',
+  'Konakli',
+  'Incekum',
+]);
+
 // Vehicle types - synced with src/lib/vehicleTypes.ts
 // Use centralized vehicle types from lib
 import { VEHICLE_TYPE_OPTIONS as VEHICLE_TYPES } from '@/lib/vehicleTypes';
@@ -328,6 +337,10 @@ const AdminRegionPrices = () => {
     const hasAnyPrice = Object.values(formPrices).some(p => parseFloat(p) > 0);
     if (!formCity || !formDistrict || !hasAnyPrice) {
       toast.error('Lütfen tüm zorunlu alanları doldurun ve en az bir araç fiyatı girin');
+      return;
+    }
+    if (formCity === 'Antalya' && ANTALYA_INTERCITY_ONLY_DISTRICTS.has(formDistrict)) {
+      toast.error('Antalya-Alanya fiyatları sadece "Şehirler Arası" sekmesinden yönetilir');
       return;
     }
 
@@ -616,7 +629,12 @@ const AdminRegionPrices = () => {
   });
 
   const availableAirports = formCity ? (CITIES_DATA as any)[formCity]?.airports || [] : [];
-  const availableDistricts = formCity ? (CITIES_DATA as any)[formCity]?.districts || [] : [];
+  const availableDistricts = formCity
+    ? (((CITIES_DATA as any)[formCity]?.districts || []) as string[]).filter(
+        (district) =>
+          !(formCity === 'Antalya' && ANTALYA_INTERCITY_ONLY_DISTRICTS.has(district))
+      )
+    : [];
   
   // Intercity districts (including airports)
   const intercityFromDistricts = intercityFromCity ? [
