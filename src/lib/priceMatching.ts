@@ -742,11 +742,10 @@ function parseGoogleMapsLocation(location: string): ParsedLocation {
 export async function matchPrice(
   pickup: string,
   dropoff: string,
-  vehicleType: string,
-  distanceKm?: number
+  vehicleType: string
 ): Promise<MatchResult> {
   try {
-    console.log('🔍 Price matching started:', { pickup, dropoff, vehicleType, distanceKm });
+    console.log('🔍 Price matching started:', { pickup, dropoff, vehicleType });
     
     const pickupParsed = parseGoogleMapsLocation(pickup);
     const dropoffParsed = parseGoogleMapsLocation(dropoff);
@@ -772,36 +771,6 @@ export async function matchPrice(
     }
     
     console.log('🚗 Transfer info:', { airport, city, district });
-
-    // ---- KM-BASED PRICING (HIGHEST PRIORITY) ----
-    if (city && distanceKm && distanceKm > 0) {
-      const currentMonth = new Date().getMonth() + 1;
-      const roundedKm = Math.round(distanceKm);
-      
-      const { data: kmMatch, error: kmError } = await supabase
-        .from('km_based_prices')
-        .select('*')
-        .ilike('city', city)
-        .eq('month', currentMonth)
-        .lte('km_from', roundedKm)
-        .gte('km_to', roundedKm)
-        .eq('vehicle_type', vehicleType)
-        .eq('is_active', true)
-        .limit(1);
-      
-      if (!kmError && kmMatch && kmMatch.length > 0) {
-        console.log('✅ KM-based price found:', kmMatch[0]);
-        return {
-          found: true,
-          price: kmMatch[0].price,
-          currency: kmMatch[0].price_currency,
-          matchedCity: kmMatch[0].city,
-          matchedDistrict: `${kmMatch[0].km_from}-${kmMatch[0].km_to} km`,
-          confidence: 'high',
-          matchType: 'exact',
-        };
-      }
-    }
     
     // Convert airport name to DB code (e.g., 'Ercan Airport (ECN)' -> 'ECN')
     let airportDbCode: string | null = null;

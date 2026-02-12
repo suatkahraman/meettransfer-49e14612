@@ -194,7 +194,6 @@ const BookingPage = () => {
   const [detectedRegion, setDetectedRegion] = useState<string | null>(null);
   const hasFetchedInitialPrices = useRef(false);
   const googleAuthRef = useRef(searchParams.get("googleAuth") === "true");
-  const [routeDistanceKm, setRouteDistanceKm] = useState<number | null>(null);
   
   // Discount state
   const [discountApplied, setDiscountApplied] = useState(false);
@@ -594,7 +593,6 @@ const BookingPage = () => {
             dropoff_place_id: dropoffPlaceId || undefined,
             customerCurrency: preferredCurrency,
             pickup_date: effectiveDate || undefined,
-            distance_km: routeDistanceKm || undefined,
           },
         });
 
@@ -629,7 +627,7 @@ const BookingPage = () => {
     fetchPrices();
     
     return () => { cancelled = true; };
-  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, effectiveDate, preferredCurrency, isHourlyBooking, routeDistanceKm]);
+  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, effectiveDate, preferredCurrency, isHourlyBooking]);
 
   // Extract city from address for hourly pricing
   const extractCityFromAddress = (address: string): string | null => {
@@ -1704,7 +1702,6 @@ const BookingPage = () => {
                   pickup={effectivePickup} 
                   dropoff={effectiveDropoff}
                   mapHeight="250px"
-                  onDistanceChange={setRouteDistanceKm}
                 />
               </CardContent>
             </Card>
@@ -1990,7 +1987,6 @@ const BookingPage = () => {
                                 dropoff_place_id: dropoffPlaceId || undefined,
                                 customerCurrency: currency.value,
                                 pickup_date: effectiveDate || undefined,
-                                distance_km: routeDistanceKm || undefined,
                               },
                             }).then(({ data }) => {
                               if (data?.prices) {

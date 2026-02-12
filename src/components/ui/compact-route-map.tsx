@@ -8,7 +8,6 @@ interface CompactRouteMapProps {
   dropoff: string;
   className?: string;
   mapHeight?: string; // e.g., "200px", "280px" - defaults to "140px"
-  onDistanceChange?: (distanceKm: number | null) => void;
 }
 
 interface Coordinates {
@@ -26,7 +25,6 @@ const CompactRouteMapComponent = ({
   dropoff,
   className,
   mapHeight = "140px",
-  onDistanceChange,
 }: CompactRouteMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
@@ -90,7 +88,6 @@ const CompactRouteMapComponent = ({
       setLoading(true);
       setError(null);
       setTripInfo(null);
-      onDistanceChange?.(null);
       setPickupCoords(null);
       setDropoffCoords(null);
 
@@ -223,11 +220,6 @@ const CompactRouteMapComponent = ({
                   duration: leg.duration?.text || '',
                   distance: leg.distance?.text || '',
                 });
-                // Report distance in km back to parent
-                if (leg.distance?.value && onDistanceChange) {
-                  const km = Math.round(leg.distance.value / 1000);
-                  onDistanceChange(km > 0 ? km : null);
-                }
               }
             }
             setLoading(false);

@@ -372,35 +372,11 @@ Deno.serve(async (req) => {
         !!fallbackSharedCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(fallbackSharedCity)
       ));
 
-    // ---- KM-BASED PRICING (highest priority when available) ----
-    // Use pickup_date month + city to check km_based_prices (base 1-50 km)
+    // Find best price with fallback strategies
     let bestPrice: Record<string, unknown> | null = null;
     let priceSource = "region_prices";
 
-    if (resolvedCity && reservation.pickup_date) {
-      try {
-        const pickupMonth = new Date(reservation.pickup_date).getMonth() + 1;
-        // Try base price (1-50 km) from km_based_prices as a city+month pricing
-        const kmPrices = await supabaseQuery("km_based_prices", {
-          city: `ilike.${resolvedCity}`,
-          month: `eq.${pickupMonth}`,
-          km_from: "eq.1",
-          km_to: "eq.50",
-          vehicle_type: `eq.${reservation.vehicle_type}`,
-          is_active: "eq.true",
-          select: "*",
-          limit: "1",
-        });
-        if (kmPrices?.[0]) {
-          bestPrice = kmPrices[0];
-          priceSource = "km_based_prices";
-        }
-      } catch (e) {
-        console.error("km_based_prices lookup failed", e);
-      }
-    }
-
-    if (!bestPrice && isTurkeyIntracityAddressTransfer) {
+    if (isTurkeyIntracityAddressTransfer) {
       const referencePrice = await findIntracityAirportReferencePrice(
         reservation.vehicle_type,
         intracityCity || fallbackSharedCity || resolvedCity,

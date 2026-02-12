@@ -723,51 +723,6 @@ export type Database = {
         }
         Relationships: []
       }
-      km_based_prices: {
-        Row: {
-          id: string
-          city: string
-          month: number
-          km_from: number
-          km_to: number
-          vehicle_type: string
-          price: number
-          price_currency: string
-          is_active: boolean
-          created_by: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          city: string
-          month: number
-          km_from: number
-          km_to: number
-          vehicle_type?: string
-          price: number
-          price_currency?: string
-          is_active?: boolean
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          city?: string
-          month?: number
-          km_from?: number
-          km_to?: number
-          vehicle_type?: string
-          price?: number
-          price_currency?: string
-          is_active?: boolean
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       hourly_rental_prices: {
         Row: {
           city: string
