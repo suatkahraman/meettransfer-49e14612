@@ -1,9 +1,11 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
+import { readDriverBootstrapCache, writeDriverBootstrapCache } from '@/lib/driverBootstrapCache';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, History } from 'lucide-react';
@@ -91,7 +93,9 @@ interface DriverHomeContext {
 }
 
 const DriverHome = () => {
+  const { user } = useAuth();
   const { driverId } = useUserRole();
+  const userId = user?.id ?? null;
   const navigate = useNavigate();
   const { t } = useDriverTranslations();
   const context = useOutletContext<DriverHomeContext>();
@@ -101,6 +105,7 @@ const DriverHome = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { playSound } = useNotificationSound();
+  const cacheHydratedRef = useRef(false);
   
   const pullY = useMotionValue(0);
   const pullProgress = useTransform(pullY, [0, PULL_THRESHOLD], [0, 1]);
@@ -146,7 +151,8 @@ const DriverHome = () => {
       const mergedRows = [...(actionableQuery.data || []), ...(completedQuery.data || [])];
       const sortedData = sortByPickupDateTime(mergedRows as Reservation[]);
       setReservations(sortedData);
-      
+
+      const notesObj: Record<string, string> = {};
       // Fetch admin notes for all reservations
       if (sortedData.length > 0) {
         const ids = sortedData.map(r => r.id);
@@ -156,21 +162,42 @@ const DriverHome = () => {
           .in('reservation_id', ids);
         
         if (notesData) {
-          const notesObj: Record<string, string> = {};
           notesData.forEach(n => {
             if (n.notes) notesObj[n.reservation_id] = n.notes;
           });
-          setAdminNotesMap(notesObj);
         }
-      } else {
-        setAdminNotesMap({});
+      }
+      setAdminNotesMap(notesObj);
+
+      if (userId && driverId) {
+        writeDriverBootstrapCache({
+          userId,
+          driverId,
+          reservations: sortedData,
+          adminNotesMap: notesObj,
+        });
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
     }
     setLoading(false);
     setRefreshing(false);
-  }, [driverId, t]);
+  }, [driverId, t, userId]);
+
+  useEffect(() => {
+    cacheHydratedRef.current = false;
+  }, [driverId, userId]);
+
+  useEffect(() => {
+    if (!driverId || !userId || cacheHydratedRef.current) return;
+    const cached = readDriverBootstrapCache(userId, driverId);
+    if (!cached) return;
+
+    cacheHydratedRef.current = true;
+    setReservations(sortByPickupDateTime(cached.reservations as Reservation[]));
+    setAdminNotesMap(cached.adminNotesMap);
+    setLoading(false);
+  }, [driverId, userId]);
 
   const handlePullEnd = async (_: any, info: PanInfo) => {
     if (info.offset.y > PULL_THRESHOLD && !refreshing) {

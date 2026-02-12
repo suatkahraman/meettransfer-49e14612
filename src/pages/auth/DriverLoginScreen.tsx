@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { primeUserRoleCache, useUserRole } from '@/hooks/useUserRole';
@@ -15,6 +15,7 @@ import { ArrowLeft, Loader2, Car, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
 import { normalizePasswordInput } from '@/lib/normalizePasswordInput';
+import { prefetchDriverBootstrap } from '@/lib/driverBootstrapCache';
 import { useStorageAvailable } from '@/hooks/useStorageAvailable';
 import { usePWADetect } from '@/hooks/usePWADetect';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
@@ -64,6 +65,18 @@ const DriverLoginScreen = () => {
   const { available: storageAvailable, checked: storageChecked } = useStorageAvailable();
   const { isIOS, isStandalone } = usePWADetect();
   const { registerTrustedDevice } = useTwoFactorAuth();
+  const warmDriverChunks = useCallback(() => {
+    void import('../driver/DriverHome');
+    void import('../driver/DriverJobList');
+    void import('../../components/driver/DriverLayout');
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      warmDriverChunks();
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [warmDriverChunks]);
 
   // Lockout countdown timer
   useEffect(() => {
@@ -268,6 +281,8 @@ const DriverLoginScreen = () => {
           driverId: roleCheck.driverId,
           agencyId: null,
         });
+        void prefetchDriverBootstrap(authData.user.id, roleCheck.driverId);
+        warmDriverChunks();
         // Driver icin otomatik cihaza guven - mevcut driverlar sorun yasamasin
         registerTrustedDevice(authData.user.id).catch(() => {});
         // Session is already established by signInWithPassword.
