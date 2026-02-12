@@ -523,7 +523,7 @@ function normalizeLocation(location: string): string {
     .replace(/türkiye|turkey|türkei|turkiye/gi, '')
     .replace(/,\s*(tr|turkey)$/i, '')
     .replace(/\(.*?\)/g, '')
-    .replace(/[,.\-_\/\\#&]/g, ' ')
+    .replace(/[,.\-_/\\#&]/g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/ı/g, 'i')
     .replace(/ğ/g, 'g')

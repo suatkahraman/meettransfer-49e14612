@@ -52,7 +52,12 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Türkiye şehirleri ve havalimanları
-const CITIES_DATA = {
+type CityData = {
+  airports: string[];
+  districts: string[];
+};
+
+const CITIES_DATA: Record<string, CityData> = {
   'Istanbul': {
     airports: ['Istanbul Airport (IST)', 'Sabiha Gokcen Airport (SAW)'],
     districts: ['Taksim', 'Sultanahmet', 'Kadikoy', 'Besiktas', 'Sisli', 'Fatih', 'Beyoglu', 'Uskudar', 'Bakirkoy', 'Atasehir', 'Maltepe', 'Pendik', 'Kartal', 'Sariyer', 'Zeytinburnu', 'Mecidiyekoy', 'Levent', 'Maslak', 'Yenikoy', 'Bebek', 'Ortakoy', 'Nisantasi', 'Cihangir', 'Galata', 'Karakoy', 'Eminonu', 'Balat', 'Eyup', 'Sile', 'Buyukcekmece', 'Beylikduzu', 'Avcilar', 'Arnavutkoy', 'Catalca', 'Silivri', 'Bagcilar', 'Bahcelievler', 'Gungoren', 'Esenler', 'Gaziosmanpasa', 'Sultangazi', 'Kucukcekmece', 'Esenyurt', 'Basaksehir', 'Kartal', 'Tuzla', 'Cekmekoy', 'Sancaktepe', 'Sultanbeyli', 'Beykoz']
@@ -619,17 +624,17 @@ const AdminRegionPrices = () => {
     return matchesSearch && matchesPriceType && matchesMonth;
   });
 
-  const availableAirports = formCity ? (CITIES_DATA as any)[formCity]?.airports || [] : [];
-  const availableDistricts = formCity ? (CITIES_DATA as any)[formCity]?.districts || [] : [];
+  const availableAirports = formCity ? CITIES_DATA[formCity]?.airports || [] : [];
+  const availableDistricts = formCity ? CITIES_DATA[formCity]?.districts || [] : [];
   
   // Intercity districts (including airports)
   const intercityFromDistricts = intercityFromCity ? [
-    ...((CITIES_DATA as any)[intercityFromCity]?.airports || []),
-    ...((CITIES_DATA as any)[intercityFromCity]?.districts || [])
+    ...(CITIES_DATA[intercityFromCity]?.airports || []),
+    ...(CITIES_DATA[intercityFromCity]?.districts || [])
   ] : [];
   const intercityToDistricts = intercityToCity ? [
-    ...((CITIES_DATA as any)[intercityToCity]?.airports || []),
-    ...((CITIES_DATA as any)[intercityToCity]?.districts || [])
+    ...(CITIES_DATA[intercityToCity]?.airports || []),
+    ...(CITIES_DATA[intercityToCity]?.districts || [])
   ] : [];
   
   const handleTest = async () => {
