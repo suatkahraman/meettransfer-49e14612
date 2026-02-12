@@ -48,6 +48,13 @@ const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: number }>
       'antalya international', 'ayt airport', 'antalya havaalani'
     ]
   },
+  'Gazipasa-Alanya Airport (GZP)': {
+    priority: 2,
+    keywords: [
+      'gazipasa airport', 'gazipaşa airport', 'gazipasa alanya airport',
+      'gazipaşa alanya airport', 'gzp', 'gzp airport', 'alanya airport'
+    ]
+  },
   'Bodrum-Milas Airport (BJV)': {
     priority: 1,
     keywords: [
@@ -145,11 +152,20 @@ const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = 
     priority: 1,
     keywords: [
       'antalya', 'kaleici', 'kaleiçi', 'konyaalti', 'konyaaltı', 'lara', 
-      'belek', 'side', 'alanya', 'kemer', 'kas', 'kaş', 'kalkan', 'manavgat',
+      'belek', 'side', 'kemer', 'kas', 'kaş', 'kalkan', 'manavgat',
       'serik', 'kundu', 'beldibi', 'goynuk', 'göynük', 'tekirova', 'cirali', 'çıralı',
       'olympos', 'kadriye', 'bogazkent', 'boğazkent', 'kumkoy', 'kumköy',
-      'colakli', 'çolaklı', 'evrenseki', 'titreyengol', 'mahmutlar', 'okurcalar',
-      'avsallar', 'konakli', 'konaklı', 'incekum'
+      'colakli', 'çolaklı', 'evrenseki', 'titreyengol'
+    ]
+  },
+  'Alanya': {
+    priority: 1,
+    keywords: [
+      'alanya', 'alanya center', 'alanya merkez', 'alanya castle',
+      'mahmutlar', 'kestel', 'tosmur', 'oba', 'cikcilli',
+      'konakli', 'konaklı', 'payallar', 'turkler', 'türkler',
+      'avsallar', 'incekum', 'okurcalar', 'kargicak', 'kargıcak',
+      'demirtas', 'demirtaş', 'gazipasa', 'gazipaşa'
     ]
   },
   'Bodrum': {
@@ -309,7 +325,7 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Sancaktepe': { priority: 2, keywords: ['sancaktepe'], city: 'Istanbul' },
   'Sultanbeyli': { priority: 2, keywords: ['sultanbeyli'], city: 'Istanbul' },
   
-  // Antalya - Each district matches DB exactly (Beldibi, Goynuk, Tekirova, Cirali, Olympos are separate from Kemer)
+  // Antalya - Each district matches DB exactly (Alanya is now a separate city)
   'Kaleici': { priority: 1, keywords: ['kaleici', 'kaleiçi', 'old town antalya', 'old city antalya', 'antalya old town', 'antalya', 'antalya center', 'antalya merkez'], city: 'Antalya' },
   'Konyaalti': { priority: 1, keywords: ['konyaalti', 'konyaaltı', 'konyaalti beach', 'konyaaltı plajı', 'konyaalti plaji'], city: 'Antalya' },
   'Lara': { priority: 1, keywords: ['lara', 'lara beach', 'lara plaji', 'lara plajı'], city: 'Antalya' },
@@ -319,7 +335,6 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Serik': { priority: 2, keywords: ['serik'], city: 'Antalya' },
   'Side': { priority: 1, keywords: ['side', 'kumkoy', 'kumköy', 'colakli', 'çolaklı', 'evrenseki', 'titreyengol', 'titreyen gol', 'sorgun'], city: 'Antalya' },
   'Manavgat': { priority: 1, keywords: ['manavgat', 'gundogdu', 'gündoğdu'], city: 'Antalya' },
-  'Alanya': { priority: 1, keywords: ['alanya', 'mahmutlar', 'okurcalar', 'avsallar', 'konakli', 'konaklı', 'incekum', 'alanya castle'], city: 'Antalya' },
   'Kemer': { priority: 1, keywords: ['kemer', 'kemer center', 'kemer merkez', 'kemer marina', 'camyuva', 'kiriş', 'kiris'], city: 'Antalya' },
   'Beldibi': { priority: 1, keywords: ['beldibi', 'beldib'], city: 'Antalya' },
   'Goynuk': { priority: 1, keywords: ['goynuk', 'göynük', 'goynuk canyon', 'göynük kanyonu'], city: 'Antalya' },
@@ -328,6 +343,23 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Olympos': { priority: 1, keywords: ['olympos', 'olimpos'], city: 'Antalya' },
   'Kas': { priority: 1, keywords: ['kas', 'kaş', 'patara'], city: 'Antalya' },
   'Kalkan': { priority: 1, keywords: ['kalkan', 'saklikent', 'saklıkent', 'xanthos', 'letoon'], city: 'Antalya' },
+
+  // Alanya - Separate city and districts
+  'Alanya': { priority: 1, keywords: ['alanya', 'alanya center', 'alanya merkez', 'alanya castle'], city: 'Alanya' },
+  'Mahmutlar': { priority: 1, keywords: ['mahmutlar'], city: 'Alanya' },
+  'Kestel': { priority: 1, keywords: ['kestel'], city: 'Alanya' },
+  'Tosmur': { priority: 1, keywords: ['tosmur'], city: 'Alanya' },
+  'Oba': { priority: 1, keywords: ['oba', 'oba mahallesi'], city: 'Alanya' },
+  'Cikcilli': { priority: 1, keywords: ['cikcilli', 'cikilli'], city: 'Alanya' },
+  'Konakli': { priority: 1, keywords: ['konakli', 'konaklı'], city: 'Alanya' },
+  'Payallar': { priority: 1, keywords: ['payallar'], city: 'Alanya' },
+  'Turkler': { priority: 1, keywords: ['turkler', 'türkler'], city: 'Alanya' },
+  'Avsallar': { priority: 1, keywords: ['avsallar'], city: 'Alanya' },
+  'Incekum': { priority: 1, keywords: ['incekum', 'ince kum'], city: 'Alanya' },
+  'Okurcalar': { priority: 1, keywords: ['okurcalar'], city: 'Alanya' },
+  'Kargicak': { priority: 1, keywords: ['kargicak', 'kargıcak'], city: 'Alanya' },
+  'Demirtas': { priority: 1, keywords: ['demirtas', 'demirtaş'], city: 'Alanya' },
+  'Gazipasa': { priority: 1, keywords: ['gazipasa', 'gazipaşa'], city: 'Alanya' },
   
   // Bodrum - Each district separate for exact matching
   'Bodrum Center': { priority: 1, keywords: ['bodrum center', 'bodrum merkez', 'bodrum centrum', 'bodrum city', 'bodrum town', 'bodrum castle', 'bodrum marina', 'bodrum'], city: 'Bodrum' },
@@ -470,6 +502,7 @@ const AIRPORT_TO_DB_CODE: Record<string, string> = {
   'Istanbul Airport (IST)': 'IST',
   'Sabiha Gokcen Airport (SAW)': 'SAW',
   'Antalya Airport (AYT)': 'AYT',
+  'Gazipasa-Alanya Airport (GZP)': 'GZP',
   'Bodrum-Milas Airport (BJV)': 'BJV',
   'Dalaman Airport (DLM)': 'DLM',
   'Izmir Adnan Menderes Airport (ADB)': 'ADB',
@@ -490,7 +523,7 @@ function normalizeLocation(location: string): string {
     .replace(/türkiye|turkey|türkei|turkiye/gi, '')
     .replace(/,\s*(tr|turkey)$/i, '')
     .replace(/\(.*?\)/g, '')
-    .replace(/[,.\-_\/\\#&]/g, ' ')
+    .replace(/[,.\-_/\\#&]/g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/ı/g, 'i')
     .replace(/ğ/g, 'g')
@@ -524,6 +557,7 @@ const AIRPORT_TO_CITY: Record<string, string> = {
   'Istanbul Airport (IST)': 'Istanbul',
   'Sabiha Gokcen Airport (SAW)': 'Istanbul',
   'Antalya Airport (AYT)': 'Antalya',
+  'Gazipasa-Alanya Airport (GZP)': 'Alanya',
   'Bodrum-Milas Airport (BJV)': 'Bodrum',
   'Dalaman Airport (DLM)': 'Dalaman',
   'Izmir Adnan Menderes Airport (ADB)': 'Izmir',
