@@ -402,7 +402,11 @@ const ReservationForm = () => {
               pricesMap[p.vehicleType] = numericPrice;
             }
           });
-          setVehiclePrices(pricesMap);
+          if (Object.keys(pricesMap).length > 0) {
+            setVehiclePrices(pricesMap);
+          } else {
+            setVehiclePrices(prev => (Object.keys(prev).length === 0 ? prev : {}));
+          }
           setPriceLookupMessage(hasAvailablePrice ? null : (message || getPriceNotFoundMessage()));
         } else {
           setVehiclePrices(prev => (Object.keys(prev).length === 0 ? prev : {}));
