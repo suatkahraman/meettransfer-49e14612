@@ -68,6 +68,11 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
 const EDGE_FETCH_TIMEOUT_MS = 8000;
 
+function isSameCity(a: string | null, b: string | null): boolean {
+  if (!a || !b) return false;
+  return normalizeTurkish(a).toLowerCase() === normalizeTurkish(b).toLowerCase();
+}
+
 const ISTANBUL_DISTRICTS = new Set([
   "taksim", "sultanahmet", "kadikoy", "besiktas", "sisli", "levent", "atasehir", "bakirkoy",
   "ortakoy", "bebek", "fatih", "beyoglu", "uskudar", "maltepe", "pendik", "kartal",
@@ -206,6 +211,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
       resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity === resolvedDropoffCity
         ? resolvedPickupCity
         : null;
+    const fallbackSharedCity =
+      !intracityCity && resolvedPickupCity && resolvedDropoffCity && isSameCity(resolvedPickupCity, resolvedDropoffCity)
+        ? resolvedPickupCity
+        : null;
+    const sameResolvedCity = !!intracityCity || !!fallbackSharedCity;
 
     let airport: string | null = null;
     
@@ -224,18 +234,22 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const isIntracityAddressTransfer =
       !airport &&
-      !!intracityCity &&
-      TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity);
+      ((
+        !!intracityCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity)
+      ) || (
+        !!fallbackSharedCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(fallbackSharedCity)
+      ));
 
     // Determine if this is an intercity transfer (no airport):
     // - Different cities, OR same city with different districts (e.g. Antalya Alanya -> Antalya Kaş)
+    const hasDifferentResolvedCities =
+      !!resolvedPickupCity &&
+      !!resolvedDropoffCity &&
+      !isSameCity(resolvedPickupCity, resolvedDropoffCity);
     const isIntercityTransfer =
       !airport &&
       !isIntracityAddressTransfer &&
-      (
-        (resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity !== resolvedDropoffCity) ||
-        (!!pickupDistrict && !!dropoffDistrict)
-      );
+      hasDifferentResolvedCities;
 
     // Frontend vehicle types
     const turkeyVehicles = [
@@ -461,9 +475,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     // Şehir içi adresten adrese kuralı:
     // hedef semtin havalimanı fiyatını baz alıp %10 daha ucuz hesapla.
-    if (isIntracityAddressTransfer && intracityCity) {
+    const intracityReferenceCity = intracityCity || fallbackSharedCity;
+    if (isIntracityAddressTransfer && intracityReferenceCity) {
       intracityReferencePrices = await fetchIntracityAirportReferencePrices(
-        intracityCity,
+        intracityReferenceCity,
         pickupDistrict,
         dropoffDistrict,
       );
@@ -513,69 +528,76 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (!usedIntracityAirportDiscount && !usedPlaceId && isIntercityTransfer && !airport) {
       const fromCity = resolvedPickupCity || city!;
       const toCity = resolvedDropoffCity || city!;
+      const sameRouteCity = isSameCity(fromCity, toCity) || sameResolvedCity;
 
-      // STRICT: When BOTH districts are known (e.g. Alanya -> Kaş), ONLY use exact district-to-district match.
-      // Strategy I2/I3 (single district) can return multiple routes (Alanya->Lara, Alanya->Belek, Alanya->Kas)
-      // and pick wrong price (e.g. 111€ instead of 190€ for Alanya->Kaş).
-      const hasExactRouteIntent = pickupDistrict && dropoffDistrict;
+      if (!sameRouteCity) {
+        // STRICT: When BOTH districts are known (e.g. Alanya -> Kaş), ONLY use exact district-to-district match.
+        // Strategy I2/I3 (single district) can return multiple routes (Alanya->Lara, Alanya->Belek, Alanya->Kas)
+        // and pick wrong price (e.g. 111€ instead of 190€ for Alanya->Kaş).
+        const hasExactRouteIntent = pickupDistrict && dropoffDistrict;
 
-      // Strategy I1: from_district + to_district + cities (REQUIRED when both districts known)
-      if (pickupDistrict && dropoffDistrict) {
-        intercityPrices = await queryTable("intercity_prices", {
-          from_city: `ilike.${fromCity}`,
-          to_city: `ilike.${toCity}`,
-          from_district: `ilike.${pickupDistrict}`,
-          to_district: `ilike.${dropoffDistrict}`,
-        });
-
-        // Also try reverse direction
-        if (intercityPrices.length === 0) {
-          intercityPrices = await queryTable("intercity_prices", {
-            from_city: `ilike.${toCity}`,
-            to_city: `ilike.${fromCity}`,
-            from_district: `ilike.${dropoffDistrict}`,
-            to_district: `ilike.${pickupDistrict}`,
-          });
-        }
-      }
-
-      // Strategy I2/I3: ONLY when we don't have both districts - avoids wrong cross-route price
-      if (!hasExactRouteIntent) {
-        if (intercityPrices.length === 0 && pickupDistrict) {
+        // Strategy I1: from_district + to_district + cities (REQUIRED when both districts known)
+        if (pickupDistrict && dropoffDistrict) {
           intercityPrices = await queryTable("intercity_prices", {
             from_city: `ilike.${fromCity}`,
             to_city: `ilike.${toCity}`,
             from_district: `ilike.${pickupDistrict}`,
-          });
-        }
-        if (intercityPrices.length === 0 && dropoffDistrict) {
-          intercityPrices = await queryTable("intercity_prices", {
-            from_city: `ilike.${fromCity}`,
-            to_city: `ilike.${toCity}`,
             to_district: `ilike.${dropoffDistrict}`,
           });
-        }
-        // Strategy I4: cities only - SKIP when we have district-level intent
-        if (intercityPrices.length === 0 && fromCity && toCity) {
-          intercityPrices = await queryTable("intercity_prices", {
-            from_city: `ilike.${fromCity}`,
-            to_city: `ilike.${toCity}`,
-          });
-          if (intercityPrices.length === 0 && fromCity !== toCity) {
+
+          // Also try reverse direction
+          if (intercityPrices.length === 0) {
             intercityPrices = await queryTable("intercity_prices", {
               from_city: `ilike.${toCity}`,
               to_city: `ilike.${fromCity}`,
+              from_district: `ilike.${dropoffDistrict}`,
+              to_district: `ilike.${pickupDistrict}`,
             });
           }
         }
-      }
 
-      if (intercityPrices.length > 0) usedIntercity = true;
+        // Strategy I2/I3: ONLY when we don't have both districts - avoids wrong cross-route price
+        if (!hasExactRouteIntent) {
+          if (intercityPrices.length === 0 && pickupDistrict) {
+            intercityPrices = await queryTable("intercity_prices", {
+              from_city: `ilike.${fromCity}`,
+              to_city: `ilike.${toCity}`,
+              from_district: `ilike.${pickupDistrict}`,
+            });
+          }
+          if (intercityPrices.length === 0 && dropoffDistrict) {
+            intercityPrices = await queryTable("intercity_prices", {
+              from_city: `ilike.${fromCity}`,
+              to_city: `ilike.${toCity}`,
+              to_district: `ilike.${dropoffDistrict}`,
+            });
+          }
+          // Strategy I4: cities only - SKIP when we have district-level intent
+          if (intercityPrices.length === 0 && fromCity && toCity) {
+            intercityPrices = await queryTable("intercity_prices", {
+              from_city: `ilike.${fromCity}`,
+              to_city: `ilike.${toCity}`,
+            });
+            if (intercityPrices.length === 0 && fromCity !== toCity) {
+              intercityPrices = await queryTable("intercity_prices", {
+                from_city: `ilike.${toCity}`,
+                to_city: `ilike.${fromCity}`,
+              });
+            }
+          }
+        }
+
+        if (intercityPrices.length > 0) usedIntercity = true;
+      }
     }
 
     // IMPORTANT: When intercity intent (different districts, e.g. Alanya->Kas) but NO intercity match,
     // do NOT fall back to region_prices - that would wrongly use airport->district price (e.g. 111€) for a long route.
-    const hasGranularIntercityIntent = pickupDistrict && dropoffDistrict && !airport;
+    const hasGranularIntercityIntent =
+      !!pickupDistrict &&
+      !!dropoffDistrict &&
+      !airport &&
+      hasDifferentResolvedCities;
     const skipRegionFallback = hasGranularIntercityIntent && usedIntercity === false && intercityPrices.length === 0;
 
     // Apply strict monthly/seasonal filter: use price for pickup_date only (Place ID + text results)

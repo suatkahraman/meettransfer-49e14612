@@ -41,6 +41,11 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
 
+function isSameCity(a: string | null, b: string | null): boolean {
+  if (!a || !b) return false;
+  return normalizeTurkish(a).toLowerCase() === normalizeTurkish(b).toLowerCase();
+}
+
 const ISTANBUL_DISTRICTS = new Set([
   "taksim", "sultanahmet", "kadikoy", "besiktas", "sisli", "levent", "atasehir", "bakirkoy",
 ]);
@@ -349,6 +354,10 @@ Deno.serve(async (req) => {
       resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity === resolvedDropoffCity
         ? resolvedPickupCity
         : null;
+    const fallbackSharedCity =
+      !intracityCity && resolvedPickupCity && resolvedDropoffCity && isSameCity(resolvedPickupCity, resolvedDropoffCity)
+        ? resolvedPickupCity
+        : null;
 
     if (!resolvedCity && !airport) {
       await sendManualEmail(reservation, { airport, city, district, direction, confidence });
@@ -357,8 +366,11 @@ Deno.serve(async (req) => {
 
     const isTurkeyIntracityAddressTransfer =
       !airport &&
-      !!intracityCity &&
-      TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity);
+      ((
+        !!intracityCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity)
+      ) || (
+        !!fallbackSharedCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(fallbackSharedCity)
+      ));
 
     // Find best price with fallback strategies
     let bestPrice: Record<string, unknown> | null = null;
@@ -367,7 +379,7 @@ Deno.serve(async (req) => {
     if (isTurkeyIntracityAddressTransfer) {
       const referencePrice = await findIntracityAirportReferencePrice(
         reservation.vehicle_type,
-        intracityCity || resolvedCity,
+        intracityCity || fallbackSharedCity || resolvedCity,
         pickupDistrict,
         dropoffDistrict,
       );

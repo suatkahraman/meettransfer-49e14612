@@ -41,6 +41,11 @@ const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
 
 const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
 
+function isSameCity(a: string | null, b: string | null): boolean {
+  if (!a || !b) return false;
+  return normalizeTurkish(a).toLowerCase() === normalizeTurkish(b).toLowerCase();
+}
+
 const ISTANBUL_DISTRICTS = new Set([
   "taksim", "sultanahmet", "kadikoy", "besiktas", "sisli", "levent", "atasehir", "bakirkoy",
 ]);
@@ -418,6 +423,10 @@ Deno.serve(async (req) => {
       resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity === resolvedDropoffCity
         ? resolvedPickupCity
         : null;
+    const fallbackSharedCity =
+      !intracityCity && resolvedPickupCity && resolvedDropoffCity && isSameCity(resolvedPickupCity, resolvedDropoffCity)
+        ? resolvedPickupCity
+        : null;
 
     if (!resolvedCity && !airport) {
       await sendManualEmail(booking, { airport, city, district, direction, confidence });
@@ -426,17 +435,21 @@ Deno.serve(async (req) => {
 
     const isTurkeyIntracityAddressTransfer =
       !airport &&
-      !!intracityCity &&
-      TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity);
+      ((
+        !!intracityCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity)
+      ) || (
+        !!fallbackSharedCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(fallbackSharedCity)
+      ));
 
     // Determine if this is an intercity/intra-city transfer without airport
+    const hasDifferentResolvedCities =
+      !!resolvedPickupCity &&
+      !!resolvedDropoffCity &&
+      !isSameCity(resolvedPickupCity, resolvedDropoffCity);
     const isIntercityTransfer =
       !airport &&
       !isTurkeyIntracityAddressTransfer &&
-      (
-        (resolvedPickupCity && resolvedDropoffCity && resolvedPickupCity !== resolvedDropoffCity) ||
-        (!!pickupDistrict && !!dropoffDistrict)
-      );
+      hasDifferentResolvedCities;
 
     // Find best price: try intercity_prices first for non-airport, then fallback to region_prices
     let bestPrice: Record<string, unknown> | null = null;
@@ -445,7 +458,7 @@ Deno.serve(async (req) => {
     if (isTurkeyIntracityAddressTransfer) {
       const referencePrice = await findIntracityAirportReferencePrice(
         booking.vehicle_type,
-        intracityCity || resolvedCity,
+        intracityCity || fallbackSharedCity || resolvedCity,
         pickupDistrict,
         dropoffDistrict,
       );
@@ -461,6 +474,12 @@ Deno.serve(async (req) => {
     }
 
     if (!bestPrice && isIntercityTransfer && !airport) {
+      const fromCity = resolvedPickupCity || resolvedCity;
+      const toCity = resolvedDropoffCity || resolvedCity;
+      if (isSameCity(fromCity || null, toCity || null)) {
+        // Same-city routes should not consume intercity table prices.
+        bestPrice = null;
+      } else {
       bestPrice = await findIntercityPrice(
         booking.vehicle_type,
         resolvedPickupCity,
@@ -469,6 +488,7 @@ Deno.serve(async (req) => {
         dropoffDistrict,
       );
       if (bestPrice) priceSource = "intercity_prices";
+      }
     }
 
     // Fallback to region_prices
