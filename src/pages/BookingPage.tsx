@@ -45,6 +45,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
+import { getDirections } from "@/utils/googleMapsLoader";
 import { z } from "zod";
 
 // Session storage key for caching booking form state during Google OAuth
@@ -258,6 +259,8 @@ const BookingPage = () => {
   const [editableDropoff, setEditableDropoff] = useState("");
   const [pickupPlaceId, setPickupPlaceId] = useState<string | null>(null);
   const [dropoffPlaceId, setDropoffPlaceId] = useState<string | null>(null);
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
   
   // Initialize editable locations from URL params on mount
   useEffect(() => {
@@ -292,18 +295,22 @@ const BookingPage = () => {
     if (details?.formattedAddress) {
       setEditablePickup(details.formattedAddress);
       setPickupPlaceId(details.place_id || null);
+      setPickupCoords(details.lat != null && details.lng != null ? { lat: details.lat, lng: details.lng } : null);
     } else if (value) {
       setEditablePickup(value);
       setPickupPlaceId(null);
+      setPickupCoords(null);
     }
   }, []);
   const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => {
     if (details?.formattedAddress) {
       setEditableDropoff(details.formattedAddress);
       setDropoffPlaceId(details.place_id || null);
+      setDropoffCoords(details.lat != null && details.lng != null ? { lat: details.lat, lng: details.lng } : null);
     } else if (value) {
       setEditableDropoff(value);
       setDropoffPlaceId(null);
+      setDropoffCoords(null);
     }
   }, []);
 
@@ -583,6 +590,18 @@ const BookingPage = () => {
       
       const startTime = Date.now();
       const minLoadingTime = isInitialFetch ? 5000 : 800;
+
+      let distanceKm: number | undefined;
+      if (pickupCoords && dropoffCoords) {
+        try {
+          const directions = await getDirections(pickupCoords, dropoffCoords);
+          if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
+            distanceKm = directions.distanceKm;
+          }
+        } catch (_) {
+          // Mesafe alınamazsa devam et - backend şehir bazlı kontrol yapar
+        }
+      }
       
       try {
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
@@ -593,6 +612,7 @@ const BookingPage = () => {
             dropoff_place_id: dropoffPlaceId || undefined,
             customerCurrency: preferredCurrency,
             pickup_date: effectiveDate || undefined,
+            distance_km: distanceKm,
           },
         });
 
@@ -627,7 +647,7 @@ const BookingPage = () => {
     fetchPrices();
     
     return () => { cancelled = true; };
-  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, effectiveDate, preferredCurrency, isHourlyBooking]);
+  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, pickupCoords, dropoffCoords, effectiveDate, preferredCurrency, isHourlyBooking]);
 
   // Extract city from address for hourly pricing
   const extractCityFromAddress = (address: string): string | null => {

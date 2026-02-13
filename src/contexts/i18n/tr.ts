@@ -22,6 +22,7 @@ const translations = {
   "preparingBestPriceDesc": "Sizin için en iyi fiyatı hesaplıyoruz...",
   "bestPriceGuarantee": "En İyi Fiyat Garantisi",
   "noHiddenFees": "Gizli Ücret Yok",
+  "airportTransfer": "Havalimanı Transferi",
   "qbNewPriceReceived": "Yeni fiyat alındı! Artık inceleyip onaylayabilirsiniz.",
   "qbRequestReceived": "İstek Alındı",
   "qbCalculatingPrice": "Fiyat Hesaplanıyor",

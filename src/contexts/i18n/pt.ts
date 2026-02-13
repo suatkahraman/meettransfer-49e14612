@@ -94,6 +94,7 @@ const translations = {
   "preparingBestPriceDesc": "Estamos a calcular o melhor preço possível para si...",
   "bestPriceGuarantee": "Garantia de Melhor Preço",
   "noHiddenFees": "Sem Taxas Ocultas",
+  "airportTransfer": "Transfer Aeroporto",
   "qbNewPriceReceived": "Novo preço recebido! Pode agora rever e confirmar.",
   "qbRequestReceived": "Pedido Recebido",
   "qbCalculatingPrice": "A Calcular Preço",

@@ -22,6 +22,7 @@ const translations = {
   "preparingBestPriceDesc": "お客様に最適な価格を計算しています...",
   "bestPriceGuarantee": "最安値保証",
   "noHiddenFees": "隠れた料金なし",
+  "airportTransfer": "空港送迎",
   "qbNewPriceReceived": "新しい価格を受け取りました！確認してご承認ください。",
   "qbRequestReceived": "リクエスト受付済み",
   "qbCalculatingPrice": "価格計算中",

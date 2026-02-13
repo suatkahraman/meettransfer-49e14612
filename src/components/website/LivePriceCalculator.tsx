@@ -23,6 +23,7 @@ interface PriceResult {
   matched: boolean;
   matchedCity?: string;
   matchedAirport?: string;
+  transferType?: string | null;
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -214,9 +215,14 @@ const LivePriceCalculator = () => {
             >
               {availablePrices.length > 0 ? (
                 <>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-6">
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-6 flex-wrap">
                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                     {t("pricesFound") || "Prices found for your route"}
+                    {priceResult.transferType === "Airport Transfer" && (
+                      <span className="ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                        {t("airportTransfer") || "Airport Transfer"}
+                      </span>
+                    )}
                   </div>
                   
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">

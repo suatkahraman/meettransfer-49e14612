@@ -219,6 +219,7 @@ export const getDirections = async (
   route: any;
   duration: string;
   distance: string;
+  distanceKm: number | null;
 } | null> => {
   const maps = getGoogleMaps();
   if (!maps) return null;
@@ -234,10 +235,13 @@ export const getDirections = async (
       (result: any, status: string) => {
         if (status === 'OK' && result) {
           const leg = result.routes[0]?.legs[0];
+          const distanceValueMeters = leg?.distance?.value;
+          const distanceKm = typeof distanceValueMeters === 'number' ? distanceValueMeters / 1000 : null;
           resolve({
             route: result,
             duration: leg?.duration?.text || '',
             distance: leg?.distance?.text || '',
+            distanceKm,
           });
         } else {
           resolve(null);

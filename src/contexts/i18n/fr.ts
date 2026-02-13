@@ -22,6 +22,7 @@ const translations = {
   "preparingBestPriceDesc": "Nous calculons le meilleur prix possible pour vous...",
   "bestPriceGuarantee": "Garantie du meilleur prix",
   "noHiddenFees": "Sans frais cachés",
+  "airportTransfer": "Transfert aéroport",
   "qbNewPriceReceived": "Nouveau prix reçu ! Vous pouvez maintenant vérifier et confirmer.",
   "qbRequestReceived": "Demande reçue",
   "qbCalculatingPrice": "Calcul du prix",
