@@ -1,10 +1,10 @@
 {
-  "version": "2.6.10",
+  "version": "2.7.2",
   "releaseDate": "2026-02-13",
-  "buildNumber": 13,
+  "buildNumber": 14,
   "notes": {
-    "TR": "Rezervasyon oluşturma düzeltmesi, fiyat güncelleme iyileştirmesi",
-    "EN": "Booking creation fix, price update improvements",
+    "TR": "Şehir içi 50 km altı fiyat düzeltmesi, Math.min garantisi",
+    "EN": "Short distance pricing fix, Math.min guarantee",
     "DE": "Buchungserstellung behoben, Preisaktualisierung verbessert",
     "FR": "Correction de la création de réservation, amélioration des mises à jour de prix",
     "RU": "Исправление создания бронирования, улучшение обновления цен",
