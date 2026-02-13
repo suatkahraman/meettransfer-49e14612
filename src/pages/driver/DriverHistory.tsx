@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
@@ -247,8 +247,11 @@ const DriverHistory = () => {
                 transition={{ delay: index * 0.05 }}
               >
                 <Card 
-                  className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-green-500"
-                  onClick={() => navigate(`/driver/job/${reservation.id}`)}
+                  role="button"
+                  tabIndex={0}
+                  className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-green-500 touch-manipulation min-h-[44px]"
+                  onClick={() => startTransition(() => navigate(`/driver/job/${reservation.id}`))}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startTransition(() => navigate(`/driver/job/${reservation.id}`)); } }}
                 >
                   <CardContent className="p-4 space-y-3">
                     {/* Date & Time */}

@@ -176,8 +176,13 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   // Only allow swipe left if validation passes and not cancelled
   const canSwipeLeft = !isCancelledOrInactive && reservation.status === 'active' && onComplete && completionValidation.canComplete;
 
+  // onTap fires on quick tap (no drag) - critical for iOS where drag can block click
+  const handleTap = () => {
+    if (!isProcessing && onClick) onClick();
+  };
+
   return (
-    <div className="relative w-full max-w-full overflow-hidden rounded-xl">
+    <div className="relative w-full max-w-full overflow-hidden rounded-xl touch-manipulation">
       {/* Left background (Accept) */}
       {canSwipeRight && (
         <motion.div 
@@ -210,19 +215,22 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
         </motion.div>
       )}
 
-      {/* Main Card */}
+      {/* Main Card - onTap handles tap-to-navigate (iOS: drag can block onClick) */}
       <motion.div
         drag={canSwipeRight || canSwipeLeft ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.7}
         onDragEnd={handleDragEnd}
+        onTap={handleTap}
         style={{ x }}
         whileTap={{ scale: 0.98 }}
-        className="relative z-10"
+        className="relative z-10 touch-manipulation"
       >
         <Card 
+          role="button"
+          tabIndex={0}
           className={cn(
-            "cursor-pointer active:shadow-lg transition-all duration-300 border-l-4 relative overflow-hidden",
+            "cursor-pointer active:shadow-lg transition-all duration-300 border-l-4 relative overflow-hidden min-h-[44px]",
             // Updated reservation awaiting re-confirmation - special amber glow
             reservation.status === 'confirmed' && reservation.driver_confirmed === false 
               ? "border-amber-500 ring-2 ring-amber-400/50 shadow-lg shadow-amber-500/20 bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-950/30 dark:to-transparent" 
@@ -232,7 +240,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
             // Greyed out appearance for cancelled/inactive reservations
             isCancelledOrInactive && "opacity-60 grayscale-[30%]"
           )}
-          onClick={onClick}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.(); } }}
         >
           {/* Glow overlay for updated reservations */}
           {reservation.status === 'confirmed' && reservation.driver_confirmed === false && (

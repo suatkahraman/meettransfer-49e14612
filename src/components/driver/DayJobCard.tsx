@@ -53,13 +53,14 @@ const DayJobCard = ({
 
   return (
     <motion.button
+      type="button"
       onClick={onClick}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "w-full p-3 rounded-xl border transition-all duration-200",
+        "w-full p-3 min-h-[44px] rounded-xl border transition-all duration-200 touch-manipulation",
         "backdrop-blur-sm shadow-md hover:shadow-lg",
-        "flex items-center gap-3 text-left",
+        "flex items-center gap-3 text-left cursor-pointer",
         colors.bg,
         colors.border
       )}

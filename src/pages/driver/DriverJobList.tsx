@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, startTransition } from 'react';
 import { useNavigate, useParams, useSearchParams, useOutletContext } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -696,9 +696,13 @@ const DriverJobList = () => {
   const config = getPageConfig();
   const PageIcon = config.icon;
 
-  // Pull-to-refresh handlers
+  // Pull-to-refresh: only activate when touch starts in top zone to avoid blocking card taps
+  const PULL_ZONE_TOP_PX = 80;
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (containerRef.current && containerRef.current.scrollTop === 0) {
+    if (!containerRef.current || containerRef.current.scrollTop > 0) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const touchY = e.touches[0].clientY - rect.top;
+    if (touchY <= PULL_ZONE_TOP_PX) {
       touchStartY.current = e.touches[0].clientY;
       setIsPulling(true);
     }
@@ -727,7 +731,7 @@ const DriverJobList = () => {
   return (
     <div 
       ref={containerRef}
-      className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto"
+      className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto touch-manipulation"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -798,13 +802,14 @@ const DriverJobList = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ duration: 0.16, delay: Math.min(index, 2) * 0.02 }}
+                  className="touch-manipulation"
                 >
                   <SwipeableJobCard
                     reservation={reservation}
                     adminNotes={adminNotesMap[reservation.id]}
                     onAccept={jobType === 'pending' ? () => handleAcceptJob(reservation.id) : undefined}
                     onComplete={jobType === 'active' ? () => handleCompleteJob(reservation.id) : undefined}
-                    onClick={() => navigate(`/driver/job/${reservation.id}`)}
+                    onClick={() => startTransition(() => navigate(`/driver/job/${reservation.id}`))}
                   />
                 </motion.div>
               ))}
