@@ -64,7 +64,7 @@ export const primeUserRoleCache = (payload: {
 };
 
 export const useUserRole = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [driverId, setDriverId] = useState<string | null>(null);
@@ -131,9 +131,8 @@ export const useUserRole = () => {
       }
 
       try {
-        // 1) Edge function (RLS bypass) - single fast attempt
-        const { data } = await supabase.auth.getSession();
-        const token = data?.session?.access_token;
+        // 1) Edge function (RLS bypass) - single fast attempt, use session from AuthContext to avoid redundant getSession()
+        const token = session?.access_token;
         if (token) {
           const { data: fnData } = await supabase.functions.invoke('get-user-role', {
             headers: { Authorization: `Bearer ${token}` },
@@ -249,7 +248,7 @@ export const useUserRole = () => {
     };
 
     fetchRole();
-  }, [user]);
+  }, [user, session]);
 
   return { role, loading, driverId, agencyId };
 };

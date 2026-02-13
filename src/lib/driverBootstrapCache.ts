@@ -140,7 +140,8 @@ export const prefetchDriverBootstrap = async (userId: string, driverId: string |
         .eq('driver_id', driverId)
         .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active'])
         .order('pickup_date', { ascending: true })
-        .order('pickup_time', { ascending: true }),
+        .order('pickup_time', { ascending: true })
+        .limit(40),
       supabase
         .from('reservations')
         .select(BOOTSTRAP_RESERVATION_SELECT)
@@ -148,8 +149,9 @@ export const prefetchDriverBootstrap = async (userId: string, driverId: string |
         .eq('status', 'completed')
         .gte('pickup_date', firstDayOfCurrentMonth)
         .lte('pickup_date', lastDayOfCurrentMonth)
-        .order('pickup_date', { ascending: true })
-        .order('pickup_time', { ascending: true }),
+        .order('pickup_date', { ascending: false })
+        .order('pickup_time', { ascending: false })
+        .limit(40),
     ]);
 
     if (actionableQuery.error || completedQuery.error) return;
@@ -159,25 +161,12 @@ export const prefetchDriverBootstrap = async (userId: string, driverId: string |
       ...((completedQuery.data || []) as BootstrapReservation[]),
     ]);
 
-    const adminNotesMap: Record<string, string> = {};
-    if (reservations.length > 0) {
-      const { data: notesData } = await supabase
-        .from('reservation_admin_notes')
-        .select('reservation_id, notes')
-        .in('reservation_id', reservations.map((r) => r.id));
-
-      if (notesData) {
-        notesData.forEach((note) => {
-          if (note.notes) adminNotesMap[note.reservation_id] = note.notes;
-        });
-      }
-    }
-
+    // Admin notes deferred to job details view - speeds up login bootstrap
     writeDriverBootstrapCache({
       userId,
       driverId,
       reservations,
-      adminNotesMap,
+      adminNotesMap: {},
     });
   } catch {
     // Prefetch should never block login flow.

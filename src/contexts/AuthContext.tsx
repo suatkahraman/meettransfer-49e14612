@@ -30,20 +30,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         if (!isMounted) return;
-        
-        console.log('[AuthContext] onAuthStateChange event:', event);
-        
+
         // Handle sign out - ensure clean state
         if (event === 'SIGNED_OUT') {
-          console.log('[AuthContext] User signed out, clearing state');
           setSession(null);
           setUser(null);
           return;
         }
-        
+
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        // INITIAL auth load controls loading; onAuthStateChange should not.
 
         // Do not auto-redirect on sign-in here.
         // Redirecting is handled by dedicated pages (OAuthCallback) and login screens.
@@ -57,10 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = async () => {
       try {
         let { data: { session: existingSession } } = await supabase.auth.getSession();
-        // iOS WebKit: getSession bazen ilk seferde null döner - birkaç kez kademeli olarak tekrar deneyin
+        // iOS WebKit: getSession bazen ilk seferde null döner - kısa aralıklarla tekrar dene (toplam ~350ms)
         const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
         if (!existingSession && isIOS) {
-          const delays = [100, 250, 500, 1000]; // 4 deneme: 100ms, 250ms, 500ms, 1s
+          const delays = [50, 100, 200]; // 3 deneme: toplam 350ms
           for (const delay of delays) {
             await new Promise(r => setTimeout(r, delay));
             const retry = await supabase.auth.getSession();
@@ -159,21 +155,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      console.log('[AuthContext] Signing out...');
       // Clear state immediately before calling signOut
       setUser(null);
       setSession(null);
-      
+
       // Use scope: 'global' to sign out from all tabs/windows
       const { error } = await supabase.auth.signOut({ scope: 'global' });
-      
+
       if (error) {
         console.error('[AuthContext] Sign out error:', error);
         toast.error('Error signing out');
         return;
       }
-      
-      console.log('[AuthContext] Signed out successfully');
+
       toast.success('Signed out successfully');
       navigate('/auth', { replace: true });
     } catch (error) {

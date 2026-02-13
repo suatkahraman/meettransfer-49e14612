@@ -72,9 +72,7 @@ const DriverLoginScreen = () => {
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      warmDriverChunks();
-    }, 700);
+    const timer = window.setTimeout(warmDriverChunks, 200);
     return () => window.clearTimeout(timer);
   }, [warmDriverChunks]);
 
@@ -274,7 +272,7 @@ const DriverLoginScreen = () => {
           return;
         }
 
-        await logLoginAttempt(validation.email, true, undefined, undefined, 'driver');
+        void logLoginAttempt(validation.email, true, undefined, undefined, 'driver');
         primeUserRoleCache({
           userId: authData.user.id,
           role: 'driver',

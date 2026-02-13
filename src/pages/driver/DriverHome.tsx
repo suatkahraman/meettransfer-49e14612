@@ -149,6 +149,7 @@ const DriverHome = () => {
     const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
     const lastDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
+    // Limit to 40 rows each - profile + active tasks only for fast dashboard load
     const [actionableQuery, completedQuery] = await Promise.all([
       supabase
         .from('reservations')
@@ -156,7 +157,8 @@ const DriverHome = () => {
         .eq('driver_id', driverId)
         .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active'])
         .order('pickup_date', { ascending: true })
-        .order('pickup_time', { ascending: true }),
+        .order('pickup_time', { ascending: true })
+        .limit(40),
       supabase
         .from('reservations')
         .select(LIST_RESERVATION_SELECT)
@@ -164,8 +166,9 @@ const DriverHome = () => {
         .eq('status', 'completed')
         .gte('pickup_date', firstDayOfCurrentMonth)
         .lte('pickup_date', lastDayOfCurrentMonth)
-        .order('pickup_date', { ascending: true })
-        .order('pickup_time', { ascending: true }),
+        .order('pickup_date', { ascending: false })
+        .order('pickup_time', { ascending: false })
+        .limit(40),
     ]);
 
     if (actionableQuery.error || completedQuery.error) {
