@@ -195,6 +195,7 @@ const BookingPage = () => {
   const [detectedRegion, setDetectedRegion] = useState<string | null>(null);
   const hasFetchedInitialPrices = useRef(false);
   const googleAuthRef = useRef(searchParams.get("googleAuth") === "true");
+  const lastDistanceKmRef = useRef<number | undefined>(undefined);
   
   // Discount state
   const [discountApplied, setDiscountApplied] = useState(false);
@@ -597,12 +598,13 @@ const BookingPage = () => {
           const directions = await getDirections(pickupCoords, dropoffCoords);
           if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
             distanceKm = directions.distanceKm;
+            lastDistanceKmRef.current = distanceKm;
           }
         } catch (_) {
           // Mesafe alınamazsa devam et - backend şehir bazlı kontrol yapar
         }
       }
-      
+
       try {
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: {
@@ -612,7 +614,7 @@ const BookingPage = () => {
             dropoff_place_id: dropoffPlaceId || undefined,
             customerCurrency: preferredCurrency,
             pickup_date: effectiveDate || undefined,
-            distance_km: distanceKm,
+            distance_km: distanceKm, // KM only - from getDirections (meters/1000)
           },
         });
 
@@ -2007,6 +2009,7 @@ const BookingPage = () => {
                                 dropoff_place_id: dropoffPlaceId || undefined,
                                 customerCurrency: currency.value,
                                 pickup_date: effectiveDate || undefined,
+                                distance_km: lastDistanceKmRef.current,
                               },
                             }).then(({ data }) => {
                               if (data?.prices) {

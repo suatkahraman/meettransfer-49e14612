@@ -430,12 +430,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const vehicleTypes = isDubai ? dubaiVehicles : turkeyVehicles;
 
     // ========== TÜRKİYE: SADECE KM BAZLI (distance_pricing_rules) ==========
-    const distanceKm = typeof body.distance_km === "number" && Number.isFinite(body.distance_km) ? body.distance_km : null;
+    // Frontend must send distance in KM (Google Maps returns meters - divide by 1000 before sending)
+    let distanceKm: number | null = typeof body.distance_km === "number" && Number.isFinite(body.distance_km) ? body.distance_km : null;
+    if (distanceKm != null && distanceKm > 2000 && distanceKm <= 2000000) {
+      console.warn("[get-all-vehicle-prices] distance_km looks like meters (>" + 2000 + "), converting to km:", { raw: body.distance_km, converted: distanceKm / 1000 });
+      distanceKm = distanceKm / 1000;
+    }
     const AIRPORT_PARKING_FEE_EUR = 5;
 
     if (!isDubai) {
       const turkeyResult = await (async () => {
         if (distanceKm == null || distanceKm <= 0) {
+          console.log("[get-all-vehicle-prices] Turkey: distance_km is null or <=0, cannot calculate", JSON.stringify({ distance_km: body.distance_km }));
           return {
             prices: turkeyVehicles.map((v) => ({
               vehicleType: v.value,
@@ -466,6 +472,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
         const kmRules: Array<{ vehicle_type: string | null; base_price: number | null; price_per_km: number | null; min_km: number | null; max_km: number | null }> = await kmRulesRes.json();
 
+        console.log("[get-all-vehicle-prices] Turkey KM pricing: " + JSON.stringify({ distance_km: distanceKm, price_per_km_from_db: kmRules?.map((r) => ({ vehicle_type: r.vehicle_type, price_per_km: r.price_per_km })) }));
+
         const vehiclePriceMap: Record<string, number> = {};
         for (const r of kmRules || []) {
           const base = Number(r.base_price);
@@ -482,6 +490,22 @@ Deno.serve(async (req: Request): Promise<Response> => {
         const isAirport = /airport|havalimani|havalimanı|ist|saw|ayt|bjv|dlm|adb|esb|asr|nav|ada|gzt|tzx|diy|van|mlx|szf|kco|teq|edn|khv|dnz|ezs|vas|nop|kfs|onq|nkt|aji|mqm|kzr|msr|erz|erc|sfq|hty|edo|ckz|ogu|rzv|yei|gzp/i.test(pickupSanitized + " " + dropoffSanitized);
         const airportFee = isAirport ? AIRPORT_PARKING_FEE_EUR : 0;
 
+        const baseCurrency = "EUR";
+        const targetCurrency = customerCurrency || "EUR";
+        let conversionRate = 1;
+        if (baseCurrency !== targetCurrency) {
+          try {
+            const rateRes = await fetch(`https://api.frankfurter.app/latest?from=${baseCurrency}&to=${targetCurrency}`);
+            if (rateRes.ok) {
+              const rateData = await rateRes.json();
+              conversionRate = rateData.rates?.[targetCurrency] ?? 1;
+              console.log("[get-all-vehicle-prices] Currency conversion: " + JSON.stringify({ from: baseCurrency, to: targetCurrency, rate: conversionRate }));
+            }
+          } catch {
+            console.warn("[get-all-vehicle-prices] Currency conversion failed, using EUR");
+          }
+        }
+
         const prices = turkeyVehicles.map((vt) => {
           let match = null;
           for (const alias of vt.dbAliases) {
@@ -492,12 +516,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
           }
           const basePrice = match ?? vehiclePriceMap[vt.value];
           const available = basePrice != null && basePrice > 0;
-          const total = available ? Math.ceil(basePrice + airportFee) : null;
+          const totalEur = available ? Math.ceil(basePrice + airportFee) : null;
+          const total = totalEur != null ? Math.ceil(totalEur * conversionRate) : null;
           return {
             vehicleType: vt.value,
             vehicleLabel: vt.label,
             price: total,
-            currency: customerCurrency || "EUR",
+            currency: targetCurrency,
             passengers: vt.passengers,
             luggage: vt.luggage,
             available,

@@ -235,6 +235,7 @@ export const getDirections = async (
       (result: any, status: string) => {
         if (status === 'OK' && result) {
           const leg = result.routes[0]?.legs[0];
+          // Google Directions API returns distance.value in METERS - MUST divide by 1000 for backend (get-all-vehicle-prices expects KM)
           const distanceValueMeters = leg?.distance?.value;
           const distanceKm = typeof distanceValueMeters === 'number' ? distanceValueMeters / 1000 : null;
           resolve({

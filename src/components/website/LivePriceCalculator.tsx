@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { loadGoogleMapsScript, getDirections, geocodeAddress } from "@/utils/googleMapsLoader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -40,6 +41,8 @@ const LivePriceCalculator = () => {
   
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [priceResult, setPriceResult] = useState<PriceResult | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
@@ -58,16 +61,39 @@ const LivePriceCalculator = () => {
 
   const fetchPrices = useCallback(async () => {
     if (!pickup || !dropoff) return;
-    
+
     setIsLoading(true);
     setHasSearched(true);
-    
+
     try {
+      let distanceKm: number | undefined;
+      if (pickupCoords && dropoffCoords) {
+        try {
+          const directions = await getDirections(pickupCoords, dropoffCoords);
+          if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
+            distanceKm = directions.distanceKm;
+          }
+        } catch (_) {}
+      } else {
+        await loadGoogleMapsScript(["places"]);
+        const [pickupGeo, dropoffGeo] = await Promise.all([
+          geocodeAddress(pickup),
+          geocodeAddress(dropoff),
+        ]);
+        if (pickupGeo && dropoffGeo) {
+          const directions = await getDirections(pickupGeo, dropoffGeo);
+          if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
+            distanceKm = directions.distanceKm;
+          }
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
         body: {
           pickup,
           dropoff,
           customerCurrency: getCurrencyByLanguage(),
+          distance_km: distanceKm, // KM only - from getDirections (meters/1000)
         },
       });
 
@@ -79,16 +105,18 @@ const LivePriceCalculator = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [pickup, dropoff, language]);
+  }, [pickup, dropoff, pickupCoords, dropoffCoords, language]);
 
-  const handlePickupSelect = (value: string, details?: { formattedAddress: string }) => {
+  const handlePickupSelect = (value: string, details?: { formattedAddress: string; lat?: number | null; lng?: number | null }) => {
     setPickup(details?.formattedAddress || value);
+    setPickupCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
     setPriceResult(null);
     setHasSearched(false);
   };
 
-  const handleDropoffSelect = (value: string, details?: { formattedAddress: string }) => {
+  const handleDropoffSelect = (value: string, details?: { formattedAddress: string; lat?: number | null; lng?: number | null }) => {
     setDropoff(details?.formattedAddress || value);
+    setDropoffCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
     setPriceResult(null);
     setHasSearched(false);
   };
