@@ -406,10 +406,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const vehicleTypes = isDubai ? dubaiVehicles : turkeyVehicles;
 
     // ========== TÜRKİYE: SADECE KM BAZLI (distance_pricing_rules), region/intercity/place_id YOK ==========
-    const distanceKm = typeof body.distance_km === "number" && Number.isFinite(body.distance_km) ? body.distance_km : null;
+    const rawDistanceKm = typeof body.distance_km === "number" && Number.isFinite(body.distance_km) ? body.distance_km : null;
+    // Hassas mesafe kontrolü: 1 ondalık basamağa yuvarla (küçük sapmaların fiyatı katlamasını engelle)
+    const distanceKm = rawDistanceKm != null ? Math.round(rawDistanceKm * 10) / 10 : null;
     const AIRPORT_PARKING_FEE_EUR = 5;
 
-    console.log("[get-all-vehicle-prices DEBUG] Turkey branch - incoming distance_km:", body.distance_km, "| parsed distanceKm:", distanceKm, "| isDubai:", isDubai);
+    console.log("[get-all-vehicle-prices DEBUG] Turkey branch - incoming distance_km:", body.distance_km, "| rounded distanceKm:", distanceKm, "| isDubai:", isDubai);
 
     if (!isDubai) {
       const turkeyResult = await (async () => {
@@ -465,6 +467,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
         const vehiclePriceMap: Record<string, number> = {};
         const matchedRuleIds: Record<string, string> = {};
+        const matchedBasePerKm: Record<string, { base: number; perKm: number }> = {};
         for (const r of kmRules || []) {
           const base = Number(r.base_price);
           const perKm = Number(r.price_per_km);
@@ -477,15 +480,32 @@ Deno.serve(async (req: Request): Promise<Response> => {
           if (!vehiclePriceMap[vt] || price < vehiclePriceMap[vt]) {
             vehiclePriceMap[vt] = price;
             if (r.id) matchedRuleIds[vt] = r.id;
+            matchedBasePerKm[vt] = { base, perKm };
           }
         }
 
         console.log("[get-all-vehicle-prices DEBUG] Turkey - distance_pricing_rules matched:", Object.keys(vehiclePriceMap).length > 0 ? "EVET" : "HAYIR", "| rule_ids:", matchedRuleIds, "| vehiclePriceMap:", vehiclePriceMap);
 
-        const isAirport = /airport|havalimani|havalimanı|ist|saw|ayt|bjv|dlm|adb|esb|asr|nav|ada|gzt|tzx|diy|van|mlx|szf|kco|teq|edn|khv|dnz|ezs|vas|nop|kfs|onq|nkt|aji|mqm|kzr|msr|erz|erc|sfq|hty|edo|ckz|ogu|rzv|yei|gzp/i.test(
-          pickupSanitized + " " + dropoffSanitized
-        );
-        const airportFee = isAirport ? AIRPORT_PARKING_FEE_EUR : 0;
+        // Airport Fee Kontrolü: Sadece açıkça havalimanı tespit edildiyse ücret ekle (airport değişkeni)
+        // Kalkış veya varış havalimanı değilse airport=null → fee=0
+        const airportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;
+
+        // Şehir içi (city-to-city) debug: havalimanı yoksa Base, PerKM, AirportFee:0 logla
+        if (!airport && Object.keys(matchedBasePerKm).length > 0) {
+          const firstRule = Object.entries(matchedBasePerKm)[0];
+          if (firstRule) {
+            const [vt, { base, perKm }] = firstRule;
+            console.log(`[get-all-vehicle-prices DEBUG] City-to-City detected. Distance: ${distanceKm} km, Base: ${base}, PerKM: ${perKm}, AirportFee: 0`);
+          }
+        }
+
+        // Kısa mesafe (0-50 km) uyarısı: Base Price ağırlıklı olmalı, per_km makul seviyede
+        if (distanceKm < 50 && Object.keys(matchedBasePerKm).length > 0) {
+          const first = Object.values(matchedBasePerKm)[0];
+          if (first && first.perKm > 2.0) {
+            console.warn(`[get-all-vehicle-prices DEBUG] Short distance (${distanceKm} km) - per_km=${first.perKm} may be high for city transfers. Consider rules with min_km=0,max_km=50 and lower per_km.`);
+          }
+        }
 
         const prices = turkeyVehicles.map((vt) => {
           let match: number | null = null;
