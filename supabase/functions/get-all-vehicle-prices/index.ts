@@ -430,42 +430,42 @@ Deno.serve(async (req: Request): Promise<Response> => {
           };
         }
 
-        // INTERCITY: Önce intercity_prices (city_to_city sabit fiyat) tablosuna bak
-        // INTRACITY: Bu adımı ATLA - asla sabit fiyat tablosuna gitme
-        // İSTANBUL: v2.8.2 - fixed_prices/region_prices/airport_prices HİÇBİRİNE SORGU ATMA - SADECE KM
+        // v2.8.5: İstanbul = SADECE distance_pricing_rules. Seasonal/Regional/Base katmanlarına ASLA girme.
         let fixedPricesFromIntercity: Array<{ vehicle_type: string; price: number; price_currency: string }> = [];
-        if (!isIstanbulRoute && !isIntracityTurkey && hasDifferentResolvedCities && resolvedPickupCity && resolvedDropoffCity) {
-          // v2.8.4: Standart şehir formu ile sorgula - DB'deki İstanbul/istanbul/İSTANBUL eşleşir
-          const fromCity = normalizeCityName(resolvedPickupCity) || resolvedPickupCity;
-          const toCity = normalizeCityName(resolvedDropoffCity) || resolvedDropoffCity;
-          try {
-            const q1 = `and=(from_city.ilike.${encodeURIComponent(fromCity)},to_city.ilike.${encodeURIComponent(toCity)},is_active.eq.true)`;
-            const q2 = `and=(from_city.ilike.${encodeURIComponent(toCity)},to_city.ilike.${encodeURIComponent(fromCity)},is_active.eq.true)`;
-            const [r1, r2] = await Promise.all([
-              fetch(`${SUPABASE_URL}/rest/v1/intercity_prices?${q1}&select=vehicle_type,price,price_currency`, {
-                headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-              }),
-              fetch(`${SUPABASE_URL}/rest/v1/intercity_prices?${q2}&select=vehicle_type,price,price_currency`, {
-                headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-              }),
-            ]);
-            const d1 = r1.ok ? await r1.json() : [];
-            const d2 = r2.ok ? await r2.json() : [];
-            fixedPricesFromIntercity = Array.isArray(d1) && d1.length > 0 ? d1 : Array.isArray(d2) && d2.length > 0 ? d2 : [];
-            if (fixedPricesFromIntercity.length > 0) {
-              console.log("[get-all-vehicle-prices DEBUG] Intercity FIXED prices (city_to_city) found:", fixedPricesFromIntercity.length);
+        if (!isIstanbulRoute) {
+          // Sezonluk (Seasonal), Bölgesel (Regional), Temel (Base) katmanları - SADECE İstanbul dışı rotalar
+          if (!isIntracityTurkey && hasDifferentResolvedCities && resolvedPickupCity && resolvedDropoffCity) {
+            const fromCity = normalizeCityName(resolvedPickupCity) || resolvedPickupCity;
+            const toCity = normalizeCityName(resolvedDropoffCity) || resolvedDropoffCity;
+            try {
+              const q1 = `and=(from_city.ilike.${encodeURIComponent(fromCity)},to_city.ilike.${encodeURIComponent(toCity)},is_active.eq.true)`;
+              const q2 = `and=(from_city.ilike.${encodeURIComponent(toCity)},to_city.ilike.${encodeURIComponent(fromCity)},is_active.eq.true)`;
+              const [r1, r2] = await Promise.all([
+                fetch(`${SUPABASE_URL}/rest/v1/intercity_prices?${q1}&select=vehicle_type,price,price_currency`, {
+                  headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+                }),
+                fetch(`${SUPABASE_URL}/rest/v1/intercity_prices?${q2}&select=vehicle_type,price,price_currency`, {
+                  headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+                }),
+              ]);
+              const d1 = r1.ok ? await r1.json() : [];
+              const d2 = r2.ok ? await r2.json() : [];
+              fixedPricesFromIntercity = Array.isArray(d1) && d1.length > 0 ? d1 : Array.isArray(d2) && d2.length > 0 ? d2 : [];
+              if (fixedPricesFromIntercity.length > 0) {
+                console.log("[get-all-vehicle-prices DEBUG] Intercity FIXED prices (city_to_city) found:", fixedPricesFromIntercity.length);
+              }
+            } catch (e) {
+              console.warn("[get-all-vehicle-prices DEBUG] intercity_prices query failed:", String(e));
             }
-          } catch (e) {
-            console.warn("[get-all-vehicle-prices DEBUG] intercity_prices query failed:", String(e));
+          } else if (isIntracityTurkey) {
+            console.log("[get-all-vehicle-prices DEBUG] Intracity - sabit fiyat tablosuna BAKILMAZ, sadece KM hesabı");
           }
-        } else if (isIstanbulRoute) {
-          console.log("[get-all-vehicle-prices DEBUG] Istanbul - fixed_prices/region_prices/airport_prices SORGU ATILMAZ, SADECE KM");
-        } else if (isIntracityTurkey) {
-          console.log("[get-all-vehicle-prices DEBUG] Intracity - sabit fiyat tablosuna BAKILMAZ, sadece KM hesabı");
+        } else {
+          console.log("[get-all-vehicle-prices DEBUG] Istanbul - Seasonal/Regional/Base ATLANIR, SADECE distance_pricing_rules");
         }
 
-        // Eğer intercity sabit fiyat bulunduysa onu kullan, yoksa distance_pricing_rules ile hesapla
-        if (fixedPricesFromIntercity.length > 0) {
+        // Eğer intercity sabit fiyat bulunduysa onu kullan (İstanbul için ASLA), yoksa distance_pricing_rules
+        if (!isIstanbulRoute && fixedPricesFromIntercity.length > 0) {
           const airportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;
           const firstRow = fixedPricesFromIntercity[0];
           const prices = turkeyVehicles.map((vt) => {
