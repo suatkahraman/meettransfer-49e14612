@@ -117,7 +117,36 @@ const CITIES_DATA: Record<string, CityData> = {
   'Ankara': {
     airports: ['Ankara Esenboga Airport (ESB)'],
     districts: ['Ankara Center', 'Cankaya', 'Kizilay', 'Ulus', 'Kavaklidere', 'Tunali', 'Bahcelievler', 'Emek', 'Ayranci', 'GOP', 'Dikmen', 'Oran', 'Cayyolu', 'Yasamkent', 'Batikent', 'Kecioren', 'Etimesgut', 'Sincan', 'Yenimahalle', 'Mamak', 'Altindag', 'Pursaklar', 'Golbasi', 'Beypazari', 'Polatli', 'Haymana', 'Cubuk', 'Kazan', 'Akyurt', 'Elmadag']
-  }
+  },
+  // Türkiye - Tüm bölgesel havalimanları (KM tabanlı fiyatlandırma kapsamı)
+  'Trabzon': { airports: ['Trabzon Airport (TZX)'], districts: ['Trabzon Center', 'Akcaabat', 'Yomra', 'Of', 'Surmene', 'Hayrat'] },
+  'Gaziantep': { airports: ['Gaziantep Airport (GZT)'], districts: ['Gaziantep Center', 'Sahinbey', 'Sehitkamil', 'Oguzeli'] },
+  'Diyarbakir': { airports: ['Diyarbakir Airport (DIY)'], districts: ['Diyarbakir Center', 'Sur', 'Baglar', 'Yenisehir', 'Kayapinar'] },
+  'Van': { airports: ['Van Ferit Melen Airport (VAN)'], districts: ['Van Center', 'Edremit', 'Tusba', 'Ipekyolu'] },
+  'Malatya': { airports: ['Malatya Airport (MLX)'], districts: ['Malatya Center', 'Battalgazi', 'Aslantas', 'Yesilyurt'] },
+  'Samsun': { airports: ['Samsun Carsamba Airport (SZF)'], districts: ['Samsun Center', 'Carsamba', 'Ilkadim', 'Atakum', 'Canik'] },
+  'Kocaeli': { airports: ['Kocaeli Cengiz Topel Airport (KCO)'], districts: ['Izmit', 'Gebze', 'Kartepe', 'Kandira', 'Golcuk', 'Derince'] },
+  'Tekirdag': { airports: ['Tekirdag Corlu Airport (TEQ)'], districts: ['Tekirdag Center', 'Corlu', 'Suleymanpasa', 'Cerkezkoy'] },
+  'Edirne': { airports: ['Edirne Airport (EDN)'], districts: ['Edirne Center', 'Kesan', 'Uzunkopru', 'Ipsala'] },
+  'Kars': { airports: ['Kars Harakani Airport (KHV)'], districts: ['Kars Center', 'Kagizman', 'Sarikamis'] },
+  'Elazig': { airports: ['Elazig Airport (EZS)'], districts: ['Elazig Center', 'Kovancilar', 'Baskil'] },
+  'Sivas': { airports: ['Sivas Nuri Demirag Airport (VAS)'], districts: ['Sivas Center', 'Kangal', 'Divrigi'] },
+  'Sinop': { airports: ['Sinop Airport (NOP)'], districts: ['Sinop Center', 'Boyabat', 'Ayancik'] },
+  'Kastamonu': { airports: ['Kastamonu Airport (KFS)'], districts: ['Kastamonu Center', 'Taskopru', 'Inebolu'] },
+  'Zonguldak': { airports: ['Zonguldak Caycuma Airport (ONQ)'], districts: ['Zonguldak Center', 'Caycuma', 'Eregli'] },
+  'Sirnak': { airports: ['Sirnak Airport (NKT)'], districts: ['Sirnak Center', 'Cizre', 'Silopi'] },
+  'Agri': { airports: ['Agri Airport (AJI)'], districts: ['Agri Center', 'Dogubayazit', 'Patnos'] },
+  'Mardin': { airports: ['Mardin Airport (MQM)'], districts: ['Mardin Center', 'Midyat', 'Artuklu'] },
+  'Afyon': { airports: ['Afyon Zafer Airport (KZR)'], districts: ['Afyon Center', 'Sandikli', 'Bolvadin'] },
+  'Mus': { airports: ['Mus Airport (MSR)'], districts: ['Mus Center', 'Malazgirt', 'Bulanik'] },
+  'Erzurum': { airports: ['Erzurum Airport (ERZ)'], districts: ['Erzurum Center', 'Palandoken', 'Yakutiye', 'Aziziye'] },
+  'Erzincan': { airports: ['Erzincan Airport (ERC)'], districts: ['Erzincan Center', 'Tercan'] },
+  'Sanliurfa': { airports: ['Sanliurfa GAP Airport (SFQ)'], districts: ['Sanliurfa Center', 'Harran', 'Eyyubiye', 'Haliliye'] },
+  'Hatay': { airports: ['Hatay Airport (HTY)'], districts: ['Antakya', 'Iskenderun', 'Samandag', 'Harbiye'] },
+  'Balikesir': { airports: ['Balikesir Koca Seyit Airport (EDO)'], districts: ['Balikesir Center', 'Bandirma', 'Edremit', 'Ayvalik'] },
+  'Canakkale': { airports: ['Canakkale Airport (CKZ)'], districts: ['Canakkale Center', 'Gelibolu', 'Troy', 'Eceabat'] },
+  'Ordu': { airports: ['Ordu-Giresun Airport (OGU)'], districts: ['Ordu Center', 'Giresun Center', 'Unye', 'Fatsa'] },
+  'Rize': { airports: ['Rize-Artvin Airport (RZV)'], districts: ['Rize Center', 'Artvin Center', 'Cayeli', 'Pazar'] }
 };
 
 // Vehicle types - synced with src/lib/vehicleTypes.ts

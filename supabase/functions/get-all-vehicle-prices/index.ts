@@ -39,6 +39,26 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "beykoz": "Beykoz", "cekmekoy": "Cekmekoy", "sancaktepe": "Sancaktepe",
   "sultanbeyli": "Sultanbeyli", "sile": "Sile", "silivri": "Silivri",
   "catalca": "Catalca", "tuzla": "Tuzla", "yenikoy": "Yenikoy",
+  // Türkiye - Diğer şehirler (bölgesel fiyatlandırma)
+  "trabzon": "Trabzon Center", "akcaabat": "Akcaabat", "of": "Of",
+  "adana center": "Adana Center", "seyhan": "Seyhan", "tarsus": "Tarsus",
+  "gaziantep center": "Gaziantep Center", "sahinbey": "Sahinbey",
+  "diyarbakir center": "Diyarbakir Center", "sur": "Sur",
+  "van center": "Van Center", "tusba": "Tusba", "ipekyolu": "Ipekyolu",
+  "malatya center": "Malatya Center", "battalgazi": "Battalgazi",
+  "samsun center": "Samsun Center", "atakum": "Atakum",
+  "izmit": "Izmit", "gebze": "Gebze", "kartepe": "Kartepe",
+  "tekirdag center": "Tekirdag Center", "corlu": "Corlu",
+  "edirne center": "Edirne Center", "kesan": "Kesan",
+  "kars center": "Kars Center", "sarikamis": "Sarikamis",
+  "denizli center": "Denizli Center", "pamukkale": "Pamukkale",
+  "elazig center": "Elazig Center", "kovancilar": "Kovancilar",
+  "sivas center": "Sivas Center", "kangal": "Kangal",
+  "antakya": "Antakya", "iskenderun": "Iskenderun", "samandag": "Samandag",
+  "bandirma": "Bandirma", "ayvalik": "Ayvalik",
+  "canakkale center": "Canakkale Center", "gelibolu": "Gelibolu",
+  "ordu center": "Ordu Center", "giresun center": "Giresun Center",
+  "rize center": "Rize Center", "artvin center": "Artvin Center",
   // Ankara
   "pursaklar": "Pursaklar", "kecioren": "Keçiören", "ulus": "Ulus",
   "cankaya": "Çankaya Merkez", "mamak": "Mamak", "yenimahalle": "Yenimahalle Merkez",
@@ -97,6 +117,14 @@ const ANTALYA_DISTRICTS = new Set([
 const BODRUM_DISTRICTS = new Set(["bodrum merkez", "turgutreis", "yalikavak", "gumbet", "bitez"]);
 const DALAMAN_DISTRICTS = new Set(["fethiye", "oludeniz", "marmaris", "dalyan"]);
 const IZMIR_DISTRICTS = new Set(["cesme", "alacati", "kusadasi"]);
+const TRABZON_DISTRICTS = new Set(["trabzon center", "akcaabat", "yomra", "of", "surmene"]);
+const ADANA_DISTRICTS = new Set(["adana center", "seyhan", "cukurova", "tarsus", "ceyhan"]);
+const GAZIANTEP_DISTRICTS = new Set(["gaziantep center", "sahinbey", "sehitkamil", "oguzeli"]);
+const DIYARBAKIR_DISTRICTS = new Set(["diyarbakir center", "sur", "baglar", "kayapinar"]);
+const VAN_DISTRICTS = new Set(["van center", "tusba", "ipekyolu"]);
+const MALATYA_DISTRICTS = new Set(["malatya center", "battalgazi", "yesilyurt"]);
+const SAMSUN_DISTRICTS = new Set(["samsun center", "carsamba", "atakum", "canik"]);
+const DENIZLI_DISTRICTS = new Set(["denizli center", "pamukkale", "cardak"]);
 
 // Normalize Turkish characters to ASCII equivalents for reliable regex matching
 function normalizeTurkish(text: string): string {
@@ -144,7 +172,37 @@ function detectCity(text: string): string | null {
   if (/bodrum|\bbjv\b|turgutreis|yalikavak|gumbet/i.test(s)) return "Bodrum";
   if (/dalaman|\bdlm\b|fethiye|marmaris|oludeniz/i.test(s)) return "Dalaman";
   if (/izmir|\badb\b|cesme|alacati/i.test(s)) return "Izmir";
-  if (/bursa/i.test(s)) return "Bursa";
+  if (/bursa|\byei\b/i.test(s)) return "Bursa";
+  if (/adana|\bada\b/i.test(s)) return "Adana";
+  if (/gaziantep|\bgzt\b/i.test(s)) return "Gaziantep";
+  if (/trabzon|\btzx\b/i.test(s)) return "Trabzon";
+  if (/diyarbakir|diyarbakır|\bdiy\b/i.test(s)) return "Diyarbakir";
+  if (/van/i.test(s) && /airport|havalimani|havalimanı/i.test(s)) return "Van";
+  if (/malatya|\bmlx\b/i.test(s)) return "Malatya";
+  if (/samsun|\bszf\b/i.test(s)) return "Samsun";
+  if (/kocaeli|\bkco\b|izmit/i.test(s)) return "Kocaeli";
+  if (/tekirdag|tekirdağ|\bteq\b|corlu|çorlu/i.test(s)) return "Tekirdag";
+  if (/edirne|\bedn\b/i.test(s)) return "Edirne";
+  if (/kars|\bkhv\b/i.test(s)) return "Kars";
+  if (/denizli|\bdnz\b|pamukkale/i.test(s)) return "Denizli";
+  if (/elazig|elazığ|\bezs\b/i.test(s)) return "Elazig";
+  if (/sivas|\bvas\b/i.test(s)) return "Sivas";
+  if (/sinop|\bnop\b/i.test(s)) return "Sinop";
+  if (/kastamonu|\bkfs\b/i.test(s)) return "Kastamonu";
+  if (/zonguldak|\bonq\b/i.test(s)) return "Zonguldak";
+  if (/sirnak|sırnak|\bnkt\b/i.test(s)) return "Sirnak";
+  if (/agri|ağrı|\baji\b/i.test(s)) return "Agri";
+  if (/mardin|\bmqm\b/i.test(s)) return "Mardin";
+  if (/afyon|\bkzr\b|zafer/i.test(s)) return "Afyon";
+  if (/mus|muş|\bmsr\b/i.test(s)) return "Mus";
+  if (/erzurum|\berz\b/i.test(s)) return "Erzurum";
+  if (/erzincan|\berc\b/i.test(s)) return "Erzincan";
+  if (/sanliurfa|şanlıurfa|urfa|\bsfq\b|gap/i.test(s)) return "Sanliurfa";
+  if (/hatay|\bhty\b|antakya|iskenderun/i.test(s)) return "Hatay";
+  if (/balikesir|balıkesir|\bedo\b|bandirma|bandırma/i.test(s)) return "Balikesir";
+  if (/canakkale|çanakkale|\bckz\b/i.test(s)) return "Canakkale";
+  if (/ordu|giresun|\bogu\b/i.test(s)) return "Ordu";
+  if (/rize|artvin|\brzv\b/i.test(s)) return "Rize";
   return null;
 }
 
@@ -161,6 +219,14 @@ function inferCityFromDistrict(district: string | null): string | null {
   if (BODRUM_DISTRICTS.has(normalizedDistrict)) return "Bodrum";
   if (DALAMAN_DISTRICTS.has(normalizedDistrict)) return "Dalaman";
   if (IZMIR_DISTRICTS.has(normalizedDistrict)) return "Izmir";
+  if (TRABZON_DISTRICTS.has(normalizedDistrict)) return "Trabzon";
+  if (ADANA_DISTRICTS.has(normalizedDistrict)) return "Adana";
+  if (GAZIANTEP_DISTRICTS.has(normalizedDistrict)) return "Gaziantep";
+  if (DIYARBAKIR_DISTRICTS.has(normalizedDistrict)) return "Diyarbakir";
+  if (VAN_DISTRICTS.has(normalizedDistrict)) return "Van";
+  if (MALATYA_DISTRICTS.has(normalizedDistrict)) return "Malatya";
+  if (SAMSUN_DISTRICTS.has(normalizedDistrict)) return "Samsun";
+  if (DENIZLI_DISTRICTS.has(normalizedDistrict)) return "Denizli";
   return null;
 }
 
@@ -223,13 +289,48 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (/dxb|dubai.*airport|dubai.*international/i.test(s)) airport = "Dubai International Airport (DXB)";
       else if (/dwc|al maktoum/i.test(s)) airport = "Al Maktoum International Airport (DWC)";
     } else {
-      if (/istanbul airport/i.test(s)) airport = "Istanbul Airport (IST)";
-      else if (/sabiha|gokcen/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
-      else if (/antalya.*airport|antalya.*havalimani/i.test(s)) airport = "Antalya Airport (AYT)";
+      // Türkiye - Tüm havalimanları (KM tabanlı bölgesel fiyatlandırma kapsamı)
+      if (/istanbul airport|\bist\b/i.test(s)) airport = "Istanbul Airport (IST)";
+      else if (/sabiha|gokcen|\bsaw\b/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
+      else if (/gazipasa|gazipaşa|\bgzp\b|alanya.*airport/i.test(s)) airport = "Gazipasa-Alanya Airport (GZP)";
+      else if (/antalya.*airport|antalya.*havalimani|\bayt\b/i.test(s)) airport = "Antalya Airport (AYT)";
       else if (/\bbjv\b|bodrum.*airport|milas.*airport|bodrum.*havalimani|milas.*havalimani/i.test(s)) airport = "Bodrum-Milas Airport (BJV)";
       else if (/\bdlm\b|dalaman.*airport|dalaman.*havalimani/i.test(s)) airport = "Dalaman Airport (DLM)";
-      else if (/adnan menderes/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
-      else if (/esenboga|\besb\b/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
+      else if (/adnan menderes|\badb\b/i.test(s)) airport = "Izmir Adnan Menderes Airport (ADB)";
+      else if (/kayseri|\basr\b|erkilet/i.test(s)) airport = "Kayseri Airport (ASR)";
+      else if (/nevsehir|nevşehir|kapadokya|\bnav\b/i.test(s)) airport = "Nevsehir-Kapadokya Airport (NAV)";
+      else if (/esenboga|esenboğa|\besb\b|ankara.*airport/i.test(s)) airport = "Ankara Esenboga Airport (ESB)";
+      else if (/adana|sakirpasa|\bada\b/i.test(s)) airport = "Adana Sakirpasa Airport (ADA)";
+      else if (/gaziantep|\bgzt\b|oguzeli/i.test(s)) airport = "Gaziantep Airport (GZT)";
+      else if (/trabzon|\btzx\b/i.test(s)) airport = "Trabzon Airport (TZX)";
+      else if (/diyarbakir|diyarbakır|\bdiy\b/i.test(s)) airport = "Diyarbakir Airport (DIY)";
+      else if (/van.*(airport|havalimani|havalimanı)|(airport|havalimani|havalimanı).*van|\bvan\b.*havalimani/i.test(s)) airport = "Van Ferit Melen Airport (VAN)";
+      else if (/malatya|\bmlx\b/i.test(s)) airport = "Malatya Airport (MLX)";
+      else if (/samsun|\bszf\b|carsamba.*airport/i.test(s)) airport = "Samsun Carsamba Airport (SZF)";
+      else if (/cengiz topel|\bkco\b|kocaeli.*airport/i.test(s)) airport = "Kocaeli Cengiz Topel Airport (KCO)";
+      else if (/tekirdag|tekirdağ|corlu|çorlu|\bteq\b/i.test(s)) airport = "Tekirdag Corlu Airport (TEQ)";
+      else if (/edirne|\bedn\b/i.test(s)) airport = "Edirne Airport (EDN)";
+      else if (/kars|\bkhv\b|harakani/i.test(s)) airport = "Kars Harakani Airport (KHV)";
+      else if (/denizli|cardak|çardak|\bdnz\b|pamukkale.*airport/i.test(s)) airport = "Denizli Cardak Airport (DNZ)";
+      else if (/elazig|elazığ|\bezs\b/i.test(s)) airport = "Elazig Airport (EZS)";
+      else if (/sivas|\bvas\b|nuri demirag/i.test(s)) airport = "Sivas Nuri Demirag Airport (VAS)";
+      else if (/sinop|\bnop\b/i.test(s)) airport = "Sinop Airport (NOP)";
+      else if (/kastamonu|\bkfs\b/i.test(s)) airport = "Kastamonu Airport (KFS)";
+      else if (/zonguldak|\bonq\b|caycuma|çaycuma/i.test(s)) airport = "Zonguldak Caycuma Airport (ONQ)";
+      else if (/sirnak|sırnak|\bnkt\b/i.test(s)) airport = "Sirnak Airport (NKT)";
+      else if (/agri|ağrı|\baji\b/i.test(s)) airport = "Agri Airport (AJI)";
+      else if (/mardin|\bmqm\b/i.test(s)) airport = "Mardin Airport (MQM)";
+      else if (/afyon|zafer|\bkzr\b/i.test(s)) airport = "Afyon Zafer Airport (KZR)";
+      else if (/mus.*airport|muş.*havalimani|\bmsr\b/i.test(s)) airport = "Mus Airport (MSR)";
+      else if (/erzurum|\berz\b/i.test(s)) airport = "Erzurum Airport (ERZ)";
+      else if (/erzincan|\berc\b/i.test(s)) airport = "Erzincan Airport (ERC)";
+      else if (/sanliurfa|şanlıurfa|urfa.*airport|\bsfq\b|gap.*airport/i.test(s)) airport = "Sanliurfa GAP Airport (SFQ)";
+      else if (/hatay|\bhty\b|antakya.*airport|iskenderun.*airport/i.test(s)) airport = "Hatay Airport (HTY)";
+      else if (/balikesir|balıkesir|koca seyit|\bedo\b|bandirma.*airport/i.test(s)) airport = "Balikesir Koca Seyit Airport (EDO)";
+      else if (/canakkale|çanakkale|\bckz\b/i.test(s)) airport = "Canakkale Airport (CKZ)";
+      else if (/ordu|giresun|\bogu\b/i.test(s)) airport = "Ordu-Giresun Airport (OGU)";
+      else if (/rize|artvin|\brzv\b|cayeli/i.test(s)) airport = "Rize-Artvin Airport (RZV)";
+      else if (/bursa|yenisehir|\byei\b/i.test(s)) airport = "Bursa Yenisehir Airport (YEI)";
     }
 
     const isIntracityAddressTransfer =
