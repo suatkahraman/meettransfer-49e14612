@@ -1,10 +1,10 @@
 {
-  "version": "2.7.2",
+  "version": "2.7.4",
   "releaseDate": "2026-02-13",
-  "buildNumber": 17,
+  "buildNumber": 19,
   "notes": {
-    "TR": "Şehir içi 50 km altı fiyat düzeltmesi, Math.min garantisi",
-    "EN": "Short distance pricing fix, Math.min guarantee",
+    "TR": "Intercity/Intracity öncelik hiyerarşisi, şehir içi sabit fiyat atlama",
+    "EN": "Intercity/Intracity priority, skip fixed prices for intracity",
     "DE": "Buchungserstellung behoben, Preisaktualisierung verbessert",
     "FR": "Correction de la création de réservation, amélioration des mises à jour de prix",
     "RU": "Исправление создания бронирования, улучшение обновления цен",
