@@ -7,11 +7,12 @@ import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { readDriverBootstrapCache, writeDriverBootstrapCache } from '@/lib/driverBootstrapCache';
 import { Button } from '@/components/ui/button';
-import { Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, History } from 'lucide-react';
+import { Car, AlertCircle, CheckCircle2, Bell, Calculator, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import JobCategoryCard from '@/components/driver/JobCategoryCard';
 import DayJobCard from '@/components/driver/DayJobCard';
+import { DashboardSkeleton } from '@/components/driver/DashboardSkeleton';
 import type { DriverHeaderExtras } from '@/components/driver/DriverLayout';
 
 interface Reservation {
@@ -40,13 +41,9 @@ interface Reservation {
   // Place details
   pickup_place_name: string | null;
   dropoff_place_name: string | null;
-  // Agency details
-  agencies?: {
-    id: string;
-    agency_name: string;
-  } | null;
 }
 
+// Lean select: only list-relevant columns (no agencies join)
 const LIST_RESERVATION_SELECT = `
   id,
   customer_id,
@@ -72,9 +69,10 @@ const LIST_RESERVATION_SELECT = `
   luggage_count,
   baby_seat_count,
   pickup_place_name,
-  dropoff_place_name,
-  agencies (id, agency_name)
+  dropoff_place_name
 `;
+const ACTIONABLE_LIMIT = 20;
+const COMPLETED_LIMIT = 10;
 
 const sortByPickupDateTime = (items: Reservation[]) =>
   [...items].sort((a, b) => {
@@ -149,7 +147,7 @@ const DriverHome = () => {
     const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
     const lastDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
-    // Limit to 40 rows each - profile + active tasks only for fast dashboard load
+    // Limit rows for fast dashboard load - actionable + last 10 completed
     const [actionableQuery, completedQuery] = await Promise.all([
       supabase
         .from('reservations')
@@ -158,7 +156,7 @@ const DriverHome = () => {
         .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active'])
         .order('pickup_date', { ascending: true })
         .order('pickup_time', { ascending: true })
-        .limit(40),
+        .limit(ACTIONABLE_LIMIT),
       supabase
         .from('reservations')
         .select(LIST_RESERVATION_SELECT)
@@ -168,7 +166,7 @@ const DriverHome = () => {
         .lte('pickup_date', lastDayOfCurrentMonth)
         .order('pickup_date', { ascending: false })
         .order('pickup_time', { ascending: false })
-        .limit(40),
+        .limit(COMPLETED_LIMIT),
     ]);
 
     if (actionableQuery.error || completedQuery.error) {
@@ -410,9 +408,7 @@ const DriverHome = () => {
         </motion.section>
 
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <DashboardSkeleton />
         ) : reservations.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

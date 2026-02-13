@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams, useOutletContext } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, Car, CheckCircle2, RefreshCw, ArrowDown } from 'lucide-react';
 import SwipeableJobCard from '@/components/driver/SwipeableJobCard';
+import { JobListSkeleton } from '@/components/driver/JobListSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -37,14 +39,12 @@ interface Reservation {
   baby_seat_count: number | null;
   pickup_place_name: string | null;
   dropoff_place_name: string | null;
-  agencies?: {
-    id: string;
-    agency_name: string;
-  } | null;
+  // agencies omitted in list query - card shows 'Acenta' when agency_id exists
 }
 
 type JobType = 'pending' | 'active' | 'completed';
 
+// Lean select: only columns needed for list display (no agencies join, no json fields)
 const LIST_RESERVATION_SELECT = `
   id,
   customer_id,
@@ -70,11 +70,12 @@ const LIST_RESERVATION_SELECT = `
   luggage_count,
   baby_seat_count,
   pickup_place_name,
-  dropoff_place_name,
-  agencies (id, agency_name)
+  dropoff_place_name
 `;
 const PENDING_BASE_STATUSES = ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned'] as const;
 const PENDING_PAGE_SIZE = 12;
+const ACTIVE_COMPLETED_PAGE_SIZE = 10;
+const TAB_CACHE_STALE_MS = 2 * 60 * 1000; // 2 min - avoid refetch when switching tabs
 
 const sortByPickupDateTime = (items: Reservation[]) =>
   [...items].sort((a, b) => {
@@ -83,10 +84,13 @@ const sortByPickupDateTime = (items: Reservation[]) =>
     return dateTimeA.getTime() - dateTimeB.getTime();
   });
 
+const CACHE_QUERY_KEY = 'driver-jobs-tab-cache' as const;
+
 const DriverJobList = () => {
   const { type } = useParams<{ type: JobType }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { driverId } = useUserRole();
   const context = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
   const setHeaderRight = context?.setHeaderRight ?? (() => {});
@@ -97,6 +101,9 @@ const DriverJobList = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [hasMorePending, setHasMorePending] = useState(false);
   const [loadingMorePending, setLoadingMorePending] = useState(false);
+  const [hasMoreActiveCompleted, setHasMoreActiveCompleted] = useState(false);
+  const [loadingMoreActiveCompleted, setLoadingMoreActiveCompleted] = useState(false);
+  const activeCompletedPageRef = useRef(0);
   
   // Pull-to-refresh state
   const [pullDistance, setPullDistance] = useState(0);
@@ -131,22 +138,51 @@ const DriverJobList = () => {
     }
   }, [jobType]);
 
-  const fetchReservations = useCallback(async (options?: { showToast?: boolean; append?: boolean }) => {
+  const getCacheKey = useCallback(() => 
+    [CACHE_QUERY_KEY, driverId, jobType, filterDate, filterMonth, filterYear].join(':'),
+    [driverId, jobType, filterDate, filterMonth, filterYear]
+  );
+
+  const fetchReservations = useCallback(async (options?: { showToast?: boolean; append?: boolean; force?: boolean }) => {
     const showToast = options?.showToast ?? false;
     const append = options?.append ?? false;
+    const force = options?.force ?? false;
 
     if (!driverId) {
       setReservations([]);
       setAdminNotesMap({});
       pendingPageRef.current = 0;
+      activeCompletedPageRef.current = 0;
       setHasMorePending(false);
+      setHasMoreActiveCompleted(false);
       setLoading(false);
       setRefreshing(false);
       setLoadingMorePending(false);
+      setLoadingMoreActiveCompleted(false);
       return;
     }
 
     try {
+      // Tab cache: skip fetch when switching back to a tab with fresh data
+      if (!force && !append && (jobType === 'active' || jobType === 'completed')) {
+        const cached = queryClient.getQueryData<{ data: Reservation[]; notes: Record<string, string>; ts: number }>([CACHE_QUERY_KEY, getCacheKey()]);
+        if (cached && Date.now() - cached.ts < TAB_CACHE_STALE_MS) {
+          setReservations(sortByPickupDateTime(cached.data));
+          setAdminNotesMap(cached.notes);
+          setLoading(false);
+          setRefreshing(false);
+          if (cached.data.length > 0) {
+            void supabase.from('reservation_admin_notes').select('reservation_id, notes').in('reservation_id', cached.data.map(r => r.id)).then(({ data: notesData }) => {
+              if (!notesData) return;
+              const notesObj: Record<string, string> = {};
+              notesData.forEach((n) => { if (n.notes) notesObj[n.reservation_id] = n.notes; });
+              setAdminNotesMap(notesObj);
+            });
+          }
+          return;
+        }
+      }
+
       const statusFilter = getStatusFilter();
       let data: Reservation[] = [];
       let error: Error | null = null;
@@ -218,13 +254,20 @@ const DriverJobList = () => {
           }
         }
       } else {
+        // Active/Completed: pagination (limit 10 per page)
+        if (!append) activeCompletedPageRef.current = 0;
+        const nextPage = append ? activeCompletedPageRef.current + 1 : 0;
+        const from = nextPage * ACTIVE_COMPLETED_PAGE_SIZE;
+        const to = from + ACTIVE_COMPLETED_PAGE_SIZE; // request 11 to detect hasMore
+
+        const asc = jobType === 'active';
         let query = supabase
           .from('reservations')
           .select(LIST_RESERVATION_SELECT)
           .eq('driver_id', driverId)
           .in('status', statusFilter)
-          .order('pickup_date', { ascending: true })
-          .order('pickup_time', { ascending: true });
+          .order('pickup_date', { ascending: asc })
+          .order('pickup_time', { ascending: asc });
 
         // For completed, only show current month
         if (jobType === 'completed') {
@@ -245,9 +288,17 @@ const DriverJobList = () => {
           query = query.gte('pickup_date', firstDay).lte('pickup_date', lastDay);
         }
 
-        const response = await query;
-        data = (response.data || []) as Reservation[];
+        const response = await query.range(from, to);
+        const rows = (response.data || []) as Reservation[];
         error = response.error as Error | null;
+
+        if (!error) {
+          const hasMore = rows.length > ACTIVE_COMPLETED_PAGE_SIZE;
+          const pageRows = rows.slice(0, ACTIVE_COMPLETED_PAGE_SIZE);
+          data = pageRows;
+          activeCompletedPageRef.current = nextPage;
+          setHasMoreActiveCompleted(hasMore);
+        }
       }
 
       if (error) {
@@ -258,12 +309,20 @@ const DriverJobList = () => {
 
       if (jobType !== 'pending') {
         const sortedData = sortByPickupDateTime(data);
-        setReservations(sortedData);
-        setAdminNotesMap({});
+        if (!append) {
+          setReservations(sortedData);
+          setAdminNotesMap({});
+        } else {
+          setReservations(prev => {
+            const byId = new Map(prev.map((item) => [item.id, item]));
+            sortedData.forEach((row) => byId.set(row.id, row));
+            return sortByPickupDateTime(Array.from(byId.values()));
+          });
+        }
         pendingPageRef.current = 0;
         setHasMorePending(false);
 
-        // Fetch admin notes in background so list UI is not blocked.
+        // Cache for tab switching (Aktif/Tamamlanan) - admin notes in background
         if (sortedData.length > 0) {
           const ids = sortedData.map((r) => r.id);
           void supabase
@@ -276,8 +335,21 @@ const DriverJobList = () => {
               notesData.forEach((n) => {
                 if (n.notes) notesObj[n.reservation_id] = n.notes;
               });
-              setAdminNotesMap(notesObj);
+              if (append) {
+                setAdminNotesMap((prev) => ({ ...prev, ...notesObj }));
+              } else {
+                setAdminNotesMap(notesObj);
+              }
             });
+        } else if (!append) {
+          setAdminNotesMap({});
+        }
+        if (!append) {
+          queryClient.setQueryData([CACHE_QUERY_KEY, getCacheKey()], {
+            data: sortedData,
+            notes: {},
+            ts: Date.now(),
+          });
         }
       }
       
@@ -286,8 +358,9 @@ const DriverJobList = () => {
       setLoading(false);
       setRefreshing(false);
       setLoadingMorePending(false);
+      setLoadingMoreActiveCompleted(false);
     }
-  }, [driverId, jobType, getStatusFilter, t, filterMonth, filterYear, filterDate]);
+  }, [driverId, jobType, getStatusFilter, getCacheKey, t, filterMonth, filterYear, filterDate, queryClient]);
 
   useEffect(() => {
     if (driverId) {
@@ -303,12 +376,12 @@ const DriverJobList = () => {
         size="icon"
         onClick={() => {
           setRefreshing(true);
-          void fetchReservations({ showToast: true });
+          void fetchReservations({ showToast: true, force: true });
         }}
-        disabled={refreshing || loadingMorePending}
+        disabled={refreshing || loadingMorePending || loadingMoreActiveCompleted}
         className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
       >
-        <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", (refreshing || loadingMorePending) && "animate-spin")} />
+        <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", (refreshing || loadingMorePending || loadingMoreActiveCompleted) && "animate-spin")} />
       </Button>
     );
     return () => setHeaderRight(null);
@@ -384,6 +457,13 @@ const DriverJobList = () => {
     void fetchReservations({ append: true });
   }, [jobType, hasMorePending, loadingMorePending, refreshing, loading, fetchReservations]);
 
+  const loadNextActiveCompletedPage = useCallback(() => {
+    if (jobType === 'pending') return;
+    if (!hasMoreActiveCompleted || loadingMoreActiveCompleted || refreshing || loading) return;
+    setLoadingMoreActiveCompleted(true);
+    void fetchReservations({ append: true });
+  }, [jobType, hasMoreActiveCompleted, loadingMoreActiveCompleted, refreshing, loading, fetchReservations]);
+
   useEffect(() => {
     if (jobType !== 'pending' || !hasMorePending) return;
     const rootElement = containerRef.current;
@@ -406,6 +486,21 @@ const DriverJobList = () => {
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [jobType, hasMorePending, loadNextPendingPage, reservations.length]);
+
+  useEffect(() => {
+    if (jobType === 'pending' || !hasMoreActiveCompleted) return;
+    const rootElement = containerRef.current;
+    const sentinel = loadMoreSentinelRef.current;
+    if (!rootElement || !sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) loadNextActiveCompletedPage();
+      },
+      { root: rootElement, rootMargin: '220px 0px 220px 0px', threshold: 0.01 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [jobType, hasMoreActiveCompleted, loadNextActiveCompletedPage, reservations.length]);
 
   const getDriverMeta = useCallback(async () => {
     if (driverMetaRef.current) return driverMetaRef.current;
@@ -610,7 +705,7 @@ const DriverJobList = () => {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isPulling || refreshing || loadingMorePending) return;
+    if (!isPulling || refreshing || loadingMorePending || loadingMoreActiveCompleted) return;
     
     const currentY = e.touches[0].clientY;
     const distance = Math.max(0, currentY - touchStartY.current);
@@ -621,9 +716,9 @@ const DriverJobList = () => {
   };
 
   const handleTouchEnd = () => {
-    if (pullDistance >= PULL_THRESHOLD && !refreshing && !loadingMorePending) {
+    if (pullDistance >= PULL_THRESHOLD && !refreshing && !loadingMorePending && !loadingMoreActiveCompleted) {
       setRefreshing(true);
-      void fetchReservations({ showToast: true });
+      void fetchReservations({ showToast: true, force: true });
     }
     setPullDistance(0);
     setIsPulling(false);
@@ -683,9 +778,7 @@ const DriverJobList = () => {
       {/* Content */}
       <main className="px-3 sm:px-4 py-4 max-w-lg mx-auto w-full overflow-x-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          <JobListSkeleton count={5} />
         ) : reservations.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -716,15 +809,15 @@ const DriverJobList = () => {
                 </motion.div>
               ))}
 
-              {jobType === 'pending' && hasMorePending && (
+              {(jobType === 'pending' && hasMorePending) || (jobType !== 'pending' && hasMoreActiveCompleted) ? (
                 <div ref={loadMoreSentinelRef} className="h-2 w-full" />
-              )}
-              {jobType === 'pending' && loadingMorePending && (
+              ) : null}
+              {(jobType === 'pending' && loadingMorePending) || (jobType !== 'pending' && loadingMoreActiveCompleted) ? (
                 <div className="flex items-center justify-center py-2 text-muted-foreground text-sm gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>{t('loading') || 'Yükleniyor...'}</span>
                 </div>
-              )}
+              ) : null}
             </div>
           </AnimatePresence>
         )}

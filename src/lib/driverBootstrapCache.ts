@@ -26,10 +26,6 @@ type BootstrapReservation = {
   baby_seat_count: number | null;
   pickup_place_name: string | null;
   dropoff_place_name: string | null;
-  agencies?: {
-    id: string;
-    agency_name: string;
-  } | null;
 };
 
 type DriverBootstrapCachePayload = {
@@ -42,6 +38,7 @@ type DriverBootstrapCachePayload = {
 
 const DRIVER_BOOTSTRAP_CACHE_KEY = 'mt_driver_bootstrap_cache_v1';
 const DRIVER_BOOTSTRAP_TTL_MS = 3 * 60 * 1000;
+// Lean select for bootstrap - no agencies join
 const BOOTSTRAP_RESERVATION_SELECT = `
   id,
   customer_id,
@@ -67,9 +64,10 @@ const BOOTSTRAP_RESERVATION_SELECT = `
   luggage_count,
   baby_seat_count,
   pickup_place_name,
-  dropoff_place_name,
-  agencies (id, agency_name)
+  dropoff_place_name
 `;
+const BOOTSTRAP_ACTIONABLE_LIMIT = 20;
+const BOOTSTRAP_COMPLETED_LIMIT = 10;
 
 const sortByPickupDateTime = (items: BootstrapReservation[]) =>
   [...items].sort((a, b) => {
@@ -141,7 +139,7 @@ export const prefetchDriverBootstrap = async (userId: string, driverId: string |
         .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active'])
         .order('pickup_date', { ascending: true })
         .order('pickup_time', { ascending: true })
-        .limit(40),
+        .limit(BOOTSTRAP_ACTIONABLE_LIMIT),
       supabase
         .from('reservations')
         .select(BOOTSTRAP_RESERVATION_SELECT)
@@ -151,7 +149,7 @@ export const prefetchDriverBootstrap = async (userId: string, driverId: string |
         .lte('pickup_date', lastDayOfCurrentMonth)
         .order('pickup_date', { ascending: false })
         .order('pickup_time', { ascending: false })
-        .limit(40),
+        .limit(BOOTSTRAP_COMPLETED_LIMIT),
     ]);
 
     if (actionableQuery.error || completedQuery.error) return;
