@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+
+interface VersionBadgeProps {
+  /** Menü içinde inline göstermek için */
+  inline?: boolean;
+}
 
 /**
  * Driver panelinde Versiyon göstergesi - güncel kodu aldığımızdan emin olmak için.
  * version.json'dan okur.
  */
-export const VersionBadge = () => {
+export const VersionBadge = ({ inline }: VersionBadgeProps) => {
   const [version, setVersion] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,7 +24,10 @@ export const VersionBadge = () => {
 
   return (
     <div
-      className="fixed top-2 left-2 z-[9999] text-[10px] font-mono text-foreground/80 bg-muted/95 px-2 py-1 rounded pointer-events-auto border border-border/50"
+      className={cn(
+        'text-[10px] font-mono text-muted-foreground',
+        inline ? 'px-2 py-1' : 'fixed top-2 left-2 z-[9999] bg-muted/95 px-2 py-1 rounded pointer-events-auto border border-border/50 text-foreground/80'
+      )}
       title="Versiyon"
     >
       Versiyon v{version}

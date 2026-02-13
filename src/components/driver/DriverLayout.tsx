@@ -13,7 +13,6 @@ import ReservationSearch from '@/components/ReservationSearch';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
 import { DriverNavSheet } from './DriverNavSheet';
-import { VersionBadge } from './VersionBadge';
 
 export interface DriverHeaderExtras {
   onRefresh?: () => void;
@@ -71,8 +70,6 @@ export const DriverLayout = () => {
 
   return (
     <div className="h-screen w-full max-w-[100vw] flex flex-col items-center bg-background overflow-x-hidden overflow-y-hidden">
-      {/* Versiyon göstergesi - güncel kodu aldığımızdan emin olmak için */}
-      <VersionBadge />
       {/* Compact mobile header */}
       <header className="w-full max-w-[100vw] bg-primary text-primary-foreground py-2.5 px-3 sm:py-3 sm:px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg safe-area-inset-top overflow-x-hidden">
         <div className="flex items-center gap-2 min-w-0">

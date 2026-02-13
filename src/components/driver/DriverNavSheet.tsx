@@ -21,6 +21,7 @@ import {
   User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { VersionBadge } from './VersionBadge';
 
 interface DriverNavSheetProps {
   onOpenChange: (open: boolean) => void;
@@ -142,6 +143,11 @@ export const DriverNavSheet = ({
             <LogOut className="h-5 w-5 shrink-0" />
             <span className="font-medium">{t('logout')}</span>
           </button>
+        </div>
+
+        {/* Versiyon - menü altı */}
+        <div className="pt-4 mt-4 border-t px-3 pb-4">
+          <VersionBadge inline />
         </div>
       </nav>
     </>
