@@ -4,7 +4,7 @@ import { loadGoogleMapsScript, getDirections, geocodeAddress } from "@/utils/goo
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import GooglePlacesAutocomplete from "@/components/ui/google-places-autocomplete";
+import GooglePlacesAutocomplete, { PlaceDetails } from "@/components/ui/google-places-autocomplete";
 import { MapPin, Users, Briefcase, ArrowRight, Loader2, Car, Sparkles, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -72,6 +72,8 @@ const LivePriceCalculator = () => {
           const directions = await getDirections(pickupCoords, dropoffCoords);
           if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
             distanceKm = directions.distanceKm;
+            console.log("[LivePriceCalculator DEBUG] raw_distance_from_google:", { meters: directions.distanceMeters, km: directions.distanceKm });
+            console.log("[LivePriceCalculator DEBUG] final_sent_distance (KM):", distanceKm);
           }
         } catch (_) {}
       } else {
@@ -84,20 +86,21 @@ const LivePriceCalculator = () => {
           const directions = await getDirections(pickupGeo, dropoffGeo);
           if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
             distanceKm = directions.distanceKm;
+            console.log("[LivePriceCalculator DEBUG] raw_distance_from_google (geocode):", { meters: directions.distanceMeters, km: directions.distanceKm });
           }
+        } else {
+          console.warn("[LivePriceCalculator DEBUG] No coords - distance_km NOT sent, Turkey pricing may fail");
         }
       }
 
-      const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
-        body: {
-          pickup,
-          dropoff,
-          customerCurrency: getCurrencyByLanguage(),
-          distance_km: distanceKm, // KM only - from getDirections (meters/1000)
-        },
-      });
+      const body = { pickup, dropoff, customerCurrency: getCurrencyByLanguage(), distance_km: distanceKm };
+      console.log("[LivePriceCalculator DEBUG] Body sent to backend:", body);
+
+      const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", { body });
 
       if (error) throw error;
+      if (data?.message) console.log("[LivePriceCalculator DEBUG] Backend message:", data.message);
+      if (data?.debug_reason) console.log("[LivePriceCalculator DEBUG] Backend debug_reason:", data.debug_reason);
       setPriceResult(data);
     } catch (error) {
       console.error("Price fetch error:", error);
@@ -107,14 +110,14 @@ const LivePriceCalculator = () => {
     }
   }, [pickup, dropoff, pickupCoords, dropoffCoords, language]);
 
-  const handlePickupSelect = (value: string, details?: { formattedAddress: string; lat?: number | null; lng?: number | null }) => {
+  const handlePickupSelect = (value: string, details?: PlaceDetails) => {
     setPickup(details?.formattedAddress || value);
     setPickupCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
     setPriceResult(null);
     setHasSearched(false);
   };
 
-  const handleDropoffSelect = (value: string, details?: { formattedAddress: string; lat?: number | null; lng?: number | null }) => {
+  const handleDropoffSelect = (value: string, details?: PlaceDetails) => {
     setDropoff(details?.formattedAddress || value);
     setDropoffCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
     setPriceResult(null);

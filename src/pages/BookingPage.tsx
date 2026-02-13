@@ -22,6 +22,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TimePickerGrid } from "@/components/ui/time-picker-grid";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
+import { getDirections } from "@/utils/googleMapsLoader";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { 
@@ -291,7 +292,7 @@ const BookingPage = () => {
   const effectiveCity = tokenBookingData?.city || urlCity;
   const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
 
-  // Place selection handlers - store address and Place ID for accurate price matching
+  // Place selection handlers - store address, Place ID, and coords for price matching
   const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {
     if (details?.formattedAddress) {
       setEditablePickup(details.formattedAddress);
@@ -599,6 +600,7 @@ const BookingPage = () => {
           if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
             distanceKm = directions.distanceKm;
             lastDistanceKmRef.current = distanceKm;
+            console.log("[BookingPage DEBUG] raw_distance_from_google:", { meters: directions.distanceMeters, km: directions.distanceKm });
           }
         } catch (_) {
           // Mesafe alınamazsa devam et - backend şehir bazlı kontrol yapar
@@ -606,17 +608,24 @@ const BookingPage = () => {
       }
 
       try {
-        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: {
-            pickup: effectivePickup,
-            dropoff: effectiveDropoff,
-            pickup_place_id: pickupPlaceId || undefined,
-            dropoff_place_id: dropoffPlaceId || undefined,
-            customerCurrency: preferredCurrency,
-            pickup_date: effectiveDate || undefined,
-            distance_km: distanceKm, // KM only - from getDirections (meters/1000)
-          },
-        });
+        const body: Record<string, unknown> = {
+          pickup: effectivePickup,
+          dropoff: effectiveDropoff,
+          pickup_place_id: pickupPlaceId || undefined,
+          dropoff_place_id: dropoffPlaceId || undefined,
+          customerCurrency: preferredCurrency,
+          pickup_date: effectiveDate || undefined,
+        };
+
+        if (distanceKm != null) {
+          body.distance_km = distanceKm;
+          console.log("[BookingPage DEBUG] raw_distance_from_google / final_sent_distance (KM):", distanceKm);
+        } else {
+          console.warn("[BookingPage DEBUG] No distanceKm - pickupCoords:", !!pickupCoords, "dropoffCoords:", !!dropoffCoords);
+        }
+        console.log("[BookingPage DEBUG] Body sent to backend:", body);
+
+        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", { body });
 
         if (cancelled) return;
 

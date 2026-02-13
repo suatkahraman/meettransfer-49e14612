@@ -409,9 +409,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const distanceKm = typeof body.distance_km === "number" && Number.isFinite(body.distance_km) ? body.distance_km : null;
     const AIRPORT_PARKING_FEE_EUR = 5;
 
+    console.log("[get-all-vehicle-prices DEBUG] Turkey branch - incoming distance_km:", body.distance_km, "| parsed distanceKm:", distanceKm, "| isDubai:", isDubai);
+
     if (!isDubai) {
       const turkeyResult = await (async () => {
         if (distanceKm == null || distanceKm <= 0) {
+          const errMsg = "Fiyat hesaplanamadı: Mesafe geçersiz veya gönderilmedi (distance_km null, 0 veya eksik)";
+          console.warn("[get-all-vehicle-prices DEBUG] Turkey price fail - reason:", errMsg);
           return {
             prices: turkeyVehicles.map((v) => ({
               vehicleType: v.value,
@@ -423,15 +427,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
               available: false,
             })),
             matched: false,
-            message: "Fiyat hesaplanamadı",
+            message: errMsg,
+            debug_reason: "MESAFE_GECERSIZ",
           };
         }
 
         const kmRulesRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=vehicle_type,base_price,price_per_km,min_km,max_km`,
+          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,base_price,price_per_km,min_km,max_km`,
           { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
         );
         if (!kmRulesRes.ok) {
+          const errMsg = "Fiyat hesaplanamadı: Veritabanı hatası (distance_pricing_rules sorgusu başarısız)";
+          console.error("[get-all-vehicle-prices DEBUG] Turkey price fail - reason:", errMsg, "| status:", kmRulesRes.status);
           return {
             prices: turkeyVehicles.map((v) => ({
               vehicleType: v.value,
@@ -443,10 +450,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
               available: false,
             })),
             matched: false,
-            message: "Fiyat hesaplanamadı",
+            message: errMsg,
+            debug_reason: "VERITABANI_HATASI",
           };
         }
         const kmRules: Array<{
+          id?: string;
           vehicle_type: string | null;
           base_price: number | null;
           price_per_km: number | null;
@@ -455,6 +464,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }> = await kmRulesRes.json();
 
         const vehiclePriceMap: Record<string, number> = {};
+        const matchedRuleIds: Record<string, string> = {};
         for (const r of kmRules || []) {
           const base = Number(r.base_price);
           const perKm = Number(r.price_per_km);
@@ -464,8 +474,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
           if (distanceKm < minKm || distanceKm > maxKm) continue;
           const vt = r.vehicle_type || "mercedes-vito";
           const price = Math.ceil(base + distanceKm * perKm);
-          if (!vehiclePriceMap[vt] || price < vehiclePriceMap[vt]) vehiclePriceMap[vt] = price;
+          if (!vehiclePriceMap[vt] || price < vehiclePriceMap[vt]) {
+            vehiclePriceMap[vt] = price;
+            if (r.id) matchedRuleIds[vt] = r.id;
+          }
         }
+
+        console.log("[get-all-vehicle-prices DEBUG] Turkey - distance_pricing_rules matched:", Object.keys(vehiclePriceMap).length > 0 ? "EVET" : "HAYIR", "| rule_ids:", matchedRuleIds, "| vehiclePriceMap:", vehiclePriceMap);
 
         const isAirport = /airport|havalimani|havalimanı|ist|saw|ayt|bjv|dlm|adb|esb|asr|nav|ada|gzt|tzx|diy|van|mlx|szf|kco|teq|edn|khv|dnz|ezs|vas|nop|kfs|onq|nkt|aji|mqm|kzr|msr|erz|erc|sfq|hty|edo|ckz|ogu|rzv|yei|gzp/i.test(
           pickupSanitized + " " + dropoffSanitized
@@ -483,6 +498,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
           const basePrice = match ?? vehiclePriceMap[vt.value];
           const available = basePrice != null && basePrice > 0;
           const total = available ? Math.ceil(basePrice + airportFee) : null;
+
+          if (total != null) {
+            console.log("[get-all-vehicle-prices DEBUG] Turkey - vehicle:", vt.value, "| basePrice:", basePrice, "| airportFee:", airportFee, "| total_price:", total, "| exchange_rate: N/A (fiyat EUR)");
+          }
+
           return {
             vehicleType: vt.value,
             vehicleLabel: vt.label,
@@ -495,10 +515,21 @@ Deno.serve(async (req: Request): Promise<Response> => {
         });
 
         const hasAvailable = prices.some((p) => p.available);
+        let failReason: string | null = null;
+        if (!hasAvailable) {
+          if (Object.keys(vehiclePriceMap).length === 0) {
+            failReason = "Fiyat hesaplanamadı: distance_pricing_rules tablosunda bu mesafeye uygun kural bulunamadı (min_km/max_km aralığı dışında)";
+            console.warn("[get-all-vehicle-prices DEBUG] Turkey price fail - reason: KURAL_YOK (no matching min_km/max_km)");
+          } else {
+            failReason = "Fiyat hesaplanamadı: Araç türü eşleşmesi yok veya hesaplanan fiyat 0";
+            console.warn("[get-all-vehicle-prices DEBUG] Turkey price fail - reason: Arac_ESLESME_YOK_veya_FIYAT_0");
+          }
+        }
         return {
           prices,
           matched: hasAvailable,
-          message: hasAvailable ? null : "Fiyat hesaplanamadı",
+          message: hasAvailable ? null : (failReason || "Fiyat hesaplanamadı"),
+          debug_reason: !hasAvailable ? (Object.keys(vehiclePriceMap).length === 0 ? "KURAL_YOK" : "FIYAT_0_veya_ESLESME_YOK") : undefined,
         };
       })();
 

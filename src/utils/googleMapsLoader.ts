@@ -210,7 +210,8 @@ export const geocodeAddress = async (
 };
 
 /**
- * Get directions between two points
+ * Get directions between two points.
+ * distance.value is in METERS (Google API); distanceKm = value/1000.
  */
 export const getDirections = async (
   origin: { lat: number; lng: number },
@@ -219,7 +220,8 @@ export const getDirections = async (
   route: any;
   duration: string;
   distance: string;
-  distanceKm: number | null;
+  distanceMeters: number;
+  distanceKm: number;
 } | null> => {
   const maps = getGoogleMaps();
   if (!maps) return null;
@@ -235,13 +237,13 @@ export const getDirections = async (
       (result: any, status: string) => {
         if (status === 'OK' && result) {
           const leg = result.routes[0]?.legs[0];
-          // Google Directions API returns distance.value in METERS - MUST divide by 1000 for backend (get-all-vehicle-prices expects KM)
-          const distanceValueMeters = leg?.distance?.value;
-          const distanceKm = typeof distanceValueMeters === 'number' ? distanceValueMeters / 1000 : null;
+          const distanceMeters = leg?.distance?.value ?? 0; // Google: value in METERS
+          const distanceKm = distanceMeters / 1000;
           resolve({
             route: result,
             duration: leg?.duration?.text || '',
             distance: leg?.distance?.text || '',
+            distanceMeters,
             distanceKm,
           });
         } else {
