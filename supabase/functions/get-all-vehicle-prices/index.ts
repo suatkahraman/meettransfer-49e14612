@@ -388,7 +388,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const AIRPORT_PARKING_FEE_EUR = 5;
     const isIntracityTurkey = sameResolvedCity && !airport; // Aynı şehir, havalimanı yok
 
-    console.log("[get-all-vehicle-prices DEBUG] Turkey - distanceKm:", distanceKm, "| isIntracity:", isIntracityTurkey, "| isIntercity:", hasDifferentResolvedCities);
+    // v2.8.2 RADIKAL: İstanbul söz konusuysa fixed_prices/region_prices/airport_prices HİÇBİRİNE dokunma - SADECE KM
+    const fromCityStr = resolvedPickupCity || "";
+    const toCityStr = resolvedDropoffCity || "";
+    const isIstanbulRoute = fromCityStr.toLowerCase().includes("istanbul") || toCityStr.toLowerCase().includes("istanbul");
+    if (isIstanbulRoute) {
+      console.log("ISTANBUL_DETECTED: FORCING CLEAN START - from:", fromCityStr, "to:", toCityStr, "- SADECE distance_pricing_rules");
+    }
+
+    console.log("[get-all-vehicle-prices DEBUG] Turkey - distanceKm:", distanceKm, "| isIntracity:", isIntracityTurkey, "| isIntercity:", hasDifferentResolvedCities, "| isIstanbulRoute:", isIstanbulRoute);
 
     if (!isDubai) {
       const turkeyResult = await (async () => {
@@ -414,8 +422,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
         // INTERCITY: Önce intercity_prices (city_to_city sabit fiyat) tablosuna bak
         // INTRACITY: Bu adımı ATLA - asla sabit fiyat tablosuna gitme
+        // İSTANBUL: v2.8.2 - fixed_prices/region_prices/airport_prices HİÇBİRİNE SORGU ATMA - SADECE KM
         let fixedPricesFromIntercity: Array<{ vehicle_type: string; price: number; price_currency: string }> = [];
-        if (!isIntracityTurkey && hasDifferentResolvedCities && resolvedPickupCity && resolvedDropoffCity) {
+        if (!isIstanbulRoute && !isIntracityTurkey && hasDifferentResolvedCities && resolvedPickupCity && resolvedDropoffCity) {
           const fromCity = resolvedPickupCity;
           const toCity = resolvedDropoffCity;
           try {
@@ -438,6 +447,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
           } catch (e) {
             console.warn("[get-all-vehicle-prices DEBUG] intercity_prices query failed:", String(e));
           }
+        } else if (isIstanbulRoute) {
+          console.log("[get-all-vehicle-prices DEBUG] Istanbul - fixed_prices/region_prices/airport_prices SORGU ATILMAZ, SADECE KM");
         } else if (isIntracityTurkey) {
           console.log("[get-all-vehicle-prices DEBUG] Intracity - sabit fiyat tablosuna BAKILMAZ, sadece KM hesabı");
         }
