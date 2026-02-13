@@ -1,10 +1,10 @@
 {
-  "version": "2.7.4",
+  "version": "2.7.7",
   "releaseDate": "2026-02-13",
-  "buildNumber": 19,
+  "buildNumber": 21,
   "notes": {
-    "TR": "Intercity/Intracity öncelik hiyerarşisi, şehir içi sabit fiyat atlama",
-    "EN": "Intercity/Intracity priority, skip fixed prices for intracity",
+    "TR": "Strict mode: KURAL_BULUNAMADI, debug_info, hardcoded kaldırıldı",
+    "EN": "Strict mode: KURAL_BULUNAMADI, debug_info, no hardcoded defaults",
     "DE": "Buchungserstellung behoben, Preisaktualisierung verbessert",
     "FR": "Correction de la création de réservation, amélioration des mises à jour de prix",
     "RU": "Исправление создания бронирования, улучшение обновления цен",
