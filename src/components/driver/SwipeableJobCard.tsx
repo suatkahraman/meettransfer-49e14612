@@ -58,8 +58,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   const { t, getPaymentTypeLabel } = useDriverTranslations();
   const x = useMotionValue(0);
   
-  const getStatusConfig = (status: string) => {
-    const configs: Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
+  const statusConfigs = useMemo(() => ({
       pending: { 
         label: t('pending') || 'Beklemede', 
         color: 'text-gray-600',
@@ -126,11 +125,11 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
         bgColor: 'bg-gray-500',
         icon: <Ban className="h-4 w-4" />
       },
-    };
-    return configs[status] || configs.pending;
-  };
+    } as Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }>),
+    [t]
+  );
   
-  const config = getStatusConfig(reservation.status);
+  const config = statusConfigs[reservation.status] || statusConfigs.pending;
   
   // Validate completion eligibility for active jobs
   const completionValidation = useMemo(() => {
@@ -182,7 +181,7 @@ export const SwipeableJobCard = ({ reservation, adminNotes, onAccept, onComplete
   };
 
   return (
-    <div className="relative w-full max-w-full overflow-hidden rounded-xl touch-manipulation">
+    <div className={cn("relative w-full max-w-full overflow-hidden rounded-xl touch-manipulation", isProcessing ? "pointer-events-none" : "pointer-events-auto")}>
       {/* Left background (Accept) */}
       {canSwipeRight && (
         <motion.div 

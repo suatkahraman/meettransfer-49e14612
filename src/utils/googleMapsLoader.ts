@@ -239,6 +239,7 @@ export const getDirections = async (
           const leg = result.routes[0]?.legs[0];
           const distanceMeters = leg?.distance?.value ?? 0; // Google: value in METERS
           const distanceKm = distanceMeters / 1000;
+          console.error('[getDirections] Step 1 – Google Maps OK:', { origin, destination, distanceMeters, distanceKm, status });
           resolve({
             route: result,
             duration: leg?.duration?.text || '',
@@ -247,6 +248,7 @@ export const getDirections = async (
             distanceKm,
           });
         } else {
+          console.error('[getDirections] Step 1 – Google Maps FAIL:', { origin, destination, status, result: result ?? 'null' });
           resolve(null);
         }
       }

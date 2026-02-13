@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 
 type DriverLanguage = 'EN' | 'TR' | 'DE' | 'FR' | 'RU' | 'AR';
 
@@ -1342,11 +1342,11 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
 export const useDriverTranslations = () => {
   const language = useMemo(() => getBrowserLanguage(), []);
   
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     return driverTranslations[language]?.[key] || driverTranslations.TR[key] || key;
-  };
+  }, [language]);
 
-  const getPaymentTypeLabel = (paymentType: string): string => {
+  const getPaymentTypeLabel = useCallback((paymentType: string): string => {
     const paymentMap: Record<string, string> = {
       cash: t('cash'),
       card: t('card'),
@@ -1356,7 +1356,7 @@ export const useDriverTranslations = () => {
       none: t('none'),
     };
     return paymentMap[paymentType] || paymentType;
-  };
+  }, [t]);
 
   return { t, language, getPaymentTypeLabel };
 };

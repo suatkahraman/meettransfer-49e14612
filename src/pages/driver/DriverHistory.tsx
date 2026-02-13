@@ -250,7 +250,7 @@ const DriverHistory = () => {
                   role="button"
                   tabIndex={0}
                   className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-green-500 touch-manipulation min-h-[44px]"
-                  onClick={() => startTransition(() => navigate(`/driver/job/${reservation.id}`))}
+                  onClick={() => requestAnimationFrame(() => startTransition(() => navigate(`/driver/job/${reservation.id}`)))}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startTransition(() => navigate(`/driver/job/${reservation.id}`)); } }}
                 >
                   <CardContent className="p-4 space-y-3">

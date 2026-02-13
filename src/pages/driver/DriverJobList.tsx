@@ -95,6 +95,8 @@ const DriverJobList = () => {
   const context = useOutletContext<{ setHeaderRight: (n: React.ReactNode) => void }>();
   const setHeaderRight = context?.setHeaderRight ?? (() => {});
   const { t } = useDriverTranslations();
+  const tRef = useRef(t);
+  tRef.current = t;
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -303,7 +305,7 @@ const DriverJobList = () => {
 
       if (error) {
         console.error('Error:', error);
-        if (showToast) toast.error(t('failedToRefresh'));
+        if (showToast) toast.error(tRef.current('failedToRefresh'));
         return;
       }
 
@@ -353,14 +355,14 @@ const DriverJobList = () => {
         }
       }
       
-      if (showToast) toast.success(t('jobsRefreshed'));
+      if (showToast) toast.success(tRef.current('jobsRefreshed'));
     } finally {
       setLoading(false);
       setRefreshing(false);
       setLoadingMorePending(false);
       setLoadingMoreActiveCompleted(false);
     }
-  }, [driverId, jobType, getStatusFilter, getCacheKey, t, filterMonth, filterYear, filterDate, queryClient]);
+  }, [driverId, jobType, getStatusFilter, getCacheKey, filterMonth, filterYear, filterDate, queryClient]);
 
   useEffect(() => {
     if (driverId) {
@@ -385,7 +387,7 @@ const DriverJobList = () => {
       </Button>
     );
     return () => setHeaderRight(null);
-  }, [setHeaderRight, refreshing, fetchReservations, loadingMorePending]);
+  }, [setHeaderRight, refreshing, fetchReservations, loadingMorePending, loadingMoreActiveCompleted]);
 
   // Real-time subscription
   useEffect(() => {
@@ -809,7 +811,7 @@ const DriverJobList = () => {
                     adminNotes={adminNotesMap[reservation.id]}
                     onAccept={jobType === 'pending' ? () => handleAcceptJob(reservation.id) : undefined}
                     onComplete={jobType === 'active' ? () => handleCompleteJob(reservation.id) : undefined}
-                    onClick={() => startTransition(() => navigate(`/driver/job/${reservation.id}`))}
+                    onClick={() => requestAnimationFrame(() => startTransition(() => navigate(`/driver/job/${reservation.id}`)))}
                   />
                 </motion.div>
               ))}

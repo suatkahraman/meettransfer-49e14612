@@ -68,39 +68,65 @@ const LivePriceCalculator = () => {
     try {
       let distanceKm: number | undefined;
       if (pickupCoords && dropoffCoords) {
+        console.error('[LivePriceCalculator] Step 0 – Using coords:', { pickupCoords, dropoffCoords });
         try {
           const directions = await getDirections(pickupCoords, dropoffCoords);
+          console.error('[LivePriceCalculator] Step 2 – getDirections result:', {
+            hasDirections: !!directions,
+            distanceKm: directions?.distanceKm,
+            distanceMeters: directions?.distanceMeters,
+            isValid: directions?.distanceKm != null && Number.isFinite(directions.distanceKm),
+          });
           if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
             distanceKm = directions.distanceKm;
-            console.log("[LivePriceCalculator DEBUG] raw_distance_from_google:", { meters: directions.distanceMeters, km: directions.distanceKm });
-            console.log("[LivePriceCalculator DEBUG] final_sent_distance (KM):", distanceKm);
+          } else {
+            console.error('[LivePriceCalculator] Step 2 – distance_km INVALID or missing, backend may use fallback');
           }
-        } catch (_) {}
+        } catch (err) {
+          console.error('[LivePriceCalculator] Step 2 – getDirections threw:', err);
+        }
       } else {
+        console.error('[LivePriceCalculator] Step 0 – No coords, geocoding:', { pickup, dropoff });
         await loadGoogleMapsScript(["places"]);
         const [pickupGeo, dropoffGeo] = await Promise.all([
           geocodeAddress(pickup),
           geocodeAddress(dropoff),
         ]);
+        console.error('[LivePriceCalculator] Step 0b – Geocode result:', {
+          pickupGeo,
+          dropoffGeo,
+          hasBoth: !!(pickupGeo && dropoffGeo),
+        });
         if (pickupGeo && dropoffGeo) {
           const directions = await getDirections(pickupGeo, dropoffGeo);
+          console.error('[LivePriceCalculator] Step 2 – getDirections (geocode) result:', {
+            hasDirections: !!directions,
+            distanceKm: directions?.distanceKm,
+            isValid: directions?.distanceKm != null && Number.isFinite(directions.distanceKm),
+          });
           if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
             distanceKm = directions.distanceKm;
-            console.log("[LivePriceCalculator DEBUG] raw_distance_from_google (geocode):", { meters: directions.distanceMeters, km: directions.distanceKm });
+          } else {
+            console.error('[LivePriceCalculator] Step 2 – distance_km INVALID after geocode');
           }
         } else {
-          console.warn("[LivePriceCalculator DEBUG] No coords - distance_km NOT sent, Turkey pricing may fail");
+          console.error('[LivePriceCalculator] Step 0b – No coords after geocode, distance_km NOT sent – city pricing may fail');
         }
       }
 
       const body = { pickup, dropoff, customerCurrency: getCurrencyByLanguage(), distance_km: distanceKm };
-      console.log("[LivePriceCalculator DEBUG] Body sent to backend:", body);
+      console.error('[LivePriceCalculator] Step 3 – Body to backend:', body);
 
       const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", { body });
 
+      console.error('[LivePriceCalculator] Step 4 – Backend response:', {
+        hasError: !!error,
+        error: error?.message,
+        hasData: !!data,
+        message: data?.message,
+        debug_reason: data?.debug_reason,
+      });
       if (error) throw error;
-      if (data?.message) console.log("[LivePriceCalculator DEBUG] Backend message:", data.message);
-      if (data?.debug_reason) console.log("[LivePriceCalculator DEBUG] Backend debug_reason:", data.debug_reason);
       setPriceResult(data);
     } catch (error) {
       console.error("Price fetch error:", error);
