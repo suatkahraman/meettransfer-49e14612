@@ -80,7 +80,7 @@ const EDGE_FETCH_TIMEOUT_MS = 8000;
 
 function isSameCity(a: string | null, b: string | null): boolean {
   if (!a || !b) return false;
-  return normalizeTurkish(a).toLowerCase() === normalizeTurkish(b).toLowerCase();
+  return normalizeCityName(a) === normalizeCityName(b);
 }
 
 const ISTANBUL_DISTRICTS = new Set([
@@ -125,6 +125,15 @@ function normalizeTurkish(text: string): string {
     .replace(/Ö/g, 'O').replace(/ö/g, 'o')
     .replace(/Ü/g, 'U').replace(/ü/g, 'u')
     .replace(/Ğ/g, 'G').replace(/ğ/g, 'g');
+}
+
+/** v2.8.4: Şehir ismi eşleşmesi için standart form - küçük harf + Türkçe karakter temizliği */
+function normalizeCityName(city: string | null): string {
+  if (!city || typeof city !== "string") return "";
+  return normalizeTurkish(city)
+    .toLowerCase()
+    .replace(/ı/g, "i") // Ekstra: dotless ı -> i (bazı locale'lerde kalabilir)
+    .trim();
 }
 
 /** Sanitize and normalize user search input for price matching */
@@ -389,11 +398,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const isIntracityTurkey = sameResolvedCity && !airport; // Aynı şehir, havalimanı yok
 
     // v2.8.2 RADIKAL: İstanbul söz konusuysa fixed_prices/region_prices/airport_prices HİÇBİRİNE dokunma - SADECE KM
-    const fromCityStr = resolvedPickupCity || "";
-    const toCityStr = resolvedDropoffCity || "";
-    const isIstanbulRoute = fromCityStr.toLowerCase().includes("istanbul") || toCityStr.toLowerCase().includes("istanbul");
+    // v2.8.4: normalizeCityName ile karşılaştırma - İstanbul/istanbul/İSTANBUL hepsi eşleşir
+    const fromCityNorm = normalizeCityName(resolvedPickupCity || "");
+    const toCityNorm = normalizeCityName(resolvedDropoffCity || "");
+    const isIstanbulRoute = fromCityNorm.includes("istanbul") || toCityNorm.includes("istanbul");
     if (isIstanbulRoute) {
-      console.log("ISTANBUL_DETECTED: FORCING CLEAN START - from:", fromCityStr, "to:", toCityStr, "- SADECE distance_pricing_rules");
+      console.log("ISTANBUL_DETECTED: FORCING CLEAN START - from:", fromCityNorm || resolvedPickupCity, "to:", toCityNorm || resolvedDropoffCity, "- SADECE distance_pricing_rules");
     }
 
     console.log("[get-all-vehicle-prices DEBUG] Turkey - distanceKm:", distanceKm, "| isIntracity:", isIntracityTurkey, "| isIntercity:", hasDifferentResolvedCities, "| isIstanbulRoute:", isIstanbulRoute);
@@ -425,8 +435,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
         // İSTANBUL: v2.8.2 - fixed_prices/region_prices/airport_prices HİÇBİRİNE SORGU ATMA - SADECE KM
         let fixedPricesFromIntercity: Array<{ vehicle_type: string; price: number; price_currency: string }> = [];
         if (!isIstanbulRoute && !isIntracityTurkey && hasDifferentResolvedCities && resolvedPickupCity && resolvedDropoffCity) {
-          const fromCity = resolvedPickupCity;
-          const toCity = resolvedDropoffCity;
+          // v2.8.4: Standart şehir formu ile sorgula - DB'deki İstanbul/istanbul/İSTANBUL eşleşir
+          const fromCity = normalizeCityName(resolvedPickupCity) || resolvedPickupCity;
+          const toCity = normalizeCityName(resolvedDropoffCity) || resolvedDropoffCity;
           try {
             const q1 = `and=(from_city.ilike.${encodeURIComponent(fromCity)},to_city.ilike.${encodeURIComponent(toCity)},is_active.eq.true)`;
             const q2 = `and=(from_city.ilike.${encodeURIComponent(toCity)},to_city.ilike.${encodeURIComponent(fromCity)},is_active.eq.true)`;
@@ -512,8 +523,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
           return distanceKm >= minKm && distanceKm <= maxKm;
         });
 
-        // Strict Mode: Geçerli KM kuralı YOKSA fiyat uydurma - doğrudan FİYAT_TANIMLANMADI
+        // Strict Mode: Geçerli KM kuralı YOKSA fiyat uydurma - doğrudan FİYAT_TANIMLANMADI (79 EUR ASLA dönme)
         if (rulesToUse.length === 0) {
+          if (isIstanbulRoute) {
+            console.error("[get-all-vehicle-prices v2.8.4] ISTANBUL_KM_RULE_NOT_FOUND - distance_pricing_rules'da mesafeye uygun kural YOK. distance_km:", distanceKm, "| Nerede koptu: KM kuralı eksik.");
+          }
           console.warn("[get-all-vehicle-prices DEBUG] FİYAT_TANIMLANMADI - distance_pricing_rules'da mesafeye uygun kural yok");
           return {
             prices: turkeyVehicles.map((v) => ({
