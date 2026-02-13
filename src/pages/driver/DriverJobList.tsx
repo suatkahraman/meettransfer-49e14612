@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef, startTransition } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams, useOutletContext } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Loader2, AlertCircle, Car, CheckCircle2, RefreshCw, ArrowDown } from 'lucide-react';
 import SwipeableJobCard from '@/components/driver/SwipeableJobCard';
 import { JobListSkeleton } from '@/components/driver/JobListSkeleton';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { checkCompletionEligibility } from '@/hooks/useCompletionValidation';
@@ -738,95 +737,68 @@ const DriverJobList = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Pull-to-refresh indicator */}
-      <AnimatePresence>
-        {(pullDistance > 0 || refreshing) && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ 
-              opacity: 1, 
-              height: refreshing ? 60 : pullDistance 
-            }}
-            exit={{ opacity: 0, height: 0 }}
-            className="flex items-center justify-center bg-gradient-to-b from-muted/50 to-transparent overflow-hidden"
-          >
-            <motion.div
-              animate={{ 
-                rotate: refreshing ? 360 : (pullDistance / PULL_THRESHOLD) * 180,
-                scale: pullDistance >= PULL_THRESHOLD ? 1.2 : 1
-              }}
-              transition={{ 
-                rotate: refreshing ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 0 }
-              }}
-              className={cn(
-                "flex items-center justify-center rounded-full p-2",
-                pullDistance >= PULL_THRESHOLD ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-              )}
-            >
-              {refreshing ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <ArrowDown className={cn(
-                  "h-5 w-5 transition-transform",
-                  pullDistance >= PULL_THRESHOLD && "rotate-180"
-                )} />
-              )}
-            </motion.div>
-            {pullDistance >= PULL_THRESHOLD && !refreshing && (
-              <span className="ml-2 text-sm text-primary font-medium">
-                {t('releaseToRefresh') || 'Yenilemek için bırakın'}
-              </span>
+      {/* Pull-to-refresh indicator - plain div, no Framer Motion */}
+      {(pullDistance > 0 || refreshing) && (
+        <div
+          style={{ height: refreshing ? 60 : pullDistance }}
+          className="flex items-center justify-center bg-gradient-to-b from-muted/50 to-transparent overflow-hidden"
+        >
+          <div
+            className={cn(
+              "flex items-center justify-center rounded-full p-2",
+              pullDistance >= PULL_THRESHOLD ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          >
+            {refreshing ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <ArrowDown className={cn(
+                "h-5 w-5 transition-transform",
+                pullDistance >= PULL_THRESHOLD && "rotate-180"
+              )} />
+            )}
+          </div>
+          {pullDistance >= PULL_THRESHOLD && !refreshing && (
+            <span className="ml-2 text-sm text-primary font-medium">
+              {t('releaseToRefresh') || 'Yenilemek için bırakın'}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Content */}
       <main className="px-3 sm:px-4 py-4 max-w-lg mx-auto w-full overflow-x-hidden">
         {loading ? (
           <JobListSkeleton count={5} />
         ) : reservations.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-16"
-          >
+          <div className="text-center py-16">
             <PageIcon className={cn("h-16 w-16 mx-auto mb-4", config.iconColor, "opacity-50")} />
             <p className="text-muted-foreground">{config.emptyMessage}</p>
-          </motion.div>
+          </div>
         ) : (
-          <AnimatePresence mode="popLayout">
-            <div className="space-y-3">
-              {reservations.map((reservation, index) => (
-                <motion.div
-                  key={reservation.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.16, delay: Math.min(index, 2) * 0.02 }}
-                  className="touch-manipulation"
-                >
-                  <SwipeableJobCard
-                    reservation={reservation}
-                    adminNotes={adminNotesMap[reservation.id]}
-                    onAccept={jobType === 'pending' ? () => handleAcceptJob(reservation.id) : undefined}
-                    onComplete={jobType === 'active' ? () => handleCompleteJob(reservation.id) : undefined}
-                    onClick={() => requestAnimationFrame(() => startTransition(() => navigate(`/driver/job/${reservation.id}`)))}
-                  />
-                </motion.div>
-              ))}
+          <div className="space-y-3">
+            {reservations.map((reservation) => (
+              <div key={reservation.id}>
+                <SwipeableJobCard
+                  reservation={reservation}
+                  adminNotes={adminNotesMap[reservation.id]}
+                  onAccept={jobType === 'pending' ? () => handleAcceptJob(reservation.id) : undefined}
+                  onComplete={jobType === 'active' ? () => handleCompleteJob(reservation.id) : undefined}
+                  onClick={() => navigate(`/driver/job/${reservation.id}`)}
+                />
+              </div>
+            ))}
 
-              {(jobType === 'pending' && hasMorePending) || (jobType !== 'pending' && hasMoreActiveCompleted) ? (
-                <div ref={loadMoreSentinelRef} className="h-2 w-full" />
-              ) : null}
-              {(jobType === 'pending' && loadingMorePending) || (jobType !== 'pending' && loadingMoreActiveCompleted) ? (
-                <div className="flex items-center justify-center py-2 text-muted-foreground text-sm gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>{t('loading') || 'Yükleniyor...'}</span>
-                </div>
-              ) : null}
-            </div>
-          </AnimatePresence>
+            {(jobType === 'pending' && hasMorePending) || (jobType !== 'pending' && hasMoreActiveCompleted) ? (
+              <div ref={loadMoreSentinelRef} className="h-2 w-full" />
+            ) : null}
+            {(jobType === 'pending' && loadingMorePending) || (jobType !== 'pending' && loadingMoreActiveCompleted) ? (
+              <div className="flex items-center justify-center py-2 text-muted-foreground text-sm gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>{t('loading') || 'Yükleniyor...'}</span>
+              </div>
+            ) : null}
+          </div>
         )}
       </main>
     </div>

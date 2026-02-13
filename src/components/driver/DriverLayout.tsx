@@ -70,6 +70,18 @@ export const DriverLayout = () => {
 
   return (
     <div className="h-screen w-full max-w-[100vw] flex flex-col items-center bg-background overflow-x-hidden overflow-y-hidden">
+      {/* DEBUG: iOS overlay test - görünüyorsa ve tıklanabiliyorsa katman sorunu yok */}
+      <div
+        className="fixed top-2 left-2 z-[9999] w-2 h-2 rounded-full bg-red-500 pointer-events-auto"
+        title="DEBUG_MODE_ACTIVE"
+        aria-label="DEBUG_MODE_ACTIVE"
+      />
+      <div
+        className="fixed top-2 left-6 z-[9999] text-[10px] font-mono text-red-600 bg-white/90 px-1 rounded pointer-events-auto"
+        title="DEBUG_MODE_ACTIVE"
+      >
+        DEBUG
+      </div>
       {/* Compact mobile header */}
       <header className="w-full max-w-[100vw] bg-primary text-primary-foreground py-2.5 px-3 sm:py-3 sm:px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg safe-area-inset-top overflow-x-hidden">
         <div className="flex items-center gap-2 min-w-0">

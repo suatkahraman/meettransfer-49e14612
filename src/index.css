@@ -1,5 +1,11 @@
 /* Fonts are loaded in index.html for better performance */
 
+/* iOS Safari geçici fix - touch/tap müdahalelerini azalt */
+* {
+  touch-action: auto !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

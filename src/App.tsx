@@ -8,6 +8,7 @@ import { AIChatProvider } from "./contexts/AIChatContext";
 import { AITestProvider } from "./contexts/AITestContext";
 import { AgencyLanguageProvider } from "./contexts/AgencyLanguageContext";
 import { AdminRoute, DriverRoute, CustomerRoute, AgencyRoute } from "./components/ProtectedRoute";
+import { DriverJobListErrorBoundary } from "./components/driver/DriverJobListErrorBoundary";
 import OAuthCallbackHandler from "./components/OAuthCallbackHandler";
 import { lazy, Suspense, useEffect, useState } from "react";
 import HashScroll from "@/components/HashScroll";
@@ -455,7 +456,7 @@ const App = () => {
               {/* Driver Routes - Protected with Layout */}
               <Route path="/driver" element={<DriverRoute><LazyRoute><DriverLayout /></LazyRoute></DriverRoute>}>
                 <Route index element={<DriverHome />} />
-                <Route path="jobs/:type" element={<DriverJobList />} />
+                <Route path="jobs/:type" element={<DriverJobListErrorBoundary><DriverJobList /></DriverJobListErrorBoundary>} />
                 <Route path="job/:id" element={<DriverJobDetails />} />
                 <Route path="accounting" element={<DriverAccounting />} />
                 <Route path="monthly-accounting" element={<DriverMonthlyAccounting />} />
