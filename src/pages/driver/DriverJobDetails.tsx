@@ -25,6 +25,7 @@ import { getCurrencySymbol } from '@/lib/currency';
 import { parseMoneyInput } from '@/lib/money';
 import { getWhatsAppUrl } from '@/lib/contact';
 import { PaymentStatusBadge } from '@/components/payments/PaymentStatusBadge';
+import { JobDetailSkeleton } from '@/components/driver/JobDetailSkeleton';
 
 const vehicleTypeLabels: Record<string, string> = {
   'sedan': 'Sedan or Similar',
@@ -567,11 +568,7 @@ const DriverJobDetails = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
+    return <JobDetailSkeleton />;
   }
 
   if (!reservation) {

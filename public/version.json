@@ -1,7 +1,7 @@
 {
   "version": "2.7.2",
   "releaseDate": "2026-02-13",
-  "buildNumber": 14,
+  "buildNumber": 17,
   "notes": {
     "TR": "Şehir içi 50 km altı fiyat düzeltmesi, Math.min garantisi",
     "EN": "Short distance pricing fix, Math.min guarantee",
