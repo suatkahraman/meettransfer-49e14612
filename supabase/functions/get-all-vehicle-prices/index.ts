@@ -340,18 +340,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
       !airport &&
       hasDifferentResolvedCities;
 
-    // Frontend vehicle types - v2.8.8: Yeni araç isimleri (DB ile eşleşme: .trim().toLowerCase())
+    // v2.8.9: Booking Form ile birebir aynı araç isimleri (DB vehicle_type: Standard Sedan, Mercedes Vito or Similar, Mercedes Maybach, Mercedes Sprinter or Similar)
     const turkeyVehicles = [
       { value: "sedan", label: "Standard Sedan", passengers: 3, luggage: 2,
         dbAliases: ["standard sedan", "sedan", "standard_sedan", "standard-sedan"] },
       { value: "mercedes-vito", label: "Mercedes Vito or Similar", passengers: 6, luggage: 6,
-        dbAliases: ["mercedes vito or similar", "mercedes-vito", "vito"] },
+        dbAliases: ["mercedes vito or similar", "mercedes-vito", "vito", "mercedes vito"] },
       { value: "vip-mercedes", label: "Mercedes Maybach", passengers: 5, luggage: 5,
-        dbAliases: ["mercedes maybach", "maybach", "vip-mercedes", "vip-vito"] },
+        dbAliases: ["mercedes maybach", "maybach", "vip-mercedes", "vip-vito", "maybach-minibus"] },
       { value: "maybach-minibus", label: "Mercedes Maybach", passengers: 4, luggage: 4,
         dbAliases: ["mercedes maybach", "maybach-minibus", "maybach-minivan"] },
       { value: "minibus", label: "Mercedes Sprinter or Similar", passengers: 20, luggage: 20,
-        dbAliases: ["mercedes sprinter or similar", "minibus", "mercedes-sprinter"] },
+        dbAliases: ["mercedes sprinter or similar", "minibus", "mercedes-sprinter", "sprinter"] },
     ];
 
     const dubaiVehicles = [
@@ -513,18 +513,27 @@ Deno.serve(async (req: Request): Promise<Response> => {
           return rCity === cityNorm || cityNorm.includes(rCity) || rCity.includes(cityNorm);
         }
 
+        // v2.8.9: Esnek eşleşme - tam eşleşme yoksa includes() ile fallback (örn: "vito" -> "Mercedes Vito or Similar")
         function ruleMatchesVehicle(r: KmRule, vt: typeof turkeyVehicles[0]): boolean {
           const rVt = norm(r.vehicle_type || "");
           if (!rVt) return false;
+          const labelNorm = norm(vt.label);
           for (const alias of vt.dbAliases) {
-            if (norm(alias) === rVt || rVt.includes(norm(alias)) || norm(alias).includes(rVt)) return true;
+            const a = norm(alias);
+            if (a === rVt) return true;                    // Tam eşleşme
+            if (rVt.includes(a)) return true;             // DB "Mercedes Vito..." içinde "vito" var
+            if (a.includes(rVt)) return true;              // Alias "mercedes vito..." içinde DB "vito" var
           }
-          return norm(vt.value) === rVt;
+          if (labelNorm === rVt) return true;
+          if (rVt.includes(labelNorm)) return true;
+          if (labelNorm.includes(rVt)) return true;
+          return false;
         }
 
-        // 0-50: price_amount = SABİT FİYAT (direkt kullan, KM ile çarpma)
-        // 51-85: price_amount = KM BAŞI ÇARPAN (distance × price_amount)
-        // 86+: en üst dilim 1.50 ile hesapla veya "Lütfen fiyat isteyin"
+        // v2.8.9: 0-50 KM ÖZEL KURAL - price_amount TOPLAM FİYAT (çarpan değil, direkt döndür)
+        // 51-85: price_amount = KM başı çarpan (distance × price_amount)
+        // 86+: en üst dilim 1.50 veya "Lütfen fiyat isteyin"
+        const IS_FIXED_PRICE_0_50 = distanceKm <= 50;
         const TOP_TIER_PER_KM = 1.50;
         const REQUEST_PRICE_OVER_KM = 86;
 
@@ -545,8 +554,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
             const basePrice = r.base_price != null ? Number(r.base_price) : 0;
             const perKm = r.price_per_km != null ? Number(r.price_per_km) : 0;
 
-            if (distanceKm <= 50) {
-              // 0-50: price_amount SABİT FİYAT (direkt)
+            if (IS_FIXED_PRICE_0_50) {
+              // 0-50: price_amount = TOPLAM FİYAT (çarpan değil, direkt kullan)
               if (Number.isFinite(priceAmount)) {
                 const p = Math.ceil(priceAmount);
                 if (price == null || p < price) price = p;
