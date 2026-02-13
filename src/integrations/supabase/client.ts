@@ -9,7 +9,9 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-// iOS uyumlu storage: Android'de giriş yapılan hesaba iOS'tan erişim sorununu önler
+// iOS Safari uyumlu hibrit storage (localStorage + sessionStorage fallback).
+// SameSite: Token'lar localStorage'da tutulur; Supabase sunucu çerezleri kendi domain'inde.
+// Oturum kalıcılığı için persistSession + autoRefreshToken etkin.
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: supabaseStorage,

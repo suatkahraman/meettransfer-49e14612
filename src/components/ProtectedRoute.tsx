@@ -113,6 +113,19 @@ const ProtectedRoute = ({
     return () => window.clearTimeout(t);
   }, [userId, roleLoading, role, fallbackLoading, fallbackRole]);
 
+  // iOS ITP: Hızlı yönlendirme bazen session henüz okunmadan tetiklenebilir.
+  // getSession retry'ları tamamlansın diye kısa bir grace ekle (client-side Navigate, 302 değil).
+  const [authRedirectGrace, setAuthRedirectGrace] = useState(false);
+  const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
+
+  useEffect(() => {
+    if (!user && !authLoading && isIOS && !authRedirectGrace) {
+      const t = window.setTimeout(() => setAuthRedirectGrace(true), 120);
+      return () => window.clearTimeout(t);
+    }
+    if (user) setAuthRedirectGrace(false);
+  }, [user, authLoading, isIOS, authRedirectGrace]);
+
   // Show loading state while checking auth and role
   if (authLoading || roleLoading || fallbackLoading || (user && !role && !fallbackRole && !roleGraceExpired)) {
     return (
@@ -123,7 +136,15 @@ const ProtectedRoute = ({
   }
 
   // Redirect to appropriate login page if not logged in
+  // iOS: authRedirectGrace ile getSession retry'larına ek süre ver
   if (!user) {
+    if (isIOS && !authRedirectGrace) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      );
+    }
     return <Navigate to={redirectTo} replace />;
   }
 

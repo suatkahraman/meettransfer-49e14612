@@ -222,68 +222,108 @@ const DriverLoginScreen = () => {
 
     try {
       const validation = loginSchema.parse({ email, password });
-      
+
       // Check rate limit before attempting login
-      const rateLimit = await checkRateLimit(validation.email);
+      let rateLimit;
+      try {
+        rateLimit = await checkRateLimit(validation.email);
+      } catch (rlErr) {
+        console.warn('[DriverLogin] Rate limit check failed:', rlErr);
+        rateLimit = { locked: false };
+      }
       if (rateLimit.locked) {
         toast.error(`Hesabınız geçici olarak kilitlendi. ${formatLockoutTime(rateLimit.remainingSeconds || 0)} sonra tekrar deneyin.`);
         setIsLoading(false);
         return;
       }
-      
+
       // Save or clear email based on remember me
-      if (rememberMe) {
-        safeLocalSet('driverRememberMe', 'true');
-        safeLocalSet('driverSavedEmail', validation.email);
-      } else {
-        safeLocalRemove('driverRememberMe');
-        safeLocalRemove('driverSavedEmail');
+      try {
+        if (rememberMe) {
+          safeLocalSet('driverRememberMe', 'true');
+          safeLocalSet('driverSavedEmail', validation.email);
+        } else {
+          safeLocalRemove('driverRememberMe');
+          safeLocalRemove('driverSavedEmail');
+        }
+      } catch {
+        // Storage yazma hatası (iOS gizli mod vb.) - devam et
       }
 
       // Şoför girişi - 2FA yok
-      const { error, data: authData } = await supabase.auth.signInWithPassword({
-        email: validation.email,
-        password: validation.password,
-      });
-      
-      if (error) {
-        await logLoginAttempt(validation.email, false, error.message, undefined, 'driver');
-        
-        if (error.message?.includes('Invalid login credentials')) {
-          setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
-        } else if (error.message?.includes('Email not confirmed')) {
-          toast.error(t('emailNotConfirmed') || 'Please confirm your email first');
-        } else if (error.message?.includes('Too many requests')) {
-          toast.error(t('tooManyRequests') || 'Too many login attempts. Please try again later.');
-        } else {
-          toast.error(error.message || t('loginFailed') || 'Login failed');
-        }
-      } else if (authData?.user && authData?.session) {
-        // Yeni auth/RLS duzeninde false-negative'i onlemek icin coklu fallback kullan.
-        const roleCheck = await isDriverAccount(
-          authData.user.id,
-          authData.session.access_token
+      let authData: { user: { id: string }; session: { access_token: string } } | null = null;
+      let authError: { message?: string } | null = null;
+
+      try {
+        const result = await supabase.auth.signInWithPassword({
+          email: validation.email,
+          password: validation.password,
+        });
+        authError = result.error;
+        authData = result.data as typeof authData;
+      } catch (authErr) {
+        console.error('[DriverLogin] signInWithPassword unhandled rejection:', authErr);
+        toast.error(t('loginFailed') || 'Login failed. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      if (authError) {
+        await logLoginAttempt(validation.email, false, authError.message, undefined, 'driver').catch(
+          () => {}
         );
 
-        if (!roleCheck.isDriver) {
-          toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil' : 'This is not a driver account');
-          await supabase.auth.signOut();
+        if (authError.message?.includes('Invalid login credentials')) {
+          setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
+        } else if (authError.message?.includes('Email not confirmed')) {
+          toast.error(t('emailNotConfirmed') || 'Please confirm your email first');
+        } else if (authError.message?.includes('Too many requests')) {
+          toast.error(t('tooManyRequests') || 'Too many login attempts. Please try again later.');
+        } else {
+          toast.error(authError.message || t('loginFailed') || 'Login failed');
+        }
+        return;
+      }
+
+      if (authData?.user && authData?.session) {
+        let roleCheck: { isDriver: boolean; driverId: string | null };
+        try {
+          roleCheck = await isDriverAccount(
+            authData.user.id,
+            authData.session.access_token
+          );
+        } catch (roleErr) {
+          console.error('[DriverLogin] isDriverAccount failed:', roleErr);
+          toast.error(t('loginFailed') || 'Login failed. Please try again.');
           setIsLoading(false);
           return;
         }
 
-        void logLoginAttempt(validation.email, true, undefined, undefined, 'driver');
+        if (!roleCheck.isDriver) {
+          toast.error(language === 'TR' ? 'Bu hesap bir sürücü hesabı değil' : 'This is not a driver account');
+          await supabase.auth.signOut().catch(() => {});
+          setIsLoading(false);
+          return;
+        }
+
+        void logLoginAttempt(validation.email, true, undefined, undefined, 'driver').catch(() => {});
         primeUserRoleCache({
           userId: authData.user.id,
           role: 'driver',
           driverId: roleCheck.driverId,
           agencyId: null,
         });
-        void prefetchDriverBootstrap(authData.user.id, roleCheck.driverId);
+        void prefetchDriverBootstrap(authData.user.id, roleCheck.driverId).catch(() => {});
         warmDriverChunks();
-        // Driver icin otomatik cihaza guven - mevcut driverlar sorun yasamasin
         registerTrustedDevice(authData.user.id).catch(() => {});
-        // Session is already established by signInWithPassword.
+
+        // iOS Safari: Storage yazmasının tamamlanması için kısa gecikme (ITP/WebKit uyumluluğu)
+        // window.location.replace hemen yapılırsa yeni sayfa yüklendiğinde session henüz storage'da olmayabilir
+        const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
+        if (isIOS) {
+          await new Promise((r) => setTimeout(r, 150));
+        }
+
         window.location.replace('/driver');
         return;
       }
@@ -297,7 +337,7 @@ const DriverLoginScreen = () => {
         });
         setErrors(fieldErrors);
       } else {
-        console.error('Login error:', error);
+        console.error('[DriverLogin] Login error:', error);
         toast.error(t('loginFailed') || 'Login failed. Please try again.');
       }
     } finally {
@@ -367,7 +407,15 @@ const DriverLoginScreen = () => {
     const confirmPassword = formData.get('confirmPassword') as string;
     try {
       const validation = newPasswordSchema.parse({ password, confirmPassword });
-      let { data: { session: currentSession } } = await supabase.auth.getSession();
+      let currentSession;
+      try {
+        const { data } = await supabase.auth.getSession();
+        currentSession = data.session;
+      } catch (sessionErr) {
+        console.error('[DriverLogin] getSession failed:', sessionErr);
+        toast.error(language === 'TR' ? 'Oturum alınamadı. Sayfayı yenileyip tekrar deneyin.' : 'Session error. Refresh and try again.');
+        return;
+      }
       if (!currentSession) {
         toast.error(language === 'TR' ? 'Oturum bulunamadı. Yeni bir şifre sıfırlama bağlantısı isteyin.' : 'Session missing. Request a new reset link.');
         return;
@@ -383,7 +431,16 @@ const DriverLoginScreen = () => {
       }
       toast.success(language === 'TR' ? 'Şifre güncellendi. Yönlendiriliyorsunuz...' : 'Password updated. Redirecting...');
       setNewPasswordValue('');
-      await supabase.auth.refreshSession();
+      try {
+        await supabase.auth.refreshSession();
+      } catch (refreshErr) {
+        console.warn('[DriverLogin] refreshSession failed:', refreshErr);
+      }
+      // iOS Safari: Storage flush için kısa gecikme
+      const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
+      if (isIOS) {
+        await new Promise((r) => setTimeout(r, 150));
+      }
       window.location.replace('/driver');
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -393,6 +450,9 @@ const DriverLoginScreen = () => {
           if (p) fieldErrors[p] = er.message;
         });
         setErrors(fieldErrors);
+      } else {
+        console.error('[DriverLogin] handleSetNewPassword error:', err);
+        toast.error(language === 'TR' ? 'Bir hata oluştu. Lütfen tekrar deneyin.' : 'An error occurred. Please try again.');
       }
     } finally {
       setIsLoading(false);

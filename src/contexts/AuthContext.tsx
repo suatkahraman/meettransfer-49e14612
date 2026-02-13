@@ -53,15 +53,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = async () => {
       try {
         let { data: { session: existingSession } } = await supabase.auth.getSession();
-        // iOS WebKit: getSession bazen ilk seferde null döner - kısa aralıklarla tekrar dene (toplam ~350ms)
+        // iOS WebKit/ITP: getSession bazen ilk seferde null döner (storage gecikmesi).
+        // Tekrar dene - iOS'ta hibrit storage flush için daha uzun süre ver.
         const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
         if (!existingSession && isIOS) {
-          const delays = [50, 100, 200]; // 3 deneme: toplam 350ms
+          const delays = [80, 150, 250, 400]; // 4 deneme: toplam ~880ms - ITP/storage sync için
           for (const delay of delays) {
             await new Promise(r => setTimeout(r, delay));
-            const retry = await supabase.auth.getSession();
-            existingSession = retry.data.session;
-            if (existingSession) break;
+            try {
+              const retry = await supabase.auth.getSession();
+              existingSession = retry.data.session;
+              if (existingSession) break;
+            } catch (retryErr) {
+              console.warn('[AuthContext] getSession retry failed:', retryErr);
+            }
           }
         }
         if (isMounted) {
