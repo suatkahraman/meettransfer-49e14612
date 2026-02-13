@@ -75,17 +75,6 @@ const DISTRICT_MAPPING: Record<string, string> = {
   "al barsha": "Al Barsha", "silicon oasis": "Dubai Silicon Oasis",
 };
 
-const TURKEY_INTRACITY_DISCOUNT_CITIES = new Set([
-  "Istanbul",
-  "Ankara",
-  "Antalya",
-  "Bodrum",
-  "Dalaman",
-  "Izmir",
-  "Bursa",
-]);
-
-const INTRACITY_AIRPORT_DISCOUNT_RATE = 0.1;
 const EDGE_FETCH_TIMEOUT_MS = 8000;
 
 // İstanbul havalimanları (IST, SAW) -> şehir dışı/uzun mesafe için sabit fiyat DEVRE DIŞI
@@ -220,11 +209,8 @@ function detectCity(text: string): string | null {
   if (/canakkale|çanakkale|\bckz\b/i.test(s)) return "Canakkale";
   if (/ordu|giresun|\bogu\b/i.test(s)) return "Ordu";
   if (/rize|artvin|\brzv\b/i.test(s)) return "Rize";
+  if (/dubai|uae|dxb|dwc|al maktoum/i.test(s)) return "Dubai";
   return null;
-}
-
-function applyIntracityAirportDiscount(price: number): number {
-  return Math.max(1, Math.ceil(price * (1 - INTRACITY_AIRPORT_DISCOUNT_RATE)));
 }
 
 function inferCityFromDistrict(district: string | null): string | null {
@@ -306,7 +292,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
       if (/dxb|dubai.*airport|dubai.*international/i.test(s)) airport = "Dubai International Airport (DXB)";
       else if (/dwc|al maktoum/i.test(s)) airport = "Al Maktoum International Airport (DWC)";
     } else {
-      // Türkiye - Tüm havalimanları (KM tabanlı bölgesel fiyatlandırma kapsamı)
       if (/istanbul airport|\bist\b/i.test(s)) airport = "Istanbul Airport (IST)";
       else if (/sabiha|gokcen|\bsaw\b/i.test(s)) airport = "Sabiha Gokcen Airport (SAW)";
       else if (/gazipasa|gazipaşa|\bgzp\b|alanya.*airport/i.test(s)) airport = "Gazipasa-Alanya Airport (GZP)";
@@ -350,14 +335,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
       else if (/bursa|yenisehir|\byei\b/i.test(s)) airport = "Bursa Yenisehir Airport (YEI)";
     }
 
-    const isIntracityAddressTransfer =
-      !airport &&
-      ((
-        !!intracityCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(intracityCity)
-      ) || (
-        !!fallbackSharedCity && TURKEY_INTRACITY_DISCOUNT_CITIES.has(fallbackSharedCity)
-      ));
-
     // Determine if this is an intercity transfer (no airport):
     // - Different cities, OR same city with different districts (e.g. Antalya Alanya -> Antalya Kaş)
     const hasDifferentResolvedCities =
@@ -366,7 +343,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
       !isSameCity(resolvedPickupCity, resolvedDropoffCity);
     const isIntercityTransfer =
       !airport &&
-      !isIntracityAddressTransfer &&
       hasDifferentResolvedCities;
 
     // Mesafe önceliği: IST/SAW -> şehir dışı veya 80+ KM ise havalimanı sabit fiyatlarını DEVRE DIŞI bırak
@@ -429,19 +405,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const vehicleTypes = isDubai ? dubaiVehicles : turkeyVehicles;
 
-    // ========== TÜRKİYE: SADECE KM BAZLI (distance_pricing_rules) ==========
-    // Frontend must send distance in KM (Google Maps returns meters - divide by 1000 before sending)
-    let distanceKm: number | null = typeof body.distance_km === "number" && Number.isFinite(body.distance_km) ? body.distance_km : null;
-    if (distanceKm != null && distanceKm > 2000 && distanceKm <= 2000000) {
-      console.warn("[get-all-vehicle-prices] distance_km looks like meters (>" + 2000 + "), converting to km:", { raw: body.distance_km, converted: distanceKm / 1000 });
-      distanceKm = distanceKm / 1000;
-    }
+    // ========== TÜRKİYE: SADECE KM BAZLI (distance_pricing_rules), region/intercity/place_id YOK ==========
+    const distanceKm = typeof body.distance_km === "number" && Number.isFinite(body.distance_km) ? body.distance_km : null;
     const AIRPORT_PARKING_FEE_EUR = 5;
 
     if (!isDubai) {
       const turkeyResult = await (async () => {
         if (distanceKm == null || distanceKm <= 0) {
-          console.log("[get-all-vehicle-prices] Turkey: distance_km is null or <=0, cannot calculate", JSON.stringify({ distance_km: body.distance_km }));
           return {
             prices: turkeyVehicles.map((v) => ({
               vehicleType: v.value,
@@ -457,22 +427,32 @@ Deno.serve(async (req: Request): Promise<Response> => {
           };
         }
 
-        const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-        const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
         const kmRulesRes = await fetch(
           `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=vehicle_type,base_price,price_per_km,min_km,max_km`,
           { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
         );
         if (!kmRulesRes.ok) {
           return {
-            prices: turkeyVehicles.map((v) => ({ vehicleType: v.value, vehicleLabel: v.label, price: null, currency: customerCurrency || "EUR", passengers: v.passengers, luggage: v.luggage, available: false })),
+            prices: turkeyVehicles.map((v) => ({
+              vehicleType: v.value,
+              vehicleLabel: v.label,
+              price: null,
+              currency: customerCurrency || "EUR",
+              passengers: v.passengers,
+              luggage: v.luggage,
+              available: false,
+            })),
             matched: false,
             message: "Fiyat hesaplanamadı",
           };
         }
-        const kmRules: Array<{ vehicle_type: string | null; base_price: number | null; price_per_km: number | null; min_km: number | null; max_km: number | null }> = await kmRulesRes.json();
-
-        console.log("[get-all-vehicle-prices] Turkey KM pricing: " + JSON.stringify({ distance_km: distanceKm, price_per_km_from_db: kmRules?.map((r) => ({ vehicle_type: r.vehicle_type, price_per_km: r.price_per_km })) }));
+        const kmRules: Array<{
+          vehicle_type: string | null;
+          base_price: number | null;
+          price_per_km: number | null;
+          min_km: number | null;
+          max_km: number | null;
+        }> = await kmRulesRes.json();
 
         const vehiclePriceMap: Record<string, number> = {};
         for (const r of kmRules || []) {
@@ -487,27 +467,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
           if (!vehiclePriceMap[vt] || price < vehiclePriceMap[vt]) vehiclePriceMap[vt] = price;
         }
 
-        const isAirport = /airport|havalimani|havalimanı|ist|saw|ayt|bjv|dlm|adb|esb|asr|nav|ada|gzt|tzx|diy|van|mlx|szf|kco|teq|edn|khv|dnz|ezs|vas|nop|kfs|onq|nkt|aji|mqm|kzr|msr|erz|erc|sfq|hty|edo|ckz|ogu|rzv|yei|gzp/i.test(pickupSanitized + " " + dropoffSanitized);
+        const isAirport = /airport|havalimani|havalimanı|ist|saw|ayt|bjv|dlm|adb|esb|asr|nav|ada|gzt|tzx|diy|van|mlx|szf|kco|teq|edn|khv|dnz|ezs|vas|nop|kfs|onq|nkt|aji|mqm|kzr|msr|erz|erc|sfq|hty|edo|ckz|ogu|rzv|yei|gzp/i.test(
+          pickupSanitized + " " + dropoffSanitized
+        );
         const airportFee = isAirport ? AIRPORT_PARKING_FEE_EUR : 0;
 
-        const baseCurrency = "EUR";
-        const targetCurrency = customerCurrency || "EUR";
-        let conversionRate = 1;
-        if (baseCurrency !== targetCurrency) {
-          try {
-            const rateRes = await fetch(`https://api.frankfurter.app/latest?from=${baseCurrency}&to=${targetCurrency}`);
-            if (rateRes.ok) {
-              const rateData = await rateRes.json();
-              conversionRate = rateData.rates?.[targetCurrency] ?? 1;
-              console.log("[get-all-vehicle-prices] Currency conversion: " + JSON.stringify({ from: baseCurrency, to: targetCurrency, rate: conversionRate }));
-            }
-          } catch {
-            console.warn("[get-all-vehicle-prices] Currency conversion failed, using EUR");
-          }
-        }
-
         const prices = turkeyVehicles.map((vt) => {
-          let match = null;
+          let match: number | null = null;
           for (const alias of vt.dbAliases) {
             if (vehiclePriceMap[alias] != null) {
               match = vehiclePriceMap[alias];
@@ -516,13 +482,12 @@ Deno.serve(async (req: Request): Promise<Response> => {
           }
           const basePrice = match ?? vehiclePriceMap[vt.value];
           const available = basePrice != null && basePrice > 0;
-          const totalEur = available ? Math.ceil(basePrice + airportFee) : null;
-          const total = totalEur != null ? Math.ceil(totalEur * conversionRate) : null;
+          const total = available ? Math.ceil(basePrice + airportFee) : null;
           return {
             vehicleType: vt.value,
             vehicleLabel: vt.label,
             price: total,
-            currency: targetCurrency,
+            currency: customerCurrency || "EUR",
             passengers: vt.passengers,
             luggage: vt.luggage,
             available,
@@ -537,27 +502,31 @@ Deno.serve(async (req: Request): Promise<Response> => {
         };
       })();
 
-      if (turkeyResult) {
-        return new Response(
-          JSON.stringify({
-            ...turkeyResult,
-            region: "turkey",
-            isDubai: false,
-            priceSource: "distance_pricing_rules",
-            transferType: /airport|havalimani|havalimanı/i.test(pickupSanitized + " " + dropoffSanitized) ? "Airport Transfer" : null,
-          }),
-          { headers: corsHeaders }
-        );
-      }
+      return new Response(
+        JSON.stringify({
+          ...turkeyResult,
+          region: "turkey",
+          isDubai: false,
+          priceSource: "distance_pricing_rules",
+          transferType: /airport|havalimani|havalimanı/i.test(pickupSanitized + " " + dropoffSanitized)
+            ? "Airport Transfer"
+            : null,
+        }),
+        { headers: corsHeaders }
+      );
     }
 
-    // ========== DUBAİ: Mevcut mantık (region_prices, intercity_prices vb.) ==========
+    // ========== DUBAİ: region_prices, intercity_prices, place_id (mevcut mantık) ==========
     if (!city && !airport && isDubai) {
       return new Response(JSON.stringify({
-        prices: dubaiVehicles.map(v => ({ 
-          vehicleType: v.value, vehicleLabel: v.label, 
-          price: null, currency: customerCurrency || "EUR", 
-          passengers: v.passengers, luggage: v.luggage, available: false 
+        prices: dubaiVehicles.map((v) => ({
+          vehicleType: v.value,
+          vehicleLabel: v.label,
+          price: null,
+          currency: customerCurrency || "EUR",
+          passengers: v.passengers,
+          luggage: v.luggage,
+          available: false,
         })),
         matched: false,
         region,
@@ -661,85 +630,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return Array.from(byVehicle.values());
     }
 
-    async function fetchIntracityAirportReferencePrices(
-      intracityCityName: string,
-      primaryDistrict: string | null,
-      secondaryDistrict: string | null,
-    ): Promise<any[]> {
-      const queriedDistricts = new Set<string>();
-      const districtCandidates = [primaryDistrict, secondaryDistrict].filter((district): district is string => !!district);
-
-      for (const districtCandidate of districtCandidates) {
-        const normalizedCandidate = normalizeTurkish(districtCandidate);
-        const lookupKeys = [districtCandidate, normalizedCandidate];
-        let districtRows: any[] = [];
-
-        for (const lookupDistrict of lookupKeys) {
-          const dedupeKey = lookupDistrict.toLowerCase();
-          if (queriedDistricts.has(dedupeKey)) continue;
-          queriedDistricts.add(dedupeKey);
-
-          const rows = await queryTable(
-            "region_prices",
-            {
-              city: `ilike.${intracityCityName}`,
-              district: `ilike.${lookupDistrict}`,
-              airport: "not.is.null",
-            },
-            "",
-            "price.asc",
-          );
-          districtRows = districtRows.concat(rows);
-        }
-
-        if (pickupDateStr && districtRows.length > 0) {
-          districtRows = applySeasonalFilter(districtRows, pickupDateStr);
-        }
-
-        const districtLowest = pickLowestPricePerVehicle(districtRows);
-        if (districtLowest.length > 0) return districtLowest;
-      }
-
-      let cityRows = await queryTable(
-        "region_prices",
-        {
-          city: `ilike.${intracityCityName}`,
-          airport: "not.is.null",
-        },
-        "",
-        "price.asc",
-      );
-
-      if (pickupDateStr && cityRows.length > 0) {
-        cityRows = applySeasonalFilter(cityRows, pickupDateStr);
-      }
-
-      return pickLowestPricePerVehicle(cityRows);
-    }
-
     // ---- PLACE ID MATCHING (preferred when both IDs provided - Google Place from Autocomplete) ----
     let intercityPrices: any[] = [];
     let regionPrices: any[] = [];
-    let intracityReferencePrices: any[] = [];
     let usedIntercity = false;
     let usedPlaceId = false;
-    let usedIntracityAirportDiscount = false;
 
-    // Şehir içi adresten adrese kuralı:
-    // hedef semtin havalimanı fiyatını baz alıp %10 daha ucuz hesapla.
-    const intracityReferenceCity = intracityCity || fallbackSharedCity;
-    if (isIntracityAddressTransfer && intracityReferenceCity) {
-      intracityReferencePrices = await fetchIntracityAirportReferencePrices(
-        intracityReferenceCity,
-        pickupDistrict,
-        dropoffDistrict,
-      );
-      if (intracityReferencePrices.length > 0) {
-        usedIntracityAirportDiscount = true;
-      }
-    }
-
-    if (!usedIntracityAirportDiscount && !isIntracityAddressTransfer && pickupPlaceId && dropoffPlaceId) {
+    if (pickupPlaceId && dropoffPlaceId) {
       try {
         const res = await fetchWithTimeout(
           `${SUPABASE_URL}/rest/v1/intercity_prices?is_active=eq.true&select=vehicle_type,price,price_currency,valid_from,valid_to&or=(and(pickup_place_id.eq.${encodeURIComponent(pickupPlaceId)},dropoff_place_id.eq.${encodeURIComponent(dropoffPlaceId)}),and(pickup_place_id.eq.${encodeURIComponent(dropoffPlaceId)},dropoff_place_id.eq.${encodeURIComponent(pickupPlaceId)}))&order=updated_at.desc`,
@@ -849,7 +746,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // ---- INTERCITY / INTRA-CITY PRICE MATCHING (text-based, when no Place ID match) ----
-    if (!usedIntracityAirportDiscount && !usedPlaceId && isIntercityTransfer && !airport) {
+    if (!usedPlaceId && isIntercityTransfer && !airport) {
       const fromCity = resolvedPickupCity || city!;
       const toCity = resolvedDropoffCity || city!;
       const sameRouteCity = isSameCity(fromCity, toCity) || sameResolvedCity;
@@ -930,8 +827,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // ---- REGION PRICES MATCHING (airport transfers + fallback)
-    // skipAirportFixedPrices: IST/SAW -> şehir dışı/80+ KM durumunda havalimanı sabit fiyatlarını ATLA
-    if (!usedIntracityAirportDiscount && !usedPlaceId && !usedIntercity && !skipRegionFallback && !skipAirportFixedPrices) {
+    if (!usedPlaceId && !usedIntercity && !skipRegionFallback) {
       // Strategy R1: District + City + Airport (most specific). Case-insensitive for district/city.
       if (district && city && airport) {
         regionPrices = await queryTable("region_prices", {
@@ -973,23 +869,37 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // Apply strict monthly/seasonal filter for region prices
-    if (!usedIntracityAirportDiscount && !usedIntercity && pickupDateStr && regionPrices.length > 0) {
+    if (!usedIntercity && pickupDateStr && regionPrices.length > 0) {
       regionPrices = applySeasonalFilter(regionPrices, pickupDateStr);
     }
 
-    const intracityDiscountedPrices = usedIntracityAirportDiscount
-      ? intracityReferencePrices.map((row: any) => ({
-          ...row,
-          price: applyIntracityAirportDiscount(Number(row.price)),
-        }))
-      : [];
-
     // Use whichever source found prices (validation: specific route+month price is used, no generic override)
-    const matchedPrices = usedIntracityAirportDiscount
-      ? intracityDiscountedPrices
-      : usedIntercity
-      ? intercityPrices
-      : regionPrices;
+    const matchedPrices = usedIntercity ? intercityPrices : regionPrices;
+
+    // distance_pricing_rules: Havalimanı transferinde airport_extra_fee ekle
+    let airportExtraFeeByVehicle: Record<string, number> = {};
+    let defaultAirportExtraFee = 0;
+    if (airport) {
+      try {
+        const rulesRes = await fetchWithTimeout(
+          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?is_airport_transfer=eq.true&select=vehicle_type,airport_extra_fee`,
+          { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+        );
+        if (rulesRes.ok) {
+          const rules: Array<{ vehicle_type: string | null; airport_extra_fee: number | null }> = await rulesRes.json();
+          for (const r of rules || []) {
+            const fee = Number(r.airport_extra_fee) || 0;
+            if (r.vehicle_type) {
+              airportExtraFeeByVehicle[r.vehicle_type] = fee;
+            } else {
+              defaultAirportExtraFee = fee;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("distance_pricing_rules fetch failed:", String(e));
+      }
+    }
 
     // distance_pricing_rules: Havalimanı transferinde airport_extra_fee ekle (sadece şehir içi sabit fiyatlarda)
     // skipAirportFixedPrices = uzun mesafe/şehirler arası -> intercity veya KM bazlı kullanıldı, ek ücret YOK
@@ -1030,11 +940,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
       const normalizedMatchPrice = Number(match?.price);
 
       if (match && Number.isFinite(normalizedMatchPrice) && normalizedMatchPrice > 0) {
-        // Havalimanı transferinde airport_extra_fee ekle (distance_pricing_rules)
         let basePrice = normalizedMatchPrice;
         if (airport) {
-          const extraFee = airportExtraFeeByVehicle[vt.value] ?? 
-            vt.dbAliases.map((a: string) => airportExtraFeeByVehicle[a]).find((f: number) => f !== undefined) ?? 
+          const extraFee = airportExtraFeeByVehicle[vt.value] ??
+            vt.dbAliases.map((a: string) => airportExtraFeeByVehicle[a]).find((f: number) => f !== undefined) ??
             defaultAirportExtraFee;
           basePrice += Number(extraFee) || 0;
         }
@@ -1078,12 +987,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       transferType: airport ? "Airport Transfer" : null,
       isDubai,
       region,
-      priceSource: usedIntracityAirportDiscount
-        ? "intracity_airport_discount"
-        : usedIntercity
-        ? "intercity_prices"
-        : "region_prices",
-      intracityDiscountApplied: usedIntracityAirportDiscount,
+      priceSource: usedIntercity ? "intercity_prices" : "region_prices",
       message: hasAvailablePrice ? null : "Fiyat Bulunamadı",
     }), { headers: corsHeaders });
 
