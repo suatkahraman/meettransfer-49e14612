@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useUserRole, AppRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { Loader2 } from 'lucide-react';
 
 /** Production login redirect URLs with role param for centralized login */
@@ -127,7 +128,7 @@ const ProtectedRoute = ({
   // iOS ITP: Hızlı yönlendirme bazen session henüz okunmadan tetiklenebilir.
   // getSession retry'ları tamamlansın diye kısa bir grace ekle (client-side Navigate, 302 değil).
   const [authRedirectGrace, setAuthRedirectGrace] = useState(false);
-  const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
+  const isIOS = isIOSDevice();
 
   useEffect(() => {
     if (!user && !authLoading && isIOS && !authRedirectGrace) {

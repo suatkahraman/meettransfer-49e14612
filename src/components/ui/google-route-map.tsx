@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { loadGoogleMapsScript, getGoogleMaps, geocodeAddress as geoCode } from '@/utils/googleMapsLoader';
 
 const withTimeout = async <T,>(
@@ -315,7 +316,7 @@ const GoogleRouteMapComponent = ({
   const openNavigation = (destination: Coordinates | null) => {
     if (!destination) return;
     
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isIOS = isIOSDevice();
     const isAndroid = /Android/.test(navigator.userAgent);
     
     if (isIOS) {

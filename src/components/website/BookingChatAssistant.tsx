@@ -31,6 +31,7 @@ import { SoundWaveInline } from "@/components/ui/SoundWaveAnimation";
 import { RecordingWaveform, CircularWaveform, InlineRecordingWave } from "@/components/ui/RecordingWaveform";
 import { SpeakingBubbleOverlay, SpeakingWaveBar } from "@/components/ui/SpeakingBubbleOverlay";
 import { useHapticFeedback } from "@/hooks/useHapticFeedback";
+import { isIOSDevice } from "@/lib/platformDetect";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -170,11 +171,7 @@ function useVoiceRecorder(onTranscription: (text: string) => void, language: str
   // Effective support: native or fallback
   const isSupported = isNativeSupported || isMediaRecorderSupported;
 
-  // Detect iOS Safari
-  const isIOS = useCallback(() => {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  }, []);
+  const isIOS = isIOSDevice;
   
   // Detect Android
   const isAndroid = useCallback(() => {
@@ -1698,12 +1695,6 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
 
     window.addEventListener("booking-ai-open", handler as EventListener);
     return () => window.removeEventListener("booking-ai-open", handler as EventListener);
-  }, []);
-
-  // Detect iOS device
-  const isIOSDevice = useCallback(() => {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }, []);
 
   // Detect Android device
@@ -3900,9 +3891,7 @@ export default function BookingChatAssistant({ onApplyBooking, defaultOpen = fal
                       }}
                       onFocus={() => {
                         // iOS needs the input to scroll into view when keyboard opens
-                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-                        const delay = isIOS ? 450 : 350;
+                        const delay = isIOSDevice() ? 450 : 350;
                         
                         setTimeout(() => {
                           // Scroll input into visible area above keyboard

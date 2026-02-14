@@ -24,8 +24,7 @@ import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { scrollToFirstError } from '@/lib/formValidation';
 import { safeLocalGet, safeLocalRemove, safeLocalSet } from '@/lib/safeStorage';
 import { clearSuppressAuthRedirect, setSuppressAuthRedirect } from '@/lib/authRedirectGuard';
-
-
+import { normalizeLoginRole } from '@/lib/platformDetect';
 
 const stripQueryParam = (key: string) => {
   try {
@@ -64,18 +63,20 @@ const newPasswordSchema = z.object({
 });
 
 type ViewMode = 'login' | 'forgot' | 'reset' | 'reset-sent' | '2fa';
-type LoginSection = 'customer' | 'driver' | 'agency';
+/** Valid login section roles (normalized: trimmed, lowercased) */
+const LOGIN_SECTION_ROLES = ['customer', 'driver', 'agency'] as const;
+type LoginSection = (typeof LOGIN_SECTION_ROLES)[number];
 
 const LoginScreen = () => {
   const isResetting = typeof window !== 'undefined' && window.location.href.includes('type=recovery');
-  const [searchParams, setSearchParams] = useSearchParams();
-  const roleParam = searchParams.get('role') as LoginSection | null;
+  const [searchParams] = useSearchParams();
+  const roleParam = normalizeLoginRole(searchParams.get('role'), LOGIN_SECTION_ROLES);
   const [loginSection, setLoginSection] = useState<LoginSection | null>(() => {
-    if (roleParam && ['customer', 'driver', 'agency'].includes(roleParam)) return roleParam;
+    if (roleParam && LOGIN_SECTION_ROLES.includes(roleParam as LoginSection)) return roleParam as LoginSection;
     return null;
   });
   useEffect(() => {
-    if (roleParam && ['customer', 'driver', 'agency'].includes(roleParam)) setLoginSection(roleParam);
+    if (roleParam && LOGIN_SECTION_ROLES.includes(roleParam as LoginSection)) setLoginSection(roleParam as LoginSection);
   }, [roleParam]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -273,14 +274,16 @@ const LoginScreen = () => {
   }, [isResetting]);
 
   useEffect(() => {
-    if (roleParam === 'admin') {
+    const rawRole = searchParams.get('role');
+    const normalizedRole = rawRole?.trim().toLowerCase();
+    if (normalizedRole === 'admin') {
       window.location.replace('/auth');
       return;
     }
-    if (roleParam && ['customer', 'driver', 'agency'].includes(roleParam)) {
-      setLoginSection(roleParam);
+    if (roleParam && LOGIN_SECTION_ROLES.includes(roleParam as LoginSection)) {
+      setLoginSection(roleParam as LoginSection);
     }
-  }, [roleParam]);
+  }, [roleParam, searchParams]);
 
   // Role-based redirect – şifre sıfırlama (link tıklayıp yeni şifre formu) iken ASLA yönlendirme yapma
   useEffect(() => {
