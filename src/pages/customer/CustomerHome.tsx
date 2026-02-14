@@ -61,6 +61,7 @@ import { tr, enUS } from 'date-fns/locale';
 import { useActivePromoCode } from '@/hooks/useActivePromoCode';
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/currency';
 
 // Time options for 30-minute intervals
@@ -1319,23 +1320,32 @@ const CustomerHome = () => {
 
   // Removed showPricePreparation animation - now reservations are created directly
 
-  // Show loading screen while auth or data is loading
+  // Show skeleton while auth or data is loading
   if (authLoading || (isLoading && !recentReservations.length && !completedReservations.length)) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <img 
-              src={meetTransferLogo} 
-              alt="Meet Transfer" 
-              className="h-16 w-16 rounded-full object-cover border-2 border-primary/20"
-            />
-            <Loader2 className="h-6 w-6 animate-spin text-primary absolute -bottom-1 -right-1" />
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+        <header className="bg-primary text-primary-foreground py-2 px-2 sm:py-4 sm:px-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-10 w-10 rounded-full bg-primary-foreground/20" />
+              <Skeleton className="h-6 w-24 bg-primary-foreground/20" />
+            </div>
           </div>
-          <p className="text-muted-foreground text-sm">
-            {language === 'TR' ? 'Yükleniyor...' : 'Loading...'}
-          </p>
-        </div>
+        </header>
+        <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-4xl">
+          <div className="rounded-2xl overflow-hidden bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/20 p-4 sm:p-6 space-y-4">
+            <div className="flex gap-3">
+              <Skeleton className="h-14 flex-1 rounded-xl" />
+              <Skeleton className="h-14 w-14 rounded-xl shrink-0" />
+            </div>
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-xl" />
+            <div className="flex gap-2 pt-4">
+              <Skeleton className="h-12 flex-1 rounded-lg" />
+              <Skeleton className="h-12 flex-1 rounded-lg" />
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -1403,6 +1413,8 @@ const CustomerHome = () => {
               ? (recentReservations[0].dropoff_place_name || recentReservations[0].dropoff).split(',')[0]?.trim() || null
               : null
           }
+          customerName={profileData.full_name || user?.email?.split('@')[0] || ''}
+          isDataLoading={isLoading && !recentReservations.length && !completedReservations.length}
           t={t}
           language={language}
           onBookNowClick={() => {

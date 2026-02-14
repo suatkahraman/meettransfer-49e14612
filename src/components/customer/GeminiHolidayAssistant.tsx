@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 interface ReservationContext {
@@ -157,15 +157,16 @@ export function GeminiHolidayAssistant({
 
     try {
       if (!apiKey) {
+        const errMsg =
+          language === 'TR'
+            ? 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin veya daha sonra tekrar deneyin.'
+            : 'We cannot reach our assistant right now. Please check the API key or try again later.';
         setMessages((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
             role: 'model',
-            content:
-              language === 'TR'
-                ? 'Gemini API anahtarı yapılandırılmamış. Lütfen .env dosyasına VITE_GEMINI_API_KEY ekleyin.'
-                : 'Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.',
+            content: errMsg,
             timestamp: new Date(),
           },
         ]);
@@ -197,15 +198,16 @@ export function GeminiHolidayAssistant({
         },
       ]);
     } catch (err) {
+      const errMsg =
+        language === 'TR'
+          ? 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin veya daha sonra tekrar deneyin.'
+          : 'We cannot reach our assistant right now. Please check the API key or try again later.';
       setMessages((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
           role: 'model',
-          content:
-            language === 'TR'
-              ? 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
-              : 'An error occurred. Please try again later.',
+          content: errMsg,
           timestamp: new Date(),
         },
       ]);

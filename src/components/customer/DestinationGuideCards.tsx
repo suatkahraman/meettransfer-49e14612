@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Cloud, UtensilsCrossed, MapPin, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
@@ -101,21 +101,13 @@ export function DestinationGuideCards({
     setError(null);
 
     if (!GEMINI_API_KEY) {
-      setWeather(
+      const errMsg =
         language === 'TR'
-          ? `${loc} için hava durumu bilgisi - Gemini API yapılandırılmamış.`
-          : `Weather info for ${loc} - Gemini API not configured.`
-      );
-      setRestaurants(
-        language === 'TR'
-          ? 'Restoran önerileri için .env dosyasına VITE_GEMINI_API_KEY ekleyin.'
-          : 'Add VITE_GEMINI_API_KEY to .env for restaurant suggestions.'
-      );
-      setPlaces(
-        language === 'TR'
-          ? 'Gezilecek yerler için Gemini API anahtarı gerekli.'
-          : 'Gemini API key required for places to visit.'
-      );
+          ? 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin.'
+          : 'We cannot reach our assistant right now. Please check the API key.';
+      setWeather(errMsg);
+      setRestaurants(errMsg);
+      setPlaces(errMsg);
       setLoading(false);
       return;
     }
@@ -128,9 +120,13 @@ export function DestinationGuideCards({
           setPlaces(data.places || '-');
         }
       })
-      .catch((err) => {
+      .catch(() => {
         if (!cancelled) {
-          setError(err.message || 'Failed to load');
+          const errMsg =
+            language === 'TR'
+              ? 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin.'
+              : 'We cannot reach our assistant right now. Please check the API key.';
+          setError(errMsg);
           setWeather('-');
           setRestaurants('-');
           setPlaces('-');
