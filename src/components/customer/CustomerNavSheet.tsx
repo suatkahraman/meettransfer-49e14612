@@ -83,25 +83,25 @@ export const CustomerNavSheet = ({
           {t('settingsTitle')}
         </SheetTitle>
       </SheetHeader>
-      <nav className="flex-1 overflow-y-auto p-3 space-y-4">
-        {/* Kısa yollar */}
+      <nav className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
+        {/* Kısa yollar - Ferahlatılmış */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-1">
             {t('quickActions') || (language === 'TR' ? 'Kısayollar' : 'Shortcuts')}
           </p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => handleNav('/')}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
+              className="flex flex-col items-center gap-2 px-4 py-4 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
             >
-              <Home className="h-5 w-5 text-primary" />
+              <Home className="h-6 w-6 text-primary" />
               <span className="text-xs font-medium">{t('homeBtn')}</span>
             </button>
             <button
               onClick={() => handleNav('/customer/payments')}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-blue-500/5 border border-blue-500/20 hover:bg-blue-500/10 transition-colors"
+              className="flex flex-col items-center gap-2 px-4 py-4 rounded-xl bg-blue-500/5 border border-blue-500/20 hover:bg-blue-500/10 transition-colors"
             >
-              <CreditCard className="h-5 w-5 text-blue-500" />
+              <CreditCard className="h-6 w-6 text-blue-500" />
               <span className="text-xs font-medium">{t('paymentsLabel') || 'Ödemeler'}</span>
             </button>
             <button
@@ -109,9 +109,9 @@ export const CustomerNavSheet = ({
                 window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank');
                 onOpenChange(false);
               }}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-green-500/5 border border-green-500/20 hover:bg-green-500/10 transition-colors"
+              className="flex flex-col items-center gap-2 px-4 py-4 rounded-xl bg-green-500/5 border border-green-500/20 hover:bg-green-500/10 transition-colors"
             >
-              <MessageCircle className="h-5 w-5 text-green-500" />
+              <MessageCircle className="h-6 w-6 text-green-500" />
               <span className="text-xs font-medium">WhatsApp</span>
             </button>
             <button
@@ -119,16 +119,16 @@ export const CustomerNavSheet = ({
                 window.open(`tel:${EMERGENCY_PHONE}`, '_self');
                 onOpenChange(false);
               }}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 transition-colors"
+              className="flex flex-col items-center gap-2 px-4 py-4 rounded-xl bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 transition-colors"
             >
-              <PhoneCall className="h-5 w-5 text-red-500" />
+              <PhoneCall className="h-6 w-6 text-red-500" />
               <span className="text-xs font-medium">{t('emergencyBtn')}</span>
             </button>
             <button
               onClick={() => handleNav('/security-settings')}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors col-span-2"
+              className="flex flex-col items-center gap-2 px-4 py-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors col-span-2"
             >
-              <Shield className="h-5 w-5 text-emerald-500" />
+              <Shield className="h-6 w-6 text-emerald-500" />
               <span className="text-xs font-medium">{t('securityBtn')}</span>
             </button>
           </div>

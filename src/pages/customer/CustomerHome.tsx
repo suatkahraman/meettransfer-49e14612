@@ -22,8 +22,11 @@ import {
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '@/components/NotificationBell';
-import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { GooglePlacesAutocomplete, type PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import { GoogleRouteMap } from '@/components/ui/google-route-map';
+import { getDirections } from '@/utils/googleMapsLoader';
+import { GeminiHolidayAssistant } from '@/components/customer/GeminiHolidayAssistant';
+import { DestinationGuideCards } from '@/components/customer/DestinationGuideCards';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -204,6 +207,11 @@ const CustomerHome = () => {
   const [isPickupDateOpen, setIsPickupDateOpen] = useState(false);
   const [isReturnDateOpen, setIsReturnDateOpen] = useState(false);
 
+  // Coordinates for distance_km calculation
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [confirmingVehicle, setConfirmingVehicle] = useState<string | null>(null);
+
   // Supported currencies
   const SUPPORTED_CURRENCIES = ['EUR', 'USD', 'GBP', 'TRY', 'AED', 'AUD'] as const;
 
@@ -244,8 +252,10 @@ const CustomerHome = () => {
     setSelectedCurrency(getCurrencyByLanguage());
   }, []);
 
-  // Fetch prices when pickup and dropoff are filled
+  // Fetch prices when pickup and dropoff are filled (with distance_km for accurate pricing)
   useEffect(() => {
+    let cancelled = false;
+
     const fetchVehiclePrices = async () => {
       if (!formData.pickup || !formData.dropoff) {
         setVehiclePrices({});
@@ -253,32 +263,41 @@ const CustomerHome = () => {
         return;
       }
 
-      // Minimum length check
-      if (formData.pickup.length < 3 || formData.dropoff.length < 3) {
-        return;
-      }
+      if (formData.pickup.length < 3 || formData.dropoff.length < 3) return;
 
       setIsPricesLoading(true);
       setPricesError(null);
 
       try {
-        const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: {
-            pickup: formData.pickup,
-            dropoff: formData.dropoff,
-            customerCurrency: selectedCurrency,
-            pickup_date: formData.date || undefined,
-          },
-        });
+        let distanceKm: number | undefined;
+        if (pickupCoords && dropoffCoords) {
+          try {
+            const directions = await getDirections(pickupCoords, dropoffCoords);
+            if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
+              distanceKm = directions.distanceKm;
+            }
+          } catch (_) {
+            // Mesafe alınamazsa devam et - backend şehir bazlı kontrol yapar
+          }
+        }
 
+        const body: Record<string, unknown> = {
+          pickup: formData.pickup,
+          dropoff: formData.dropoff,
+          customerCurrency: selectedCurrency,
+          pickup_date: formData.date || undefined,
+        };
+        if (distanceKm != null) body.distance_km = distanceKm;
+
+        const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", { body });
+
+        if (cancelled) return;
         if (error) throw error;
 
         if (data?.prices && data.prices.length > 0) {
           const pricesMap: Record<string, number> = {};
           data.prices.forEach((p: any) => {
-            if (p.price) {
-              pricesMap[p.vehicleType] = p.price;
-            }
+            if (p.price) pricesMap[p.vehicleType] = p.price;
           });
           setVehiclePrices(pricesMap);
         } else {
@@ -286,18 +305,22 @@ const CustomerHome = () => {
           setPricesError(t('noPriceFound') || 'Bu güzergah için fiyat bulunamadı');
         }
       } catch (error) {
-        console.error("Error fetching vehicle prices:", error);
-        setVehiclePrices({});
-        setPricesError(t('priceError') || 'Fiyat alınırken hata oluştu');
+        if (!cancelled) {
+          console.error("Error fetching vehicle prices:", error);
+          setVehiclePrices({});
+          setPricesError(t('priceError') || 'Fiyat alınırken hata oluştu');
+        }
       } finally {
-        setIsPricesLoading(false);
+        if (!cancelled) setIsPricesLoading(false);
       }
     };
 
-    // Debounce the fetch
     const timeoutId = setTimeout(fetchVehiclePrices, 500);
-    return () => clearTimeout(timeoutId);
-  }, [formData.pickup, formData.dropoff, selectedCurrency, t]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [formData.pickup, formData.dropoff, formData.date, selectedCurrency, pickupCoords, dropoffCoords, t]);
 
   // Memoized greeting
   const greeting = useMemo(() => getGreeting(t), [t]);
@@ -1010,8 +1033,11 @@ const CustomerHome = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    setIsLoading(true);
+    await createReservationForVehicle(formData.vehicleType);
+  };
 
+  const createReservationForVehicle = async (vehicleType: string) => {
+    setIsLoading(true);
     const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
     if (validPassengerNames.length === 0) {
       setErrors({ passengerNames: t('passengerRequired') });
@@ -1034,7 +1060,6 @@ const CustomerHome = () => {
       return;
     }
 
-    // Validate return trip if selected
     if (formData.hasReturnTrip) {
       if (!formData.returnDate) {
         setErrors(prev => ({ ...prev, returnDate: t('returnDateRequired') || 'Return date is required' }));
@@ -1050,7 +1075,6 @@ const CustomerHome = () => {
       }
     }
 
-    // Save to recent searches
     if (user?.id) {
       const newSearch = { pickup: result.data.pickup, dropoff: result.data.dropoff.trim() };
       const existingSearches = recentSearches.filter(
@@ -1061,8 +1085,7 @@ const CustomerHome = () => {
       localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
     }
 
-    // Determine initial status based on whether we have a price
-    const selectedVehiclePrice = vehiclePrices[formData.vehicleType];
+    const selectedVehiclePrice = vehiclePrices[vehicleType];
     const hasPrice = selectedVehiclePrice && selectedVehiclePrice > 0;
     const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
 
@@ -1079,7 +1102,7 @@ const CustomerHome = () => {
         dropoff: result.data.dropoff.trim(),
         pickup_date: result.data.date,
         pickup_time: result.data.time,
-        vehicle_type: formData.vehicleType,
+        vehicle_type: vehicleType,
         price: selectedVehiclePrice || null,
         price_currency: selectedCurrency || 'EUR',
         status: initialStatus,
@@ -1128,18 +1151,17 @@ const CustomerHome = () => {
 
       // Create return trip if requested (with discount applied)
       if (formData.hasReturnTrip && formData.returnDate && formData.returnTime) {
-        // Calculate discounted return price
         const returnPrice = selectedVehiclePrice ? getReturnPrice(selectedVehiclePrice) : null;
         
         const returnReservationData = {
           customer_id: user?.id,
           customer_name: validPassengerNames[0],
           customer_phone: result.data.passengerPhone.trim(),
-          pickup: result.data.dropoff.trim(), // Swap
-          dropoff: result.data.pickup.trim(), // Swap
+          pickup: result.data.dropoff.trim(),
+          dropoff: result.data.pickup.trim(),
           pickup_date: formData.returnDate,
           pickup_time: formData.returnTime,
-          vehicle_type: formData.vehicleType,
+          vehicle_type: vehicleType,
           price: returnPrice, // Discounted price for return
           price_currency: selectedCurrency || 'EUR',
           status: initialStatus,
@@ -1215,7 +1237,7 @@ const CustomerHome = () => {
         ? `Rezervasyonunuz oluşturuldu! Kod: ${reservation?.reservation_code}`
         : `Your reservation has been created! Code: ${reservation?.reservation_code}`);
 
-      // Reset form
+      // Reset form and coords
       setFormData({
         pickup: '',
         dropoff: '',
@@ -1234,12 +1256,11 @@ const CustomerHome = () => {
       });
       setPassengerNames(['']);
       setVehiclePrices({});
+      setPickupCoords(null);
+      setDropoffCoords(null);
       setIsBookingFormOpen(false);
 
-      // Refresh data to show the new reservation
       fetchData();
-
-      // Navigate to reservation detail
       if (reservation?.id) {
         navigate(`/customer/reservation/${reservation.id}`);
       }
@@ -1296,15 +1317,16 @@ const CustomerHome = () => {
             
             <NotificationBell />
           
-          {/* Hamburger Menu */}
+          {/* Hamburger Menu - Büyük ve belirgin */}
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10"
+                className="text-primary-foreground hover:bg-primary-foreground/15 h-11 w-11 sm:h-12 sm:w-12 rounded-xl transition-all"
+                aria-label={language === 'TR' ? 'Menü' : 'Menu'}
               >
-                <Menu className="h-4 w-4 sm:h-6 sm:w-6" />
+                <Menu className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.5} />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto p-0 flex flex-col">
@@ -1497,20 +1519,19 @@ const CustomerHome = () => {
           )}
         </AnimatePresence>
 
-        {/* Quick Actions Grid - More compact on mobile */}
+        {/* Hero - Sadece Book Now butonu */}
         <motion.div 
           initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
-          className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6"
+          className="mb-4 sm:mb-6"
         >
-          {/* New Reservation Card */}
           <motion.div
-            whileHover={{ scale: 1.03 }}
+            whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
           >
             <Card 
-              className="cursor-pointer shadow-md hover:shadow-xl transition-all bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-0 overflow-hidden relative"
+              className="cursor-pointer shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-0 overflow-hidden relative"
               onClick={() => {
                 setIsBookingFormOpen(true);
                 setTimeout(() => {
@@ -1520,50 +1541,16 @@ const CustomerHome = () => {
               }}
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.15),_transparent_50%)]" />
-              <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center min-h-[90px] sm:min-h-[110px] relative z-10">
-                <div className="bg-primary-foreground/20 rounded-full p-2 sm:p-2.5 mb-1.5 sm:mb-2 backdrop-blur-sm">
-                  <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
+              <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center min-h-[100px] sm:min-h-[120px] relative z-10">
+                <div className="bg-primary-foreground/20 rounded-full p-3 sm:p-4 mb-2 sm:mb-3 backdrop-blur-sm">
+                  <Car className="h-8 w-8 sm:h-10 sm:w-10" />
                 </div>
-                <span className="font-semibold text-xs sm:text-sm">
-                  {t('newReservationBtn')}
+                <span className="font-bold text-base sm:text-lg">
+                  {language === 'TR' ? 'Book Now' : 'Book Now'}
                 </span>
-                <span className="text-[10px] sm:text-xs opacity-80 mt-0.5 sm:mt-1 hidden xs:block">
-                  {t('startNowDesc')}
+                <span className="text-xs sm:text-sm opacity-90 mt-1">
+                  {language === 'TR' ? 'Transfer fiyatınızı alın, hemen rezervasyon yapın' : 'Get your quote and book instantly'}
                 </span>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* My Bookings Card */}
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            className="relative z-10"
-          >
-            <Card 
-              className="cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden bg-gradient-to-br from-background to-muted/50 border-2 border-transparent hover:border-primary/30 active:bg-muted/70"
-              onClick={() => navigate('/customer/bookings')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate('/customer/bookings')}
-            >
-              <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center min-h-[90px] sm:min-h-[110px] pointer-events-none">
-                <div className="bg-primary/10 rounded-full p-2 sm:p-2.5 mb-1.5 sm:mb-2">
-                  <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                </div>
-                <span className="font-semibold text-xs sm:text-sm">
-                  {t('myBookingsBtn')}
-                </span>
-                <span className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                  {activeBookingsCount > 0 
-                    ? `${activeBookingsCount} ${t('activeLabel')}`
-                    : t('viewAllLabel')}
-                </span>
-                {activeBookingsCount > 0 && (
-                  <Badge className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-orange-500 hover:bg-orange-600 shadow-lg text-[10px] sm:text-xs px-1.5 sm:px-2 pointer-events-none">
-                    {activeBookingsCount}
-                  </Badge>
-                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -1880,6 +1867,31 @@ const CustomerHome = () => {
           </motion.div>
         )}
 
+        {/* Akıllı Rehber Kartları - Varış noktasına göre (Dashboard altı) */}
+        {(nextTransfer?.dropoff || recentReservations[0]?.dropoff) && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-6"
+          >
+            <h2 className="text-base font-semibold mb-4 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary" />
+              {language === 'TR' ? 'Varış noktanız için rehber' : 'Guide for your destination'}
+            </h2>
+            <DestinationGuideCards
+              destination={
+                nextTransfer?.dropoff ||
+                recentReservations[0]?.dropoff_place_name ||
+                recentReservations[0]?.dropoff ||
+                ''
+              }
+              date={nextTransfer?.date || recentReservations[0]?.pickup_date}
+              language={language === 'TR' ? 'TR' : 'EN'}
+            />
+          </motion.div>
+        )}
+
         {/* Recent Searches - New Feature */}
         {recentSearches.length > 0 && (
           <motion.div
@@ -1919,204 +1931,6 @@ const CustomerHome = () => {
             </div>
           </motion.div>
         )}
-
-        {/* Favorite Routes Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="mb-6"
-        >
-          <Card className="shadow-md border-border/50 overflow-hidden">
-            <CardHeader className="pb-3 bg-gradient-to-r from-rose-500/10 to-pink-500/10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
-                    <Heart className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base font-semibold">
-                      {t('favoriteRoutes')}
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      {t('frequentRoutesDesc')}
-                    </CardDescription>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/20"
-                  onClick={() => setIsAddingFavorite(true)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  {t('addFavoriteBtn')}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4">
-              {/* Add New Favorite Route Form */}
-              <AnimatePresence>
-                {isAddingFavorite && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mb-4 p-4 bg-muted/50 rounded-lg border border-rose-200 dark:border-rose-800"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <Route className="h-4 w-4 text-rose-500" />
-                        {t('newFavoriteRouteTitle')}
-                      </h4>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => {
-                          setIsAddingFavorite(false);
-                          setNewFavoriteRoute({ name: '', pickup: '', dropoff: '', notes: '' });
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {t('routeName')}
-                        </Label>
-                        <Input
-                          placeholder={t('routeNameExample')}
-                          value={newFavoriteRoute.name}
-                          onChange={(e) => setNewFavoriteRoute(prev => ({ ...prev, name: e.target.value }))}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {t('pickupLocationLabel')}
-                        </Label>
-                        <GooglePlacesAutocomplete
-                          initialValue={newFavoriteRoute.pickup}
-                          onPlaceSelected={(val) => setNewFavoriteRoute(prev => ({ ...prev, pickup: val }))}
-                          onInputChange={(val) => setNewFavoriteRoute(prev => ({ ...prev, pickup: val }))}
-                          placeholder={t('enterAddressPlaceholder')}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {t('dropoffLocationLabel')}
-                        </Label>
-                        <GooglePlacesAutocomplete
-                          initialValue={newFavoriteRoute.dropoff}
-                          onPlaceSelected={(val) => setNewFavoriteRoute(prev => ({ ...prev, dropoff: val }))}
-                          onInputChange={(val) => setNewFavoriteRoute(prev => ({ ...prev, dropoff: val }))}
-                          placeholder={t('enterAddressPlaceholder')}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {t('notesOptional')}
-                        </Label>
-                        <Input
-                          placeholder={t('specialNotesPlaceholder')}
-                          value={newFavoriteRoute.notes}
-                          onChange={(e) => setNewFavoriteRoute(prev => ({ ...prev, notes: e.target.value }))}
-                          className="mt-1"
-                        />
-                      </div>
-                      <Button
-                        onClick={handleAddFavoriteRoute}
-                        className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
-                      >
-                        <Heart className="h-4 w-4 mr-2" />
-                        {t('addToFavoritesBtn')}
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Favorite Routes List */}
-              {favoriteRoutes.length > 0 ? (
-                <div className="space-y-2">
-                  {favoriteRoutes.map((route, index) => (
-                    <motion.div
-                      key={route.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.05 * index }}
-                      className="group"
-                    >
-                      <div
-                        className="flex items-center gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-lg border border-border/50 hover:border-rose-300 dark:hover:border-rose-700 transition-all cursor-pointer"
-                        onClick={() => handleUseFavoriteRoute(route)}
-                      >
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 flex items-center justify-center flex-shrink-0">
-                          <Heart className="h-5 w-5 text-rose-500" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="font-semibold text-sm truncate">{route.name}</span>
-                            {route.usage_count > 0 && (
-                              <Badge variant="secondary" className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
-                                {route.usage_count}x
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <MapPin className="h-3 w-3 flex-shrink-0" />
-                            <span className="truncate max-w-[100px]">{route.pickup_location.split(',')[0]}</span>
-                            <ArrowRight className="h-3 w-3 flex-shrink-0" />
-                            <span className="truncate max-w-[100px]">{route.dropoff_location.split(',')[0]}</span>
-                          </div>
-                          {route.notes && (
-                            <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">{route.notes}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteFavoriteRoute(route.id);
-                            }}
-                          >
-                            <HeartOff className="h-4 w-4" />
-                          </Button>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : !isAddingFavorite ? (
-                <div className="text-center py-6">
-                  <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
-                    <Heart className="h-8 w-8 text-muted-foreground/50" />
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {t('noFavoriteRoutes')}
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsAddingFavorite(true)}
-                    className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:hover:bg-rose-900/20"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('addFirstRouteBtn')}
-                  </Button>
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
-        </motion.div>
 
         {/* Booking Form with Enhanced Styling */}
         <motion.div
@@ -2185,7 +1999,14 @@ const CustomerHome = () => {
                   {t('pickupPoint')}
                 </Label>
                 <GooglePlacesAutocomplete
-                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
+                  onPlaceSelected={(value, details?: PlaceDetails) => {
+                    setFormData((prev) => ({ ...prev, pickup: value }));
+                    if (details?.lat != null && details?.lng != null) {
+                      setPickupCoords({ lat: details.lat, lng: details.lng });
+                    } else {
+                      setPickupCoords(null);
+                    }
+                  }}
                   placeholder={t('enterPickupPoint')}
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
@@ -2201,7 +2022,14 @@ const CustomerHome = () => {
                   {t('dropoffLocation')}
                 </Label>
                 <GooglePlacesAutocomplete
-                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
+                  onPlaceSelected={(value, details?: PlaceDetails) => {
+                    setFormData((prev) => ({ ...prev, dropoff: value }));
+                    if (details?.lat != null && details?.lng != null) {
+                      setDropoffCoords({ lat: details.lat, lng: details.lng });
+                    } else {
+                      setDropoffCoords(null);
+                    }
+                  }}
                   placeholder={t('hotelNameOrAddress')}
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
@@ -2668,91 +2496,117 @@ const CustomerHome = () => {
                   "grid gap-3",
                   availableVehicles.length === 1 ? "grid-cols-1" : "grid-cols-2"
                 )}>
-                  {availableVehicles.map((v) => (
-                    <button
+                  {availableVehicles.map((v) => {
+                    const isConfirming = confirmingVehicle === v.value;
+                    const canConfirm = vehiclePrices[v.value] && !isLoading && !(minibusRequired && v.value !== 'minibus');
+                    return (
+                    <div
                       key={v.value}
-                      type="button"
-                      disabled={isLoading || (minibusRequired && v.value !== 'minibus')}
-                      onClick={() => setFormData({...formData, vehicleType: v.value})}
                       className={cn(
-                        "relative overflow-hidden rounded-xl p-3 transition-all duration-200 text-left",
-                        "border-2 hover:scale-[1.02] active:scale-[0.98]",
+                        "relative overflow-hidden rounded-xl p-3 transition-all duration-200 text-left border-2",
                         formData.vehicleType === v.value
                           ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/30"
                           : "border-border bg-card hover:bg-muted/50 hover:border-primary/40",
-                        (isLoading || (minibusRequired && v.value !== 'minibus')) && "opacity-50 cursor-not-allowed"
+                        (minibusRequired && v.value !== 'minibus') && "opacity-50"
                       )}
                     >
-                      {formData.vehicleType === v.value && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                          <CheckCircle className="h-3 w-3 text-primary-foreground" />
-                        </div>
-                      )}
-                      <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-muted">
-                        <img
-                          src={v.images[0]?.src}
-                          alt={v.label}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className={cn(
-                          "font-semibold text-sm",
-                          formData.vehicleType === v.value ? "text-primary" : "text-foreground"
-                        )}>
-                          {v.label}
-                        </h3>
-                        {/* Price badge on vehicle card */}
-                        {vehiclePrices[v.value] ? (
-                          <span className={cn(
-                            "text-sm font-bold px-2 py-0.5 rounded-full",
-                            formData.vehicleType === v.value 
-                              ? "bg-primary text-primary-foreground" 
-                              : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                          )}>
-                            {vehiclePrices[v.value]} {selectedCurrency}
-                          </span>
-                        ) : isPricesLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                        ) : (
-                          <span className="text-xs text-muted-foreground italic">
-                            {t('priceOnRequest') || 'Fiyat talebi'}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {v.passengers}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Briefcase className="h-3 w-3" />
-                          {v.luggage}
-                        </span>
-                      </div>
-                      {/* Feature icons - like Hero.tsx */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {v.features.slice(0, 4).map((feature, idx) => {
-                          const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
-                          return (
-                            <div 
-                              key={idx} 
-                              className="flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 rounded text-[10px]"
-                              title={language === 'TR' ? feature.labelTr : feature.label}
-                            >
-                              <FeatureIcon className={cn("h-2.5 w-2.5", color)} />
-                            </div>
-                          );
-                        })}
-                        {v.features.length > 4 && (
-                          <div className="flex items-center px-1.5 py-0.5 bg-muted/50 rounded text-[10px] text-muted-foreground">
-                            +{v.features.length - 4}
+                      <button
+                        type="button"
+                        disabled={isLoading || (minibusRequired && v.value !== 'minibus')}
+                        onClick={() => setFormData({...formData, vehicleType: v.value})}
+                        className="w-full text-left"
+                      >
+                        {formData.vehicleType === v.value && (
+                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center z-10">
+                            <CheckCircle className="h-3 w-3 text-primary-foreground" />
                           </div>
                         )}
-                      </div>
-                    </button>
-                  ))}
+                        <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-muted">
+                          <img
+                            src={v.images[0]?.src}
+                            alt={v.label}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className={cn(
+                            "font-semibold text-sm",
+                            formData.vehicleType === v.value ? "text-primary" : "text-foreground"
+                          )}>
+                            {v.label}
+                          </h3>
+                          {vehiclePrices[v.value] ? (
+                            <span className={cn(
+                              "text-sm font-bold px-2 py-0.5 rounded-full",
+                              formData.vehicleType === v.value 
+                                ? "bg-primary text-primary-foreground" 
+                                : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                            )}>
+                              {vehiclePrices[v.value]} {selectedCurrency}
+                            </span>
+                          ) : isPricesLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">
+                              {t('priceOnRequest') || 'Fiyat talebi'}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {v.passengers}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Briefcase className="h-3 w-3" />
+                            {v.luggage}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {v.features.slice(0, 4).map((feature, idx) => {
+                            const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
+                            return (
+                              <div 
+                                key={idx} 
+                                className="flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 rounded text-[10px]"
+                                title={language === 'TR' ? feature.labelTr : feature.label}
+                              >
+                                <FeatureIcon className={cn("h-2.5 w-2.5", color)} />
+                              </div>
+                            );
+                          })}
+                          {v.features.length > 4 && (
+                            <div className="flex items-center px-1.5 py-0.5 bg-muted/50 rounded text-[10px] text-muted-foreground">
+                              +{v.features.length - 4}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                      {canConfirm && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="w-full mt-2 gap-1.5"
+                          disabled={isLoading || isConfirming}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            setConfirmingVehicle(v.value);
+                            await createReservationForVehicle(v.value);
+                            setConfirmingVehicle(null);
+                          }}
+                        >
+                          {isConfirming ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4" />
+                          )}
+                          {language === 'TR' ? 'Onayla' : 'Confirm'}
+                        </Button>
+                      )}
+                    </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -2990,6 +2844,28 @@ const CustomerHome = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Gemini AI Tatil Asistanı - Sağ alt köşe Chat Bubble */}
+      <GeminiHolidayAssistant
+        reservationContext={
+          nextTransfer
+            ? {
+                customer_name: profileData.full_name || user?.email?.split('@')[0] || '',
+                dropoff: nextTransfer.dropoff,
+                pickup_date: nextTransfer.date,
+                pickup_time: nextTransfer.time,
+              }
+            : recentReservations[0]
+            ? {
+                customer_name: profileData.full_name || user?.email?.split('@')[0] || '',
+                dropoff: recentReservations[0].dropoff_place_name || recentReservations[0].dropoff,
+                pickup_date: recentReservations[0].pickup_date,
+                pickup_time: recentReservations[0].pickup_time,
+              }
+            : null
+        }
+        language={language === 'TR' ? 'TR' : 'EN'}
+      />
 
       {/* Phone Number Required Modal - For OAuth users without phone */}
       <Dialog open={showPhoneRequiredModal} onOpenChange={(open) => {
