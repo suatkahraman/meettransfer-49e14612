@@ -27,10 +27,21 @@ import { GoogleRouteMap } from '@/components/ui/google-route-map';
 import { getDirections } from '@/utils/googleMapsLoader';
 import { GeminiHolidayAssistant } from '@/components/customer/GeminiHolidayAssistant';
 import { DestinationGuideCards } from '@/components/customer/DestinationGuideCards';
+import { CustomerHeroWelcomePanel } from '@/components/customer/CustomerHeroWelcomePanel';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes, getAvailableVehicles, isMinibusRequired, VEHICLE_TYPE_MAP } from '@/lib/vehicleTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -90,14 +101,6 @@ const getFeatureIconWithColor = (iconName: string) => {
     'champagne': { icon: Wine, color: 'text-pink-500' },
   };
   return iconConfig[iconName] || { icon: Sparkles, color: 'text-purple-500' };
-};
-
-// Helper function - outside component for better performance
-const getGreeting = (t: (key: string) => string): string => {
-  const hour = new Date().getHours();
-  if (hour < 12) return t('goodMorning');
-  if (hour < 18) return t('goodAfternoon');
-  return t('goodEvening');
 };
 
 const CustomerHome = () => {
@@ -211,6 +214,8 @@ const CustomerHome = () => {
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [confirmingVehicle, setConfirmingVehicle] = useState<string | null>(null);
+  const [cancelConfirmReservationId, setCancelConfirmReservationId] = useState<string | null>(null);
+  const [cancellingReservationId, setCancellingReservationId] = useState<string | null>(null);
 
   // Supported currencies
   const SUPPORTED_CURRENCIES = ['EUR', 'USD', 'GBP', 'TRY', 'AED', 'AUD'] as const;
@@ -321,9 +326,6 @@ const CustomerHome = () => {
       clearTimeout(timeoutId);
     };
   }, [formData.pickup, formData.dropoff, formData.date, selectedCurrency, pickupCoords, dropoffCoords, t]);
-
-  // Memoized greeting
-  const greeting = useMemo(() => getGreeting(t), [t]);
 
   // Memoized display name
   const displayName = useMemo(() => {
@@ -1012,6 +1014,48 @@ const CustomerHome = () => {
     setIsAddingFavorite(true);
   };
 
+  const canCancelReservation = (reservation: { pickup_date: string; pickup_time: string; status: string }) => {
+    const cancellableStatuses = ['waiting_for_customer_approval', 'customer_approved', 'confirmed', 'sent_to_driver'];
+    if (!cancellableStatuses.includes(reservation.status)) return false;
+    const now = new Date();
+    const pickupDateTime = new Date(`${reservation.pickup_date}T${reservation.pickup_time}`);
+    const hoursUntil = (pickupDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    return hoursUntil >= 24;
+  };
+
+  const handleCancelReservationFromHero = async (reservationId: string) => {
+    setCancellingReservationId(reservationId);
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled_by_customer', driver_id: null })
+        .eq('id', reservationId);
+
+      if (error) throw error;
+
+      try {
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            type: 'reservation_cancelled',
+            title: language === 'TR' ? 'Müşteri Rezervasyonu İptal Etti' : 'Customer Cancelled Reservation',
+            message: `Reservation #${reservationId.slice(0, 8)} cancelled.`,
+            notify_admins: true,
+            reservation_id: reservationId,
+            send_push: true,
+          },
+        });
+      } catch (_) {}
+
+      toast.success(t('reservationCancelledSuccess') || (language === 'TR' ? 'Rezervasyon iptal edildi.' : 'Reservation cancelled.'));
+      setCancelConfirmReservationId(null);
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || t('failedToCancelReservation') || (language === 'TR' ? 'İptal başarısız' : 'Cancel failed'));
+    } finally {
+      setCancellingReservationId(null);
+    }
+  };
+
   const addPassenger = () => {
     if (passengerNames.length < MAX_PASSENGERS) {
       setPassengerNames([...passengerNames, '']);
@@ -1261,9 +1305,7 @@ const CustomerHome = () => {
       setIsBookingFormOpen(false);
 
       fetchData();
-      if (reservation?.id) {
-        navigate(`/customer/reservation/${reservation.id}`);
-      }
+      toast.success(t('reservationConfirmed'));
 
     } catch (error) {
       console.error('Error creating reservation:', error);
@@ -1351,42 +1393,135 @@ const CustomerHome = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        {/* Welcome Section */}
-        <motion.div 
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="mb-4"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                className="bg-primary/20 p-2.5 rounded-full"
-              >
-                <Sparkles className="h-5 w-5 text-primary" />
-              </motion.div>
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {greeting}
-                </p>
-                <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
-                  {displayName}
-                </h1>
+
+        {/* Hero - Sadece: Prompt+Cevap, Book Now, Aktif Rezervasyonlar */}
+        <CustomerHeroWelcomePanel
+          destinationCity={
+            nextTransfer?.dropoff
+              ? (nextTransfer.dropoff.split(',')[0] || '').trim()
+              : recentReservations[0]?.dropoff
+              ? (recentReservations[0].dropoff_place_name || recentReservations[0].dropoff).split(',')[0]?.trim() || null
+              : null
+          }
+          t={t}
+          language={language}
+          onBookNowClick={() => {
+            setIsBookingFormOpen(true);
+            setTimeout(() => {
+              document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+          activeReservationsSlot={
+            recentReservations.length > 0 ? (
+              <div className="pt-2 border-t border-border/50">
+                <div className="flex items-center justify-between mb-3 mt-2">
+                  <span className="text-sm font-semibold">{t('activeReservationsTitle')}</span>
+                  {activeBookingsCount > 3 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => navigate('/customer/bookings')}
+                    >
+                      {t('viewAll')}
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  {recentReservations.slice(0, 3).map((reservation) => {
+                    const statusConfig: Record<string, { key: string; color: string; bgColor: string }> = {
+                      'awaiting-price': { key: 'awaitingPrice', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+                      'waiting_for_customer_approval': { key: 'awaitingApproval', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+                      'customer_approved': { key: 'approved', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+                      'confirmed': { key: 'confirmed', color: 'text-green-700', bgColor: 'bg-green-100' },
+                      'sent_to_driver': { key: 'driverAssigned', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+                      'pending_admin_review': { key: 'underReview', color: 'text-purple-700', bgColor: 'bg-purple-100' },
+                    };
+                    const status = statusConfig[reservation.status] || { key: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
+                    const canCancel = canCancelReservation(reservation);
+                    return (
+                      <Card key={reservation.id} className="shadow-sm transition-all border-l-4 border-l-primary/60 overflow-hidden">
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between gap-2 mb-3">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <span className="font-mono text-xs font-semibold text-primary">{reservation.reservation_code || 'N/A'}</span>
+                                <Badge className={cn("text-[10px]", status.bgColor, status.color)}>{t(status.key)}</Badge>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                <span className="truncate">{(reservation.pickup_place_name || reservation.pickup).split(',')[0]}</span>
+                                <ArrowRight className="h-3 w-3 shrink-0" />
+                                <span className="truncate">{(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}</span>
+                              </div>
+                              <div className="text-[10px] text-muted-foreground mt-0.5">
+                                {new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })} • {reservation.pickup_time.slice(0, 5)}
+                              </div>
+                            </div>
+                          </div>
+                          {/* 2 seçenek - büyük punto: İptal et (önce sor), Detay */}
+                          <div className="flex gap-2">
+                            {canCancel && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="flex-1 text-base font-semibold h-10"
+                                disabled={cancellingReservationId === reservation.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCancelConfirmReservationId(reservation.id);
+                                }}
+                              >
+                                {cancellingReservationId === reservation.id ? (
+                                  <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                  t('cancelReservation')
+                                )}
+                              </Button>
+                            )}
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className={cn("text-base font-semibold h-10", canCancel ? "flex-1" : "w-full")}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/customer/reservation/${reservation.id}`);
+                              }}
+                            >
+                              {t('viewDetails') || (language === 'TR' ? 'Detay' : 'Details')}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchData}
-              disabled={isRefreshing}
-              className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </motion.div>
+            ) : null
+          }
+        />
+
+        {/* İptal onay dialog */}
+        <AlertDialog open={!!cancelConfirmReservationId} onOpenChange={(open) => !open && setCancelConfirmReservationId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('cancelReservationTitle')}</AlertDialogTitle>
+              <AlertDialogDescription>{t('cancelReservationMessage')}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (cancelConfirmReservationId) handleCancelReservationFromHero(cancelConfirmReservationId);
+                }}
+              >
+                {cancellingReservationId ? <Loader2 className="h-4 w-4 animate-spin" /> : (t('yesCancelIt') || (language === 'TR' ? 'Evet, İptal Et' : 'Yes, Cancel'))}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Ödeme Özeti */}
         {paymentStats.totalReservations > 0 && (
@@ -1519,193 +1654,9 @@ const CustomerHome = () => {
           )}
         </AnimatePresence>
 
-        {/* Hero - Sadece Book Now butonu */}
-        <motion.div 
-          initial={false}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="mb-4 sm:mb-6"
-        >
-          <motion.div
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Card 
-              className="cursor-pointer shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-0 overflow-hidden relative"
-              onClick={() => {
-                setIsBookingFormOpen(true);
-                setTimeout(() => {
-                  const formElement = document.getElementById('booking-form');
-                  formElement?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              }}
-            >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.15),_transparent_50%)]" />
-              <CardContent className="p-5 sm:p-6 flex flex-col items-center justify-center text-center min-h-[100px] sm:min-h-[120px] relative z-10">
-                <div className="bg-primary-foreground/20 rounded-full p-3 sm:p-4 mb-2 sm:mb-3 backdrop-blur-sm">
-                  <Car className="h-8 w-8 sm:h-10 sm:w-10" />
-                </div>
-                <span className="font-bold text-base sm:text-lg">
-                  {language === 'TR' ? 'Book Now' : 'Book Now'}
-                </span>
-                <span className="text-xs sm:text-sm opacity-90 mt-1">
-                  {language === 'TR' ? 'Transfer fiyatınızı alın, hemen rezervasyon yapın' : 'Get your quote and book instantly'}
-                </span>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </motion.div>
+        {/* Active Reservations artık Hero içinde gösteriliyor */}
 
-        {/* Active Reservations Cards */}
-        {recentReservations.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="mb-6"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold">
-                  {t('activeReservationsTitle')}
-                </span>
-              </div>
-              {activeBookingsCount > 3 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-primary hover:text-primary/80"
-                  onClick={() => navigate('/customer/bookings')}
-                >
-                  {t('viewAll')}
-                  <ChevronRight className="h-3 w-3 ml-1" />
-                </Button>
-              )}
-            </div>
-            <div className="space-y-3">
-              {recentReservations.slice(0, 3).map((reservation, index) => {
-                const statusConfig: Record<string, { key: string; color: string; bgColor: string }> = {
-                  'awaiting-price': { key: 'awaitingPrice', color: 'text-amber-700', bgColor: 'bg-amber-100' },
-                  'waiting_for_customer_approval': { key: 'awaitingApproval', color: 'text-orange-700', bgColor: 'bg-orange-100' },
-                  'customer_approved': { key: 'approved', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-                  'confirmed': { key: 'confirmed', color: 'text-green-700', bgColor: 'bg-green-100' },
-                  'sent_to_driver': { key: 'driverAssigned', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
-                  'pending_admin_review': { key: 'underReview', color: 'text-purple-700', bgColor: 'bg-purple-100' },
-                };
-                const status = statusConfig[reservation.status] || { key: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
-                
-                const vehicleLabels: Record<string, string> = {
-                  'mercedes-vito': 'Mercedes Vito',
-                  'mercedes-vito-vip': 'Mercedes Vito VIP',
-                  'mercedes-sprinter': 'Sprinter',
-                  'minibus': 'Minibüs',
-                  'maybach': 'Mercedes Maybach Minivan',
-                };
-                
-                return (
-                  <motion.div
-                    key={reservation.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                  >
-                    <Card
-                      className="cursor-pointer shadow-sm hover:shadow-md transition-all border-l-4 border-l-primary/60 overflow-hidden"
-                      onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            {/* Header with code and status */}
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <span className="font-mono text-sm font-semibold text-primary">
-                                {reservation.reservation_code || 'N/A'}
-                              </span>
-                              <Badge className={cn("text-xs font-medium", status.bgColor, status.color)}>
-                                {t(status.key)}
-                              </Badge>
-                            </div>
-                            
-                            {/* Route info */}
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1.5">
-                              <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
-                              <span className="truncate">
-                                {(reservation.pickup_place_name || reservation.pickup).split(',')[0]}
-                              </span>
-                              <ArrowRight className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">
-                                {(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}
-                              </span>
-                            </div>
-                            
-                            {/* Date, time and vehicle */}
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                <span>{new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                <span>{reservation.pickup_time.slice(0, 5)}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Car className="h-3 w-3" />
-                                <span>{vehicleLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
-                              </div>
-                            </div>
-                            
-                            {/* Vehicle capacity and features */}
-                            {(() => {
-                              const vehicleInfo = VEHICLE_TYPE_MAP[reservation.vehicle_type];
-                              if (!vehicleInfo) return null;
-                              return (
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <div className="flex items-center gap-2 text-xs bg-muted/50 px-2 py-1 rounded">
-                                    <Users className="h-3 w-3 text-primary" />
-                                    <span>{vehicleInfo.passengers}</span>
-                                    <Briefcase className="h-3 w-3 text-orange-500 ml-1" />
-                                    <span>{vehicleInfo.luggage}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    {vehicleInfo.features.slice(0, 3).map((feature, idx) => {
-                                      const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
-                                      return (
-                                        <div 
-                                          key={idx} 
-                                          className="bg-muted/50 p-1 rounded"
-                                          title={language === 'TR' ? feature.labelTr : feature.label}
-                                        >
-                                          <FeatureIcon className={cn("h-3 w-3", color)} />
-                                        </div>
-                                      );
-                                    })}
-                                    {vehicleInfo.features.length > 3 && (
-                                      <div className="bg-muted/50 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground">
-                                        +{vehicleInfo.features.length - 3}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                          
-                          {/* Arrow indicator */}
-                          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Completed Reservations History */}
+        {/* Completed Reservations History - Geçmiş rezervasyonlar menüden de erişilebilir */}
         {completedReservations.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
