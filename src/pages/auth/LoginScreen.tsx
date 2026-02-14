@@ -273,6 +273,10 @@ const LoginScreen = () => {
   }, [isResetting]);
 
   useEffect(() => {
+    if (roleParam === 'admin') {
+      window.location.replace('/auth');
+      return;
+    }
     if (roleParam && ['customer', 'driver', 'agency'].includes(roleParam)) {
       setLoginSection(roleParam);
     }
