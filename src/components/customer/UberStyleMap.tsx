@@ -4,6 +4,7 @@ import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route, Car, Us
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { loadGoogleMapsScript, getGoogleMaps } from '@/utils/googleMapsLoader';
 
 interface UberStyleMapProps {
@@ -317,9 +318,7 @@ export const UberStyleMap = ({
 
   const openNavigation = (destination: Coordinates | null, type: 'pickup' | 'dropoff') => {
     if (!destination) return;
-    
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    
+    const isIOS = isIOSDevice();
     if (isIOS) {
       window.open(`maps://maps.apple.com/?daddr=${destination.lat},${destination.lng}&dirflg=d`, '_blank');
     } else {

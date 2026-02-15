@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { startOAuthSignIn } from '@/lib/oauthSignIn';
@@ -55,8 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         let { data: { session: existingSession } } = await supabase.auth.getSession();
         // iOS WebKit/ITP: getSession bazen ilk seferde null döner (storage gecikmesi).
         // Tekrar dene - iOS'ta hibrit storage flush için daha uzun süre ver.
-        const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
-        if (!existingSession && isIOS) {
+        if (!existingSession && isIOSDevice()) {
           const delays = [80, 150, 250, 400]; // 4 deneme: toplam ~880ms - ITP/storage sync için
           for (const delay of delays) {
             await new Promise(r => setTimeout(r, delay));

@@ -1,11 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import {
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,12 +15,11 @@ import {
   Shield,
   Globe,
   LogOut,
-  User,
-  Settings,
   Edit2,
   Save,
   X,
   Phone,
+  ClipboardList,
 } from 'lucide-react';
 import { WHATSAPP_NUMBER, EMERGENCY_PHONE } from '@/lib/contact';
 import { PhoneInput } from '@/components/ui/phone-input';
@@ -75,149 +70,109 @@ export const CustomerNavSheet = ({
     }
   };
 
+  const navItem = "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted/80 transition-colors text-left w-full";
+
   return (
     <>
-      <SheetHeader className="p-4 border-b text-left">
-        <SheetTitle className="text-lg font-serif flex items-center gap-2">
-          <Settings className="h-5 w-5" />
+      <SheetHeader className="p-4 sm:p-5 border-b">
+        <SheetTitle className="text-base font-semibold tracking-tight">
           {t('settingsTitle')}
         </SheetTitle>
       </SheetHeader>
-      <nav className="flex-1 overflow-y-auto p-3 space-y-4">
-        {/* Kısa yollar */}
-        <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
-            {t('quickActions') || (language === 'TR' ? 'Kısayollar' : 'Shortcuts')}
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => handleNav('/')}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-colors"
-            >
-              <Home className="h-5 w-5 text-primary" />
-              <span className="text-xs font-medium">{t('homeBtn')}</span>
-            </button>
-            <button
-              onClick={() => handleNav('/customer/payments')}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-blue-500/5 border border-blue-500/20 hover:bg-blue-500/10 transition-colors"
-            >
-              <CreditCard className="h-5 w-5 text-blue-500" />
-              <span className="text-xs font-medium">{t('paymentsLabel') || 'Ödemeler'}</span>
-            </button>
-            <button
-              onClick={() => {
-                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank');
-                onOpenChange(false);
-              }}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-green-500/5 border border-green-500/20 hover:bg-green-500/10 transition-colors"
-            >
-              <MessageCircle className="h-5 w-5 text-green-500" />
-              <span className="text-xs font-medium">WhatsApp</span>
-            </button>
-            <button
-              onClick={() => {
-                window.open(`tel:${EMERGENCY_PHONE}`, '_self');
-                onOpenChange(false);
-              }}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 transition-colors"
-            >
-              <PhoneCall className="h-5 w-5 text-red-500" />
-              <span className="text-xs font-medium">{t('emergencyBtn')}</span>
-            </button>
-            <button
-              onClick={() => handleNav('/security-settings')}
-              className="flex flex-col items-center gap-1.5 px-3 py-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-colors col-span-2"
-            >
-              <Shield className="h-5 w-5 text-emerald-500" />
-              <span className="text-xs font-medium">{t('securityBtn')}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Profil */}
-        <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <User className="h-4 w-4" />
-              {t('profileInfoTitle')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-0">
-            {!isEditingProfile ? (
-              <>
-                <p className="text-sm font-medium">{editData.full_name || t('notSpecified')}</p>
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Phone className="h-3 w-3" />
+      <nav className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+        {/* Profil - Kompakt */}
+        <div className="rounded-lg border bg-muted/30 p-3">
+          {!isEditingProfile ? (
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{editData.full_name || t('notSpecified')}</p>
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                  <Phone className="h-3 w-3 shrink-0" />
                   {editData.phone || <span className="text-amber-600">{t('pleaseAdd')}</span>}
                 </p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
-                <Button size="sm" variant="outline" onClick={() => setIsEditingProfile(true)} className="gap-1">
-                  <Edit2 className="h-3 w-3" />
-                  {t('editBtn')}
+              </div>
+              <Button size="sm" variant="ghost" onClick={() => setIsEditingProfile(true)} className="shrink-0 h-8 text-xs">
+                <Edit2 className="h-3 w-3" />
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div>
+                <Label className="text-xs text-muted-foreground">{t('fullNameLabel')}</Label>
+                <Input value={editData.full_name} onChange={(e) => setEditData({ ...editData, full_name: e.target.value })} className="mt-1 h-8 text-sm" />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">{t('phoneLabel')}</Label>
+                <PhoneInput value={editData.phone} onChange={(v) => setEditData({ ...editData, phone: v })} className="mt-1 h-8" />
+              </div>
+              <div className="flex gap-2 pt-1">
+                <Button size="sm" variant="ghost" onClick={() => setIsEditingProfile(false)} className="h-8">
+                  <X className="h-3 w-3" />
                 </Button>
-              </>
-            ) : (
-              <>
-                <div>
-                  <Label className="text-xs">{t('fullNameLabel')}</Label>
-                  <Input
-                    value={editData.full_name}
-                    onChange={(e) => setEditData({ ...editData, full_name: e.target.value })}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">{t('phoneLabel')}</Label>
-                  <PhoneInput value={editData.phone} onChange={(v) => setEditData({ ...editData, phone: v })} className="mt-1" />
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setIsEditingProfile(false)}>
-                    <X className="h-3 w-3" />
-                  </Button>
-                  <Button size="sm" onClick={handleSaveProfile} disabled={isSaving} className="gap-1">
-                    {isSaving ? null : <Save className="h-3 w-3" />}
-                    {t('save')}
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+                <Button size="sm" onClick={handleSaveProfile} disabled={isSaving} className="h-8 gap-1">
+                  {isSaving ? null : <Save className="h-3 w-3" />}
+                  {t('save')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
 
-        {/* Notification Settings */}
-        <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
-
-        {/* Profile & Security */}
-        <div className="space-y-1 border-t pt-4">
-          <button
-            onClick={() => handleNav('/customer/profile')}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-muted transition-colors text-left"
-          >
-            <User className="h-5 w-5 shrink-0" />
-            <span className="font-medium">{t('editProfile')}</span>
+        {/* Navigasyon - Tek liste, sade */}
+        <div className="space-y-0.5">
+          <button onClick={() => handleNav('/')} className={navItem}>
+            <Home className="h-4 w-4 shrink-0 text-muted-foreground" />
+            {t('homeBtn')}
+          </button>
+          <button onClick={() => handleNav('/customer/bookings')} className={navItem}>
+            <ClipboardList className="h-4 w-4 shrink-0 text-muted-foreground" />
+            {t('myBookingsBtn') || (language === 'TR' ? 'Rezervasyonlarım' : 'My Bookings')}
+          </button>
+          <button onClick={() => handleNav('/customer/bookings#past-reservations')} className={navItem}>
+            <ClipboardList className="h-4 w-4 shrink-0 text-muted-foreground" />
+            {t('pastReservations') || (language === 'TR' ? 'Geçmiş Rezervasyonlar' : 'Past Reservations')}
+          </button>
+          <button onClick={() => handleNav('/customer/payments')} className={navItem}>
+            <CreditCard className="h-4 w-4 shrink-0 text-muted-foreground" />
+            {t('paymentsLabel') || 'Ödemeler'}
           </button>
           <button
-            onClick={() => handleNav('/security-settings')}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-muted transition-colors text-left"
+            onClick={() => { window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank'); onOpenChange(false); }}
+            className={navItem}
           >
-            <Shield className="h-5 w-5 shrink-0" />
-            <span className="font-medium">{t('securitySettingsMenu')}</span>
+            <MessageCircle className="h-4 w-4 shrink-0 text-muted-foreground" />
+            WhatsApp
           </button>
-          <div className="px-3 py-2 flex items-center gap-3">
-            <Globe className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <UniversalLanguageSelector variant="compact" />
-          </div>
           <button
-            onClick={() => {
-              signOut();
-              onOpenChange(false);
-            }}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-destructive/10 text-destructive transition-colors text-left"
+            onClick={() => { window.open(`tel:${EMERGENCY_PHONE}`, '_self'); onOpenChange(false); }}
+            className={navItem}
           >
-            <LogOut className="h-5 w-5 shrink-0" />
-            <span className="font-medium">{t('logoutBtn')}</span>
+            <PhoneCall className="h-4 w-4 shrink-0 text-muted-foreground" />
+            {t('emergencyBtn')}
+          </button>
+          <button onClick={() => handleNav('/security-settings')} className={navItem}>
+            <Shield className="h-4 w-4 shrink-0 text-muted-foreground" />
+            {t('securityBtn')}
           </button>
         </div>
+
+        {/* Dil seçimi */}
+        <div className="flex items-center gap-3 pt-2 border-t">
+          <Globe className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <UniversalLanguageSelector variant="compact" />
+        </div>
+
+        {/* Bildirimler */}
+        <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
+
+        {/* Çıkış */}
+        <button
+          onClick={() => { signOut(); onOpenChange(false); }}
+          className={`${navItem} text-destructive hover:bg-destructive/10 mt-2`}
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {t('logoutBtn')}
+        </button>
       </nav>
     </>
   );

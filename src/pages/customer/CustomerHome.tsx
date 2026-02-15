@@ -22,12 +22,26 @@ import {
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '@/components/NotificationBell';
-import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
+import { GooglePlacesAutocomplete, type PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import { GoogleRouteMap } from '@/components/ui/google-route-map';
+import { getDirections } from '@/utils/googleMapsLoader';
+import { GeminiHolidayAssistant } from '@/components/customer/GeminiHolidayAssistant';
+import { DestinationGuideCards } from '@/components/customer/DestinationGuideCards';
+import { CustomerHeroWelcomePanel } from '@/components/customer/CustomerHeroWelcomePanel';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { VEHICLE_TYPE_OPTIONS as vehicleTypes, getAvailableVehicles, isMinibusRequired, VEHICLE_TYPE_MAP } from '@/lib/vehicleTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -87,14 +101,6 @@ const getFeatureIconWithColor = (iconName: string) => {
     'champagne': { icon: Wine, color: 'text-pink-500' },
   };
   return iconConfig[iconName] || { icon: Sparkles, color: 'text-purple-500' };
-};
-
-// Helper function - outside component for better performance
-const getGreeting = (t: (key: string) => string): string => {
-  const hour = new Date().getHours();
-  if (hour < 12) return t('goodMorning');
-  if (hour < 18) return t('goodAfternoon');
-  return t('goodEvening');
 };
 
 const CustomerHome = () => {
@@ -204,6 +210,13 @@ const CustomerHome = () => {
   const [isPickupDateOpen, setIsPickupDateOpen] = useState(false);
   const [isReturnDateOpen, setIsReturnDateOpen] = useState(false);
 
+  // Coordinates for distance_km calculation
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [confirmingVehicle, setConfirmingVehicle] = useState<string | null>(null);
+  const [cancelConfirmReservationId, setCancelConfirmReservationId] = useState<string | null>(null);
+  const [cancellingReservationId, setCancellingReservationId] = useState<string | null>(null);
+
   // Supported currencies
   const SUPPORTED_CURRENCIES = ['EUR', 'USD', 'GBP', 'TRY', 'AED', 'AUD'] as const;
 
@@ -244,8 +257,10 @@ const CustomerHome = () => {
     setSelectedCurrency(getCurrencyByLanguage());
   }, []);
 
-  // Fetch prices when pickup and dropoff are filled
+  // Fetch prices when pickup and dropoff are filled (with distance_km for accurate pricing)
   useEffect(() => {
+    let cancelled = false;
+
     const fetchVehiclePrices = async () => {
       if (!formData.pickup || !formData.dropoff) {
         setVehiclePrices({});
@@ -253,32 +268,41 @@ const CustomerHome = () => {
         return;
       }
 
-      // Minimum length check
-      if (formData.pickup.length < 3 || formData.dropoff.length < 3) {
-        return;
-      }
+      if (formData.pickup.length < 3 || formData.dropoff.length < 3) return;
 
       setIsPricesLoading(true);
       setPricesError(null);
 
       try {
-        const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: {
-            pickup: formData.pickup,
-            dropoff: formData.dropoff,
-            customerCurrency: selectedCurrency,
-            pickup_date: formData.date || undefined,
-          },
-        });
+        let distanceKm: number | undefined;
+        if (pickupCoords && dropoffCoords) {
+          try {
+            const directions = await getDirections(pickupCoords, dropoffCoords);
+            if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
+              distanceKm = directions.distanceKm;
+            }
+          } catch (_) {
+            // Mesafe alınamazsa devam et - backend şehir bazlı kontrol yapar
+          }
+        }
 
+        const body: Record<string, unknown> = {
+          pickup: formData.pickup,
+          dropoff: formData.dropoff,
+          customerCurrency: selectedCurrency,
+          pickup_date: formData.date || undefined,
+        };
+        if (distanceKm != null) body.distance_km = distanceKm;
+
+        const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", { body });
+
+        if (cancelled) return;
         if (error) throw error;
 
         if (data?.prices && data.prices.length > 0) {
           const pricesMap: Record<string, number> = {};
           data.prices.forEach((p: any) => {
-            if (p.price) {
-              pricesMap[p.vehicleType] = p.price;
-            }
+            if (p.price) pricesMap[p.vehicleType] = p.price;
           });
           setVehiclePrices(pricesMap);
         } else {
@@ -286,21 +310,22 @@ const CustomerHome = () => {
           setPricesError(t('noPriceFound') || 'Bu güzergah için fiyat bulunamadı');
         }
       } catch (error) {
-        console.error("Error fetching vehicle prices:", error);
-        setVehiclePrices({});
-        setPricesError(t('priceError') || 'Fiyat alınırken hata oluştu');
+        if (!cancelled) {
+          console.error("Error fetching vehicle prices:", error);
+          setVehiclePrices({});
+          setPricesError(t('priceError') || 'Fiyat alınırken hata oluştu');
+        }
       } finally {
-        setIsPricesLoading(false);
+        if (!cancelled) setIsPricesLoading(false);
       }
     };
 
-    // Debounce the fetch
     const timeoutId = setTimeout(fetchVehiclePrices, 500);
-    return () => clearTimeout(timeoutId);
-  }, [formData.pickup, formData.dropoff, selectedCurrency, t]);
-
-  // Memoized greeting
-  const greeting = useMemo(() => getGreeting(t), [t]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [formData.pickup, formData.dropoff, formData.date, selectedCurrency, pickupCoords, dropoffCoords, t]);
 
   // Memoized display name
   const displayName = useMemo(() => {
@@ -989,6 +1014,48 @@ const CustomerHome = () => {
     setIsAddingFavorite(true);
   };
 
+  const canCancelReservation = (reservation: { pickup_date: string; pickup_time: string; status: string }) => {
+    const cancellableStatuses = ['waiting_for_customer_approval', 'customer_approved', 'confirmed', 'sent_to_driver'];
+    if (!cancellableStatuses.includes(reservation.status)) return false;
+    const now = new Date();
+    const pickupDateTime = new Date(`${reservation.pickup_date}T${reservation.pickup_time}`);
+    const hoursUntil = (pickupDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    return hoursUntil >= 24;
+  };
+
+  const handleCancelReservationFromHero = async (reservationId: string) => {
+    setCancellingReservationId(reservationId);
+    try {
+      const { error } = await supabase
+        .from('reservations')
+        .update({ status: 'cancelled_by_customer', driver_id: null })
+        .eq('id', reservationId);
+
+      if (error) throw error;
+
+      try {
+        await supabase.functions.invoke('create-notification', {
+          body: {
+            type: 'reservation_cancelled',
+            title: language === 'TR' ? 'Müşteri Rezervasyonu İptal Etti' : 'Customer Cancelled Reservation',
+            message: `Reservation #${reservationId.slice(0, 8)} cancelled.`,
+            notify_admins: true,
+            reservation_id: reservationId,
+            send_push: true,
+          },
+        });
+      } catch (_) {}
+
+      toast.success(t('reservationCancelledSuccess') || (language === 'TR' ? 'Rezervasyon iptal edildi.' : 'Reservation cancelled.'));
+      setCancelConfirmReservationId(null);
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || t('failedToCancelReservation') || (language === 'TR' ? 'İptal başarısız' : 'Cancel failed'));
+    } finally {
+      setCancellingReservationId(null);
+    }
+  };
+
   const addPassenger = () => {
     if (passengerNames.length < MAX_PASSENGERS) {
       setPassengerNames([...passengerNames, '']);
@@ -1010,8 +1077,11 @@ const CustomerHome = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-    setIsLoading(true);
+    await createReservationForVehicle(formData.vehicleType);
+  };
 
+  const createReservationForVehicle = async (vehicleType: string) => {
+    setIsLoading(true);
     const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
     if (validPassengerNames.length === 0) {
       setErrors({ passengerNames: t('passengerRequired') });
@@ -1034,7 +1104,6 @@ const CustomerHome = () => {
       return;
     }
 
-    // Validate return trip if selected
     if (formData.hasReturnTrip) {
       if (!formData.returnDate) {
         setErrors(prev => ({ ...prev, returnDate: t('returnDateRequired') || 'Return date is required' }));
@@ -1050,7 +1119,6 @@ const CustomerHome = () => {
       }
     }
 
-    // Save to recent searches
     if (user?.id) {
       const newSearch = { pickup: result.data.pickup, dropoff: result.data.dropoff.trim() };
       const existingSearches = recentSearches.filter(
@@ -1061,8 +1129,7 @@ const CustomerHome = () => {
       localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
     }
 
-    // Determine initial status based on whether we have a price
-    const selectedVehiclePrice = vehiclePrices[formData.vehicleType];
+    const selectedVehiclePrice = vehiclePrices[vehicleType];
     const hasPrice = selectedVehiclePrice && selectedVehiclePrice > 0;
     const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
 
@@ -1079,7 +1146,7 @@ const CustomerHome = () => {
         dropoff: result.data.dropoff.trim(),
         pickup_date: result.data.date,
         pickup_time: result.data.time,
-        vehicle_type: formData.vehicleType,
+        vehicle_type: vehicleType,
         price: selectedVehiclePrice || null,
         price_currency: selectedCurrency || 'EUR',
         status: initialStatus,
@@ -1128,18 +1195,17 @@ const CustomerHome = () => {
 
       // Create return trip if requested (with discount applied)
       if (formData.hasReturnTrip && formData.returnDate && formData.returnTime) {
-        // Calculate discounted return price
         const returnPrice = selectedVehiclePrice ? getReturnPrice(selectedVehiclePrice) : null;
         
         const returnReservationData = {
           customer_id: user?.id,
           customer_name: validPassengerNames[0],
           customer_phone: result.data.passengerPhone.trim(),
-          pickup: result.data.dropoff.trim(), // Swap
-          dropoff: result.data.pickup.trim(), // Swap
+          pickup: result.data.dropoff.trim(),
+          dropoff: result.data.pickup.trim(),
           pickup_date: formData.returnDate,
           pickup_time: formData.returnTime,
-          vehicle_type: formData.vehicleType,
+          vehicle_type: vehicleType,
           price: returnPrice, // Discounted price for return
           price_currency: selectedCurrency || 'EUR',
           status: initialStatus,
@@ -1215,7 +1281,7 @@ const CustomerHome = () => {
         ? `Rezervasyonunuz oluşturuldu! Kod: ${reservation?.reservation_code}`
         : `Your reservation has been created! Code: ${reservation?.reservation_code}`);
 
-      // Reset form
+      // Reset form and coords
       setFormData({
         pickup: '',
         dropoff: '',
@@ -1234,15 +1300,12 @@ const CustomerHome = () => {
       });
       setPassengerNames(['']);
       setVehiclePrices({});
+      setPickupCoords(null);
+      setDropoffCoords(null);
       setIsBookingFormOpen(false);
 
-      // Refresh data to show the new reservation
       fetchData();
-
-      // Navigate to reservation detail
-      if (reservation?.id) {
-        navigate(`/customer/reservation/${reservation.id}`);
-      }
+      toast.success(t('reservationConfirmed'));
 
     } catch (error) {
       console.error('Error creating reservation:', error);
@@ -1296,15 +1359,16 @@ const CustomerHome = () => {
             
             <NotificationBell />
           
-          {/* Hamburger Menu */}
+          {/* Hamburger Menu - Büyük ve belirgin */}
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10"
+                className="text-primary-foreground hover:bg-primary-foreground/15 h-11 w-11 sm:h-12 sm:w-12 rounded-xl transition-all"
+                aria-label={language === 'TR' ? 'Menü' : 'Menu'}
               >
-                <Menu className="h-4 w-4 sm:h-6 sm:w-6" />
+                <Menu className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={2.5} />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto p-0 flex flex-col">
@@ -1329,42 +1393,147 @@ const CustomerHome = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        {/* Welcome Section */}
-        <motion.div 
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="mb-4"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                className="bg-primary/20 p-2.5 rounded-full"
+
+        {/* Hero - Sadece: Prompt+Cevap, Book Now, Aktif Rezervasyonlar */}
+        <CustomerHeroWelcomePanel
+          destinationCity={
+            nextTransfer?.dropoff
+              ? (nextTransfer.dropoff.split(',')[0] || '').trim()
+              : recentReservations[0]?.dropoff
+              ? (recentReservations[0].dropoff_place_name || recentReservations[0].dropoff).split(',')[0]?.trim() || null
+              : null
+          }
+          t={t}
+          language={language}
+          onBookNowClick={() => {
+            setIsBookingFormOpen(true);
+            setTimeout(() => {
+              document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+          activeReservationsSlot={
+            recentReservations.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">
+                    {t('activeReservationsTitle')}
+                  </h3>
+                  {activeBookingsCount > 3 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-sm h-8 shrink-0"
+                      onClick={() => navigate('/customer/bookings')}
+                    >
+                      {t('viewAll')}
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-4 flex-1">
+                  {recentReservations.slice(0, 3).map((reservation) => {
+                    const statusConfig: Record<string, { key: string; color: string; bgColor: string }> = {
+                      'awaiting-price': { key: 'awaitingPrice', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+                      'waiting_for_customer_approval': { key: 'awaitingApproval', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+                      'customer_approved': { key: 'approved', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+                      'confirmed': { key: 'confirmed', color: 'text-green-700', bgColor: 'bg-green-100' },
+                      'sent_to_driver': { key: 'driverAssigned', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+                      'pending_admin_review': { key: 'underReview', color: 'text-purple-700', bgColor: 'bg-purple-100' },
+                    };
+                    const status = statusConfig[reservation.status] || { key: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
+                    const canCancel = canCancelReservation(reservation);
+                    return (
+                      <div
+                        key={reservation.id}
+                        className="rounded-xl border border-slate-200/80 dark:border-slate-600/50 bg-slate-50/50 dark:bg-slate-800/30 p-4 gap-4 flex flex-col min-w-0 overflow-hidden"
+                      >
+                        <div className="flex items-center justify-between gap-3 min-w-0">
+                          <div className="min-w-0 flex-1 overflow-hidden">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="font-mono text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                {reservation.reservation_code || 'N/A'}
+                              </span>
+                              <Badge className={cn("text-xs", status.bgColor, status.color)}>{t(status.key)}</Badge>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed min-w-0">
+                              <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
+                              <span className="truncate min-w-0 flex-1">{(reservation.pickup_place_name || reservation.pickup).split(',')[0]}</span>
+                              <ArrowRight className="h-3 w-3 shrink-0" />
+                              <span className="truncate min-w-0 flex-1">{(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-500">
+                              <Calendar className="h-3.5 w-3.5" />
+                              {new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
+                              <span className="text-slate-400">•</span>
+                              <Clock className="h-3.5 w-3.5" />
+                              {reservation.pickup_time.slice(0, 5)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 mt-1">
+                          {canCancel && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1 h-12 sm:h-14 w-full font-semibold text-base rounded-xl hover:scale-[1.02] transition-transform"
+                              disabled={cancellingReservationId === reservation.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCancelConfirmReservationId(reservation.id);
+                              }}
+                            >
+                              {cancellingReservationId === reservation.id ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                              ) : (
+                                t('cancelReservation')
+                              )}
+                            </Button>
+                          )}
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className={cn(
+                              "h-12 sm:h-14 font-semibold text-base rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-md",
+                              canCancel ? "flex-1" : "w-full"
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/customer/reservation/${reservation.id}`);
+                            }}
+                          >
+                            {t('viewDetails') || (language === 'TR' ? 'Detay' : 'Details')}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : null
+          }
+        />
+
+        {/* İptal onay dialog */}
+        <AlertDialog open={!!cancelConfirmReservationId} onOpenChange={(open) => !open && setCancelConfirmReservationId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('cancelReservationTitle')}</AlertDialogTitle>
+              <AlertDialogDescription>{t('cancelReservationMessage')}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (cancelConfirmReservationId) handleCancelReservationFromHero(cancelConfirmReservationId);
+                }}
               >
-                <Sparkles className="h-5 w-5 text-primary" />
-              </motion.div>
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {greeting}
-                </p>
-                <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
-                  {displayName}
-                </h1>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchData}
-              disabled={isRefreshing}
-              className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </motion.div>
+                {cancellingReservationId ? <Loader2 className="h-4 w-4 animate-spin" /> : (t('yesCancelIt') || (language === 'TR' ? 'Evet, İptal Et' : 'Yes, Cancel'))}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Ödeme Özeti */}
         {paymentStats.totalReservations > 0 && (
@@ -1497,228 +1666,9 @@ const CustomerHome = () => {
           )}
         </AnimatePresence>
 
-        {/* Quick Actions Grid - More compact on mobile */}
-        <motion.div 
-          initial={false}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6"
-        >
-          {/* New Reservation Card */}
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Card 
-              className="cursor-pointer shadow-md hover:shadow-xl transition-all bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-0 overflow-hidden relative"
-              onClick={() => {
-                setIsBookingFormOpen(true);
-                setTimeout(() => {
-                  const formElement = document.getElementById('booking-form');
-                  formElement?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-              }}
-            >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.15),_transparent_50%)]" />
-              <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center min-h-[90px] sm:min-h-[110px] relative z-10">
-                <div className="bg-primary-foreground/20 rounded-full p-2 sm:p-2.5 mb-1.5 sm:mb-2 backdrop-blur-sm">
-                  <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
-                </div>
-                <span className="font-semibold text-xs sm:text-sm">
-                  {t('newReservationBtn')}
-                </span>
-                <span className="text-[10px] sm:text-xs opacity-80 mt-0.5 sm:mt-1 hidden xs:block">
-                  {t('startNowDesc')}
-                </span>
-              </CardContent>
-            </Card>
-          </motion.div>
+        {/* Active Reservations artık Hero içinde gösteriliyor */}
 
-          {/* My Bookings Card */}
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            className="relative z-10"
-          >
-            <Card 
-              className="cursor-pointer shadow-md hover:shadow-xl transition-all relative overflow-hidden bg-gradient-to-br from-background to-muted/50 border-2 border-transparent hover:border-primary/30 active:bg-muted/70"
-              onClick={() => navigate('/customer/bookings')}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate('/customer/bookings')}
-            >
-              <CardContent className="p-3 sm:p-4 flex flex-col items-center justify-center text-center min-h-[90px] sm:min-h-[110px] pointer-events-none">
-                <div className="bg-primary/10 rounded-full p-2 sm:p-2.5 mb-1.5 sm:mb-2">
-                  <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                </div>
-                <span className="font-semibold text-xs sm:text-sm">
-                  {t('myBookingsBtn')}
-                </span>
-                <span className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
-                  {activeBookingsCount > 0 
-                    ? `${activeBookingsCount} ${t('activeLabel')}`
-                    : t('viewAllLabel')}
-                </span>
-                {activeBookingsCount > 0 && (
-                  <Badge className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-orange-500 hover:bg-orange-600 shadow-lg text-[10px] sm:text-xs px-1.5 sm:px-2 pointer-events-none">
-                    {activeBookingsCount}
-                  </Badge>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        </motion.div>
-
-        {/* Active Reservations Cards */}
-        {recentReservations.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="mb-6"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold">
-                  {t('activeReservationsTitle')}
-                </span>
-              </div>
-              {activeBookingsCount > 3 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-primary hover:text-primary/80"
-                  onClick={() => navigate('/customer/bookings')}
-                >
-                  {t('viewAll')}
-                  <ChevronRight className="h-3 w-3 ml-1" />
-                </Button>
-              )}
-            </div>
-            <div className="space-y-3">
-              {recentReservations.slice(0, 3).map((reservation, index) => {
-                const statusConfig: Record<string, { key: string; color: string; bgColor: string }> = {
-                  'awaiting-price': { key: 'awaitingPrice', color: 'text-amber-700', bgColor: 'bg-amber-100' },
-                  'waiting_for_customer_approval': { key: 'awaitingApproval', color: 'text-orange-700', bgColor: 'bg-orange-100' },
-                  'customer_approved': { key: 'approved', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-                  'confirmed': { key: 'confirmed', color: 'text-green-700', bgColor: 'bg-green-100' },
-                  'sent_to_driver': { key: 'driverAssigned', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
-                  'pending_admin_review': { key: 'underReview', color: 'text-purple-700', bgColor: 'bg-purple-100' },
-                };
-                const status = statusConfig[reservation.status] || { key: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
-                
-                const vehicleLabels: Record<string, string> = {
-                  'mercedes-vito': 'Mercedes Vito',
-                  'mercedes-vito-vip': 'Mercedes Vito VIP',
-                  'mercedes-sprinter': 'Sprinter',
-                  'minibus': 'Minibüs',
-                  'maybach': 'Mercedes Maybach Minivan',
-                };
-                
-                return (
-                  <motion.div
-                    key={reservation.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                  >
-                    <Card
-                      className="cursor-pointer shadow-sm hover:shadow-md transition-all border-l-4 border-l-primary/60 overflow-hidden"
-                      onClick={() => navigate(`/customer/reservation/${reservation.id}`)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            {/* Header with code and status */}
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <span className="font-mono text-sm font-semibold text-primary">
-                                {reservation.reservation_code || 'N/A'}
-                              </span>
-                              <Badge className={cn("text-xs font-medium", status.bgColor, status.color)}>
-                                {t(status.key)}
-                              </Badge>
-                            </div>
-                            
-                            {/* Route info */}
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1.5">
-                              <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-primary" />
-                              <span className="truncate">
-                                {(reservation.pickup_place_name || reservation.pickup).split(',')[0]}
-                              </span>
-                              <ArrowRight className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">
-                                {(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}
-                              </span>
-                            </div>
-                            
-                            {/* Date, time and vehicle */}
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                <span>{new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                <span>{reservation.pickup_time.slice(0, 5)}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Car className="h-3 w-3" />
-                                <span>{vehicleLabels[reservation.vehicle_type] || reservation.vehicle_type}</span>
-                              </div>
-                            </div>
-                            
-                            {/* Vehicle capacity and features */}
-                            {(() => {
-                              const vehicleInfo = VEHICLE_TYPE_MAP[reservation.vehicle_type];
-                              if (!vehicleInfo) return null;
-                              return (
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <div className="flex items-center gap-2 text-xs bg-muted/50 px-2 py-1 rounded">
-                                    <Users className="h-3 w-3 text-primary" />
-                                    <span>{vehicleInfo.passengers}</span>
-                                    <Briefcase className="h-3 w-3 text-orange-500 ml-1" />
-                                    <span>{vehicleInfo.luggage}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    {vehicleInfo.features.slice(0, 3).map((feature, idx) => {
-                                      const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
-                                      return (
-                                        <div 
-                                          key={idx} 
-                                          className="bg-muted/50 p-1 rounded"
-                                          title={language === 'TR' ? feature.labelTr : feature.label}
-                                        >
-                                          <FeatureIcon className={cn("h-3 w-3", color)} />
-                                        </div>
-                                      );
-                                    })}
-                                    {vehicleInfo.features.length > 3 && (
-                                      <div className="bg-muted/50 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground">
-                                        +{vehicleInfo.features.length - 3}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })()}
-                          </div>
-                          
-                          {/* Arrow indicator */}
-                          <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Completed Reservations History */}
+        {/* Completed Reservations History - Geçmiş rezervasyonlar menüden de erişilebilir */}
         {completedReservations.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -1880,6 +1830,36 @@ const CustomerHome = () => {
           </motion.div>
         )}
 
+        {/* Akıllı Rehber Kartları - Varış noktasına göre (Dashboard altı) */}
+        {(nextTransfer?.dropoff || recentReservations[0]?.dropoff) && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-6"
+          >
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                {language === 'TR' ? 'Varış noktanız için rehber' : 'Guide for your destination'}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {language === 'TR' ? 'Hava durumu, restoran ve gezilecek yer önerileri' : 'Weather, restaurant and sightseeing recommendations'}
+              </p>
+            </div>
+            <DestinationGuideCards
+              destination={
+                nextTransfer?.dropoff ||
+                recentReservations[0]?.dropoff_place_name ||
+                recentReservations[0]?.dropoff ||
+                ''
+              }
+              date={nextTransfer?.date || recentReservations[0]?.pickup_date}
+              language={language === 'TR' ? 'TR' : 'EN'}
+            />
+          </motion.div>
+        )}
+
         {/* Recent Searches - New Feature */}
         {recentSearches.length > 0 && (
           <motion.div
@@ -1920,222 +1900,24 @@ const CustomerHome = () => {
           </motion.div>
         )}
 
-        {/* Favorite Routes Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="mb-6"
-        >
-          <Card className="shadow-md border-border/50 overflow-hidden">
-            <CardHeader className="pb-3 bg-gradient-to-r from-rose-500/10 to-pink-500/10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
-                    <Heart className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base font-semibold">
-                      {t('favoriteRoutes')}
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      {t('frequentRoutesDesc')}
-                    </CardDescription>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/20"
-                  onClick={() => setIsAddingFavorite(true)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  {t('addFavoriteBtn')}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4">
-              {/* Add New Favorite Route Form */}
-              <AnimatePresence>
-                {isAddingFavorite && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mb-4 p-4 bg-muted/50 rounded-lg border border-rose-200 dark:border-rose-800"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-sm flex items-center gap-2">
-                        <Route className="h-4 w-4 text-rose-500" />
-                        {t('newFavoriteRouteTitle')}
-                      </h4>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => {
-                          setIsAddingFavorite(false);
-                          setNewFavoriteRoute({ name: '', pickup: '', dropoff: '', notes: '' });
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {t('routeName')}
-                        </Label>
-                        <Input
-                          placeholder={t('routeNameExample')}
-                          value={newFavoriteRoute.name}
-                          onChange={(e) => setNewFavoriteRoute(prev => ({ ...prev, name: e.target.value }))}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {t('pickupLocationLabel')}
-                        </Label>
-                        <GooglePlacesAutocomplete
-                          initialValue={newFavoriteRoute.pickup}
-                          onPlaceSelected={(val) => setNewFavoriteRoute(prev => ({ ...prev, pickup: val }))}
-                          onInputChange={(val) => setNewFavoriteRoute(prev => ({ ...prev, pickup: val }))}
-                          placeholder={t('enterAddressPlaceholder')}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {t('dropoffLocationLabel')}
-                        </Label>
-                        <GooglePlacesAutocomplete
-                          initialValue={newFavoriteRoute.dropoff}
-                          onPlaceSelected={(val) => setNewFavoriteRoute(prev => ({ ...prev, dropoff: val }))}
-                          onInputChange={(val) => setNewFavoriteRoute(prev => ({ ...prev, dropoff: val }))}
-                          placeholder={t('enterAddressPlaceholder')}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">
-                          {t('notesOptional')}
-                        </Label>
-                        <Input
-                          placeholder={t('specialNotesPlaceholder')}
-                          value={newFavoriteRoute.notes}
-                          onChange={(e) => setNewFavoriteRoute(prev => ({ ...prev, notes: e.target.value }))}
-                          className="mt-1"
-                        />
-                      </div>
-                      <Button
-                        onClick={handleAddFavoriteRoute}
-                        className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white"
-                      >
-                        <Heart className="h-4 w-4 mr-2" />
-                        {t('addToFavoritesBtn')}
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Favorite Routes List */}
-              {favoriteRoutes.length > 0 ? (
-                <div className="space-y-2">
-                  {favoriteRoutes.map((route, index) => (
-                    <motion.div
-                      key={route.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.05 * index }}
-                      className="group"
-                    >
-                      <div
-                        className="flex items-center gap-3 p-3 bg-muted/30 hover:bg-muted/50 rounded-lg border border-border/50 hover:border-rose-300 dark:hover:border-rose-700 transition-all cursor-pointer"
-                        onClick={() => handleUseFavoriteRoute(route)}
-                      >
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 flex items-center justify-center flex-shrink-0">
-                          <Heart className="h-5 w-5 text-rose-500" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="font-semibold text-sm truncate">{route.name}</span>
-                            {route.usage_count > 0 && (
-                              <Badge variant="secondary" className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
-                                {route.usage_count}x
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <MapPin className="h-3 w-3 flex-shrink-0" />
-                            <span className="truncate max-w-[100px]">{route.pickup_location.split(',')[0]}</span>
-                            <ArrowRight className="h-3 w-3 flex-shrink-0" />
-                            <span className="truncate max-w-[100px]">{route.dropoff_location.split(',')[0]}</span>
-                          </div>
-                          {route.notes && (
-                            <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">{route.notes}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteFavoriteRoute(route.id);
-                            }}
-                          >
-                            <HeartOff className="h-4 w-4" />
-                          </Button>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : !isAddingFavorite ? (
-                <div className="text-center py-6">
-                  <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
-                    <Heart className="h-8 w-8 text-muted-foreground/50" />
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {t('noFavoriteRoutes')}
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsAddingFavorite(true)}
-                    className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:hover:bg-rose-900/20"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('addFirstRouteBtn')}
-                  </Button>
-                </div>
-              ) : null}
-            </CardContent>
-          </Card>
-        </motion.div>
-
         {/* Booking Form with Enhanced Styling */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
+          <Card id="booking-form" className="scroll-mt-20 rounded-3xl border-amber-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/70 backdrop-blur-md shadow-xl overflow-hidden">
           <CardHeader 
-            className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg"
+            className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-3xl p-6"
             onClick={() => setIsBookingFormOpen(!isBookingFormOpen)}
           >
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl sm:text-2xl font-serif flex items-center gap-2">
-                  <Car className="h-5 w-5 sm:h-6 sm:w-6" />
+                <CardTitle className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <Car className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                   {t('bookYourTransfer')}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
                   {t('submitTransferDetails')}
                 </CardDescription>
               </div>
@@ -2158,8 +1940,8 @@ const CustomerHome = () => {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 style={{ overflow: "hidden" }}
               >
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5 relative">
+          <CardContent className="p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-6 relative">
               {/* Loading Overlay */}
               <AnimatePresence>
                 {isLoading && (
@@ -2185,7 +1967,14 @@ const CustomerHome = () => {
                   {t('pickupPoint')}
                 </Label>
                 <GooglePlacesAutocomplete
-                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, pickup: value }))}
+                  onPlaceSelected={(value, details?: PlaceDetails) => {
+                    setFormData((prev) => ({ ...prev, pickup: value }));
+                    if (details?.lat != null && details?.lng != null) {
+                      setPickupCoords({ lat: details.lat, lng: details.lng });
+                    } else {
+                      setPickupCoords(null);
+                    }
+                  }}
                   placeholder={t('enterPickupPoint')}
                   className={errors.pickup ? 'border-destructive' : ''}
                   maxLength={200}
@@ -2201,7 +1990,14 @@ const CustomerHome = () => {
                   {t('dropoffLocation')}
                 </Label>
                 <GooglePlacesAutocomplete
-                  onPlaceSelected={(value) => setFormData((prev) => ({ ...prev, dropoff: value }))}
+                  onPlaceSelected={(value, details?: PlaceDetails) => {
+                    setFormData((prev) => ({ ...prev, dropoff: value }));
+                    if (details?.lat != null && details?.lng != null) {
+                      setDropoffCoords({ lat: details.lat, lng: details.lng });
+                    } else {
+                      setDropoffCoords(null);
+                    }
+                  }}
                   placeholder={t('hotelNameOrAddress')}
                   className={errors.dropoff ? 'border-destructive' : ''}
                   maxLength={200}
@@ -2668,91 +2464,117 @@ const CustomerHome = () => {
                   "grid gap-3",
                   availableVehicles.length === 1 ? "grid-cols-1" : "grid-cols-2"
                 )}>
-                  {availableVehicles.map((v) => (
-                    <button
+                  {availableVehicles.map((v) => {
+                    const isConfirming = confirmingVehicle === v.value;
+                    const canConfirm = vehiclePrices[v.value] && !isLoading && !(minibusRequired && v.value !== 'minibus');
+                    return (
+                    <div
                       key={v.value}
-                      type="button"
-                      disabled={isLoading || (minibusRequired && v.value !== 'minibus')}
-                      onClick={() => setFormData({...formData, vehicleType: v.value})}
                       className={cn(
-                        "relative overflow-hidden rounded-xl p-3 transition-all duration-200 text-left",
-                        "border-2 hover:scale-[1.02] active:scale-[0.98]",
+                        "relative overflow-hidden rounded-xl p-3 transition-all duration-200 text-left border-2",
                         formData.vehicleType === v.value
                           ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/30"
                           : "border-border bg-card hover:bg-muted/50 hover:border-primary/40",
-                        (isLoading || (minibusRequired && v.value !== 'minibus')) && "opacity-50 cursor-not-allowed"
+                        (minibusRequired && v.value !== 'minibus') && "opacity-50"
                       )}
                     >
-                      {formData.vehicleType === v.value && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                          <CheckCircle className="h-3 w-3 text-primary-foreground" />
-                        </div>
-                      )}
-                      <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-muted">
-                        <img
-                          src={v.images[0]?.src}
-                          alt={v.label}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className={cn(
-                          "font-semibold text-sm",
-                          formData.vehicleType === v.value ? "text-primary" : "text-foreground"
-                        )}>
-                          {v.label}
-                        </h3>
-                        {/* Price badge on vehicle card */}
-                        {vehiclePrices[v.value] ? (
-                          <span className={cn(
-                            "text-sm font-bold px-2 py-0.5 rounded-full",
-                            formData.vehicleType === v.value 
-                              ? "bg-primary text-primary-foreground" 
-                              : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                          )}>
-                            {vehiclePrices[v.value]} {selectedCurrency}
-                          </span>
-                        ) : isPricesLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                        ) : (
-                          <span className="text-xs text-muted-foreground italic">
-                            {t('priceOnRequest') || 'Fiyat talebi'}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {v.passengers}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Briefcase className="h-3 w-3" />
-                          {v.luggage}
-                        </span>
-                      </div>
-                      {/* Feature icons - like Hero.tsx */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {v.features.slice(0, 4).map((feature, idx) => {
-                          const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
-                          return (
-                            <div 
-                              key={idx} 
-                              className="flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 rounded text-[10px]"
-                              title={language === 'TR' ? feature.labelTr : feature.label}
-                            >
-                              <FeatureIcon className={cn("h-2.5 w-2.5", color)} />
-                            </div>
-                          );
-                        })}
-                        {v.features.length > 4 && (
-                          <div className="flex items-center px-1.5 py-0.5 bg-muted/50 rounded text-[10px] text-muted-foreground">
-                            +{v.features.length - 4}
+                      <button
+                        type="button"
+                        disabled={isLoading || (minibusRequired && v.value !== 'minibus')}
+                        onClick={() => setFormData({...formData, vehicleType: v.value})}
+                        className="w-full text-left"
+                      >
+                        {formData.vehicleType === v.value && (
+                          <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center z-10">
+                            <CheckCircle className="h-3 w-3 text-primary-foreground" />
                           </div>
                         )}
-                      </div>
-                    </button>
-                  ))}
+                        <div className="aspect-video rounded-lg overflow-hidden mb-2 bg-muted">
+                          <img
+                            src={v.images[0]?.src}
+                            alt={v.label}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className={cn(
+                            "font-semibold text-sm",
+                            formData.vehicleType === v.value ? "text-primary" : "text-foreground"
+                          )}>
+                            {v.label}
+                          </h3>
+                          {vehiclePrices[v.value] ? (
+                            <span className={cn(
+                              "text-sm font-bold px-2 py-0.5 rounded-full",
+                              formData.vehicleType === v.value 
+                                ? "bg-primary text-primary-foreground" 
+                                : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                            )}>
+                              {vehiclePrices[v.value]} {selectedCurrency}
+                            </span>
+                          ) : isPricesLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">
+                              {t('priceOnRequest') || 'Fiyat talebi'}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {v.passengers}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Briefcase className="h-3 w-3" />
+                            {v.luggage}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {v.features.slice(0, 4).map((feature, idx) => {
+                            const { icon: FeatureIcon, color } = getFeatureIconWithColor(feature.icon);
+                            return (
+                              <div 
+                                key={idx} 
+                                className="flex items-center gap-1 bg-muted/50 px-1.5 py-0.5 rounded text-[10px]"
+                                title={language === 'TR' ? feature.labelTr : feature.label}
+                              >
+                                <FeatureIcon className={cn("h-2.5 w-2.5", color)} />
+                              </div>
+                            );
+                          })}
+                          {v.features.length > 4 && (
+                            <div className="flex items-center px-1.5 py-0.5 bg-muted/50 rounded text-[10px] text-muted-foreground">
+                              +{v.features.length - 4}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                      {canConfirm && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="w-full h-12 sm:h-14 mt-2 gap-2 font-semibold rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-md"
+                          disabled={isLoading || isConfirming}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            setConfirmingVehicle(v.value);
+                            await createReservationForVehicle(v.value);
+                            setConfirmingVehicle(null);
+                          }}
+                        >
+                          {isConfirming ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4" />
+                          )}
+                          {language === 'TR' ? 'Onayla' : 'Confirm'}
+                        </Button>
+                      )}
+                    </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -2920,7 +2742,12 @@ const CustomerHome = () => {
                 </div>
               )}
 
-              <Button type="submit" className="w-full h-12 text-base font-semibold" size="lg" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full h-14 text-base font-semibold rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-lg" 
+                size="lg" 
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />
@@ -2990,6 +2817,28 @@ const CustomerHome = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Gemini AI Tatil Asistanı - Sağ alt köşe Chat Bubble */}
+      <GeminiHolidayAssistant
+        reservationContext={
+          nextTransfer
+            ? {
+                customer_name: profileData.full_name || user?.email?.split('@')[0] || '',
+                dropoff: nextTransfer.dropoff,
+                pickup_date: nextTransfer.date,
+                pickup_time: nextTransfer.time,
+              }
+            : recentReservations[0]
+            ? {
+                customer_name: profileData.full_name || user?.email?.split('@')[0] || '',
+                dropoff: recentReservations[0].dropoff_place_name || recentReservations[0].dropoff,
+                pickup_date: recentReservations[0].pickup_date,
+                pickup_time: recentReservations[0].pickup_time,
+              }
+            : null
+        }
+        language={language === 'TR' ? 'TR' : 'EN'}
+      />
 
       {/* Phone Number Required Modal - For OAuth users without phone */}
       <Dialog open={showPhoneRequiredModal} onOpenChange={(open) => {

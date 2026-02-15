@@ -611,7 +611,7 @@ const AgencyLoginScreen = () => {
             </Link>
             <div className="text-center text-sm text-muted-foreground">
               {t("areYouGuest") || "Are you a guest?"}{' '}
-              <Link to="/login" className="text-accent hover:underline inline-flex items-center gap-1">
+              <Link to="/login?role=customer" className="text-accent hover:underline inline-flex items-center gap-1">
                 <User className="h-3 w-3" />
                 {t("guestLogin") || "Guest Login"}
               </Link>

@@ -1,3 +1,5 @@
+import { isIOSDevice } from '@/lib/platformDetect';
+
 /**
  * iOS Safari uyumlu hibrit storage adapter for Supabase Auth.
  * - localStorage öncelikli, hata olursa sessionStorage fallback (iOS PWA, private mode vb.)
@@ -7,11 +9,6 @@
  * Android'de oluşturulan hesaba iOS'tan giriş yapılamama sorununa yardımcı olur.
  */
 const AUTH_STORAGE_KEY_PREFIX = 'sb-';
-
-function detectIOS(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  return /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
-}
 
 function tryLocalGet(key: string): string | null {
   try {
@@ -69,7 +66,7 @@ export const supabaseStorage = {
 
   setItem: (key: string, value: string): void => {
     const isAuthKey = key.startsWith(AUTH_STORAGE_KEY_PREFIX);
-    const isIOS = detectIOS();
+    const isIOS = isIOSDevice();
 
     // 1) localStorage'a yaz
     const localOk = tryLocalSet(key, value);

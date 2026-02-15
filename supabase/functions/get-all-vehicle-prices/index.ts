@@ -474,8 +474,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
 
         // v2.8.8: distance_pricing_rules - 0-50 FIXED, 51-85 PER-KM, 86+ en üst dilim veya "Lütfen fiyat isteyin"
+        // valid_from, valid_to: İki tarih arasında fiyat değişikliği (sezonluk)
         const kmRulesRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,price_amount,base_price,price_per_km,min_km,max_km`,
+          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,price_amount,base_price,price_per_km,min_km,max_km,valid_from,valid_to`,
           { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
         );
         if (!kmRulesRes.ok) {
@@ -497,8 +498,24 @@ Deno.serve(async (req: Request): Promise<Response> => {
             debug_info: { raw_km_price: null, applied_base_fare: null, source_table: "distance_pricing_rules" },
           };
         }
-        type KmRule = { vehicle_type: string | null; city: string | null; price_amount: number | null; base_price?: number | null; price_per_km?: number | null; min_km: number | null; max_km: number | null };
-        const kmRules: KmRule[] = await kmRulesRes.json();
+        type KmRule = { vehicle_type: string | null; city: string | null; price_amount: number | null; base_price?: number | null; price_per_km?: number | null; min_km: number | null; max_km: number | null; valid_from?: string | null; valid_to?: string | null };
+        let kmRules: KmRule[] = await kmRulesRes.json();
+
+        // İki tarih arası filtre: pickup_date varsa valid_from/valid_to ile eşleşen kuralları önceliklendir
+        if (pickupDateStr && kmRules.length > 0) {
+          const dateRules = kmRules.filter((r) => {
+            const vf = r.valid_from ? String(r.valid_from).split("T")[0] : null;
+            const vt = r.valid_to ? String(r.valid_to).split("T")[0] : null;
+            if (!vf || !vt) return false;
+            return pickupDateStr >= vf && pickupDateStr <= vt;
+          });
+          const baseRules = kmRules.filter((r) => !r.valid_from && !r.valid_to);
+          // Tarih aralığına uyan kural varsa onu kullan, yoksa tarihsiz (her zaman geçerli) kurallara fallback
+          kmRules = dateRules.length > 0 ? dateRules : baseRules;
+          if (dateRules.length > 0) {
+            console.log("[get-all-vehicle-prices] distance_pricing_rules: tarih aralığı eşleşti", pickupDateStr, "->", dateRules.length, "kural");
+          }
+        }
 
         // Eşleşme: .trim().toLowerCase() ile vehicle_type ve city
         const cityNorm = normalizeCityName(resolvedPickupCity || "") || normalizeCityName(resolvedDropoffCity || "");

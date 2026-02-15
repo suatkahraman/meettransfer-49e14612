@@ -18,6 +18,7 @@ import { normalizePasswordInput } from '@/lib/normalizePasswordInput';
 import { prefetchDriverBootstrap } from '@/lib/driverBootstrapCache';
 import { useStorageAvailable } from '@/hooks/useStorageAvailable';
 import { usePWADetect } from '@/hooks/usePWADetect';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 
 // Şoförler için 2FA yok - sadece şifre ile giriş
@@ -319,8 +320,7 @@ const DriverLoginScreen = () => {
 
         // iOS Safari: Storage yazmasının tamamlanması için kısa gecikme (ITP/WebKit uyumluluğu)
         // window.location.replace hemen yapılırsa yeni sayfa yüklendiğinde session henüz storage'da olmayabilir
-        const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
-        if (isIOS) {
+        if (isIOSDevice()) {
           await new Promise((r) => setTimeout(r, 150));
         }
 
@@ -437,8 +437,7 @@ const DriverLoginScreen = () => {
         console.warn('[DriverLogin] refreshSession failed:', refreshErr);
       }
       // iOS Safari: Storage flush için kısa gecikme
-      const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
-      if (isIOS) {
+      if (isIOSDevice()) {
         await new Promise((r) => setTimeout(r, 150));
       }
       window.location.replace('/driver');

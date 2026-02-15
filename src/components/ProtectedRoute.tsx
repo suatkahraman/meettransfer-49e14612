@@ -3,7 +3,19 @@ import { Navigate } from 'react-router-dom';
 import { useUserRole, AppRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { Loader2 } from 'lucide-react';
+
+/** Production login redirect URLs with role param for centralized login */
+const LOGIN_REDIRECT_BASE =
+  (import.meta.env.VITE_APP_URL as string | undefined)?.replace(/\/$/, '') ||
+  (typeof window !== 'undefined' ? window.location.origin : 'https://meettransfer.app');
+export const LOGIN_REDIRECT_URLS = {
+  driver: `${LOGIN_REDIRECT_BASE}/login?role=driver`,
+  customer: `${LOGIN_REDIRECT_BASE}/login?role=customer`,
+  admin: `${LOGIN_REDIRECT_BASE}/login?role=admin`,
+  agency: `${LOGIN_REDIRECT_BASE}/login?role=agency`,
+} as const;
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -116,7 +128,7 @@ const ProtectedRoute = ({
   // iOS ITP: Hızlı yönlendirme bazen session henüz okunmadan tetiklenebilir.
   // getSession retry'ları tamamlansın diye kısa bir grace ekle (client-side Navigate, 302 değil).
   const [authRedirectGrace, setAuthRedirectGrace] = useState(false);
-  const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
+  const isIOS = isIOSDevice();
 
   useEffect(() => {
     if (!user && !authLoading && isIOS && !authRedirectGrace) {
@@ -145,6 +157,10 @@ const ProtectedRoute = ({
         </div>
       );
     }
+    if (redirectTo.startsWith('http')) {
+      window.location.replace(redirectTo);
+      return null;
+    }
     return <Navigate to={redirectTo} replace />;
   }
 
@@ -152,19 +168,21 @@ const ProtectedRoute = ({
 
   // If role is still unknown after grace period, return to route-specific login.
   if (!effectiveRole) {
+    if (redirectTo.startsWith('http')) {
+      window.location.replace(redirectTo);
+      return null;
+    }
     return <Navigate to={redirectTo} replace />;
   }
 
-  // Redirect if user doesn't have required role
+  // Redirect if user doesn't have required role (to their home, not login)
   if (!allowedRoles.includes(effectiveRole)) {
-    // Redirect to appropriate home page based on role
     const roleRedirects: Record<AppRole, string> = {
       admin: '/admin',
       driver: '/driver',
       customer: '/customer',
       agency: '/agency'
     };
-    
     const redirect = roleRedirects[effectiveRole] ?? redirectTo;
     return <Navigate to={redirect} replace />;
   }
@@ -172,27 +190,27 @@ const ProtectedRoute = ({
   return <>{children}</>;
 };
 
-// Convenience components - her rol kendi giriş sayfasına yönlendirilir
+// Convenience components - her rol kendi giriş sayfasına yönlendirilir (https://meettransfer.app/login?role=X)
 export const AdminRoute = ({ children }: { children: ReactNode }) => (
-  <ProtectedRoute allowedRoles={['admin']} redirectTo="/auth">
+  <ProtectedRoute allowedRoles={['admin']} redirectTo={LOGIN_REDIRECT_URLS.admin}>
     {children}
   </ProtectedRoute>
 );
 
 export const DriverRoute = ({ children }: { children: ReactNode }) => (
-  <ProtectedRoute allowedRoles={['driver']} redirectTo="/login/driver">
+  <ProtectedRoute allowedRoles={['driver']} redirectTo={LOGIN_REDIRECT_URLS.driver}>
     {children}
   </ProtectedRoute>
 );
 
 export const CustomerRoute = ({ children }: { children: ReactNode }) => (
-  <ProtectedRoute allowedRoles={['customer']} redirectTo="/login">
+  <ProtectedRoute allowedRoles={['customer']} redirectTo={LOGIN_REDIRECT_URLS.customer}>
     {children}
   </ProtectedRoute>
 );
 
 export const AgencyRoute = ({ children }: { children: ReactNode }) => (
-  <ProtectedRoute allowedRoles={['agency']} redirectTo="/login/agency">
+  <ProtectedRoute allowedRoles={['agency']} redirectTo={LOGIN_REDIRECT_URLS.agency}>
     {children}
   </ProtectedRoute>
 );
