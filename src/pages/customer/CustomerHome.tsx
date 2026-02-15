@@ -2696,6 +2696,7 @@ const CustomerHome = () => {
                   availableVehicles.length === 1 ? "grid-cols-1" : "grid-cols-2"
                 )}>
                   {availableVehicles.map((v) => (
+                    <div key={v.value} className="space-y-2">
                     <button
                       key={v.value}
                       type="button"
@@ -2800,9 +2801,8 @@ const CustomerHome = () => {
                         {language === 'TR' ? 'Onayla' : 'Confirm'}
                       </Button>
                     )}
-                  </div>
-                  );
-                })}
+                    </div>
+                  ))}
                 </div>
               </div>
 
