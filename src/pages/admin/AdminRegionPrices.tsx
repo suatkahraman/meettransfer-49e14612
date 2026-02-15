@@ -851,22 +851,18 @@ const AdminRegionPrices = () => {
           <TabsContent value="airport">
             <Card>
               <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl shrink-0">
                   <MapPin className="h-5 w-5 shrink-0" />
                   Havalimanı Transfer Fiyatları
                 </CardTitle>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setIsMonthlyUpdateDialogOpen(true)}>
+                <div className="flex flex-wrap gap-2 items-center overflow-x-auto pb-1">
+                  <Button variant="outline" size="sm" className="shrink-0" onClick={() => setIsMonthlyUpdateDialogOpen(true)}>
                     <Calendar className="h-4 w-4 mr-2 shrink-0" />
                     Aylık Fiyat
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setIsBulkUpdateDialogOpen(true)}>
+                  <Button variant="outline" size="sm" className="shrink-0" onClick={() => setIsBulkUpdateDialogOpen(true)}>
                     <Percent className="h-4 w-4 mr-2 shrink-0" />
                     % Güncelle
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none text-destructive hover:text-destructive" onClick={() => setIsBulkDeleteDialogOpen(true)}>
-                    <Trash2 className="h-4 w-4 mr-2 shrink-0" />
-                    Toplu Sil
                   </Button>
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
@@ -1018,26 +1014,26 @@ const AdminRegionPrices = () => {
                     </Select>
                   </div>
                   
-                  {/* Active filter summary */}
+                  {/* Active filter summary + Toplu Sil (şehir, kategori, ay seçildikten sonra aktif) */}
                   {(filterCity !== 'all' || filterMonth !== 'all' || filterPriceType !== 'all') && (
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm text-muted-foreground">Aktif filtreler:</span>
                       {filterCity !== 'all' && (
                         <Badge variant="secondary" className="gap-1">
                           Şehir: {filterCity}
-                          <button onClick={() => setFilterCity('all')} className="ml-1 hover:text-destructive">×</button>
+                          <button type="button" onClick={() => setFilterCity('all')} className="ml-1 hover:text-destructive">×</button>
                         </Badge>
                       )}
                       {filterPriceType !== 'all' && (
                         <Badge variant="secondary" className="gap-1">
                           {filterPriceType === 'base' ? 'Temel' : 'Aylık'} Fiyat
-                          <button onClick={() => setFilterPriceType('all')} className="ml-1 hover:text-destructive">×</button>
+                          <button type="button" onClick={() => setFilterPriceType('all')} className="ml-1 hover:text-destructive">×</button>
                         </Badge>
                       )}
                       {filterMonth !== 'all' && (
                         <Badge variant="secondary" className="gap-1">
-                          {MONTHS.find(m => m.value.toString() === filterMonth)?.label}
-                          <button onClick={() => setFilterMonth('all')} className="ml-1 hover:text-destructive">×</button>
+                          {MONTHS.find(m => m.value.toString() === filterMonth)?.label} {filterYear}
+                          <button type="button" onClick={() => setFilterMonth('all')} className="ml-1 hover:text-destructive">×</button>
                         </Badge>
                       )}
                       <Button variant="ghost" size="sm" onClick={() => {
@@ -1048,6 +1044,18 @@ const AdminRegionPrices = () => {
                       }}>
                         Temizle
                       </Button>
+                      {/* Toplu Sil: sadece Aylık Fiyat + Ay seçildiğinde aktif */}
+                      {filterPriceType === 'seasonal' && filterMonth !== 'all' && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="ml-2"
+                          onClick={() => setIsBulkDeleteDialogOpen(true)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Toplu Sil
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1178,10 +1186,6 @@ const AdminRegionPrices = () => {
                   <Button variant="outline" onClick={() => setIsBulkIntercityUpdateDialogOpen(true)}>
                     <Percent className="h-4 w-4 mr-2" />
                     % Güncelle
-                  </Button>
-                  <Button variant="outline" className="text-destructive hover:text-destructive" onClick={() => setIsBulkDeleteIntercityDialogOpen(true)}>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Toplu Sil
                   </Button>
                   <Dialog open={isIntercityDialogOpen} onOpenChange={setIsIntercityDialogOpen}>
                     <DialogTrigger asChild>
@@ -1361,6 +1365,18 @@ const AdminRegionPrices = () => {
                       <Button variant="ghost" size="sm" onClick={() => { setIntercityFilterMonth('all'); setIntercityFilterPriceType('all'); setIntercitySearchTerm(''); }}>
                         Temizle
                       </Button>
+                      {/* Toplu Sil: Aylık Fiyat + Ay seçildiğinde aktif */}
+                      {intercityFilterPriceType === 'seasonal' && intercityFilterMonth !== 'all' && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="ml-2"
+                          onClick={() => setIsBulkDeleteIntercityDialogOpen(true)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Toplu Sil
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1544,6 +1560,9 @@ const AdminRegionPrices = () => {
           priceType="region"
           onSuccess={fetchPrices}
           cities={Object.keys(CITIES_DATA)}
+          initialMonth={filterMonth !== 'all' ? filterMonth : undefined}
+          initialYear={filterYear}
+          initialCity={filterCity !== 'all' ? filterCity : undefined}
         />
         <BulkDeleteByMonthDialog
           open={isBulkDeleteIntercityDialogOpen}
@@ -1551,6 +1570,8 @@ const AdminRegionPrices = () => {
           priceType="intercity"
           onSuccess={fetchIntercityPrices}
           cities={Object.keys(CITIES_DATA)}
+          initialMonth={intercityFilterMonth !== 'all' ? intercityFilterMonth : undefined}
+          initialYear={intercityFilterYear}
         />
       </main>
     </div>

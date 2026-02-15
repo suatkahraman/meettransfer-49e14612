@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,10 @@ interface BulkDeleteByMonthDialogProps {
   priceType: PriceType;
   onSuccess: () => void;
   cities?: string[];
+  /** Başlangıç değerleri - filtrelerden geldiğinde önceden doldurulur */
+  initialMonth?: string;
+  initialYear?: number;
+  initialCity?: string;
 }
 
 const MONTHS = [
@@ -51,13 +55,25 @@ const BulkDeleteByMonthDialog = ({
   priceType,
   onSuccess,
   cities = [],
+  initialMonth,
+  initialYear,
+  initialCity,
 }: BulkDeleteByMonthDialogProps) => {
   const currentYear = new Date().getFullYear();
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [filterCity, setFilterCity] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState<string>(initialMonth ?? "");
+  const [selectedYear, setSelectedYear] = useState(initialYear ?? currentYear);
+  const [filterCity, setFilterCity] = useState(initialCity ?? "all");
   const [loading, setLoading] = useState(false);
   const [previewCount, setPreviewCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedMonth(initialMonth ?? "");
+      setSelectedYear(initialYear ?? currentYear);
+      setFilterCity(initialCity ?? "all");
+      setPreviewCount(null);
+    }
+  }, [open, initialMonth, initialYear, initialCity, currentYear]);
 
   const getTableName = () => {
     return priceType === "region" ? "region_prices" : "intercity_prices";
