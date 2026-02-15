@@ -1485,7 +1485,6 @@ const AdminRegionPrices = () => {
 
           {/* Seasonal Prices Tab */}
           <TabsContent value="seasonal" className="space-y-6">
-            <SeasonalPricesManager priceType="region" />
             <SeasonalPricesManager priceType="intercity" />
           </TabsContent>
           <TabsContent value="km" className="space-y-6">

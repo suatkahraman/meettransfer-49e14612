@@ -135,9 +135,9 @@ export default function DistancePricingRulesManager() {
   };
 
   const openEditDialog = (rule: DistancePricingRule) => {
-    const groupKey = `${rule.location_display || rule.city || 'Genel'}|${rule.min_km ?? 0}|${rule.max_km ?? '-'}`;
+    const groupKey = `${rule.location_display || rule.city || 'Genel'}|${rule.min_km ?? 0}|${rule.max_km ?? '-'}|${rule.valid_from ?? ''}|${rule.valid_to ?? ''}`;
     const group = rules.filter(r =>
-      `${r.location_display || r.city || 'Genel'}|${r.min_km ?? 0}|${r.max_km ?? '-'}` === groupKey
+      `${r.location_display || r.city || 'Genel'}|${r.min_km ?? 0}|${r.max_km ?? '-'}|${r.valid_from ?? ''}|${r.valid_to ?? ''}` === groupKey
     );
     setEditingGroup(group);
     setEditingRule(rule);
@@ -286,7 +286,8 @@ export default function DistancePricingRulesManager() {
         if (error) throw error;
       }
 
-      toast.success('KM fiyat kuralları kaydedildi');
+      const dateRangeMsg = validFromDate && validToDate ? ` (${validFromDate} - ${validToDate})` : '';
+      toast.success(`KM fiyat kuralları kaydedildi${dateRangeMsg}`);
       setIsDialogOpen(false);
       resetForm();
       fetchRules();
@@ -312,9 +313,9 @@ export default function DistancePricingRulesManager() {
     }
   };
 
-  // Grupla: location_display + min_km + max_km
+  // Grupla: location_display + min_km + max_km + tarih aralığı (valid_from|valid_to)
   const groupedRules = rules.reduce<Record<string, DistancePricingRule[]>>((acc, r) => {
-    const key = `${r.location_display || r.city || 'Genel'}|${r.min_km ?? 0}|${r.max_km ?? '-'}`;
+    const key = `${r.location_display || r.city || 'Genel'}|${r.min_km ?? 0}|${r.max_km ?? '-'}|${r.valid_from ?? ''}|${r.valid_to ?? ''}`;
     if (!acc[key]) acc[key] = [];
     acc[key].push(r);
     return acc;
@@ -345,7 +346,9 @@ export default function DistancePricingRulesManager() {
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedRules).map(([key, group]) => {
-              const [loc, min, max] = key.split('|');
+              const parts = key.split('|');
+              const [loc, min, max, vf, vt] = parts;
+              const dateRange = vf && vt ? ` • ${vf} - ${vt}` : '';
               const first = group[0];
               return (
                 <div key={key} className="border rounded-lg p-4 space-y-2">
@@ -354,7 +357,7 @@ export default function DistancePricingRulesManager() {
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{loc}</span>
                       <span className="text-sm text-muted-foreground">
-                        ({min}-{max} km)
+                        ({min}-{max} km){dateRange}
                       </span>
                     </div>
                     <div className="flex gap-2">
