@@ -14,20 +14,47 @@ type CachedRolePayload = {
 
 const ROLE_CACHE_KEY = 'mt_user_role_cache_v1';
 const ROLE_CACHE_TTL_MS = 30 * 60 * 1000;
+const isIOS = () => typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
 
 const isAppRole = (value: unknown): value is AppRole =>
   value === 'admin' || value === 'driver' || value === 'agency' || value === 'customer';
 
+function safeStorageGet(key: string): string | null {
+  try {
+    return localStorage.getItem(key) ?? sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeStorageSet(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+    if (isIOS()) sessionStorage.setItem(key, value);
+  } catch {
+    try {
+      sessionStorage.setItem(key, value);
+    } catch {
+      /* iOS private mode vb. */
+    }
+  }
+}
+
 const readUserRoleCache = (userId: string): CachedRolePayload | null => {
   try {
-    const raw = localStorage.getItem(ROLE_CACHE_KEY);
+    const raw = safeStorageGet(ROLE_CACHE_KEY);
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as Partial<CachedRolePayload>;
     if (parsed.userId !== userId) return null;
     if (!isAppRole(parsed.role)) return null;
     if (typeof parsed.expiresAt !== 'number' || parsed.expiresAt < Date.now()) {
-      localStorage.removeItem(ROLE_CACHE_KEY);
+      try {
+        localStorage.removeItem(ROLE_CACHE_KEY);
+        sessionStorage.removeItem(ROLE_CACHE_KEY);
+      } catch {
+        /* ignore */
+      }
       return null;
     }
 
@@ -57,7 +84,7 @@ export const primeUserRoleCache = (payload: {
       agencyId: payload.agencyId ?? null,
       expiresAt: Date.now() + ROLE_CACHE_TTL_MS,
     };
-    localStorage.setItem(ROLE_CACHE_KEY, JSON.stringify(cacheValue));
+    safeStorageSet(ROLE_CACHE_KEY, JSON.stringify(cacheValue));
   } catch {
     // Storage can be unavailable in some iOS/private contexts.
   }
@@ -131,8 +158,12 @@ export const useUserRole = () => {
       }
 
       try {
-        // 1) Edge function (RLS bypass) - single fast attempt, use session from AuthContext to avoid redundant getSession()
-        const token = session?.access_token;
+        // 1) Edge function (RLS bypass) - iOS: AuthContext session gecikmeli olabilir, getSession ile taze token al
+        let token = session?.access_token;
+        if (!token && isIOS()) {
+          const { data } = await supabase.auth.getSession();
+          token = data.session?.access_token ?? null;
+        }
         if (token) {
           const { data: fnData } = await supabase.functions.invoke('get-user-role', {
             headers: { Authorization: `Bearer ${token}` },
@@ -172,48 +203,55 @@ export const useUserRole = () => {
         }
 
         // 2) Fallback: Direkt user_roles + drivers/agencies sorgusu (RLS gerekir)
-        // Yeni yapida bir kullanici birden fazla role sahip olabilir.
-        const { data: roleRows, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id);
+        // iOS: auth.uid() bazen ilk istekte null - RLS hata verirse kisa araliklarla tekrar dene
+        const runFallback = async (): Promise<{
+          roleRows: { role: string }[] | null;
+          roleError: { message: string } | null;
+          driverLookup: LookupResult;
+          agencyLookup: LookupResult;
+        }> => {
+          const { data: roleRows, error: roleError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id);
+          const driverLookup = await fetchDriverId(user.id);
+          const agencyLookup = await fetchAgencyId(user.id);
+          return { roleRows: roleRows ?? [], roleError, driverLookup, agencyLookup };
+        };
 
+        let result = await runFallback();
+        if (isIOS() && (result.roleError || result.driverLookup.hasError || result.agencyLookup.hasError)) {
+          for (const delay of [150, 300]) {
+            await new Promise((r) => setTimeout(r, delay));
+            result = await runFallback();
+            if (!result.roleError && !result.driverLookup.hasError && !result.agencyLookup.hasError) break;
+          }
+        }
+
+        const { roleRows, roleError, driverLookup, agencyLookup } = result;
         if (roleError) {
           console.warn('[useUserRole] user_roles fallback error:', roleError.message);
         }
 
         let resolvedRole = resolveAppRole((roleRows ?? []).map((r) => r.role));
         let hadLookupError = !!roleError;
-        let resolvedDriverId: string | null = null;
-        let resolvedAgencyId: string | null = null;
+        let resolvedDriverId: string | null = driverLookup.id;
+        let resolvedAgencyId: string | null = agencyLookup.id;
+        hadLookupError = hadLookupError || driverLookup.hasError || agencyLookup.hasError;
 
         if (resolvedRole === 'driver') {
-          const driverLookup = await fetchDriverId(user.id);
           resolvedDriverId = driverLookup.id;
-          hadLookupError = hadLookupError || driverLookup.hasError;
         }
-
         if (resolvedRole === 'agency') {
-          const agencyLookup = await fetchAgencyId(user.id);
           resolvedAgencyId = agencyLookup.id;
-          hadLookupError = hadLookupError || agencyLookup.hasError;
         }
 
         // user_roles kaydi yoksa veya rol stale ise tablo varligindan rol cikar
         if (!resolvedRole) {
-          const driverLookup = await fetchDriverId(user.id);
-          resolvedDriverId = driverLookup.id;
-          hadLookupError = hadLookupError || driverLookup.hasError;
-
           if (resolvedDriverId) {
             resolvedRole = 'driver';
-          } else {
-            const agencyLookup = await fetchAgencyId(user.id);
-            resolvedAgencyId = agencyLookup.id;
-            hadLookupError = hadLookupError || agencyLookup.hasError;
-            if (resolvedAgencyId) {
-              resolvedRole = 'agency';
-            }
+          } else if (resolvedAgencyId) {
+            resolvedRole = 'agency';
           }
         }
 
