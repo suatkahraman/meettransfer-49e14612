@@ -30,7 +30,14 @@ After Supabase finishes the flow, it sends the user to your app. That target is 
 - **Production:** set `VITE_APP_URL=https://meettransfer.app` in your production env so `redirectTo` is always `https://meettransfer.app/oauth/callback`.
 - In **Supabase Dashboard** → **Authentication** → **URL Configuration**:
   - **Site URL:** `https://meettransfer.app`
-  - **Redirect URLs:** include `https://meettransfer.app/oauth/callback` (and any preview/local URLs you use).
+  - **Redirect URLs:** include at minimum:
+    - `https://meettransfer.app/oauth/callback`
+    - `https://meettransfer.app/login?role=driver`
+    - `https://meettransfer.app/login?role=customer`
+    - `https://meettransfer.app/login?role=agency`
+    - `https://meettransfer.app/login`
+    - `https://meettransfer.app/auth`
+    - (and any preview/local URLs you use).
 
 So:
 
@@ -53,6 +60,7 @@ Implemented in `src/pages/OAuthCallback.tsx`: it reads the auth code/tokens from
 
 - [ ] **Google Cloud Console** – Authorized redirect URIs contains:  
   `https://zqykoyugubaeealrspxm.supabase.co/auth/v1/callback`
-- [ ] **Supabase** – Redirect URLs contains:  
-  `https://meettransfer.app/oauth/callback`
+- [ ] **Supabase** – Redirect URLs contains (see `docs/DEPLOY_CHECKLIST_IOS_AUTH.md` for full list):
+  - `https://meettransfer.app/oauth/callback`
+  - `https://meettransfer.app/login?role=driver`, `?role=customer`, `?role=agency`, `?role=admin`
 - [ ] **Production env** – `VITE_APP_URL=https://meettransfer.app` so OAuth always uses production for `redirectTo`.
