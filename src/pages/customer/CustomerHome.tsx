@@ -1413,14 +1413,16 @@ const CustomerHome = () => {
           }}
           activeReservationsSlot={
             recentReservations.length > 0 ? (
-              <div className="pt-2 border-t border-border/50">
-                <div className="flex items-center justify-between mb-3 mt-2">
-                  <span className="text-sm font-semibold">{t('activeReservationsTitle')}</span>
+              <>
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">
+                    {t('activeReservationsTitle')}
+                  </h3>
                   {activeBookingsCount > 3 && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs h-7"
+                      className="text-sm h-8 shrink-0"
                       onClick={() => navigate('/customer/bookings')}
                     >
                       {t('viewAll')}
@@ -1428,7 +1430,7 @@ const CustomerHome = () => {
                     </Button>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-4 flex-1">
                   {recentReservations.slice(0, 3).map((reservation) => {
                     const statusConfig: Record<string, { key: string; color: string; bgColor: string }> = {
                       'awaiting-price': { key: 'awaitingPrice', color: 'text-amber-700', bgColor: 'bg-amber-100' },
@@ -1441,62 +1443,72 @@ const CustomerHome = () => {
                     const status = statusConfig[reservation.status] || { key: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
                     const canCancel = canCancelReservation(reservation);
                     return (
-                      <Card key={reservation.id} className="shadow-sm transition-all border-l-4 border-l-primary/60 overflow-hidden">
-                        <CardContent className="p-3">
-                          <div className="flex items-center justify-between gap-2 mb-3">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="font-mono text-xs font-semibold text-primary">{reservation.reservation_code || 'N/A'}</span>
-                                <Badge className={cn("text-[10px]", status.bgColor, status.color)}>{t(status.key)}</Badge>
-                              </div>
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <span className="truncate">{(reservation.pickup_place_name || reservation.pickup).split(',')[0]}</span>
-                                <ArrowRight className="h-3 w-3 shrink-0" />
-                                <span className="truncate">{(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}</span>
-                              </div>
-                              <div className="text-[10px] text-muted-foreground mt-0.5">
-                                {new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })} • {reservation.pickup_time.slice(0, 5)}
-                              </div>
+                      <div
+                        key={reservation.id}
+                        className="rounded-xl border border-slate-200/80 dark:border-slate-600/50 bg-slate-50/50 dark:bg-slate-800/30 p-4 gap-4 flex flex-col min-w-0 overflow-hidden"
+                      >
+                        <div className="flex items-center justify-between gap-3 min-w-0">
+                          <div className="min-w-0 flex-1 overflow-hidden">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="font-mono text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                {reservation.reservation_code || 'N/A'}
+                              </span>
+                              <Badge className={cn("text-xs", status.bgColor, status.color)}>{t(status.key)}</Badge>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed min-w-0">
+                              <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
+                              <span className="truncate min-w-0 flex-1">{(reservation.pickup_place_name || reservation.pickup).split(',')[0]}</span>
+                              <ArrowRight className="h-3 w-3 shrink-0" />
+                              <span className="truncate min-w-0 flex-1">{(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-500">
+                              <Calendar className="h-3.5 w-3.5" />
+                              {new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
+                              <span className="text-slate-400">•</span>
+                              <Clock className="h-3.5 w-3.5" />
+                              {reservation.pickup_time.slice(0, 5)}
                             </div>
                           </div>
-                          {/* 2 seçenek - büyük punto: İptal et (önce sor), Detay */}
-                          <div className="flex gap-2">
-                            {canCancel && (
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="flex-1 text-base font-semibold h-10"
-                                disabled={cancellingReservationId === reservation.id}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setCancelConfirmReservationId(reservation.id);
-                                }}
-                              >
-                                {cancellingReservationId === reservation.id ? (
-                                  <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                  t('cancelReservation')
-                                )}
-                              </Button>
-                            )}
+                        </div>
+                        <div className="flex gap-3 mt-1">
+                          {canCancel && (
                             <Button
-                              variant="default"
+                              variant="destructive"
                               size="sm"
-                              className={cn("text-base font-semibold h-10", canCancel ? "flex-1" : "w-full")}
+                              className="flex-1 h-12 sm:h-14 w-full font-semibold text-base rounded-xl hover:scale-[1.02] transition-transform"
+                              disabled={cancellingReservationId === reservation.id}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/customer/reservation/${reservation.id}`);
+                                setCancelConfirmReservationId(reservation.id);
                               }}
                             >
-                              {t('viewDetails') || (language === 'TR' ? 'Detay' : 'Details')}
+                              {cancellingReservationId === reservation.id ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                              ) : (
+                                t('cancelReservation')
+                              )}
                             </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                          )}
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className={cn(
+                              "h-12 sm:h-14 font-semibold text-base rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-md",
+                              canCancel ? "flex-1" : "w-full"
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/customer/reservation/${reservation.id}`);
+                            }}
+                          >
+                            {t('viewDetails') || (language === 'TR' ? 'Detay' : 'Details')}
+                          </Button>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
-              </div>
+              </>
             ) : null
           }
         />
@@ -1826,10 +1838,15 @@ const CustomerHome = () => {
             transition={{ delay: 0.4 }}
             className="mb-6"
           >
-            <h2 className="text-base font-semibold mb-4 flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" />
-              {language === 'TR' ? 'Varış noktanız için rehber' : 'Guide for your destination'}
-            </h2>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                {language === 'TR' ? 'Varış noktanız için rehber' : 'Guide for your destination'}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {language === 'TR' ? 'Hava durumu, restoran ve gezilecek yer önerileri' : 'Weather, restaurant and sightseeing recommendations'}
+              </p>
+            </div>
             <DestinationGuideCards
               destination={
                 nextTransfer?.dropoff ||
@@ -1889,18 +1906,18 @@ const CustomerHome = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
+          <Card id="booking-form" className="scroll-mt-20 rounded-3xl border-amber-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/70 backdrop-blur-md shadow-xl overflow-hidden">
           <CardHeader 
-            className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg"
+            className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-3xl p-6"
             onClick={() => setIsBookingFormOpen(!isBookingFormOpen)}
           >
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl sm:text-2xl font-serif flex items-center gap-2">
-                  <Car className="h-5 w-5 sm:h-6 sm:w-6" />
+                <CardTitle className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <Car className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                   {t('bookYourTransfer')}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
                   {t('submitTransferDetails')}
                 </CardDescription>
               </div>
@@ -1923,8 +1940,8 @@ const CustomerHome = () => {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 style={{ overflow: "hidden" }}
               >
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5 relative">
+          <CardContent className="p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-6 relative">
               {/* Loading Overlay */}
               <AnimatePresence>
                 {isLoading && (
@@ -2538,7 +2555,7 @@ const CustomerHome = () => {
                         <Button
                           type="button"
                           size="sm"
-                          className="w-full mt-2 gap-1.5"
+                          className="w-full h-12 sm:h-14 mt-2 gap-2 font-semibold rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-md"
                           disabled={isLoading || isConfirming}
                           onClick={async (e) => {
                             e.stopPropagation();
@@ -2725,7 +2742,12 @@ const CustomerHome = () => {
                 </div>
               )}
 
-              <Button type="submit" className="w-full h-12 text-base font-semibold" size="lg" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full h-14 text-base font-semibold rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-lg" 
+                size="lg" 
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />

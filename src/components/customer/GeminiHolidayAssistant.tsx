@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 interface ReservationContext {
@@ -111,6 +111,7 @@ export function GeminiHolidayAssistant({
       },
     ]);
     } else if (reservationContext && !apiKey) {
+      console.warn('Vite Env Yüklenemedi: VITE_GEMINI_API_KEY undefined veya boş. Vercel: Environment Variables\'da Production/Preview/Development scope kontrol edin.');
       setMessages([
         {
           id: crypto.randomUUID(),
@@ -157,6 +158,7 @@ export function GeminiHolidayAssistant({
 
     try {
       if (!apiKey) {
+        console.warn('Vite Env Yüklenemedi: VITE_GEMINI_API_KEY undefined veya boş. Vercel: Environment Variables\'da Production/Preview/Development scope kontrol edin.');
         setMessages((prev) => [
           ...prev,
           {
