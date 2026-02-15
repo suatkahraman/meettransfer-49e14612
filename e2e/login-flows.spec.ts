@@ -14,9 +14,9 @@ test.describe("Login sayfaları yükleniyor", () => {
   test("Customer/Unified login (/login) sayfası açılıyor", async ({ page }) => {
     await page.goto("/login");
     await expect(page).toHaveURL(/\/login/);
-    // Rol seçimi veya form görünmeli
+    // Rol seçimi veya form görünmeli (Customer Login, Müşteri Girişi vb.)
     await expect(
-      page.getByRole("button", { name: /Müşteri Girişi|Customer Login|Giriş|Login/i })
+      page.getByRole("button", { name: /Müşteri Girişi|Customer Login/i }).first()
     ).toBeVisible({ timeout: 10000 });
   });
 
