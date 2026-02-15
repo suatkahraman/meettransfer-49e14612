@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
 import { ArrowLeft, Loader2, Building2, User, KeyRound, Share2, Check } from 'lucide-react';
@@ -26,6 +28,7 @@ const loginSchema = z.object({
 type ViewMode = 'login' | 'reset' | '2fa';
 
 const AgencyLoginScreen = () => {
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('login');
@@ -73,6 +76,17 @@ const AgencyLoginScreen = () => {
       return () => clearInterval(interval);
     }
   }, [rateLimitStatus.locked, rateLimitStatus.remainingSeconds]);
+
+  // OAuth role_mismatch: Google ile acenta olmayan hesap girişi denendi
+  useEffect(() => {
+    const err = searchParams.get('error');
+    if (err === 'role_mismatch') {
+      toast.error(language === 'TR'
+        ? 'Bu hesap bir acenta hesabı değil. Acenta girişi için e-posta ve şifre kullanın.'
+        : 'This is not an agency account. Use email and password for agency login.');
+      window.history.replaceState(null, '', '/login/agency');
+    }
+  }, [searchParams, language]);
 
   const handleShare = async () => {
     const shareUrl = window.location.origin + '/login/agency';
@@ -528,6 +542,15 @@ const AgencyLoginScreen = () => {
           </CardHeader>
           
           <CardContent className="space-y-4">
+            <SocialAuthButtons disabled={isLoading} mode="login" expectedRole="agency" />
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">{t("or") || "or"}</span>
+              </div>
+            </div>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">{t("email") || "Email"}</Label>

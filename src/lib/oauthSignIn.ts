@@ -36,6 +36,8 @@ function isCustomDomain(): boolean {
   return !isLovableDomain;
 }
 
+export type OAuthExpectedRole = 'customer' | 'driver' | 'agency';
+
 /**
  * Starts OAuth sign-in.
  *
@@ -45,12 +47,19 @@ function isCustomDomain(): boolean {
  *
  * redirectTo: Uses VITE_APP_URL in production (e.g. https://meettransfer.app/oauth/callback)
  * so it matches Supabase redirect allowlist. Otherwise uses current origin.
+ *
+ * expectedRole: When provided (driver/agency), OAuth callback will verify the user's actual
+ * role matches. If not, user is signed out and redirected to the login page with an error.
  */
 export async function startOAuthSignIn(
-  provider: OAuthProvider
+  provider: OAuthProvider,
+  options?: { expectedRole?: OAuthExpectedRole }
 ): Promise<{ error: Error | null }> {
   try {
-    const callbackUrl = `${APP_URL || window.location.origin}/oauth/callback`;
+    let callbackUrl = `${APP_URL || window.location.origin}/oauth/callback`;
+    if (options?.expectedRole && (options.expectedRole === 'driver' || options.expectedRole === 'agency')) {
+      callbackUrl += `?expected_role=${encodeURIComponent(options.expectedRole)}`;
+    }
     console.log("[OAuth] Starting sign-in for provider:", provider);
     console.log("[OAuth] Callback URL:", callbackUrl);
     console.log("[OAuth] Is custom domain:", isCustomDomain());

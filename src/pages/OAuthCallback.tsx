@@ -46,17 +46,21 @@ export default function OAuthCallback() {
       }
     };
 
-    const resolveRedirectTarget = async (userId: string, accessToken?: string | null): Promise<string> => {
+    const resolveRedirectTarget = async (
+      userId: string,
+      accessToken?: string | null
+    ): Promise<{ path: string; actualRole: string }> => {
       console.log("[OAuthCallback] ====== ROLE RESOLUTION START ======");
 
       // postOAuthRedirect oncelikli - booking sayfasi vb. kesin korunur
       const postOAuthRedirect = consumePostOAuthRedirect();
       if (postOAuthRedirect) {
         console.log("[OAuthCallback] Found post-OAuth redirect (booking vb.):", postOAuthRedirect);
-        return postOAuthRedirect;
+        return { path: postOAuthRedirect, actualRole: "customer" };
       }
 
       // get-user-role edge function - eski kullanicilar (drivers/agencies user_roles olmadan) icin
+      let actualRole = "customer";
       const token = accessToken || (await supabase.auth.getSession()).data?.session?.access_token;
       if (token) {
         for (let attempt = 0; attempt < 3; attempt++) {
@@ -65,9 +69,10 @@ export default function OAuthCallback() {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (data?.success && data?.role) {
-            const path = { admin: "/admin", driver: "/driver", agency: "/agency" }[data.role as string] ?? "/customer";
-            console.log("[OAuthCallback] get-user-role:", data.role, "->", path);
-            return path;
+            actualRole = data.role as string;
+            const path = { admin: "/admin", driver: "/driver", agency: "/agency" }[actualRole] ?? "/customer";
+            console.log("[OAuthCallback] get-user-role:", actualRole, "->", path);
+            return { path, actualRole };
           }
         }
       }
@@ -80,21 +85,26 @@ export default function OAuthCallback() {
           .eq("user_id", userId)
           .maybeSingle();
         if (!roleError && roleData?.role) {
-          const path = { admin: "/admin", driver: "/driver", agency: "/agency" }[roleData.role as string] ?? "/customer";
-          return path;
+          actualRole = roleData.role as string;
+          const path = { admin: "/admin", driver: "/driver", agency: "/agency" }[actualRole] ?? "/customer";
+          return { path, actualRole };
         }
       } catch {
         // ignore
       }
-      return "/customer";
+      return { path: "/customer", actualRole };
     };
 
-    const navigateAfterLogin = async (userId: string, accessToken?: string | null) => {
-      console.log("[OAuthCallback] Starting redirect resolution...");
+    const navigateAfterLogin = async (
+      userId: string,
+      accessToken?: string | null,
+      expectedRole?: string | null
+    ) => {
+      console.log("[OAuthCallback] Starting redirect resolution...", { expectedRole });
 
       const rolePromise = resolveRedirectTarget(userId, accessToken).catch((err) => {
         console.error("[OAuthCallback] resolveRedirectTarget rejected:", err);
-        return "/customer";
+        return { path: "/customer", actualRole: "customer" };
       });
 
       let timedOut = false;
@@ -102,12 +112,28 @@ export default function OAuthCallback() {
         timedOut = true;
       }, 3000);
 
-      const target = await Promise.race<string>([
+      const result = await Promise.race<{ path: string; actualRole: string }>([
         rolePromise,
-        new Promise<string>((resolve) => setTimeout(() => resolve("/customer"), 3000)),
+        new Promise<{ path: string; actualRole: string }>((resolve) =>
+          setTimeout(() => resolve({ path: "/customer", actualRole: "customer" }), 3000)
+        ),
       ]);
 
       clearTimeout(timer);
+
+      const target = result.path;
+
+      // Role validation: driver/agency sayfalarından Google ile giriş yapıldıysa, rol eşleşmeli
+      if (expectedRole && (expectedRole === "driver" || expectedRole === "agency")) {
+        if (result.actualRole !== expectedRole) {
+          console.warn("[OAuthCallback] Role mismatch:", { expectedRole, actualRole: result.actualRole });
+          await supabase.auth.signOut();
+          const loginPath =
+            expectedRole === "driver" ? "/login/driver" : "/login/agency";
+          window.location.replace(`${loginPath}?error=role_mismatch`);
+          return;
+        }
+      }
 
       console.log(
         timedOut
@@ -127,8 +153,9 @@ export default function OAuthCallback() {
         const hash = url.hash;
         const code = url.searchParams.get("code");
         const oauthError = url.searchParams.get("error") || url.searchParams.get("error_description");
+        const expectedRole = url.searchParams.get("expected_role");
 
-        console.log("[OAuthCallback] Processing callback...");
+        console.log("[OAuthCallback] Processing callback...", { expectedRole });
         console.log("[OAuthCallback] URL:", window.location.href);
         console.log("[OAuthCallback] Hash present:", !!hash);
         console.log("[OAuthCallback] Code present:", !!code);
@@ -227,7 +254,7 @@ export default function OAuthCallback() {
             const userId = data?.user?.id;
             const accessToken = data?.session?.access_token;
             if (userId) {
-              await navigateAfterLogin(userId, accessToken);
+              await navigateAfterLogin(userId, accessToken, expectedRole);
               return;
             }
           } catch (fetchError: any) {
@@ -249,7 +276,7 @@ export default function OAuthCallback() {
             } = await supabase.auth.getSession();
 
             if (session?.user?.id) {
-              await navigateAfterLogin(session.user.id, session.access_token);
+              await navigateAfterLogin(session.user.id, session.access_token, expectedRole);
               return;
             }
           } catch (getSessionError) {
@@ -288,7 +315,7 @@ export default function OAuthCallback() {
           console.log("[OAuthCallback] Code exchanged successfully, user:", data?.user?.email);
 
           if (data?.user?.id) {
-            await navigateAfterLogin(data.user.id, data.session?.access_token);
+            await navigateAfterLogin(data.user.id, data.session?.access_token, expectedRole);
           } else {
             console.error("[OAuthCallback] User is null after code exchange");
             setError("Oturum açıldı ancak kullanıcı bilgisi alınamadı");
@@ -305,7 +332,7 @@ export default function OAuthCallback() {
           } = await supabase.auth.getSession();
           if (session?.user?.id) {
             cleanupUrl(url);
-            await navigateAfterLogin(session.user.id, session.access_token);
+            await navigateAfterLogin(session.user.id, session.access_token, expectedRole);
             return;
           }
           await new Promise((r) => setTimeout(r, 200));
