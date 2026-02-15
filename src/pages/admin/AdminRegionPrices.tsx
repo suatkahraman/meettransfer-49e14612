@@ -28,6 +28,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays, Calculator } from 'lucide-react';
+import BulkDeleteByMonthDialog from "@/components/admin/BulkDeleteByMonthDialog";
 
 function priceCoversMonth(price: { valid_from?: string | null; valid_to?: string | null }, month: number, year: number): boolean {
   if (!price.valid_from || !price.valid_to) return true;
@@ -220,6 +221,8 @@ const AdminRegionPrices = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
   const [isBulkIntercityUpdateDialogOpen, setIsBulkIntercityUpdateDialogOpen] = useState(false);
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+  const [isBulkDeleteIntercityDialogOpen, setIsBulkDeleteIntercityDialogOpen] = useState(false);
   const [isMonthlyUpdateDialogOpen, setIsMonthlyUpdateDialogOpen] = useState(false);
   const [isMonthlyIntercityUpdateDialogOpen, setIsMonthlyIntercityUpdateDialogOpen] = useState(false);
   const [editingPrice, setEditingPrice] = useState<RegionPrice | null>(null);
@@ -861,6 +864,10 @@ const AdminRegionPrices = () => {
                     <Percent className="h-4 w-4 mr-2 shrink-0" />
                     % Güncelle
                   </Button>
+                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none text-destructive hover:text-destructive" onClick={() => setIsBulkDeleteDialogOpen(true)}>
+                    <Trash2 className="h-4 w-4 mr-2 shrink-0" />
+                    Toplu Sil
+                  </Button>
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                       <Button size="sm" className="flex-1 sm:flex-none" onClick={openNewDialog}>
@@ -1163,7 +1170,7 @@ const AdminRegionPrices = () => {
                   <ArrowRightLeft className="h-5 w-5" />
                   Şehirler Arası Fiyatlar
                 </CardTitle>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button variant="outline" onClick={() => setIsMonthlyIntercityUpdateDialogOpen(true)}>
                     <Calendar className="h-4 w-4 mr-2" />
                     Aylık Fiyat
@@ -1171,6 +1178,10 @@ const AdminRegionPrices = () => {
                   <Button variant="outline" onClick={() => setIsBulkIntercityUpdateDialogOpen(true)}>
                     <Percent className="h-4 w-4 mr-2" />
                     % Güncelle
+                  </Button>
+                  <Button variant="outline" className="text-destructive hover:text-destructive" onClick={() => setIsBulkDeleteIntercityDialogOpen(true)}>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Toplu Sil
                   </Button>
                   <Dialog open={isIntercityDialogOpen} onOpenChange={setIsIntercityDialogOpen}>
                     <DialogTrigger asChild>
@@ -1526,6 +1537,20 @@ const AdminRegionPrices = () => {
           onSuccess={fetchIntercityPrices}
           cities={Object.keys(CITIES_DATA)}
           vehicleTypes={VEHICLE_TYPES}
+        />
+        <BulkDeleteByMonthDialog
+          open={isBulkDeleteDialogOpen}
+          onOpenChange={setIsBulkDeleteDialogOpen}
+          priceType="region"
+          onSuccess={fetchPrices}
+          cities={Object.keys(CITIES_DATA)}
+        />
+        <BulkDeleteByMonthDialog
+          open={isBulkDeleteIntercityDialogOpen}
+          onOpenChange={setIsBulkDeleteIntercityDialogOpen}
+          priceType="intercity"
+          onSuccess={fetchIntercityPrices}
+          cities={Object.keys(CITIES_DATA)}
         />
       </main>
     </div>
