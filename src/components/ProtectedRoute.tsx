@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { isIOSDevice } from '@/lib/platformDetect';
 import { Loader2 } from 'lucide-react';
+import { SessionGate } from '@/components/SessionGate';
 
 /** Production login redirect URLs with role param for centralized login */
 const LOGIN_REDIRECT_BASE =
@@ -185,6 +186,15 @@ const ProtectedRoute = ({
     };
     const redirect = roleRedirects[effectiveRole] ?? redirectTo;
     return <Navigate to={redirect} replace />;
+  }
+
+  // Driver/Customer: iOS RLS - session hazır olana kadar bekle (auth.uid() null engelle)
+  if (effectiveRole === 'driver' || effectiveRole === 'customer') {
+    return (
+      <SessionGate>
+        {children}
+      </SessionGate>
+    );
   }
 
   return <>{children}</>;
