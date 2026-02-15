@@ -848,16 +848,16 @@ const AdminRegionPrices = () => {
           <TabsContent value="airport">
             <Card>
               <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl shrink-0">
                   <MapPin className="h-5 w-5 shrink-0" />
                   Havalimanı Transfer Fiyatları
                 </CardTitle>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setIsMonthlyUpdateDialogOpen(true)}>
+                <div className="flex flex-wrap gap-2 items-center overflow-x-auto pb-1">
+                  <Button variant="outline" size="sm" className="shrink-0" onClick={() => setIsMonthlyUpdateDialogOpen(true)}>
                     <Calendar className="h-4 w-4 mr-2 shrink-0" />
                     Aylık Fiyat
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setIsBulkUpdateDialogOpen(true)}>
+                  <Button variant="outline" size="sm" className="shrink-0" onClick={() => setIsBulkUpdateDialogOpen(true)}>
                     <Percent className="h-4 w-4 mr-2 shrink-0" />
                     % Güncelle
                   </Button>
@@ -1011,26 +1011,26 @@ const AdminRegionPrices = () => {
                     </Select>
                   </div>
                   
-                  {/* Active filter summary */}
+                  {/* Active filter summary + Toplu Sil (şehir, kategori, ay seçildikten sonra aktif) */}
                   {(filterCity !== 'all' || filterMonth !== 'all' || filterPriceType !== 'all') && (
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm text-muted-foreground">Aktif filtreler:</span>
                       {filterCity !== 'all' && (
                         <Badge variant="secondary" className="gap-1">
                           Şehir: {filterCity}
-                          <button onClick={() => setFilterCity('all')} className="ml-1 hover:text-destructive">×</button>
+                          <button type="button" onClick={() => setFilterCity('all')} className="ml-1 hover:text-destructive">×</button>
                         </Badge>
                       )}
                       {filterPriceType !== 'all' && (
                         <Badge variant="secondary" className="gap-1">
                           {filterPriceType === 'base' ? 'Temel' : 'Aylık'} Fiyat
-                          <button onClick={() => setFilterPriceType('all')} className="ml-1 hover:text-destructive">×</button>
+                          <button type="button" onClick={() => setFilterPriceType('all')} className="ml-1 hover:text-destructive">×</button>
                         </Badge>
                       )}
                       {filterMonth !== 'all' && (
                         <Badge variant="secondary" className="gap-1">
-                          {MONTHS.find(m => m.value.toString() === filterMonth)?.label}
-                          <button onClick={() => setFilterMonth('all')} className="ml-1 hover:text-destructive">×</button>
+                          {MONTHS.find(m => m.value.toString() === filterMonth)?.label} {filterYear}
+                          <button type="button" onClick={() => setFilterMonth('all')} className="ml-1 hover:text-destructive">×</button>
                         </Badge>
                       )}
                       <Button variant="ghost" size="sm" onClick={() => {
@@ -1163,7 +1163,7 @@ const AdminRegionPrices = () => {
                   <ArrowRightLeft className="h-5 w-5" />
                   Şehirler Arası Fiyatlar
                 </CardTitle>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button variant="outline" onClick={() => setIsMonthlyIntercityUpdateDialogOpen(true)}>
                     <Calendar className="h-4 w-4 mr-2" />
                     Aylık Fiyat
@@ -1500,6 +1500,9 @@ const AdminRegionPrices = () => {
           onSuccess={fetchPrices}
           cities={Object.keys(CITIES_DATA)}
           vehicleTypes={VEHICLE_TYPES}
+          initialFilterCity={filterCity !== "all" ? filterCity : undefined}
+          initialFilterMonth={filterMonth !== "all" ? filterMonth : undefined}
+          initialFilterYear={filterYear}
         />
         <BulkPriceUpdateDialog
           open={isBulkIntercityUpdateDialogOpen}
@@ -1508,6 +1511,8 @@ const AdminRegionPrices = () => {
           onSuccess={fetchIntercityPrices}
           cities={Object.keys(CITIES_DATA)}
           vehicleTypes={VEHICLE_TYPES}
+          initialFilterMonth={intercityFilterMonth !== "all" ? intercityFilterMonth : undefined}
+          initialFilterYear={intercityFilterYear}
         />
         
         {/* Monthly Price Update Dialogs */}
