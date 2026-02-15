@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { parseGeminiError } from '@/lib/geminiApi';
 
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
 if (typeof window !== "undefined") console.log("Anahtar Kontrol:", !!import.meta.env.VITE_GEMINI_API_KEY);
@@ -37,7 +38,8 @@ interface GeminiHolidayAssistantProps {
 async function fetchGeminiResponse(
   apiKey: string,
   prompt: string,
-  history: Array<{ role: string; parts: { text: string }[] }>
+  history: Array<{ role: string; parts: { text: string }[] }>,
+  lang: 'TR' | 'EN' = 'EN'
 ): Promise<string> {
   const contents = [
     ...history.map((m) => ({
@@ -63,8 +65,9 @@ async function fetchGeminiResponse(
   );
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err || `Gemini API error: ${res.status}`);
+    const errText = await res.text();
+    const msg = parseGeminiError(res.status, errText, lang);
+    throw new Error(msg);
   }
 
   const data = await res.json();
@@ -188,7 +191,7 @@ export function GeminiHolidayAssistant({
         ? `${systemContext}\n\nKullanıcı: ${text}`
         : text;
 
-      const response = await fetchGeminiResponse(apiKey, fullPrompt, history);
+      const response = await fetchGeminiResponse(apiKey, fullPrompt, history, language);
 
       setMessages((prev) => [
         ...prev,
@@ -200,15 +203,13 @@ export function GeminiHolidayAssistant({
         },
       ]);
     } catch (err) {
+      const msg = err instanceof Error ? err.message : (language === 'TR' ? 'Bir hata oluştu.' : 'An error occurred.');
       setMessages((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
           role: 'model',
-          content:
-            language === 'TR'
-              ? 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
-              : 'An error occurred. Please try again later.',
+          content: msg,
           timestamp: new Date(),
         },
       ]);
