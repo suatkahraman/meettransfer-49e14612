@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UtensilsCrossed, MapPin, ThermometerSun } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { parseGeminiError } from '@/lib/geminiApi';
 
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
 const GEMINI_API_URL =
@@ -65,7 +66,11 @@ async function fetchGuideData(
     }),
   });
 
-  if (!res.ok) throw new Error('Failed to fetch guide data');
+  if (!res.ok) {
+    const errText = await res.text();
+    const msg = parseGeminiError(res.status, errText, lang);
+    throw new Error(msg);
+  }
   const data = await res.json();
   const text =
     data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';

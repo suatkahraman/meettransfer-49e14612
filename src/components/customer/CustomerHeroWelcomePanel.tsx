@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Loader2, Car, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { parseGeminiError } from '@/lib/geminiApi';
 
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
@@ -35,7 +36,11 @@ async function fetchGeminiResponse(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error('Gemini API error');
+  if (!res.ok) {
+    const errText = await res.text();
+    const msg = parseGeminiError(res.status, errText, (lang === 'TR' ? 'TR' : 'EN') as 'TR' | 'EN');
+    throw new Error(msg);
+  }
   const data = await res.json();
   return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
 }
@@ -87,8 +92,9 @@ export function CustomerHeroWelcomePanel({
       const response = await fetchGeminiResponse(GEMINI_API_KEY, q, language, systemContext);
       setAnswer(response);
       setPromptValue('');
-    } catch {
-      setAnswer(language === 'TR' ? 'Bir hata oluştu. Lütfen tekrar deneyin.' : 'An error occurred. Please try again.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : (language === 'TR' ? 'Bir hata oluştu.' : 'An error occurred.');
+      setAnswer(msg);
     } finally {
       setIsLoading(false);
     }
