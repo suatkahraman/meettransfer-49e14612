@@ -332,7 +332,7 @@ const ReservationForm = () => {
         const { prices, hasAvailablePrice, message } = await fetchVehiclePricesSafely(
           urlPickup,
           urlDropoff,
-          urlCurrency,
+          "EUR",
           urlDate || undefined,
         );
         
@@ -390,7 +390,7 @@ const ReservationForm = () => {
         const { prices, hasAvailablePrice, message } = await fetchVehiclePricesSafely(
           urlPickup,
           urlDropoff,
-          urlCurrency,
+          "EUR",
           urlDate || undefined,
         );
         
@@ -445,10 +445,33 @@ const ReservationForm = () => {
   const prefilledCurrency = urlCurrency;
   const prefilledReturnPrice = urlReturnPrice ? parseFloat(urlReturnPrice) : null;
   
-  // Currency selection
+  // Currency selection - Baz fiyat EUR, seçilen para biriminde o günün kuruyla göster
   const [preferredCurrency, setPreferredCurrency] = useState(urlCurrency || 'EUR');
+  const [eurToPreferredRate, setEurToPreferredRate] = useState<number>(1);
   
   const currencyOptions = CURRENCY_OPTIONS;
+
+  // Fiyatlar EUR - para birimi değiştiğinde hemen o günün kuruyla dönüştür
+  useEffect(() => {
+    if (preferredCurrency === "EUR") {
+      setEurToPreferredRate(1);
+      return;
+    }
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: preferredCurrency },
+    })
+      .then(({ data }) => { if (data?.rate) setEurToPreferredRate(data.rate); })
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToPreferredRate(fallback[preferredCurrency] ?? 1);
+      });
+  }, [preferredCurrency]);
+
+  const getDisplayPrice = useCallback((priceEur: number | null | undefined): number | null => {
+    if (priceEur == null || !Number.isFinite(priceEur)) return null;
+    if (preferredCurrency === "EUR") return Math.round(priceEur);
+    return Math.round(priceEur * eurToPreferredRate);
+  }, [preferredCurrency, eurToPreferredRate]);
 
   
   const [formData, setFormData] = useState(() => ({
@@ -691,7 +714,7 @@ const ReservationForm = () => {
         const { prices, hasAvailablePrice, message } = await fetchVehiclePricesSafely(
           formData.pickup,
           formData.dropoff,
-          preferredCurrency,
+          "EUR",
           formData.date || undefined,
         );
 
@@ -1054,10 +1077,13 @@ const ReservationForm = () => {
         .update({ phone: pendingFormData.phone.trim(), full_name: primaryPassengerName })
         .eq('id', userId);
       
-      // Get selected vehicle's price
+      // Baz fiyat EUR - müşteri para biriminde kaydet (kuruyla dönüştürülmüş)
       const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
-      const reservationPrice = selectedPriceInfo?.price || null;
-      const reservationCurrency = selectedPriceInfo?.currency || preferredCurrency;
+      const priceEur = selectedPriceInfo?.price ?? null;
+      const reservationPrice = preferredCurrency === 'EUR' 
+        ? priceEur 
+        : (priceEur != null ? getDisplayPrice(priceEur) : null);
+      const reservationCurrency = preferredCurrency;
       const hasPrice = reservationPrice !== null;
       
       // Create reservation
@@ -1237,7 +1263,7 @@ const ReservationForm = () => {
       const minDiscount: Record<string, number> = { EUR: 2, USD: 2, GBP: 2, TRY: 80, AED: 8 };
       const maxDiscount: Record<string, number> = { EUR: 8, USD: 9, GBP: 7, TRY: 300, AED: 35 };
       
-      const currency = selectedPriceInfo.currency;
+      const currency = 'EUR'; // Fiyatlar her zaman EUR
       const calculatedDiscount = Math.round(selectedPriceInfo.price * discountPercentage);
       const discountAmount = Math.max(
         minDiscount[currency] || 2,
@@ -1252,9 +1278,10 @@ const ReservationForm = () => {
         }))
       );
 
-      // Store discount info for badge display
+      // Store discount info for badge display (convert for display)
       const actualPercentage = Math.round((discountAmount / selectedPriceInfo.price) * 100);
-      setAppliedDiscountInfo({ amount: discountAmount, percentage: actualPercentage, currency });
+      const displayDiscountAmount = preferredCurrency === 'EUR' ? discountAmount : (getDisplayPrice(discountAmount) ?? discountAmount);
+      setAppliedDiscountInfo({ amount: displayDiscountAmount, percentage: actualPercentage, currency: preferredCurrency });
       
       setDiscountJustApplied(true);
       setIsDiscountedOffer(true);
@@ -1367,29 +1394,31 @@ const ReservationForm = () => {
   }
 
   // Vehicle selection screen after price preparation
+  // Tüm fiyatlar EUR (API) - preferredCurrency ile o günün kuruyla göster
   if (showVehicleSelection && pendingFormData) {
     const recommendedVehicle = getRecommendedVehicle(pendingPassengerNames.length);
     const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
-    const selectedPrice = selectedPriceInfo?.price || null;
-    const selectedCurrency = selectedPriceInfo?.currency || preferredCurrency;
+    const selectedPriceEur = selectedPriceInfo?.price ?? null;
+    const selectedPrice = getDisplayPrice(selectedPriceEur);
+    const selectedCurrency = preferredCurrency;
     
     // Calculate return price - always discounted for return trips
     const RETURN_DISCOUNT_PERCENTAGE = 10; // 10% discount for return trip by default
     const PROMO_DISCOUNT_PERCENTAGE = 25; // 25% discount with promo code
     
     const getReturnPrice = () => {
-      if (!hasReturnTrip || !selectedPrice) return null;
-      // Promo code gives 25% off, otherwise 10% default return discount
+      if (!hasReturnTrip || selectedPriceEur == null) return null;
       const discountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
-      return Math.round(selectedPrice * (100 - discountPercent) / 100);
+      const returnPriceEur = Math.round(selectedPriceEur * (100 - discountPercent) / 100);
+      return getDisplayPrice(returnPriceEur);
     };
     
     const returnPrice = getReturnPrice();
-    const returnOriginalPrice = selectedPrice; // Original return price (same as outbound)
+    const returnOriginalPrice = selectedPrice;
     const returnDiscountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
-    const returnDiscountAmount = hasReturnTrip && selectedPrice ? Math.round(selectedPrice * returnDiscountPercent / 100) : null;
-    const totalPrice = selectedPrice ? selectedPrice + (returnPrice || 0) : null;
-    const totalWithoutDiscount = hasReturnTrip && selectedPrice ? selectedPrice * 2 : selectedPrice;
+    const returnDiscountAmount = hasReturnTrip && selectedPrice ? Math.round((selectedPrice ?? 0) * returnDiscountPercent / 100) : null;
+    const totalPrice = selectedPrice ? (selectedPrice ?? 0) + (returnPrice ?? 0) : null;
+    const totalWithoutDiscount = hasReturnTrip && selectedPrice ? (selectedPrice ?? 0) * 2 : selectedPrice;
     const totalSavings = hasReturnTrip && returnDiscountAmount ? returnDiscountAmount : null;
     
     return (
@@ -1589,7 +1618,7 @@ const ReservationForm = () => {
                             {hasDiscount && discountJustApplied && (
                               <div className="absolute -top-2 right-2 sm:right-4 z-10">
                                 <span className="bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full line-through">
-                                  {previousPrice} {vehicle.currency}
+                                  {getDisplayPrice(previousPrice)} {preferredCurrency}
                                 </span>
                               </div>
                             )}
@@ -1598,8 +1627,8 @@ const ReservationForm = () => {
                               vehicleType={vehicle.vehicleType}
                               isSelected={isSelected}
                               onSelect={(v) => setSelectedVehicleForConfirm(v)}
-                              price={vehicle.price}
-                              currency={vehicle.currency}
+                              price={getDisplayPrice(vehicle.price)}
+                              currency={preferredCurrency}
                               showPrice={true}
                               isRecommended={isRecommended}
                               available={vehicle.available}
@@ -2638,19 +2667,18 @@ const ReservationForm = () => {
                 <div className="grid gap-4">
                   {vehicleTypes.map(vehicle => {
                     // For logged-in users NOT coming from QuickBooking, don't show prices in main form
-                    // Price will be shown after form submission in vehicle selection screen
                     const showPriceInMainForm = isFromQuickBooking;
-                    const vehiclePrice = showPriceInMainForm ? (vehiclePrices[vehicle.value] || null) : null;
+                    const vehiclePriceEur = showPriceInMainForm ? (vehiclePrices[vehicle.value] || null) : null;
                     return (
                       <VehicleSelectionCard
                         key={vehicle.value}
                         vehicleType={vehicle.value}
                         isSelected={formData.vehicleType === vehicle.value}
                         onSelect={(v) => setFormData({...formData, vehicleType: v})}
-                        price={vehiclePrice}
-                        currency={prefilledCurrency}
+                        price={getDisplayPrice(vehiclePriceEur)}
+                        currency={preferredCurrency}
                         showPrice={showPriceInMainForm}
-                        isRecommended={isFromQuickBooking && vehicle.value === formData.vehicleType && !!vehiclePrice}
+                        isRecommended={isFromQuickBooking && vehicle.value === formData.vehicleType && !!vehiclePriceEur}
                         isLoading={isFromQuickBooking && isPricesLoading}
                       />
                     );

@@ -22,7 +22,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TimePickerGrid } from "@/components/ui/time-picker-grid";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
-import { getDirections } from "@/utils/googleMapsLoader";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { 
@@ -46,7 +45,6 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
-import { getDirections } from "@/utils/googleMapsLoader";
 import { z } from "zod";
 
 // Session storage key for caching booking form state during Google OAuth
@@ -135,6 +133,7 @@ const BookingPage = () => {
   const urlBabySeatCount = searchParams.get("babySeatCount");
   const urlLuggageCount = searchParams.get("luggageCount");
   const urlPromoCode = searchParams.get("promoCode") || "";
+  const urlCurrency = searchParams.get("currency") || "";
   
   // Token booking data state
   const [tokenBookingData, setTokenBookingData] = useState<{
@@ -171,7 +170,9 @@ const BookingPage = () => {
   const [passengers, setPassengers] = useState(urlPassengers ? parseInt(urlPassengers) : 1);
   const [luggageCount, setLuggageCount] = useState(urlLuggageCount ? parseInt(urlLuggageCount) : 1);
   const [babySeatCount, setBabySeatCount] = useState(urlBabySeatCount ? parseInt(urlBabySeatCount) : 0);
-  const [preferredCurrency, setPreferredCurrency] = useState("EUR");
+  const [preferredCurrency, setPreferredCurrency] = useState(() => 
+    ["EUR","TRY","USD","GBP","AED","RUB","UAH","JPY","AUD"].includes(urlCurrency) ? urlCurrency : "EUR"
+  );
   const [eurToPreferredRate, setEurToPreferredRate] = useState<number>(1);
   const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
   const [customerPhone, setCustomerPhone] = useState("");
@@ -198,7 +199,6 @@ const BookingPage = () => {
   const [detectedRegion, setDetectedRegion] = useState<string | null>(null);
   const hasFetchedInitialPrices = useRef(false);
   const googleAuthRef = useRef(searchParams.get("googleAuth") === "true");
-  const lastDistanceKmRef = useRef<number | undefined>(undefined);
   
   // Discount state
   const [discountApplied, setDiscountApplied] = useState(false);
@@ -263,8 +263,6 @@ const BookingPage = () => {
   const [editableDropoff, setEditableDropoff] = useState("");
   const [pickupPlaceId, setPickupPlaceId] = useState<string | null>(null);
   const [dropoffPlaceId, setDropoffPlaceId] = useState<string | null>(null);
-  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
   
   // Initialize editable locations from URL params on mount
   useEffect(() => {
@@ -294,27 +292,23 @@ const BookingPage = () => {
   const effectiveCity = tokenBookingData?.city || urlCity;
   const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
 
-  // Place selection handlers - store address, Place ID, and coords for price matching
+  // Place selection handlers - store address and Place ID for accurate price matching
   const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {
     if (details?.formattedAddress) {
       setEditablePickup(details.formattedAddress);
       setPickupPlaceId(details.place_id || null);
-      setPickupCoords(details.lat != null && details.lng != null ? { lat: details.lat, lng: details.lng } : null);
     } else if (value) {
       setEditablePickup(value);
       setPickupPlaceId(null);
-      setPickupCoords(null);
     }
   }, []);
   const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => {
     if (details?.formattedAddress) {
       setEditableDropoff(details.formattedAddress);
       setDropoffPlaceId(details.place_id || null);
-      setDropoffCoords(details.lat != null && details.lng != null ? { lat: details.lat, lng: details.lng } : null);
     } else if (value) {
       setEditableDropoff(value);
       setDropoffPlaceId(null);
-      setDropoffCoords(null);
     }
   }, []);
 
@@ -594,39 +588,18 @@ const BookingPage = () => {
       
       const startTime = Date.now();
       const minLoadingTime = isInitialFetch ? 5000 : 800;
-
-      let distanceKm: number | undefined;
-      if (pickupCoords && dropoffCoords) {
-        try {
-          const directions = await getDirections(pickupCoords, dropoffCoords);
-          if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
-            distanceKm = directions.distanceKm;
-            lastDistanceKmRef.current = distanceKm;
-            console.log("[BookingPage DEBUG] raw_distance_from_google:", { meters: directions.distanceMeters, km: directions.distanceKm });
-          }
-        } catch (_) {
-          // Mesafe alınamazsa devam et - backend şehir bazlı kontrol yapar
-        }
-      }
-
+      
       try {
-        const body: Record<string, unknown> = {
-          pickup: effectivePickup,
-          dropoff: effectiveDropoff,
-          pickup_place_id: pickupPlaceId || undefined,
-          dropoff_place_id: dropoffPlaceId || undefined,
-          pickup_date: effectiveDate || undefined,
-        };
-
-        if (distanceKm != null) {
-          body.distance_km = distanceKm;
-          console.log("[BookingPage DEBUG] raw_distance_from_google / final_sent_distance (KM):", distanceKm);
-        } else {
-          console.warn("[BookingPage DEBUG] No distanceKm - pickupCoords:", !!pickupCoords, "dropoffCoords:", !!dropoffCoords);
-        }
-        console.log("[BookingPage DEBUG] Body sent to backend:", body);
-
-        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", { body });
+        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
+          body: {
+            pickup: effectivePickup,
+            dropoff: effectiveDropoff,
+            pickup_place_id: pickupPlaceId || undefined,
+            dropoff_place_id: dropoffPlaceId || undefined,
+            customerCurrency: "EUR",
+            pickup_date: effectiveDate || undefined,
+          },
+        });
 
         if (cancelled) return;
 
@@ -659,9 +632,9 @@ const BookingPage = () => {
     fetchPrices();
     
     return () => { cancelled = true; };
-  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, pickupCoords, dropoffCoords, effectiveDate, isHourlyBooking]);
+  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, effectiveDate, isHourlyBooking]);
 
-  // Fiyatlar her zaman EUR - farklı para birimi için o günün kuruyla dönüştür
+  // Fiyatlar her zaman EUR - para birimi değişince hemen o günün kuruyla dönüştür
   useEffect(() => {
     if (preferredCurrency === "EUR") {
       setEurToPreferredRate(1);
@@ -674,11 +647,13 @@ const BookingPage = () => {
       .then(({ data }) => {
         if (data?.rate) setEurToPreferredRate(data.rate);
       })
-      .catch(() => setEurToPreferredRate(1))
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToPreferredRate(fallback[preferredCurrency] ?? 1);
+      })
       .finally(() => setIsLoadingExchangeRate(false));
   }, [preferredCurrency]);
 
-  // EUR fiyatı -> seçilen para biriminde gösterim (transfer fiyatları EUR)
   const getDisplayPrice = (priceEur: number | null): number | null => {
     if (priceEur == null) return null;
     if (preferredCurrency === "EUR") return Math.round(priceEur);
@@ -1382,10 +1357,9 @@ const BookingPage = () => {
 
   // Parse date for display
   const displayDate = effectiveDate ? format(parse(effectiveDate, "yyyy-MM-dd", new Date()), "dd MMM yyyy") : "";
-  const selectedPriceEur = isHourlyBooking 
+  const selectedPrice = isHourlyBooking 
     ? getHourlyPrice(vehicleType, selectedDuration) 
     : getPriceForVehicle(vehicleType);
-  const selectedPrice = getDisplayPrice(selectedPriceEur);
 
   // Time options
   const timeOptions = [];
@@ -1839,10 +1813,9 @@ const BookingPage = () => {
                       const v = vehicleTypeMap[vehicleOption.value];
                       if (!v) return null;
                       
-                      const priceEur = isHourlyBooking 
+                      const price = isHourlyBooking 
                         ? getHourlyPrice(vehicleOption.value, selectedDuration)
                         : getPriceForVehicle(vehicleOption.value);
-                      const price = getDisplayPrice(priceEur);
                       const isSelected = vehicleType === vehicleOption.value;
                       const vehicleCapacity = v.passengers;
                       const isCapacityInsufficient = passengers > vehicleCapacity;
@@ -2032,7 +2005,29 @@ const BookingPage = () => {
                           setPreferredCurrency(currency.value);
                           const nextSection = !isHourlyBooking && isTurkey ? 'section-return' : 'section-payment';
                           scrollToSection(nextSection);
-                          // Fiyatlar EUR - kur ile otomatik dönüştürülür, refetch gerekmez
+                          // Refetch prices with new currency
+                          if (isHourlyBooking) {
+                            // For hourly, prices are in DB currency, just update display
+                          } else if (effectivePickup && effectiveDropoff) {
+                            setIsRefetchingPrices(true);
+                            supabase.functions.invoke("get-all-vehicle-prices", {
+                              body: {
+                                pickup: effectivePickup,
+                                dropoff: effectiveDropoff,
+                                pickup_place_id: pickupPlaceId || undefined,
+                                dropoff_place_id: dropoffPlaceId || undefined,
+                                customerCurrency: currency.value,
+                                pickup_date: effectiveDate || undefined,
+                              },
+                            }).then(({ data }) => {
+                              if (data?.prices) {
+                                setVehiclePrices(data.prices);
+                              }
+                              setIsRefetchingPrices(false);
+                            }).catch(() => {
+                              setIsRefetchingPrices(false);
+                            });
+                          }
                         }}
                         className={cn(
                           "flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-medium transition-all duration-200 text-sm border-2",

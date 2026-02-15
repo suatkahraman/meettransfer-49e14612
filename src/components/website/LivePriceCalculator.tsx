@@ -1,10 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { loadGoogleMapsScript, getDirections, geocodeAddress } from "@/utils/googleMapsLoader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import GooglePlacesAutocomplete, { PlaceDetails } from "@/components/ui/google-places-autocomplete";
+import GooglePlacesAutocomplete from "@/components/ui/google-places-autocomplete";
 import { MapPin, Users, Briefcase, ArrowRight, Loader2, Car, Sparkles, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +23,6 @@ interface PriceResult {
   matched: boolean;
   matchedCity?: string;
   matchedAirport?: string;
-  transferType?: string | null;
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -41,8 +39,6 @@ const LivePriceCalculator = () => {
   
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
-  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [priceResult, setPriceResult] = useState<PriceResult | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
@@ -69,7 +65,10 @@ const LivePriceCalculator = () => {
       body: { from_currency: "EUR", to_currency: displayCurrency },
     })
       .then(({ data }) => { if (data?.rate) setEurToDisplayRate(data.rate); })
-      .catch(() => setEurToDisplayRate(1));
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToDisplayRate(fallback[displayCurrency] ?? 1);
+      });
   }, [displayCurrency]);
 
   const getCurrencyByLanguage = (): string => {
@@ -86,71 +85,19 @@ const LivePriceCalculator = () => {
 
   const fetchPrices = useCallback(async () => {
     if (!pickup || !dropoff) return;
-
+    
     setIsLoading(true);
     setHasSearched(true);
-
+    
     try {
-      let distanceKm: number | undefined;
-      if (pickupCoords && dropoffCoords) {
-        console.error('[LivePriceCalculator] Step 0 – Using coords:', { pickupCoords, dropoffCoords });
-        try {
-          const directions = await getDirections(pickupCoords, dropoffCoords);
-          console.error('[LivePriceCalculator] Step 2 – getDirections result:', {
-            hasDirections: !!directions,
-            distanceKm: directions?.distanceKm,
-            distanceMeters: directions?.distanceMeters,
-            isValid: directions?.distanceKm != null && Number.isFinite(directions.distanceKm),
-          });
-          if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
-            distanceKm = directions.distanceKm;
-          } else {
-            console.error('[LivePriceCalculator] Step 2 – distance_km INVALID or missing, backend may use fallback');
-          }
-        } catch (err) {
-          console.error('[LivePriceCalculator] Step 2 – getDirections threw:', err);
-        }
-      } else {
-        console.error('[LivePriceCalculator] Step 0 – No coords, geocoding:', { pickup, dropoff });
-        await loadGoogleMapsScript(["places"]);
-        const [pickupGeo, dropoffGeo] = await Promise.all([
-          geocodeAddress(pickup),
-          geocodeAddress(dropoff),
-        ]);
-        console.error('[LivePriceCalculator] Step 0b – Geocode result:', {
-          pickupGeo,
-          dropoffGeo,
-          hasBoth: !!(pickupGeo && dropoffGeo),
-        });
-        if (pickupGeo && dropoffGeo) {
-          const directions = await getDirections(pickupGeo, dropoffGeo);
-          console.error('[LivePriceCalculator] Step 2 – getDirections (geocode) result:', {
-            hasDirections: !!directions,
-            distanceKm: directions?.distanceKm,
-            isValid: directions?.distanceKm != null && Number.isFinite(directions.distanceKm),
-          });
-          if (directions?.distanceKm != null && Number.isFinite(directions.distanceKm)) {
-            distanceKm = directions.distanceKm;
-          } else {
-            console.error('[LivePriceCalculator] Step 2 – distance_km INVALID after geocode');
-          }
-        } else {
-          console.error('[LivePriceCalculator] Step 0b – No coords after geocode, distance_km NOT sent – city pricing may fail');
-        }
-      }
-
-      const body = { pickup, dropoff, customerCurrency: getCurrencyByLanguage(), distance_km: distanceKm };
-      console.error('[LivePriceCalculator] Step 3 – Body to backend:', body);
-
-      const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", { body });
-
-      console.error('[LivePriceCalculator] Step 4 – Backend response:', {
-        hasError: !!error,
-        error: error?.message,
-        hasData: !!data,
-        message: data?.message,
-        debug_reason: data?.debug_reason,
+      const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
+        body: {
+          pickup,
+          dropoff,
+          customerCurrency: "EUR",
+        },
       });
+
       if (error) throw error;
       setPriceResult(data);
     } catch (error) {
@@ -159,18 +106,16 @@ const LivePriceCalculator = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [pickup, dropoff, pickupCoords, dropoffCoords, language]);
+  }, [pickup, dropoff, language]);
 
-  const handlePickupSelect = (value: string, details?: PlaceDetails) => {
+  const handlePickupSelect = (value: string, details?: { formattedAddress: string }) => {
     setPickup(details?.formattedAddress || value);
-    setPickupCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
     setPriceResult(null);
     setHasSearched(false);
   };
 
-  const handleDropoffSelect = (value: string, details?: PlaceDetails) => {
+  const handleDropoffSelect = (value: string, details?: { formattedAddress: string }) => {
     setDropoff(details?.formattedAddress || value);
-    setDropoffCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
     setPriceResult(null);
     setHasSearched(false);
   };
@@ -181,6 +126,7 @@ const LivePriceCalculator = () => {
       dropoff,
       vehicle: vehicleType,
     });
+    if (displayCurrency !== "EUR") params.set("currency", displayCurrency);
     navigate(`/quick-booking?${params.toString()}`);
   };
 
@@ -298,14 +244,9 @@ const LivePriceCalculator = () => {
             >
               {availablePrices.length > 0 ? (
                 <>
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-6 flex-wrap">
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-6">
                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                     {t("pricesFound") || "Prices found for your route"}
-                    {priceResult.transferType === "Airport Transfer" && (
-                      <span className="ml-2 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                        {t("airportTransfer") || "Airport Transfer"}
-                      </span>
-                    )}
                   </div>
                   
                   <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
