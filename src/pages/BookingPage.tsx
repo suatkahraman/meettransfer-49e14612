@@ -172,6 +172,8 @@ const BookingPage = () => {
   const [luggageCount, setLuggageCount] = useState(urlLuggageCount ? parseInt(urlLuggageCount) : 1);
   const [babySeatCount, setBabySeatCount] = useState(urlBabySeatCount ? parseInt(urlBabySeatCount) : 0);
   const [preferredCurrency, setPreferredCurrency] = useState("EUR");
+  const [eurToPreferredRate, setEurToPreferredRate] = useState<number>(1);
+  const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
@@ -613,7 +615,6 @@ const BookingPage = () => {
           dropoff: effectiveDropoff,
           pickup_place_id: pickupPlaceId || undefined,
           dropoff_place_id: dropoffPlaceId || undefined,
-          customerCurrency: preferredCurrency,
           pickup_date: effectiveDate || undefined,
         };
 
@@ -658,7 +659,31 @@ const BookingPage = () => {
     fetchPrices();
     
     return () => { cancelled = true; };
-  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, pickupCoords, dropoffCoords, effectiveDate, preferredCurrency, isHourlyBooking]);
+  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, pickupCoords, dropoffCoords, effectiveDate, isHourlyBooking]);
+
+  // Fiyatlar her zaman EUR - farklı para birimi için o günün kuruyla dönüştür
+  useEffect(() => {
+    if (preferredCurrency === "EUR") {
+      setEurToPreferredRate(1);
+      return;
+    }
+    setIsLoadingExchangeRate(true);
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: preferredCurrency },
+    })
+      .then(({ data }) => {
+        if (data?.rate) setEurToPreferredRate(data.rate);
+      })
+      .catch(() => setEurToPreferredRate(1))
+      .finally(() => setIsLoadingExchangeRate(false));
+  }, [preferredCurrency]);
+
+  // EUR fiyatı -> seçilen para biriminde gösterim (transfer fiyatları EUR)
+  const getDisplayPrice = (priceEur: number | null): number | null => {
+    if (priceEur == null) return null;
+    if (preferredCurrency === "EUR") return Math.round(priceEur);
+    return Math.round(priceEur * eurToPreferredRate);
+  };
 
   // Extract city from address for hourly pricing
   const extractCityFromAddress = (address: string): string | null => {
@@ -1357,9 +1382,10 @@ const BookingPage = () => {
 
   // Parse date for display
   const displayDate = effectiveDate ? format(parse(effectiveDate, "yyyy-MM-dd", new Date()), "dd MMM yyyy") : "";
-  const selectedPrice = isHourlyBooking 
+  const selectedPriceEur = isHourlyBooking 
     ? getHourlyPrice(vehicleType, selectedDuration) 
     : getPriceForVehicle(vehicleType);
+  const selectedPrice = getDisplayPrice(selectedPriceEur);
 
   // Time options
   const timeOptions = [];
@@ -1813,9 +1839,10 @@ const BookingPage = () => {
                       const v = vehicleTypeMap[vehicleOption.value];
                       if (!v) return null;
                       
-                      const price = isHourlyBooking 
+                      const priceEur = isHourlyBooking 
                         ? getHourlyPrice(vehicleOption.value, selectedDuration)
                         : getPriceForVehicle(vehicleOption.value);
+                      const price = getDisplayPrice(priceEur);
                       const isSelected = vehicleType === vehicleOption.value;
                       const vehicleCapacity = v.passengers;
                       const isCapacityInsufficient = passengers > vehicleCapacity;
@@ -2005,30 +2032,7 @@ const BookingPage = () => {
                           setPreferredCurrency(currency.value);
                           const nextSection = !isHourlyBooking && isTurkey ? 'section-return' : 'section-payment';
                           scrollToSection(nextSection);
-                          // Refetch prices with new currency
-                          if (isHourlyBooking) {
-                            // For hourly, prices are in DB currency, just update display
-                          } else if (effectivePickup && effectiveDropoff) {
-                            setIsRefetchingPrices(true);
-                            supabase.functions.invoke("get-all-vehicle-prices", {
-                              body: {
-                                pickup: effectivePickup,
-                                dropoff: effectiveDropoff,
-                                pickup_place_id: pickupPlaceId || undefined,
-                                dropoff_place_id: dropoffPlaceId || undefined,
-                                customerCurrency: currency.value,
-                                pickup_date: effectiveDate || undefined,
-                                distance_km: lastDistanceKmRef.current,
-                              },
-                            }).then(({ data }) => {
-                              if (data?.prices) {
-                                setVehiclePrices(data.prices);
-                              }
-                              setIsRefetchingPrices(false);
-                            }).catch(() => {
-                              setIsRefetchingPrices(false);
-                            });
-                          }
+                          // Fiyatlar EUR - kur ile otomatik dönüştürülür, refetch gerekmez
                         }}
                         className={cn(
                           "flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg font-medium transition-all duration-200 text-sm border-2",

@@ -408,7 +408,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
               vehicleType: v.value,
               vehicleLabel: v.label,
               price: null,
-              currency: customerCurrency || "EUR",
+              currency: "EUR",
               passengers: v.passengers,
               luggage: v.luggage,
               available: false,
@@ -466,7 +466,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
             const basePrice = row ? Number(row.price) : null;
             const total = basePrice != null ? Math.ceil(basePrice + airportFee) : null;
             const available = total != null && total > 0;
-            return { vehicleType: vt.value, vehicleLabel: vt.label, price: total, currency: row?.price_currency || "EUR", passengers: vt.passengers, luggage: vt.luggage, available };
+            return { vehicleType: vt.value, vehicleLabel: vt.label, price: total, currency: "EUR", passengers: vt.passengers, luggage: vt.luggage, available };
           });
           const hasAvailable = prices.some((p) => p.available);
           const debug_info = { raw_km_price: null, applied_base_fare: firstRow ? Number(firstRow.price) : null, source_table: "intercity_prices" };
@@ -486,7 +486,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
               vehicleType: v.value,
               vehicleLabel: v.label,
               price: null,
-              currency: customerCurrency || "EUR",
+              currency: "EUR",
               passengers: v.passengers,
               luggage: v.luggage,
               available: false,
@@ -603,7 +603,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
             vehicleType: vt.value,
             vehicleLabel: vt.label,
             price: total,
-            currency: customerCurrency || "EUR",
+            currency: "EUR",
             passengers: vt.passengers,
             luggage: vt.luggage,
             available,
@@ -657,7 +657,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           vehicleType: v.value,
           vehicleLabel: v.label,
           price: null,
-          currency: customerCurrency || "EUR",
+          currency: "EUR",
           passengers: v.passengers,
           luggage: v.luggage,
           available: false,
@@ -987,7 +987,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           vehicleType: vt.value,
           vehicleLabel: vt.label,
           price: Math.ceil(basePrice),
-          currency: match.price_currency || customerCurrency || "EUR",
+          currency: "EUR",
           passengers: vt.passengers,
           luggage: vt.luggage,
           available: true
@@ -997,7 +997,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           vehicleType: vt.value,
           vehicleLabel: vt.label,
           price: null,
-          currency: customerCurrency || "EUR",
+          currency: "EUR",
           passengers: vt.passengers,
           luggage: vt.luggage,
           available: false
