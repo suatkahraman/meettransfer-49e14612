@@ -157,6 +157,7 @@ export function GeminiHolidayAssistant({
 
     try {
       if (!apiKey) {
+        console.log('Hata detayı: VITE_GEMINI_API_KEY eksik veya boş');
         const errMsg =
           language === 'TR'
             ? 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin veya daha sonra tekrar deneyin.'
@@ -198,6 +199,7 @@ export function GeminiHolidayAssistant({
         },
       ]);
     } catch (err) {
+      console.log('Hata detayı:', err);
       const errMsg =
         language === 'TR'
           ? 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin veya daha sonra tekrar deneyin.'

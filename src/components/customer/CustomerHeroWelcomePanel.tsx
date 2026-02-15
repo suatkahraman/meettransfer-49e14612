@@ -7,7 +7,7 @@ import { Send, Loader2, Car } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 const GEMINI_ERROR_MSG_TR = 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin veya daha sonra tekrar deneyin.';
@@ -76,7 +76,7 @@ export function CustomerHeroWelcomePanel({
   const answerRef = useRef<HTMLDivElement>(null);
 
   const placeholder = t('heroPromptPlaceholder') || 'Bana gitmek istediğiniz şehirle ilgili her şeyi sorabilirsiniz...';
-  const apiKey = GEMINI_API_KEY?.trim() || undefined;
+  const apiKey = GEMINI_API_KEY;
 
   // Sayfa açıldığında gizli "Merhaba" ile asistan karşılama
   useEffect(() => {
@@ -105,7 +105,8 @@ export function CustomerHeroWelcomePanel({
       .then((res) => {
         if (!cancelled && res) setAnswer(res);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log('Hata detayı:', err);
         if (!cancelled) setAnswer(null);
       })
       .finally(() => {
@@ -130,6 +131,7 @@ export function CustomerHeroWelcomePanel({
 
     try {
       if (!apiKey) {
+        console.log('Hata detayı: VITE_GEMINI_API_KEY eksik veya boş, env:', typeof import.meta.env.VITE_GEMINI_API_KEY);
         setAnswer(language === 'TR' ? GEMINI_ERROR_MSG_TR : GEMINI_ERROR_MSG_EN);
         return;
       }
@@ -140,6 +142,7 @@ export function CustomerHeroWelcomePanel({
       setAnswer(response);
       setPromptValue('');
     } catch (err) {
+      console.log('Hata detayı:', err);
       const msg = language === 'TR' ? GEMINI_ERROR_MSG_TR : GEMINI_ERROR_MSG_EN;
       setAnswer(msg);
     } finally {

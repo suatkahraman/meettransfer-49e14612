@@ -120,7 +120,8 @@ export function DestinationGuideCards({
           setPlaces(data.places || '-');
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log('Hata detayı:', err);
         if (!cancelled) {
           const errMsg =
             language === 'TR'
