@@ -67,6 +67,7 @@ const BulkPriceUpdateDialog = ({
   const [operation, setOperation] = useState<"increase" | "decrease" | "delete">("increase");
   const [filterCity, setFilterCity] = useState(initialFilterCity ?? "all");
   const [filterVehicle, setFilterVehicle] = useState("all");
+  const [deleteTargetType, setDeleteTargetType] = useState<"seasonal" | "base" | "all">("seasonal");
   const [deleteMonth, setDeleteMonth] = useState<string>(initialFilterMonth ?? "");
   const [deleteYear, setDeleteYear] = useState(initialFilterYear ?? currentYear);
   const [loading, setLoading] = useState(false);
@@ -114,30 +115,49 @@ const BulkPriceUpdateDialog = ({
 
   const handlePreview = async () => {
     if (operation === "delete") {
-      if (!deleteMonth) {
+      if (deleteTargetType === "seasonal" && !deleteMonth) {
         toast.error("Ay seçin");
         return;
       }
       try {
-        const firstDay = new Date(deleteYear, parseInt(deleteMonth, 10) - 1, 1);
-        const lastDay = new Date(deleteYear, parseInt(deleteMonth, 10), 0);
-        const firstDayStr = firstDay.toISOString().split("T")[0];
-        const lastDayStr = lastDay.toISOString().split("T")[0];
+        let totalCount = 0;
 
-        let query = supabase
-          .from(getTableName())
-          .select("id", { count: "exact", head: true })
-          .not("valid_from", "is", null)
-          .not("valid_to", "is", null)
-          .lte("valid_from", lastDayStr)
-          .gte("valid_to", firstDayStr);
+        if (deleteTargetType === "base" || deleteTargetType === "all") {
+          let baseQuery = supabase
+            .from(getTableName())
+            .select("id", { count: "exact", head: true })
+            .is("valid_from", null)
+            .is("valid_to", null);
+          if (filterCity !== "all") baseQuery = baseQuery.eq(getCityColumn(), filterCity);
+          if (filterVehicle !== "all") baseQuery = baseQuery.eq("vehicle_type", filterVehicle);
+          const { count: baseCount } = await baseQuery;
+          totalCount += baseCount ?? 0;
+        }
 
-        if (filterCity !== "all") query = query.eq(getCityColumn(), filterCity);
-        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+        if (deleteTargetType === "seasonal" || deleteTargetType === "all") {
+          if (!deleteMonth) {
+            setPreviewCount(totalCount);
+            return;
+          }
+          const firstDay = new Date(deleteYear, parseInt(deleteMonth, 10) - 1, 1);
+          const lastDay = new Date(deleteYear, parseInt(deleteMonth, 10), 0);
+          const firstDayStr = firstDay.toISOString().split("T")[0];
+          const lastDayStr = lastDay.toISOString().split("T")[0];
 
-        const { count, error } = await query;
-        if (error) throw error;
-        setPreviewCount(count ?? 0);
+          let seasonalQuery = supabase
+            .from(getTableName())
+            .select("id", { count: "exact", head: true })
+            .not("valid_from", "is", null)
+            .not("valid_to", "is", null)
+            .lte("valid_from", lastDayStr)
+            .gte("valid_to", firstDayStr);
+          if (filterCity !== "all") seasonalQuery = seasonalQuery.eq(getCityColumn(), filterCity);
+          if (filterVehicle !== "all") seasonalQuery = seasonalQuery.eq("vehicle_type", filterVehicle);
+          const { count: seasonalCount } = await seasonalQuery;
+          totalCount += seasonalCount ?? 0;
+        }
+
+        setPreviewCount(totalCount);
       } catch (error: any) {
         console.error("Delete preview error:", error);
         toast.error("Önizleme yapılamadı");
@@ -185,40 +205,53 @@ const BulkPriceUpdateDialog = ({
 
   const handleSubmit = async () => {
     if (operation === "delete") {
-      if (!deleteMonth || (previewCount ?? 0) === 0) {
+      if (deleteTargetType === "seasonal" && !deleteMonth) {
+        toast.error("Ay seçin");
+        return;
+      }
+      if ((previewCount ?? 0) === 0) {
         toast.error("Silinecek fiyat bulunamadı");
         return;
       }
-      const monthLabel = MONTHS.find((m) => m.value.toString() === deleteMonth)?.label;
-      if (
-        !confirm(
-          `${deleteYear} ${monthLabel} ayına ait ${previewCount} aylık fiyat kaydı kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?`
-        )
-      ) {
-        return;
-      }
+      const confirmMsg =
+        deleteTargetType === "base"
+          ? `${previewCount} temel fiyat kaydı kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?`
+          : deleteTargetType === "seasonal"
+            ? `${deleteYear} ${MONTHS.find((m) => m.value.toString() === deleteMonth)?.label} ayına ait ${previewCount} aylık fiyat kaydı kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?`
+            : `${previewCount} fiyat kaydı (temel + aylık) kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?`;
+      if (!confirm(confirmMsg)) return;
+
       setLoading(true);
       try {
-        const firstDay = new Date(deleteYear, parseInt(deleteMonth, 10) - 1, 1);
-        const lastDay = new Date(deleteYear, parseInt(deleteMonth, 10), 0);
-        const firstDayStr = firstDay.toISOString().split("T")[0];
-        const lastDayStr = lastDay.toISOString().split("T")[0];
+        if (deleteTargetType === "base" || deleteTargetType === "all") {
+          let baseQuery = supabase.from(getTableName()).delete().is("valid_from", null).is("valid_to", null);
+          if (filterCity !== "all") baseQuery = baseQuery.eq(getCityColumn(), filterCity);
+          if (filterVehicle !== "all") baseQuery = baseQuery.eq("vehicle_type", filterVehicle);
+          const { error: baseErr } = await baseQuery;
+          if (baseErr) throw baseErr;
+        }
 
-        let query = supabase
-          .from(getTableName())
-          .delete()
-          .not("valid_from", "is", null)
-          .not("valid_to", "is", null)
-          .lte("valid_from", lastDayStr)
-          .gte("valid_to", firstDayStr);
+        if (deleteTargetType === "seasonal" || deleteTargetType === "all") {
+          if (deleteMonth) {
+            const firstDay = new Date(deleteYear, parseInt(deleteMonth, 10) - 1, 1);
+            const lastDay = new Date(deleteYear, parseInt(deleteMonth, 10), 0);
+            const firstDayStr = firstDay.toISOString().split("T")[0];
+            const lastDayStr = lastDay.toISOString().split("T")[0];
+            let seasonalQuery = supabase
+              .from(getTableName())
+              .delete()
+              .not("valid_from", "is", null)
+              .not("valid_to", "is", null)
+              .lte("valid_from", lastDayStr)
+              .gte("valid_to", firstDayStr);
+            if (filterCity !== "all") seasonalQuery = seasonalQuery.eq(getCityColumn(), filterCity);
+            if (filterVehicle !== "all") seasonalQuery = seasonalQuery.eq("vehicle_type", filterVehicle);
+            const { error: seasonalErr } = await seasonalQuery;
+            if (seasonalErr) throw seasonalErr;
+          }
+        }
 
-        if (filterCity !== "all") query = query.eq(getCityColumn(), filterCity);
-        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
-
-        const { error } = await query;
-        if (error) throw error;
-
-        toast.success(`${previewCount} aylık fiyat kaydı silindi`);
+        toast.success(`${previewCount} fiyat kaydı silindi`);
         onSuccess();
         onOpenChange(false);
         resetForm();
@@ -403,10 +436,14 @@ const BulkPriceUpdateDialog = ({
     setOperation("increase");
     setFilterCity("all");
     setFilterVehicle("all");
+    setDeleteTargetType("seasonal");
     setDeleteMonth("");
     setDeleteYear(currentYear);
     setPreviewCount(null);
   };
+
+  const deleteNeedsMonth = deleteTargetType === "seasonal" || deleteTargetType === "all";
+  const deletePreviewDisabled = operation === "delete" && deleteNeedsMonth && !deleteMonth;
 
   return (
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) resetForm(); }}>
@@ -451,12 +488,31 @@ const BulkPriceUpdateDialog = ({
           </div>
 
           {operation === "delete" && (
-            <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800 dark:text-amber-200">
-                Sadece <strong>aylık (sezonluk) fiyatlar</strong> silinir. Temel fiyatlar etkilenmez.
-              </p>
-            </div>
+            <>
+              <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  {deleteTargetType === "base"
+                    ? <>Sadece <strong>temel fiyatlar</strong> silinir.</>
+                    : deleteTargetType === "seasonal"
+                      ? <>Sadece <strong>aylık (sezonluk) fiyatlar</strong> silinir.</>
+                      : <><strong>Temel ve aylık</strong> tüm fiyatlar silinir.</>}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Silinecek Fiyat Tipi</Label>
+                <Select value={deleteTargetType} onValueChange={(v) => { setDeleteTargetType(v as "seasonal" | "base" | "all"); setPreviewCount(null); }}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="seasonal">Aylık (sezonluk) fiyatlar</SelectItem>
+                    <SelectItem value="base">Temel fiyatlar</SelectItem>
+                    <SelectItem value="all">Tümü (temel + aylık)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
           )}
 
           {/* Percentage Input (sadece Artır/Azalt için) */}
@@ -481,8 +537,8 @@ const BulkPriceUpdateDialog = ({
             </div>
           )}
 
-          {/* Ay/Yıl (sadece Toplu Sil için) */}
-          {operation === "delete" && (
+          {/* Ay/Yıl (sadece Aylık veya Tümü için) */}
+          {operation === "delete" && deleteNeedsMonth && (
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Ay</Label>
@@ -559,7 +615,7 @@ const BulkPriceUpdateDialog = ({
             variant="outline"
             className="w-full"
             onClick={handlePreview}
-            disabled={operation === "delete" ? !deleteMonth : !percentage}
+            disabled={operation === "delete" ? deletePreviewDisabled : !percentage}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Önizle
@@ -576,10 +632,16 @@ const BulkPriceUpdateDialog = ({
             }`}>
               <p className="font-semibold">
                 {operation === "delete"
-                  ? (previewCount === 0 ? "Bu ay için silinecek aylık fiyat bulunamadı" : `${previewCount} aylık fiyat kaydı silinecek`)
+                  ? (previewCount === 0
+                    ? (deleteTargetType === "base" ? "Silinecek temel fiyat bulunamadı" : "Silinecek fiyat bulunamadı")
+                    : deleteTargetType === "base"
+                      ? `${previewCount} temel fiyat kaydı silinecek`
+                      : deleteTargetType === "seasonal"
+                        ? `${previewCount} aylık fiyat kaydı silinecek`
+                        : `${previewCount} fiyat kaydı silinecek`)
                   : `${previewCount} fiyat %${percentage} ${operation === "increase" ? "artırılacak" : "azaltılacak"}`}
               </p>
-              {operation === "delete" && previewCount > 0 && deleteMonth && (
+              {operation === "delete" && previewCount > 0 && deleteMonth && deleteNeedsMonth && (
                 <p className="text-xs mt-1 opacity-80">
                   {MONTHS.find((m) => m.value.toString() === deleteMonth)?.label} {deleteYear}
                 </p>
@@ -596,7 +658,9 @@ const BulkPriceUpdateDialog = ({
             onClick={handleSubmit}
             disabled={
               loading ||
-              (operation === "delete" ? (!deleteMonth || previewCount === null || previewCount === 0) : (!percentage || previewCount === null || previewCount === 0))
+              (operation === "delete"
+                ? (previewCount === null || previewCount === 0 || (deleteNeedsMonth && !deleteMonth))
+                : (!percentage || previewCount === null || previewCount === 0))
             }
             variant={operation === "delete" || operation === "decrease" ? "destructive" : "default"}
           >
