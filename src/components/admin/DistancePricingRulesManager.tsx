@@ -78,7 +78,10 @@ export default function DistancePricingRulesManager() {
     'minibus': '',
   });
 
+  const [tableError, setTableError] = useState<string | null>(null);
+
   const fetchRules = async () => {
+    setTableError(null);
     try {
       const { data, error } = await supabase
         .from('distance_pricing_rules')
@@ -88,9 +91,14 @@ export default function DistancePricingRulesManager() {
 
       if (error) throw error;
       setRules((data as DistancePricingRule[]) || []);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching distance pricing rules:', err);
-      toast.error('Kurallar yüklenirken hata oluştu');
+      const msg = err && typeof err === 'object' && 'message' in err ? String((err as { message?: string }).message) : '';
+      if (msg.includes('distance_pricing_rules') && (msg.includes('not exist') || msg.includes('schema cache') || msg.includes('42P01'))) {
+        setTableError('TABLO_YOK');
+      } else {
+        toast.error('Kurallar yüklenirken hata oluştu');
+      }
     } finally {
       setLoading(false);
     }
@@ -337,7 +345,20 @@ export default function DistancePricingRulesManager() {
         </Button>
       </CardHeader>
       <CardContent>
-        {loading ? (
+        {tableError === 'TABLO_YOK' ? (
+          <div className="py-8 space-y-4">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-4">
+              <p className="font-medium text-amber-800 dark:text-amber-200">Supabase Tablosu Eksik</p>
+              <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                <code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">distance_pricing_rules</code> tablosu bulunamadı.
+                Supabase Dashboard → SQL Editor içinde <code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">supabase/SETUP_KM_HESAPLAMA.sql</code> scriptini çalıştırın.
+              </p>
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => { setTableError(null); fetchRules(); }}>
+                Tekrar Dene
+              </Button>
+            </div>
+          </div>
+        ) : loading ? (
           <div className="py-8 text-center text-muted-foreground">Yükleniyor...</div>
         ) : rules.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground">
