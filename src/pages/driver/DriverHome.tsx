@@ -14,6 +14,8 @@ import JobCategoryCard from '@/components/driver/JobCategoryCard';
 import DayJobCard from '@/components/driver/DayJobCard';
 import { DashboardSkeleton } from '@/components/driver/DashboardSkeleton';
 import type { DriverHeaderExtras } from '@/components/driver/DriverLayout';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 
 interface Reservation {
   id: string;
@@ -132,6 +134,18 @@ const DriverHome = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Pull to refresh handler
+  const handlePullRefresh = useCallback(async () => {
+    await fetchReservations(true);
+  }, [fetchReservations]);
+
+  const { pullDistance, isRefreshing: isPullRefreshing, isPulling, handlers } = usePullToRefresh({
+    onRefresh: handlePullRefresh,
+    threshold: 80,
+    disabled: loading,
+  });
+
   const { playSound } = useNotificationSound();
   const cacheHydratedRef = useRef(false);
 
@@ -381,7 +395,15 @@ const DriverHome = () => {
   }, [setHeaderExtras, refreshing, pendingJobs.length, activeJobsCount, fetchReservations]);
 
   return (
-    <div className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto">
+    <div 
+      className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto"
+      {...handlers}
+    >
+      <PullToRefreshIndicator 
+        pullDistance={pullDistance}
+        isRefreshing={isPullRefreshing}
+        isPulling={isPulling}
+      />
       <div className="pb-8 px-3 sm:px-4 w-full max-w-lg mx-auto flex-1 overflow-x-hidden">
         {/* Hero Section */}
         <motion.section

@@ -47,6 +47,7 @@ import { tr, enUS } from 'date-fns/locale';
 import { useActivePromoCode } from '@/hooks/useActivePromoCode';
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
+import { CustomerHomeSkeleton } from '@/components/customer/CustomerHomeSkeleton';
 import { formatCurrency } from '@/lib/currency';
 
 // Time options for 30-minute intervals
@@ -1285,27 +1286,16 @@ const CustomerHome = () => {
 
   // Show loading screen while auth or data is loading
   if (authLoading || (isLoading && !recentReservations.length && !completedReservations.length)) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <img 
-              src={meetTransferLogo} 
-              alt="Meet Transfer" 
-              className="h-16 w-16 rounded-full object-cover border-2 border-primary/20"
-            />
-            <Loader2 className="h-6 w-6 animate-spin text-primary absolute -bottom-1 -right-1" />
-          </div>
-          <p className="text-muted-foreground text-sm">
-            {language === 'TR' ? 'Yükleniyor...' : 'Loading...'}
-          </p>
-        </div>
-      </div>
-    );
+    return <CustomerHomeSkeleton />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30" {...pullHandlers}>
+      <PullToRefreshIndicator 
+        pullDistance={pullDistance}
+        isRefreshing={isPullRefreshing}
+        isPulling={isPulling}
+      />
       {/* Header with Logo & Language - More compact on mobile */}
       <header className="bg-primary text-primary-foreground py-2 px-2 sm:py-4 sm:px-6 sticky top-0 z-10 safe-area-inset-top shadow-lg">
         <div className="flex justify-between items-center">

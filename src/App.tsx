@@ -16,6 +16,8 @@ import LanguageQueryRedirect from "./components/LanguageQueryRedirect";
 import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
 import { Button } from "@/components/ui/button";
 import { GlobalErrorHandlers } from "./components/GlobalErrorHandlers";
+import { CustomerErrorBoundary } from "./components/customer/CustomerErrorBoundary";
+import { AgencyErrorBoundary } from "./components/agency/AgencyErrorBoundary";
 
 // Toasters are NOT needed for first paint — lazy load to shorten critical chain
 const LazyToaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -444,16 +446,56 @@ const App = () => {
               <Route path="/agency-dashboard" element={<Navigate to="/agency" replace />} />
               
               {/* Customer Routes - Protected */}
-              <Route path="/customer" element={<CustomerRoute><LazyRoute><CustomerHome /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/bookings" element={<CustomerRoute><LazyRoute><CustomerBookings /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/reservations" element={<CustomerRoute><LazyRoute><CustomerBookings /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/reservation/:id" element={<CustomerRoute><LazyRoute><CustomerReservationDetail /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/reservations/:id" element={<CustomerRoute><LazyRoute><CustomerReservationDetail /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/reservation/:id/edit" element={<CustomerRoute><LazyRoute><CustomerEditReservation /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/reservations/:id/edit" element={<CustomerRoute><LazyRoute><CustomerEditReservation /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/review/:reservationId" element={<CustomerRoute><LazyRoute><CustomerReviewPage /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/profile" element={<CustomerRoute><LazyRoute><CustomerProfile /></LazyRoute></CustomerRoute>} />
-              <Route path="/customer/payments" element={<CustomerRoute><LazyRoute><CustomerPayments /></LazyRoute></CustomerRoute>} />
+              <Route path="/customer" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerHome /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/bookings" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerBookings /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/reservations" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerBookings /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/reservation/:id" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerReservationDetail /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/reservations/:id" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerReservationDetail /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/reservation/:id/edit" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerEditReservation /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/reservations/:id/edit" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerEditReservation /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/review/:reservationId" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerReviewPage /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/profile" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerProfile /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
+              <Route path="/customer/payments" element={
+                <CustomerErrorBoundary>
+                  <CustomerRoute><LazyRoute><CustomerPayments /></LazyRoute></CustomerRoute>
+                </CustomerErrorBoundary>
+              } />
               
               {/* Driver Routes - Protected with Layout */}
               <Route path="/driver" element={<DriverRoute><LazyRoute><DriverLayout /></LazyRoute></DriverRoute>}>
@@ -498,16 +540,56 @@ const App = () => {
               <Route path="/admin/payments" element={<AdminRoute><LazyRoute><AdminPayments /></LazyRoute></AdminRoute>} />
               
               {/* Agency Routes - Protected */}
-              <Route path="/agency" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyHome /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/create-reservation" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyCreateReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/reports" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReports /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/transactions" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyTransactionHistory /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/currency/:currency" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyCurrencyDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/payment-success" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyPaymentSuccess /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/reservation/:id" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/reservation/:id/edit" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyEditReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/payments" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyPayments /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
-              <Route path="/agency/settings" element={<AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencySettings /></LazyRoute></AgencyLanguageProvider></AgencyRoute>} />
+              <Route path="/agency" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyHome /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/create-reservation" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyCreateReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/reports" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReports /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/transactions" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyTransactionHistory /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/currency/:currency" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyCurrencyDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/payment-success" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyPaymentSuccess /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/reservation/:id" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyReservationDetail /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/reservation/:id/edit" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyEditReservation /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/payments" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencyPayments /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
+              <Route path="/agency/settings" element={
+                <AgencyErrorBoundary>
+                  <AgencyRoute><AgencyLanguageProvider><LazyRoute><AgencySettings /></LazyRoute></AgencyLanguageProvider></AgencyRoute>
+                </AgencyErrorBoundary>
+              } />
               
               {/* Customer Portal & Booking Confirmation - Public */}
               <Route path="/customer-portal" element={<LazyRoute><CustomerPortal /></LazyRoute>} />
