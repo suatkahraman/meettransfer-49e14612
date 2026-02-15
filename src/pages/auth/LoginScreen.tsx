@@ -966,6 +966,28 @@ const LoginScreen = () => {
               <CardDescription>{t('signInToManage')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {loginSection === 'customer' && (
+                <>
+                  {showIOSWarning && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+                      <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-amber-600 dark:text-amber-400">{t('iosAppNotice')}</p>
+                        <p className="text-muted-foreground mt-1">{t('iosGoogleLoginNotice')}</p>
+                      </div>
+                    </div>
+                  )}
+                  <SocialAuthButtons disabled={isLoading} mode="login" />
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">{t('or')}</span>
+                    </div>
+                  </div>
+                </>
+              )}
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">{t('email')}</Label>
