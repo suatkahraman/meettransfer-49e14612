@@ -395,6 +395,11 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Vercel: VITE_GEMINI_API_KEY zorla (hardcode) build sırasında enjekte edilir
+  define: {
+    "import.meta.env.VITE_GEMINI_API_KEY": JSON.stringify(process.env.VITE_GEMINI_API_KEY ?? ""),
+  },
+  envPrefix: "VITE_",
   build: {
     rollupOptions: {
       output: {
@@ -555,8 +560,8 @@ export default defineConfig(({ mode }) => ({
     // that can break vendor chunks on some devices/browsers.
     minify: "esbuild",
     esbuild: {
-      // Keep bundles lean without risking terser-specific transforms.
-      drop: ["console", "debugger"],
+      // Drop debugger only; keep console.warn/error for production diagnostics (e.g. VITE_GEMINI_API_KEY)
+      drop: ["debugger"],
     },
     // Target modern browsers
     target: "es2020",
