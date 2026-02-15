@@ -283,6 +283,9 @@ useEffect(() => {
       <div className="flex-1 flex items-center justify-center p-4 py-8">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-2">
+            <div className="rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-sm font-medium text-primary">
+              {t('loginWelcomeFeature')}
+            </div>
             <CardTitle className="text-2xl md:text-3xl font-serif">{t('createAccount')}</CardTitle>
             <CardDescription>{t('joinMeetTransfer')}</CardDescription>
           </CardHeader>

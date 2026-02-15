@@ -111,6 +111,7 @@ export function GeminiHolidayAssistant({
       },
     ]);
     } else if (reservationContext && !apiKey) {
+      console.warn('Vite Env Yüklenemedi: VITE_GEMINI_API_KEY undefined veya boş. Vercel: Environment Variables\'da Production/Preview/Development scope kontrol edin.');
       setMessages([
         {
           id: crypto.randomUUID(),
@@ -157,17 +158,16 @@ export function GeminiHolidayAssistant({
 
     try {
       if (!apiKey) {
-        console.log('Hata detayı: VITE_GEMINI_API_KEY eksik veya boş');
-        const errMsg =
-          language === 'TR'
-            ? 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin veya daha sonra tekrar deneyin.'
-            : 'We cannot reach our assistant right now. Please check the API key or try again later.';
+        console.warn('Vite Env Yüklenemedi: VITE_GEMINI_API_KEY undefined veya boş. Vercel: Environment Variables\'da Production/Preview/Development scope kontrol edin.');
         setMessages((prev) => [
           ...prev,
           {
             id: crypto.randomUUID(),
             role: 'model',
-            content: errMsg,
+            content:
+              language === 'TR'
+                ? 'Gemini API anahtarı yapılandırılmamış. Lütfen .env dosyasına VITE_GEMINI_API_KEY ekleyin.'
+                : 'Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.',
             timestamp: new Date(),
           },
         ]);
@@ -199,17 +199,15 @@ export function GeminiHolidayAssistant({
         },
       ]);
     } catch (err) {
-      console.log('Hata detayı:', err);
-      const errMsg =
-        language === 'TR'
-          ? 'Şu an asistanımıza ulaşılamıyor. Lütfen API anahtarını kontrol edin veya daha sonra tekrar deneyin.'
-          : 'We cannot reach our assistant right now. Please check the API key or try again later.';
       setMessages((prev) => [
         ...prev,
         {
           id: crypto.randomUUID(),
           role: 'model',
-          content: errMsg,
+          content:
+            language === 'TR'
+              ? 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+              : 'An error occurred. Please try again later.',
           timestamp: new Date(),
         },
       ]);

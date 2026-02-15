@@ -61,10 +61,6 @@ import { tr, enUS } from 'date-fns/locale';
 import { useActivePromoCode } from '@/hooks/useActivePromoCode';
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
-import { Skeleton } from '@/components/ui/skeleton';
-import { LocationInputs } from '@/components/hero/LocationInputs';
-import { FloatingLabelDatePicker } from '@/components/ui/floating-label-datepicker';
-import { TimePickerAMPM } from '@/components/ui/time-picker-ampm';
 import { formatCurrency } from '@/lib/currency';
 
 // Time options for 30-minute intervals
@@ -1323,32 +1319,23 @@ const CustomerHome = () => {
 
   // Removed showPricePreparation animation - now reservations are created directly
 
-  // Show skeleton while auth or data is loading
+  // Show loading screen while auth or data is loading
   if (authLoading || (isLoading && !recentReservations.length && !completedReservations.length)) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-        <header className="bg-primary text-primary-foreground py-2 px-2 sm:py-4 sm:px-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-10 w-10 rounded-full bg-primary-foreground/20" />
-              <Skeleton className="h-6 w-24 bg-primary-foreground/20" />
-            </div>
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <img 
+              src={meetTransferLogo} 
+              alt="Meet Transfer" 
+              className="h-16 w-16 rounded-full object-cover border-2 border-primary/20"
+            />
+            <Loader2 className="h-6 w-6 animate-spin text-primary absolute -bottom-1 -right-1" />
           </div>
-        </header>
-        <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-4xl">
-          <div className="rounded-2xl overflow-hidden bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/20 p-4 sm:p-6 space-y-4">
-            <div className="flex gap-3">
-              <Skeleton className="h-14 flex-1 rounded-xl" />
-              <Skeleton className="h-14 w-14 rounded-xl shrink-0" />
-            </div>
-            <Skeleton className="h-24 w-full rounded-xl" />
-            <Skeleton className="h-20 w-full rounded-xl" />
-            <div className="flex gap-2 pt-4">
-              <Skeleton className="h-12 flex-1 rounded-lg" />
-              <Skeleton className="h-12 flex-1 rounded-lg" />
-            </div>
-          </div>
-        </main>
+          <p className="text-muted-foreground text-sm">
+            {language === 'TR' ? 'Yükleniyor...' : 'Loading...'}
+          </p>
+        </div>
       </div>
     );
   }
@@ -1416,8 +1403,6 @@ const CustomerHome = () => {
               ? (recentReservations[0].dropoff_place_name || recentReservations[0].dropoff).split(',')[0]?.trim() || null
               : null
           }
-          customerName={profileData.full_name || user?.email?.split('@')[0] || ''}
-          isDataLoading={isLoading && !recentReservations.length && !completedReservations.length}
           t={t}
           language={language}
           onBookNowClick={() => {
@@ -1428,14 +1413,16 @@ const CustomerHome = () => {
           }}
           activeReservationsSlot={
             recentReservations.length > 0 ? (
-              <div className="pt-2 border-t border-border/50">
-                <div className="flex items-center justify-between mb-3 mt-2">
-                  <span className="text-sm font-semibold">{t('activeReservationsTitle')}</span>
+              <>
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100">
+                    {t('activeReservationsTitle')}
+                  </h3>
                   {activeBookingsCount > 3 && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-xs h-7"
+                      className="text-sm h-8 shrink-0"
                       onClick={() => navigate('/customer/bookings')}
                     >
                       {t('viewAll')}
@@ -1443,7 +1430,7 @@ const CustomerHome = () => {
                     </Button>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-4 flex-1">
                   {recentReservations.slice(0, 3).map((reservation) => {
                     const statusConfig: Record<string, { key: string; color: string; bgColor: string }> = {
                       'awaiting-price': { key: 'awaitingPrice', color: 'text-amber-700', bgColor: 'bg-amber-100' },
@@ -1456,62 +1443,72 @@ const CustomerHome = () => {
                     const status = statusConfig[reservation.status] || { key: reservation.status, color: 'text-gray-700', bgColor: 'bg-gray-100' };
                     const canCancel = canCancelReservation(reservation);
                     return (
-                      <Card key={reservation.id} className="shadow-sm transition-all border-l-4 border-l-primary/60 overflow-hidden">
-                        <CardContent className="p-3">
-                          <div className="flex items-center justify-between gap-2 mb-3">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="font-mono text-xs font-semibold text-primary">{reservation.reservation_code || 'N/A'}</span>
-                                <Badge className={cn("text-[10px]", status.bgColor, status.color)}>{t(status.key)}</Badge>
-                              </div>
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <span className="truncate">{(reservation.pickup_place_name || reservation.pickup).split(',')[0]}</span>
-                                <ArrowRight className="h-3 w-3 shrink-0" />
-                                <span className="truncate">{(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}</span>
-                              </div>
-                              <div className="text-[10px] text-muted-foreground mt-0.5">
-                                {new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })} • {reservation.pickup_time.slice(0, 5)}
-                              </div>
+                      <div
+                        key={reservation.id}
+                        className="rounded-xl border border-slate-200/80 dark:border-slate-600/50 bg-slate-50/50 dark:bg-slate-800/30 p-4 gap-4 flex flex-col min-w-0 overflow-hidden"
+                      >
+                        <div className="flex items-center justify-between gap-3 min-w-0">
+                          <div className="min-w-0 flex-1 overflow-hidden">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="font-mono text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                {reservation.reservation_code || 'N/A'}
+                              </span>
+                              <Badge className={cn("text-xs", status.bgColor, status.color)}>{t(status.key)}</Badge>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed min-w-0">
+                              <MapPin className="h-4 w-4 shrink-0 text-slate-500" />
+                              <span className="truncate min-w-0 flex-1">{(reservation.pickup_place_name || reservation.pickup).split(',')[0]}</span>
+                              <ArrowRight className="h-3 w-3 shrink-0" />
+                              <span className="truncate min-w-0 flex-1">{(reservation.dropoff_place_name || reservation.dropoff).split(',')[0]}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-500">
+                              <Calendar className="h-3.5 w-3.5" />
+                              {new Date(reservation.pickup_date).toLocaleDateString(language === 'TR' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
+                              <span className="text-slate-400">•</span>
+                              <Clock className="h-3.5 w-3.5" />
+                              {reservation.pickup_time.slice(0, 5)}
                             </div>
                           </div>
-                          {/* 2 seçenek - büyük punto: İptal et (önce sor), Detay */}
-                          <div className="flex gap-2">
-                            {canCancel && (
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="flex-1 text-base font-semibold h-10"
-                                disabled={cancellingReservationId === reservation.id}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setCancelConfirmReservationId(reservation.id);
-                                }}
-                              >
-                                {cancellingReservationId === reservation.id ? (
-                                  <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                  t('cancelReservation')
-                                )}
-                              </Button>
-                            )}
+                        </div>
+                        <div className="flex gap-3 mt-1">
+                          {canCancel && (
                             <Button
-                              variant="default"
+                              variant="destructive"
                               size="sm"
-                              className={cn("text-base font-semibold h-10", canCancel ? "flex-1" : "w-full")}
+                              className="flex-1 h-12 sm:h-14 w-full font-semibold text-base rounded-xl hover:scale-[1.02] transition-transform"
+                              disabled={cancellingReservationId === reservation.id}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/customer/reservation/${reservation.id}`);
+                                setCancelConfirmReservationId(reservation.id);
                               }}
                             >
-                              {t('viewDetails') || (language === 'TR' ? 'Detay' : 'Details')}
+                              {cancellingReservationId === reservation.id ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                              ) : (
+                                t('cancelReservation')
+                              )}
                             </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                          )}
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className={cn(
+                              "h-12 sm:h-14 font-semibold text-base rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-md",
+                              canCancel ? "flex-1" : "w-full"
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/customer/reservation/${reservation.id}`);
+                            }}
+                          >
+                            {t('viewDetails') || (language === 'TR' ? 'Detay' : 'Details')}
+                          </Button>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
-              </div>
+              </>
             ) : null
           }
         />
@@ -1841,10 +1838,15 @@ const CustomerHome = () => {
             transition={{ delay: 0.4 }}
             className="mb-6"
           >
-            <h2 className="text-base font-semibold mb-4 flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" />
-              {language === 'TR' ? 'Varış noktanız için rehber' : 'Guide for your destination'}
-            </h2>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                {language === 'TR' ? 'Varış noktanız için rehber' : 'Guide for your destination'}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {language === 'TR' ? 'Hava durumu, restoran ve gezilecek yer önerileri' : 'Weather, restaurant and sightseeing recommendations'}
+              </p>
+            </div>
             <DestinationGuideCards
               destination={
                 nextTransfer?.dropoff ||
@@ -1904,18 +1906,18 @@ const CustomerHome = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
+          <Card id="booking-form" className="scroll-mt-20 rounded-3xl border-amber-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/70 backdrop-blur-md shadow-xl overflow-hidden">
           <CardHeader 
-            className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg"
+            className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-3xl p-6"
             onClick={() => setIsBookingFormOpen(!isBookingFormOpen)}
           >
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl sm:text-2xl font-serif flex items-center gap-2">
-                  <Car className="h-5 w-5 sm:h-6 sm:w-6" />
+                <CardTitle className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <Car className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                   {t('bookYourTransfer')}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-slate-500 dark:text-slate-400">
                   {t('submitTransferDetails')}
                 </CardDescription>
               </div>
@@ -1938,8 +1940,8 @@ const CustomerHome = () => {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 style={{ overflow: "hidden" }}
               >
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-5 relative">
+          <CardContent className="p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-6 relative">
               {/* Loading Overlay */}
               <AnimatePresence>
                 {isLoading && (
@@ -1958,31 +1960,53 @@ const CustomerHome = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
-              {/* Pick-up & Drop-off - Hero-style LocationInputs */}
-              <div className={cn((errors.pickup || errors.dropoff) && "animate-shake")}>
-                <LocationInputs
-                  pickup={formData.pickup}
-                  dropoff={formData.dropoff}
-                  onPickupSelected={(value, details?: PlaceDetails) => {
+              {/* Pick-up Point */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  {t('pickupPoint')}
+                </Label>
+                <GooglePlacesAutocomplete
+                  onPlaceSelected={(value, details?: PlaceDetails) => {
                     setFormData((prev) => ({ ...prev, pickup: value }));
-                    setPickupCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
+                    if (details?.lat != null && details?.lng != null) {
+                      setPickupCoords({ lat: details.lat, lng: details.lng });
+                    } else {
+                      setPickupCoords(null);
+                    }
                   }}
-                  onDropoffSelected={(value, details?: PlaceDetails) => {
-                    setFormData((prev) => ({ ...prev, dropoff: value }));
-                    setDropoffCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
-                  }}
-                  onSwapLocations={() => {
-                    setFormData((prev) => ({ ...prev, pickup: prev.dropoff, dropoff: prev.pickup }));
-                    setPickupCoords(dropoffCoords);
-                    setDropoffCoords(pickupCoords);
-                  }}
-                  language={language}
-                  pickupError={!!errors.pickup}
-                  dropoffError={!!errors.dropoff}
+                  placeholder={t('enterPickupPoint')}
+                  className={errors.pickup ? 'border-destructive' : ''}
+                  maxLength={200}
+                  disabled={isLoading}
                 />
+                {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
               </div>
 
-              {/* Route Map Preview - GoogleRouteMap */}
+              {/* Drop-off Location */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  {t('dropoffLocation')}
+                </Label>
+                <GooglePlacesAutocomplete
+                  onPlaceSelected={(value, details?: PlaceDetails) => {
+                    setFormData((prev) => ({ ...prev, dropoff: value }));
+                    if (details?.lat != null && details?.lng != null) {
+                      setDropoffCoords({ lat: details.lat, lng: details.lng });
+                    } else {
+                      setDropoffCoords(null);
+                    }
+                  }}
+                  placeholder={t('hotelNameOrAddress')}
+                  className={errors.dropoff ? 'border-destructive' : ''}
+                  maxLength={200}
+                  disabled={isLoading}
+                />
+                {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
+              </div>
+
+              {/* Route Map Preview */}
               {formData.pickup && formData.dropoff && formData.pickup.length >= 3 && formData.dropoff.length >= 3 && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -2041,111 +2065,94 @@ const CustomerHome = () => {
                 </p>
               </div>
 
-              {/* Date & Time - Hero-style amber boxes */}
+              {/* Date & Time - Enhanced Pickers */}
               <div className="grid grid-cols-2 gap-3">
-                <div
-                  id="ride-date-field"
-                  className={cn(
-                    "flex h-[90px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
-                    errors.date && "ring-2 ring-destructive/30"
-                  )}
-                  onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (!target.closest('button')) (e.currentTarget as HTMLElement).querySelector('button')?.click();
-                  }}
-                >
-                  <label className={cn("pointer-events-none mb-0.5 block text-base font-bold", errors.date ? "text-destructive" : "text-foreground")}>
-                    {t('pickupDate') || t('date')}
-                  </label>
-                  <div className="flex min-w-0 items-center gap-3">
-                    <Calendar className={cn("pointer-events-none h-6 w-6 flex-shrink-0", errors.date ? "text-destructive" : "text-foreground")} />
-                    <div className="min-w-0 flex-1 overflow-hidden">
-                      <FloatingLabelDatePicker
-                        label={language === 'TR' ? 'Tarih Seçin' : 'Pick a date'}
-                        date={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
+                {/* Date Picker */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    {t('date')}
+                  </Label>
+                  <Popover open={isPickupDateOpen} onOpenChange={setIsPickupDateOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        disabled={isLoading}
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-11",
+                          !formData.date && "text-muted-foreground",
+                          errors.date && "border-destructive"
+                        )}
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {formData.date ? (
+                          format(new Date(formData.date), 'dd MMM yyyy', { locale: language === 'TR' ? tr : enUS })
+                        ) : (
+                          <span>{language === 'TR' ? 'Tarih Seçin' : 'Pick a date'}</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <DayPickerCalendar
+                        mode="single"
+                        selected={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
                         onSelect={(date: Date | undefined) => {
                           if (date) {
                             const formattedDate = format(date, 'yyyy-MM-dd');
                             setFormData(prev => ({ ...prev, date: formattedDate }));
+                            // Clear return date if it's before the new pickup date
                             if (formData.returnDate && new Date(formData.returnDate) < date) {
                               setFormData(prev => ({ ...prev, returnDate: '' }));
-                              toast.warning(language === 'TR' ? 'Dönüş tarihi gidiş tarihinden önce olamaz.' : 'Return date cannot be before departure.');
+                              toast.warning(
+                                language === 'TR' 
+                                  ? 'Dönüş tarihi gidiş tarihinden önce olamaz. Lütfen yeni bir dönüş tarihi seçin.' 
+                                  : 'Return date cannot be before departure date. Please select a new return date.'
+                              );
                             }
                           }
+                          setIsPickupDateOpen(false);
                         }}
-                        disabled={isLoading}
-                        disabledDates={(d) => d < new Date(new Date().setHours(0,0,0,0))}
-                        dateFormat="EEE, dd MMM"
-                        triggerClassName="h-auto w-full justify-start truncate border-0 bg-transparent p-0 text-xl font-bold text-foreground shadow-none hover:bg-transparent focus:ring-0"
-                        icon={<span />}
+                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+                        initialFocus
+                        locale={language === 'TR' ? tr : enUS}
+                        className="p-3 pointer-events-auto"
                       />
-                    </div>
-                  </div>
-                  {errors.date && <p className="pointer-events-none mt-0.5 text-xs font-medium text-destructive">{t('required') || 'Required'}</p>}
+                    </PopoverContent>
+                  </Popover>
+                  {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
                 </div>
-                <div
-                  id="ride-time-field"
-                  className={cn(
-                    "flex h-[90px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
-                    errors.time && "ring-2 ring-destructive/30"
-                  )}
-                  onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (!target.closest('button')) (e.currentTarget as HTMLElement).querySelector('button')?.click();
-                  }}
-                >
-                  <label className={cn("pointer-events-none mb-0.5 block text-base font-bold", errors.time ? "text-destructive" : "text-foreground")}>
-                    {t('pickupTime') || t('time')}
-                  </label>
-                  <div className="flex min-w-0 items-center gap-3">
-                    <Clock className={cn("pointer-events-none h-6 w-6 flex-shrink-0", errors.time ? "text-destructive" : "text-foreground")} />
-                    <TimePickerAMPM
-                      value={formData.time}
-                      onValueChange={(v) => setFormData(prev => ({ ...prev, time: v }))}
-                      triggerClassName="text-xl font-bold text-foreground"
-                      labels={{ hour: t("timeHour") || "Hour", minute: t("timeMinute") || "Min", save: t("timeSave") || "Save" }}
-                    />
-                  </div>
-                  {errors.time && <p className="pointer-events-none mt-0.5 text-xs font-medium text-destructive">{t('required') || 'Required'}</p>}
+                
+                {/* Time Picker */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    {t('time')}
+                  </Label>
+                  <Select
+                    value={formData.time}
+                    onValueChange={(value) => setFormData({...formData, time: value})}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className={cn(
+                      "h-11",
+                      errors.time && "border-destructive"
+                    )}>
+                      <SelectValue placeholder={language === 'TR' ? 'Saat Seçin' : 'Pick a time'} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {TIME_OPTIONS.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          <span className="flex items-center gap-2">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            {time}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
                 </div>
               </div>
-
-              {/* Get Quote - Hero-style primary button */}
-              <Button
-                type="button"
-                onClick={() => {
-                  const missing: string[] = [];
-                  if (!formData.pickup) missing.push(t('pickupPoint') || 'Pickup');
-                  if (!formData.dropoff) missing.push(t('dropoffLocation') || 'Drop-off');
-                  if (!formData.date) missing.push(t('pickupDate') || 'Date');
-                  if (!formData.time) missing.push(t('pickupTime') || 'Time');
-                  if (missing.length > 0) {
-                    setErrors(prev => ({
-                      ...prev,
-                      pickup: !formData.pickup,
-                      dropoff: !formData.dropoff,
-                      date: !formData.date,
-                      time: !formData.time,
-                    }));
-                    toast.error(`${t('pleaseFilAllFields') || 'Please fill in'}: ${missing.join(', ')}`);
-                    return;
-                  }
-                  setErrors({});
-                  document.getElementById('vehicle-list-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-                disabled={isLoading}
-                className="group h-[90px] w-full touch-manipulation rounded-xl border-0 bg-gradient-to-r from-primary via-primary to-primary/90 text-xl font-bold shadow-lg shadow-primary/30 transition-all duration-300 hover:from-primary/90 hover:to-primary hover:shadow-xl hover:shadow-primary/40"
-              >
-                {isPricesLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : (
-                  <>
-                    <Zap className="mr-2 h-5 w-5 animate-pulse" />
-                    <span className="tracking-wide">{t('getQuote')}</span>
-                    <ArrowRight className="ml-2 h-6 w-6 transition-transform duration-300 group-hover:translate-x-1.5" />
-                  </>
-                )}
-              </Button>
 
               {/* Return Trip Toggle with Discount */}
               <div className="space-y-3">
@@ -2441,21 +2448,12 @@ const CustomerHome = () => {
                 </div>
               </div>
 
-              {/* Vehicle Type - Hero-style cards, Get Quote sonrası burada yüklenir */}
-              <div id="vehicle-list-section" className="scroll-mt-24 space-y-3">
+              {/* Vehicle Type - Visual Cards */}
+              <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
                   {t('vehicleType')}
                 </Label>
-                {/* Loading state - aynı sayfada yükleme animasyonu */}
-                {isPricesLoading && formData.pickup && formData.dropoff && Object.keys(vehiclePrices).length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/50 dark:border-zinc-600 dark:bg-zinc-800/50">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {language === 'TR' ? 'Fiyatlar yükleniyor...' : 'Loading prices...'}
-                    </p>
-                  </div>
-                )}
                 {minibusRequired && (
                   <div className="flex items-center gap-2 text-amber-600 text-xs bg-amber-100 dark:bg-amber-900/30 p-2 rounded-lg">
                     <Briefcase className="h-4 w-4" />
@@ -2473,10 +2471,10 @@ const CustomerHome = () => {
                     <div
                       key={v.value}
                       className={cn(
-                        "relative overflow-hidden rounded-xl p-4 transition-all duration-200 text-left border-2",
+                        "relative overflow-hidden rounded-xl p-3 transition-all duration-200 text-left border-2",
                         formData.vehicleType === v.value
                           ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/30"
-                          : "border-amber-200 bg-amber-50/80 dark:border-zinc-700 dark:bg-zinc-800/80 hover:bg-amber-200/80 dark:hover:bg-zinc-700",
+                          : "border-border bg-card hover:bg-muted/50 hover:border-primary/40",
                         (minibusRequired && v.value !== 'minibus') && "opacity-50"
                       )}
                     >
@@ -2556,8 +2554,8 @@ const CustomerHome = () => {
                       {canConfirm && (
                         <Button
                           type="button"
-                          size="lg"
-                          className="w-full mt-3 h-12 font-bold rounded-xl bg-gradient-to-r from-primary to-primary/90 shadow-lg gap-2"
+                          size="sm"
+                          className="w-full h-12 sm:h-14 mt-2 gap-2 font-semibold rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-md"
                           disabled={isLoading || isConfirming}
                           onClick={async (e) => {
                             e.stopPropagation();
@@ -2567,9 +2565,9 @@ const CustomerHome = () => {
                           }}
                         >
                           {isConfirming ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            <CheckCircle className="h-5 w-5" />
+                            <CheckCircle className="h-4 w-4" />
                           )}
                           {language === 'TR' ? 'Onayla' : 'Confirm'}
                         </Button>
@@ -2744,7 +2742,12 @@ const CustomerHome = () => {
                 </div>
               )}
 
-              <Button type="submit" className="w-full h-12 text-base font-semibold" size="lg" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full h-14 text-base font-semibold rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-lg" 
+                size="lg" 
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />
