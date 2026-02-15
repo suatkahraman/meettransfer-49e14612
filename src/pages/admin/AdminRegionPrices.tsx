@@ -28,7 +28,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays, Calculator } from 'lucide-react';
-import BulkDeleteByMonthDialog from "@/components/admin/BulkDeleteByMonthDialog";
 
 function priceCoversMonth(price: { valid_from?: string | null; valid_to?: string | null }, month: number, year: number): boolean {
   if (!price.valid_from || !price.valid_to) return true;
@@ -221,8 +220,6 @@ const AdminRegionPrices = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
   const [isBulkIntercityUpdateDialogOpen, setIsBulkIntercityUpdateDialogOpen] = useState(false);
-  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
-  const [isBulkDeleteIntercityDialogOpen, setIsBulkDeleteIntercityDialogOpen] = useState(false);
   const [isMonthlyUpdateDialogOpen, setIsMonthlyUpdateDialogOpen] = useState(false);
   const [isMonthlyIntercityUpdateDialogOpen, setIsMonthlyIntercityUpdateDialogOpen] = useState(false);
   const [editingPrice, setEditingPrice] = useState<RegionPrice | null>(null);
@@ -1044,18 +1041,6 @@ const AdminRegionPrices = () => {
                       }}>
                         Temizle
                       </Button>
-                      {/* Toplu Sil: sadece Aylık Fiyat + Ay seçildiğinde aktif */}
-                      {filterPriceType === 'seasonal' && filterMonth !== 'all' && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="ml-2"
-                          onClick={() => setIsBulkDeleteDialogOpen(true)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Toplu Sil
-                        </Button>
-                      )}
                     </div>
                   )}
                 </div>
@@ -1365,18 +1350,6 @@ const AdminRegionPrices = () => {
                       <Button variant="ghost" size="sm" onClick={() => { setIntercityFilterMonth('all'); setIntercityFilterPriceType('all'); setIntercitySearchTerm(''); }}>
                         Temizle
                       </Button>
-                      {/* Toplu Sil: Aylık Fiyat + Ay seçildiğinde aktif */}
-                      {intercityFilterPriceType === 'seasonal' && intercityFilterMonth !== 'all' && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="ml-2"
-                          onClick={() => setIsBulkDeleteIntercityDialogOpen(true)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Toplu Sil
-                        </Button>
-                      )}
                     </div>
                   )}
                 </div>
@@ -1527,6 +1500,9 @@ const AdminRegionPrices = () => {
           onSuccess={fetchPrices}
           cities={Object.keys(CITIES_DATA)}
           vehicleTypes={VEHICLE_TYPES}
+          initialFilterCity={filterCity !== "all" ? filterCity : undefined}
+          initialFilterMonth={filterMonth !== "all" ? filterMonth : undefined}
+          initialFilterYear={filterYear}
         />
         <BulkPriceUpdateDialog
           open={isBulkIntercityUpdateDialogOpen}
@@ -1535,6 +1511,8 @@ const AdminRegionPrices = () => {
           onSuccess={fetchIntercityPrices}
           cities={Object.keys(CITIES_DATA)}
           vehicleTypes={VEHICLE_TYPES}
+          initialFilterMonth={intercityFilterMonth !== "all" ? intercityFilterMonth : undefined}
+          initialFilterYear={intercityFilterYear}
         />
         
         {/* Monthly Price Update Dialogs */}
@@ -1553,25 +1531,6 @@ const AdminRegionPrices = () => {
           onSuccess={fetchIntercityPrices}
           cities={Object.keys(CITIES_DATA)}
           vehicleTypes={VEHICLE_TYPES}
-        />
-        <BulkDeleteByMonthDialog
-          open={isBulkDeleteDialogOpen}
-          onOpenChange={setIsBulkDeleteDialogOpen}
-          priceType="region"
-          onSuccess={fetchPrices}
-          cities={Object.keys(CITIES_DATA)}
-          initialMonth={filterMonth !== 'all' ? filterMonth : undefined}
-          initialYear={filterYear}
-          initialCity={filterCity !== 'all' ? filterCity : undefined}
-        />
-        <BulkDeleteByMonthDialog
-          open={isBulkDeleteIntercityDialogOpen}
-          onOpenChange={setIsBulkDeleteIntercityDialogOpen}
-          priceType="intercity"
-          onSuccess={fetchIntercityPrices}
-          cities={Object.keys(CITIES_DATA)}
-          initialMonth={intercityFilterMonth !== 'all' ? intercityFilterMonth : undefined}
-          initialYear={intercityFilterYear}
         />
       </main>
     </div>

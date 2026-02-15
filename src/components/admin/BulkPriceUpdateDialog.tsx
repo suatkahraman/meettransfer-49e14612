@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Percent, TrendingUp, TrendingDown, RefreshCw } from "lucide-react";
+import { Percent, TrendingUp, TrendingDown, RefreshCw, Trash2, AlertTriangle } from "lucide-react";
+
+const MONTHS = [
+  { value: 1, label: "Ocak" },
+  { value: 2, label: "Şubat" },
+  { value: 3, label: "Mart" },
+  { value: 4, label: "Nisan" },
+  { value: 5, label: "Mayıs" },
+  { value: 6, label: "Haziran" },
+  { value: 7, label: "Temmuz" },
+  { value: 8, label: "Ağustos" },
+  { value: 9, label: "Eylül" },
+  { value: 10, label: "Ekim" },
+  { value: 11, label: "Kasım" },
+  { value: 12, label: "Aralık" },
+];
 
 type PriceType = "hourly" | "region" | "intercity";
 
@@ -30,6 +45,10 @@ interface BulkPriceUpdateDialogProps {
   onSuccess: () => void;
   cities?: string[];
   vehicleTypes?: { value: string; label: string }[];
+  /** Sayfa filtrelerinden gelen başlangıç değerleri */
+  initialFilterCity?: string;
+  initialFilterMonth?: string;
+  initialFilterYear?: number;
 }
 
 const BulkPriceUpdateDialog = ({
@@ -39,13 +58,27 @@ const BulkPriceUpdateDialog = ({
   onSuccess,
   cities = [],
   vehicleTypes = [],
+  initialFilterCity,
+  initialFilterMonth,
+  initialFilterYear,
 }: BulkPriceUpdateDialogProps) => {
+  const currentYear = new Date().getFullYear();
   const [percentage, setPercentage] = useState("");
-  const [operation, setOperation] = useState<"increase" | "decrease">("increase");
-  const [filterCity, setFilterCity] = useState("all");
+  const [operation, setOperation] = useState<"increase" | "decrease" | "delete">("increase");
+  const [filterCity, setFilterCity] = useState(initialFilterCity ?? "all");
   const [filterVehicle, setFilterVehicle] = useState("all");
+  const [deleteMonth, setDeleteMonth] = useState<string>(initialFilterMonth ?? "");
+  const [deleteYear, setDeleteYear] = useState(initialFilterYear ?? currentYear);
   const [loading, setLoading] = useState(false);
   const [previewCount, setPreviewCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      if (initialFilterCity !== undefined) setFilterCity(initialFilterCity);
+      if (initialFilterMonth !== undefined) setDeleteMonth(initialFilterMonth);
+      if (initialFilterYear !== undefined) setDeleteYear(initialFilterYear);
+    }
+  }, [open, initialFilterCity, initialFilterMonth, initialFilterYear]);
 
   const getTableName = () => {
     switch (priceType) {
@@ -80,6 +113,38 @@ const BulkPriceUpdateDialog = ({
   };
 
   const handlePreview = async () => {
+    if (operation === "delete") {
+      if (!deleteMonth) {
+        toast.error("Ay seçin");
+        return;
+      }
+      try {
+        const firstDay = new Date(deleteYear, parseInt(deleteMonth, 10) - 1, 1);
+        const lastDay = new Date(deleteYear, parseInt(deleteMonth, 10), 0);
+        const firstDayStr = firstDay.toISOString().split("T")[0];
+        const lastDayStr = lastDay.toISOString().split("T")[0];
+
+        let query = supabase
+          .from(getTableName())
+          .select("id", { count: "exact", head: true })
+          .not("valid_from", "is", null)
+          .not("valid_to", "is", null)
+          .lte("valid_from", lastDayStr)
+          .gte("valid_to", firstDayStr);
+
+        if (filterCity !== "all") query = query.eq(getCityColumn(), filterCity);
+        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+
+        const { count, error } = await query;
+        if (error) throw error;
+        setPreviewCount(count ?? 0);
+      } catch (error: any) {
+        console.error("Delete preview error:", error);
+        toast.error("Önizleme yapılamadı");
+      }
+      return;
+    }
+
     if (!percentage || parseFloat(percentage) <= 0) {
       toast.error("Geçerli bir yüzde girin");
       return;
@@ -87,7 +152,7 @@ const BulkPriceUpdateDialog = ({
 
     try {
       let count = 0;
-      
+
       if (priceType === "hourly") {
         let query = supabase.from("hourly_rental_prices").select("id", { count: "exact" });
         if (filterCity !== "all") query = query.eq("city", filterCity);
@@ -119,6 +184,53 @@ const BulkPriceUpdateDialog = ({
   };
 
   const handleSubmit = async () => {
+    if (operation === "delete") {
+      if (!deleteMonth || (previewCount ?? 0) === 0) {
+        toast.error("Silinecek fiyat bulunamadı");
+        return;
+      }
+      const monthLabel = MONTHS.find((m) => m.value.toString() === deleteMonth)?.label;
+      if (
+        !confirm(
+          `${deleteYear} ${monthLabel} ayına ait ${previewCount} aylık fiyat kaydı kalıcı olarak silinecek. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?`
+        )
+      ) {
+        return;
+      }
+      setLoading(true);
+      try {
+        const firstDay = new Date(deleteYear, parseInt(deleteMonth, 10) - 1, 1);
+        const lastDay = new Date(deleteYear, parseInt(deleteMonth, 10), 0);
+        const firstDayStr = firstDay.toISOString().split("T")[0];
+        const lastDayStr = lastDay.toISOString().split("T")[0];
+
+        let query = supabase
+          .from(getTableName())
+          .delete()
+          .not("valid_from", "is", null)
+          .not("valid_to", "is", null)
+          .lte("valid_from", lastDayStr)
+          .gte("valid_to", firstDayStr);
+
+        if (filterCity !== "all") query = query.eq(getCityColumn(), filterCity);
+        if (filterVehicle !== "all") query = query.eq("vehicle_type", filterVehicle);
+
+        const { error } = await query;
+        if (error) throw error;
+
+        toast.success(`${previewCount} aylık fiyat kaydı silindi`);
+        onSuccess();
+        onOpenChange(false);
+        resetForm();
+      } catch (error: any) {
+        console.error("Delete error:", error);
+        toast.error("Toplu silme başarısız");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (!percentage || parseFloat(percentage) <= 0) {
       toast.error("Geçerli bir yüzde girin");
       return;
@@ -291,6 +403,8 @@ const BulkPriceUpdateDialog = ({
     setOperation("increase");
     setFilterCity("all");
     setFilterVehicle("all");
+    setDeleteMonth("");
+    setDeleteYear(currentYear);
     setPreviewCount(null);
   };
 
@@ -306,46 +420,98 @@ const BulkPriceUpdateDialog = ({
 
         <div className="space-y-4 py-4">
           {/* Operation Selection */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <Button
               type="button"
               variant={operation === "increase" ? "default" : "outline"}
-              onClick={() => setOperation("increase")}
+              onClick={() => { setOperation("increase"); setPreviewCount(null); }}
               className="flex items-center gap-2"
             >
-              <TrendingUp className="h-4 w-4" />
+              <TrendingUp className="h-4 w-4 shrink-0" />
               Artır
             </Button>
             <Button
               type="button"
               variant={operation === "decrease" ? "destructive" : "outline"}
-              onClick={() => setOperation("decrease")}
+              onClick={() => { setOperation("decrease"); setPreviewCount(null); }}
               className="flex items-center gap-2"
             >
-              <TrendingDown className="h-4 w-4" />
+              <TrendingDown className="h-4 w-4 shrink-0" />
               Azalt
+            </Button>
+            <Button
+              type="button"
+              variant={operation === "delete" ? "destructive" : "outline"}
+              onClick={() => { setOperation("delete"); setPreviewCount(null); }}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="h-4 w-4 shrink-0" />
+              Toplu Sil
             </Button>
           </div>
 
-          {/* Percentage Input */}
-          <div className="space-y-2">
-            <Label>Yüzde Oranı (%)</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                placeholder="Örn: 10"
-                value={percentage}
-                onChange={(e) => {
-                  setPercentage(e.target.value);
-                  setPreviewCount(null);
-                }}
-                min="0"
-                max="100"
-                step="0.1"
-              />
-              <Percent className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {operation === "delete" && (
+            <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                Sadece <strong>aylık (sezonluk) fiyatlar</strong> silinir. Temel fiyatlar etkilenmez.
+              </p>
             </div>
-          </div>
+          )}
+
+          {/* Percentage Input (sadece Artır/Azalt için) */}
+          {operation !== "delete" && (
+            <div className="space-y-2">
+              <Label>Yüzde Oranı (%)</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  placeholder="Örn: 10"
+                  value={percentage}
+                  onChange={(e) => {
+                    setPercentage(e.target.value);
+                    setPreviewCount(null);
+                  }}
+                  min="0"
+                  max="100"
+                  step="0.1"
+                />
+                <Percent className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+          )}
+
+          {/* Ay/Yıl (sadece Toplu Sil için) */}
+          {operation === "delete" && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Ay</Label>
+                <Select value={deleteMonth} onValueChange={(v) => { setDeleteMonth(v); setPreviewCount(null); }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Ay seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MONTHS.map((m) => (
+                      <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Yıl</Label>
+                <Select value={deleteYear.toString()} onValueChange={(v) => { setDeleteYear(parseInt(v)); setPreviewCount(null); }}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[currentYear - 1, currentYear, currentYear + 1, currentYear + 2].map((year) => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
 
           {/* City Filter */}
           {cities.length > 0 && (
@@ -393,7 +559,7 @@ const BulkPriceUpdateDialog = ({
             variant="outline"
             className="w-full"
             onClick={handlePreview}
-            disabled={!percentage}
+            disabled={operation === "delete" ? !deleteMonth : !percentage}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Önizle
@@ -401,10 +567,23 @@ const BulkPriceUpdateDialog = ({
 
           {/* Preview Result */}
           {previewCount !== null && (
-            <div className={`p-3 rounded-lg text-center ${operation === "increase" ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400" : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"}`}>
+            <div className={`p-3 rounded-lg text-center ${
+              operation === "delete"
+                ? "bg-destructive/10 text-destructive"
+                : operation === "increase"
+                  ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+                  : "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+            }`}>
               <p className="font-semibold">
-                {previewCount} fiyat %{percentage} {operation === "increase" ? "artırılacak" : "azaltılacak"}
+                {operation === "delete"
+                  ? (previewCount === 0 ? "Bu ay için silinecek aylık fiyat bulunamadı" : `${previewCount} aylık fiyat kaydı silinecek`)
+                  : `${previewCount} fiyat %${percentage} ${operation === "increase" ? "artırılacak" : "azaltılacak"}`}
               </p>
+              {operation === "delete" && previewCount > 0 && deleteMonth && (
+                <p className="text-xs mt-1 opacity-80">
+                  {MONTHS.find((m) => m.value.toString() === deleteMonth)?.label} {deleteYear}
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -415,10 +594,17 @@ const BulkPriceUpdateDialog = ({
           </DialogClose>
           <Button
             onClick={handleSubmit}
-            disabled={loading || !percentage || previewCount === null || previewCount === 0}
-            className={operation === "increase" ? "" : "bg-destructive hover:bg-destructive/90"}
+            disabled={
+              loading ||
+              (operation === "delete" ? (!deleteMonth || previewCount === null || previewCount === 0) : (!percentage || previewCount === null || previewCount === 0))
+            }
+            variant={operation === "delete" || operation === "decrease" ? "destructive" : "default"}
           >
-            {loading ? "Güncelleniyor..." : `%${percentage || "0"} ${operation === "increase" ? "Artır" : "Azalt"}`}
+            {loading
+              ? (operation === "delete" ? "Siliniyor..." : "Güncelleniyor...")
+              : operation === "delete"
+                ? "Toplu Sil"
+                : `%${percentage || "0"} ${operation === "increase" ? "Artır" : "Azalt"}`}
           </Button>
         </DialogFooter>
       </DialogContent>
