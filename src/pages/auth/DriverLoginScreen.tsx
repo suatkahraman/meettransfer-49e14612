@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
 import { ArrowLeft, Loader2, Car, KeyRound, Eye, EyeOff } from 'lucide-react';
@@ -76,6 +78,17 @@ const DriverLoginScreen = () => {
     const timer = window.setTimeout(warmDriverChunks, 200);
     return () => window.clearTimeout(timer);
   }, [warmDriverChunks]);
+
+  // OAuth role_mismatch: Google ile sürücü olmayan hesap girişi denendi
+  useEffect(() => {
+    const err = searchParams.get('error');
+    if (err === 'role_mismatch') {
+      toast.error(language === 'TR'
+        ? 'Bu hesap bir sürücü hesabı değil. Sürücü girişi için e-posta ve şifre kullanın.'
+        : 'This is not a driver account. Use email and password for driver login.');
+      window.history.replaceState(null, '', '/login/driver');
+    }
+  }, [searchParams, language]);
 
   // Lockout countdown timer
   useEffect(() => {
@@ -628,6 +641,15 @@ const DriverLoginScreen = () => {
           </CardHeader>
           
           <CardContent className="space-y-4">
+            <SocialAuthButtons disabled={isLoading || !!lockoutCountdown} mode="login" expectedRole="driver" />
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">{t('or') || 'veya'}</span>
+              </div>
+            </div>
             {/* iOS/storage uyarısı - localStorage çalışmıyorsa (gizli mod vb.) */}
             {storageChecked && !storageAvailable && (
               <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">

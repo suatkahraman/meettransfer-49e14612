@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePWADetect } from '@/hooks/usePWADetect';
-import { startOAuthSignIn } from '@/lib/oauthSignIn';
+import { startOAuthSignIn, type OAuthExpectedRole } from '@/lib/oauthSignIn';
 
 // Google Icon SVG component
 const GoogleIcon = () => (
@@ -33,6 +33,7 @@ const GoogleIcon = () => (
 interface SocialAuthButtonsProps {
   disabled?: boolean;
   mode?: 'login' | 'signup';
+  expectedRole?: OAuthExpectedRole;
   onGoogleClick?: () => void;
   onAppleClick?: () => void;
   className?: string;
@@ -41,6 +42,7 @@ interface SocialAuthButtonsProps {
 export const SocialAuthButtons = ({ 
   disabled = false, 
   mode = 'login',
+  expectedRole,
   onGoogleClick,
   className = ''
 }: SocialAuthButtonsProps) => {
@@ -63,7 +65,7 @@ export const SocialAuthButtons = ({
         toast.info(t('redirectingGoogle') || 'Yönlendiriliyor...');
       }
 
-      const { error } = await startOAuthSignIn('google');
+      const { error } = await startOAuthSignIn('google', expectedRole ? { expectedRole } : undefined);
       
       if (error) {
         console.error('Google OAuth error:', error);
