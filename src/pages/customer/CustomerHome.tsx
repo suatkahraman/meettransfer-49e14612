@@ -194,9 +194,10 @@ const CustomerHome = () => {
     returnTime: '',
   });
 
-   // Price fetching state
+   // Price fetching state - API her zaman EUR döner
   const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
   const [selectedCurrency, setSelectedCurrency] = useState<string>('EUR');
+  const [eurToSelectedRate, setEurToSelectedRate] = useState<number>(1);
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [pricesError, setPricesError] = useState<string | null>(null);
 
@@ -244,6 +245,28 @@ const CustomerHome = () => {
     setSelectedCurrency(getCurrencyByLanguage());
   }, []);
 
+  // Fiyatlar EUR - seçilen para birimi değiştiğinde o günün kuruyla hemen dönüştür
+  useEffect(() => {
+    if (selectedCurrency === "EUR") {
+      setEurToSelectedRate(1);
+      return;
+    }
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: selectedCurrency },
+    })
+      .then(({ data }) => { if (data?.rate) setEurToSelectedRate(data.rate); })
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToSelectedRate(fallback[selectedCurrency] ?? 1);
+      });
+  }, [selectedCurrency]);
+
+  const getDisplayPrice = useCallback((priceEur: number | null | undefined): number | null => {
+    if (priceEur == null || !Number.isFinite(priceEur)) return null;
+    if (selectedCurrency === "EUR") return Math.round(priceEur);
+    return Math.round(priceEur * eurToSelectedRate);
+  }, [selectedCurrency, eurToSelectedRate]);
+
   // Fetch prices when pickup and dropoff are filled
   useEffect(() => {
     const fetchVehiclePrices = async () => {
@@ -266,7 +289,7 @@ const CustomerHome = () => {
           body: {
             pickup: formData.pickup,
             dropoff: formData.dropoff,
-            customerCurrency: selectedCurrency,
+            customerCurrency: "EUR",
             pickup_date: formData.date || undefined,
           },
         });
@@ -297,7 +320,7 @@ const CustomerHome = () => {
     // Debounce the fetch
     const timeoutId = setTimeout(fetchVehiclePrices, 500);
     return () => clearTimeout(timeoutId);
-  }, [formData.pickup, formData.dropoff, selectedCurrency, t]);
+  }, [formData.pickup, formData.dropoff, formData.date, t]);
 
   // Memoized greeting
   const greeting = useMemo(() => getGreeting(t), [t]);
@@ -1061,10 +1084,12 @@ const CustomerHome = () => {
       localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
     }
 
-    // Determine initial status based on whether we have a price
-    const selectedVehiclePrice = vehiclePrices[formData.vehicleType];
-    const hasPrice = selectedVehiclePrice && selectedVehiclePrice > 0;
+    const selectedVehiclePriceEur = vehiclePrices[vehicleType];
+    const hasPrice = selectedVehiclePriceEur && selectedVehiclePriceEur > 0;
     const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
+    const priceToSave = selectedCurrency === 'EUR' 
+      ? (selectedVehiclePriceEur || null) 
+      : (getDisplayPrice(selectedVehiclePriceEur) || null);
 
     try {
       // Create main reservation directly in database
@@ -1079,8 +1104,8 @@ const CustomerHome = () => {
         dropoff: result.data.dropoff.trim(),
         pickup_date: result.data.date,
         pickup_time: result.data.time,
-        vehicle_type: formData.vehicleType,
-        price: selectedVehiclePrice || null,
+        vehicle_type: vehicleType,
+        price: priceToSave,
         price_currency: selectedCurrency || 'EUR',
         status: initialStatus,
         payment_type: result.data.paymentType,
@@ -1114,8 +1139,8 @@ const CustomerHome = () => {
             .from('agency_reservation_details')
             .insert({
               reservation_id: reservation.id,
-              customer_price: selectedVehiclePrice || 0,
-              company_amount: selectedVehiclePrice || 0,
+              customer_price: priceToSave || 0,
+              company_amount: priceToSave || 0,
               agency_price_currency: selectedCurrency || 'EUR',
               agency_notes: 'Customer Panel - Direct Booking',
               payment_status: 'not_paid',
@@ -1128,8 +1153,10 @@ const CustomerHome = () => {
 
       // Create return trip if requested (with discount applied)
       if (formData.hasReturnTrip && formData.returnDate && formData.returnTime) {
-        // Calculate discounted return price
-        const returnPrice = selectedVehiclePrice ? getReturnPrice(selectedVehiclePrice) : null;
+        const returnPriceEur = selectedVehiclePriceEur ? getReturnPrice(selectedVehiclePriceEur) : null;
+        const returnPrice = returnPriceEur != null && selectedCurrency !== 'EUR' 
+          ? getDisplayPrice(returnPriceEur) 
+          : returnPriceEur;
         
         const returnReservationData = {
           customer_id: user?.id,
@@ -1152,7 +1179,7 @@ const CustomerHome = () => {
           original_reservation_id: reservation?.id,
           promo_code: returnPromoCode?.code || null, // Track promo code used
           discount_percentage: returnDiscountPercentage,
-          discount_amount: selectedVehiclePrice ? (selectedVehiclePrice - (returnPrice || 0)) : null,
+          discount_amount: priceToSave && returnPrice ? (priceToSave - returnPrice) : null,
           agency_id: MEET_TRANSFER_ONLINE_AGENCY_ID, // Auto-assign Meet Transfer Online
         };
 
@@ -2407,10 +2434,10 @@ const CustomerHome = () => {
                       {formData.hasReturnTrip && vehiclePrices[formData.vehicleType] && (
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs line-through text-muted-foreground">
-                            {vehiclePrices[formData.vehicleType]} {selectedCurrency}
+                            {getDisplayPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
                           </span>
                           <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                            {getReturnPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
+                            {getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType]))} {selectedCurrency}
                           </span>
                           <span className="text-[10px] text-green-600 dark:text-green-400">
                             ({language === 'TR' ? 'Dönüş fiyatı' : 'Return price'})
@@ -2711,7 +2738,7 @@ const CustomerHome = () => {
                               ? "bg-primary text-primary-foreground" 
                               : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                           )}>
-                            {vehiclePrices[v.value]} {selectedCurrency}
+                            {getDisplayPrice(vehiclePrices[v.value])} {selectedCurrency}
                           </span>
                         ) : isPricesLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -2752,7 +2779,30 @@ const CustomerHome = () => {
                         )}
                       </div>
                     </button>
-                  ))}
+                    {canConfirm && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="w-full h-12 sm:h-14 mt-2 gap-2 font-semibold rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-md"
+                        disabled={isLoading || isConfirming}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setConfirmingVehicle(v.value);
+                          await createReservationForVehicle(v.value);
+                          setConfirmingVehicle(null);
+                        }}
+                      >
+                        {isConfirming ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4" />
+                        )}
+                        {language === 'TR' ? 'Onayla' : 'Confirm'}
+                      </Button>
+                    )}
+                  </div>
+                  );
+                })}
                 </div>
               </div>
 
@@ -2807,7 +2857,7 @@ const CustomerHome = () => {
                         </span>
                       </div>
                     </div>
-                  ) : vehiclePrices[formData.vehicleType] ? (
+                  ) : getDisplayPrice(vehiclePrices[formData.vehicleType]) ? (
                     <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-4 rounded-xl border border-green-500/30">
                       {/* Outbound Price */}
                       <div className="flex items-center justify-between mb-2">
@@ -2820,7 +2870,7 @@ const CustomerHome = () => {
                           </span>
                         </div>
                         <span className="font-bold text-lg text-foreground">
-                          {vehiclePrices[formData.vehicleType]} {selectedCurrency}
+                          {getDisplayPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
                         </span>
                       </div>
 
@@ -2847,10 +2897,10 @@ const CustomerHome = () => {
                             </div>
                             <div className="text-right">
                               <span className="text-xs line-through text-muted-foreground mr-2">
-                                {vehiclePrices[formData.vehicleType]} {selectedCurrency}
+                                {getDisplayPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
                               </span>
                               <span className="font-bold text-lg text-green-600 dark:text-green-400">
-                                {getReturnPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
+                                {getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType]))} {selectedCurrency}
                               </span>
                             </div>
                           </div>
@@ -2869,15 +2919,15 @@ const CustomerHome = () => {
                           <div className="text-right">
                             <span className="font-bold text-xl text-green-700 dark:text-green-400">
                               {formData.hasReturnTrip 
-                                ? (vehiclePrices[formData.vehicleType] + getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)
-                                : vehiclePrices[formData.vehicleType]
+                                ? (getDisplayPrice(vehiclePrices[formData.vehicleType]) ?? 0) + (getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType])) ?? 0)
+                                : getDisplayPrice(vehiclePrices[formData.vehicleType])
                               } {selectedCurrency}
                             </span>
                             {formData.hasReturnTrip && (
                               <p className="text-xs text-green-600 dark:text-green-400">
                                 {language === 'TR' 
-                                  ? `${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${selectedCurrency} tasarruf!`
-                                  : `Save ${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${selectedCurrency}!`
+                                  ? `${Math.max(0, (getDisplayPrice(vehiclePrices[formData.vehicleType]) ?? 0) - (getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType])) ?? 0))} ${selectedCurrency} tasarruf!`
+                                  : `Save ${Math.max(0, (getDisplayPrice(vehiclePrices[formData.vehicleType]) ?? 0) - (getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType])) ?? 0))} ${selectedCurrency}!`
                                 }
                               </p>
                             )}

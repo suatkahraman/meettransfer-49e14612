@@ -42,6 +42,34 @@ const LivePriceCalculator = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [priceResult, setPriceResult] = useState<PriceResult | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [eurToDisplayRate, setEurToDisplayRate] = useState<number>(1);
+
+  const displayCurrency = (() => {
+    switch (language) {
+      case "TR": return "TRY";
+      case "RU": return "EUR";
+      case "DE": return "EUR";
+      case "FR": return "EUR";
+      case "AR": return "AED";
+      case "UK": return "EUR";
+      default: return "EUR";
+    }
+  })();
+
+  useEffect(() => {
+    if (displayCurrency === "EUR") {
+      setEurToDisplayRate(1);
+      return;
+    }
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: displayCurrency },
+    })
+      .then(({ data }) => { if (data?.rate) setEurToDisplayRate(data.rate); })
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToDisplayRate(fallback[displayCurrency] ?? 1);
+      });
+  }, [displayCurrency]);
 
   const getCurrencyByLanguage = (): string => {
     switch (language) {
@@ -66,7 +94,7 @@ const LivePriceCalculator = () => {
         body: {
           pickup,
           dropoff,
-          customerCurrency: getCurrencyByLanguage(),
+          customerCurrency: "EUR",
         },
       });
 
@@ -98,12 +126,14 @@ const LivePriceCalculator = () => {
       dropoff,
       vehicle: vehicleType,
     });
+    if (displayCurrency !== "EUR") params.set("currency", displayCurrency);
     navigate(`/quick-booking?${params.toString()}`);
   };
 
-  const formatPrice = (price: number, currency: string) => {
-    const symbol = CURRENCY_SYMBOLS[currency] || currency;
-    return `${symbol}${price.toLocaleString()}`;
+  const formatPrice = (priceEur: number) => {
+    const displayPrice = displayCurrency === "EUR" ? Math.round(priceEur) : Math.round(priceEur * eurToDisplayRate);
+    const sym = CURRENCY_SYMBOLS[displayCurrency] || displayCurrency;
+    return `${sym}${displayPrice.toLocaleString()}`;
   };
 
   const availablePrices = priceResult?.prices.filter(v => v.available) || [];
@@ -245,7 +275,7 @@ const LivePriceCalculator = () => {
                             </div>
 
                             <div className="text-2xl font-bold text-primary mb-4">
-                              {formatPrice(vehicle.price!, vehicle.currency)}
+                              {formatPrice(vehicle.price!)}
                             </div>
                           </div>
 

@@ -133,6 +133,7 @@ const BookingPage = () => {
   const urlBabySeatCount = searchParams.get("babySeatCount");
   const urlLuggageCount = searchParams.get("luggageCount");
   const urlPromoCode = searchParams.get("promoCode") || "";
+  const urlCurrency = searchParams.get("currency") || "";
   
   // Token booking data state
   const [tokenBookingData, setTokenBookingData] = useState<{
@@ -169,7 +170,11 @@ const BookingPage = () => {
   const [passengers, setPassengers] = useState(urlPassengers ? parseInt(urlPassengers) : 1);
   const [luggageCount, setLuggageCount] = useState(urlLuggageCount ? parseInt(urlLuggageCount) : 1);
   const [babySeatCount, setBabySeatCount] = useState(urlBabySeatCount ? parseInt(urlBabySeatCount) : 0);
-  const [preferredCurrency, setPreferredCurrency] = useState("EUR");
+  const [preferredCurrency, setPreferredCurrency] = useState(() => 
+    ["EUR","TRY","USD","GBP","AED","RUB","UAH","JPY","AUD"].includes(urlCurrency) ? urlCurrency : "EUR"
+  );
+  const [eurToPreferredRate, setEurToPreferredRate] = useState<number>(1);
+  const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
@@ -591,7 +596,7 @@ const BookingPage = () => {
             dropoff: effectiveDropoff,
             pickup_place_id: pickupPlaceId || undefined,
             dropoff_place_id: dropoffPlaceId || undefined,
-            customerCurrency: preferredCurrency,
+            customerCurrency: "EUR",
             pickup_date: effectiveDate || undefined,
           },
         });
@@ -627,7 +632,33 @@ const BookingPage = () => {
     fetchPrices();
     
     return () => { cancelled = true; };
-  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, effectiveDate, preferredCurrency, isHourlyBooking]);
+  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, effectiveDate, isHourlyBooking]);
+
+  // Fiyatlar her zaman EUR - para birimi değişince hemen o günün kuruyla dönüştür
+  useEffect(() => {
+    if (preferredCurrency === "EUR") {
+      setEurToPreferredRate(1);
+      return;
+    }
+    setIsLoadingExchangeRate(true);
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: preferredCurrency },
+    })
+      .then(({ data }) => {
+        if (data?.rate) setEurToPreferredRate(data.rate);
+      })
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToPreferredRate(fallback[preferredCurrency] ?? 1);
+      })
+      .finally(() => setIsLoadingExchangeRate(false));
+  }, [preferredCurrency]);
+
+  const getDisplayPrice = (priceEur: number | null): number | null => {
+    if (priceEur == null) return null;
+    if (preferredCurrency === "EUR") return Math.round(priceEur);
+    return Math.round(priceEur * eurToPreferredRate);
+  };
 
   // Extract city from address for hourly pricing
   const extractCityFromAddress = (address: string): string | null => {
