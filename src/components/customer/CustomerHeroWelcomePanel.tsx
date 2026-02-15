@@ -148,20 +148,20 @@ export function CustomerHeroWelcomePanel({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto -mx-3 sm:-mx-4 mb-4 sm:mb-6">
-      {/* Glassmorphism Panel - Sadece: Prompt+Cevap, Book Now, Aktif Rezervasyonlar */}
+    <div className="w-full max-w-6xl mx-auto -mx-3 sm:-mx-4 mb-4 sm:mb-6">
+      {/* Asistan Paneli - 3x büyük prompt ve cevap alanı */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl sm:rounded-3xl overflow-hidden mx-3 sm:mx-4 bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg"
+        className="rounded-2xl sm:rounded-3xl overflow-hidden mx-3 sm:mx-4 bg-white/60 dark:bg-white/10 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-xl"
       >
-        <div className="p-4 sm:p-6">
-          {/* 1. Prompt + Cevap - En üstte, geniş ve ferah */}
-          <div className="w-full max-w-4xl flex gap-3 mb-4">
+        <div className="p-5 sm:p-8">
+          {/* 1. Asistan Prompt - max-w-6xl, 3x büyük */}
+          <div className="w-full max-w-6xl flex gap-4 mb-5">
             {isDataLoading ? (
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-14 w-full max-w-4xl rounded-xl" />
-                <Skeleton className="h-20 w-full max-w-3xl rounded-xl" />
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-16 sm:h-20 w-full rounded-2xl" />
+                <Skeleton className="h-28 w-full rounded-2xl" />
               </div>
             ) : (
               <>
@@ -171,7 +171,7 @@ export function CustomerHeroWelcomePanel({
                   onChange={(e) => setPromptValue(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                   placeholder={placeholder}
-                  className="flex-1 min-w-0 w-full max-w-4xl h-12 sm:h-14 py-4 px-4 sm:px-5 rounded-xl border border-border/60 bg-background/80 text-foreground placeholder:text-muted-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all"
+                  className="flex-1 min-w-0 h-14 sm:h-20 py-5 px-5 sm:px-6 rounded-2xl border-2 border-amber-200 dark:border-zinc-600 bg-amber-50/80 dark:bg-zinc-800/80 text-foreground placeholder:text-muted-foreground text-lg sm:text-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                   disabled={isLoading}
                 />
                 <button
@@ -179,23 +179,23 @@ export function CustomerHeroWelcomePanel({
                   onClick={handleSubmit}
                   disabled={!promptValue.trim() || isLoading}
                   className={cn(
-                    'h-12 sm:h-14 px-5 rounded-xl font-medium transition-all shrink-0 flex items-center justify-center gap-2',
+                    'h-14 sm:h-20 px-6 sm:px-8 rounded-2xl font-semibold text-base sm:text-lg transition-all shrink-0 flex items-center justify-center gap-2',
                     promptValue.trim() && !isLoading
-                      ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg'
                       : 'bg-muted text-muted-foreground cursor-not-allowed'
                   )}
                 >
                   {isLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-6 w-6 sm:h-7 sm:w-7 animate-spin" />
                   ) : (
-                    <Send className="h-5 w-5" />
+                    <Send className="h-6 w-6 sm:h-7 sm:w-7" />
                   )}
                 </button>
               </>
             )}
           </div>
 
-          {/* Cevap alanı - prompt altında açılır */}
+          {/* Cevap alanı - 3x büyük Asistan Paneli hissi */}
           <AnimatePresence>
             {(answer || isLoading) && (
               <motion.div
@@ -204,13 +204,13 @@ export function CustomerHeroWelcomePanel({
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="mb-4 overflow-hidden"
+                className="mb-5 overflow-hidden"
               >
-                <div className="mt-2 rounded-xl bg-muted/50 border border-border/50 p-4 text-sm text-foreground">
+                <div className="mt-3 rounded-2xl bg-amber-50/80 dark:bg-zinc-800/80 border-2 border-amber-200/60 dark:border-zinc-600 p-6 sm:p-8 text-base sm:text-lg text-foreground leading-relaxed">
                   {isLoading ? (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {language === 'TR' ? 'Yanıt hazırlanıyor...' : 'Preparing response...'}
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <span>{language === 'TR' ? 'Yanıt hazırlanıyor...' : 'Preparing response...'}</span>
                     </div>
                   ) : (
                     <div className="whitespace-pre-wrap">{answer}</div>

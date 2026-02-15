@@ -62,6 +62,9 @@ import { useActivePromoCode } from '@/hooks/useActivePromoCode';
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LocationInputs } from '@/components/hero/LocationInputs';
+import { FloatingLabelDatePicker } from '@/components/ui/floating-label-datepicker';
+import { TimePickerAMPM } from '@/components/ui/time-picker-ampm';
 import { formatCurrency } from '@/lib/currency';
 
 // Time options for 30-minute intervals
@@ -1955,53 +1958,31 @@ const CustomerHome = () => {
                   </motion.div>
                 )}
               </AnimatePresence>
-              {/* Pick-up Point */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  {t('pickupPoint')}
-                </Label>
-                <GooglePlacesAutocomplete
-                  onPlaceSelected={(value, details?: PlaceDetails) => {
+              {/* Pick-up & Drop-off - Hero-style LocationInputs */}
+              <div className={cn((errors.pickup || errors.dropoff) && "animate-shake")}>
+                <LocationInputs
+                  pickup={formData.pickup}
+                  dropoff={formData.dropoff}
+                  onPickupSelected={(value, details?: PlaceDetails) => {
                     setFormData((prev) => ({ ...prev, pickup: value }));
-                    if (details?.lat != null && details?.lng != null) {
-                      setPickupCoords({ lat: details.lat, lng: details.lng });
-                    } else {
-                      setPickupCoords(null);
-                    }
+                    setPickupCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
                   }}
-                  placeholder={t('enterPickupPoint')}
-                  className={errors.pickup ? 'border-destructive' : ''}
-                  maxLength={200}
-                  disabled={isLoading}
-                />
-                {errors.pickup && <p className="text-sm text-destructive">{errors.pickup}</p>}
-              </div>
-
-              {/* Drop-off Location */}
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  {t('dropoffLocation')}
-                </Label>
-                <GooglePlacesAutocomplete
-                  onPlaceSelected={(value, details?: PlaceDetails) => {
+                  onDropoffSelected={(value, details?: PlaceDetails) => {
                     setFormData((prev) => ({ ...prev, dropoff: value }));
-                    if (details?.lat != null && details?.lng != null) {
-                      setDropoffCoords({ lat: details.lat, lng: details.lng });
-                    } else {
-                      setDropoffCoords(null);
-                    }
+                    setDropoffCoords(details?.lat != null && details?.lng != null ? { lat: details.lat, lng: details.lng } : null);
                   }}
-                  placeholder={t('hotelNameOrAddress')}
-                  className={errors.dropoff ? 'border-destructive' : ''}
-                  maxLength={200}
-                  disabled={isLoading}
+                  onSwapLocations={() => {
+                    setFormData((prev) => ({ ...prev, pickup: prev.dropoff, dropoff: prev.pickup }));
+                    setPickupCoords(dropoffCoords);
+                    setDropoffCoords(pickupCoords);
+                  }}
+                  language={language}
+                  pickupError={!!errors.pickup}
+                  dropoffError={!!errors.dropoff}
                 />
-                {errors.dropoff && <p className="text-sm text-destructive">{errors.dropoff}</p>}
               </div>
 
-              {/* Route Map Preview */}
+              {/* Route Map Preview - GoogleRouteMap */}
               {formData.pickup && formData.dropoff && formData.pickup.length >= 3 && formData.dropoff.length >= 3 && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -2060,94 +2041,111 @@ const CustomerHome = () => {
                 </p>
               </div>
 
-              {/* Date & Time - Enhanced Pickers */}
+              {/* Date & Time - Hero-style amber boxes */}
               <div className="grid grid-cols-2 gap-3">
-                {/* Date Picker */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    {t('date')}
-                  </Label>
-                  <Popover open={isPickupDateOpen} onOpenChange={setIsPickupDateOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        disabled={isLoading}
-                        className={cn(
-                          "w-full justify-start text-left font-normal h-11",
-                          !formData.date && "text-muted-foreground",
-                          errors.date && "border-destructive"
-                        )}
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {formData.date ? (
-                          format(new Date(formData.date), 'dd MMM yyyy', { locale: language === 'TR' ? tr : enUS })
-                        ) : (
-                          <span>{language === 'TR' ? 'Tarih Seçin' : 'Pick a date'}</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50" align="start">
-                      <DayPickerCalendar
-                        mode="single"
-                        selected={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
+                <div
+                  id="ride-date-field"
+                  className={cn(
+                    "flex h-[90px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
+                    errors.date && "ring-2 ring-destructive/30"
+                  )}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (!target.closest('button')) (e.currentTarget as HTMLElement).querySelector('button')?.click();
+                  }}
+                >
+                  <label className={cn("pointer-events-none mb-0.5 block text-base font-bold", errors.date ? "text-destructive" : "text-foreground")}>
+                    {t('pickupDate') || t('date')}
+                  </label>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Calendar className={cn("pointer-events-none h-6 w-6 flex-shrink-0", errors.date ? "text-destructive" : "text-foreground")} />
+                    <div className="min-w-0 flex-1 overflow-hidden">
+                      <FloatingLabelDatePicker
+                        label={language === 'TR' ? 'Tarih Seçin' : 'Pick a date'}
+                        date={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
                         onSelect={(date: Date | undefined) => {
                           if (date) {
                             const formattedDate = format(date, 'yyyy-MM-dd');
                             setFormData(prev => ({ ...prev, date: formattedDate }));
-                            // Clear return date if it's before the new pickup date
                             if (formData.returnDate && new Date(formData.returnDate) < date) {
                               setFormData(prev => ({ ...prev, returnDate: '' }));
-                              toast.warning(
-                                language === 'TR' 
-                                  ? 'Dönüş tarihi gidiş tarihinden önce olamaz. Lütfen yeni bir dönüş tarihi seçin.' 
-                                  : 'Return date cannot be before departure date. Please select a new return date.'
-                              );
+                              toast.warning(language === 'TR' ? 'Dönüş tarihi gidiş tarihinden önce olamaz.' : 'Return date cannot be before departure.');
                             }
                           }
-                          setIsPickupDateOpen(false);
                         }}
-                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                        initialFocus
-                        locale={language === 'TR' ? tr : enUS}
-                        className="p-3 pointer-events-auto"
+                        disabled={isLoading}
+                        disabledDates={(d) => d < new Date(new Date().setHours(0,0,0,0))}
+                        dateFormat="EEE, dd MMM"
+                        triggerClassName="h-auto w-full justify-start truncate border-0 bg-transparent p-0 text-xl font-bold text-foreground shadow-none hover:bg-transparent focus:ring-0"
+                        icon={<span />}
                       />
-                    </PopoverContent>
-                  </Popover>
-                  {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
+                    </div>
+                  </div>
+                  {errors.date && <p className="pointer-events-none mt-0.5 text-xs font-medium text-destructive">{t('required') || 'Required'}</p>}
                 </div>
-                
-                {/* Time Picker */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-primary" />
-                    {t('time')}
-                  </Label>
-                  <Select
-                    value={formData.time}
-                    onValueChange={(value) => setFormData({...formData, time: value})}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className={cn(
-                      "h-11",
-                      errors.time && "border-destructive"
-                    )}>
-                      <SelectValue placeholder={language === 'TR' ? 'Saat Seçin' : 'Pick a time'} />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {TIME_OPTIONS.map((time) => (
-                        <SelectItem key={time} value={time}>
-                          <span className="flex items-center gap-2">
-                            <Clock className="h-3 w-3 text-muted-foreground" />
-                            {time}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.time && <p className="text-sm text-destructive">{errors.time}</p>}
+                <div
+                  id="ride-time-field"
+                  className={cn(
+                    "flex h-[90px] cursor-pointer flex-col justify-center overflow-hidden rounded-xl border border-amber-200 bg-amber-50 p-3 transition-all hover:bg-amber-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700",
+                    errors.time && "ring-2 ring-destructive/30"
+                  )}
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (!target.closest('button')) (e.currentTarget as HTMLElement).querySelector('button')?.click();
+                  }}
+                >
+                  <label className={cn("pointer-events-none mb-0.5 block text-base font-bold", errors.time ? "text-destructive" : "text-foreground")}>
+                    {t('pickupTime') || t('time')}
+                  </label>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Clock className={cn("pointer-events-none h-6 w-6 flex-shrink-0", errors.time ? "text-destructive" : "text-foreground")} />
+                    <TimePickerAMPM
+                      value={formData.time}
+                      onValueChange={(v) => setFormData(prev => ({ ...prev, time: v }))}
+                      triggerClassName="text-xl font-bold text-foreground"
+                      labels={{ hour: t("timeHour") || "Hour", minute: t("timeMinute") || "Min", save: t("timeSave") || "Save" }}
+                    />
+                  </div>
+                  {errors.time && <p className="pointer-events-none mt-0.5 text-xs font-medium text-destructive">{t('required') || 'Required'}</p>}
                 </div>
               </div>
+
+              {/* Get Quote - Hero-style primary button */}
+              <Button
+                type="button"
+                onClick={() => {
+                  const missing: string[] = [];
+                  if (!formData.pickup) missing.push(t('pickupPoint') || 'Pickup');
+                  if (!formData.dropoff) missing.push(t('dropoffLocation') || 'Drop-off');
+                  if (!formData.date) missing.push(t('pickupDate') || 'Date');
+                  if (!formData.time) missing.push(t('pickupTime') || 'Time');
+                  if (missing.length > 0) {
+                    setErrors(prev => ({
+                      ...prev,
+                      pickup: !formData.pickup,
+                      dropoff: !formData.dropoff,
+                      date: !formData.date,
+                      time: !formData.time,
+                    }));
+                    toast.error(`${t('pleaseFilAllFields') || 'Please fill in'}: ${missing.join(', ')}`);
+                    return;
+                  }
+                  setErrors({});
+                  document.getElementById('vehicle-list-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                disabled={isLoading}
+                className="group h-[90px] w-full touch-manipulation rounded-xl border-0 bg-gradient-to-r from-primary via-primary to-primary/90 text-xl font-bold shadow-lg shadow-primary/30 transition-all duration-300 hover:from-primary/90 hover:to-primary hover:shadow-xl hover:shadow-primary/40"
+              >
+                {isPricesLoading ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <>
+                    <Zap className="mr-2 h-5 w-5 animate-pulse" />
+                    <span className="tracking-wide">{t('getQuote')}</span>
+                    <ArrowRight className="ml-2 h-6 w-6 transition-transform duration-300 group-hover:translate-x-1.5" />
+                  </>
+                )}
+              </Button>
 
               {/* Return Trip Toggle with Discount */}
               <div className="space-y-3">
@@ -2443,12 +2441,21 @@ const CustomerHome = () => {
                 </div>
               </div>
 
-              {/* Vehicle Type - Visual Cards */}
-              <div className="space-y-3">
+              {/* Vehicle Type - Hero-style cards, Get Quote sonrası burada yüklenir */}
+              <div id="vehicle-list-section" className="scroll-mt-24 space-y-3">
                 <Label className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
                   {t('vehicleType')}
                 </Label>
+                {/* Loading state - aynı sayfada yükleme animasyonu */}
+                {isPricesLoading && formData.pickup && formData.dropoff && Object.keys(vehiclePrices).length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-12 rounded-xl border-2 border-dashed border-amber-200 bg-amber-50/50 dark:border-zinc-600 dark:bg-zinc-800/50">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {language === 'TR' ? 'Fiyatlar yükleniyor...' : 'Loading prices...'}
+                    </p>
+                  </div>
+                )}
                 {minibusRequired && (
                   <div className="flex items-center gap-2 text-amber-600 text-xs bg-amber-100 dark:bg-amber-900/30 p-2 rounded-lg">
                     <Briefcase className="h-4 w-4" />
@@ -2466,10 +2473,10 @@ const CustomerHome = () => {
                     <div
                       key={v.value}
                       className={cn(
-                        "relative overflow-hidden rounded-xl p-3 transition-all duration-200 text-left border-2",
+                        "relative overflow-hidden rounded-xl p-4 transition-all duration-200 text-left border-2",
                         formData.vehicleType === v.value
                           ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/30"
-                          : "border-border bg-card hover:bg-muted/50 hover:border-primary/40",
+                          : "border-amber-200 bg-amber-50/80 dark:border-zinc-700 dark:bg-zinc-800/80 hover:bg-amber-200/80 dark:hover:bg-zinc-700",
                         (minibusRequired && v.value !== 'minibus') && "opacity-50"
                       )}
                     >
@@ -2549,8 +2556,8 @@ const CustomerHome = () => {
                       {canConfirm && (
                         <Button
                           type="button"
-                          size="sm"
-                          className="w-full mt-2 gap-1.5"
+                          size="lg"
+                          className="w-full mt-3 h-12 font-bold rounded-xl bg-gradient-to-r from-primary to-primary/90 shadow-lg gap-2"
                           disabled={isLoading || isConfirming}
                           onClick={async (e) => {
                             e.stopPropagation();
@@ -2560,9 +2567,9 @@ const CustomerHome = () => {
                           }}
                         >
                           {isConfirming ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="h-5 w-5 animate-spin" />
                           ) : (
-                            <CheckCircle className="h-4 w-4" />
+                            <CheckCircle className="h-5 w-5" />
                           )}
                           {language === 'TR' ? 'Onayla' : 'Confirm'}
                         </Button>
