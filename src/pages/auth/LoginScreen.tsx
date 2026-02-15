@@ -338,9 +338,8 @@ const LoginScreen = () => {
         }
       }
       
-      // Tam sayfa yonlendirme - AuthContext/useUserRole senkronizasyonu icin
       const path = pendingRole === 'admin' ? '/admin' : pendingRole === 'agency' ? '/agency' : '/customer';
-      window.location.replace(path);
+      navigate(path, { replace: true });
     }
   };
 
@@ -463,8 +462,7 @@ const LoginScreen = () => {
           registerTrustedDevice(authData.user.id).catch(() => {});
           clearSuppressAuthRedirect();
           await supabase.auth.refreshSession();
-          await new Promise((r) => setTimeout(r, 150));
-          window.location.replace('/driver');
+          navigate('/driver', { replace: true });
           return;
         }
 
@@ -654,7 +652,7 @@ const LoginScreen = () => {
             path = paths[data.role as string] ?? '/customer';
           }
         }
-        window.location.replace(path);
+        navigate(path, { replace: true });
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

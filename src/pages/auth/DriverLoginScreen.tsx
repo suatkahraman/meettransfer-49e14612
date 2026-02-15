@@ -317,14 +317,8 @@ const DriverLoginScreen = () => {
         warmDriverChunks();
         registerTrustedDevice(authData.user.id).catch(() => {});
 
-        // iOS Safari: Storage yazmasının tamamlanması için kısa gecikme (ITP/WebKit uyumluluğu)
-        // window.location.replace hemen yapılırsa yeni sayfa yüklendiğinde session henüz storage'da olmayabilir
-        const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
-        if (isIOS) {
-          await new Promise((r) => setTimeout(r, 150));
-        }
-
-        window.location.replace('/driver');
+        // Full reload yerine navigate: Session bellekte kalır, iOS storage okuma sorunu önlenir.
+        navigate('/driver', { replace: true });
         return;
       }
     } catch (error) {
@@ -436,12 +430,7 @@ const DriverLoginScreen = () => {
       } catch (refreshErr) {
         console.warn('[DriverLogin] refreshSession failed:', refreshErr);
       }
-      // iOS Safari: Storage flush için kısa gecikme
-      const isIOS = /iPhone|iPad|iPod|Macintosh.*Mobile/i.test(navigator.userAgent);
-      if (isIOS) {
-        await new Promise((r) => setTimeout(r, 150));
-      }
-      window.location.replace('/driver');
+      navigate('/driver', { replace: true });
     } catch (err) {
       if (err instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};

@@ -308,8 +308,7 @@ const AgencyLoginScreen = () => {
         } else {
           await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
           await supabase.auth.refreshSession();
-          await new Promise((r) => setTimeout(r, 150));
-          window.location.replace('/agency');
+          navigate('/agency', { replace: true });
           return;
         }
       }
