@@ -28,6 +28,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays, Calculator } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function priceCoversMonth(price: { valid_from?: string | null; valid_to?: string | null }, month: number, year: number): boolean {
   if (!price.valid_from || !price.valid_to) return true;
@@ -223,6 +224,7 @@ const AdminRegionPrices = () => {
   const [isMonthlyUpdateDialogOpen, setIsMonthlyUpdateDialogOpen] = useState(false);
   const [isMonthlyIntercityUpdateDialogOpen, setIsMonthlyIntercityUpdateDialogOpen] = useState(false);
   const [editingPrice, setEditingPrice] = useState<RegionPrice | null>(null);
+  const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
   
   // Airport form state - now supports all 4 vehicles at once
   const [formCity, setFormCity] = useState('');
@@ -639,6 +641,69 @@ const AdminRegionPrices = () => {
     return matchesSearch && matchesCity && matchesPriceType && matchesMonth;
   });
 
+  const toggleSelectAll = () => {
+    if (selectedPrices.length === filteredPrices.length) {
+      setSelectedPrices([]);
+    } else {
+      setSelectedPrices(filteredPrices.map(p => p.id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    if (selectedPrices.includes(id)) {
+      setSelectedPrices(selectedPrices.filter(p => p !== id));
+    } else {
+      setSelectedPrices([...selectedPrices, id]);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!selectedPrices.length) return;
+    if (!confirm(`${selectedPrices.length} adet fiyat kaydını silmek istediğinizden emin misiniz?`)) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('region_prices')
+        .delete()
+        .in('id', selectedPrices);
+
+      if (error) throw error;
+      toast.success(`${selectedPrices.length} fiyat silindi`);
+      setSelectedPrices([]);
+      fetchPrices();
+    } catch (error) {
+      console.error('Error deleting prices:', error);
+      toast.error('Fiyatlar silinirken hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleFilteredDelete = async () => {
+    if (filteredPrices.length === 0) return;
+    if (!confirm(`Filtrelenen ${filteredPrices.length} adet fiyat kaydını silmek istediğinizden emin misiniz?`)) return;
+
+    setLoading(true);
+    try {
+      const idsToDelete = filteredPrices.map(p => p.id);
+      const { error } = await supabase
+        .from('region_prices')
+        .delete()
+        .in('id', idsToDelete);
+
+      if (error) throw error;
+      toast.success(`${idsToDelete.length} fiyat silindi`);
+      setSelectedPrices([]);
+      fetchPrices();
+    } catch (error) {
+      console.error('Error deleting prices:', error);
+      toast.error('Fiyatlar silinirken hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredIntercityPrices = intercityPrices.filter(price => {
     const matchesSearch = !intercitySearchTerm ||
       price.from_city.toLowerCase().includes(intercitySearchTerm.toLowerCase()) ||
@@ -1009,6 +1074,16 @@ const AdminRegionPrices = () => {
                         ))}
                       </SelectContent>
                     </Select>
+
+                    {selectedPrices.length > 0 ? (
+                      <Button variant="destructive" onClick={handleBulkDelete}>
+                        Seçilenleri Sil ({selectedPrices.length})
+                      </Button>
+                    ) : (filteredPrices.length > 0 && filteredPrices.length < prices.length) ? (
+                      <Button variant="destructive" onClick={handleFilteredDelete}>
+                        Filtrelenenleri Sil ({filteredPrices.length})
+                      </Button>
+                    ) : null}
                   </div>
                   
                   {/* Active filter summary + Toplu Sil (şehir, kategori, ay seçildikten sonra aktif) */}
@@ -1062,6 +1137,12 @@ const AdminRegionPrices = () => {
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead className="w-[50px]">
+                              <Checkbox 
+                                checked={filteredPrices.length > 0 && selectedPrices.length === filteredPrices.length}
+                                onCheckedChange={toggleSelectAll}
+                              />
+                            </TableHead>
                             <TableHead>Şehir</TableHead>
                             <TableHead>Havalimanı</TableHead>
                             <TableHead>İlçe/Bölge</TableHead>
@@ -1079,6 +1160,12 @@ const AdminRegionPrices = () => {
                               : null;
                             return (
                               <TableRow key={price.id}>
+                                <TableCell>
+                                  <Checkbox 
+                                    checked={selectedPrices.includes(price.id)}
+                                    onCheckedChange={() => toggleSelect(price.id)}
+                                  />
+                                </TableCell>
                                 <TableCell className="font-medium">{price.city}</TableCell>
                                 <TableCell className="text-muted-foreground">{price.airport || '-'}</TableCell>
                                 <TableCell>{price.district}</TableCell>
@@ -1111,9 +1198,15 @@ const AdminRegionPrices = () => {
                           : null;
                         return (
                           <Card key={price.id} className="p-4">
-                            <div className="flex justify-between items-start gap-2">
-                              <div className="min-w-0 flex-1">
-                                <div className="font-medium text-sm">{price.city}</div>
+                            <div className="flex items-start gap-3">
+                              <Checkbox 
+                                className="mt-1"
+                                checked={selectedPrices.includes(price.id)}
+                                onCheckedChange={() => toggleSelect(price.id)}
+                              />
+                              <div className="flex-1 flex justify-between items-start gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-medium text-sm">{price.city}</div>
                                 <div className="text-xs text-muted-foreground mt-0.5">{price.airport || '-'} · {price.district}</div>
                                 <div className="flex items-center gap-2 mt-2 flex-wrap">
                                   <span className="text-xs text-muted-foreground">{getVehicleLabel(price.vehicle_type)}</span>
@@ -1131,6 +1224,7 @@ const AdminRegionPrices = () => {
                                   <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(price.id)}><Trash2 className="h-4 w-4" /></Button>
                                 </div>
                               </div>
+                            </div>
                             </div>
                           </Card>
                         );

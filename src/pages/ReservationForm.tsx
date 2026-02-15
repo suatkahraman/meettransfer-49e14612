@@ -2527,7 +2527,7 @@ const ReservationForm = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  {t('phone')}
+                  {t('phone')} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   placeholder={t('phonePlaceholder')}

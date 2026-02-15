@@ -336,7 +336,7 @@ useEffect(() => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">{t('phone')}</Label>
+                <Label htmlFor="phone">{t('phone')} <span className="text-destructive">*</span></Label>
                 <Input 
                   id="phone" 
                   name="phone" 
