@@ -897,6 +897,9 @@ const LoginScreen = () => {
           return (
             <Card className="w-full max-w-md">
               <CardHeader className="text-center space-y-2">
+                <div className="rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-sm font-medium text-primary">
+                  {t('loginWelcomeFeature')}
+                </div>
                 <CardTitle className="text-2xl md:text-3xl font-serif">{t('welcomeBack')}</CardTitle>
                 <CardDescription>{language === 'TR' ? 'Giriş yapmak için hesap türünü seçin' : 'Select account type to sign in'}</CardDescription>
               </CardHeader>

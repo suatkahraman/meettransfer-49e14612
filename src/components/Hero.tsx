@@ -97,6 +97,9 @@ export const Hero = () => {
               {/* Header inside the card - mobile-first padding */}
               <div className="p-4 pb-2 pt-6 sm:p-5 sm:pb-3 sm:pt-4 md:p-6">
                 <HeroHeader language={language} />
+                <p className="mt-2 text-sm font-semibold text-primary/90 text-center sm:text-left">
+                  {tSafe("heroAITagline", "Meet AI: Plan Your Journey, Book with One Click!")}
+                </p>
                 <Suspense fallback={<div className="mt-3 h-[72px]" />}>
                   <InstantBookingInfo language={language} className="mt-3" />
                 </Suspense>

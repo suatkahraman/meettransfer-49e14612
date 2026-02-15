@@ -1,4 +1,4 @@
-import { Shield, Clock, Star, Headphones, Sparkles, CheckCircle2 } from "lucide-react";
+import { Shield, Clock, Star, Headphones, Sparkles, CheckCircle2, Bot, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
 
@@ -155,19 +155,23 @@ const featureIcons = [
   { icon: Clock, gradient: "from-purple-500/20 to-pink-500/20", iconColor: "text-purple-500" },
   { icon: Star, gradient: "from-amber-500/20 to-orange-500/20", iconColor: "text-amber-500" },
   { icon: Headphones, gradient: "from-emerald-500/20 to-teal-500/20", iconColor: "text-emerald-500" },
+  { icon: Bot, gradient: "from-violet-500/20 to-indigo-500/20", iconColor: "text-violet-500" },
+  { icon: Zap, gradient: "from-amber-500/20 to-yellow-500/20", iconColor: "text-amber-500" },
 ];
 
 export const Features = () => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const lang = language || "EN";
 
   const ft = (key: string) => featureTranslations[key]?.[lang] || featureTranslations[key]?.["EN"] || key;
 
   const features = [
-    { titleKey: "safeSecure", descKey: "safeSecureDesc" },
-    { titleKey: "availability247", descKey: "availability247Desc" },
-    { titleKey: "premiumFleet", descKey: "premiumFleetDesc" },
-    { titleKey: "support247", descKey: "support247Desc" },
+    { titleKey: "safeSecure", descKey: "safeSecureDesc", useT: false },
+    { titleKey: "availability247", descKey: "availability247Desc", useT: false },
+    { titleKey: "premiumFleet", descKey: "premiumFleetDesc", useT: false },
+    { titleKey: "support247", descKey: "support247Desc", useT: false },
+    { titleKey: "benefitAIAssistant", descKey: "benefitAIAssistantDesc", useT: true },
+    { titleKey: "benefitSeamlessBooking", descKey: "benefitSeamlessBookingDesc", useT: true },
   ];
 
   return (
@@ -207,7 +211,7 @@ export const Features = () => {
         </motion.div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => {
             const IconData = featureIcons[index];
             return (
@@ -235,12 +239,12 @@ export const Features = () => {
 
                     {/* Title */}
                     <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
-                      {ft(feature.titleKey)}
+                      {feature.useT ? t(feature.titleKey) : ft(feature.titleKey)}
                     </h3>
 
                     {/* Description */}
                     <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                      {ft(feature.descKey)}
+                      {feature.useT ? t(feature.descKey) : ft(feature.descKey)}
                     </p>
 
                     {/* Check icon */}

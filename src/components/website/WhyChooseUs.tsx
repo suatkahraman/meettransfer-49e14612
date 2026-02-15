@@ -1,4 +1,4 @@
-import { Clock, Shield, CreditCard, Plane, Baby, Wifi, Car, Award, HeadphonesIcon, XCircle, CheckCircle2, Sparkles } from "lucide-react";
+import { Clock, Shield, CreditCard, Plane, Baby, Wifi, Car, Award, HeadphonesIcon, XCircle, CheckCircle2, Sparkles, Bot, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 import { motion } from "framer-motion";
@@ -363,14 +363,32 @@ const benefits: Benefit[] = [
     gradient: "from-teal-500/20 to-green-500/20",
     iconColor: "text-teal-500",
   },
+  {
+    icon: Bot,
+    titleKey: "benefitAIAssistant",
+    descKey: "benefitAIAssistantDesc",
+    gradient: "from-violet-500/20 to-indigo-500/20",
+    iconColor: "text-violet-500",
+    useMainI18n: true,
+  },
+  {
+    icon: Zap,
+    titleKey: "benefitSeamlessBooking",
+    descKey: "benefitSeamlessBookingDesc",
+    gradient: "from-amber-500/20 to-yellow-500/20",
+    iconColor: "text-amber-500",
+    useMainI18n: true,
+  },
 ];
 
 const WhyChooseUs = () => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { rating } = useGoogleReviewStats();
   const lang = language || "EN";
 
   const wt = (key: string) => whyTranslations[key]?.[lang] || whyTranslations[key]?.["EN"] || key;
+  const resolveText = (benefit: { titleKey: string; descKey: string; useMainI18n?: boolean }, key: "titleKey" | "descKey") =>
+    (benefit as { useMainI18n?: boolean }).useMainI18n ? t(benefit[key]) : wt(benefit[key]);
 
   return (
     <section className="py-20 md:py-28 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden">
@@ -456,7 +474,7 @@ const WhyChooseUs = () => {
                   <div className="flex-1 relative z-10">
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="font-bold text-foreground group-hover:text-primary transition-colors">
-                        {wt(benefit.titleKey)}
+                        {resolveText(benefit, "titleKey")}
                       </h3>
                       {benefit.highlight && (
                         <span className="px-2.5 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
@@ -465,7 +483,7 @@ const WhyChooseUs = () => {
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      {wt(benefit.descKey)}
+                      {resolveText(benefit, "descKey")}
                     </p>
                   </div>
                   <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-1 relative z-10" />

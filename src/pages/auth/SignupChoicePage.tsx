@@ -24,6 +24,9 @@ const SignupChoicePage = () => {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4 py-8">
         <div className="w-full max-w-lg space-y-6">
+          <div className="rounded-lg bg-primary/10 border border-primary/20 px-4 py-3 text-center text-sm font-medium text-primary">
+            {t('loginWelcomeFeature')}
+          </div>
           <div className="text-center space-y-2">
             <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
               {t('signupChoiceTitle')}
