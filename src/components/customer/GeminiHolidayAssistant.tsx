@@ -11,6 +11,7 @@ import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
+if (typeof window !== "undefined") console.log("Anahtar Kontrol:", !!import.meta.env.VITE_GEMINI_API_KEY);
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 interface ReservationContext {

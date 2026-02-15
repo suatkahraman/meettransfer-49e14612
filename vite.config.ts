@@ -395,9 +395,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Vercel: VITE_GEMINI_API_KEY zorla (hardcode) build sırasında enjekte edilir
+  // Vercel: VITE_GEMINI_API_KEY zorla enjekte edilir
   define: {
-    "import.meta.env.VITE_GEMINI_API_KEY": JSON.stringify(process.env.VITE_GEMINI_API_KEY ?? ""),
+    "import.meta.env.VITE_GEMINI_API_KEY": JSON.stringify(process.env.VITE_GEMINI_API_KEY),
   },
   envPrefix: "VITE_",
   build: {
