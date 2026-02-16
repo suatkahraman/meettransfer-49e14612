@@ -1,0 +1,78 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="vitoInterior" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="premiumLeather" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2c1810;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3d2317;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4a2c1a;stop-opacity:1" />
+    </linearGradient>
+    <filter id="premiumGlow">
+      <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Premium interior background -->
+  <rect width="800" height="450" fill="#0a0a0a"/>
+  
+  <!-- Spacious minivan dashboard -->
+  <path d="M0 180 Q400 160 800 180 L800 450 L0 450 Z" fill="url(#vitoInterior)" stroke="#4a90e2" stroke-width="3"/>
+  
+  <!-- Large center console display -->
+  <rect x="250" y="200" width="300" height="150" fill="#1a1a2e" stroke="#00d4ff" stroke-width="3" rx="15" filter="url(#premiumGlow)"/>
+  <rect x="270" y="220" width="260" height="110" fill="#0f3460" opacity="0.9"/>
+  
+  <!-- Digital instrument cluster -->
+  <rect x="80" y="200" width="200" height="90" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="8"/>
+  <text x="180" y="245" font-family="Arial" font-size="16" fill="#00d4ff" text-anchor="middle">VITO PREMIUM</text>
+  <text x="180" y="265" font-family="Arial" font-size="12" fill="#5dade2" text-anchor="middle">Digital Cluster</text>
+  
+  <!-- Premium leather front seats -->
+  <path d="M80 320 Q100 300 160 300 L260 300 Q280 310 280 340 L260 380 L80 380 Z" fill="url(#premiumLeather)" stroke="#8b4513" stroke-width="2"/>
+  <path d="M520 320 Q540 300 600 300 L700 300 Q720 310 720 340 L700 380 L520 380 Z" fill="url(#premiumLeather)" stroke="#8b4513" stroke-width="2"/>
+  
+  <!-- Spacious rear bench seat -->
+  <path d="M160 380 Q250 360 400 360 L550 360 Q640 380 620 420 L180 420 Z" fill="url(#premiumLeather)" stroke="#8b4513" stroke-width="2"/>
+  
+  <!-- Individual rear captain chairs -->
+  <path d="M180 380 Q200 360 260 360 L340 360 Q360 370 360 400 L340 430 L180 430 Z" fill="url(#premiumLeather)" stroke="#8b4513" stroke-width="1"/>
+  <path d="M440 380 Q460 360 520 360 L600 360 Q620 370 620 400 L600 430 L440 430 Z" fill="url(#premiumLeather)" stroke="#8b4513" stroke-width="1"/>
+  
+  <!-- Premium ambient LED lighting -->
+  <rect x="0" y="300" width="800" height="4" fill="#00d4ff" opacity="0.8" filter="url(#premiumGlow)"/>
+  <rect x="0" y="380" width="800" height="3" fill="#9b59b6" opacity="0.7"/>
+  <rect x="0" y="430" width="800" height="2" fill="#f39c12" opacity="0.6"/>
+  
+  <!-- Door panels with premium LED -->
+  <rect x="60" y="320" width="12" height="70" fill="#00d4ff" opacity="0.7"/>
+  <rect x="728" y="320" width="12" height="70" fill="#00d4ff" opacity="0.7"/>
+  
+  <!-- Spacious headliner -->
+  <path d="M0 180 Q400 140 800 180 L780 200 Q400 160 20 200 Z" fill="#2c3e50" opacity="0.4"/>
+  
+  <!-- Multiple climate control zones -->
+  <rect x="200" y="350" width="80" height="12" fill="#34495e" rx="6"/>
+  <rect x="320" y="350" width="80" height="12" fill="#34495e" rx="6"/>
+  <rect x="480" y="350" width="80" height="12" fill="#34495e" rx="6"/>
+  
+  <!-- Premium USB and charging ports -->
+  <circle cx="120" cy="360" r="4" fill="#00d4ff"/>
+  <circle cx="150" cy="360" r="4" fill="#00d4ff"/>
+  <circle cx="680" cy="360" r="4" fill="#00d4ff"/>
+  <circle cx="650" cy="360" r="4" fill="#00d4ff"/>
+  <circle cx="300" cy="360" r="4" fill="#00d4ff"/>
+  <circle cx="500" cy="360" r="4" fill="#00d4ff"/>
+  
+  <!-- Premium seat stitching -->
+  <line x1="100" y1="320" x2="260" y2="320" stroke="#8b4513" stroke-width="2" opacity="0.6"/>
+  <line x1="540" y1="320" x2="700" y2="320" stroke="#8b4513" stroke-width="2" opacity="0.6"/>
+  <line x1="200" y1="380" x2="600" y2="380" stroke="#8b4513" stroke-width="1" opacity="0.5"/>
+  
+  <!-- SEO Alt Text: Futuristic Mercedes Vito minivan premium interior with black leather seats and ambient lighting -->
+</svg>

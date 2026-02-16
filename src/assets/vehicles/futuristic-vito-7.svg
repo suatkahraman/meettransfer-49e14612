@@ -1,0 +1,63 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="vitoNightBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="nightVitoLight" cx="70%" cy="30%" r="40%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#4a90e2;stop-opacity:0.1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Futuristic night city background -->
+  <rect width="800" height="450" fill="url(#vitoNightBg)"/>
+  
+  <!-- City skyline -->
+  <rect x="0" y="100" width="150" height="350" fill="#2c3e50" opacity="0.4"/>
+  <rect x="200" y="80" width="120" height="370" fill="#34495e" opacity="0.5"/>
+  <rect x="400" y="120" width="100" height="330" fill="#2c3e50" opacity="0.4"/>
+  <rect x="600" y="60" width="140" height="390" fill="#34495e" opacity="0.5"/>
+  
+  <!-- Building lights -->
+  <circle cx="50" cy="150" r="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="100" cy="200" r="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="250" cy="120" r="3" fill="#00d4ff" opacity="0.7"/>
+  <circle cx="300" cy="180" r="3" fill="#00d4ff" opacity="0.7"/>
+  <circle cx="450" cy="160" r="3" fill="#f39c12" opacity="0.7"/>
+  <circle cx="650" cy="100" r="3" fill="#9b59b6" opacity="0.7"/>
+  
+  <!-- Futuristic Mercedes Vito in night city -->
+  <path d="M160 290 Q190 230 260 230 L540 230 Q620 230 650 290 L670 350 L630 380 L180 380 L140 350 Z" fill="#0a0a0a" stroke="#00d4ff" stroke-width="3"/>
+  <path d="M180 240 Q210 210 290 210 L510 210 Q590 210 620 240 L610 290 L190 290 Z" fill="#2c3e50" opacity="0.8" stroke="#5dade2" stroke-width="2"/>
+  
+  <!-- Professional night Vito chauffeur -->
+  <rect x="290" y="200" width="45" height="65" fill="#2c3e50" rx="22"/>
+  <circle cx="312" cy="190" r="16" fill="#34495e"/>
+  
+  <!-- LED street lighting -->
+  <circle cx="400" cy="200" r="55" fill="url(#nightVitoLight)" opacity="0.6"/>
+  
+  <!-- Large Vito wheels -->
+  <circle cx="240" cy="380" r="28" fill="#2c3e50" stroke="#7f8c8d" stroke-width="4"/>
+  <circle cx="580" cy="380" r="28" fill="#2c3e50" stroke="#7f8c8d" stroke-width="4"/>
+  <circle cx="240" cy="380" r="17" fill="#34495e"/>
+  <circle cx="580" cy="380" r="17" fill="#34495e"/>
+  
+  <!-- Futuristic Vito headlights -->
+  <ellipse cx="610" cy="270" rx="16" ry="9" fill="#00d4ff" opacity="0.9"/>
+  <ellipse cx="190" cy="270" rx="13" ry="7" fill="#ff6b35" opacity="0.8"/>
+  
+  <!-- LED light strips for Vito -->
+  <rect x="590" y="260" width="38" height="4" fill="#00d4ff" opacity="0.8"/>
+  <rect x="185" y="260" width="28" height="4" fill="#ff6b35" opacity="0.8"/>
+  
+  <!-- Ground reflection -->
+  <ellipse cx="400" cy="400" rx="320" ry="22" fill="#00d4ff" opacity="0.1"/>
+  
+  <!-- Night service elements -->
+  <rect x="350" y="320" width="100" height="35" fill="#9b59b6" opacity="0.4" rx="6"/>
+  <text x="400" y="345" font-family="Arial" font-size="13" fill="#ffffff" text-anchor="middle">NIGHT SERVICE</text>
+  
+  <!-- SEO Alt Text: Futuristic Mercedes Vito minivan night city transfer with professional chauffeur and leather interior -->
+</svg>

@@ -1,0 +1,64 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="vitoGroupBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8e44ad;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="groupVitoLight" cx="50%" cy="60%" r="50%">
+      <stop offset="0%" style="stop-color:#f39c12;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#9b59b6;stop-opacity:0.3" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Group travel background -->
+  <rect width="800" height="450" fill="url(#vitoGroupBg)"/>
+  
+  <!-- Group atmosphere elements -->
+  <circle cx="200" cy="160" r="55" fill="url(#groupVitoLight)" opacity="0.5"/>
+  <circle cx="600" cy="180" r="50" fill="url(#groupVitoLight)" opacity="0.4"/>
+  
+  <!-- Futuristic Mercedes Vito for group -->
+  <path d="M160 290 Q190 230 260 230 L540 230 Q620 230 650 290 L670 350 L630 380 L180 380 L140 350 Z" fill="#0a0a0a" stroke="#f39c12" stroke-width="3"/>
+  <path d="M180 240 Q210 210 290 210 L510 210 Q590 210 620 240 L610 290 L190 290 Z" fill="#2c3e50" opacity="0.8" stroke="#f39c12" stroke-width="2"/>
+  
+  <!-- Group silhouettes -->
+  <rect x="240" y="195" width="35" height="60" fill="#2c3e50" rx="17"/>
+  <rect x="285" y="200" width="30" height="55" fill="#2c3e50" rx="15"/>
+  <rect x="325" y="198" width="28" height="58" fill="#2c3e50" rx="14"/>
+  <rect x="365" y="202" width="32" height="54" fill="#2c3e50" rx="16"/>
+  <rect x="410" y="196" width="26" height="62" fill="#2c3e50" rx="13"/>
+  <rect x="450" y="199" width="29" height="57" fill="#2c3e50" rx="14"/>
+  <circle cx="257" cy="185" r="14" fill="#34495e"/>
+  <circle cx="300" cy="187" r="12" fill="#34495e"/>
+  <circle cx="339" cy="185" r="11" fill="#34495e"/>
+  <circle cx="381" cy="189" r="13" fill="#34495e"/>
+  <circle cx="423" cy="186" r="10" fill="#34495e"/>
+  <circle cx="464" cy="188" r="11" fill="#34495e"/>
+  
+  <!-- Group ambient lighting -->
+  <rect x="0" y="300" width="800" height="4" fill="#f39c12" opacity="0.6"/>
+  <rect x="0" y="350" width="800" height="2" fill="#9b59b6" opacity="0.5"/>
+  
+  <!-- Vehicle wheels -->
+  <circle cx="250" cy="380" r="28" fill="#2c3e50" stroke="#7f8c8d" stroke-width="4"/>
+  <circle cx="580" cy="380" r="28" fill="#2c3e50" stroke="#7f8c8d" stroke-width="4"/>
+  <circle cx="250" cy="380" r="17" fill="#34495e"/>
+  <circle cx="580" cy="380" r="17" fill="#34495e"/>
+  
+  <!-- Group headlights -->
+  <ellipse cx="610" cy="270" rx="15" ry="8" fill="#f39c12" opacity="0.9"/>
+  <ellipse cx="230" cy="270" rx="12" ry="6" fill="#ff6b35" opacity="0.8"/>
+  
+  <!-- LED group strips -->
+  <rect x="590" y="260" width="35" height="3" fill="#f39c12" opacity="0.8"/>
+  <rect x="210" y="260" width="28" height="3" fill="#ff6b35" opacity="0.8"/>
+  
+  <!-- Ground reflection -->
+  <ellipse cx="400" cy="400" rx="300" ry="20" fill="#f39c12" opacity="0.1"/>
+  
+  <!-- Group service elements -->
+  <rect x="350" y="320" width="100" height="30" fill="#9b59b6" opacity="0.4" rx="6"/>
+  <text x="400" y="342" font-family="Arial" font-size="12" fill="#ffffff" text-anchor="middle">GROUP SERVICE</text>
+  
+  <!-- SEO Alt Text: Futuristic Mercedes Vito minivan group transfer with spacious leather interior for 6 passengers -->
+</svg>

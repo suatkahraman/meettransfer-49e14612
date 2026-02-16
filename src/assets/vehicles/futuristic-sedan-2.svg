@@ -1,0 +1,72 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="leatherSeat" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2c1810;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4a2c1a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="dashboard" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+    <filter id="ambientGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Futuristic interior background -->
+  <rect width="800" height="450" fill="#0f0f0f"/>
+  
+  <!-- Dashboard -->
+  <path d="M0 200 Q400 180 800 200 L800 450 L0 450 Z" fill="url(#dashboard)" stroke="#4a90e2" stroke-width="2"/>
+  
+  <!-- Steering wheel -->
+  <circle cx="150" cy="280" r="40" fill="#2c3e50" stroke="#7f8c8d" stroke-width="3"/>
+  <circle cx="150" cy="280" r="25" fill="#34495e"/>
+  <rect x="145" y="240" width="10" height="80" fill="#7f8c8d" rx="5"/>
+  
+  <!-- Center console display -->
+  <rect x="300" y="220" width="200" height="120" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="10" filter="url(#ambientGlow)"/>
+  <rect x="310" y="230" width="180" height="100" fill="#0f3460" opacity="0.8"/>
+  
+  <!-- Digital instrument cluster -->
+  <rect x="50" y="220" width="180" height="80" fill="#1a1a2e" stroke="#00d4ff" stroke-width="1" rx="5"/>
+  <text x="140" y="260" font-family="Arial" font-size="14" fill="#00d4ff" text-anchor="middle">DIGITAL CLUSTER</text>
+  
+  <!-- Front seats -->
+  <path d="M100 320 Q120 300 180 300 L280 300 Q300 310 300 340 L280 380 L100 380 Z" fill="url(#leatherSeat)" stroke="#8b4513" stroke-width="1"/>
+  <path d="M500 320 Q520 300 580 300 L680 300 Q700 310 700 340 L680 380 L500 380 Z" fill="url(#leatherSeat)" stroke="#8b4513" stroke-width="1"/>
+  
+  <!-- Rear seat -->
+  <path d="M200 380 Q250 360 350 360 L450 360 Q550 360 600 380 L580 420 L220 420 Z" fill="url(#leatherSeat)" stroke="#8b4513" stroke-width="1"/>
+  
+  <!-- Ambient LED strips -->
+  <rect x="0" y="300" width="800" height="3" fill="#9b59b6" opacity="0.7" filter="url(#ambientGlow)"/>
+  <rect x="0" y="380" width="800" height="2" fill="#00d4ff" opacity="0.5"/>
+  
+  <!-- Door panels with LED -->
+  <rect x="50" y="320" width="8" height="60" fill="#00d4ff" opacity="0.6"/>
+  <rect x="742" y="320" width="8" height="60" fill="#00d4ff" opacity="0.6"/>
+  
+  <!-- Headliner -->
+  <path d="M0 200 Q400 150 800 200 L780 220 Q400 170 20 220 Z" fill="#2c3e50" opacity="0.3"/>
+  
+  <!-- Climate control vents -->
+  <rect x="320" y="350" width="60" height="8" fill="#34495e" rx="4"/>
+  <rect x="420" y="350" width="60" height="8" fill="#34495e" rx="4"/>
+  
+  <!-- USB ports -->
+  <circle cx="200" cy="360" r="3" fill="#00d4ff"/>
+  <circle cx="220" cy="360" r="3" fill="#00d4ff"/>
+  <circle cx="580" cy="360" r="3" fill="#00d4ff"/>
+  <circle cx="600" cy="360" r="3" fill="#00d4ff"/>
+  
+  <!-- Seat stitching detail -->
+  <line x1="120" y1="320" x2="280" y2="320" stroke="#8b4513" stroke-width="1" opacity="0.5"/>
+  <line x1="520" y1="320" x2="680" y2="320" stroke="#8b4513" stroke-width="1" opacity="0.5"/>
+  
+  <!-- SEO Alt Text: Futuristic sedan interior with leather seats ambient lighting and digital dashboard -->
+</svg>

@@ -1,0 +1,72 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="vipVitoAirportBg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="airportVipVitoLight" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#9b59b6;stop-opacity:0.2" />
+    </radialGradient>
+    <radialGradient id="starlightAirport" cx="50%" cy="40%" r="85%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="25%" style="stop-color:#9b59b6;stop-opacity:0.7" />
+      <stop offset="50%" style="stop-color:#8e44ad;stop-opacity:0.5" />
+      <stop offset="100%" style="stop-color:#4a90e2;stop-opacity:0.3" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Futuristic VIP airport background -->
+  <rect width="800" height="450" fill="url(#vipVitoAirportBg)"/>
+  
+  <!-- Airport terminal structure -->
+  <rect x="0" y="0" width="800" height="200" fill="#2c3e50" opacity="0.3"/>
+  <rect x="120" y="150" width="560" height="50" fill="#34495e" opacity="0.5"/>
+  
+  <!-- Terminal lights with starlight -->
+  <circle cx="180" cy="100" r="50" fill="url(#airportVipVitoLight)" opacity="0.6"/>
+  <circle cx="620" cy="100" r="50" fill="url(#airportVipVitoLight)" opacity="0.6"/>
+  
+  <!-- Futuristic Mercedes VIP Vito at airport -->
+  <path d="M130 290 Q160 220 240 220 L560 220 Q640 220 670 290 L690 350 L650 390 L150 390 L110 350 Z" fill="#030303" stroke="#9b59b6" stroke-width="4"/>
+  <path d="M150 230 Q180 190 270 190 L530 190 Q640 190 670 230 L660 290 L160 290 Z" fill="url(#starlightAirport)" stroke="#8e44ad" stroke-width="3"/>
+  
+  <!-- Professional VIP Vito chauffeur -->
+  <rect x="300" y="200" width="50" height="70" fill="#2c3e50" rx="25"/>
+  <circle cx="325" cy="190" r="18" fill="#34495e"/>
+  
+  <!-- VIP airport signage -->
+  <rect x="300" y="120" width="200" height="40" fill="#9b59b6" opacity="0.8" rx="8"/>
+  <text x="400" y="145" font-family="Arial" font-size="20" fill="#ffffff" text-anchor="middle">VIP ARRIVALS</text>
+  
+  <!-- LED pathway lights for VIP Vito -->
+  <rect x="150" y="350" width="30" height="5" fill="#ffffff" opacity="0.9"/>
+  <rect x="200" y="350" width="30" height="5" fill="#9b59b6" opacity="0.9"/>
+  <rect x="250" y="350" width="30" height="5" fill="#8e44ad" opacity="0.9"/>
+  <rect x="570" y="350" width="30" height="5" fill="#ffffff" opacity="0.9"/>
+  <rect x="620" y="350" width="30" height="5" fill="#9b59b6" opacity="0.9"/>
+  <rect x="670" y="350" width="30" height="5" fill="#8e44ad" opacity="0.9"/>
+  
+  <!-- Large VIP Vito wheels -->
+  <circle cx="210" cy="390" r="35" fill="#2c3e50" stroke="#7f8c8d" stroke-width="5"/>
+  <circle cx="590" cy="390" r="35" fill="#2c3e50" stroke="#7f8c8d" stroke-width="5"/>
+  <circle cx="210" cy="390" r="21" fill="#34495e"/>
+  <circle cx="590" cy="390" r="21" fill="#34495e"/>
+  
+  <!-- Premium VIP Vito headlights with starlight -->
+  <ellipse cx="630" cy="270" rx="18" ry="10" fill="#ffffff" opacity="0.95"/>
+  <ellipse cx="170" cy="270" rx="14" ry="8" fill="#f1c40f" opacity="0.9"/>
+  
+  <!-- Starlight LED running lights -->
+  <rect x="610" y="245" width="50" height="6" fill="#ffffff" opacity="0.9"/>
+  <rect x="155" y="245" width="40" height="6" fill="#f1c40f" opacity="0.8"/>
+  
+  <!-- Ground reflection -->
+  <ellipse cx="400" cy="400" rx="320" ry="25" fill="#9b59b6" opacity="0.2"/>
+  
+  <!-- VIP welcome service elements -->
+  <rect x="380" y="320" width="120" height="50" fill="#8e44ad" opacity="0.6" rx="8"/>
+  <text x="440" y="350" font-family="Arial" font-size="16" fill="#ffffff" text-anchor="middle">VIP WELCOME</text>
+  
+  <!-- SEO Alt Text: Futuristic Mercedes VIP Vito minivan airport transfer with starlight ceiling and premium chauffeur -->
+</svg>

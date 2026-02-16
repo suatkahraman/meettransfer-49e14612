@@ -77,13 +77,7 @@ export const Hero = () => {
   return (
     <section ref={heroRef} id="booking-form" className="relative overflow-hidden bg-background">
       {/* HeroBackground is NOT lazy loaded - critical for LCP */}
-      <HeroBackground 
-        videosLoaded={false} 
-        cityVideos={[]} 
-        currentVideoIndex={0} 
-        setCurrentVideoIndex={() => {}} 
-        language={language} 
-      />
+      <HeroBackground language={language} />
 
       {/* Mobile-first layout: Full viewport on mobile, grid on desktop */}
       <div className="container relative z-10 px-0 pt-0 pb-0 sm:px-3 sm:pt-4 sm:pb-4 md:px-4 md:pt-8 md:pb-8 lg:pb-16">
@@ -218,13 +212,7 @@ export const Hero = () => {
 
           {/* Visual Sections */}
           <SilentSectionErrorBoundary fallback={<div className="hidden md:block" />}>
-            <HeroVisualSection 
-              videosLoaded={false} 
-              cityVideos={[]} 
-              currentVideoIndex={0} 
-              language={language} 
-              t={t} 
-            />
+            <HeroVisualSection language={language} t={t} />
           </SilentSectionErrorBoundary>
         </div>
       </div>

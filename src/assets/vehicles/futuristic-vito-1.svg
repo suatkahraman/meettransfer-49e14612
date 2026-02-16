@@ -1,0 +1,76 @@
+<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="vitoBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0a0a0a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="vitoGlass" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#34495e;stop-opacity:0.7" />
+    </linearGradient>
+    <linearGradient id="leatherSeatVito" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2c1810;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4a2c1a;stop-opacity:1" />
+    </linearGradient>
+    <filter id="vitoGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Futuristic background -->
+  <rect width="800" height="450" fill="#050505"/>
+  <rect x="0" y="320" width="800" height="130" fill="#1a1a1a"/>
+  
+  <!-- Ground reflection -->
+  <ellipse cx="400" cy="400" rx="350" ry="25" fill="#2c3e50" opacity="0.2"/>
+  
+  <!-- Mercedes Vito minivan body -->
+  <path d="M120 280 Q150 220 220 220 L580 220 Q650 220 680 280 L700 340 L660 370 L140 370 L100 340 Z" fill="url(#vitoBody)" stroke="#4a90e2" stroke-width="3" filter="url(#vitoGlow)"/>
+  
+  <!-- Extended windows for minivan -->
+  <path d="M140 230 Q170 200 250 200 L550 200 Q630 200 660 230 L650 280 L150 280 Z" fill="url(#vitoGlass)" stroke="#5dade2" stroke-width="2"/>
+  
+  <!-- Side windows -->
+  <rect x="180" y="210" width="80" height="60" fill="url(#vitoGlass)" stroke="#5dade2" stroke-width="1" rx="5"/>
+  <rect x="280" y="210" width="80" height="60" fill="url(#vitoGlass)" stroke="#5dade2" stroke-width="1" rx="5"/>
+  <rect x="380" y="210" width="80" height="60" fill="url(#vitoGlass)" stroke="#5dade2" stroke-width="1" rx="5"/>
+  <rect x="480" y="210" width="80" height="60" fill="url(#vitoGlass)" stroke="#5dade2" stroke-width="1" rx="5"/>
+  
+  <!-- Premium LED headlights -->
+  <ellipse cx="640" cy="260" rx="18" ry="10" fill="#00d4ff" opacity="0.95" filter="url(#vitoGlow)"/>
+  <ellipse cx="160" cy="260" rx="15" ry="8" fill="#ff6b35" opacity="0.85"/>
+  
+  <!-- LED running lights -->
+  <rect x="620" y="240" width="45" height="4" fill="#00d4ff" opacity="0.9"/>
+  <rect x="135" y="240" width="35" height="4" fill="#ff6b35" opacity="0.8"/>
+  
+  <!-- Large wheels for minivan -->
+  <circle cx="200" cy="370" r="30" fill="#2c3e50" stroke="#7f8c8d" stroke-width="4"/>
+  <circle cx="600" cy="370" r="30" fill="#2c3e50" stroke="#7f8c8d" stroke-width="4"/>
+  <circle cx="200" cy="370" r="18" fill="#34495e"/>
+  <circle cx="600" cy="370" r="18" fill="#34495e"/>
+  
+  <!-- Chrome accents -->
+  <rect x="130" y="300" width="640" height="3" fill="#bdc3c7" opacity="0.8"/>
+  <rect x="130" y="340" width="640" height="2" fill="#bdc3c7" opacity="0.6"/>
+  
+  <!-- Mercedes emblem -->
+  <circle cx="400" cy="250" r="8" fill="#ffffff" opacity="0.9"/>
+  <path d="M395 245 L405 245 M400 240 L400 250 M395 255 L405 255" stroke="#000000" stroke-width="2"/>
+  
+  <!-- Side LED strips -->
+  <rect x="150" y="320" width="600" height="2" fill="#9b59b6" opacity="0.7"/>
+  
+  <!-- Interior leather seats visible through windows -->
+  <rect x="200" y="240" width="60" height="25" fill="url(#leatherSeatVito)" stroke="#8b4513" stroke-width="1" rx="3"/>
+  <rect x="300" y="240" width="60" height="25" fill="url(#leatherSeatVito)" stroke="#8b4513" stroke-width="1" rx="3"/>
+  <rect x="400" y="240" width="60" height="25" fill="url(#leatherSeatVito)" stroke="#8b4513" stroke-width="1" rx="3"/>
+  <rect x="500" y="240" width="60" height="25" fill="url(#leatherSeatVito)" stroke="#8b4513" stroke-width="1" rx="3"/>
+  
+  <!-- SEO Alt Text: Futuristic Mercedes Vito minivan exterior with black leather seats and LED lighting -->
+</svg>

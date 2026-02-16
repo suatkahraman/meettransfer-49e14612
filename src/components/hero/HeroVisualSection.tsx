@@ -5,9 +5,9 @@ import { useGoogleReviewStats } from "@/hooks/useGoogleReviewStats";
 import { PaymentComingSoonBanner } from "./PaymentComingSoonBanner";
 
 interface HeroVisualSectionProps {
-  videosLoaded: boolean;
-  cityVideos: CityVideo[];
-  currentVideoIndex: number;
+  videosLoaded?: boolean;
+  cityVideos?: CityVideo[];
+  currentVideoIndex?: number;
   language: string;
   t: (key: string) => string;
 }

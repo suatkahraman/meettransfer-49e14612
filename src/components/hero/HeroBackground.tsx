@@ -8,7 +8,7 @@ interface HeroBackgroundProps {
   cityVideos?: unknown[];
   currentVideoIndex?: number;
   setCurrentVideoIndex?: (index: number) => void;
-  language?: string;
+  language: string;
 }
 
 export const HeroBackground = memo(({}: HeroBackgroundProps) => {
