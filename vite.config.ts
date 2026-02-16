@@ -577,4 +577,4 @@ export default defineConfig(({ mode }) => {
     // Reduce asset inline limit for better caching
     assetsInlineLimit: 2048
   }
-}));
+});

@@ -48,6 +48,7 @@ import { useActivePromoCode } from '@/hooks/useActivePromoCode';
 import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
 import { CustomerHomeSkeleton } from '@/components/customer/CustomerHomeSkeleton';
+import { GeminiHolidayAssistant } from '@/components/customer/GeminiHolidayAssistant';
 import { formatCurrency } from '@/lib/currency';
 
 // Time options for 30-minute intervals
@@ -3228,6 +3229,19 @@ const CustomerHome = () => {
           )}
         </DialogContent>
       </Dialog>
+      <GeminiHolidayAssistant
+        reservationContext={
+          nextTransfer
+            ? {
+                customer_name: profileData.full_name,
+                dropoff: nextTransfer.dropoff,
+                pickup_date: nextTransfer.date,
+                pickup_time: nextTransfer.time,
+              }
+            : null
+        }
+        language={language === 'TR' ? 'TR' : 'EN'}
+      />
     </div>
   );
 };

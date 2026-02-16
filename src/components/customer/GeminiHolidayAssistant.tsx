@@ -12,7 +12,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { parseGeminiError } from '@/lib/geminiApi';
 
 const GEMINI_API_KEY = (import.meta.env.VITE_GEMINI_API_KEY as string | undefined)?.trim() || undefined;
-if (typeof window !== "undefined") console.log("Anahtar Kontrol:", !!import.meta.env.VITE_GEMINI_API_KEY);
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 interface ReservationContext {
@@ -221,14 +220,14 @@ export function GeminiHolidayAssistant({
   const hasReservation = !!reservationContext;
 
   return (
-    <div className={cn('fixed z-[60]', className)}>
+    <div className={cn('fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60]', className)}>
       <AnimatePresence>
         {isOpen ? (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="absolute bottom-20 right-0 w-[340px] max-w-[calc(100vw-2rem)] h-[450px] max-h-[70vh] bg-background border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="absolute bottom-16 right-0 w-[340px] max-w-[calc(100vw-2rem)] h-[450px] max-h-[70vh] bg-background border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground">
               <div className="flex items-center gap-2">
@@ -324,7 +323,7 @@ export function GeminiHolidayAssistant({
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6"
+        className="relative"
       >
         <Button
           size="lg"
