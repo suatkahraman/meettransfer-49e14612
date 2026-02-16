@@ -220,7 +220,7 @@ export function GeminiHolidayAssistant({
   const hasReservation = !!reservationContext;
 
   return (
-    <div className={cn('fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[60]', className)}>
+    <div className={cn('fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999]', className)}>
       <AnimatePresence>
         {isOpen ? (
           <motion.div

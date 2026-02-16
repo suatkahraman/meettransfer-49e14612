@@ -347,7 +347,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       { value: "mercedes-vito", label: "Mercedes Vito or Similar", passengers: 6, luggage: 6,
         dbAliases: ["mercedes vito or similar", "mercedes-vito", "vito", "mercedes vito"] },
       { value: "vip-mercedes", label: "Mercedes Maybach", passengers: 5, luggage: 5,
-        dbAliases: ["mercedes maybach", "maybach", "vip-mercedes", "vip-vito", "maybach-minibus"] },
+        dbAliases: ["mercedes maybach", "maybach", "vip-mercedes", "vip mercedes", "vip-vito", "maybach-minibus"] },
       { value: "maybach-minibus", label: "Mercedes Maybach", passengers: 4, luggage: 4,
         dbAliases: ["mercedes maybach", "maybach-minibus", "maybach-minivan"] },
       { value: "minibus", label: "Mercedes Sprinter or Similar", passengers: 20, luggage: 20,
@@ -590,13 +590,21 @@ Deno.serve(async (req: Request): Promise<Response> => {
           
           let bestPrice: number | null = null;
 
-          for (const r of matchingRules) {
+          // 1. KM aralığına göre filtrele
+          const validKmRules = matchingRules.filter(r => {
             const minKm = r.min_km != null ? Number(r.min_km) : 0;
             const maxKm = r.max_km != null ? Number(r.max_km) : Infinity;
-            
-            // KM aralığı kontrolü
-            if (distanceKm < minKm || distanceKm > maxKm) continue;
+            return distanceKm >= minKm && distanceKm <= maxKm;
+          });
 
+          // 2. Önceliklendirme: Tarih kısıtlaması olan (Sezonluk) kurallar > Genel kurallar
+          const seasonalRules = validKmRules.filter(r => r.start_date || r.end_date);
+          const standardRules = validKmRules.filter(r => !r.start_date && !r.end_date);
+          
+          // Eğer sezonluk kural varsa SADECE onları kullan, yoksa genel kurallara bak
+          const activeRules = seasonalRules.length > 0 ? seasonalRules : standardRules;
+
+          for (const r of activeRules) {
             let calculatedPrice: number | null = null;
 
             if (r.pricing_mode === 'fixed') {
@@ -610,10 +618,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
             }
 
             if (calculatedPrice != null) {
-              // En düşük fiyatı al (veya en spesifik kuralı - şimdilik en düşüğü alıyoruz)
-              // İyileştirme: Havalimanı kodu olan kural daha öncelikli olmalı.
-              // Şimdilik basitçe en uygun fiyatı bulalım.
               const p = Math.ceil(calculatedPrice);
+              // En düşük fiyatı al
               if (bestPrice == null || p < bestPrice) {
                 bestPrice = p;
               }

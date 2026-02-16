@@ -3229,6 +3229,7 @@ const CustomerHome = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* @SOLO BUILDER */}
       <GeminiHolidayAssistant
         reservationContext={
           nextTransfer

@@ -72,7 +72,6 @@ export const PaymentFilters = ({
               <SelectItem value="paid">Ödendi</SelectItem>
               <SelectItem value="pending">Bekliyor</SelectItem>
               <SelectItem value="partial">Kısmi</SelectItem>
-              <SelectItem value="pay_on_transfer">Nakit</SelectItem>
             </SelectContent>
           </Select>
         )}

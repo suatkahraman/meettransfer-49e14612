@@ -216,6 +216,7 @@ export default function DistancePricingRulesManager() {
           'Standard Sedan': 'sedan',
           'Mercedes Vito or Similar': 'mercedes-vito',
           'Mercedes Maybach': 'maybach-minibus',
+          'VIP Mercedes': 'vip-mercedes',
           'Mercedes Sprinter or Similar': 'minibus',
         };
         
