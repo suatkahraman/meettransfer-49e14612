@@ -2,8 +2,8 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/9bc5699b-31ad-4950-a84f-3b7c521c7941
-**Vercel Project**: https://vercel.com/suatkahramans-projects/meettransfer-app
+**URL**: `https://lovable.dev/projects/9bc5699b-31ad-4950-a84f-3b7c521c7941`
+**Vercel Project**: `https://vercel.com/suatkahramans-projects/meettransfer-app`
 
 ## How can I edit this code?
 

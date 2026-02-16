@@ -1,7 +1,14 @@
+Write-Output "Checking vite..." | Out-File -FilePath build_log.txt -Encoding UTF8 
+if (Test-Path "node_modules/vite") {
+    Get-ChildItem -Recurse node_modules/vite | Select-Object FullName | Out-File -FilePath build_log.txt -Append -Encoding UTF8 
+} else {
+    "node_modules/vite not found" | Out-File -FilePath build_log.txt -Append -Encoding UTF8
+}
+
 $ErrorActionPreference = "Stop"
 
 $logFile = "build_log.txt"
-"Starting build..." | Out-File -FilePath $logFile -Encoding UTF8
+"Starting build..." | Out-File -FilePath $logFile -Append -Encoding UTF8
 
 function LogLine([string]$line) {
   $line | Out-File -FilePath $logFile -Append -Encoding UTF8
