@@ -48,20 +48,23 @@ export function useHourlyForm(
   const { getLocalizedPath } = useLanguage();
   const { loadSavedFormData } = useHeroFormStorage();
   
+  // Initialize state from localStorage - optimize by loading once
+  const initialFormData = loadSavedFormData();
+  
   // Initialize state from localStorage
-  const [hourlyCity, setHourlyCity] = useState(() => loadSavedFormData()?.hourlyCity || "");
+  const [hourlyCity, setHourlyCity] = useState(() => initialFormData?.hourlyCity || "");
   const [hourlyDate, setHourlyDate] = useState<Date | undefined>(() =>
-    parseSavedDate(loadSavedFormData()?.hourlyDate)
+    parseSavedDate(initialFormData?.hourlyDate)
   );
-  const [hourlyTime, setHourlyTime] = useState(() => loadSavedFormData()?.hourlyTime || "");
+  const [hourlyTime, setHourlyTime] = useState(() => initialFormData?.hourlyTime || "");
   // Default to "4" hours - ensure a valid default is always set
   const [hourlyDuration, setHourlyDuration] = useState<string>(() => {
-    const saved = loadSavedFormData()?.hourlyDuration;
+    const saved = initialFormData?.hourlyDuration;
     return saved && saved.length > 0 ? saved : "4";
   });
-  const [hourlyPassengers, setHourlyPassengers] = useState(() => loadSavedFormData()?.hourlyPassengers || "2");
-  const [hourlyVehicleType, setHourlyVehicleType] = useState(() => loadSavedFormData()?.hourlyVehicleType || "mercedes-vito");
-  const [customHours, setCustomHours] = useState(() => loadSavedFormData()?.customHours || "9");
+  const [hourlyPassengers, setHourlyPassengers] = useState(() => initialFormData?.hourlyPassengers || "2");
+  const [hourlyVehicleType, setHourlyVehicleType] = useState(() => initialFormData?.hourlyVehicleType || "mercedes-vito");
+  const [customHours, setCustomHours] = useState(() => initialFormData?.customHours || "9");
   
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [cityDurations, setCityDurations] = useState<Record<string, string[]>>({});

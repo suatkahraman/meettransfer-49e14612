@@ -26,7 +26,7 @@ const LazySonner = lazy(() => import("@/components/ui/sonner").then(m => ({ defa
 // Non-critical app-shell components — loaded AFTER first paint as a single chunk
 const DeferredAppShell = lazy(() => import("./components/DeferredAppShell"));
 
-// Homepage - critical for first paint, import statically
+// Homepage - critical for first paint, import directly
 import Index from "./pages/Index";
 const DebugPage = lazy(() => import("./pages/DebugPage"));
 

@@ -152,14 +152,17 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   const { loadSavedFormData } = useHeroFormStorage();
   const { promoCode: activePromo } = usePromo();
   
+  // Initialize state from localStorage - optimize by loading once
+  const initialFormData = loadSavedFormData();
+  
   // Initialize state from localStorage
-  const [pickup, setPickup] = useState(() => loadSavedFormData()?.pickup || "");
-  const [dropoff, setDropoff] = useState(() => loadSavedFormData()?.dropoff || "");
+  const [pickup, setPickup] = useState(() => initialFormData?.pickup || "");
+  const [dropoff, setDropoff] = useState(() => initialFormData?.dropoff || "");
   const [date, setDate] = useState<Date | undefined>(() => 
-    parseSavedDate(loadSavedFormData()?.date) || new Date()
+    parseSavedDate(initialFormData?.date) || new Date()
   );
   const [time, setTime] = useState(() => {
-    const saved = loadSavedFormData()?.time;
+    const saved = initialFormData?.time;
     if (saved) return saved;
     // Default to current time rounded to next 30 minutes
     const now = new Date();
@@ -168,8 +171,8 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     const hours = minutes < 30 ? now.getHours() : now.getHours() + 1;
     return `${hours.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
   });
-  const [passengers, setPassengers] = useState(() => loadSavedFormData()?.passengers || "2");
-  const [vehicleType, setVehicleType] = useState(() => loadSavedFormData()?.vehicleType || "mercedes-vito");
+  const [passengers, setPassengers] = useState(() => initialFormData?.passengers || "2");
+  const [vehicleType, setVehicleType] = useState(() => initialFormData?.vehicleType || "mercedes-vito");
   const [submitting, setSubmitting] = useState(false);
   const [allVehiclePrices, setAllVehiclePrices] = useState<any[]>([]);
   const [transferPriceCurrency, setTransferPriceCurrency] = useState("EUR");
