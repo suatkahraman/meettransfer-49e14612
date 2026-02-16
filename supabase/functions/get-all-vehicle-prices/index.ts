@@ -458,7 +458,217 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     if (!isDubai) {
       const turkeyResult = await (async () => {
+        // Validation
         if (distanceKm == null || distanceKm <= 0) {
+          const errMsg = "Fiyat hesaplanamadı: Mesafe geçersiz veya gönderilmedi (distance_km null, 0 veya eksik)";
+          console.warn("[get-all-vehicle-prices DEBUG] Turkey price fail - reason:", errMsg);
+          return {
+            prices: turkeyVehicles.map((v) => ({
+              vehicleType: v.value,
+              vehicleLabel: v.label,
+              price: null,
+              currency: "EUR",
+              passengers: v.passengers,
+              luggage: v.luggage,
+              available: false,
+            })),
+            matched: false,
+            message: errMsg,
+            error: "FİYAT_TANIMLANMADI",
+            debug_info: { raw_km_price: null, applied_base_fare: null, source_table: null },
+          };
+        }
+
+
+        // =========================================================================================
+        // PRIORITY 1: DISTANCE PRICING RULES (KM Based) - "distance_pricing_rules"
+        // =========================================================================================
+        
+        let distanceRulesMatched = false;
+        let distanceBasedPrices: any[] = [];
+        let kmDebugInfo = {};
+
+        try {
+          // v3.0.1: Yeni distance_pricing_rules yapısı (city, airport_code, pricing_mode verified)
+          const kmRulesRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
+            { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+          );
+
+          if (kmRulesRes.ok) {
+            type KmRule = { 
+              vehicle_type: string | null; 
+              city: string | null; 
+              airport_code: string | null;
+              pricing_mode: 'fixed' | 'distance' | null;
+              base_price: number | null; 
+              extra_km_price: number | null;
+              min_km: number | null; 
+              max_km: number | null; 
+              start_date?: string | null; 
+              end_date?: string | null; 
+            };
+            
+            let kmRules: KmRule[] = await kmRulesRes.json();
+
+            // Tarih Filtresi
+            if (pickupDateStr && kmRules.length > 0) {
+              kmRules = kmRules.filter((r) => {
+                const sd = r.start_date ? String(r.start_date).split("T")[0] : null;
+                const ed = r.end_date ? String(r.end_date).split("T")[0] : null;
+                if (!sd && !ed) return true;
+                if (sd && pickupDateStr < sd) return false;
+                if (ed && pickupDateStr > ed) return false;
+                return true;
+              });
+            }
+
+            // Lokasyon Eşleşmesi
+            const cityNorm = normalizeCityName(resolvedPickupCity || "") || normalizeCityName(resolvedDropoffCity || "");
+            let currentAirportCode: string | null = null;
+            if (airport) {
+              const match = airport.match(/\(([A-Z]{3})\)/);
+              if (match) currentAirportCode = match[1];
+            }
+
+            function norm(s: string | null): string {
+              return (s || "").trim().toLowerCase();
+            }
+
+            function ruleMatchesLocation(r: KmRule): boolean {
+              // 1. Şehir Kontrolü
+              if (r.city) {
+                const rCity = norm(r.city);
+                const match = rCity === cityNorm || cityNorm.includes(rCity) || rCity.includes(cityNorm);
+                if (!match) return false;
+              }
+              // 2. Havalimanı Kodu Kontrolü
+              if (r.airport_code) {
+                 if (!currentAirportCode) return false;
+                 if (r.airport_code.toUpperCase() !== currentAirportCode) return false;
+              }
+              return true;
+            }
+
+            function ruleMatchesVehicle(r: KmRule, vt: typeof turkeyVehicles[0]): boolean {
+              const rVt = norm(r.vehicle_type || "");
+              if (!rVt) return false;
+              const labelNorm = norm(vt.label);
+              for (const alias of vt.dbAliases) {
+                const a = norm(alias);
+                if (a === rVt) return true;
+                if (rVt.includes(a)) return true;
+                if (a.includes(rVt)) return true;
+              }
+              if (labelNorm === rVt) return true;
+              if (rVt.includes(labelNorm)) return true;
+              if (labelNorm.includes(rVt)) return true;
+              return false;
+            }
+
+            const vehiclePriceMap: Record<string, number> = {};
+            const currentAirportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;
+
+            for (const vt of turkeyVehicles) {
+              const matchingRules = (kmRules || []).filter((r) => ruleMatchesVehicle(r, vt) && ruleMatchesLocation(r));
+              
+              let bestPrice: number | null = null;
+
+              // 1. KM aralığına göre filtrele (Strict Range Match)
+              let validKmRules = matchingRules.filter(r => {
+                const minKm = r.min_km != null ? Number(r.min_km) : 0;
+                const maxKm = r.max_km != null ? Number(r.max_km) : Infinity;
+                return distanceKm >= minKm && distanceKm <= maxKm;
+              });
+
+              // Fallback: Eğer tam aralık bulunamazsa, en yakın kuralı bul (Alt/Üst Kural)
+              if (validKmRules.length === 0 && matchingRules.length > 0) {
+                 // Sort by max_km ascending
+                 const sortedRules = matchingRules.sort((a, b) => (Number(a.max_km) || 0) - (Number(b.max_km) || 0));
+                 
+                 // If distance > largest max_km, pick largest
+                 if (distanceKm > (Number(sortedRules[sortedRules.length - 1].max_km) || 0)) {
+                    validKmRules = [sortedRules[sortedRules.length - 1]];
+                 } 
+                 // If distance < smallest min_km, pick smallest
+                 else if (distanceKm < (Number(sortedRules[0].min_km) || 0)) {
+                    validKmRules = [sortedRules[0]];
+                 }
+                 // Otherwise find closest (simplified: just take all matching, priority logic below will handle)
+                 else {
+                    // This case shouldn't happen often if rules are contiguous, but just in case add all
+                    validKmRules = matchingRules;
+                 }
+                 console.log(`[Calc] Fallback rule used for ${vt.value} (Dist: ${distanceKm})`);
+              }
+
+              const seasonalRules = validKmRules.filter(r => r.start_date || r.end_date);
+              const standardRules = validKmRules.filter(r => !r.start_date && !r.end_date);
+              const activeRules = seasonalRules.length > 0 ? seasonalRules : standardRules;
+
+              for (const r of activeRules) {
+                const { price, log } = calculateFinalPrice(r, distanceKm, currentAirportFee);
+                if (price != null) {
+                  if (bestPrice == null || price < bestPrice) {
+                    bestPrice = price;
+                  }
+                }
+              }
+
+              if (bestPrice != null) {
+                vehiclePriceMap[vt.value] = bestPrice;
+              }
+            }
+
+            distanceBasedPrices = turkeyVehicles.map((vt) => {
+              const finalPrice = vehiclePriceMap[vt.value] ?? null;
+              const available = finalPrice != null && finalPrice > 0;
+              return {
+                vehicleType: vt.value,
+                vehicleLabel: vt.label,
+                price: finalPrice,
+                currency: "EUR",
+                passengers: vt.passengers,
+                luggage: vt.luggage,
+                available,
+              };
+            });
+
+            const hasAvailable = distanceBasedPrices.some((p) => p.available);
+            if (hasAvailable) {
+                distanceRulesMatched = true;
+                kmDebugInfo = {
+                  raw_km_price: distanceKm,
+                  applied_base_fare: null,
+                  source_table: "distance_pricing_rules",
+                  pricing_system: "v3.0.1_centralized_priority"
+                };
+            }
+          } else {
+             console.error("distance_pricing_rules fetch failed with status", kmRulesRes.status);
+          }
+        } catch (e) {
+          console.error("Error in distance pricing rules logic:", e);
+        }
+
+        if (distanceRulesMatched) {
+           return {
+             prices: distanceBasedPrices,
+             matched: true,
+             message: null,
+             priceSource: "distance_pricing_rules",
+             debug_info: kmDebugInfo,
+           };
+        }
+
+        // =========================================================================================
+        // PRIORITY 2: INTERCITY PRICES (Fixed) - "intercity_prices"
+        // =========================================================================================
+
+        // Only if NO price found in Priority 1
+        // ... existing intercity logic ...
+
+
           const errMsg = "Fiyat hesaplanamadı: Mesafe geçersiz veya gönderilmedi (distance_km null, 0 veya eksik)";
           console.warn("[get-all-vehicle-prices DEBUG] Turkey price fail - reason:", errMsg);
           return {
