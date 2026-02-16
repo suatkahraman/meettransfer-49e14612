@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 // import { Hero } from "@/components/Hero";
-import HeroMinimal from "@/components/HeroMinimal"; // Minimal version for testing
+import HeroRestored from "@/components/HeroRestored"; // Restored version with full functionality
 import HeroErrorBoundary from "@/components/hero/HeroErrorBoundary";
 // BookingForm removed - form is now inside Hero component
 import { Footer } from "@/components/Footer";
@@ -55,7 +55,7 @@ const Index = () => {
       />
       {/* Hero and TrustBar are critical - no Suspense wrapper */}
       <HeroErrorBoundary>
-        <HeroMinimal />
+        <HeroRestored />
       </HeroErrorBoundary>
       <TrustBar />
       
