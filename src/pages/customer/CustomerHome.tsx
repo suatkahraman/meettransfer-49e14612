@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePromo, getLocalizedDiscountText } from '@/contexts/PromoContext';
 import { supabase } from '@/integrations/supabase/client';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -112,6 +113,7 @@ const CustomerHome = () => {
   // State - organized by purpose
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Start with loading true
+  const [iosLoadingDelay, setIosLoadingDelay] = useState(false); // iOS-specific loading delay
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -352,8 +354,12 @@ const CustomerHome = () => {
     
     setIsRefreshing(true);
     setIsLoading(true);
+    
+    // iOS Safari: İlk yüklemede sadece kritik verileri getir
+    const isIOS = isIOSDevice();
+    
     try {
-      // Fetch active bookings with next transfer info
+      // Fetch active bookings with next transfer info - iOS için optimize edilmiş
       const { data: activeReservations, count } = await supabase
         .from('reservations')
         .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type', { count: 'exact' })
@@ -361,7 +367,7 @@ const CustomerHome = () => {
         .in('status', ['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'confirmed', 'sent_to_driver', 'pending_admin_review'])
         .order('pickup_date', { ascending: true })
         .order('pickup_time', { ascending: true })
-        .limit(5);
+        .limit(isIOS ? 3 : 5); // iOS için daha az veri
       
       setActiveBookingsCount(count || 0);
       setRecentReservations(activeReservations || []);
@@ -380,7 +386,7 @@ const CustomerHome = () => {
         setNextTransfer(null);
       }
 
-      // Fetch completed reservations with driver info
+      // Fetch completed reservations with driver info - iOS için optimize edilmiş
       const { data: pastReservations } = await supabase
         .from('reservations')
         .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type, driver_id, drivers:driver_id(name)')
@@ -388,7 +394,7 @@ const CustomerHome = () => {
         .in('status', ['completed', 'cancelled'])
         .order('pickup_date', { ascending: false })
         .order('pickup_time', { ascending: false })
-        .limit(5);
+        .limit(isIOS ? 2 : 5); // iOS için daha az geçmiş rezervasyon
       
       // Check for existing reviews for completed reservations
       if (pastReservations && pastReservations.length > 0) {
@@ -415,13 +421,13 @@ const CustomerHome = () => {
         setCompletedReservations([]);
       }
 
-      // Fetch favorite routes
+      // Fetch favorite routes - iOS için optimize edilmiş
       const { data: favorites } = await supabase
         .from('favorite_routes')
         .select('id, name, pickup_location, dropoff_location, notes, usage_count')
         .eq('user_id', user.id)
         .order('usage_count', { ascending: false })
-        .limit(10);
+        .limit(isIOS ? 5 : 10); // iOS için daha az favori rota
       
       setFavoriteRoutes(favorites || []);
 
@@ -888,9 +894,19 @@ const CustomerHome = () => {
 
   useEffect(() => {
     if (!authLoading && user?.id) {
-      fetchData();
+      // iOS Safari: Panel yükleme hızını artırmak için gecikmeyi azalt
+      if (isIOSDevice()) {
+        setIosLoadingDelay(true);
+        // iOS için optimize edilmiş yükleme: hemen başla ama UI'ı geciktirme
+        fetchData();
+        // UI loading state'ini kısa süre sonra kaldır (veri hâlâ yükleniyor olabilir)
+        setTimeout(() => setIosLoadingDelay(false), 300);
+      } else {
+        fetchData();
+      }
     } else if (!authLoading && !user) {
       setIsLoading(false);
+      setIosLoadingDelay(false);
     }
   }, [authLoading, user?.id, fetchData]);
 
@@ -934,6 +950,44 @@ const CustomerHome = () => {
       supabase.removeChannel(channel);
     };
   }, [user?.id, language, fetchData]);
+
+  // iOS Safari: İlk yükleme sonrası ek verileri zamanla yükle
+  useEffect(() => {
+    if (isIOSDevice() && !isLoading && user?.id) {
+      // iOS için: İlk render'dan sonra ek verileri yükle
+      const timer = setTimeout(() => {
+        // Ek verileri yükle (örneğin daha fazla geçmiş rezervasyon)
+        loadAdditionalData();
+      }, 1000); // 1 saniye gecikme
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, user?.id]);
+  
+  // Ek veri yükleme fonksiyonu - iOS için
+  const loadAdditionalData = async () => {
+    if (!user?.id) return;
+    
+    try {
+      // Sadece iOS'ta eksik verileri tamamla
+      if (completedReservations.length < 3) {
+        const { data: additionalPast } = await supabase
+          .from('reservations')
+          .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type, driver_id, drivers:driver_id(name)')
+          .eq('customer_id', user.id)
+          .in('status', ['completed', 'cancelled'])
+          .order('pickup_date', { ascending: false })
+          .order('pickup_time', { ascending: false })
+          .range(2, 4); // İlk 2'den sonraki 3 kayıt
+          
+        if (additionalPast && additionalPast.length > 0) {
+          setCompletedReservations(prev => [...prev, ...additionalPast.map(r => ({ ...r, hasReview: false }))]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading additional data:', error);
+    }
+  };
 
   // Favorite routes functions
   const handleAddFavoriteRoute = async () => {
@@ -1293,8 +1347,31 @@ const CustomerHome = () => {
 
   // Removed showPricePreparation animation - now reservations are created directly
 
-  // Show loading screen while auth or data is loading
+  // Show loading screen while auth or data is loading - iOS optimized
   if (authLoading || (isLoading && !recentReservations.length && !completedReservations.length)) {
+    // iOS için daha hızlı skeleton göster
+    if (isIOSDevice() && !authLoading) {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+          {/* iOS için optimize edilmiş hızlı skeleton */}
+          <div className="space-y-4 p-4 animate-pulse">
+            {/* Header */}
+            <div className="h-16 bg-muted rounded-lg"></div>
+            {/* Quick actions */}
+            <div className="grid grid-cols-4 gap-2">
+              {[1,2,3,4].map(i => <div key={i} className="h-20 bg-muted rounded-lg"></div>)}
+            </div>
+            {/* Content areas */}
+            <div className="space-y-2">
+              <div className="h-4 bg-muted rounded w-1/3"></div>
+              <div className="h-24 bg-muted rounded-lg"></div>
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+              <div className="h-20 bg-muted rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
     return <CustomerHomeSkeleton />;
   }
 

@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { readDriverBootstrapCache, writeDriverBootstrapCache } from '@/lib/driverBootstrapCache';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { Button } from '@/components/ui/button';
 import { Car, AlertCircle, CheckCircle2, Bell, Calculator, History } from 'lucide-react';
 import { toast } from 'sonner';
@@ -75,6 +76,8 @@ const LIST_RESERVATION_SELECT = `
 `;
 const ACTIONABLE_LIMIT = 20;
 const COMPLETED_LIMIT = 10;
+const ACTIONABLE_LIMIT_IOS = 10; // iOS için daha az
+const COMPLETED_LIMIT_IOS = 5;  // iOS için daha az
 
 const sortByPickupDateTime = (items: Reservation[]) =>
   [...items].sort((a, b) => {
@@ -161,6 +164,11 @@ const DriverHome = () => {
     const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
     const lastDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
+    // iOS Safari: Daha az veri ile daha hızlı yükleme
+    const isIOS = isIOSDevice();
+    const actionableLimit = isIOS ? ACTIONABLE_LIMIT_IOS : ACTIONABLE_LIMIT;
+    const completedLimit = isIOS ? COMPLETED_LIMIT_IOS : COMPLETED_LIMIT;
+
     // Limit rows for fast dashboard load - actionable + last 10 completed
     const [actionableQuery, completedQuery] = await Promise.all([
       supabase
@@ -170,7 +178,7 @@ const DriverHome = () => {
         .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active'])
         .order('pickup_date', { ascending: true })
         .order('pickup_time', { ascending: true })
-        .limit(ACTIONABLE_LIMIT),
+        .limit(actionableLimit), // iOS için optimize edilmiş limit
       supabase
         .from('reservations')
         .select(LIST_RESERVATION_SELECT)
@@ -180,7 +188,7 @@ const DriverHome = () => {
         .lte('pickup_date', lastDayOfCurrentMonth)
         .order('pickup_date', { ascending: false })
         .order('pickup_time', { ascending: false })
-        .limit(COMPLETED_LIMIT),
+        .limit(completedLimit), // iOS için optimize edilmiş limit
     ]);
 
     if (actionableQuery.error || completedQuery.error) {
@@ -221,7 +229,13 @@ const DriverHome = () => {
   }, [driverId, userId]);
 
   useEffect(() => {
-    fetchReservations();
+    // iOS Safari: Sürücü paneli yükleme hızını artır
+    if (isIOSDevice()) {
+      // iOS için optimize edilmiş yükleme: hemen başla ama daha az veri ile
+      fetchReservations();
+    } else {
+      fetchReservations();
+    }
   }, [driverId, fetchReservations]);
 
   // Real-time subscription for new job assignments
@@ -430,7 +444,26 @@ const DriverHome = () => {
         </motion.section>
 
         {loading ? (
-          <DashboardSkeleton />
+          // iOS için optimize edilmiş yükleme ekranı
+          isIOSDevice() ? (
+            <div className="space-y-4 p-4 animate-pulse">
+              {/* Header */}
+              <div className="h-16 bg-muted rounded-lg"></div>
+              {/* Stats cards */}
+              <div className="grid grid-cols-3 gap-2">
+                {[1,2,3].map(i => <div key={i} className="h-20 bg-muted rounded-lg"></div>)}
+              </div>
+              {/* Content areas */}
+              <div className="space-y-2">
+                <div className="h-4 bg-muted rounded w-1/3"></div>
+                <div className="h-16 bg-muted rounded-lg"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-20 bg-muted rounded-lg"></div>
+              </div>
+            </div>
+          ) : (
+            <DashboardSkeleton />
+          )
         ) : reservations.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
