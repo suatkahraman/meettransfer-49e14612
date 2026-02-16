@@ -40,19 +40,12 @@ const CITIES = [
   "Balikesir", "Canakkale", "Ordu", "Rize", "Dubai"
 ];
 
-export interface DistancePricingRule {
-  id: string;
-  vehicle_type: string | null;
-  city: string | null;
-  airport_code: string | null;
+import { Database } from '@/integrations/supabase/types';
+
+type DistancePricingRuleRow = Database['public']['Tables']['distance_pricing_rules']['Row'];
+
+export interface DistancePricingRule extends Omit<DistancePricingRuleRow, 'pricing_mode'> {
   pricing_mode: 'fixed' | 'distance';
-  base_price: number | null;
-  extra_km_price: number | null;
-  min_km: number | null;
-  max_km: number | null;
-  start_date: string | null;
-  end_date: string | null;
-  created_at: string;
 }
 
 export default function DistancePricingRulesManager() {
@@ -95,7 +88,14 @@ export default function DistancePricingRulesManager() {
         .order('min_km', { ascending: true });
 
       if (error) throw error;
-      setRules((data as unknown as DistancePricingRule[]) || []);
+      
+      // Veritabanından gelen veriyi (string) arayüz tipine (union) dönüştür
+      const typedData = (data || []).map(row => ({
+        ...row,
+        pricing_mode: (row.pricing_mode as 'fixed' | 'distance')
+      }));
+      
+      setRules(typedData);
     } catch (err: unknown) {
       console.error('Error fetching distance pricing rules:', err);
       const msg = err && typeof err === 'object' && 'message' in err ? String((err as { message?: string }).message) : '';

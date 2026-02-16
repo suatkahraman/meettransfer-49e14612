@@ -78,6 +78,64 @@ const DISTRICT_MAPPING: Record<string, string> = {
 
 const EDGE_FETCH_TIMEOUT_MS = 8000;
 
+/**
+ * Merkezi Fiyat Hesaplama Motoru
+ * - Fixed: base_price + airport_fee
+ * - Distance: (km * extra_km_price) + airport_fee
+ * 
+ * @param rule Veritabanından gelen kural satırı
+ * @param distanceKm Mesafe (KM)
+ * @param airportFee Havalimanı ek ücreti (EUR)
+ */
+function calculateFinalPrice(
+  rule: { 
+    pricing_mode: 'fixed' | 'distance' | null; 
+    base_price: number | null; 
+    extra_km_price: number | null;
+    vehicle_type: string | null;
+    city: string | null;
+  }, 
+  distanceKm: number, 
+  airportFee: number
+): { price: number | null; log: string } {
+  // Güvenlik: Mesafe kontrolü
+  if (distanceKm < 0) {
+    return { price: null, log: `[Calc] Invalid distance: ${distanceKm}` };
+  }
+
+  let rawPrice = 0;
+  let logPrefix = `[Calc] Rule for ${rule.vehicle_type} (${rule.city || 'Global'})`;
+
+  if (rule.pricing_mode === 'fixed') {
+    // Fallback: base_price yoksa null dön
+    if (rule.base_price == null) {
+      return { price: null, log: `${logPrefix} - FIXED mode but base_price is null` };
+    }
+    rawPrice = Number(rule.base_price);
+    const final = rawPrice + airportFee;
+    return { 
+      price: Math.ceil(final), 
+      log: `${logPrefix} - FIXED: ${rawPrice} + ${airportFee} (airport) = ${final}` 
+    };
+  } 
+  
+  if (rule.pricing_mode === 'distance') {
+    // Fallback: extra_km_price yoksa null dön
+    if (rule.extra_km_price == null) {
+      return { price: null, log: `${logPrefix} - DISTANCE mode but extra_km_price is null` };
+    }
+    const kmPrice = Number(rule.extra_km_price);
+    rawPrice = distanceKm * kmPrice;
+    const final = rawPrice + airportFee;
+    return { 
+      price: Math.ceil(final), 
+      log: `${logPrefix} - DISTANCE: (${distanceKm}km * ${kmPrice}) + ${airportFee} (airport) = ${final}` 
+    };
+  }
+
+  return { price: null, log: `${logPrefix} - Unknown pricing_mode: ${rule.pricing_mode}` };
+}
+
 function isSameCity(a: string | null, b: string | null): boolean {
   if (!a || !b) return false;
   return normalizeCityName(a) === normalizeCityName(b);
@@ -473,7 +531,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           return { prices, matched: hasAvailable, message: hasAvailable ? null : "Fiyat Bulunamadı", priceSource: "intercity_prices", debug_info };
         }
 
-        // v3.0.0: Yeni distance_pricing_rules yapısı
+        // v3.0.1: Yeni distance_pricing_rules yapısı (city, airport_code, pricing_mode verified)
         // city, airport_code, start_date, end_date, pricing_mode, base_price, extra_km_price
         const kmRulesRes = await fetch(
           `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
@@ -584,6 +642,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
         const vehiclePriceMap: Record<string, number> = {};
         
+        const currentAirportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;
+
         for (const vt of turkeyVehicles) {
           // Bu araç tipi için uygun kuralları bul
           const matchingRules = (kmRules || []).filter((r) => ruleMatchesVehicle(r, vt) && ruleMatchesLocation(r));
@@ -605,24 +665,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
           const activeRules = seasonalRules.length > 0 ? seasonalRules : standardRules;
 
           for (const r of activeRules) {
-            let calculatedPrice: number | null = null;
-
-            if (r.pricing_mode === 'fixed') {
-              if (r.base_price != null) {
-                calculatedPrice = Number(r.base_price);
+            // Merkezi hesaplama motorunu kullan
+            const { price, log } = calculateFinalPrice(r, distanceKm, currentAirportFee);
+            
+            if (price != null) {
+              console.log(log); // Loglamayı burada yapıyoruz
+              if (bestPrice == null || price < bestPrice) {
+                bestPrice = price;
               }
-            } else if (r.pricing_mode === 'distance') {
-              if (r.extra_km_price != null) {
-                calculatedPrice = distanceKm * Number(r.extra_km_price);
-              }
-            }
-
-            if (calculatedPrice != null) {
-              const p = Math.ceil(calculatedPrice);
-              // En düşük fiyatı al
-              if (bestPrice == null || p < bestPrice) {
-                bestPrice = p;
-              }
+            } else {
+              console.warn(log); // Hesaplama yapılamadıysa warn logu
             }
           }
 
@@ -631,25 +683,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
           }
         }
 
-        const airportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0; // Eski mantıkta vardı, yeni sistemde kurala gömülebilir ama promptta airport_extra_fee yeni kolonlarda yok. O yüzden burda ekleyelim mi? 
-        // Prompt: "Artık tabloda city, airport_code, start_date, end_date, km_from, km_to, base_price, extra_km_price ve pricing_mode kolonları var."
-        // airport_extra_fee yok. O zaman koddan kaldırmalıyız veya sabit eklemeliyiz.
-        // Ancak admin panelde "airport_extra_fee" kaldırıldı mı? Ben kaldırdım.
-        // O zaman burda da eklememeliyiz veya sabit bir değer eklemeliyiz.
-        // Mevcut kodda: `const airportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;` (5 EUR) var. Bunu koruyalım.
-
         console.log("[get-all-vehicle-prices v3.0.0] distance_km:", distanceKm, "| vehiclePriceMap:", vehiclePriceMap);
 
         const prices = turkeyVehicles.map((vt) => {
-          const basePrice = vehiclePriceMap[vt.value] ?? null;
-          const available = basePrice != null && basePrice > 0;
-          // Airport fee'yi basePrice'a ekleyelim (eğer varsa)
-          const total = available ? Math.ceil(basePrice + airportFee) : null;
+          // Artık calculateFinalPrice içinde airport fee dahil edildiği için
+          // vehiclePriceMap direkt final fiyatı içeriyor.
+          // Ancak, eğer yukarıda calculateFinalPrice kullanılmadıysa (eski kod kalıntıları varsa) dikkatli olmalıyız.
+          // Şu anki refactor ile vehiclePriceMap içindeki fiyatlar FINAL (airport dahil) fiyatlardır.
+          const finalPrice = vehiclePriceMap[vt.value] ?? null;
+          const available = finalPrice != null && finalPrice > 0;
 
           return {
             vehicleType: vt.value,
             vehicleLabel: vt.label,
-            price: total,
+            price: finalPrice,
             currency: "EUR",
             passengers: vt.passengers,
             luggage: vt.luggage,
@@ -670,7 +717,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           raw_km_price: distanceKm,
           applied_base_fare: null,
           source_table: "distance_pricing_rules",
-          pricing_system: "v3.0.0_dynamic"
+          pricing_system: "v3.0.1_centralized"
         };
         
         return {
