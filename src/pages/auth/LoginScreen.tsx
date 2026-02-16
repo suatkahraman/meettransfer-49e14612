@@ -347,7 +347,18 @@ const LoginScreen = () => {
       
       // Tam sayfa yonlendirme - AuthContext/useUserRole senkronizasyonu icin
       const path = pendingRole === 'admin' ? '/admin' : pendingRole === 'agency' ? '/agency' : '/customer';
-      window.location.replace(path);
+      
+      // iOS Safari optimization: Use immediate redirect for faster dashboard access
+      if (isIOS) {
+        window.location.href = path;
+      } else {
+        // iOS Safari optimization: Use immediate redirect for faster dashboard access
+        if (isIOS) {
+          window.location.href = path;
+        } else {
+          window.location.replace(path);
+        }
+      }
     }
   };
 
@@ -470,8 +481,14 @@ const LoginScreen = () => {
           registerTrustedDevice(authData.user.id).catch(() => {});
           clearSuppressAuthRedirect();
           await supabase.auth.refreshSession();
-          await new Promise((r) => setTimeout(r, 150));
-          window.location.replace('/driver');
+          
+          // iOS Safari optimization: Use immediate redirect for faster dashboard access
+          if (isIOS) {
+            window.location.href = '/driver';
+          } else {
+            await new Promise((r) => setTimeout(r, 150));
+            window.location.replace('/driver');
+          }
           return;
         }
 
