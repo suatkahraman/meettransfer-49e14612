@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Mercedes Sprinter 19-Passenger Luxury Minibus Interior View">
+  <title>Mercedes Sprinter 19-Passenger Luxury Minibus Interior</title>
+  <desc>Spacious 19-passenger Mercedes Sprinter interior with black leather seats, LED ambient lighting, and premium amenities</desc>
+  
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="sprinterInterior" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#374151;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1f2937;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="sprinterSeat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2d2d2d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f0f0f;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="sprinterCeiling" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4b5563;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1f2937;stop-opacity:1" />
+    </linearGradient>
+    
+    <radialGradient id="sprinterLight" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:0.3" />
+    </radialGradient>
+    
+    <filter id="sprinterAmbient" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#0f172a"/>
+  
+  <!-- Interior perspective -->
+  <g transform="translate(100,100)">
+    <!-- Cabin ceiling -->
+    <polygon points="0,0 1000,0 900,100 100,100" fill="url(#sprinterCeiling)" stroke="#374151" stroke-width="2"/>
+    
+    <!-- LED ceiling lights -->
+    <circle cx="150" cy="50" r="8" fill="url(#sprinterLight)" filter="url(#sprinterAmbient)"/>
+    <circle cx="300" cy="50" r="8" fill="url(#sprinterLight)" filter="url(#sprinterAmbient)"/>
+    <circle cx="450" cy="50" r="8" fill="url(#sprinterLight)" filter="url(#sprinterAmbient)"/>
+    <circle cx="600" cy="50" r="8" fill="url(#sprinterLight)" filter="url(#sprinterAmbient)"/>
+    <circle cx="750" cy="50" r="8" fill="url(#sprinterLight)" filter="url(#sprinterAmbient)"/>
+    <circle cx="900" cy="50" r="8" fill="url(#sprinterLight)" filter="url(#sprinterAmbient)"/>
+    
+    <!-- Left side seats (9 seats) -->
+    <g transform="translate(50,150)">
+      <rect x="0" y="0" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="100" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="200" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="300" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="400" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="500" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="600" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="700" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="800" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+    </g>
+    
+    <!-- Right side seats (10 seats) -->
+    <g transform="translate(890,150)">
+      <rect x="0" y="0" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="100" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="200" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="300" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="400" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="500" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="600" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="700" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="800" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+      <rect x="0" y="900" width="60" height="80" rx="8" fill="url(#sprinterSeat)" stroke="#4b5563" stroke-width="2"/>
+    </g>
+    
+    <!-- Aisle carpet -->
+    <rect x="150" y="180" width="700" height="700" fill="#1f2937" stroke="#374151" stroke-width="2"/>
+    
+    <!-- LED floor lighting -->
+    <rect x="160" y="190" width="680" height="3" fill="#3b82f6" opacity="0.7"/>
+    <rect x="160" y="290" width="680" height="3" fill="#3b82f6" opacity="0.7"/>
+    <rect x="160" y="390" width="680" height="3" fill="#3b82f6" opacity="0.7"/>
+    <rect x="160" y="490" width="680" height="3" fill="#3b82f6" opacity="0.7"/>
+    <rect x="160" y="590" width="680" height="3" fill="#3b82f6" opacity="0.7"/>
+    <rect x="160" y="690" width="680" height="3" fill="#3b82f6" opacity="0.7"/>
+    <rect x="160" y="790" width="680" height="3" fill="#3b82f6" opacity="0.7"/>
+    <rect x="160" y="890" width="680" height="3" fill="#3b82f6" opacity="0.7"/>
+    
+    <!-- Passenger capacity display -->
+    <rect x="400" y="850" width="200" height="40" rx="20" fill="#1e40af" stroke="#60a5fa" stroke-width="2"/>
+    <text x="500" y="875" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff">19 Kişi Kapasite</text>
+  </g>
+  
+  <!-- Ambient lighting effects -->
+  <g opacity="0.4">
+    <rect x="0" y="200" width="1200" height="5" fill="#3b82f6" filter="url(#sprinterAmbient)"/>
+    <rect x="0" y="400" width="1200" height="5" fill="#3b82f6" filter="url(#sprinterAmbient)"/>
+    <rect x="0" y="600" width="1200" height="5" fill="#3b82f6" filter="url(#sprinterAmbient)"/>
+  </g>
+</svg>

@@ -234,6 +234,24 @@ const PageLoader = () => (
 // Lazy-load BlogLayout to keep it out of main bundle
 const BlogLayout = lazy(() => import("./components/blog/BlogLayout").then(m => ({ default: m.BlogLayout })));
 
+// Helper to create localized routes WITHOUT Suspense (for eager-loaded pages like Home)
+const localizedRoutesEager = (basePath: string, element: React.ReactNode) => {
+  const routes = [
+    <Route key={`en-${basePath}`} path={basePath} element={element} />,
+  ];
+  
+  LANG_PREFIXES.forEach((prefix) => {
+    const localizedPath = basePath === "/" 
+      ? `/${prefix}` 
+      : `/${prefix}${basePath}`;
+    routes.push(
+      <Route key={`${prefix}-${basePath}`} path={localizedPath} element={element} />
+    );
+  });
+  
+  return routes;
+};
+
 // Helper to create localized routes with Suspense
 const localizedRoutes = (basePath: string, element: React.ReactNode) => {
   const wrappedElement = <Suspense fallback={<PageLoader />}>{element}</Suspense>;
@@ -326,7 +344,7 @@ const App = () => {
               <AuthProvider>
                 <Routes>
               {/* Localized Website Pages - Support all languages */}
-              {localizedRoutes("/", <Index />)}
+              {localizedRoutesEager("/", <Index />)}
               {localizedRoutes("/services", <ServicesPage />)}
               {localizedRoutes("/destinations", <DestinationsPage />)}
               {localizedRoutes("/destinations/:cityName", <DestinationDetail />)}
