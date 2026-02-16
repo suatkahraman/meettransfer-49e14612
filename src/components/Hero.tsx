@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Car, Timer } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -20,9 +20,9 @@ import { RideFormContent } from "@/components/hero/RideFormContent";
 import { HourlyFormContent } from "@/components/hero/HourlyFormContent";
 import { InstantBookingInfo } from "@/components/hero/InstantBookingInfo";
 
-// Lazy load non-critical visual components - loads after LCP
-const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
-const PaymentComingSoonBanner = lazy(() => import("@/components/hero/PaymentComingSoonBanner").then(m => ({ default: m.PaymentComingSoonBanner })));
+// Visual components - static import for faster initial load
+import { HeroVisualSection } from "@/components/hero/HeroVisualSection";
+import { PaymentComingSoonBanner } from "@/components/hero/PaymentComingSoonBanner";
 
 export const Hero = () => {
   const { t, language } = useLanguage();
@@ -212,23 +212,19 @@ export const Hero = () => {
               <HeroTrustBadges />
               
               {/* Payment Coming Soon Banner */}
-              <Suspense fallback={null}>
-                <PaymentComingSoonBanner language={language} compact className="mt-3" />
-              </Suspense>
+              <PaymentComingSoonBanner language={language} compact className="mt-3" />
             </div>
           </div>
 
           {/* Visual Sections */}
           <SilentSectionErrorBoundary fallback={<div className="hidden md:block" />}>
-            <Suspense fallback={<div className="hidden md:block" />}>
-              <HeroVisualSection 
-                videosLoaded={false} 
-                cityVideos={[]} 
-                currentVideoIndex={0} 
-                language={language} 
-                t={t} 
-              />
-            </Suspense>
+            <HeroVisualSection 
+              videosLoaded={false} 
+              cityVideos={[]} 
+              currentVideoIndex={0} 
+              language={language} 
+              t={t} 
+            />
           </SilentSectionErrorBoundary>
         </div>
       </div>
