@@ -17,7 +17,7 @@ import {
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
   Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle,
   Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv,
-  Award, Zap, Tag, Heart, HeartOff, Route, Percent, CalendarCheck
+  Award, Zap, Tag, Heart, HeartOff, Route, Percent, CalendarCheck, Coins
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -49,7 +49,7 @@ import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
 import { CustomerHomeSkeleton } from '@/components/customer/CustomerHomeSkeleton';
 import { GeminiHolidayAssistant } from '@/components/customer/GeminiHolidayAssistant';
-import { formatCurrency } from '@/lib/currency';
+import { formatCurrency, CURRENCY_OPTIONS } from '@/lib/currency';
 
 // Time options for 30-minute intervals
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
@@ -202,6 +202,8 @@ const CustomerHome = () => {
   const [eurToSelectedRate, setEurToSelectedRate] = useState<number>(1);
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [pricesError, setPricesError] = useState<string | null>(null);
+  const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
+  const [isRefetchingPrices, setIsRefetchingPrices] = useState(false);
 
   // Date picker popover state
   const [isPickupDateOpen, setIsPickupDateOpen] = useState(false);
@@ -232,35 +234,41 @@ const CustomerHome = () => {
     }
   }, [minibusRequired, formData.vehicleType]);
 
-  // Get currency based on language (used for initial value)
-  const getCurrencyByLanguage = useCallback(() => {
-    switch (language) {
-      case 'TR': return 'TRY';
-      case 'AR': return 'AED';
-      case 'DE': return 'EUR';
-      default: return 'EUR';
-    }
-  }, [language]);
-
-  // Set initial currency based on language once
+  // Set EUR as default currency - always start with Euro
   useEffect(() => {
-    setSelectedCurrency(getCurrencyByLanguage());
+    setSelectedCurrency('EUR');
   }, []);
 
   // Fiyatlar EUR - seçilen para birimi değiştiğinde o günün kuruyla hemen dönüştür
   useEffect(() => {
     if (selectedCurrency === "EUR") {
       setEurToSelectedRate(1);
+      setIsLoadingExchangeRate(false);
       return;
     }
+    
+    setIsLoadingExchangeRate(true);
     supabase.functions.invoke("get-exchange-rate", {
       body: { from_currency: "EUR", to_currency: selectedCurrency },
     })
-      .then(({ data }) => { if (data?.rate) setEurToSelectedRate(data.rate); })
+      .then(({ data }) => { 
+        if (data?.rate) setEurToSelectedRate(data.rate); 
+      })
       .catch(() => {
-        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        // Fallback rates for common currencies - updated to current rates
+        const fallback: Record<string, number> = { 
+          TRY: 35, 
+          AED: 4, 
+          USD: 1.08, 
+          GBP: 0.86,
+          RUB: 95,
+          UAH: 42,
+          JPY: 165,
+          AUD: 1.65
+        };
         setEurToSelectedRate(fallback[selectedCurrency] ?? 1);
-      });
+      })
+      .finally(() => setIsLoadingExchangeRate(false));
   }, [selectedCurrency]);
 
   const getDisplayPrice = useCallback((priceEur: number | null | undefined): number | null => {
@@ -2670,6 +2678,69 @@ const CustomerHome = () => {
                 </div>
               </div>
 
+              {/* Currency Selector */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Coins className="h-4 w-4" />
+                  {t('preferredCurrency') || 'Currency'}
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {CURRENCY_OPTIONS.map((currency) => (
+                    <button
+                      key={currency.value}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCurrency(currency.value);
+                        // Refetch prices when currency changes
+                        if (formData.pickup && formData.dropoff) {
+                          setIsRefetchingPrices(true);
+                          // Trigger price refetch by calling the same function
+                          supabase.functions.invoke("get-all-vehicle-prices", {
+                            body: {
+                              pickup: formData.pickup,
+                              dropoff: formData.dropoff,
+                              customerCurrency: currency.value,
+                              pickup_date: formData.date || undefined,
+                            },
+                          })
+                          .then(({ data, error }) => {
+                            if (error) throw error;
+                            if (data?.prices && data.prices.length > 0) {
+                              const pricesMap: Record<string, number> = {};
+                              data.prices.forEach((p: any) => {
+                                if (p.price) {
+                                  pricesMap[p.vehicleType] = p.price;
+                                }
+                              });
+                              setVehiclePrices(pricesMap);
+                            }
+                          })
+                          .catch((error) => {
+                            console.error("Error refetching prices:", error);
+                          })
+                          .finally(() => {
+                            setIsRefetchingPrices(false);
+                          });
+                        }
+                      }}
+                      className={cn(
+                        "px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all",
+                        selectedCurrency === currency.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background hover:border-primary/50 hover:bg-primary/5"
+                      )}
+                      disabled={isLoadingExchangeRate || isRefetchingPrices}
+                    >
+                      <span className="mr-1">{currency.flag}</span>
+                      {currency.value}
+                      {isLoadingExchangeRate && selectedCurrency === currency.value && (
+                        <Loader2 className="ml-1 h-3 w-3 animate-spin inline" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Vehicle Type - Visual Cards */}
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
@@ -2723,14 +2794,19 @@ const CustomerHome = () => {
                           {v.label}
                         </h3>
                         {/* Price badge on vehicle card */}
-                        {vehiclePrices[v.value] ? (
+                        {isRefetchingPrices ? (
+                          <div className="flex items-center gap-1">
+                            <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                            <span className="text-xs text-muted-foreground">{t('updating') || 'Güncelleniyor'}</span>
+                          </div>
+                        ) : vehiclePrices[v.value] ? (
                           <span className={cn(
                             "text-sm font-bold px-2 py-0.5 rounded-full",
                             formData.vehicleType === v.value 
                               ? "bg-primary text-primary-foreground" 
                               : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                           )}>
-                            {getDisplayPrice(vehiclePrices[v.value])} {selectedCurrency}
+                            {formatCurrency(getDisplayPrice(vehiclePrices[v.value]), selectedCurrency)}
                           </span>
                         ) : isPricesLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

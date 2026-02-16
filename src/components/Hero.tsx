@@ -18,9 +18,7 @@ import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
 // Form content components - eagerly import for faster LCP
 import { RideFormContent } from "@/components/hero/RideFormContent";
 import { HourlyFormContent } from "@/components/hero/HourlyFormContent";
-
-// Lazy load non-critical info banner - loads after LCP
-const InstantBookingInfo = lazy(() => import("@/components/hero/InstantBookingInfo").then(m => ({ default: m.InstantBookingInfo })));
+import { InstantBookingInfo } from "@/components/hero/InstantBookingInfo";
 
 // Lazy load non-critical visual components - loads after LCP
 const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
@@ -100,9 +98,7 @@ export const Hero = () => {
                 <p className="mt-2 text-sm font-semibold text-primary/90 text-center sm:text-left">
                   {tSafe("heroAITagline", "Meet AI: Plan Your Journey, Book with One Click!")}
                 </p>
-                <Suspense fallback={<div className="mt-3 h-[72px]" />}>
-                  <InstantBookingInfo language={language} className="mt-3" />
-                </Suspense>
+                <InstantBookingInfo language={language} className="mt-3" />
               </div>
 
               {/* Booking Form Card - Critical for LCP, no Suspense wrapper */}
