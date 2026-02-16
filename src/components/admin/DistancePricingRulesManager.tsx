@@ -18,37 +18,40 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Pencil, Trash2, MapPin, Calculator } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MoneyInput } from '@/components/ui/money-input';
-import { GooglePlacesAutocomplete, type PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import { VEHICLE_TYPE_OPTIONS } from '@/lib/vehicleTypes';
 
-// Backend ile uyumlu canonical vehicle_type değerleri
-const VEHICLE_TO_CANONICAL: Record<string, string> = {
-  'sedan': 'Standard Sedan',
-  'mercedes-vito': 'Mercedes Vito or Similar',
-  'vip-mercedes': 'Mercedes Maybach',
-  'maybach-minibus': 'Mercedes Maybach',
-  'minibus': 'Mercedes Sprinter or Similar',
-};
+const CITIES = [
+  "Istanbul", "Ankara", "Antalya", "Bodrum", "Dalaman", "Izmir", "Bursa", 
+  "Yalova", "Sapanca", "Adana", "Gaziantep", "Trabzon", "Diyarbakir", "Van", 
+  "Malatya", "Samsun", "Kocaeli", "Tekirdag", "Edirne", "Kars", "Denizli", 
+  "Elazig", "Sivas", "Sinop", "Kastamonu", "Zonguldak", "Sirnak", "Agri", 
+  "Mardin", "Afyon", "Mus", "Erzurum", "Erzincan", "Sanliurfa", "Hatay", 
+  "Balikesir", "Canakkale", "Ordu", "Rize", "Dubai"
+];
 
 export interface DistancePricingRule {
   id: string;
   vehicle_type: string | null;
   city: string | null;
-  place_id: string | null;
-  location_display: string | null;
-  price_amount: number | null;
+  airport_code: string | null;
+  pricing_mode: 'fixed' | 'distance';
   base_price: number | null;
-  price_per_km: number | null;
+  extra_km_price: number | null;
   min_km: number | null;
   max_km: number | null;
-  is_airport_transfer: boolean;
-  airport_extra_fee: number | null;
-  valid_from: string | null;
-  valid_to: string | null;
+  start_date: string | null;
+  end_date: string | null;
   created_at: string;
 }
 
@@ -61,15 +64,17 @@ export default function DistancePricingRulesManager() {
   const [saving, setSaving] = useState(false);
 
   // Form state
-  const [locationDisplay, setLocationDisplay] = useState('');
-  const [placeId, setPlaceId] = useState('');
   const [city, setCity] = useState('');
+  const [airportCode, setAirportCode] = useState('');
   const [minKm, setMinKm] = useState('');
   const [maxKm, setMaxKm] = useState('');
-  const [validFrom, setValidFrom] = useState('');
-  const [validTo, setValidTo] = useState('');
-  const [isAirportTransfer, setIsAirportTransfer] = useState(true);
-  const [airportBasePrice, setAirportBasePrice] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [pricingMode, setPricingMode] = useState<'fixed' | 'distance'>('fixed');
+  
+  // Araç bazlı fiyatlar
+  // fixed -> base_price
+  // distance -> extra_km_price
   const [vehiclePrices, setVehiclePrices] = useState<Record<string, string>>({
     'sedan': '',
     'mercedes-vito': '',
@@ -85,12 +90,12 @@ export default function DistancePricingRulesManager() {
     try {
       const { data, error } = await supabase
         .from('distance_pricing_rules')
-        .select('id,vehicle_type,city,place_id,location_display,price_amount,base_price,price_per_km,min_km,max_km,is_airport_transfer,airport_extra_fee,valid_from,valid_to,created_at')
-        .order('location_display', { ascending: true })
+        .select('id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date,created_at')
+        .order('city', { ascending: true })
         .order('min_km', { ascending: true });
 
       if (error) throw error;
-      setRules((data as DistancePricingRule[]) || []);
+      setRules((data as unknown as DistancePricingRule[]) || []);
     } catch (err: unknown) {
       console.error('Error fetching distance pricing rules:', err);
       const msg = err && typeof err === 'object' && 'message' in err ? String((err as { message?: string }).message) : '';
@@ -108,24 +113,14 @@ export default function DistancePricingRulesManager() {
     fetchRules();
   }, []);
 
-  const handlePlaceSelected = (value: string, details?: PlaceDetails) => {
-    setLocationDisplay(value);
-    if (details) {
-      setPlaceId(details.place_id || '');
-      setCity(details.city || '');
-    }
-  };
-
   const resetForm = () => {
-    setLocationDisplay('');
-    setPlaceId('');
     setCity('');
+    setAirportCode('');
     setMinKm('');
     setMaxKm('');
-    setValidFrom('');
-    setValidTo('');
-    setIsAirportTransfer(true);
-    setAirportBasePrice('');
+    setStartDate('');
+    setEndDate('');
+    setPricingMode('fixed');
     setVehiclePrices({
       'sedan': '',
       'mercedes-vito': '',
@@ -143,43 +138,53 @@ export default function DistancePricingRulesManager() {
   };
 
   const openEditDialog = (rule: DistancePricingRule) => {
-    const groupKey = `${rule.location_display || rule.city || 'Genel'}|${rule.min_km ?? 0}|${rule.max_km ?? '-'}|${rule.valid_from ?? ''}|${rule.valid_to ?? ''}`;
+    // Gruplama anahtarı
+    const groupKey = `${rule.city || ''}|${rule.airport_code || ''}|${rule.min_km ?? 0}|${rule.max_km ?? '-'}|${rule.start_date ?? ''}|${rule.end_date ?? ''}|${rule.pricing_mode}`;
+    
     const group = rules.filter(r =>
-      `${r.location_display || r.city || 'Genel'}|${r.min_km ?? 0}|${r.max_km ?? '-'}|${r.valid_from ?? ''}|${r.valid_to ?? ''}` === groupKey
+      `${r.city || ''}|${r.airport_code || ''}|${r.min_km ?? 0}|${r.max_km ?? '-'}|${r.start_date ?? ''}|${r.end_date ?? ''}|${r.pricing_mode}` === groupKey
     );
+    
     setEditingGroup(group);
     setEditingRule(rule);
-    setLocationDisplay(rule.location_display || '');
-    setPlaceId(rule.place_id || '');
+    
     setCity(rule.city || '');
+    setAirportCode(rule.airport_code || '');
     setMinKm(rule.min_km != null ? String(rule.min_km) : '');
     setMaxKm(rule.max_km != null ? String(rule.max_km) : '');
-    setValidFrom(rule.valid_from || '');
-    setValidTo(rule.valid_to || '');
-    setIsAirportTransfer(rule.is_airport_transfer ?? true);
-    setAirportBasePrice(rule.airport_extra_fee != null ? String(rule.airport_extra_fee) : '');
+    setStartDate(rule.start_date || '');
+    setEndDate(rule.end_date || '');
+    setPricingMode(rule.pricing_mode || 'fixed');
+
     const prices: Record<string, string> = {
       'sedan': '', 'mercedes-vito': '', 'vip-mercedes': '', 'maybach-minibus': '', 'minibus': '',
     };
+    
     const revMap: Record<string, string> = {
       'Standard Sedan': 'sedan',
       'Mercedes Vito or Similar': 'mercedes-vito',
       'Mercedes Maybach': 'maybach-minibus',
       'Mercedes Sprinter or Similar': 'minibus',
     };
+    
     for (const r of group) {
       const canonical = r.vehicle_type || '';
       const key = revMap[canonical];
-      if (key && r.price_amount != null) prices[key] = String(r.price_amount);
-      else if (key && r.base_price != null) prices[key] = String(r.base_price);
+      if (key) {
+        if (r.pricing_mode === 'distance') {
+            prices[key] = r.extra_km_price != null ? String(r.extra_km_price) : '';
+        } else {
+            prices[key] = r.base_price != null ? String(r.base_price) : '';
+        }
+      }
     }
     setVehiclePrices(prices);
     setIsDialogOpen(true);
   };
 
   const handleSave = async () => {
-    if (!locationDisplay.trim()) {
-      toast.error('Lütfen şehir veya havalimanı seçin (Google Places)');
+    if (!city) {
+      toast.error('Lütfen şehir seçin');
       return;
     }
     const min = parseFloat(minKm);
@@ -200,61 +205,55 @@ export default function DistancePricingRulesManager() {
 
     setSaving(true);
     try {
-      const airportFee = parseFloat(airportBasePrice) || 0;
-      const validFromDate = validFrom || null;
-      const validToDate = validTo || null;
-      const cityVal = city.trim() || null;
+      const startDateVal = startDate || null;
+      const endDateVal = endDate || null;
+      const cityVal = city || null;
+      const airportCodeVal = airportCode.trim() || null;
 
       if (editingRule && editingGroup.length > 0) {
-        // Grup güncelleme - her araç için ayrı güncelle
+        // Grup güncelleme
         const revMap: Record<string, string> = {
           'Standard Sedan': 'sedan',
           'Mercedes Vito or Similar': 'mercedes-vito',
           'Mercedes Maybach': 'maybach-minibus',
           'Mercedes Sprinter or Similar': 'minibus',
         };
+        
         const updatePayload = {
-          location_display: locationDisplay.trim(),
-          place_id: placeId || null,
           city: cityVal,
+          airport_code: airportCodeVal,
           min_km: min,
           max_km: max,
-          valid_from: validFromDate,
-          valid_to: validToDate,
-          is_airport_transfer: isAirportTransfer,
-          airport_extra_fee: airportFee,
-          updated_at: new Date().toISOString(),
+          start_date: startDateVal,
+          end_date: endDateVal,
+          pricing_mode: pricingMode,
+          // Diğer alanları null yapalım ki karışıklık olmasın
+          base_price: null as number | null,
+          extra_km_price: null as number | null,
         };
+
         for (const r of editingGroup) {
           const canonical = (r.vehicle_type || '').trim();
           const key = revMap[canonical];
           const priceVal = key ? parseFloat(vehiclePrices[key] || '0') : 0;
+          
+          const finalPayload = { ...updatePayload };
+          if (pricingMode === 'distance') {
+            finalPayload.extra_km_price = priceVal;
+          } else {
+            finalPayload.base_price = priceVal;
+          }
+
           const { error } = await supabase
             .from('distance_pricing_rules')
-            .update({ ...updatePayload, price_amount: priceVal })
+            .update(finalPayload)
             .eq('id', r.id);
           if (error) throw error;
         }
       } else {
-        // Yeni kurallar: her araç için bir satır (canonical mapping ile birleştirilmiş)
-        const toInsert: Array<{
-          vehicle_type: string;
-          city: string | null;
-          place_id: string | null;
-          location_display: string | null;
-          price_amount: number;
-          base_price: number;
-          price_per_km: number;
-          min_km: number;
-          max_km: number | null;
-          is_airport_transfer: boolean;
-          airport_extra_fee: number;
-          valid_from: string | null;
-          valid_to: string | null;
-        }> = [];
-
+        // Yeni kurallar
+        const toInsert: any[] = [];
         const seenCanonical = new Set<string>();
-        // Mercedes Maybach için önce maybach-minibus, yoksa vip-mercedes
         const canonicalOrder: Array<[string, string]> = [
           ['sedan', 'Standard Sedan'],
           ['mercedes-vito', 'Mercedes Vito or Similar'],
@@ -262,26 +261,33 @@ export default function DistancePricingRulesManager() {
           ['vip-mercedes', 'Mercedes Maybach'],
           ['minibus', 'Mercedes Sprinter or Similar'],
         ];
+
         for (const [vtKey, canonical] of canonicalOrder) {
           const p = parseFloat(vehiclePrices[vtKey] || '0');
           if (p <= 0) continue;
           if (seenCanonical.has(canonical)) continue;
           seenCanonical.add(canonical);
-          toInsert.push({
+
+          const payload: any = {
             vehicle_type: canonical,
             city: cityVal,
-            place_id: placeId || null,
-            location_display: locationDisplay.trim(),
-            price_amount: p,
-            base_price: p,
-            price_per_km: 0,
+            airport_code: airportCodeVal,
             min_km: min,
             max_km: max,
-            is_airport_transfer: isAirportTransfer,
-            airport_extra_fee: airportFee,
-            valid_from: validFromDate,
-            valid_to: validToDate,
-          });
+            start_date: startDateVal,
+            end_date: endDateVal,
+            pricing_mode: pricingMode,
+          };
+
+          if (pricingMode === 'distance') {
+            payload.extra_km_price = p;
+            payload.base_price = null;
+          } else {
+            payload.base_price = p;
+            payload.extra_km_price = null;
+          }
+
+          toInsert.push(payload);
         }
 
         if (toInsert.length === 0) {
@@ -294,8 +300,8 @@ export default function DistancePricingRulesManager() {
         if (error) throw error;
       }
 
-      const dateRangeMsg = validFromDate && validToDate ? ` (${validFromDate} - ${validToDate})` : '';
-      toast.success(`KM fiyat kuralları kaydedildi${dateRangeMsg}`);
+      const dateRangeMsg = startDateVal && endDateVal ? ` (${startDateVal} - ${endDateVal})` : '';
+      toast.success(`Kurallar kaydedildi${dateRangeMsg}`);
       setIsDialogOpen(false);
       resetForm();
       fetchRules();
@@ -321,9 +327,9 @@ export default function DistancePricingRulesManager() {
     }
   };
 
-  // Grupla: location_display + min_km + max_km + tarih aralığı (valid_from|valid_to)
+  // Grupla: city + airport_code + min_km + max_km + tarih + pricing_mode
   const groupedRules = rules.reduce<Record<string, DistancePricingRule[]>>((acc, r) => {
-    const key = `${r.location_display || r.city || 'Genel'}|${r.min_km ?? 0}|${r.max_km ?? '-'}|${r.valid_from ?? ''}|${r.valid_to ?? ''}`;
+    const key = `${r.city || 'Genel'}|${r.airport_code || ''}|${r.min_km ?? 0}|${r.max_km ?? '-'}|${r.start_date ?? ''}|${r.end_date ?? ''}|${r.pricing_mode}`;
     if (!acc[key]) acc[key] = [];
     acc[key].push(r);
     return acc;
@@ -334,10 +340,10 @@ export default function DistancePricingRulesManager() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Calculator className="h-5 w-5" />
-          KM Bazlı Fiyat Kuralları
+          KM Bazlı Fiyat Kuralları (Yeni Sistem)
         </CardTitle>
         <CardDescription>
-          Şehir veya havalimanını Google Places ile seçin, KM aralığı ve tüm araç fiyatlarını girin.
+          Şehir, Havalimanı, Tarih ve KM aralığına göre fiyatlandırma kuralları.
         </CardDescription>
         <Button size="sm" onClick={openNewDialog} className="w-fit">
           <Plus className="h-4 w-4 mr-2" />
@@ -348,10 +354,9 @@ export default function DistancePricingRulesManager() {
         {tableError === 'TABLO_YOK' ? (
           <div className="py-8 space-y-4">
             <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-4">
-              <p className="font-medium text-amber-800 dark:text-amber-200">Supabase Tablosu Eksik</p>
+              <p className="font-medium text-amber-800 dark:text-amber-200">Supabase Tablosu Eksik/Uyumsuz</p>
               <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                <code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">distance_pricing_rules</code> tablosu bulunamadı.
-                Supabase Dashboard → SQL Editor içinde <code className="bg-amber-100 dark:bg-amber-900/50 px-1 rounded">supabase/SETUP_KM_HESAPLAMA.sql</code> scriptini çalıştırın.
+                Tablo şeması değişmiş olabilir. Lütfen SQL editörden kontrol edin.
               </p>
               <Button variant="outline" size="sm" className="mt-3" onClick={() => { setTableError(null); fetchRules(); }}>
                 Tekrar Dene
@@ -368,17 +373,21 @@ export default function DistancePricingRulesManager() {
           <div className="space-y-6">
             {Object.entries(groupedRules).map(([key, group]) => {
               const parts = key.split('|');
-              const [loc, min, max, vf, vt] = parts;
-              const dateRange = vf && vt ? ` • ${vf} - ${vt}` : '';
-              const first = group[0];
+              const [cityName, airportCodeStr, min, max, sd, ed, pMode] = parts;
+              const dateRange = sd && ed ? ` • ${sd} - ${ed}` : '';
+              const airportDisplay = airportCodeStr ? ` • ${airportCodeStr}` : '';
+              
               return (
                 <div key={key} className="border rounded-lg p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{loc}</span>
+                      <span className="font-medium">{cityName}{airportDisplay}</span>
                       <span className="text-sm text-muted-foreground">
                         ({min}-{max} km){dateRange}
+                        <span className="ml-2 px-2 py-0.5 rounded bg-secondary text-secondary-foreground text-xs uppercase">
+                          {pMode === 'distance' ? 'Mesafe Bazlı' : 'Sabit'}
+                        </span>
                       </span>
                     </div>
                     <div className="flex gap-2">
@@ -407,14 +416,13 @@ export default function DistancePricingRulesManager() {
                     {group.map(r => (
                       <div key={r.id} className="flex justify-between">
                         <span className="text-muted-foreground">{r.vehicle_type}:</span>
-                        <span>€{r.price_amount ?? (r.base_price != null && r.price_per_km != null ? `${r.base_price}+${r.price_per_km}/km` : '-')}</span>
+                        <span className="font-semibold">
+                          {r.pricing_mode === 'distance' 
+                            ? `€${r.extra_km_price}/km` 
+                            : `€${r.base_price} (Sabit)`}
+                        </span>
                       </div>
                     ))}
-                    {first?.airport_extra_fee != null && Number(first.airport_extra_fee) > 0 && (
-                      <div className="col-span-full text-xs text-muted-foreground">
-                        Havalimanı baz: +€{first.airport_extra_fee}
-                      </div>
-                    )}
                   </div>
                 </div>
               );
@@ -429,14 +437,29 @@ export default function DistancePricingRulesManager() {
             <DialogTitle>{editingRule ? 'Kuralı Düzenle' : 'Yeni KM Fiyat Kuralı'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Şehir / Havalimanı (Google Places) *</Label>
-              <GooglePlacesAutocomplete
-                placeholder="Şehir veya havalimanı ara... (örn: İstanbul Havalimanı, Antalya)"
-                onPlaceSelected={handlePlaceSelected}
-                initialValue={locationDisplay}
-              />
-              {city && <p className="text-xs text-muted-foreground">Tespit edilen şehir: {city}</p>}
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Şehir *</Label>
+                <Select value={city} onValueChange={setCity}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Şehir Seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CITIES.map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Havalimanı Kodu (Opsiyonel)</Label>
+                <Input
+                  placeholder="örn: IST, AYT"
+                  value={airportCode}
+                  onChange={e => setAirportCode(e.target.value.toUpperCase())}
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -464,40 +487,49 @@ export default function DistancePricingRulesManager() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Geçerlilik Başlangıç (opsiyonel)</Label>
+                <Label>Başlangıç Tarihi</Label>
                 <Input
                   type="date"
-                  value={validFrom}
-                  onChange={e => setValidFrom(e.target.value)}
+                  value={startDate}
+                  onChange={e => setStartDate(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Geçerlilik Bitiş (opsiyonel)</Label>
+                <Label>Bitiş Tarihi</Label>
                 <Input
                   type="date"
-                  value={validTo}
-                  onChange={e => setValidTo(e.target.value)}
+                  value={endDate}
+                  onChange={e => setEndDate(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isAirport"
-                checked={isAirportTransfer}
-                onChange={e => setIsAirportTransfer(e.target.checked)}
-              />
-              <Label htmlFor="isAirport">Havalimanı transferi</Label>
-            </div>
-
             <div className="space-y-2">
-              <Label>Havalimanı Baz Fiyat (€) – Transfer tutarına eklenecek</Label>
-              <MoneyInput
-                value={airportBasePrice}
-                onValueChange={setAirportBasePrice}
-                placeholder="0"
-              />
+              <Label>Fiyatlandırma Modu</Label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer border p-2 rounded w-full justify-center has-[:checked]:bg-secondary">
+                  <input
+                    type="radio"
+                    name="pricingMode"
+                    value="fixed"
+                    checked={pricingMode === 'fixed'}
+                    onChange={() => setPricingMode('fixed')}
+                    className="accent-primary"
+                  />
+                  <span>Sabit Fiyat (Base Price)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer border p-2 rounded w-full justify-center has-[:checked]:bg-secondary">
+                  <input
+                    type="radio"
+                    name="pricingMode"
+                    value="distance"
+                    checked={pricingMode === 'distance'}
+                    onChange={() => setPricingMode('distance')}
+                    className="accent-primary"
+                  />
+                  <span>Mesafe Bazlı (KM * Price)</span>
+                </label>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -509,7 +541,7 @@ export default function DistancePricingRulesManager() {
                     <MoneyInput
                       value={vehiclePrices[v.value]}
                       onValueChange={val => setVehiclePrices(prev => ({ ...prev, [v.value]: val }))}
-                      placeholder="0"
+                      placeholder={pricingMode === 'distance' ? "KM Başına €" : "Sabit Tutar €"}
                     />
                   </div>
                 ))}

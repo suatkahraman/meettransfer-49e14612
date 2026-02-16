@@ -1,0 +1,35 @@
+﻿Starting build...
+node : node:internal/modules/cjs/loader:1424
+At C:\Users\suat-\Documents\trae_projects\meettransfer\build.ps
+1:3 char:5
++     node "node_modules/vite/bin/vite.js" build 2>&1 | Out-Fil
+e -FileP ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (node:internal/mod 
+   ules/cjs/loader:1424:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  throw err;
+  ^
+
+Error: Cannot find module 'C:\Users\suat-\Documents\trae_projec
+ts\meettransfer\node_modules\vite\bin\vite.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loade
+r:1421:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:105
+9:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader
+:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:1
+4)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal
+/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.13.0
+Finished.

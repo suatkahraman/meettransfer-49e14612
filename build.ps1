@@ -1,0 +1,2 @@
+Write-Output "Checking vite..." | Out-File -FilePath build_log.txt -Encoding UTF8
+Get-ChildItem -Recurse node_modules/vite | Select-Object FullName | Out-File -FilePath build_log.txt -Append -Encoding UTF8

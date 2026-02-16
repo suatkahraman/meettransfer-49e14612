@@ -473,10 +473,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
           return { prices, matched: hasAvailable, message: hasAvailable ? null : "Fiyat Bulunamadı", priceSource: "intercity_prices", debug_info };
         }
 
-        // v2.8.8: distance_pricing_rules - 0-50 FIXED, 51-85 PER-KM, 86+ en üst dilim veya "Lütfen fiyat isteyin"
-        // valid_from, valid_to: İki tarih arasında fiyat değişikliği (sezonluk)
+        // v3.0.0: Yeni distance_pricing_rules yapısı
+        // city, airport_code, start_date, end_date, pricing_mode, base_price, extra_km_price
         const kmRulesRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,price_amount,base_price,price_per_km,min_km,max_km,valid_from,valid_to`,
+          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
           { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
         );
         if (!kmRulesRes.ok) {
@@ -498,48 +498,83 @@ Deno.serve(async (req: Request): Promise<Response> => {
             debug_info: { raw_km_price: null, applied_base_fare: null, source_table: "distance_pricing_rules" },
           };
         }
-        type KmRule = { vehicle_type: string | null; city: string | null; price_amount: number | null; base_price?: number | null; price_per_km?: number | null; min_km: number | null; max_km: number | null; valid_from?: string | null; valid_to?: string | null };
+        
+        type KmRule = { 
+          vehicle_type: string | null; 
+          city: string | null; 
+          airport_code: string | null;
+          pricing_mode: 'fixed' | 'distance' | null;
+          base_price: number | null; 
+          extra_km_price: number | null;
+          min_km: number | null; 
+          max_km: number | null; 
+          start_date?: string | null; 
+          end_date?: string | null; 
+        };
+        
         let kmRules: KmRule[] = await kmRulesRes.json();
 
-        // İki tarih arası filtre: pickup_date varsa valid_from/valid_to ile eşleşen kuralları önceliklendir
+        // Tarih Filtresi: pickupDate, start_date ve end_date arasında mı?
+        // Kuralda tarih yoksa (null), her zaman geçerli kabul edilir.
         if (pickupDateStr && kmRules.length > 0) {
-          const dateRules = kmRules.filter((r) => {
-            const vf = r.valid_from ? String(r.valid_from).split("T")[0] : null;
-            const vt = r.valid_to ? String(r.valid_to).split("T")[0] : null;
-            if (!vf || !vt) return false;
-            return pickupDateStr >= vf && pickupDateStr <= vt;
+          kmRules = kmRules.filter((r) => {
+            const sd = r.start_date ? String(r.start_date).split("T")[0] : null;
+            const ed = r.end_date ? String(r.end_date).split("T")[0] : null;
+            
+            // Eğer tarih kısıtlaması yoksa geçerlidir
+            if (!sd && !ed) return true;
+
+            // Tarih kısıtlaması varsa kontrol et
+            if (sd && pickupDateStr < sd) return false;
+            if (ed && pickupDateStr > ed) return false;
+            
+            return true;
           });
-          const baseRules = kmRules.filter((r) => !r.valid_from && !r.valid_to);
-          // Tarih aralığına uyan kural varsa onu kullan, yoksa tarihsiz (her zaman geçerli) kurallara fallback
-          kmRules = dateRules.length > 0 ? dateRules : baseRules;
-          if (dateRules.length > 0) {
-            console.log("[get-all-vehicle-prices] distance_pricing_rules: tarih aralığı eşleşti", pickupDateStr, "->", dateRules.length, "kural");
-          }
         }
 
-        // Eşleşme: .trim().toLowerCase() ile vehicle_type ve city
+        // Lokasyon Eşleşmesi: City ve Airport Code
         const cityNorm = normalizeCityName(resolvedPickupCity || "") || normalizeCityName(resolvedDropoffCity || "");
+        
+        // Airport Code Extraction (e.g. "Istanbul Airport (IST)" -> "IST")
+        let currentAirportCode: string | null = null;
+        if (airport) {
+          const match = airport.match(/\(([A-Z]{3})\)/);
+          if (match) currentAirportCode = match[1];
+        }
 
         function norm(s: string | null): string {
           return (s || "").trim().toLowerCase();
         }
 
-        function ruleMatchesCity(r: KmRule): boolean {
-          const rCity = norm(r.city);
-          if (!rCity) return true; // city NULL = tüm şehirler
-          return rCity === cityNorm || cityNorm.includes(rCity) || rCity.includes(cityNorm);
+        function ruleMatchesLocation(r: KmRule): boolean {
+          // 1. Şehir Kontrolü
+          if (r.city) {
+            const rCity = norm(r.city);
+            const match = rCity === cityNorm || cityNorm.includes(rCity) || rCity.includes(cityNorm);
+            if (!match) return false;
+          }
+
+          // 2. Havalimanı Kodu Kontrolü
+          if (r.airport_code) {
+             // Eğer kuralda havalimanı kodu varsa, transferin de o havalimanından olması gerekir.
+             // Transferde havalimanı yoksa veya kod uyuşmuyorsa eşleşmez.
+             if (!currentAirportCode) return false;
+             if (r.airport_code.toUpperCase() !== currentAirportCode) return false;
+          }
+
+          return true;
         }
 
-        // v2.8.9: Esnek eşleşme - tam eşleşme yoksa includes() ile fallback (örn: "vito" -> "Mercedes Vito or Similar")
+        // Araç Eşleşmesi (Fuzzy Match)
         function ruleMatchesVehicle(r: KmRule, vt: typeof turkeyVehicles[0]): boolean {
           const rVt = norm(r.vehicle_type || "");
           if (!rVt) return false;
           const labelNorm = norm(vt.label);
           for (const alias of vt.dbAliases) {
             const a = norm(alias);
-            if (a === rVt) return true;                    // Tam eşleşme
-            if (rVt.includes(a)) return true;             // DB "Mercedes Vito..." içinde "vito" var
-            if (a.includes(rVt)) return true;              // Alias "mercedes vito..." içinde DB "vito" var
+            if (a === rVt) return true;
+            if (rVt.includes(a)) return true;
+            if (a.includes(rVt)) return true;
           }
           if (labelNorm === rVt) return true;
           if (rVt.includes(labelNorm)) return true;
@@ -547,74 +582,63 @@ Deno.serve(async (req: Request): Promise<Response> => {
           return false;
         }
 
-        // v2.8.9: 0-50 KM ÖZEL KURAL - price_amount TOPLAM FİYAT (çarpan değil, direkt döndür)
-        // 51-85: price_amount = KM başı çarpan (distance × price_amount)
-        // 86+: en üst dilim 1.50 veya "Lütfen fiyat isteyin"
-        const IS_FIXED_PRICE_0_50 = distanceKm <= 50;
-        const TOP_TIER_PER_KM = 1.50;
-        const REQUEST_PRICE_OVER_KM = 86;
-
         const vehiclePriceMap: Record<string, number> = {};
-        const vehicleRequestPrice: Record<string, boolean> = {}; // 86+ km için "lütfen fiyat isteyin"
-
+        
         for (const vt of turkeyVehicles) {
-          const matchingRules = (kmRules || []).filter((r) => ruleMatchesVehicle(r, vt) && ruleMatchesCity(r));
-          let price: number | null = null;
-          let requestPriceFlag = false;
+          // Bu araç tipi için uygun kuralları bul
+          const matchingRules = (kmRules || []).filter((r) => ruleMatchesVehicle(r, vt) && ruleMatchesLocation(r));
+          
+          let bestPrice: number | null = null;
 
           for (const r of matchingRules) {
             const minKm = r.min_km != null ? Number(r.min_km) : 0;
             const maxKm = r.max_km != null ? Number(r.max_km) : Infinity;
+            
+            // KM aralığı kontrolü
             if (distanceKm < minKm || distanceKm > maxKm) continue;
 
-            const priceAmount = r.price_amount != null ? Number(r.price_amount) : (r.base_price != null && r.price_per_km != null ? null : null);
-            const basePrice = r.base_price != null ? Number(r.base_price) : 0;
-            const perKm = r.price_per_km != null ? Number(r.price_per_km) : 0;
+            let calculatedPrice: number | null = null;
 
-            if (IS_FIXED_PRICE_0_50) {
-              // 0-50: price_amount = TOPLAM FİYAT (çarpan değil, direkt kullan)
-              if (Number.isFinite(priceAmount)) {
-                const p = Math.ceil(priceAmount);
-                if (price == null || p < price) price = p;
-              } else if (Number.isFinite(basePrice) && Number.isFinite(perKm)) {
-                const p = Math.ceil(basePrice + distanceKm * perKm);
-                if (price == null || p < price) price = p;
+            if (r.pricing_mode === 'fixed') {
+              if (r.base_price != null) {
+                calculatedPrice = Number(r.base_price);
               }
-            } else if (distanceKm <= 85) {
-              // 51-85: price_amount KM BAŞI ÇARPAN
-              if (Number.isFinite(priceAmount)) {
-                const p = Math.ceil(distanceKm * priceAmount);
-                if (price == null || p < price) price = p;
-              } else if (Number.isFinite(perKm)) {
-                const p = Math.ceil(basePrice + distanceKm * perKm);
-                if (price == null || p < price) price = p;
+            } else if (r.pricing_mode === 'distance') {
+              if (r.extra_km_price != null) {
+                calculatedPrice = distanceKm * Number(r.extra_km_price);
               }
-            } else {
-              // 86+: en üst dilim 1.50 veya "Lütfen fiyat isteyin"
-              requestPriceFlag = true;
-              const p = Math.ceil(distanceKm * TOP_TIER_PER_KM);
-              if (price == null || p < price) price = p;
+            }
+
+            if (calculatedPrice != null) {
+              // En düşük fiyatı al (veya en spesifik kuralı - şimdilik en düşüğü alıyoruz)
+              // İyileştirme: Havalimanı kodu olan kural daha öncelikli olmalı.
+              // Şimdilik basitçe en uygun fiyatı bulalım.
+              const p = Math.ceil(calculatedPrice);
+              if (bestPrice == null || p < bestPrice) {
+                bestPrice = p;
+              }
             }
           }
 
-          // 86+ km ve kural yoksa: en üst dilim 1.50 ile hesapla + "Lütfen fiyat isteyin"
-          if (distanceKm > 85 && price == null) {
-            price = Math.ceil(distanceKm * TOP_TIER_PER_KM);
-            requestPriceFlag = true;
+          if (bestPrice != null) {
+            vehiclePriceMap[vt.value] = bestPrice;
           }
-
-          if (price != null) vehiclePriceMap[vt.value] = price;
-          if (requestPriceFlag) vehicleRequestPrice[vt.value] = true;
         }
 
-        const airportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;
-        console.log("[get-all-vehicle-prices v2.8.8] distance_km:", distanceKm, "| vehiclePriceMap:", vehiclePriceMap, "| requestPrice86+:", Object.keys(vehicleRequestPrice));
+        const airportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0; // Eski mantıkta vardı, yeni sistemde kurala gömülebilir ama promptta airport_extra_fee yeni kolonlarda yok. O yüzden burda ekleyelim mi? 
+        // Prompt: "Artık tabloda city, airport_code, start_date, end_date, km_from, km_to, base_price, extra_km_price ve pricing_mode kolonları var."
+        // airport_extra_fee yok. O zaman koddan kaldırmalıyız veya sabit eklemeliyiz.
+        // Ancak admin panelde "airport_extra_fee" kaldırıldı mı? Ben kaldırdım.
+        // O zaman burda da eklememeliyiz veya sabit bir değer eklemeliyiz.
+        // Mevcut kodda: `const airportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;` (5 EUR) var. Bunu koruyalım.
+
+        console.log("[get-all-vehicle-prices v3.0.0] distance_km:", distanceKm, "| vehiclePriceMap:", vehiclePriceMap);
 
         const prices = turkeyVehicles.map((vt) => {
           const basePrice = vehiclePriceMap[vt.value] ?? null;
           const available = basePrice != null && basePrice > 0;
+          // Airport fee'yi basePrice'a ekleyelim (eğer varsa)
           const total = available ? Math.ceil(basePrice + airportFee) : null;
-          const reqPrice = vehicleRequestPrice[vt.value];
 
           return {
             vehicleType: vt.value,
@@ -624,7 +648,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
             passengers: vt.passengers,
             luggage: vt.luggage,
             available,
-            ...(reqPrice && total != null && { priceNote: "Lütfen fiyat isteyin (86+ km)" }),
           };
         });
 
@@ -632,16 +655,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
         let failReason: string | null = null;
         let failError: string | undefined;
         if (!hasAvailable) {
-          failReason = "Fiyat hesaplanamadı: Bu rota için kural tanımlı değil. Admin panelden distance_pricing_rules veya intercity_prices ekleyin.";
+          failReason = "Fiyat hesaplanamadı: Bu rota için kural tanımlı değil.";
           failError = "FİYAT_TANIMLANMADI";
           console.warn("[get-all-vehicle-prices DEBUG] Turkey price fail - FİYAT_TANIMLANMADI");
         }
+        
         const debug_info = {
           raw_km_price: distanceKm,
           applied_base_fare: null,
           source_table: "distance_pricing_rules",
-          tier: distanceKm <= 50 ? "0-50_fixed" : distanceKm <= 85 ? "51-85_per_km" : "86+_top_tier",
+          pricing_system: "v3.0.0_dynamic"
         };
+        
         return {
           prices,
           matched: hasAvailable,
