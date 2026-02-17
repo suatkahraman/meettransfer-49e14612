@@ -1,59 +1,26 @@
-<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Black Standard Sedan Rear Interior">
   <defs>
-    <linearGradient id="hotelBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#34495e;stop-opacity:1" />
+    <linearGradient id="seatGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#333;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#111;stop-opacity:1" />
     </linearGradient>
-    <radialGradient id="hotelLight" cx="50%" cy="50%" r="60%">
-      <stop offset="0%" style="stop-color:#f39c12;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#e67e22;stop-opacity:0.3" />
-    </radialGradient>
   </defs>
+  <rect width="800" height="600" fill="#e2e8f0"/>
   
-  <!-- Luxury hotel background -->
-  <rect width="800" height="450" fill="url(#hotelBg)"/>
+  <!-- Car Frame -->
+  <path d="M50,100 L750,100 L750,550 L50,550 Z" fill="#cbd5e1"/>
   
-  <!-- Hotel entrance -->
-  <rect x="0" y="0" width="800" height="180" fill="#2c3e50" opacity="0.4"/>
-  <rect x="200" y="120" width="400" height="60" fill="#34495e" opacity="0.6"/>
+  <!-- Rear Seats -->
+  <path d="M100,250 L700,250 L700,550 L100,550 Z" fill="url(#seatGradient)"/>
   
-  <!-- Hotel canopy -->
-  <path d="M150 120 Q400 100 650 120 L650 140 L150 140 Z" fill="#7f8c8d" opacity="0.7"/>
+  <!-- Seat Details -->
+  <path d="M200,250 L200,550 M400,250 L400,550 M600,250 L600,550" stroke="#000" stroke-width="2" opacity="0.3"/>
   
-  <!-- Futuristic sedan at hotel -->
-  <path d="M250 280 Q280 240 350 240 L450 240 Q520 240 550 280 L570 320 L530 340 L270 340 L230 320 Z" fill="#1a1a2e" stroke="#f39c12" stroke-width="2"/>
-  <path d="M270 250 Q300 220 380 220 L420 220 Q500 220 530 250 L520 280 L280 280 Z" fill="#2c3e50" opacity="0.8" stroke="#f39c12" stroke-width="1"/>
+  <!-- Headrests -->
+  <rect x="150" y="200" width="100" height="60" rx="10" fill="#222"/>
+  <rect x="350" y="200" width="100" height="60" rx="10" fill="#222"/>
+  <rect x="550" y="200" width="100" height="60" rx="10" fill="#222"/>
   
-  <!-- Professional chauffeur service -->
-  <rect x="290" y="200" width="35" height="55" fill="#2c3e50" rx="18"/>
-  <circle cx="307" cy="190" r="13" fill="#34495e"/>
-  
-  <!-- Hotel valet area -->
-  <circle cx="400" cy="340" r="30" fill="url(#hotelLight)" opacity="0.6"/>
-  <text x="400" y="345" font-family="Arial" font-size="14" fill="#ffffff" text-anchor="middle">VALET</text>
-  
-  <!-- LED pathway lighting -->
-  <rect x="220" y="340" width="15" height="3" fill="#f39c12" opacity="0.9"/>
-  <rect x="260" y="340" width="15" height="3" fill="#f39c12" opacity="0.9"/>
-  <rect x="540" y="340" width="15" height="3" fill="#f39c12" opacity="0.9"/>
-  <rect x="580" y="340" width="15" height="3" fill="#f39c12" opacity="0.9"/>
-  
-  <!-- Vehicle wheels -->
-  <circle cx="320" cy="340" r="22" fill="#2c3e50" stroke="#7f8c8d" stroke-width="3"/>
-  <circle cx="480" cy="340" r="22" fill="#2c3e50" stroke="#7f8c8d" stroke-width="3"/>
-  <circle cx="320" cy="340" r="13" fill="#34495e"/>
-  <circle cx="480" cy="340" r="13" fill="#34495e"/>
-  
-  <!-- Luxury headlights -->
-  <ellipse cx="520" cy="270" rx="10" ry="5" fill="#f39c12" opacity="0.9"/>
-  <ellipse cx="280" cy="270" rx="8" ry="4" fill="#ff6b35" opacity="0.8"/>
-  
-  <!-- Ground reflection -->
-  <ellipse cx="400" cy="380" rx="200" ry="12" fill="#f39c12" opacity="0.15"/>
-  
-  <!-- Premium service elements -->
-  <rect x="350" y="300" width="100" height="25" fill="#9b59b6" opacity="0.5" rx="5"/>
-  <text x="400" y="317" font-family="Arial" font-size="10" fill="#ffffff" text-anchor="middle">PREMIUM</text>
-  
-  <!-- SEO Alt Text: Futuristic Toyota Corolla sedan luxury hotel transfer with professional valet service -->
+  <!-- Window View -->
+  <rect x="100" y="120" width="600" height="100" fill="#94a3b8"/>
 </svg>

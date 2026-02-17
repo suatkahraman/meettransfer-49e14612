@@ -1,53 +1,38 @@
-<svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Black Standard Sedan Exterior Side View">
   <defs>
-    <linearGradient id="sedanBody" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#16213e;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0f3460;stop-opacity:1" />
+    <linearGradient id="blackBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2c2c2c;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#000000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="sedanGlass" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#34495e;stop-opacity:0.6" />
+    <linearGradient id="glass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a202c;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:0.7" />
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge> 
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
   
-  <!-- Futuristic background -->
-  <rect width="800" height="450" fill="#0a0a0a"/>
-  <rect x="0" y="300" width="800" height="150" fill="#1a1a1a"/>
+  <rect width="800" height="600" fill="#f8fafc"/>
   
-  <!-- Ground reflection -->
-  <ellipse cx="400" cy="380" rx="300" ry="20" fill="#2c3e50" opacity="0.3"/>
-  
-  <!-- Vehicle body -->
-  <path d="M150 280 Q180 240 250 240 L550 240 Q620 240 650 280 L670 320 L630 340 L170 340 L130 320 Z" fill="url(#sedanBody)" stroke="#4a90e2" stroke-width="2" filter="url(#glow)"/>
+  <!-- Car Body -->
+  <path d="M100,350 L150,280 L280,240 L520,240 L650,280 L700,350 L700,420 L100,420 Z" fill="url(#blackBody)"/>
   
   <!-- Windows -->
-  <path d="M170 250 Q200 220 280 220 L520 220 Q580 220 630 250 L620 280 L180 280 Z" fill="url(#sedanGlass)" stroke="#5dade2" stroke-width="1"/>
-  
-  <!-- Headlights -->
-  <ellipse cx="620" cy="270" rx="15" ry="8" fill="#00d4ff" opacity="0.9" filter="url(#glow)"/>
-  <ellipse cx="180" cy="270" rx="12" ry="6" fill="#ff6b35" opacity="0.8"/>
+  <path d="M290,250 L510,250 L630,290 L170,290 Z" fill="url(#glass)"/>
   
   <!-- Wheels -->
-  <circle cx="220" cy="340" r="25" fill="#2c3e50" stroke="#7f8c8d" stroke-width="3"/>
-  <circle cx="580" cy="340" r="25" fill="#2c3e50" stroke="#7f8c8d" stroke-width="3"/>
-  <circle cx="220" cy="340" r="15" fill="#34495e"/>
-  <circle cx="580" cy="340" r="15" fill="#34495e"/>
+  <circle cx="200" cy="420" r="45" fill="#333" stroke="#000" stroke-width="5"/>
+  <circle cx="600" cy="420" r="45" fill="#333" stroke="#000" stroke-width="5"/>
+  <circle cx="200" cy="420" r="25" fill="#666"/>
+  <circle cx="600" cy="420" r="25" fill="#666"/>
   
-  <!-- LED light strips -->
-  <rect x="600" y="260" width="40" height="3" fill="#00d4ff" opacity="0.8"/>
-  <rect x="160" y="260" width="30" height="3" fill="#ff6b35" opacity="0.8"/>
-  
-  <!-- Futuristic elements -->
-  <rect x="300" y="245" width="200" height="2" fill="#9b59b6" opacity="0.6"/>
-  <circle cx="400" cy="290" r="5" fill="#00d4ff" opacity="0.7"/>
-  
-  <!-- SEO Alt Text: Futuristic Toyota Corolla sedan exterior with LED lights and modern design -->
+  <!-- Headlights -->
+  <path d="M680,360 L700,360 L695,380 L680,380 Z" fill="#e2e8f0" filter="url(#glow)"/>
+  <path d="M100,360 L120,360 L125,380 L105,380 Z" fill="#ef4444" opacity="0.8"/>
+
+  <!-- Reflection -->
+  <path d="M150,320 Q400,340 650,320" stroke="#444" stroke-width="2" fill="none" opacity="0.5"/>
 </svg>

@@ -21,7 +21,7 @@ const WebsiteLayout = ({ children, showBottomNav = true }: WebsiteLayoutProps) =
   useAdvancedTracking();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100dvh] bg-background">
       <WebsiteHeader />
       <LazyMotionMain
         key={location.pathname}

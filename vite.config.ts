@@ -185,7 +185,7 @@ export default defineConfig(({ mode }) => {
       esbuild: {
         drop: ["debugger"],
       },
-      target: "es2020",
+      target: ["es2015", "safari13"],
       cssCodeSplit: true,
       cssMinify: "esbuild",
       assetsInlineLimit: 2048,
@@ -193,5 +193,5 @@ export default defineConfig(({ mode }) => {
     }
   };
 });
-// Build configuration simplified to fix loading issues
+// Build configuration simplified to fix loading issues - Updated to force deploy
 

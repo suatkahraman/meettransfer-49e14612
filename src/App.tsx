@@ -224,7 +224,7 @@ const LANG_PREFIXES = ["tr", "de", "fr", "ru", "it", "es", "ar", "uk", "ja", "pt
 
 // Simple loading fallback
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
+  <div className="min-h-[100dvh] flex items-center justify-center">
     <div className="text-center px-6">
       <div className="mx-auto animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
     </div>

@@ -652,7 +652,7 @@ const AgencyHome = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background pb-safe"
+      className="min-h-[100dvh] bg-background pb-safe"
       {...pullHandlers}
     >
       {/* Pull to Refresh Indicator */}

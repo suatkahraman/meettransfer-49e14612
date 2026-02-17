@@ -1376,7 +1376,7 @@ const CustomerHome = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30" {...pullHandlers}>
+    <div className="min-h-[100dvh] bg-gradient-to-b from-background to-muted/30" {...pullHandlers}>
       <PullToRefreshIndicator 
         pullDistance={pullDistance}
         isRefreshing={isPullRefreshing}

@@ -962,16 +962,20 @@ function useTextToSpeech(language: string, onSpeakEnd?: () => void, mobileFloati
   // Split text into sentences for more natural reading
   const splitIntoSentences = useCallback((text: string): string[] => {
     // Split on sentence-ending punctuation, keeping the punctuation
+    // Replaced lookbehind with safe split logic for iOS compatibility
     const sentences = text
-      .split(/(?<=[.!?])\s+/)
+      .replace(/([.!?])\s+/g, '$1|SPLIT|')
+      .split('|SPLIT|')
       .map(s => s.trim())
       .filter(s => s.length > 0);
     
     // If no sentences found (no proper punctuation), try to split on commas or other breaks
     if (sentences.length === 1 && text.length > 150) {
       // Split long text on commas or semicolons for natural pauses
+      // Replaced lookbehind with safe split logic
       const parts = text
-        .split(/(?<=[,;:])\s+/)
+        .replace(/([,;:])\s+/g, '$1|SPLIT|')
+        .split('|SPLIT|')
         .map(s => s.trim())
         .filter(s => s.length > 0);
       

@@ -10,6 +10,7 @@ import { validatePromoCode } from "@/hooks/useActivePromoCode";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePWADetect } from "@/hooks/usePWADetect";
 import { PendingBookingStorage } from "@/hooks/usePendingBookingStorage";
+import { safeLocalGet, safeLocalSet, safeLocalRemove, safeSessionGet, safeSessionSet, safeSessionRemove } from "@/lib/safeStorage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,10 +77,10 @@ const passwordSchema = z.string()
   .regex(/\d.*\d.*\d.*\d/, 'Password must contain at least 4 digits');
 
 const getSessionId = () => {
-  let sessionId = localStorage.getItem('quick_booking_session_id');
+  let sessionId = safeLocalGet('quick_booking_session_id');
   if (!sessionId) {
     sessionId = crypto.randomUUID();
-    localStorage.setItem('quick_booking_session_id', sessionId);
+    safeLocalSet('quick_booking_session_id', sessionId);
   }
   return sessionId;
 };
@@ -1050,8 +1051,8 @@ const BookingPage = () => {
       preferredCurrency,
     };
     const json = JSON.stringify(cacheData);
-    sessionStorage.setItem(GOOGLE_AUTH_CACHE_KEY, json);
-    try { localStorage.setItem(GOOGLE_AUTH_CACHE_BACKUP_KEY, json); } catch {}
+    safeSessionSet(GOOGLE_AUTH_CACHE_KEY, json);
+    safeLocalSet(GOOGLE_AUTH_CACHE_BACKUP_KEY, json);
     console.log('[OAuth] Saved COMPLETE form cache before OAuth redirect:', cacheData);
     return cacheData;
   };

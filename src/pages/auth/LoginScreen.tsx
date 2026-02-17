@@ -1120,7 +1120,7 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-secondary">
+    <div className="min-h-[100dvh] flex flex-col bg-secondary">
       {/* Header with iOS safe area support */}
       <header className="sticky top-0 z-50 bg-card border-b border-border safe-area-header">
         <div className="flex items-center justify-between h-14 px-4">

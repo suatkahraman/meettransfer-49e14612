@@ -32,7 +32,15 @@ export async function runVersionCheck(): Promise<boolean> {
   if (import.meta.env.DEV) return true;
 
   try {
-    const res = await fetch("/version.json?t=" + Date.now(), { cache: "no-store" });
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 3000); // 3s timeout
+
+    const res = await fetch("/version.json?t=" + Date.now(), { 
+      cache: "no-store",
+      signal: controller.signal 
+    });
+    clearTimeout(id);
+
     if (!res.ok) return true;
 
     const data = await res.json();

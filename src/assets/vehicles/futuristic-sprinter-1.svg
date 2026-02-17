@@ -1,108 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Mercedes Sprinter 16-Passenger Luxury Minibus Exterior View">
-  <title>Mercedes Sprinter 16-Passenger Luxury Minibus</title>
-  <desc>Professional 16-passenger Mercedes Sprinter minibus with black leather seats, LED lighting, and luxury amenities</desc>
-  
-  <!-- Gradient Definitions -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Black Mercedes Sprinter Exterior Side View">
   <defs>
-    <linearGradient id="sprinterBody" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#2d2d2d;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:1" />
+    <linearGradient id="sprinterBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2c2c2c;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#000000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
     </linearGradient>
-    
     <linearGradient id="sprinterGlass" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#4a5568;stop-opacity:0.8" />
-      <stop offset="100%" style="stop-color:#1a202c;stop-opacity:0.9" />
+      <stop offset="0%" style="stop-color:#1a202c;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:0.9" />
     </linearGradient>
-    
-    <linearGradient id="sprinterChrome" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#e2e8f0;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#f7fafc;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#cbd5e0;stop-opacity:1" />
-    </linearGradient>
-    
-    <radialGradient id="sprinterWheel" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:#2d3748;stop-opacity:1" />
-      <stop offset="70%" style="stop-color:#1a202c;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
-    </radialGradient>
-    
-    <filter id="sprinterGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
   
-  <!-- Background -->
-  <rect width="1200" height="800" fill="#0f0f23"/>
+  <rect width="800" height="600" fill="#f8fafc"/>
   
-  <!-- Futuristic grid background -->
-  <g opacity="0.3">
-    <path d="M0,400 L1200,400" stroke="#1e40af" stroke-width="1" opacity="0.2"/>
-    <path d="M600,0 L600,800" stroke="#1e40af" stroke-width="1" opacity="0.2"/>
-    <circle cx="600" cy="400" r="200" stroke="#1e40af" stroke-width="1" fill="none" opacity="0.1"/>
-    <circle cx="600" cy="400" r="100" stroke="#1e40af" stroke-width="1" fill="none" opacity="0.15"/>
-  </g>
+  <!-- Sprinter Long Body -->
+  <path d="M50,400 L50,150 L200,150 L250,220 L700,220 L750,400 L750,480 L50,480 Z" fill="url(#sprinterBody)"/>
   
-  <!-- Mercedes Sprinter Minibus -->
-  <g transform="translate(300,200)">
-    <!-- Main body -->
-    <rect x="0" y="100" width="600" height="200" rx="20" fill="url(#sprinterBody)" stroke="url(#sprinterChrome)" stroke-width="2"/>
-    
-    <!-- Extended passenger section -->
-    <rect x="400" y="120" width="180" height="160" rx="15" fill="url(#sprinterBody)" stroke="url(#sprinterChrome)" stroke-width="1"/>
-    
-    <!-- Front section -->
-    <rect x="0" y="90" width="150" height="220" rx="25" fill="url(#sprinterBody)" stroke="url(#sprinterChrome)" stroke-width="2"/>
-    
-    <!-- Windshield -->
-    <polygon points="20,110 130,110 140,180 10,180" fill="url(#sprinterGlass)" stroke="#2563eb" stroke-width="1"/>
-    
-    <!-- Side windows -->
-    <rect x="160" y="130" width="60" height="80" fill="url(#sprinterGlass)" stroke="#2563eb" stroke-width="1"/>
-    <rect x="240" y="130" width="60" height="80" fill="url(#sprinterGlass)" stroke="#2563eb" stroke-width="1"/>
-    <rect x="320" y="130" width="60" height="80" fill="url(#sprinterGlass)" stroke="#2563eb" stroke-width="1"/>
-    <rect x="400" y="130" width="60" height="80" fill="url(#sprinterGlass)" stroke="#2563eb" stroke-width="1"/>
-    <rect x="480" y="130" width="60" height="80" fill="url(#sprinterGlass)" stroke="#2563eb" stroke-width="1"/>
-    <rect x="560" y="130" width="60" height="80" fill="url(#sprinterGlass)" stroke="#2563eb" stroke-width="1"/>
-    
-    <!-- LED headlights -->
-    <circle cx="40" cy="160" r="15" fill="#60a5fa" filter="url(#sprinterGlow)"/>
-    <circle cx="110" cy="160" r="15" fill="#60a5fa" filter="url(#sprinterGlow)"/>
-    
-    <!-- LED strip lighting -->
-    <rect x="10" y="120" width="580" height="3" fill="#3b82f6" opacity="0.8"/>
-    <rect x="10" y="280" width="580" height="3" fill="#3b82f6" opacity="0.8"/>
-    
-    <!-- Wheels -->
-    <circle cx="120" cy="320" r="35" fill="url(#sprinterWheel)" stroke="#374151" stroke-width="3"/>
-    <circle cx="300" cy="320" r="35" fill="url(#sprinterWheel)" stroke="#374151" stroke-width="3"/>
-    <circle cx="480" cy="320" r="35" fill="url(#sprinterWheel)" stroke="#374151" stroke-width="3"/>
-    
-    <!-- Mercedes emblem -->
-    <circle cx="75" cy="140" r="12" fill="url(#sprinterChrome)"/>
-    <path d="M75,130 L75,150 M65,140 L85,140" stroke="#1f2937" stroke-width="2"/>
-    
-    <!-- Passenger capacity indicator -->
-    <rect x="250" y="50" width="100" height="30" rx="15" fill="#1e40af" stroke="#60a5fa" stroke-width="2"/>
-    <text x="300" y="70" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#ffffff">16 Kişi</text>
-  </g>
+  <!-- Windows (Privacy Glass) -->
+  <path d="M260,230 L400,230 L400,320 L260,320 Z" fill="url(#sprinterGlass)"/>
+  <path d="M420,230 L560,230 L560,320 L420,320 Z" fill="url(#sprinterGlass)"/>
+  <path d="M580,230 L700,230 L710,320 L580,320 Z" fill="url(#sprinterGlass)"/>
+  <path d="M100,160 L200,160 L200,320 L100,320 Z" fill="url(#sprinterGlass)"/> <!-- Front Side Window -->
   
-  <!-- Professional chauffeur silhouette -->
-  <g transform="translate(380,180)">
-    <ellipse cx="0" cy="0" rx="15" ry="20" fill="#1e293b"/>
-    <rect x="-12" y="20" width="24" height="40" rx="5" fill="#334155"/>
-    <rect x="-15" y="60" width="30" height="25" rx="3" fill="#1e293b"/>
-  </g>
+  <!-- Wheels -->
+  <circle cx="150" cy="480" r="50" fill="#222" stroke="#000" stroke-width="5"/>
+  <circle cx="650" cy="480" r="50" fill="#222" stroke="#000" stroke-width="5"/>
+  <circle cx="150" cy="480" r="30" fill="#666"/>
+  <circle cx="650" cy="480" r="30" fill="#666"/>
   
-  <!-- LED accent lighting -->
-  <g opacity="0.6">
-    <circle cx="600" cy="300" r="50" fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.3">
-      <animate attributeName="r" values="50;70;50" dur="3s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.3;0.1;0.3" dur="3s" repeatCount="indefinite"/>
-    </circle>
-  </g>
+  <!-- Side Trim -->
+  <rect x="50" y="420" width="700" height="15" fill="#111"/>
+  
+  <!-- Headlights -->
+  <path d="M50,380 L80,380 L85,410 L55,410 Z" fill="#e2e8f0"/>
+  <path d="M720,380 L750,380 L745,410 L720,410 Z" fill="#ef4444"/>
 </svg>

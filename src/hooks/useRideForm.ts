@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { getRegionVehicles, getSuitableVehicle, isVehicleValidForRegion, VehicleRegion } from "@/lib/vehicleRegions";
+import { getDirections } from "@/utils/googleMapsLoader";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { useHeroFormStorage, parseSavedDate, SavedFormData } from "./useHeroFormStorage";
 import type { BookingData } from "@/components/hero/types";
@@ -158,6 +159,8 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   // Initialize state from localStorage
   const [pickup, setPickup] = useState(() => initialFormData?.pickup || "");
   const [dropoff, setDropoff] = useState(() => initialFormData?.dropoff || "");
+  const [pickupDetails, setPickupDetails] = useState<PlaceDetails | undefined>();
+  const [dropoffDetails, setDropoffDetails] = useState<PlaceDetails | undefined>();
   const [date, setDate] = useState<Date | undefined>(() => 
     parseSavedDate(initialFormData?.date) || new Date()
   );
@@ -211,6 +214,14 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     setLoadingTransferPrice(true);
     const timer = setTimeout(async () => {
       try {
+        // Calculate distance using Google Maps Directions Service
+        if (pickupDetails?.lat && pickupDetails?.lng && dropoffDetails?.lat && dropoffDetails?.lng) {
+          await getDirections(
+            { lat: pickupDetails.lat, lng: pickupDetails.lng },
+            { lat: dropoffDetails.lat, lng: dropoffDetails.lng }
+          );
+        }
+
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: { pickup, dropoff, customerCurrency: "EUR" }
         });
@@ -234,7 +245,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [pickup, dropoff]);
+  }, [pickup, dropoff, pickupDetails, dropoffDetails]);
 
   // Auto-adjust vehicle type based on passenger count AND region
   useEffect(() => {
@@ -258,10 +269,16 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   // Handlers
   const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {
     setPickup(details?.displayText || value);
+    if (details) {
+      setPickupDetails(details);
+    }
   }, []);
 
   const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => {
     setDropoff(details?.displayText || value);
+    if (details) {
+      setDropoffDetails(details);
+    }
   }, []);
 
   const handleSwapLocations = useCallback(() => {
@@ -269,7 +286,11 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
       setDropoff(() => prev);
       return dropoff;
     });
-  }, [dropoff]);
+    setPickupDetails(prev => {
+      setDropoffDetails(() => prev);
+      return dropoffDetails;
+    });
+  }, [dropoff, dropoffDetails]);
 
   const handleSetDate = useCallback((d: Date | undefined) => setDate(d), []);
   const handleSetTime = useCallback((t: string) => setTime(t), []);

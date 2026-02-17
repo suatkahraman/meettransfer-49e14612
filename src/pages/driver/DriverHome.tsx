@@ -81,8 +81,11 @@ const COMPLETED_LIMIT_IOS = 5;  // iOS için daha az
 
 const sortByPickupDateTime = (items: Reservation[]) =>
   [...items].sort((a, b) => {
-    const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-    const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
+    // iOS Safari safe date parsing
+    const dateStrA = a.pickup_date.includes('T') ? a.pickup_date : `${a.pickup_date}T${a.pickup_time}`;
+    const dateStrB = b.pickup_date.includes('T') ? b.pickup_date : `${b.pickup_date}T${b.pickup_time}`;
+    const dateTimeA = new Date(dateStrA);
+    const dateTimeB = new Date(dateStrB);
     return dateTimeA.getTime() - dateTimeB.getTime();
   });
 

@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePromo } from '@/contexts/PromoContext';
 import { validatePromoCode } from '@/hooks/useActivePromoCode';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { safeLocalGet, safeLocalSet, safeLocalRemove, safeSessionGet, safeSessionRemove } from '@/lib/safeStorage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -528,8 +529,8 @@ const ReservationForm = () => {
   // Also check for data from CustomerHome sessionStorage
   useEffect(() => {
     // Check for customer data from CustomerHome form
-    const savedPassengerNames = sessionStorage.getItem('customerPassengerNames');
-    const savedPhone = sessionStorage.getItem('customerPhone');
+    const savedPassengerNames = safeSessionGet('customerPassengerNames');
+    const savedPhone = safeSessionGet('customerPhone');
     
     if (savedPassengerNames) {
       try {
@@ -1208,7 +1209,7 @@ const ReservationForm = () => {
         ? 'Both reservations submitted successfully!'
         : 'Reservation submitted successfully!');
       
-      localStorage.removeItem(FORM_STORAGE_KEY);
+      safeLocalRemove(FORM_STORAGE_KEY);
       trackConversion(CONVERSION_LABELS.RESERVATION_SUBMIT);
       
       // Reset states
