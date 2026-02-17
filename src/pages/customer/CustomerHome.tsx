@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -110,6 +110,9 @@ const CustomerHome = () => {
   // Return transfer promo code hook
   const { promoCode: returnPromoCode, loading: promoLoading } = useActivePromoCode('return_transfer');
   const { stats: paymentStats } = useCustomerPayments({ language: language === 'TR' ? 'TR' : 'EN' });
+  
+  // Refs
+  const bookingFormRef = useRef<HTMLDivElement>(null);
   
   // State - organized by purpose
   const [menuOpen, setMenuOpen] = useState(false);
@@ -1441,10 +1444,7 @@ const CustomerHome = () => {
           onBookNowClick={() => {
             setIsBookingFormOpen(true);
             setTimeout(() => {
-              const formElement = document.getElementById('booking-form');
-              if (formElement) {
-                formElement.scrollIntoView({ behavior: 'smooth' });
-              }
+              bookingFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
           }}
           activeReservationsSlot={undefined}
@@ -1598,8 +1598,7 @@ const CustomerHome = () => {
               onClick={() => {
                 setIsBookingFormOpen(true);
                 setTimeout(() => {
-                  const formElement = document.getElementById('booking-form');
-                  formElement?.scrollIntoView({ behavior: 'smooth' });
+                  bookingFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
               }}
             >
@@ -2208,7 +2207,7 @@ const CustomerHome = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
+          <Card ref={bookingFormRef} id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
           <CardHeader 
             className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg"
             onClick={() => setIsBookingFormOpen(!isBookingFormOpen)}
