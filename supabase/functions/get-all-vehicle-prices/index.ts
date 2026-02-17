@@ -489,9 +489,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
         let kmDebugInfo = {};
 
         try {
-          // v3.0.1: Yeni distance_pricing_rules yapısı (city, airport_code, pricing_mode verified)
+          // v3.0.2: Added region, currency, is_active support
           const kmRulesRes = await fetch(
-            `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
+            `${SUPABASE_URL}/rest/v1/distance_pricing_rules?is_active=eq.true&select=id,vehicle_type,city,airport_code,region,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date,currency`,
             { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
           );
 
@@ -500,13 +500,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
               vehicle_type: string | null; 
               city: string | null; 
               airport_code: string | null;
+              region: string | null;
               pricing_mode: 'fixed' | 'distance' | null;
               base_price: number | null; 
               extra_km_price: number | null;
               min_km: number | null; 
               max_km: number | null; 
               start_date?: string | null; 
-              end_date?: string | null; 
+              end_date?: string | null;
+              currency?: string | null;
             };
             
             let kmRules: KmRule[] = await kmRulesRes.json();
@@ -536,6 +538,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
             }
 
             function ruleMatchesLocation(r: KmRule): boolean {
+              // 0. Region Kontrolü (Turkey vs Dubai)
+              if (r.region) {
+                const rRegion = norm(r.region);
+                if (isDubai && rRegion !== "dubai") return false;
+                if (!isDubai && rRegion !== "turkey") return false;
+              }
+
               // 1. Şehir Kontrolü
               if (r.city) {
                 const rCity = norm(r.city);
@@ -566,13 +575,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
               return false;
             }
 
-            const vehiclePriceMap: Record<string, number> = {};
+            const vehiclePriceMap: Record<string, { price: number, currency: string }> = {};
             const currentAirportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;
 
             for (const vt of turkeyVehicles) {
               const matchingRules = (kmRules || []).filter((r) => ruleMatchesVehicle(r, vt) && ruleMatchesLocation(r));
               
               let bestPrice: number | null = null;
+              let bestCurrency = "EUR";
 
               // 1. KM aralığına göre filtrele (Strict Range Match)
               let validKmRules = matchingRules.filter(r => {
@@ -611,23 +621,26 @@ Deno.serve(async (req: Request): Promise<Response> => {
                 if (price != null) {
                   if (bestPrice == null || price < bestPrice) {
                     bestPrice = price;
+                    bestCurrency = r.currency || "EUR";
                   }
                 }
               }
 
               if (bestPrice != null) {
-                vehiclePriceMap[vt.value] = bestPrice;
+                vehiclePriceMap[vt.value] = { price: bestPrice, currency: bestCurrency };
               }
             }
 
             distanceBasedPrices = turkeyVehicles.map((vt) => {
-              const finalPrice = vehiclePriceMap[vt.value] ?? null;
+              const data = vehiclePriceMap[vt.value];
+              const finalPrice = data?.price ?? null;
+              const currency = data?.currency ?? "EUR";
               const available = finalPrice != null && finalPrice > 0;
               return {
                 vehicleType: vt.value,
                 vehicleLabel: vt.label,
                 price: finalPrice,
-                currency: "EUR",
+                currency: currency,
                 passengers: vt.passengers,
                 luggage: vt.luggage,
                 available,
@@ -741,10 +754,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
           return { prices, matched: hasAvailable, message: hasAvailable ? null : "Fiyat Bulunamadı", priceSource: "intercity_prices", debug_info };
         }
 
-        // v3.0.1: Yeni distance_pricing_rules yapısı (city, airport_code, pricing_mode verified)
+        // v3.0.2: Added region, currency, is_active support
         // city, airport_code, start_date, end_date, pricing_mode, base_price, extra_km_price
         const kmRulesRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
+          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?is_active=eq.true&select=id,vehicle_type,city,airport_code,region,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date,currency`,
           { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
         );
         if (!kmRulesRes.ok) {
@@ -771,6 +784,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           vehicle_type: string | null; 
           city: string | null; 
           airport_code: string | null;
+          region: string | null;
           pricing_mode: 'fixed' | 'distance' | null;
           base_price: number | null; 
           extra_km_price: number | null;
@@ -778,6 +792,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           max_km: number | null; 
           start_date?: string | null; 
           end_date?: string | null; 
+          currency?: string | null;
         };
         
         let kmRules: KmRule[] = await kmRulesRes.json();
@@ -815,6 +830,13 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
 
         function ruleMatchesLocation(r: KmRule): boolean {
+          // 0. Region Kontrolü (Turkey vs Dubai)
+          if (r.region) {
+            const rRegion = norm(r.region);
+            if (isDubai && rRegion !== "dubai") return false;
+            if (!isDubai && rRegion !== "turkey") return false;
+          }
+
           // 1. Şehir Kontrolü
           if (r.city) {
             const rCity = norm(r.city);
@@ -850,7 +872,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           return false;
         }
 
-        const vehiclePriceMap: Record<string, number> = {};
+        const vehiclePriceMap: Record<string, { price: number, currency: string }> = {};
         
         const currentAirportFee = airport ? AIRPORT_PARKING_FEE_EUR : 0;
 
@@ -859,6 +881,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           const matchingRules = (kmRules || []).filter((r) => ruleMatchesVehicle(r, vt) && ruleMatchesLocation(r));
           
           let bestPrice: number | null = null;
+          let bestCurrency = "EUR";
 
           // 1. KM aralığına göre filtrele
           const validKmRules = matchingRules.filter(r => {
@@ -882,6 +905,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
               console.log(log); // Loglamayı burada yapıyoruz
               if (bestPrice == null || price < bestPrice) {
                 bestPrice = price;
+                bestCurrency = r.currency || "EUR";
               }
             } else {
               console.warn(log); // Hesaplama yapılamadıysa warn logu
@@ -889,7 +913,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           }
 
           if (bestPrice != null) {
-            vehiclePriceMap[vt.value] = bestPrice;
+            vehiclePriceMap[vt.value] = { price: bestPrice, currency: bestCurrency };
           }
         }
 
@@ -900,14 +924,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
           // vehiclePriceMap direkt final fiyatı içeriyor.
           // Ancak, eğer yukarıda calculateFinalPrice kullanılmadıysa (eski kod kalıntıları varsa) dikkatli olmalıyız.
           // Şu anki refactor ile vehiclePriceMap içindeki fiyatlar FINAL (airport dahil) fiyatlardır.
-          const finalPrice = vehiclePriceMap[vt.value] ?? null;
+          const data = vehiclePriceMap[vt.value];
+          const finalPrice = data?.price ?? null;
+          const currency = data?.currency ?? "EUR";
           const available = finalPrice != null && finalPrice > 0;
 
           return {
             vehicleType: vt.value,
             vehicleLabel: vt.label,
             price: finalPrice,
-            currency: "EUR",
+            currency: currency,
             passengers: vt.passengers,
             luggage: vt.luggage,
             available,

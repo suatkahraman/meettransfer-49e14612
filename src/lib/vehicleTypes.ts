@@ -2,39 +2,39 @@
 // Used by Hero.tsx, AdminRegionPrices.tsx, QuickBookingConfirm.tsx, and edge functions
 
 // ========== SEDAN IMAGES - Only sedan vehicles (Toyota Corolla, Renault Megane) ==========
-import futuristicSedan1 from "@/assets/vehicles/futuristic-sedan-1.svg";
-import futuristicSedan2 from "@/assets/vehicles/futuristic-sedan-2.svg";
-import futuristicSedan3 from "@/assets/vehicles/futuristic-sedan-3.svg";
-import futuristicSedan4 from "@/assets/vehicles/futuristic-sedan-4.svg";
-import futuristicSedan5 from "@/assets/vehicles/futuristic-sedan-5.svg";
+import sedanHero from "@/assets/vehicles/sedan-hero.webp";
+import sedanInterior from "@/assets/vehicles/sedan-interior-premium.webp";
+import sedanExterior from "@/assets/vehicles/sedan-standard-exterior.webp";
+import sedanRear from "@/assets/vehicles/sedan-standard-interior.webp";
+import sedanAirport from "@/assets/vehicles/sedan-airport.webp";
 
 // ========== MERCEDES VITO IMAGES - Only Vito vehicles ==========
-import futuristicVito1 from "@/assets/vehicles/futuristic-vito-1.svg";
-import futuristicVito2 from "@/assets/vehicles/futuristic-vito-2.svg";
-import futuristicVito3 from "@/assets/vehicles/futuristic-vito-3.svg";
-import futuristicVito4 from "@/assets/vehicles/futuristic-vito-4.svg";
-import futuristicVito5 from "@/assets/vehicles/futuristic-vito-5.svg";
+import vitoHero from "@/assets/vehicles/vito-hero.webp";
+import vitoInterior from "@/assets/vehicles/vito-interior.webp";
+import vitoExterior from "@/assets/vehicles/vito-exterior.webp";
+import vitoRear from "@/assets/vehicles/vito-premium-interior.webp";
+import vitoPremium from "@/assets/vehicles/vito-premium-exterior.webp";
 
 // ========== VIP MERCEDES IMAGES - Only VIP Vito vehicles ==========
-import futuristicVipVito1 from "@/assets/vehicles/futuristic-vip-vito-1.svg";
-import futuristicVipVito2 from "@/assets/vehicles/futuristic-vip-vito-2.svg";
-import futuristicVipVito3 from "@/assets/vehicles/futuristic-vip-vito-3.svg";
-import futuristicVipVito4 from "@/assets/vehicles/futuristic-vip-vito-4.svg";
-import futuristicVipVito5 from "@/assets/vehicles/futuristic-vip-vito-5.svg";
+import vipVitoHero from "@/assets/vehicles/vito-vip-hero.webp";
+import vipVitoInterior from "@/assets/vehicles/vip-mercedes-interior.webp";
+import vipVitoExterior from "@/assets/vehicles/vip-mercedes-exterior.webp";
+import vipVitoStarlight from "@/assets/vehicles/vip-vito-starlight.webp";
+import vipVitoNight from "@/assets/vehicles/vip-vito-night.jpg";
 
 // ========== MAYBACH MINIVAN IMAGES - Only Maybach vehicles ==========
-import futuristicMaybach1 from "@/assets/vehicles/futuristic-maybach-1.svg";
-import futuristicMaybach2 from "@/assets/vehicles/futuristic-maybach-2.svg";
-import futuristicMaybach3 from "@/assets/vehicles/futuristic-maybach-3.svg";
-import futuristicMaybach4 from "@/assets/vehicles/futuristic-maybach-4.svg";
-import futuristicMaybach5 from "@/assets/vehicles/futuristic-maybach-5.svg";
+import maybachHero from "@/assets/vehicles/maybach-hero.webp";
+import maybachInterior from "@/assets/vehicles/maybach-interior-luxury.webp";
+import maybachExterior from "@/assets/vehicles/maybach-minivan-exterior.webp";
+import maybachRear from "@/assets/vehicles/maybach-interior-rear.webp";
+import maybachStarlight from "@/assets/vehicles/maybach-starlight.jpg";
 
 // ========== SPRINTER MINIBUS IMAGES - Only Sprinter vehicles ==========
-import futuristicSprinter1 from "@/assets/vehicles/futuristic-sprinter-1.svg";
-import futuristicSprinter2 from "@/assets/vehicles/futuristic-sprinter-2.svg";
-import futuristicSprinter3 from "@/assets/vehicles/futuristic-sprinter-3.svg";
-import futuristicSprinter4 from "@/assets/vehicles/futuristic-sprinter-4.svg";
-import futuristicSprinter5 from "@/assets/vehicles/futuristic-sprinter-5.svg";
+import sprinterHero from "@/assets/vehicles/sprinter-hero.webp";
+import sprinterInterior from "@/assets/vehicles/sprinter-interior.webp";
+import sprinterExterior from "@/assets/vehicles/sprinter-exterior.webp";
+import sprinterRear from "@/assets/vehicles/sprinter-arrival.webp";
+import sprinterDark from "@/assets/vehicles/sprinter-dark.jpg";
 
 export interface VehicleImage {
   src: string;
@@ -90,11 +90,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // SEDAN ONLY IMAGES - Renault Megane, Toyota Corolla - NO Mercedes, NO Vito, NO Maybach, NO Sprinter
     images: [
-      { src: futuristicSedan1, alt: "Black Standard Sedan Exterior Side View" },
-      { src: futuristicSedan2, alt: "Black Standard Sedan Interior" },
-      { src: futuristicSedan3, alt: "Black Standard Sedan Front View" },
-      { src: futuristicSedan4, alt: "Black Standard Sedan Rear Interior" },
-      { src: futuristicSedan5, alt: "Black Standard Sedan Rear View" },
+      { src: sedanHero, alt: "Black Standard Sedan Exterior Side View" },
+      { src: sedanInterior, alt: "Black Standard Sedan Interior" },
+      { src: sedanExterior, alt: "Black Standard Sedan Front View" },
+      { src: sedanRear, alt: "Black Standard Sedan Rear Interior" },
+      { src: sedanAirport, alt: "Black Standard Sedan Rear View" },
     ],
   },
   {
@@ -127,11 +127,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // MERCEDES VITO ONLY IMAGES - BLACK Vito only, NO grey, NO Sedan, NO Maybach, NO Sprinter, NO VIP Vito starlight
     images: [
-      { src: futuristicVito1, alt: "Black Mercedes Vito Exterior Side View" },
-      { src: futuristicVito2, alt: "Black Mercedes Vito Interior" },
-      { src: futuristicVito3, alt: "Black Mercedes Vito Front View" },
-      { src: futuristicVito4, alt: "Black Mercedes Vito Rear Interior" },
-      { src: futuristicVito5, alt: "Black Mercedes Vito Rear Exterior View" },
+      { src: vitoHero, alt: "Black Mercedes Vito Exterior Side View" },
+      { src: vitoInterior, alt: "Black Mercedes Vito Interior" },
+      { src: vitoExterior, alt: "Black Mercedes Vito Front View" },
+      { src: vitoRear, alt: "Black Mercedes Vito Rear Interior" },
+      { src: vitoPremium, alt: "Black Mercedes Vito Rear Exterior View" },
     ],
   },
   {
@@ -152,11 +152,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // VIP MERCEDES VITO ONLY IMAGES - Starlight ceiling VIP Vito - NO Sedan, NO Maybach, NO Sprinter, NO regular Vito
     images: [
-      { src: futuristicVipVito1, alt: "Black VIP Mercedes Vito Exterior" },
-      { src: futuristicVipVito2, alt: "Black VIP Mercedes Vito Ultra Luxury Interior" },
-      { src: futuristicVipVito3, alt: "Black VIP Mercedes Vito Front View" },
-      { src: futuristicVipVito4, alt: "Black VIP Mercedes Vito Rear Interior with TV" },
-      { src: futuristicVipVito5, alt: "Black VIP Mercedes Vito Rear Exterior" },
+      { src: vipVitoHero, alt: "Black VIP Mercedes Vito Exterior" },
+      { src: vipVitoInterior, alt: "Black VIP Mercedes Vito Ultra Luxury Interior" },
+      { src: vipVitoExterior, alt: "Black VIP Mercedes Vito Front View" },
+      { src: vipVitoStarlight, alt: "Black VIP Mercedes Vito Rear Interior with TV" },
+      { src: vipVitoNight, alt: "Black VIP Mercedes Vito Rear Exterior" },
     ],
   },
   {
@@ -178,11 +178,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // MAYBACH MINIVAN ONLY IMAGES - NO Sedan, NO Vito, NO VIP Vito, NO Sprinter
     images: [
-      { src: futuristicMaybach1, alt: "Black Mercedes Maybach Exterior Side View" },
-      { src: futuristicMaybach2, alt: "Black Mercedes Maybach First Class Interior" },
-      { src: futuristicMaybach3, alt: "Black Mercedes Maybach Front View" },
-      { src: futuristicMaybach4, alt: "Black Mercedes Maybach Rear Interior with Screens" },
-      { src: futuristicMaybach5, alt: "Black Mercedes Maybach Rear Exterior" },
+      { src: maybachHero, alt: "Black Mercedes Maybach Exterior Side View" },
+      { src: maybachInterior, alt: "Black Mercedes Maybach First Class Interior" },
+      { src: maybachExterior, alt: "Black Mercedes Maybach Front View" },
+      { src: maybachRear, alt: "Black Mercedes Maybach Rear Interior with Screens" },
+      { src: maybachStarlight, alt: "Black Mercedes Maybach Rear Exterior" },
     ],
   },
   {
@@ -217,11 +217,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // SPRINTER MINIBUS ONLY IMAGES - NO Sedan, NO Vito, NO VIP Vito, NO Maybach
     images: [
-      { src: futuristicSprinter1, alt: "Black Mercedes Sprinter Exterior Side View" },
-      { src: futuristicSprinter2, alt: "Black Mercedes Sprinter Ultra Luxury Interior" },
-      { src: futuristicSprinter3, alt: "Black Mercedes Sprinter Front View" },
-      { src: futuristicSprinter4, alt: "Black Mercedes Sprinter Rear Interior View" },
-      { src: futuristicSprinter5, alt: "Black Mercedes Sprinter Rear Exterior View" },
+      { src: sprinterHero, alt: "Black Mercedes Sprinter Exterior Side View" },
+      { src: sprinterInterior, alt: "Black Mercedes Sprinter Ultra Luxury Interior" },
+      { src: sprinterExterior, alt: "Black Mercedes Sprinter Front View" },
+      { src: sprinterRear, alt: "Black Mercedes Sprinter Rear Interior View" },
+      { src: sprinterDark, alt: "Black Mercedes Sprinter Rear Exterior View" },
     ],
   },
 ];
