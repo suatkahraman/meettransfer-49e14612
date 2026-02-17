@@ -1719,7 +1719,11 @@ const translations = {
   "blogAthensTitle": "Athens Airport Transfer Guide 2025 | Prices, Options & Tips",
   "blogAthensDesc": "Complete guide to Athens Airport transfers. Prices to city center, Piraeus port, islands and all major destinations.",
   "blogAthensH1": "Athens Airport Transfer Guide 2025",
-  "blogAthensIntro": "Athens International Airport (ATH) serves as the gateway to Greece and its beautiful islands. This comprehensive guide covers all transfer options and prices."
+  "blogAthensIntro": "Athens International Airport (ATH) serves as the gateway to Greece and its beautiful islands. This comprehensive guide covers all transfer options and prices.",
+  "bookNowHero": "Book Now",
+  "bookNowHeroDesc": "Get your quote and book instantly",
+  "preparingResponse": "Preparing response...",
+  "geminiKeyMissing": "Gemini API key is not configured."
 } as const;
 
 export default translations;

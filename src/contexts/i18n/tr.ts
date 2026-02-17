@@ -1549,7 +1549,11 @@ const translations = {
   "blogAthensTitle": "Atina Havalimanı Transfer Rehberi 2025 | Fiyatlar, Seçenekler ve İpuçları",
   "blogAthensDesc": "Atina Havalimanı transferleri için tam rehber. Şehir merkezi, Pire limanı, adalara fiyatlar.",
   "blogAthensH1": "Atina Havalimanı Transfer Rehberi 2025",
-  "blogAthensIntro": "Atina Uluslararası Havalimanı (ATH), Yunanistan'a ve güzel adalarına açılan kapıdır. Bu rehber tüm transfer seçeneklerini ve fiyatları kapsar."
+  "blogAthensIntro": "Atina Uluslararası Havalimanı (ATH), Yunanistan'a ve güzel adalarına açılan kapıdır. Bu rehber tüm transfer seçeneklerini ve fiyatları kapsar.",
+  "bookNowHero": "Hemen Rezervasyon Yap",
+  "bookNowHeroDesc": "Transfer fiyatınızı alın, hemen rezervasyon yapın",
+  "preparingResponse": "Yanıt hazırlanıyor...",
+  "geminiKeyMissing": "Gemini API anahtarı yapılandırılmamış."
 } as const;
 
 export default translations;

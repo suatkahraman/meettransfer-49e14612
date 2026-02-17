@@ -183,10 +183,10 @@ export function CustomerHeroWelcomePanel({
             >
               <div className="flex items-center gap-2">
                 <Car className="h-6 w-6" />
-                <span className="font-bold text-lg">{language === 'TR' ? 'Book Now' : 'Book Now'}</span>
+                <span className="font-bold text-lg">{t('bookNowHero')}</span>
               </div>
               <span className="text-sm opacity-90 mt-0.5">
-                {language === 'TR' ? 'Transfer fiyatınızı alın, hemen rezervasyon yapın' : 'Get your quote and book instantly'}
+                {t('bookNowHeroDesc')}
               </span>
             </motion.button>
           )}
