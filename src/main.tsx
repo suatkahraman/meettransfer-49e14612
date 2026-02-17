@@ -25,18 +25,24 @@ if (import.meta.env.DEV) {
 }
 
 async function boot() {
-  const proceed = await runVersionCheck();
-  if (!proceed) return;
+  // Fire version check in background, don't block render
+  runVersionCheck().catch(() => {});
+
   try {
     console.log("[Boot] Starting React render");
   } catch {
     /* ignore */
   }
-  createRoot(document.getElementById("root")!).render(
+  
+  const rootElement = document.getElementById("root");
+  if (!rootElement) return;
+
+  createRoot(rootElement).render(
     <GlobalErrorBoundary>
       <App />
     </GlobalErrorBoundary>
   );
+
   try {
     (window as any).__APP_MOUNTED__ = true;
     window.dispatchEvent(new Event("lovable:app-mounted"));
@@ -45,6 +51,8 @@ async function boot() {
     /* ignore */
   }
 }
+
+// Start immediately
 boot();
 
 // PWA service worker is registered by the app (prompt mode) and will
