@@ -1154,7 +1154,8 @@ const ReservationForm = () => {
 
       // Create return trip if enabled
       if (hasReturnTrip && returnTripData.date && returnTripData.time) {
-        const returnPrice = isPromoCodeValid && reservationPrice ? Math.round(reservationPrice * 0.7) : reservationPrice;
+        // Apply 25% discount for return trip automatically
+        const returnPrice = reservationPrice ? Math.round(reservationPrice * 0.75) : reservationPrice;
         
         const { data: returnReservation, error: returnError } = await supabase
           .from('reservations')
@@ -1404,19 +1405,18 @@ const ReservationForm = () => {
     const selectedCurrency = preferredCurrency;
     
     // Calculate return price - always discounted for return trips
-    const RETURN_DISCOUNT_PERCENTAGE = 10; // 10% discount for return trip by default
-    const PROMO_DISCOUNT_PERCENTAGE = 25; // 25% discount with promo code
+    const RETURN_DISCOUNT_PERCENTAGE = 25; // 25% discount for return trip
     
     const getReturnPrice = () => {
       if (!hasReturnTrip || selectedPriceEur == null) return null;
-      const discountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
+      const discountPercent = RETURN_DISCOUNT_PERCENTAGE;
       const returnPriceEur = Math.round(selectedPriceEur * (100 - discountPercent) / 100);
       return getDisplayPrice(returnPriceEur);
     };
     
     const returnPrice = getReturnPrice();
     const returnOriginalPrice = selectedPrice;
-    const returnDiscountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
+    const returnDiscountPercent = RETURN_DISCOUNT_PERCENTAGE;
     const returnDiscountAmount = hasReturnTrip && selectedPrice ? Math.round((selectedPrice ?? 0) * returnDiscountPercent / 100) : null;
     const totalPrice = selectedPrice ? (selectedPrice ?? 0) + (returnPrice ?? 0) : null;
     const totalWithoutDiscount = hasReturnTrip && selectedPrice ? (selectedPrice ?? 0) * 2 : selectedPrice;
@@ -1827,7 +1827,7 @@ const ReservationForm = () => {
                     {isPromoCodeValid === true && (
                       <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 flex items-center gap-1 bg-green-50 dark:bg-green-950/30 px-2 py-1 rounded">
                         <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                        {language === 'TR' ? `Dönüşte %${PROMO_DISCOUNT_PERCENTAGE} indirim kazandınız!` : `${PROMO_DISCOUNT_PERCENTAGE}% off on return transfer!`}
+                        {language === 'TR' ? `Dönüşte %${RETURN_DISCOUNT_PERCENTAGE} indirim kazandınız!` : `${RETURN_DISCOUNT_PERCENTAGE}% off on return transfer!`}
                       </p>
                     )}
                     {isPromoCodeValid === false && promoCodeError && (
@@ -1839,8 +1839,8 @@ const ReservationForm = () => {
                     {!isPromoCodeValid && !promoCodeError && (
                       <p className="text-xs text-muted-foreground">
                         {language === 'TR' 
-                          ? 'Kod olmadan da %10 dönüş indirimi otomatik uygulanır' 
-                          : '10% return discount is applied automatically without a code'}
+                          ? 'Kod olmadan da %25 dönüş indirimi otomatik uygulanır' 
+                          : '25% return discount is applied automatically without a code'}
                       </p>
                     )}
                     {activePromo?.validUntil && (
@@ -1903,7 +1903,7 @@ const ReservationForm = () => {
                               : (t('language') === 'TR' ? 'Dönüş İndirimi' : 'Return Discount')}
                           </span>
                           <span className="font-bold">
-                            ({isPromoCodeValid ? `${PROMO_DISCOUNT_PERCENTAGE}%` : `${RETURN_DISCOUNT_PERCENTAGE}%`})
+                            ({RETURN_DISCOUNT_PERCENTAGE}%)
                           </span>
                         </span>
                         <span className="font-semibold text-xs sm:text-sm text-green-600 dark:text-green-400">

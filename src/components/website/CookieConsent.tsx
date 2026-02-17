@@ -136,12 +136,6 @@ export const CookieConsent = () => {
             </p>
           </div>
           <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto flex-wrap md:flex-nowrap">
-            <a 
-              href="/privacy" 
-              className="text-sm text-primary hover:underline whitespace-nowrap"
-            >
-              {t.learnMore}
-            </a>
             <Button 
               onClick={handleReject}
               variant="outline"
