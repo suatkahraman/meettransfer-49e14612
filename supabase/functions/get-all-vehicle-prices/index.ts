@@ -489,14 +489,34 @@ Deno.serve(async (req: Request): Promise<Response> => {
         let kmDebugInfo = {};
 
         try {
-          // v3.0.3: Force update check
-// v3.0.2: Added region, currency, is_active support
-          const kmRulesRes = await fetch(
-            `${SUPABASE_URL}/rest/v1/distance_pricing_rules?is_active=eq.true&select=id,vehicle_type,city,airport_code,region,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date,currency`,
-            { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-          );
+          // v3.0.3: Fallback mechanism for migration safety
+          let kmRulesRes;
+          try {
+            // Try new query with region support
+            kmRulesRes = await fetch(
+              `${SUPABASE_URL}/rest/v1/distance_pricing_rules?is_active=eq.true&select=id,vehicle_type,city,airport_code,region,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date,currency`,
+              { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+            );
 
-          if (kmRulesRes.ok) {
+            // If failed with 400 (Bad Request), likely due to missing columns (migration not applied)
+            if (!kmRulesRes.ok && kmRulesRes.status === 400) {
+              console.warn("[get-all-vehicle-prices] New query failed (400), attempting fallback to legacy query. Migration might be missing.");
+              kmRulesRes = await fetch(
+                `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
+                { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+              );
+            }
+          } catch (e) {
+             console.error("[get-all-vehicle-prices] Fetch error:", e);
+             // Fallback attempt in catch block if fetch throws (network error etc)
+             // Note: This might not help if the error is network related, but good for safety
+             kmRulesRes = await fetch(
+               `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
+               { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+             );
+          }
+
+          if (kmRulesRes && kmRulesRes.ok) {
             type KmRule = { 
               vehicle_type: string | null; 
               city: string | null; 
@@ -755,15 +775,34 @@ Deno.serve(async (req: Request): Promise<Response> => {
           return { prices, matched: hasAvailable, message: hasAvailable ? null : "Fiyat Bulunamadı", priceSource: "intercity_prices", debug_info };
         }
 
-        // v3.0.2: Added region, currency, is_active support
-        // city, airport_code, start_date, end_date, pricing_mode, base_price, extra_km_price
-        const kmRulesRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/distance_pricing_rules?is_active=eq.true&select=id,vehicle_type,city,airport_code,region,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date,currency`,
-          { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-        );
-        if (!kmRulesRes.ok) {
+        // v3.0.3: Fallback mechanism for migration safety
+        let kmRulesRes;
+        try {
+          // Try new query with region support
+          kmRulesRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/distance_pricing_rules?is_active=eq.true&select=id,vehicle_type,city,airport_code,region,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date,currency`,
+            { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+          );
+
+          if (!kmRulesRes.ok && kmRulesRes.status === 400) {
+            console.warn("[get-all-vehicle-prices] New query failed (400), attempting fallback to legacy query. Migration might be missing.");
+            kmRulesRes = await fetch(
+              `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
+              { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+            );
+          }
+        } catch (e) {
+          console.error("[get-all-vehicle-prices] Fetch error:", e);
+          kmRulesRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/distance_pricing_rules?select=id,vehicle_type,city,airport_code,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date`,
+            { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+          );
+        }
+
+        if (!kmRulesRes || !kmRulesRes.ok) {
+          const status = kmRulesRes ? kmRulesRes.status : "unknown";
           const errMsg = "Fiyat hesaplanamadı: Veritabanı hatası (distance_pricing_rules sorgusu başarısız)";
-          console.error("[get-all-vehicle-prices DEBUG] Turkey price fail - reason:", errMsg, "| status:", kmRulesRes.status);
+          console.error("[get-all-vehicle-prices DEBUG] Turkey price fail - reason:", errMsg, "| status:", status);
           return {
             prices: turkeyVehicles.map((v) => ({
               vehicleType: v.value,

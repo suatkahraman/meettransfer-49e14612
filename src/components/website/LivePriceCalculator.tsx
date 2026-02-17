@@ -23,6 +23,7 @@ interface PriceResult {
   matched: boolean;
   matchedCity?: string;
   matchedAirport?: string;
+  error?: string; // v3.0.3: Error message from backend
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -234,7 +235,34 @@ const LivePriceCalculator = () => {
             </motion.div>
           )}
 
-          {!isLoading && hasSearched && priceResult && (
+          {!isLoading && hasSearched && priceResult?.error && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="mt-8 text-center"
+            >
+              <Card className="p-6 border-destructive/20 bg-destructive/5 inline-block max-w-md mx-auto">
+                <p className="text-destructive font-medium mb-2">
+                  {t("priceCalculationError") || "Error calculating price"}
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {priceResult.error}
+                </p>
+                 <Button
+                    onClick={() => navigate("/quick-booking")}
+                    variant="outline"
+                    className="mt-2"
+                  >
+                    {t("requestPrice") || "Request Manual Price"}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+              </Card>
+            </motion.div>
+          )}
+
+          {!isLoading && hasSearched && priceResult && !priceResult.error && (
             <motion.div
               key="results"
               initial={{ opacity: 0, y: 20 }}
