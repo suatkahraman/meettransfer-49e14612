@@ -38,7 +38,6 @@ const Index = () => {
 
   return (
     <WebsiteLayout>
-      <RoleBasedRedirect />
       <SEOHead
         title={t("seoHomeTitle")}
         description={t("seoHomeDesc")}
