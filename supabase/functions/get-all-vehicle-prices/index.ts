@@ -489,7 +489,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
         let kmDebugInfo = {};
 
         try {
-          // v3.0.2: Added region, currency, is_active support
+          // v3.0.3: Force update check
+// v3.0.2: Added region, currency, is_active support
           const kmRulesRes = await fetch(
             `${SUPABASE_URL}/rest/v1/distance_pricing_rules?is_active=eq.true&select=id,vehicle_type,city,airport_code,region,pricing_mode,base_price,extra_km_price,min_km,max_km,start_date,end_date,currency`,
             { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
