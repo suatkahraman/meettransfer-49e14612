@@ -767,6 +767,65 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
 
     console.log("AI Response received, booking data:", bookingData, "customerName:", extractedCustomerName, "priceRequest:", priceRequestData);
 
+    // v3.0.0: REAL-TIME PRICING INTEGRATION
+    // Instead of relying on AI's hallucinated or context-based prices, fetch REAL prices from our pricing engine
+    let realVehiclePrices: Record<string, number> | null = null;
+    let realDistanceKm: number | null = null;
+    let realDurationMins: number | null = null;
+
+    if (bookingData?.pickup && bookingData?.dropoff && bookingData?.serviceType !== 'hourly') {
+      try {
+        console.log(`Fetching real prices for: ${bookingData.pickup} -> ${bookingData.dropoff}`);
+        
+        // Call get-all-vehicle-prices function
+        const { data: priceResult, error: priceError } = await supabase.functions.invoke('get-all-vehicle-prices', {
+          body: {
+            pickup: bookingData.pickup,
+            dropoff: bookingData.dropoff,
+            // Optional: pass date/time if needed for seasonal pricing
+            pickupDate: bookingData.date,
+            pickupTime: bookingData.time
+          }
+        });
+
+        if (!priceError && priceResult?.prices) {
+          console.log("Real prices fetched successfully:", priceResult.prices.length, "vehicles");
+          
+          realVehiclePrices = {};
+          
+          // Map array to object for frontend
+          // priceResult.prices is Array<{ vehicleType: string, price: number, currency: string, ... }>
+          priceResult.prices.forEach((p: any) => {
+            if (p.price !== null) {
+              realVehiclePrices![p.vehicleType] = p.price;
+            }
+          });
+
+          // Update bookingData with real price for the selected vehicle (or default/min price)
+          if (Object.keys(realVehiclePrices).length > 0) {
+            // If vehicle type selected, update estimated price
+            if (bookingData.vehicleType && realVehiclePrices[bookingData.vehicleType]) {
+              bookingData.estimatedPrice = realVehiclePrices[bookingData.vehicleType];
+            } else {
+              // Otherwise set estimated price to lowest price (usually sedan or vito)
+              const lowestPrice = Math.min(...Object.values(realVehiclePrices));
+              bookingData.estimatedPrice = lowestPrice;
+            }
+            
+            // Capture distance/duration if returned
+            if (priceResult.distance_km) realDistanceKm = priceResult.distance_km;
+            if (priceResult.duration_mins) realDurationMins = priceResult.duration_mins;
+            
+            console.log("Updated bookingData with REAL prices. Est:", bookingData.estimatedPrice);
+          }
+        } else {
+          console.warn("Failed to fetch real prices:", priceError || "No prices returned");
+        }
+      } catch (e) {
+        console.error("Error calling pricing engine:", e);
+      }
+    }
+
     // If price request is needed, notify admin AND create quick booking record
     let priceRequestSent = false;
     if (priceRequestData?.needed) {
@@ -858,7 +917,11 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
 
       // Calculate all vehicle prices for frontend storage
       let allVehiclePrices: Record<string, number> | null = null;
-      if (bookingData.estimatedPrice && bookingData.estimatedPrice > 0) {
+      
+      // Use real prices if available (from our new fetch)
+      if (realVehiclePrices) {
+        allVehiclePrices = realVehiclePrices;
+      } else if (bookingData.estimatedPrice && bookingData.estimatedPrice > 0) {
         const basePrice = bookingData.estimatedPrice;
         allVehiclePrices = {
           'sedan': basePrice,
@@ -933,7 +996,10 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
 
     // Calculate vehicle prices if we have route info
     let vehiclePrices: Record<string, number> | null = null;
-    if (bookingData?.estimatedPrice) {
+    
+    if (realVehiclePrices) {
+      vehiclePrices = realVehiclePrices;
+    } else if (bookingData?.estimatedPrice) {
       // Calculate approximate prices for each vehicle type
       const basePrice = bookingData.estimatedPrice;
       vehiclePrices = {
