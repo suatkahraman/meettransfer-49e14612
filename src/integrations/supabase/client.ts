@@ -6,13 +6,21 @@ import { supabaseStorage } from '@/lib/supabaseStorage';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.error("Supabase environment variables are missing. Please check your .env configuration.");
+}
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 // iOS Safari uyumlu hibrit storage (localStorage + sessionStorage fallback).
 // SameSite: Token'lar localStorage'da tutulur; Supabase sunucu çerezleri kendi domain'inde.
 // Oturum kalıcılığı için persistSession + autoRefreshToken etkin.
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+// Fallback to empty strings to prevent crash on initialization if env vars are missing
+export const supabase = createClient<Database>(
+  SUPABASE_URL || "https://missing-url.supabase.co", 
+  SUPABASE_PUBLISHABLE_KEY || "missing-key", 
+  {
   auth: {
     storage: supabaseStorage,
     persistSession: true,

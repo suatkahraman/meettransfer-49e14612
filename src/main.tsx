@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { initWebVitals } from "@/utils/webVitals";
 import { runVersionCheck } from "@/lib/versionCheck";
+import { GlobalErrorBoundary } from "@/components/GlobalErrorBoundary";
 
 // Load CSS synchronously - critical for preventing FOUC (Flash of Unstyled Content)
 // This ensures styles are applied before React renders
@@ -31,7 +32,11 @@ async function boot() {
   } catch {
     /* ignore */
   }
-  createRoot(document.getElementById("root")!).render(<App />);
+  createRoot(document.getElementById("root")!).render(
+    <GlobalErrorBoundary>
+      <App />
+    </GlobalErrorBoundary>
+  );
   try {
     (window as any).__APP_MOUNTED__ = true;
     window.dispatchEvent(new Event("lovable:app-mounted"));
