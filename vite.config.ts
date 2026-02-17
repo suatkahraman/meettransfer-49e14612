@@ -185,7 +185,7 @@ export default defineConfig(({ mode }) => {
       esbuild: {
         drop: ["debugger"],
       },
-      target: ["es2015", "safari13"],
+      target: "es2015",
       cssCodeSplit: true,
       cssMinify: "esbuild",
       assetsInlineLimit: 2048,
