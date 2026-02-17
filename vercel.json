@@ -24,11 +24,11 @@
     },
     {
       "source": "/auth/v1/(.*)",
-      "destination": "https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/$1"
+      "destination": "https://zqykoyugubaeealrspxm.supabase.co/auth/v1/$1"
     },
     {
       "source": "/rest/v1/(.*)",
-      "destination": "https://lzwwxuxwlssxutwiuxtf.supabase.co/rest/v1/$1"
+      "destination": "https://zqykoyugubaeealrspxm.supabase.co/rest/v1/$1"
     },
     {
       "source": "/oauth/(.*)",

@@ -50,6 +50,7 @@ import { useCustomerPayments } from '@/hooks/useCustomerPayments';
 import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
 import { CustomerHomeSkeleton } from '@/components/customer/CustomerHomeSkeleton';
 import { GeminiHolidayAssistant } from '@/components/customer/GeminiHolidayAssistant';
+import { CustomerHeroWelcomePanel } from '@/components/customer/CustomerHeroWelcomePanel';
 import { formatCurrency, CURRENCY_OPTIONS } from '@/lib/currency';
 
 // Time options for 30-minute intervals
@@ -1432,42 +1433,22 @@ const CustomerHome = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        {/* Welcome Section */}
-        <motion.div 
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="mb-4"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                className="bg-primary/20 p-2.5 rounded-full"
-              >
-                <Sparkles className="h-5 w-5 text-primary" />
-              </motion.div>
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {greeting}
-                </p>
-                <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
-                  {displayName}
-                </h1>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchData}
-              disabled={isRefreshing}
-              className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </motion.div>
+        {/* AI Destekli Hero Bölümü - Eski Karşılama Mesajı Yerine */}
+        <CustomerHeroWelcomePanel
+          destinationCity={nextTransfer?.dropoff || null}
+          t={t}
+          language={language === 'TR' ? 'TR' : 'EN'}
+          onBookNowClick={() => {
+            setIsBookingFormOpen(true);
+            setTimeout(() => {
+              const formElement = document.getElementById('booking-form');
+              if (formElement) {
+                formElement.scrollIntoView({ behavior: 'smooth' });
+              }
+            }, 100);
+          }}
+          activeReservationsSlot={undefined}
+        />
 
         {/* Ödeme Özeti */}
         {paymentStats.totalReservations > 0 && (
