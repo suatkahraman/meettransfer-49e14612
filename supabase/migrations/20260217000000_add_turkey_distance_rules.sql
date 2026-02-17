@@ -1,4 +1,4 @@
--- Add new columns to distance_pricing_rules
+-- Add new columns to distance_pricing_rules -- Force Update
 ALTER TABLE public.distance_pricing_rules 
 ADD COLUMN IF NOT EXISTS region text,
 ADD COLUMN IF NOT EXISTS currency text DEFAULT 'EUR',
