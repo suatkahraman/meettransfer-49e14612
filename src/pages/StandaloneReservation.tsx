@@ -18,6 +18,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { Footer } from "@/components/Footer";
+import { RoleBasedRedirect } from "@/components/RoleBasedRedirect";
 
 // Custom hooks for form state management
 import { useRideForm } from "@/hooks/useRideForm";

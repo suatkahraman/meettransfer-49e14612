@@ -47,6 +47,7 @@ import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
 import { z } from "zod";
+import { RoleBasedRedirect } from "@/components/RoleBasedRedirect";
 
 // Session storage key for caching booking form state during Google OAuth
 const GOOGLE_AUTH_CACHE_KEY = 'google_auth_booking_cache';

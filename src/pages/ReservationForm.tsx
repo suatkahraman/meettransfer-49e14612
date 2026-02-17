@@ -2143,6 +2143,7 @@ const ReservationForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/80 to-primary/60 py-8 px-4">
+      <RoleBasedRedirect />
       <div className="max-w-2xl mx-auto mb-4">
         <Button variant="ghost" size="sm" onClick={() => navigate(getLocalizedPath('/book'))} className="text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
           <ArrowLeft className="h-4 w-4 mr-2" />
