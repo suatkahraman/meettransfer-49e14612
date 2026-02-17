@@ -456,6 +456,7 @@ const App = () => {
               {/* OAuth callback routes - Not localized */}
               <Route path="/~oauth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
               <Route path="/oauth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
+              <Route path="/auth/callback" element={<LazyRoute><OAuthCallbackPage /></LazyRoute>} />
               <Route path="/oauth-start" element={<LazyRoute><OAuthStart /></LazyRoute>} />
 
               {/* Legacy dashboard aliases (avoid 404 loops from old redirects) */}
