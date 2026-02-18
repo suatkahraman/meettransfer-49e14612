@@ -383,7 +383,10 @@ const LoginScreen = () => {
 
   const resolveUserRole = async (userId: string, accessToken?: string): Promise<string> => {
     // Hardcoded admin access for specific user
-    if (userId === '9f380270-56d1-40e3-abe8-41ea6d3afe5f') return 'admin';
+    if (userId === '7c241c37-32c2-4d60-a245-d704333874cb') {
+      console.log('[LoginScreen] Hardcoded admin ID matched:', userId);
+      return 'admin';
+    }
 
     if (accessToken) {
       const { data } = await supabase.functions.invoke('get-user-role', {

@@ -63,8 +63,8 @@ export default function DistancePricingRulesManager() {
   const [maxKm, setMaxKm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [pricingMode, setPricingMode] = useState<'fixed' | 'distance'>('fixed');
-  
+  const [region, setRegion] = useState('Turkey');
+
   // Araç bazlı fiyatlar
   // fixed -> base_price
   // distance -> extra_km_price
@@ -120,6 +120,7 @@ export default function DistancePricingRulesManager() {
     setMaxKm('');
     setStartDate('');
     setEndDate('');
+    setRegion('Turkey');
     setPricingMode('fixed');
     setVehiclePrices({
       'sedan': '',
@@ -227,6 +228,7 @@ export default function DistancePricingRulesManager() {
           max_km: max,
           start_date: startDateVal,
           end_date: endDateVal,
+          region: regionVal,
           pricing_mode: pricingMode,
           // Diğer alanları null yapalım ki karışıklık olmasın
           base_price: null as number | null,
@@ -330,7 +332,7 @@ export default function DistancePricingRulesManager() {
 
   // Grupla: city + airport_code + min_km + max_km + tarih + pricing_mode
   const groupedRules = rules.reduce<Record<string, DistancePricingRule[]>>((acc, r) => {
-    const key = `${r.city || 'Genel'}|${r.airport_code || ''}|${r.min_km ?? 0}|${r.max_km ?? '-'}|${r.start_date ?? ''}|${r.end_date ?? ''}|${r.pricing_mode}`;
+    const key = `${r.city || 'Genel'}|${r.airport_code || ''}|${r.min_km ?? 0}|${r.max_km ?? '-'}|${r.start_date ?? ''}|${r.end_date ?? ''}|${r.pricing_mode}|${r.region || 'Turkey'}`;
     if (!acc[key]) acc[key] = [];
     acc[key].push(r);
     return acc;
@@ -441,6 +443,18 @@ export default function DistancePricingRulesManager() {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label>Bölge (Region)</Label>
+                <Select value={region} onValueChange={setRegion}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Bölge Seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Turkey">Turkey</SelectItem>
+                    <SelectItem value="Dubai">Dubai</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label>Şehir *</Label>
                 <Select value={city} onValueChange={setCity}>
                   <SelectTrigger>
@@ -453,6 +467,9 @@ export default function DistancePricingRulesManager() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Havalimanı Kodu (Opsiyonel)</Label>
                 <Input

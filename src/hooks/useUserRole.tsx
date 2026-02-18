@@ -148,7 +148,8 @@ export const useUserRole = () => {
       }
 
       // Hardcoded admin access for specific user
-      if (user.id === '9f380270-56d1-40e3-abe8-41ea6d3afe5f') {
+      if (user.id === '7c241c37-32c2-4d60-a245-d704333874cb') {
+        console.log('[useUserRole] Hardcoded admin ID matched:', user.id);
         setRole('admin');
         setDriverId(null);
         setAgencyId(null);

