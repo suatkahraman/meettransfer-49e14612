@@ -71,9 +71,9 @@ export const LocationDisplay = ({
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <div className={cn('leading-tight', sizes.placeName)}>{displayName}</div>
+        <div className={cn('leading-tight break-words [overflow-wrap:anywhere]', sizes.placeName)}>{displayName}</div>
         {shouldShowAddress && (
-          <div className={cn('text-muted-foreground leading-tight mt-0.5', sizes.address)}>{address}</div>
+          <div className={cn('text-muted-foreground leading-tight mt-0.5 break-words [overflow-wrap:anywhere]', sizes.address)}>{address}</div>
         )}
       </div>
     </div>

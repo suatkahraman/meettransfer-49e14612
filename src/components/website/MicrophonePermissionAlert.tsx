@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { isIOSDevice } from "@/lib/platformDetect";
 import { Button } from "@/components/ui/button";
 import { Mic, X, ExternalLink, Settings, RefreshCw } from "lucide-react";
 
@@ -11,7 +12,7 @@ interface MicrophonePermissionAlertProps {
 // Detect platform for settings deep links
 const getPlatformInfo = () => {
   const ua = navigator.userAgent;
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isIOS = isIOSDevice();
   const isAndroid = /Android/i.test(ua);
   const isSamsung = /Samsung/i.test(ua);
   const isChrome = /Chrome/i.test(ua) && !/Edge|Edg/i.test(ua);

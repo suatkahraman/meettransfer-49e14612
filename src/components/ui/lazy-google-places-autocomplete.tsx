@@ -142,6 +142,11 @@ export interface PlaceDetails {
   displayText: string;
   lat: number | null;
   lng: number | null;
+  place_id?: string;
+  /** City extracted from address_components (locality or administrative_area_level_1) */
+  city?: string;
+  /** Country code or name from address_components */
+  country?: string;
 }
 
 export interface LazyGooglePlacesAutocompleteProps {
@@ -493,12 +498,27 @@ export const LazyGooglePlacesAutocomplete = memo(({
           const lat = place.geometry?.location?.lat() || null;
           const lng = place.geometry?.location?.lng() || null;
 
+          // Extract city and country from address_components
+          let city: string | undefined;
+          let country: string | undefined;
+          const ac = (place as { address_components?: Array<{ long_name: string; short_name: string; types: string[] }> }).address_components;
+          if (ac && Array.isArray(ac)) {
+            for (const c of ac) {
+              if (c.types.includes('locality')) city = c.long_name;
+              else if (!city && c.types.includes('administrative_area_level_1')) city = c.long_name;
+              if (c.types.includes('country')) country = c.short_name || c.long_name;
+            }
+          }
+
           const details: PlaceDetails = {
             placeName,
             formattedAddress,
             displayText,
             lat,
             lng,
+            place_id: place.place_id || undefined,
+            city,
+            country,
           };
 
           input.value = placeName || formattedAddress;
@@ -574,19 +594,18 @@ export const LazyGooglePlacesAutocomplete = memo(({
               if (status === 'OK' && results[0]) {
                 const place = results[0];
                 const formattedAddress = place.formatted_address || '';
-                
-                // Update input value
+                const placeId = (place as any).place_id;
                 if (inputRef.current) {
                   inputRef.current.value = formattedAddress;
                   setHasValue(true);
                 }
-
                 const details: PlaceDetails = {
                   placeName: '',
                   formattedAddress,
                   displayText: formattedAddress,
                   lat: latitude,
                   lng: longitude,
+                  place_id: placeId,
                 };
 
                 onPlaceSelectedRef.current?.(formattedAddress, details);

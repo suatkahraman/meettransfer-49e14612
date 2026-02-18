@@ -18,6 +18,21 @@ interface PaymentStatsCardsProps {
 }
 
 export const PaymentStatsCards = ({ stats }: PaymentStatsCardsProps) => {
+  const renderTotal = (totals: Record<string, number>, fallbackClass = "text-green-600") => {
+    const entries = Object.entries(totals).filter(([_, val]) => val > 0);
+    if (entries.length === 0) return <span className={fallbackClass}>-</span>;
+    
+    return (
+      <div className="flex flex-col">
+        {entries.map(([currency, total]) => (
+          <span key={currency} className={fallbackClass}>
+            {formatCurrency(total, currency)}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* Main Stats */}
@@ -44,7 +59,9 @@ export const PaymentStatsCards = ({ stats }: PaymentStatsCardsProps) => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Müşteri Toplam</p>
-                <p className="text-xl font-bold text-green-600">{formatCurrency(stats.customerTotal, 'EUR')}</p>
+                <div className="text-xl font-bold">
+                  {renderTotal(stats.customerTotal)}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -72,7 +89,9 @@ export const PaymentStatsCards = ({ stats }: PaymentStatsCardsProps) => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Acenta Toplam</p>
-                <p className="text-xl font-bold text-green-600">{formatCurrency(stats.agencyTotal, 'EUR')}</p>
+                <div className="text-xl font-bold">
+                  {renderTotal(stats.agencyTotal)}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -93,7 +112,9 @@ export const PaymentStatsCards = ({ stats }: PaymentStatsCardsProps) => {
                   <p className="text-xs text-muted-foreground">{stats.customerPendingCount} adet bekliyor</p>
                 </div>
               </div>
-              <p className="text-lg font-bold text-yellow-600">{formatCurrency(stats.customerPending, 'EUR')}</p>
+              <div className="text-lg font-bold">
+                {renderTotal(stats.customerPending, "text-yellow-600")}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -105,21 +126,27 @@ export const PaymentStatsCards = ({ stats }: PaymentStatsCardsProps) => {
           <CardContent className="p-3 text-center">
             <CalendarDays className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
             <p className="text-xs text-muted-foreground">Bugün</p>
-            <p className="text-sm font-bold text-green-600">{formatCurrency(stats.todayRevenue, 'EUR')}</p>
+            <div className="text-sm font-bold">
+              {renderTotal(stats.todayRevenue)}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <CalendarDays className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
             <p className="text-xs text-muted-foreground">Son 7 Gün</p>
-            <p className="text-sm font-bold text-green-600">{formatCurrency(stats.weekRevenue, 'EUR')}</p>
+            <div className="text-sm font-bold">
+              {renderTotal(stats.weekRevenue)}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 text-center">
             <CalendarDays className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
             <p className="text-xs text-muted-foreground">Bu Ay</p>
-            <p className="text-sm font-bold text-green-600">{formatCurrency(stats.monthRevenue, 'EUR')}</p>
+            <div className="text-sm font-bold">
+              {renderTotal(stats.monthRevenue)}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -144,7 +171,9 @@ export const PaymentStatsCards = ({ stats }: PaymentStatsCardsProps) => {
                   )}
                   <span className="text-sm font-medium capitalize">{provider}</span>
                   <Badge variant="secondary" className="text-xs">{data.count}</Badge>
-                  <span className="text-sm font-bold text-green-600">{formatCurrency(data.total, 'EUR')}</span>
+                  <div className="text-sm font-bold">
+                    {renderTotal(data.total)}
+                  </div>
                 </div>
               ))}
             </div>

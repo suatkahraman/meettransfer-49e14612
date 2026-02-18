@@ -2354,13 +2354,40 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
                 ))}
               </div>
 
-              <div className="space-y-2">
-                <Label>Müşteri Telefonu</Label>
-                <Input
-                  value={formData.customer_phone}
-                  onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Müşteri Telefonu</Label>
+                  <Input
+                    value={formData.customer_phone}
+                    onChange={(e) => setFormData({...formData, customer_phone: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Müşteri E-posta</Label>
+                  <div className="relative">
+                    <Input
+                      value={customerEmail || ''}
+                      readOnly
+                      className="bg-muted"
+                      placeholder={loadingCustomerEmail ? "Yükleniyor..." : "E-posta bulunamadı"}
+                    />
+                    {customerEmail && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full"
+                        onClick={() => {
+                          navigator.clipboard.writeText(customerEmail);
+                          toast.success('E-posta kopyalandı');
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <EditMemoizedAddressSection

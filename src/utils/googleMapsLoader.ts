@@ -210,7 +210,8 @@ export const geocodeAddress = async (
 };
 
 /**
- * Get directions between two points
+ * Get directions between two points.
+ * distance.value is in METERS (Google API); distanceKm = value/1000.
  */
 export const getDirections = async (
   origin: { lat: number; lng: number },
@@ -219,6 +220,8 @@ export const getDirections = async (
   route: any;
   duration: string;
   distance: string;
+  distanceMeters: number;
+  distanceKm: number;
 } | null> => {
   const maps = getGoogleMaps();
   if (!maps) return null;
@@ -234,12 +237,18 @@ export const getDirections = async (
       (result: any, status: string) => {
         if (status === 'OK' && result) {
           const leg = result.routes[0]?.legs[0];
+          const distanceMeters = leg?.distance?.value ?? 0; // Google: value in METERS
+          const distanceKm = distanceMeters / 1000;
+          console.error('[getDirections] Step 1 – Google Maps OK:', { origin, destination, distanceMeters, distanceKm, status });
           resolve({
             route: result,
             duration: leg?.duration?.text || '',
             distance: leg?.distance?.text || '',
+            distanceMeters,
+            distanceKm,
           });
         } else {
+          console.error('[getDirections] Step 1 – Google Maps FAIL:', { origin, destination, status, result: result ?? 'null' });
           resolve(null);
         }
       }

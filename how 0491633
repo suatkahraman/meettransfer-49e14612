@@ -1,0 +1,11 @@
+[33mcommit 0491633c9891846d717e3904134f6e6aeaf4935c[m
+Author: /suatkahraman/meettransfer-49e14612 <sautkahraman@gmail.com>
+Date:   Mon Feb 16 03:29:43 2026 +0300
+
+    Admin panel ve KM fiyatlandırma sistemi güncellendi
+
+ build.ps1                                          |   2 [32m+[m
+ build_log.txt                                      |  35 [32m+++[m
+ .../admin/DistancePricingRulesManager.tsx          | 320 [32m+++++++++++[m[31m----------[m
+ supabase/functions/get-all-vehicle-prices/index.ts | 175 [32m++++++[m[31m-----[m
+ 4 files changed, 313 insertions(+), 219 deletions(-)

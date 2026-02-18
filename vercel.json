@@ -1,8 +1,41 @@
 {
   "version": 2,
+  "buildCommand": "NODE_OPTIONS=--max-old-space-size=4096 npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/favicon.ico", "destination": "/favicon.ico" },
+    { "source": "/favicon.png", "destination": "/favicon.png" },
+    { "source": "/apple-touch-icon.png", "destination": "/apple-touch-icon.png" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/manifest.webmanifest", "destination": "/manifest.webmanifest" },
+    { "source": "/llms.txt", "destination": "/llms.txt" },
+    { "source": "/version.json", "destination": "/version.json" },
     {
-      "source": "/(.*)",
+      "source": "/login",
+      "has": [
+        {
+          "type": "query",
+          "key": "type",
+          "value": "recovery"
+        }
+      ],
+      "destination": "/reset-password"
+    },
+    {
+      "source": "/auth/v1/(.*)",
+      "destination": "https://zqykoyugubaeealrspxm.supabase.co/auth/v1/$1"
+    },
+    {
+      "source": "/rest/v1/(.*)",
+      "destination": "https://zqykoyugubaeealrspxm.supabase.co/rest/v1/$1"
+    },
+    {
+      "source": "/oauth/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "(.*)",
       "has": [
         {
           "type": "header",
@@ -11,14 +44,6 @@
         }
       ],
       "destination": "https://service.prerender.io/https://%{HTTP_HOST}/$1"
-    },
-    {
-      "source": "/auth/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/oauth/(.*)",
-      "destination": "/index.html"
     },
     {
       "source": "/(.*)",

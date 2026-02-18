@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isIOSDevice } from '@/lib/platformDetect';
 
 interface PWAStatus {
   isStandalone: boolean;
@@ -39,11 +40,8 @@ export function usePWADetect(): PWAStatus {
     const userAgent = window.navigator.userAgent;
     const userAgentLower = userAgent.toLowerCase();
     
-    // Platform detection
-    const isIOS = (
-      /iphone|ipad|ipod/i.test(userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-    ) && !('MSStream' in window);
+    // Platform detection (uses shared helper for consistency)
+    const isIOS = isIOSDevice() && !('MSStream' in window);
     
     const isAndroid = /android/i.test(userAgent);
     

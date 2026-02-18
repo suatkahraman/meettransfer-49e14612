@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { VEHICLE_TYPES } from "@/lib/vehicleTypes";
 import { getRegionVehicles, getSuitableVehicle, isVehicleValidForRegion, VehicleRegion } from "@/lib/vehicleRegions";
+import { getDirections } from "@/utils/googleMapsLoader";
 import { PlaceDetails } from "@/components/ui/lazy-google-places-autocomplete";
 import { useHeroFormStorage, parseSavedDate, SavedFormData } from "./useHeroFormStorage";
 import type { BookingData } from "@/components/hero/types";
@@ -152,14 +153,19 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   const { loadSavedFormData } = useHeroFormStorage();
   const { promoCode: activePromo } = usePromo();
   
+  // Initialize state from localStorage - optimize by loading once
+  const initialFormData = loadSavedFormData();
+  
   // Initialize state from localStorage
-  const [pickup, setPickup] = useState(() => loadSavedFormData()?.pickup || "");
-  const [dropoff, setDropoff] = useState(() => loadSavedFormData()?.dropoff || "");
+  const [pickup, setPickup] = useState(() => initialFormData?.pickup || "");
+  const [dropoff, setDropoff] = useState(() => initialFormData?.dropoff || "");
+  const [pickupDetails, setPickupDetails] = useState<PlaceDetails | undefined>();
+  const [dropoffDetails, setDropoffDetails] = useState<PlaceDetails | undefined>();
   const [date, setDate] = useState<Date | undefined>(() => 
-    parseSavedDate(loadSavedFormData()?.date) || new Date()
+    parseSavedDate(initialFormData?.date) || new Date()
   );
   const [time, setTime] = useState(() => {
-    const saved = loadSavedFormData()?.time;
+    const saved = initialFormData?.time;
     if (saved) return saved;
     // Default to current time rounded to next 30 minutes
     const now = new Date();
@@ -168,8 +174,8 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     const hours = minutes < 30 ? now.getHours() : now.getHours() + 1;
     return `${hours.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
   });
-  const [passengers, setPassengers] = useState(() => loadSavedFormData()?.passengers || "2");
-  const [vehicleType, setVehicleType] = useState(() => loadSavedFormData()?.vehicleType || "mercedes-vito");
+  const [passengers, setPassengers] = useState(() => initialFormData?.passengers || "2");
+  const [vehicleType, setVehicleType] = useState(() => initialFormData?.vehicleType || "mercedes-vito");
   const [submitting, setSubmitting] = useState(false);
   const [allVehiclePrices, setAllVehiclePrices] = useState<any[]>([]);
   const [transferPriceCurrency, setTransferPriceCurrency] = useState("EUR");
@@ -208,8 +214,20 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     setLoadingTransferPrice(true);
     const timer = setTimeout(async () => {
       try {
+        // Calculate distance using Google Maps Directions Service
+        let distanceKm: number | undefined;
+        if (pickupDetails?.lat && pickupDetails?.lng && dropoffDetails?.lat && dropoffDetails?.lng) {
+          const directions = await getDirections(
+            { lat: pickupDetails.lat, lng: pickupDetails.lng },
+            { lat: dropoffDetails.lat, lng: dropoffDetails.lng }
+          );
+          if (directions?.distanceKm) {
+            distanceKm = directions.distanceKm;
+          }
+        }
+
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: { pickup, dropoff, customerCurrency: "EUR" }
+          body: { pickup, dropoff, customerCurrency: "EUR", distance_km: distanceKm }
         });
         // Edge function returns 'prices' not 'vehicles'
         if (data?.prices?.length > 0) {
@@ -231,7 +249,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [pickup, dropoff]);
+  }, [pickup, dropoff, pickupDetails, dropoffDetails]);
 
   // Auto-adjust vehicle type based on passenger count AND region
   useEffect(() => {
@@ -255,10 +273,16 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
   // Handlers
   const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {
     setPickup(details?.displayText || value);
+    if (details) {
+      setPickupDetails(details);
+    }
   }, []);
 
   const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => {
     setDropoff(details?.displayText || value);
+    if (details) {
+      setDropoffDetails(details);
+    }
   }, []);
 
   const handleSwapLocations = useCallback(() => {
@@ -266,7 +290,11 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
       setDropoff(() => prev);
       return dropoff;
     });
-  }, [dropoff]);
+    setPickupDetails(prev => {
+      setDropoffDetails(() => prev);
+      return dropoffDetails;
+    });
+  }, [dropoff, dropoffDetails]);
 
   const handleSetDate = useCallback((d: Date | undefined) => setDate(d), []);
   const handleSetTime = useCallback((t: string) => setTime(t), []);
@@ -301,7 +329,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     params.set("date", format(date!, "yyyy-MM-dd"));
     params.set("time", time);
     params.set("passengers", passengers);
-    params.set("vehicleType", vehicleType);
+    // Araç book sayfasında seçilecek - Hero'dan gönderilmez
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
     
     // Return trip params
@@ -319,7 +347,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     params.set("showVehicleSelection", "true");
     
     navigate(`/book?${params.toString()}`);
-  }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount]);
+  }, [pickup, dropoff, date, time, passengers, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount]);
 
   const handleApplyBooking = useCallback((data: BookingData) => {
     let hasChanges = false;

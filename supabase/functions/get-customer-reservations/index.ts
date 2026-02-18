@@ -83,10 +83,14 @@ serve(async (req) => {
       const normalizedPhone = userPhone.replace(/[\s\-\(\)]/g, "");
       
       // Fetch reservations where customer_phone matches (and customer_id is null or different)
+      // Optimization: Filter by partial phone match in DB to avoid fetching all reservations
+      const phoneSearchTerm = normalizedPhone.length >= 7 ? normalizedPhone.slice(-7) : normalizedPhone;
+
       const { data: byPhoneData, error: byPhoneError } = await supabaseAdmin
         .from("reservations")
         .select("*")
         .neq("customer_id", user.id) // Only get ones not already linked
+        .ilike("customer_phone", `%${phoneSearchTerm}%`)
         .order("pickup_date", { ascending: false });
 
       if (byPhoneError) {

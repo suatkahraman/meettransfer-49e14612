@@ -1,45 +1,62 @@
 import { createRoot } from "react-dom/client";
+import React from "react";
 import App from "./App.tsx";
-import { initWebVitals } from "@/utils/webVitals";
-
-// Load CSS synchronously - critical for preventing FOUC (Flash of Unstyled Content)
-// This ensures styles are applied before React renders
 import "./index.css";
 
-// LCP image is now preloaded directly in index.html from public folder
+// Minimal inline Error Boundary to avoid external dependencies crashing startup
+class StartupErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
 
-// Initialize Core Web Vitals measurement (debug only in development)
-// Defer in production so it doesn't compete with critical rendering work.
-const startWebVitals = () => {
-  initWebVitals({ debug: import.meta.env.DEV, reportToAnalytics: true });
-};
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
 
-if (import.meta.env.DEV) {
-  startWebVitals();
-} else if ("requestIdleCallback" in window) {
-  requestIdleCallback(() => startWebVitals(), { timeout: 4000 });
-} else {
-  setTimeout(startWebVitals, 2500);
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 20, textAlign: "center", fontFamily: "system-ui" }}>
+          <h1>Application Error</h1>
+          <p>The application failed to start.</p>
+          <pre style={{ background: "#f5f5f5", padding: 10, borderRadius: 5, overflow: "auto" }}>
+            {this.state.error?.message || "Unknown error"}
+          </pre>
+          <button onClick={() => window.location.reload()} style={{ padding: "10px 20px", marginTop: 20 }}>
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
-// Signal mounting BEFORE render starts (boot watchdog safety)
-try {
-  console.log("[Boot] Starting React render");
-} catch {
-  // ignore
+function boot() {
+  try {
+    const rootElement = document.getElementById("root");
+    if (!rootElement) {
+      console.error("Root element not found");
+      return;
+    }
+
+    createRoot(rootElement).render(
+      <StartupErrorBoundary>
+        <App />
+      </StartupErrorBoundary>
+    );
+
+    // Signal success
+    try {
+      (window as any).__APP_MOUNTED__ = true;
+      window.dispatchEvent(new Event("lovable:app-mounted"));
+    } catch { /* ignore */ }
+    
+  } catch (e) {
+    console.error("Boot failed:", e);
+  }
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
-
-// Signal that the React app has mounted (used by index.html boot recovery watchdog)
-try {
-  (window as any).__APP_MOUNTED__ = true;
-  // Also emit an event so the watchdog UI can dismiss itself if it already showed.
-  window.dispatchEvent(new Event("lovable:app-mounted"));
-  console.log("[Boot] React app mounted successfully");
-} catch {
-  // ignore
-}
-
-// PWA service worker is registered by the app (prompt mode) and will
-// show an in-app "Yeni Sürüm Hazır" banner when an update is available.
+// Execute immediately
+boot();

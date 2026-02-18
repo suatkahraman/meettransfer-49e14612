@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Car, Timer } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -18,13 +18,11 @@ import { SwipeableBookingCard } from "@/components/hero/SwipeableBookingCard";
 // Form content components - eagerly import for faster LCP
 import { RideFormContent } from "@/components/hero/RideFormContent";
 import { HourlyFormContent } from "@/components/hero/HourlyFormContent";
+import { InstantBookingInfo } from "@/components/hero/InstantBookingInfo";
 
-// Lazy load non-critical info banner - loads after LCP
-const InstantBookingInfo = lazy(() => import("@/components/hero/InstantBookingInfo").then(m => ({ default: m.InstantBookingInfo })));
-
-// Lazy load non-critical visual components - loads after LCP
-const HeroVisualSection = lazy(() => import("@/components/hero/HeroVisualSection").then(m => ({ default: m.HeroVisualSection })));
-const PaymentComingSoonBanner = lazy(() => import("@/components/hero/PaymentComingSoonBanner").then(m => ({ default: m.PaymentComingSoonBanner })));
+// Visual components - static import for faster initial load
+import { HeroVisualSection } from "@/components/hero/HeroVisualSection";
+import { PaymentComingSoonBanner } from "@/components/hero/PaymentComingSoonBanner";
 
 export const Hero = () => {
   const { t, language } = useLanguage();
@@ -79,13 +77,7 @@ export const Hero = () => {
   return (
     <section ref={heroRef} id="booking-form" className="relative overflow-hidden bg-background">
       {/* HeroBackground is NOT lazy loaded - critical for LCP */}
-      <HeroBackground 
-        videosLoaded={false} 
-        cityVideos={[]} 
-        currentVideoIndex={0} 
-        setCurrentVideoIndex={() => {}} 
-        language={language} 
-      />
+      <HeroBackground language={language} />
 
       {/* Mobile-first layout: Full viewport on mobile, grid on desktop */}
       <div className="container relative z-10 px-0 pt-0 pb-0 sm:px-3 sm:pt-4 sm:pb-4 md:px-4 md:pt-8 md:pb-8 lg:pb-16">
@@ -97,9 +89,10 @@ export const Hero = () => {
               {/* Header inside the card - mobile-first padding */}
               <div className="p-4 pb-2 pt-6 sm:p-5 sm:pb-3 sm:pt-4 md:p-6">
                 <HeroHeader language={language} />
-                <Suspense fallback={<div className="mt-3 h-[72px]" />}>
-                  <InstantBookingInfo language={language} className="mt-3" />
-                </Suspense>
+                <p className="mt-2 text-sm font-semibold text-primary/90 text-center sm:text-left">
+                  {tSafe("heroAITagline", "Meet AI: Plan Your Journey, Book with One Click!")}
+                </p>
+                <InstantBookingInfo language={language} className="mt-3" />
               </div>
 
               {/* Booking Form Card - Critical for LCP, no Suspense wrapper */}
@@ -213,23 +206,13 @@ export const Hero = () => {
               <HeroTrustBadges />
               
               {/* Payment Coming Soon Banner */}
-              <Suspense fallback={null}>
-                <PaymentComingSoonBanner language={language} compact className="mt-3" />
-              </Suspense>
+              <PaymentComingSoonBanner language={language} compact className="mt-3" />
             </div>
           </div>
 
           {/* Visual Sections */}
           <SilentSectionErrorBoundary fallback={<div className="hidden md:block" />}>
-            <Suspense fallback={<div className="hidden md:block" />}>
-              <HeroVisualSection 
-                videosLoaded={false} 
-                cityVideos={[]} 
-                currentVideoIndex={0} 
-                language={language} 
-                t={t} 
-              />
-            </Suspense>
+            <HeroVisualSection language={language} t={t} />
           </SilentSectionErrorBoundary>
         </div>
       </div>

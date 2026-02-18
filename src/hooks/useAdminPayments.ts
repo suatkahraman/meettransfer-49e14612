@@ -32,16 +32,16 @@ export interface AgencyPayment {
 
 export interface PaymentStats {
   customerCount: number;
-  customerTotal: number;
-  customerPending: number;
+  customerTotal: Record<string, number>;
+  customerPending: Record<string, number>;
   customerPendingCount: number;
   agencyCount: number;
-  agencyTotal: number;
-  byProvider: Record<string, { count: number; total: number }>;
+  agencyTotal: Record<string, number>;
+  byProvider: Record<string, { count: number; total: Record<string, number> }>;
   byCurrency: Record<string, { customerTotal: number; agencyTotal: number; count: number }>;
-  todayRevenue: number;
-  weekRevenue: number;
-  monthRevenue: number;
+  todayRevenue: Record<string, number>;
+  weekRevenue: Record<string, number>;
+  monthRevenue: Record<string, number>;
 }
 
 interface UseAdminPaymentsOptions {
@@ -238,19 +238,36 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
     // Customer payments are already filtered to Stripe/PayPal only from the query
     const customerPaid = customerPayments.filter(p => p.payment_status === 'paid');
     const customerPending = customerPayments.filter(p => p.payment_status === 'pending');
-    const customerTotal = customerPaid.reduce((sum, p) => sum + (p.price || 0), 0);
-    const customerPendingTotal = customerPending.reduce((sum, p) => sum + (p.price || 0), 0);
-    const agencyTotal = agencyPayments.reduce((sum, p) => sum + p.amount, 0);
+    
+    // Group totals by currency
+    const customerTotal: Record<string, number> = {};
+    customerPaid.forEach(p => {
+      const currency = p.price_currency || 'EUR';
+      customerTotal[currency] = (customerTotal[currency] || 0) + (p.price || 0);
+    });
+
+    const customerPendingTotal: Record<string, number> = {};
+    customerPending.forEach(p => {
+      const currency = p.price_currency || 'EUR';
+      customerPendingTotal[currency] = (customerPendingTotal[currency] || 0) + (p.price || 0);
+    });
+
+    const agencyTotal: Record<string, number> = {};
+    agencyPayments.forEach(p => {
+      const currency = p.currency || 'EUR';
+      agencyTotal[currency] = (agencyTotal[currency] || 0) + p.amount;
+    });
 
     // Group by provider with counts (only from customerPayments which are online payments)
-    const byProvider: Record<string, { count: number; total: number }> = {};
+    const byProvider: Record<string, { count: number; total: Record<string, number> }> = {};
     customerPaid.forEach(p => {
       const provider = p.payment_provider || 'unknown';
       if (!byProvider[provider]) {
-        byProvider[provider] = { count: 0, total: 0 };
+        byProvider[provider] = { count: 0, total: {} };
       }
       byProvider[provider].count += 1;
-      byProvider[provider].total += p.price || 0;
+      const currency = p.price_currency || 'EUR';
+      byProvider[provider].total[currency] = (byProvider[provider].total[currency] || 0) + (p.price || 0);
     });
 
     // Group by currency (online customer + online agency payments)
@@ -277,17 +294,29 @@ export const useAdminPayments = (options: UseAdminPaymentsOptions) => {
     });
 
     // Time-based revenue - only online customer payments
-    const todayRevenue = customerPaid
+    const todayRevenue: Record<string, number> = {};
+    customerPaid
       .filter(p => p.payment_completed_at && new Date(p.payment_completed_at) >= startOfToday)
-      .reduce((sum, p) => sum + (p.price || 0), 0);
+      .forEach(p => {
+        const currency = p.price_currency || 'EUR';
+        todayRevenue[currency] = (todayRevenue[currency] || 0) + (p.price || 0);
+      });
     
-    const weekRevenue = customerPaid
+    const weekRevenue: Record<string, number> = {};
+    customerPaid
       .filter(p => p.payment_completed_at && new Date(p.payment_completed_at) >= startOfWeek)
-      .reduce((sum, p) => sum + (p.price || 0), 0);
+      .forEach(p => {
+        const currency = p.price_currency || 'EUR';
+        weekRevenue[currency] = (weekRevenue[currency] || 0) + (p.price || 0);
+      });
     
-    const monthRevenue = customerPaid
+    const monthRevenue: Record<string, number> = {};
+    customerPaid
       .filter(p => p.payment_completed_at && new Date(p.payment_completed_at) >= startOfMonth)
-      .reduce((sum, p) => sum + (p.price || 0), 0);
+      .forEach(p => {
+        const currency = p.price_currency || 'EUR';
+        monthRevenue[currency] = (monthRevenue[currency] || 0) + (p.price || 0);
+      });
 
     return {
       customerCount: customerPaid.length,

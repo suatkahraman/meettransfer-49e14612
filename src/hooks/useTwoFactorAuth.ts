@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { safeLocalGet, safeLocalSet } from '@/lib/safeStorage';
 
 interface TwoFactorState {
   isPending: boolean;
@@ -59,12 +60,16 @@ const generateDeviceFingerprint = (): string => {
       hash = Math.imul(hash, 16777619);
     }
     
-    // Add random component for uniqueness across sessions on same device
-    const sessionId = sessionStorage.getItem('device_session_id') || 
-                      Math.random().toString(36).substring(2);
-    sessionStorage.setItem('device_session_id', sessionId);
-    
-    return Math.abs(hash).toString(36) + '-' + sessionId.slice(0, 4);
+    // Cihaza guven: localStorage ile sabit ID - ayni cihazdan 2. giris de taninsin
+    const STORAGE_KEY = 'mt_device_id';
+    let deviceId = safeLocalGet(STORAGE_KEY);
+    if (!deviceId) {
+      deviceId = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID().slice(0, 8)
+        : Math.random().toString(36).substring(2, 10);
+      safeLocalSet(STORAGE_KEY, deviceId);
+    }
+    return Math.abs(hash).toString(36) + '-' + deviceId.slice(0, 8);
   } catch (e) {
     // Fallback if anything fails
     return 'fallback-' + Date.now().toString(36);

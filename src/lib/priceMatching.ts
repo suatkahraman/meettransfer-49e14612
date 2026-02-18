@@ -48,6 +48,13 @@ const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: number }>
       'antalya international', 'ayt airport', 'antalya havaalani'
     ]
   },
+  'Gazipasa-Alanya Airport (GZP)': {
+    priority: 2,
+    keywords: [
+      'gazipasa airport', 'gazipaşa airport', 'gazipasa alanya airport',
+      'gazipaşa alanya airport', 'gzp', 'gzp airport', 'alanya airport'
+    ]
+  },
   'Bodrum-Milas Airport (BJV)': {
     priority: 1,
     keywords: [
@@ -124,6 +131,216 @@ const AIRPORT_KEYWORDS: Record<string, { keywords: string[]; priority: number }>
       'bursa yenisehir', 'yenisehir havalimani'
     ]
   },
+  // Türkiye - Diğer havalimanları (tüm bölgesel fiyatlandırmayı kapsayacak şekilde)
+  'Ankara Esenboga Airport (ESB)': {
+    priority: 1,
+    keywords: [
+      'ankara airport', 'esenboga', 'esenboğa', 'esb', 'ankara havalimanı',
+      'ankara havalimani', 'ankara uluslararasi'
+    ]
+  },
+  'Adana Sakirpasa Airport (ADA)': {
+    priority: 1,
+    keywords: [
+      'adana airport', 'sakirpasa', 'şakirpaşa', 'ada', 'adana havalimanı',
+      'adana havalimani', 'cukurova airport'
+    ]
+  },
+  'Gaziantep Airport (GZT)': {
+    priority: 1,
+    keywords: [
+      'gaziantep airport', 'gzt', 'gaziantep havalimanı', 'gaziantep havalimani',
+      'oguzeli', 'oğuzeli'
+    ]
+  },
+  'Trabzon Airport (TZX)': {
+    priority: 1,
+    keywords: [
+      'trabzon airport', 'tzx', 'trabzon havalimanı', 'trabzon havalimani',
+      'trabzon uluslararasi'
+    ]
+  },
+  'Diyarbakir Airport (DIY)': {
+    priority: 1,
+    keywords: [
+      'diyarbakir airport', 'diyarbakır', 'diy', 'diyarbakir havalimanı',
+      'diyarbakir havalimani', 'diyarbakır havalimanı'
+    ]
+  },
+  'Van Ferit Melen Airport (VAN)': {
+    priority: 1,
+    keywords: [
+      'van airport', 'van havalimanı', 'van havalimani', 'van ferit melen',
+      'ferit melen airport'
+    ]
+  },
+  'Malatya Airport (MLX)': {
+    priority: 1,
+    keywords: [
+      'malatya airport', 'mlx', 'malatya havalimanı', 'malatya havalimani',
+      'malatya ernist'
+    ]
+  },
+  'Samsun Carsamba Airport (SZF)': {
+    priority: 1,
+    keywords: [
+      'samsun airport', 'szf', 'samsun havalimanı', 'samsun havalimani',
+      'carsamba', 'çarşamba airport'
+    ]
+  },
+  'Kocaeli Cengiz Topel Airport (KCO)': {
+    priority: 1,
+    keywords: [
+      'kocaeli airport', 'cengiz topel', 'kco', 'kocaeli havalimanı',
+      'izmit airport', 'körfez airport'
+    ]
+  },
+  'Tekirdag Corlu Airport (TEQ)': {
+    priority: 1,
+    keywords: [
+      'tekirdag airport', 'tekirdağ', 'corlu', 'çorlu', 'teq',
+      'tekirdag havalimanı', 'corlu havalimani'
+    ]
+  },
+  'Edirne Airport (EDN)': {
+    priority: 1,
+    keywords: [
+      'edirne airport', 'edn', 'edirne havalimanı', 'edirne havalimani',
+      'keşan airport'
+    ]
+  },
+  'Kars Harakani Airport (KHV)': {
+    priority: 1,
+    keywords: [
+      'kars airport', 'khv', 'kars havalimanı', 'kars havalimani',
+      'harakani airport'
+    ]
+  },
+  'Denizli Cardak Airport (DNZ)': {
+    priority: 1,
+    keywords: [
+      'denizli airport', 'cardak', 'çardak', 'dnz', 'denizli havalimanı',
+      'pamukkale airport'
+    ]
+  },
+  'Elazig Airport (EZS)': {
+    priority: 1,
+    keywords: [
+      'elazig airport', 'elazığ', 'ezs', 'elazig havalimanı',
+      'elazig havalimani'
+    ]
+  },
+  'Sivas Nuri Demirag Airport (VAS)': {
+    priority: 1,
+    keywords: [
+      'sivas airport', 'vas', 'sivas havalimanı', 'sivas havalimani',
+      'nuri demirag', 'nuri demirağ'
+    ]
+  },
+  'Sinop Airport (NOP)': {
+    priority: 1,
+    keywords: [
+      'sinop airport', 'nop', 'sinop havalimanı', 'sinop havalimani'
+    ]
+  },
+  'Kastamonu Airport (KFS)': {
+    priority: 1,
+    keywords: [
+      'kastamonu airport', 'kfs', 'kastamonu havalimanı', 'kastamonu havalimani'
+    ]
+  },
+  'Zonguldak Caycuma Airport (ONQ)': {
+    priority: 1,
+    keywords: [
+      'zonguldak airport', 'onq', 'zonguldak havalimanı', 'caycuma',
+      'çaycuma airport'
+    ]
+  },
+  'Sirnak Airport (NKT)': {
+    priority: 1,
+    keywords: [
+      'sirnak airport', 'şırnak', 'nkt', 'sirnak havalimanı',
+      'sirnak havalimani'
+    ]
+  },
+  'Agri Airport (AJI)': {
+    priority: 1,
+    keywords: [
+      'agri airport', 'ağrı', 'aji', 'agri havalimanı', 'agri havalimani'
+    ]
+  },
+  'Mardin Airport (MQM)': {
+    priority: 1,
+    keywords: [
+      'mardin airport', 'mqm', 'mardin havalimanı', 'mardin havalimani'
+    ]
+  },
+  'Afyon Zafer Airport (KZR)': {
+    priority: 1,
+    keywords: [
+      'afyon airport', 'zafer', 'kzr', 'afyon havalimanı', 'afyon havalimani',
+      'afyonkarahisar airport'
+    ]
+  },
+  'Mus Airport (MSR)': {
+    priority: 1,
+    keywords: [
+      'mus airport', 'muş', 'msr', 'mus havalimanı', 'mus havalimani'
+    ]
+  },
+  'Erzurum Airport (ERZ)': {
+    priority: 1,
+    keywords: [
+      'erzurum airport', 'erz', 'erzurum havalimanı', 'erzurum havalimani'
+    ]
+  },
+  'Erzincan Airport (ERC)': {
+    priority: 1,
+    keywords: [
+      'erzincan airport', 'erc', 'erzincan havalimanı', 'erzincan havalimani'
+    ]
+  },
+  'Sanliurfa GAP Airport (SFQ)': {
+    priority: 1,
+    keywords: [
+      'sanliurfa airport', 'şanlıurfa', 'sfq', 'gap airport', 'urfa airport',
+      'sanliurfa havalimanı', 'sanliurfa havalimani'
+    ]
+  },
+  'Hatay Airport (HTY)': {
+    priority: 1,
+    keywords: [
+      'hatay airport', 'hty', 'hatay havalimanı', 'antakya airport',
+      'iskenderun airport'
+    ]
+  },
+  'Balikesir Koca Seyit Airport (EDO)': {
+    priority: 1,
+    keywords: [
+      'balikesir airport', 'edo', 'koca seyit', 'balikesir havalimanı',
+      'bandirma airport', 'bandırma'
+    ]
+  },
+  'Canakkale Airport (CKZ)': {
+    priority: 1,
+    keywords: [
+      'canakkale airport', 'çanakkale', 'ckz', 'canakkale havalimanı'
+    ]
+  },
+  'Ordu-Giresun Airport (OGU)': {
+    priority: 1,
+    keywords: [
+      'ordu airport', 'giresun airport', 'ogu', 'ordu giresun',
+      'ordu havalimanı', 'giresun havalimani'
+    ]
+  },
+  'Rize-Artvin Airport (RZV)': {
+    priority: 1,
+    keywords: [
+      'rize airport', 'artvin airport', 'rzv', 'rize havalimanı',
+      'rize artvin', 'cayeli'
+    ]
+  },
 };
 
 // ==================== CITY KEYWORDS ====================
@@ -145,11 +362,20 @@ const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = 
     priority: 1,
     keywords: [
       'antalya', 'kaleici', 'kaleiçi', 'konyaalti', 'konyaaltı', 'lara', 
-      'belek', 'side', 'alanya', 'kemer', 'kas', 'kaş', 'kalkan', 'manavgat',
+      'belek', 'side', 'kemer', 'kas', 'kaş', 'kalkan', 'manavgat',
       'serik', 'kundu', 'beldibi', 'goynuk', 'göynük', 'tekirova', 'cirali', 'çıralı',
       'olympos', 'kadriye', 'bogazkent', 'boğazkent', 'kumkoy', 'kumköy',
-      'colakli', 'çolaklı', 'evrenseki', 'titreyengol', 'mahmutlar', 'okurcalar',
-      'avsallar', 'konakli', 'konaklı', 'incekum'
+      'colakli', 'çolaklı', 'evrenseki', 'titreyengol'
+    ]
+  },
+  'Alanya': {
+    priority: 1,
+    keywords: [
+      'alanya', 'alanya center', 'alanya merkez', 'alanya castle',
+      'mahmutlar', 'kestel', 'tosmur', 'oba', 'cikcilli',
+      'konakli', 'konaklı', 'payallar', 'turkler', 'türkler',
+      'avsallar', 'incekum', 'okurcalar', 'kargicak', 'kargıcak',
+      'demirtas', 'demirtaş', 'gazipasa', 'gazipaşa'
     ]
   },
   'Bodrum': {
@@ -222,6 +448,37 @@ const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = 
       'hendek', 'karasu', 'ferizli', 'sogutlu', 'söğütlü'
     ]
   },
+  // Türkiye - Bölgesel fiyatlandırma (yeni havalimanları)
+  'Trabzon Center': { priority: 1, keywords: ['trabzon center', 'trabzon merkez', 'trabzon'], city: 'Trabzon' },
+  'Adana Center': { priority: 1, keywords: ['adana center', 'adana merkez', 'adana'], city: 'Adana' },
+  'Gaziantep Center': { priority: 1, keywords: ['gaziantep center', 'gaziantep merkez', 'gaziantep'], city: 'Gaziantep' },
+  'Diyarbakir Center': { priority: 1, keywords: ['diyarbakir center', 'diyarbakır merkez', 'diyarbakir'], city: 'Diyarbakir' },
+  'Van Center': { priority: 1, keywords: ['van center', 'van merkez', 'van'], city: 'Van' },
+  'Malatya Center': { priority: 1, keywords: ['malatya center', 'malatya merkez', 'malatya'], city: 'Malatya' },
+  'Samsun Center': { priority: 1, keywords: ['samsun center', 'samsun merkez', 'samsun'], city: 'Samsun' },
+  'Tekirdag Center': { priority: 1, keywords: ['tekirdag center', 'tekirdağ merkez', 'tekirdag'], city: 'Tekirdag' },
+  'Edirne Center': { priority: 1, keywords: ['edirne center', 'edirne merkez', 'edirne'], city: 'Edirne' },
+  'Kars Center': { priority: 1, keywords: ['kars center', 'kars merkez', 'kars'], city: 'Kars' },
+  'Elazig Center': { priority: 1, keywords: ['elazig center', 'elazığ merkez', 'elazig'], city: 'Elazig' },
+  'Sivas Center': { priority: 1, keywords: ['sivas center', 'sivas merkez', 'sivas'], city: 'Sivas' },
+  'Sinop Center': { priority: 1, keywords: ['sinop center', 'sinop merkez', 'sinop'], city: 'Sinop' },
+  'Kastamonu Center': { priority: 1, keywords: ['kastamonu center', 'kastamonu merkez', 'kastamonu'], city: 'Kastamonu' },
+  'Zonguldak Center': { priority: 1, keywords: ['zonguldak center', 'zonguldak merkez', 'zonguldak'], city: 'Zonguldak' },
+  'Sirnak Center': { priority: 1, keywords: ['sirnak center', 'şırnak merkez', 'sirnak'], city: 'Sirnak' },
+  'Agri Center': { priority: 1, keywords: ['agri center', 'ağrı merkez', 'agri'], city: 'Agri' },
+  'Mardin Center': { priority: 1, keywords: ['mardin center', 'mardin merkez', 'mardin'], city: 'Mardin' },
+  'Afyon Center': { priority: 1, keywords: ['afyon center', 'afyon merkez', 'afyon'], city: 'Afyon' },
+  'Mus Center': { priority: 1, keywords: ['mus center', 'muş merkez', 'mus'], city: 'Mus' },
+  'Erzurum Center': { priority: 1, keywords: ['erzurum center', 'erzurum merkez', 'erzurum'], city: 'Erzurum' },
+  'Erzincan Center': { priority: 1, keywords: ['erzincan center', 'erzincan merkez', 'erzincan'], city: 'Erzincan' },
+  'Sanliurfa Center': { priority: 1, keywords: ['sanliurfa center', 'şanlıurfa merkez', 'sanliurfa', 'urfa'], city: 'Sanliurfa' },
+  'Antakya': { priority: 1, keywords: ['antakya', 'hatay merkez'], city: 'Hatay' },
+  'Iskenderun': { priority: 1, keywords: ['iskenderun'], city: 'Hatay' },
+  'Samandag': { priority: 1, keywords: ['samandag', 'samandağ'], city: 'Hatay' },
+  'Balikesir Center': { priority: 1, keywords: ['balikesir center', 'balıkesir merkez', 'balikesir'], city: 'Balikesir' },
+  'Canakkale Center': { priority: 1, keywords: ['canakkale center', 'çanakkale merkez', 'canakkale'], city: 'Canakkale' },
+  'Ordu Center': { priority: 1, keywords: ['ordu center', 'ordu merkez', 'ordu'], city: 'Ordu' },
+  'Rize Center': { priority: 1, keywords: ['rize center', 'rize merkez', 'rize'], city: 'Rize' },
   'Dubai': {
     priority: 1,
     keywords: [
@@ -251,6 +508,36 @@ const CITY_KEYWORDS: Record<string, { keywords: string[]; priority: number }> = 
       'çatalköy', 'catalkoy', 'karakum'
     ]
   },
+  // Türkiye - Bölgesel fiyatlandırma kapsamındaki diğer şehirler
+  'Trabzon': { priority: 1, keywords: ['trabzon', 'akçaabat', 'yomra', 'arsin', 'of', 'sürmene', 'hayrat'] },
+  'Adana': { priority: 1, keywords: ['adana', 'seyhan', 'yuregir', 'cukurova', 'saricam', 'tarsus', 'ceyhan'] },
+  'Gaziantep': { priority: 1, keywords: ['gaziantep', 'oguzeli', 'oğuzeli', 'sahinbey', 'sehitkamil'] },
+  'Diyarbakir': { priority: 1, keywords: ['diyarbakir', 'diyarbakır', 'sur', 'baglar', 'yenisehir', 'kayapinar'] },
+  'Van': { priority: 1, keywords: ['van', 'edremit', 'tusba', 'ipekyolu'] },
+  'Malatya': { priority: 1, keywords: ['malatya', 'battalgazi', 'aslantas', 'yesilyurt'] },
+  'Samsun': { priority: 1, keywords: ['samsun', 'carsamba', 'çarşamba', 'ilkadim', 'atakum', 'canik'] },
+  'Tekirdag': { priority: 1, keywords: ['tekirdag', 'tekirdağ', 'corlu', 'çorlu', 'suleymanpasa'] },
+  'Edirne': { priority: 1, keywords: ['edirne', 'kesan', 'keşan', 'uzunkopru', 'ipsala'] },
+  'Kars': { priority: 1, keywords: ['kars', 'merkez', 'kagizman', 'sarikamis'] },
+  'Denizli': { priority: 1, keywords: ['denizli', 'pamukkale', 'hierapolis', 'cardak', 'çardak'] },
+  'Elazig': { priority: 1, keywords: ['elazig', 'elazığ', 'merkez', 'kovancilar'] },
+  'Sivas': { priority: 1, keywords: ['sivas', 'merkez', 'kangal', 'divrigi'] },
+  'Sanliurfa': { priority: 1, keywords: ['sanliurfa', 'şanlıurfa', 'urfa', 'harran', 'gap', 'eylul'] },
+  'Hatay': { priority: 1, keywords: ['hatay', 'antakya', 'iskenderun', 'samandag', 'harbiye'] },
+  'Balikesir': { priority: 1, keywords: ['balikesir', 'balıkesir', 'bandirma', 'bandırma', 'edremit', 'ayvalik'] },
+  'Canakkale': { priority: 1, keywords: ['canakkale', 'çanakkale', 'gelibolu', 'troy', 'truva'] },
+  'Ordu': { priority: 1, keywords: ['ordu', 'unye', 'ülünye', 'fatsa', 'persembe'] },
+  'Rize': { priority: 1, keywords: ['rize', 'cayeli', 'pazar', 'ardesen', 'findikli'] },
+  'Erzurum': { priority: 1, keywords: ['erzurum', 'palandoken', 'yakutiye', 'aziziye'] },
+  'Erzincan': { priority: 1, keywords: ['erzincan', 'merkez', 'tercan'] },
+  'Zonguldak': { priority: 1, keywords: ['zonguldak', 'caycuma', 'çaycuma', 'eregli', 'karaelmas'] },
+  'Sinop': { priority: 1, keywords: ['sinop', 'merkez', 'boyabat'] },
+  'Kastamonu': { priority: 1, keywords: ['kastamonu', 'merkez', 'taskopru', 'inebolu'] },
+  'Mardin': { priority: 1, keywords: ['mardin', 'midyat', 'mardin merkez', 'artuklu'] },
+  'Agri': { priority: 1, keywords: ['agri', 'ağrı', 'dogubayazit', 'patnos'] },
+  'Mus': { priority: 1, keywords: ['mus', 'muş', 'merkez', 'malazgirt'] },
+  'Sirnak': { priority: 1, keywords: ['sirnak', 'şırnak', 'merkez', 'cidlis'] },
+  'Afyon': { priority: 1, keywords: ['afyon', 'afyonkarahisar', 'merkez', 'sandikli'] },
 };
 
 // ==================== DISTRICT KEYWORDS ====================
@@ -309,7 +596,7 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Sancaktepe': { priority: 2, keywords: ['sancaktepe'], city: 'Istanbul' },
   'Sultanbeyli': { priority: 2, keywords: ['sultanbeyli'], city: 'Istanbul' },
   
-  // Antalya - Each district matches DB exactly (Beldibi, Goynuk, Tekirova, Cirali, Olympos are separate from Kemer)
+  // Antalya - Each district matches DB exactly (Alanya is now a separate city)
   'Kaleici': { priority: 1, keywords: ['kaleici', 'kaleiçi', 'old town antalya', 'old city antalya', 'antalya old town', 'antalya', 'antalya center', 'antalya merkez'], city: 'Antalya' },
   'Konyaalti': { priority: 1, keywords: ['konyaalti', 'konyaaltı', 'konyaalti beach', 'konyaaltı plajı', 'konyaalti plaji'], city: 'Antalya' },
   'Lara': { priority: 1, keywords: ['lara', 'lara beach', 'lara plaji', 'lara plajı'], city: 'Antalya' },
@@ -319,7 +606,6 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Serik': { priority: 2, keywords: ['serik'], city: 'Antalya' },
   'Side': { priority: 1, keywords: ['side', 'kumkoy', 'kumköy', 'colakli', 'çolaklı', 'evrenseki', 'titreyengol', 'titreyen gol', 'sorgun'], city: 'Antalya' },
   'Manavgat': { priority: 1, keywords: ['manavgat', 'gundogdu', 'gündoğdu'], city: 'Antalya' },
-  'Alanya': { priority: 1, keywords: ['alanya', 'mahmutlar', 'okurcalar', 'avsallar', 'konakli', 'konaklı', 'incekum', 'alanya castle'], city: 'Antalya' },
   'Kemer': { priority: 1, keywords: ['kemer', 'kemer center', 'kemer merkez', 'kemer marina', 'camyuva', 'kiriş', 'kiris'], city: 'Antalya' },
   'Beldibi': { priority: 1, keywords: ['beldibi', 'beldib'], city: 'Antalya' },
   'Goynuk': { priority: 1, keywords: ['goynuk', 'göynük', 'goynuk canyon', 'göynük kanyonu'], city: 'Antalya' },
@@ -328,6 +614,23 @@ const DISTRICT_KEYWORDS: Record<string, { keywords: string[]; city: string; prio
   'Olympos': { priority: 1, keywords: ['olympos', 'olimpos'], city: 'Antalya' },
   'Kas': { priority: 1, keywords: ['kas', 'kaş', 'patara'], city: 'Antalya' },
   'Kalkan': { priority: 1, keywords: ['kalkan', 'saklikent', 'saklıkent', 'xanthos', 'letoon'], city: 'Antalya' },
+
+  // Alanya - Separate city and districts
+  'Alanya': { priority: 1, keywords: ['alanya', 'alanya center', 'alanya merkez', 'alanya castle'], city: 'Alanya' },
+  'Mahmutlar': { priority: 1, keywords: ['mahmutlar'], city: 'Alanya' },
+  'Kestel': { priority: 1, keywords: ['kestel'], city: 'Alanya' },
+  'Tosmur': { priority: 1, keywords: ['tosmur'], city: 'Alanya' },
+  'Oba': { priority: 1, keywords: ['oba', 'oba mahallesi'], city: 'Alanya' },
+  'Cikcilli': { priority: 1, keywords: ['cikcilli', 'cikilli'], city: 'Alanya' },
+  'Konakli': { priority: 1, keywords: ['konakli', 'konaklı'], city: 'Alanya' },
+  'Payallar': { priority: 1, keywords: ['payallar'], city: 'Alanya' },
+  'Turkler': { priority: 1, keywords: ['turkler', 'türkler'], city: 'Alanya' },
+  'Avsallar': { priority: 1, keywords: ['avsallar'], city: 'Alanya' },
+  'Incekum': { priority: 1, keywords: ['incekum', 'ince kum'], city: 'Alanya' },
+  'Okurcalar': { priority: 1, keywords: ['okurcalar'], city: 'Alanya' },
+  'Kargicak': { priority: 1, keywords: ['kargicak', 'kargıcak'], city: 'Alanya' },
+  'Demirtas': { priority: 1, keywords: ['demirtas', 'demirtaş'], city: 'Alanya' },
+  'Gazipasa': { priority: 1, keywords: ['gazipasa', 'gazipaşa'], city: 'Alanya' },
   
   // Bodrum - Each district separate for exact matching
   'Bodrum Center': { priority: 1, keywords: ['bodrum center', 'bodrum merkez', 'bodrum centrum', 'bodrum city', 'bodrum town', 'bodrum castle', 'bodrum marina', 'bodrum'], city: 'Bodrum' },
@@ -466,15 +769,48 @@ const KKTC_DISTRICT_DB_MAPPING: Record<string, string> = {
 };
 
 // Airport name to DB code mapping (how airports are stored in region_prices.airport)
+// Türkiye + Dubai + Kıbrıs havalimanları
 const AIRPORT_TO_DB_CODE: Record<string, string> = {
   'Istanbul Airport (IST)': 'IST',
   'Sabiha Gokcen Airport (SAW)': 'SAW',
   'Antalya Airport (AYT)': 'AYT',
+  'Gazipasa-Alanya Airport (GZP)': 'GZP',
   'Bodrum-Milas Airport (BJV)': 'BJV',
   'Dalaman Airport (DLM)': 'DLM',
   'Izmir Adnan Menderes Airport (ADB)': 'ADB',
   'Kayseri Airport (ASR)': 'ASR',
   'Nevsehir-Kapadokya Airport (NAV)': 'NAV',
+  'Ankara Esenboga Airport (ESB)': 'ESB',
+  'Adana Sakirpasa Airport (ADA)': 'ADA',
+  'Gaziantep Airport (GZT)': 'GZT',
+  'Trabzon Airport (TZX)': 'TZX',
+  'Diyarbakir Airport (DIY)': 'DIY',
+  'Van Ferit Melen Airport (VAN)': 'VAN',
+  'Malatya Airport (MLX)': 'MLX',
+  'Samsun Carsamba Airport (SZF)': 'SZF',
+  'Kocaeli Cengiz Topel Airport (KCO)': 'KCO',
+  'Tekirdag Corlu Airport (TEQ)': 'TEQ',
+  'Edirne Airport (EDN)': 'EDN',
+  'Kars Harakani Airport (KHV)': 'KHV',
+  'Denizli Cardak Airport (DNZ)': 'DNZ',
+  'Elazig Airport (EZS)': 'EZS',
+  'Sivas Nuri Demirag Airport (VAS)': 'VAS',
+  'Sinop Airport (NOP)': 'NOP',
+  'Kastamonu Airport (KFS)': 'KFS',
+  'Zonguldak Caycuma Airport (ONQ)': 'ONQ',
+  'Sirnak Airport (NKT)': 'NKT',
+  'Agri Airport (AJI)': 'AJI',
+  'Mardin Airport (MQM)': 'MQM',
+  'Afyon Zafer Airport (KZR)': 'KZR',
+  'Mus Airport (MSR)': 'MSR',
+  'Erzurum Airport (ERZ)': 'ERZ',
+  'Erzincan Airport (ERC)': 'ERC',
+  'Sanliurfa GAP Airport (SFQ)': 'SFQ',
+  'Hatay Airport (HTY)': 'HTY',
+  'Balikesir Koca Seyit Airport (EDO)': 'EDO',
+  'Canakkale Airport (CKZ)': 'CKZ',
+  'Ordu-Giresun Airport (OGU)': 'OGU',
+  'Rize-Artvin Airport (RZV)': 'RZV',
   'Dubai International Airport (DXB)': 'DXB',
   'Al Maktoum International Airport (DWC)': 'DWC',
   'Larnaca Airport (LCA)': 'LCA',
@@ -490,7 +826,7 @@ function normalizeLocation(location: string): string {
     .replace(/türkiye|turkey|türkei|turkiye/gi, '')
     .replace(/,\s*(tr|turkey)$/i, '')
     .replace(/\(.*?\)/g, '')
-    .replace(/[,.\-_\/\\#&]/g, ' ')
+    .replace(/[,.\-_/\\#&]/g, ' ')
     .replace(/\s+/g, ' ')
     .replace(/ı/g, 'i')
     .replace(/ğ/g, 'g')
@@ -520,20 +856,53 @@ const DISTRICT_NAMES_BY_CITY_NORM: Record<string, Set<string>> = (() => {
 // ==================== AIRPORT TO CITY MAPPING ====================
 // When an airport is found, this determines the correct city for price matching
 // This prevents false positives from district keywords matching wrong cities
+// Türkiye - tüm havalimanları için şehir eşlemesi
 const AIRPORT_TO_CITY: Record<string, string> = {
   'Istanbul Airport (IST)': 'Istanbul',
   'Sabiha Gokcen Airport (SAW)': 'Istanbul',
   'Antalya Airport (AYT)': 'Antalya',
+  'Gazipasa-Alanya Airport (GZP)': 'Alanya',
   'Bodrum-Milas Airport (BJV)': 'Bodrum',
   'Dalaman Airport (DLM)': 'Dalaman',
   'Izmir Adnan Menderes Airport (ADB)': 'Izmir',
   'Kayseri Airport (ASR)': 'Cappadocia',
   'Nevsehir-Kapadokya Airport (NAV)': 'Cappadocia',
+  'Ankara Esenboga Airport (ESB)': 'Ankara',
+  'Adana Sakirpasa Airport (ADA)': 'Adana',
+  'Gaziantep Airport (GZT)': 'Gaziantep',
+  'Trabzon Airport (TZX)': 'Trabzon',
+  'Diyarbakir Airport (DIY)': 'Diyarbakir',
+  'Van Ferit Melen Airport (VAN)': 'Van',
+  'Malatya Airport (MLX)': 'Malatya',
+  'Samsun Carsamba Airport (SZF)': 'Samsun',
+  'Kocaeli Cengiz Topel Airport (KCO)': 'Kocaeli',
+  'Tekirdag Corlu Airport (TEQ)': 'Tekirdag',
+  'Edirne Airport (EDN)': 'Edirne',
+  'Kars Harakani Airport (KHV)': 'Kars',
+  'Denizli Cardak Airport (DNZ)': 'Denizli',
+  'Elazig Airport (EZS)': 'Elazig',
+  'Sivas Nuri Demirag Airport (VAS)': 'Sivas',
+  'Sinop Airport (NOP)': 'Sinop',
+  'Kastamonu Airport (KFS)': 'Kastamonu',
+  'Zonguldak Caycuma Airport (ONQ)': 'Zonguldak',
+  'Sirnak Airport (NKT)': 'Sirnak',
+  'Agri Airport (AJI)': 'Agri',
+  'Mardin Airport (MQM)': 'Mardin',
+  'Afyon Zafer Airport (KZR)': 'Afyon',
+  'Mus Airport (MSR)': 'Mus',
+  'Erzurum Airport (ERZ)': 'Erzurum',
+  'Erzincan Airport (ERC)': 'Erzincan',
+  'Sanliurfa GAP Airport (SFQ)': 'Sanliurfa',
+  'Hatay Airport (HTY)': 'Hatay',
+  'Balikesir Koca Seyit Airport (EDO)': 'Balikesir',
+  'Canakkale Airport (CKZ)': 'Canakkale',
+  'Ordu-Giresun Airport (OGU)': 'Ordu',
+  'Rize-Artvin Airport (RZV)': 'Rize',
   'Dubai International Airport (DXB)': 'Dubai',
   'Al Maktoum International Airport (DWC)': 'Dubai',
   'Larnaca Airport (LCA)': 'Cyprus',
   'Paphos Airport (PFO)': 'Cyprus',
-  'Ercan Airport (ECN)': 'Kuzey Kıbrıs', // DB'de "Kuzey Kıbrıs" olarak kayıtlı
+  'Ercan Airport (ECN)': 'Kuzey Kıbrıs',
   'Bursa Yenisehir Airport (YEI)': 'Bursa',
 };
 

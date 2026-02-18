@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 
 type DriverLanguage = 'EN' | 'TR' | 'DE' | 'FR' | 'RU' | 'AR';
 
@@ -247,6 +247,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     november: 'Kasım',
     december: 'Aralık',
     futureReservations: 'İleri Tarihli Rezervasyonlar',
+    home: 'Ana Sayfa',
+    accountSettings: 'Hesap Ayarları',
+    securitySettings: 'Güvenlik Ayarları',
+    notificationSettings: 'Bildirim Ayarları',
   },
   EN: {
     driverPanel: 'Driver Panel',
@@ -460,6 +464,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     november: 'November',
     december: 'December',
     futureReservations: 'Future Reservations',
+    home: 'Home',
+    accountSettings: 'Account Settings',
+    securitySettings: 'Security Settings',
+    notificationSettings: 'Notification Settings',
   },
   DE: {
     driverPanel: 'Fahrer-Panel',
@@ -673,6 +681,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     november: 'November',
     december: 'Dezember',
     futureReservations: 'Zukünftige Reservierungen',
+    home: 'Startseite',
+    accountSettings: 'Kontoeinstellungen',
+    securitySettings: 'Sicherheitseinstellungen',
+    notificationSettings: 'Benachrichtigungen',
   },
   FR: {
     driverPanel: 'Panneau Chauffeur',
@@ -886,6 +898,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     november: 'Novembre',
     december: 'Décembre',
     futureReservations: 'Réservations Futures',
+    home: 'Accueil',
+    accountSettings: 'Paramètres du Compte',
+    securitySettings: 'Paramètres de Sécurité',
+    notificationSettings: 'Paramètres de Notification',
   },
   RU: {
     driverPanel: 'Панель Водителя',
@@ -1099,6 +1115,10 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     november: 'Ноябрь',
     december: 'Декабрь',
     futureReservations: 'Будущие Бронирования',
+    home: 'Главная',
+    accountSettings: 'Настройки аккаунта',
+    securitySettings: 'Настройки безопасности',
+    notificationSettings: 'Уведомления',
   },
   AR: {
     driverPanel: 'لوحة السائق',
@@ -1312,17 +1332,21 @@ const driverTranslations: Record<DriverLanguage, Record<string, string>> = {
     november: 'نوفمبر',
     december: 'ديسمبر',
     futureReservations: 'الحجوزات المستقبلية',
+    home: 'الرئيسية',
+    accountSettings: 'إعدادات الحساب',
+    securitySettings: 'إعدادات الأمان',
+    notificationSettings: 'إعدادات الإشعارات',
   },
 };
 
 export const useDriverTranslations = () => {
   const language = useMemo(() => getBrowserLanguage(), []);
   
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     return driverTranslations[language]?.[key] || driverTranslations.TR[key] || key;
-  };
+  }, [language]);
 
-  const getPaymentTypeLabel = (paymentType: string): string => {
+  const getPaymentTypeLabel = useCallback((paymentType: string): string => {
     const paymentMap: Record<string, string> = {
       cash: t('cash'),
       card: t('card'),
@@ -1332,7 +1356,7 @@ export const useDriverTranslations = () => {
       none: t('none'),
     };
     return paymentMap[paymentType] || paymentType;
-  };
+  }, [t]);
 
   return { t, language, getPaymentTypeLabel };
 };

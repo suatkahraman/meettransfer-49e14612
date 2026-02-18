@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePromo, getLocalizedDiscountText } from "@/contexts/PromoContext";
+import { safeDestinationSlug } from "@/utils/slug";
 import WebsiteLayout from "@/components/website/WebsiteLayout";
 import PageHeader from "@/components/website/PageHeader";
 import { SEOHead, SchemaOrg } from "@/components/seo";
@@ -14,7 +15,7 @@ import DestinationGallery from "@/components/website/DestinationGallery";
 import { motion } from "framer-motion";
 import { 
   MapPin, Star, Plane, Users, Luggage, Clock, Shield, 
-  Car, ArrowRight, Sparkles, Tag, Calendar, CheckCircle2
+  Car, ArrowRight, Sparkles, Tag, Calendar, CheckCircle2, ArrowLeft
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -553,7 +554,9 @@ const DestinationDetail = () => {
   const { promoCode, loading: promoLoading } = usePromo();
   const navigate = useNavigate();
 
-  const destination = cityName ? destinationData[cityName.toLowerCase()] : null;
+  // Only allow ASCII path segment (a-z, 0-9, hyphen) to avoid 400 from Turkish chars or malformed URLs
+  const safeCityKey = safeDestinationSlug(cityName);
+  const destination = safeCityKey ? destinationData[safeCityKey] ?? null : null;
 
   if (!destination) {
     return (
@@ -594,7 +597,7 @@ const DestinationDetail = () => {
         title={`${destination.name} Airport Transfer | VIP Transfers from ${destination.airports.join(" & ")} | Meet Transfer`}
         description={destination.description.en}
         keywords={`${destination.name} airport transfer, ${destination.airports.join(", ")} transfer, VIP transfer ${destination.name}, private chauffeur ${destination.name}`}
-        canonicalPath={`/destinations/${cityName}`}
+        canonicalPath={`/destinations/${safeCityKey}`}
       />
       <SchemaOrg
         schemas={[
@@ -605,6 +608,18 @@ const DestinationDetail = () => {
 
       {/* Hero Header */}
       <div className={`relative bg-gradient-to-br ${destination.gradient} py-16 md:py-24`}>
+        {/* Back Button */}
+        <div className="container px-4 absolute top-4 left-0 right-0 z-20">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(getLocalizedPath("/destinations"))}
+            className="text-white/90 hover:text-white hover:bg-white/10"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {isTR ? "Tüm Rotalar" : "All Destinations"}
+          </Button>
+        </div>
         {/* Pattern Overlay */}
         <div className="absolute inset-0 opacity-20">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -707,7 +722,7 @@ const DestinationDetail = () => {
         <FeatureList />
 
         {/* City Map & Popular Locations */}
-        <LazyDestinationMap cityKey={cityName || ''} />
+        <LazyDestinationMap cityKey={safeCityKey} />
 
         {/* Locations Grid */}
         <motion.section
@@ -801,7 +816,7 @@ const DestinationDetail = () => {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.entries(destinationData)
-              .filter(([key]) => key !== cityName?.toLowerCase())
+              .filter(([key]) => key !== safeCityKey)
               .slice(0, 4)
               .map(([key, dest]) => (
                 <Link

@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, LogOut, Briefcase, DollarSign, Banknote } from 'lucide-react';
-import { getCurrencySymbol } from '@/lib/currency';
+import { Briefcase, DollarSign, Banknote } from 'lucide-react';
 
 interface AccountingData {
   totalJobs: number;
@@ -16,9 +12,7 @@ interface AccountingData {
 }
 
 const DriverAccounting = () => {
-  const { signOut } = useAuth();
   const { driverId } = useUserRole();
-  const navigate = useNavigate();
   const { t } = useDriverTranslations();
   const [data, setData] = useState<AccountingData>({
     totalJobs: 0,
@@ -60,19 +54,7 @@ const DriverAccounting = () => {
   }, [driverId]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/driver')} className="text-primary-foreground hover:bg-primary-foreground/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-serif">{t('accounting')}</h1>
-        </div>
-        <Button variant="ghost" size="icon" onClick={signOut} className="text-primary-foreground hover:bg-primary-foreground/10">
-          <LogOut className="h-5 w-5" />
-        </Button>
-      </header>
-
+    <div className="h-full min-h-0 overflow-y-auto">
       <main className="container mx-auto py-8 px-4 max-w-2xl">
         {loading ? (
           <div className="text-center py-12">{t('loading')}</div>

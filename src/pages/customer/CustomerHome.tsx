@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, lazy, Suspense, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePromo, getLocalizedDiscountText } from '@/contexts/PromoContext';
 import { supabase } from '@/integrations/supabase/client';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,18 +13,19 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { 
   LogOut, Plane, MapPin, Calendar, User, Phone, Car, CreditCard, Users, 
-  Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, 
+  Trash2, UserPlus, Shield, Bell, Settings, Plus, ClipboardList, Menu,
   ChevronRight, Edit2, Save, X, MessageCircle, PhoneCall, Sparkles, 
   Clock, Star, ArrowRight, Loader2, Home, RefreshCw, Globe, History,
   Bookmark, TrendingUp, Briefcase, Baby, MessageSquare, CheckCircle,
   Snowflake, Armchair, Wifi, BatteryCharging, Droplets, Stars, Wine, Crown, Tv,
-  Award, Zap, Tag, Heart, HeartOff, Route, Percent
+  Award, Zap, Tag, Heart, HeartOff, Route, Percent, CalendarCheck, Coins
 } from 'lucide-react';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import { GoogleRouteMap } from '@/components/ui/google-route-map';
+import { getDirections, geocodeAddress, loadGoogleMapsScript } from '@/utils/googleMapsLoader';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -45,6 +47,12 @@ import { Calendar as DayPickerCalendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { tr, enUS } from 'date-fns/locale';
 import { useActivePromoCode } from '@/hooks/useActivePromoCode';
+import { useCustomerPayments } from '@/hooks/useCustomerPayments';
+import { CustomerNavSheet } from '@/components/customer/CustomerNavSheet';
+import { CustomerHomeSkeleton } from '@/components/customer/CustomerHomeSkeleton';
+import { GeminiHolidayAssistant } from '@/components/customer/GeminiHolidayAssistant';
+import { CustomerHeroWelcomePanel } from '@/components/customer/CustomerHeroWelcomePanel';
+import { formatCurrency, CURRENCY_OPTIONS } from '@/lib/currency';
 
 // Time options for 30-minute intervals
 const TIME_OPTIONS = Array.from({ length: 48 }, (_, i) => {
@@ -102,9 +110,15 @@ const CustomerHome = () => {
   
   // Return transfer promo code hook
   const { promoCode: returnPromoCode, loading: promoLoading } = useActivePromoCode('return_transfer');
+  const { stats: paymentStats } = useCustomerPayments({ language: language === 'TR' ? 'TR' : 'EN' });
+  
+  // Refs
+  const bookingFormRef = useRef<HTMLDivElement>(null);
   
   // State - organized by purpose
+  const [menuOpen, setMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Start with loading true
+  const [iosLoadingDelay, setIosLoadingDelay] = useState(false); // iOS-specific loading delay
   const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -138,9 +152,7 @@ const CustomerHome = () => {
     hasReview?: boolean;
   }>>([]);
   const [nextTransfer, setNextTransfer] = useState<{date: string; time: string; pickup: string; dropoff: string; reservationCode?: string} | null>(null);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({ full_name: '', phone: '' });
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [recentSearches, setRecentSearches] = useState<{pickup: string; dropoff: string}[]>([]);
   const [favoriteRoutes, setFavoriteRoutes] = useState<Array<{
     id: string;
@@ -191,11 +203,15 @@ const CustomerHome = () => {
     returnTime: '',
   });
 
-   // Price fetching state
+   // Price fetching state - API her zaman EUR döner
   const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
   const [selectedCurrency, setSelectedCurrency] = useState<string>('EUR');
+  const [eurToSelectedRate, setEurToSelectedRate] = useState<number>(1);
   const [isPricesLoading, setIsPricesLoading] = useState(false);
   const [pricesError, setPricesError] = useState<string | null>(null);
+  const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
+  const [isRefetchingPrices, setIsRefetchingPrices] = useState(false);
+  const [distanceKm, setDistanceKm] = useState<number | undefined>(undefined);
 
   // Date picker popover state
   const [isPickupDateOpen, setIsPickupDateOpen] = useState(false);
@@ -226,20 +242,48 @@ const CustomerHome = () => {
     }
   }, [minibusRequired, formData.vehicleType]);
 
-  // Get currency based on language (used for initial value)
-  const getCurrencyByLanguage = useCallback(() => {
-    switch (language) {
-      case 'TR': return 'TRY';
-      case 'AR': return 'AED';
-      case 'DE': return 'EUR';
-      default: return 'EUR';
-    }
-  }, [language]);
-
-  // Set initial currency based on language once
+  // Set EUR as default currency - always start with Euro
   useEffect(() => {
-    setSelectedCurrency(getCurrencyByLanguage());
+    setSelectedCurrency('EUR');
   }, []);
+
+  // Fiyatlar EUR - seçilen para birimi değiştiğinde o günün kuruyla hemen dönüştür
+  useEffect(() => {
+    if (selectedCurrency === "EUR") {
+      setEurToSelectedRate(1);
+      setIsLoadingExchangeRate(false);
+      return;
+    }
+    
+    setIsLoadingExchangeRate(true);
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: selectedCurrency },
+    })
+      .then(({ data }) => { 
+        if (data?.rate) setEurToSelectedRate(data.rate); 
+      })
+      .catch(() => {
+        // Fallback rates for common currencies - updated to current rates
+        const fallback: Record<string, number> = { 
+          TRY: 35, 
+          AED: 4, 
+          USD: 1.08, 
+          GBP: 0.86,
+          RUB: 95,
+          UAH: 42,
+          JPY: 165,
+          AUD: 1.65
+        };
+        setEurToSelectedRate(fallback[selectedCurrency] ?? 1);
+      })
+      .finally(() => setIsLoadingExchangeRate(false));
+  }, [selectedCurrency]);
+
+  const getDisplayPrice = useCallback((priceEur: number | null | undefined): number | null => {
+    if (priceEur == null || !Number.isFinite(priceEur)) return null;
+    if (selectedCurrency === "EUR") return Math.round(priceEur);
+    return Math.round(priceEur * eurToSelectedRate);
+  }, [selectedCurrency, eurToSelectedRate]);
 
   // Fetch prices when pickup and dropoff are filled
   useEffect(() => {
@@ -259,11 +303,33 @@ const CustomerHome = () => {
       setPricesError(null);
 
       try {
+        // Calculate distance client-side for KM pricing
+        let calculatedDistanceKm: number | undefined;
+        try {
+          await loadGoogleMapsScript();
+          const [pRes, dRes] = await Promise.all([
+            geocodeAddress(formData.pickup),
+            geocodeAddress(formData.dropoff)
+          ]);
+          
+          if (pRes && dRes) {
+            const directions = await getDirections(pRes, dRes);
+            if (directions?.distanceKm) {
+              calculatedDistanceKm = directions.distanceKm;
+              setDistanceKm(calculatedDistanceKm);
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to calculate distance:", e);
+        }
+
         const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: {
             pickup: formData.pickup,
             dropoff: formData.dropoff,
-            customerCurrency: selectedCurrency,
+            customerCurrency: "EUR",
+            pickup_date: formData.date || undefined,
+            distance_km: calculatedDistanceKm,
           },
         });
 
@@ -293,7 +359,7 @@ const CustomerHome = () => {
     // Debounce the fetch
     const timeoutId = setTimeout(fetchVehiclePrices, 500);
     return () => clearTimeout(timeoutId);
-  }, [formData.pickup, formData.dropoff, selectedCurrency, t]);
+  }, [formData.pickup, formData.dropoff, formData.date, t]);
 
   // Memoized greeting
   const greeting = useMemo(() => getGreeting(t), [t]);
@@ -315,8 +381,12 @@ const CustomerHome = () => {
     
     setIsRefreshing(true);
     setIsLoading(true);
+    
+    // iOS Safari: İlk yüklemede sadece kritik verileri getir
+    const isIOS = isIOSDevice();
+    
     try {
-      // Fetch active bookings with next transfer info
+      // Fetch active bookings with next transfer info - iOS için optimize edilmiş
       const { data: activeReservations, count } = await supabase
         .from('reservations')
         .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type', { count: 'exact' })
@@ -324,7 +394,7 @@ const CustomerHome = () => {
         .in('status', ['awaiting-price', 'waiting_for_customer_approval', 'customer_approved', 'confirmed', 'sent_to_driver', 'pending_admin_review'])
         .order('pickup_date', { ascending: true })
         .order('pickup_time', { ascending: true })
-        .limit(5);
+        .limit(isIOS ? 3 : 5); // iOS için daha az veri
       
       setActiveBookingsCount(count || 0);
       setRecentReservations(activeReservations || []);
@@ -343,7 +413,7 @@ const CustomerHome = () => {
         setNextTransfer(null);
       }
 
-      // Fetch completed reservations with driver info
+      // Fetch completed reservations with driver info - iOS için optimize edilmiş
       const { data: pastReservations } = await supabase
         .from('reservations')
         .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type, driver_id, drivers:driver_id(name)')
@@ -351,7 +421,7 @@ const CustomerHome = () => {
         .in('status', ['completed', 'cancelled'])
         .order('pickup_date', { ascending: false })
         .order('pickup_time', { ascending: false })
-        .limit(5);
+        .limit(isIOS ? 2 : 5); // iOS için daha az geçmiş rezervasyon
       
       // Check for existing reviews for completed reservations
       if (pastReservations && pastReservations.length > 0) {
@@ -378,13 +448,13 @@ const CustomerHome = () => {
         setCompletedReservations([]);
       }
 
-      // Fetch favorite routes
+      // Fetch favorite routes - iOS için optimize edilmiş
       const { data: favorites } = await supabase
         .from('favorite_routes')
         .select('id, name, pickup_location, dropoff_location, notes, usage_count')
         .eq('user_id', user.id)
         .order('usage_count', { ascending: false })
-        .limit(10);
+        .limit(isIOS ? 5 : 10); // iOS için daha az favori rota
       
       setFavoriteRoutes(favorites || []);
 
@@ -450,12 +520,11 @@ const CustomerHome = () => {
       const pendingToken = localStorage.getItem('pending_booking_token');
       const pendingData = localStorage.getItem('pending_booking_data');
       
-      // If we have session booking data from Google OAuth, AUTO-CREATE reservation
+      // If we have session booking data from Google OAuth, AUTO-CREATE via edge function (RLS bypass)
       if (sessionBookingData && sessionBookingData.pickup && sessionBookingData.dropoff) {
-        console.log('[CustomerHome] Found pending booking from sessionStorage, creating reservation...', sessionBookingData);
+        console.log('[CustomerHome] Found pending booking (session/localStorage), creating via edge function...', sessionBookingData);
         
         try {
-          // Get user profile info
           const { data: profile } = await supabase
             .from('profiles')
             .select('full_name, phone')
@@ -463,56 +532,53 @@ const CustomerHome = () => {
             .single();
           
           const customerName = sessionBookingData.customerName || profile?.full_name || user.user_metadata?.full_name || 'Customer';
-          const customerPhone = sessionBookingData.customerPhone || profile?.phone || 'N/A'; // Allow reservation without phone, user can add later
+          const customerPhone = sessionBookingData.customerPhone || profile?.phone || '';
           const customerEmail = user.email || '';
           
-          // Clear the pending booking data immediately to prevent duplicate processing
-          PendingBookingStorage.clear();
+          const rawPayment = sessionBookingData.paymentMethod || 'cash';
+          const paymentMethod = rawPayment === 'credit_card' ? 'online' : (['cash','payment_link','agency_pay','none','online'].includes(rawPayment) ? rawPayment : 'cash');
+          const validVehicleTypes = ['sedan','mercedes-vito','vip-mercedes','maybach-minibus','minibus'];
+          const vehicleType = sessionBookingData.vehicleType && (validVehicleTypes.includes(sessionBookingData.vehicleType) || sessionBookingData.vehicleType.startsWith('dubai-'))
+            ? sessionBookingData.vehicleType
+            : 'mercedes-vito';
           
-          setIsCreatingReservation(true);
-          
-          // Determine initial status based on whether we have a price
-          const hasPrice = sessionBookingData.estimatedPrice && sessionBookingData.estimatedPrice > 0;
-          const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
-          
-          // Build passenger names array
           let passengerNamesArray = sessionBookingData.passengerNames;
           if (!passengerNamesArray || passengerNamesArray.length === 0) {
             passengerNamesArray = [customerName];
           }
           
-          // Create main reservation directly
-          const reservationData = {
-            customer_id: user.id,
-            customer_name: customerName,
-            customer_phone: customerPhone,
-            pickup: sessionBookingData.pickup!,
-            dropoff: sessionBookingData.dropoff!,
-            pickup_date: sessionBookingData.date || new Date().toISOString().split('T')[0],
-            pickup_time: sessionBookingData.time || '10:00',
-            vehicle_type: sessionBookingData.vehicleType || 'Mercedes Vito',
+          setIsCreatingReservation(true);
+          
+          const body = {
+            customerId: user.id,
+            pickup: sessionBookingData.pickup,
+            dropoff: sessionBookingData.dropoff,
+            pickupDate: sessionBookingData.date || new Date().toISOString().split('T')[0],
+            pickupTime: sessionBookingData.time || '10:00',
+            vehicleType,
             passengers: sessionBookingData.passengers || 1,
-            price: sessionBookingData.estimatedPrice || null,
-            price_currency: sessionBookingData.currency || 'EUR',
-            status: initialStatus,
-            payment_method: sessionBookingData.paymentMethod || 'cash',
-            payment_type: sessionBookingData.paymentMethod || 'cash',
-            luggage_count: sessionBookingData.luggageCount || 1,
-            baby_seat_count: sessionBookingData.babySeatCount || 0,
-            customer_notes: sessionBookingData.customerNotes || null,
-            flight_number: sessionBookingData.flightNumber || null,
-            passenger_names: passengerNamesArray,
-            promo_code: sessionBookingData.promoCode || null,
+            price: sessionBookingData.estimatedPrice && sessionBookingData.estimatedPrice > 0 ? sessionBookingData.estimatedPrice : null,
+            priceCurrency: sessionBookingData.currency || 'EUR',
+            paymentMethod,
+            customerName,
+            customerPhone,
+            customerEmail,
+            customerNotes: sessionBookingData.customerNotes || undefined,
+            flightNumber: sessionBookingData.flightNumber || undefined,
+            passengerNames: passengerNamesArray,
+            luggageCount: sessionBookingData.luggageCount ?? 1,
+            babySeatCount: sessionBookingData.babySeatCount ?? 0,
+            promoCode: sessionBookingData.promoCode || undefined,
+            hasReturnTrip: sessionBookingData.hasReturnTrip || false,
+            returnDate: sessionBookingData.returnDate || undefined,
+            returnTime: sessionBookingData.returnTime || undefined,
+            returnPrice: sessionBookingData.returnPrice && sessionBookingData.hasReturnTrip ? sessionBookingData.returnPrice : undefined,
           };
           
-          const { data: reservation, error: reservationError } = await supabase
-            .from('reservations')
-            .insert([reservationData])
-            .select()
-            .single();
+          const { data: result, error: fnError } = await supabase.functions.invoke('create-quick-booking-reservation', { body });
           
-          if (reservationError) {
-            console.error('[CustomerHome] Failed to create reservation:', reservationError);
+          if (fnError || !result?.success) {
+            console.error('[CustomerHome] Edge function failed:', fnError || result?.error);
             toast.error(language === 'TR' 
               ? 'Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.'
               : 'Failed to create reservation. Please try again.');
@@ -520,54 +586,18 @@ const CustomerHome = () => {
             return;
           }
           
-          console.log('[CustomerHome] Reservation created successfully:', reservation?.reservation_code);
-          
-          // Create return trip if requested
-          if (sessionBookingData.hasReturnTrip && sessionBookingData.returnDate && sessionBookingData.returnTime) {
-            const returnData = {
-              customer_id: user.id,
-              customer_name: customerName,
-              customer_phone: customerPhone,
-              pickup: sessionBookingData.dropoff!, // Swap
-              dropoff: sessionBookingData.pickup!, // Swap
-              pickup_date: sessionBookingData.returnDate,
-              pickup_time: sessionBookingData.returnTime,
-              vehicle_type: sessionBookingData.vehicleType || 'Mercedes Vito',
-              passengers: sessionBookingData.passengers || 1,
-              price: sessionBookingData.returnPrice || sessionBookingData.estimatedPrice || null,
-              price_currency: sessionBookingData.currency || 'EUR',
-              status: initialStatus,
-              payment_method: sessionBookingData.paymentMethod || 'cash',
-              payment_type: sessionBookingData.paymentMethod || 'cash',
-              luggage_count: sessionBookingData.luggageCount || 1,
-              baby_seat_count: sessionBookingData.babySeatCount || 0,
-              customer_notes: sessionBookingData.customerNotes || null,
-              passenger_names: passengerNamesArray,
-              promo_code: sessionBookingData.promoCode || null,
-              is_return_trip: true,
-              original_reservation_id: reservation?.id,
-            };
-            
-            const { error: returnError } = await supabase
-              .from('reservations')
-              .insert([returnData]);
-            
-            if (returnError) {
-              console.error('[CustomerHome] Failed to create return reservation:', returnError);
-            } else {
-              console.log('[CustomerHome] Return reservation created successfully');
-            }
-          }
+          const reservationCode = result?.reservation?.reservationCode;
+          console.log('[CustomerHome] Reservation created via edge function:', reservationCode);
+          PendingBookingStorage.clear();
           
           toast.success(language === 'TR' 
-            ? `Rezervasyonunuz oluşturuldu! Kod: ${reservation?.reservation_code}`
-            : `Your reservation has been created! Code: ${reservation?.reservation_code}`);
+            ? `Rezervasyonunuz oluşturuldu! Kod: ${reservationCode}`
+            : `Your reservation has been created! Code: ${reservationCode}`);
           
-          // Refresh data to show the new reservation
           fetchData();
           
         } catch (err) {
-          console.error('[CustomerHome] Error creating reservation from sessionStorage:', err);
+          console.error('[CustomerHome] Error creating reservation:', err);
           toast.error(language === 'TR' 
             ? 'Bir hata oluştu. Lütfen tekrar deneyin.'
             : 'An error occurred. Please try again.');
@@ -782,6 +812,14 @@ const CustomerHome = () => {
       if (!passengerNamesArray || passengerNamesArray.length === 0) {
         passengerNamesArray = [customerName];
       }
+
+      // Map paymentMethod: 'credit_card' -> 'online' (reservations constraint)
+      const rawPayment = sessionData.paymentMethod || 'cash';
+      const paymentType = rawPayment === 'credit_card' ? 'online' : (['cash','payment_link','agency_pay','none','online'].includes(rawPayment) ? rawPayment : 'cash');
+      const validVehicleTypes = ['sedan','mercedes-vito','vip-mercedes','maybach-minibus','minibus'];
+      const vehicleType = sessionData.vehicleType && (validVehicleTypes.includes(sessionData.vehicleType) || sessionData.vehicleType.startsWith('dubai-'))
+        ? sessionData.vehicleType
+        : 'mercedes-vito';
       
       // Create main reservation
       const reservationData = {
@@ -792,13 +830,13 @@ const CustomerHome = () => {
         dropoff: sessionData.dropoff!,
         pickup_date: sessionData.date || new Date().toISOString().split('T')[0],
         pickup_time: sessionData.time || '10:00',
-        vehicle_type: sessionData.vehicleType || 'Mercedes Vito',
+        vehicle_type: vehicleType,
         passengers: sessionData.passengers || 1,
         price: sessionData.estimatedPrice || null,
         price_currency: sessionData.currency || 'EUR',
         status: initialStatus,
-        payment_method: sessionData.paymentMethod || 'cash',
-        payment_type: sessionData.paymentMethod || 'cash',
+        payment_method: rawPayment,
+        payment_type: paymentType,
         luggage_count: sessionData.luggageCount || 1,
         baby_seat_count: sessionData.babySeatCount || 0,
         customer_notes: sessionData.customerNotes || null,
@@ -833,13 +871,13 @@ const CustomerHome = () => {
           dropoff: sessionData.pickup!, // Swap
           pickup_date: sessionData.returnDate,
           pickup_time: sessionData.returnTime,
-          vehicle_type: sessionData.vehicleType || 'Mercedes Vito',
+          vehicle_type: vehicleType,
           passengers: sessionData.passengers || 1,
           price: sessionData.returnPrice || sessionData.estimatedPrice || null,
           price_currency: sessionData.currency || 'EUR',
           status: initialStatus,
-          payment_method: sessionData.paymentMethod || 'cash',
-          payment_type: sessionData.paymentMethod || 'cash',
+          payment_method: rawPayment,
+          payment_type: paymentType,
           luggage_count: sessionData.luggageCount || 1,
           baby_seat_count: sessionData.babySeatCount || 0,
           customer_notes: sessionData.customerNotes || null,
@@ -883,9 +921,19 @@ const CustomerHome = () => {
 
   useEffect(() => {
     if (!authLoading && user?.id) {
-      fetchData();
+      // iOS Safari: Panel yükleme hızını artırmak için gecikmeyi azalt
+      if (isIOSDevice()) {
+        setIosLoadingDelay(true);
+        // iOS için optimize edilmiş yükleme: hemen başla ama UI'ı geciktirme
+        fetchData();
+        // UI loading state'ini kısa süre sonra kaldır (veri hâlâ yükleniyor olabilir)
+        setTimeout(() => setIosLoadingDelay(false), 300);
+      } else {
+        fetchData();
+      }
     } else if (!authLoading && !user) {
       setIsLoading(false);
+      setIosLoadingDelay(false);
     }
   }, [authLoading, user?.id, fetchData]);
 
@@ -930,28 +978,41 @@ const CustomerHome = () => {
     };
   }, [user?.id, language, fetchData]);
 
-  const handleSaveProfile = async () => {
+  // iOS Safari: İlk yükleme sonrası ek verileri zamanla yükle
+  useEffect(() => {
+    if (isIOSDevice() && !isLoading && user?.id) {
+      // iOS için: İlk render'dan sonra ek verileri yükle
+      const timer = setTimeout(() => {
+        // Ek verileri yükle (örneğin daha fazla geçmiş rezervasyon)
+        loadAdditionalData();
+      }, 1000); // 1 saniye gecikme
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, user?.id]);
+  
+  // Ek veri yükleme fonksiyonu - iOS için
+  const loadAdditionalData = async () => {
     if (!user?.id) return;
     
-    setIsSavingProfile(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          full_name: profileData.full_name.trim(),
-          phone: profileData.phone.trim(),
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
-      toast.success(t('profileUpdatedMsg'));
-      setIsEditingProfile(false);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
-    } finally {
-      setIsSavingProfile(false);
+      // Sadece iOS'ta eksik verileri tamamla
+      if (completedReservations.length < 3) {
+        const { data: additionalPast } = await supabase
+          .from('reservations')
+          .select('id, reservation_code, pickup, dropoff, pickup_place_name, dropoff_place_name, pickup_date, pickup_time, status, vehicle_type, driver_id, drivers:driver_id(name)')
+          .eq('customer_id', user.id)
+          .in('status', ['completed', 'cancelled'])
+          .order('pickup_date', { ascending: false })
+          .order('pickup_time', { ascending: false })
+          .range(2, 4); // İlk 2'den sonraki 3 kayıt
+          
+        if (additionalPast && additionalPast.length > 0) {
+          setCompletedReservations(prev => [...prev, ...additionalPast.map(r => ({ ...r, hasReview: false }))]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading additional data:', error);
     }
   };
 
@@ -1114,10 +1175,12 @@ const CustomerHome = () => {
       localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
     }
 
-    // Determine initial status based on whether we have a price
-    const selectedVehiclePrice = vehiclePrices[formData.vehicleType];
-    const hasPrice = selectedVehiclePrice && selectedVehiclePrice > 0;
+    const selectedVehiclePriceEur = vehiclePrices[vehicleType];
+    const hasPrice = selectedVehiclePriceEur && selectedVehiclePriceEur > 0;
     const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
+    const priceToSave = selectedCurrency === 'EUR' 
+      ? (selectedVehiclePriceEur || null) 
+      : (getDisplayPrice(selectedVehiclePriceEur) || null);
 
     try {
       // Create main reservation directly in database
@@ -1132,8 +1195,8 @@ const CustomerHome = () => {
         dropoff: result.data.dropoff.trim(),
         pickup_date: result.data.date,
         pickup_time: result.data.time,
-        vehicle_type: formData.vehicleType,
-        price: selectedVehiclePrice || null,
+        vehicle_type: vehicleType,
+        price: priceToSave,
         price_currency: selectedCurrency || 'EUR',
         status: initialStatus,
         payment_type: result.data.paymentType,
@@ -1167,8 +1230,8 @@ const CustomerHome = () => {
             .from('agency_reservation_details')
             .insert({
               reservation_id: reservation.id,
-              customer_price: selectedVehiclePrice || 0,
-              company_amount: selectedVehiclePrice || 0,
+              customer_price: priceToSave || 0,
+              company_amount: priceToSave || 0,
               agency_price_currency: selectedCurrency || 'EUR',
               agency_notes: 'Customer Panel - Direct Booking',
               payment_status: 'not_paid',
@@ -1181,8 +1244,10 @@ const CustomerHome = () => {
 
       // Create return trip if requested (with discount applied)
       if (formData.hasReturnTrip && formData.returnDate && formData.returnTime) {
-        // Calculate discounted return price
-        const returnPrice = selectedVehiclePrice ? getReturnPrice(selectedVehiclePrice) : null;
+        const returnPriceEur = selectedVehiclePriceEur ? getReturnPrice(selectedVehiclePriceEur) : null;
+        const returnPrice = returnPriceEur != null && selectedCurrency !== 'EUR' 
+          ? getDisplayPrice(returnPriceEur) 
+          : returnPriceEur;
         
         const returnReservationData = {
           customer_id: user?.id,
@@ -1205,7 +1270,7 @@ const CustomerHome = () => {
           original_reservation_id: reservation?.id,
           promo_code: returnPromoCode?.code || null, // Track promo code used
           discount_percentage: returnDiscountPercentage,
-          discount_amount: selectedVehiclePrice ? (selectedVehiclePrice - (returnPrice || 0)) : null,
+          discount_amount: priceToSave && returnPrice ? (priceToSave - returnPrice) : null,
           agency_id: MEET_TRANSFER_ONLINE_AGENCY_ID, // Auto-assign Meet Transfer Online
         };
 
@@ -1309,29 +1374,41 @@ const CustomerHome = () => {
 
   // Removed showPricePreparation animation - now reservations are created directly
 
-  // Show loading screen while auth or data is loading
+  // Show loading screen while auth or data is loading - iOS optimized
   if (authLoading || (isLoading && !recentReservations.length && !completedReservations.length)) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <img 
-              src={meetTransferLogo} 
-              alt="Meet Transfer" 
-              className="h-16 w-16 rounded-full object-cover border-2 border-primary/20"
-            />
-            <Loader2 className="h-6 w-6 animate-spin text-primary absolute -bottom-1 -right-1" />
+    // iOS için daha hızlı skeleton göster
+    if (isIOSDevice() && !authLoading) {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+          {/* iOS için optimize edilmiş hızlı skeleton */}
+          <div className="space-y-4 p-4 animate-pulse">
+            {/* Header */}
+            <div className="h-16 bg-muted rounded-lg"></div>
+            {/* Quick actions */}
+            <div className="grid grid-cols-4 gap-2">
+              {[1,2,3,4].map(i => <div key={i} className="h-20 bg-muted rounded-lg"></div>)}
+            </div>
+            {/* Content areas */}
+            <div className="space-y-2">
+              <div className="h-4 bg-muted rounded w-1/3"></div>
+              <div className="h-24 bg-muted rounded-lg"></div>
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+              <div className="h-20 bg-muted rounded-lg"></div>
+            </div>
           </div>
-          <p className="text-muted-foreground text-sm">
-            {language === 'TR' ? 'Yükleniyor...' : 'Loading...'}
-          </p>
         </div>
-      </div>
-    );
+      );
+    }
+    return <CustomerHomeSkeleton />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-[100dvh] bg-gradient-to-b from-background to-muted/30" {...pullHandlers}>
+      <PullToRefreshIndicator 
+        pullDistance={pullDistance}
+        isRefreshing={isPullRefreshing}
+        isPulling={isPulling}
+      />
       {/* Header with Logo & Language - More compact on mobile */}
       <header className="bg-primary text-primary-foreground py-2 px-2 sm:py-4 sm:px-6 sticky top-0 z-10 safe-area-inset-top shadow-lg">
         <div className="flex justify-between items-center">
@@ -1349,233 +1426,23 @@ const CustomerHome = () => {
             
             <NotificationBell />
           
-          {/* Settings Sheet */}
-          <Sheet>
+          {/* Hamburger Menu */}
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 className="text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8 sm:h-10 sm:w-10"
               >
-                <Settings className="h-4 w-4 sm:h-6 sm:w-6" />
+                <Menu className="h-4 w-4 sm:h-6 sm:w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  {t('settingsTitle')}
-                </SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 space-y-6">
-                {/* Profile Section - Premium Design */}
-                <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(var(--primary),0.1),_transparent_50%)]" />
-                  <CardHeader className="pb-3 relative z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <motion.div 
-                          className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center"
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          <User className="h-6 w-6 text-primary" />
-                        </motion.div>
-                        <div>
-                          <CardTitle className="text-lg font-semibold">
-                            {t('profileInfoTitle')}
-                          </CardTitle>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {t('accountDetailsDesc')}
-                          </p>
-                        </div>
-                      </div>
-                      {!isEditingProfile ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setIsEditingProfile(true)}
-                          className="gap-1"
-                        >
-                          <Edit2 className="h-3.5 w-3.5" />
-                          {t('editBtn')}
-                        </Button>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setIsEditingProfile(false)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            onClick={handleSaveProfile}
-                            disabled={isSavingProfile}
-                            className="gap-1"
-                          >
-                            {isSavingProfile ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Save className="h-3.5 w-3.5" />
-                            )}
-                            {t('save')}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="relative z-10 space-y-4 pt-2">
-                    {/* Name Field */}
-                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">
-                        {t('fullNameLabel')}
-                      </Label>
-                      {isEditingProfile ? (
-                        <Input
-                          value={profileData.full_name}
-                          onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
-                          placeholder={t('yourNamePlaceholder')}
-                          className="mt-1 bg-background"
-                        />
-                      ) : (
-                        <p className="text-base font-semibold mt-1 flex items-center gap-2">
-                          {profileData.full_name || (
-                            <span className="text-muted-foreground italic">
-                              {t('notSpecified')}
-                            </span>
-                          )}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Phone Field */}
-                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {t('phoneLabel')}
-                      </Label>
-                      {isEditingProfile ? (
-                        <PhoneInput
-                          value={profileData.phone}
-                          onChange={(value) => setProfileData({ ...profileData, phone: value })}
-                          className="mt-1"
-                        />
-                      ) : (
-                        <p className="text-base font-semibold mt-1">
-                          {profileData.phone || (
-                            <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                              <span className="inline-flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                              {t('pleaseAdd')}
-                            </span>
-                          )}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Email Field */}
-                    <div className="bg-background/60 rounded-lg p-3 border border-border/50">
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">Email</Label>
-                      <p className="text-base font-semibold mt-1 flex items-center gap-2">
-                        {user?.email}
-                        <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
-                          {t('verified')}
-                        </Badge>
-                      </p>
-                    </div>
-
-                    {/* Member Since */}
-                    <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                      <span className="text-xs text-muted-foreground">
-                        {t('memberSince')}
-                      </span>
-                      <Badge variant="secondary" className="text-xs">
-                        <Star className="h-3 w-3 mr-1" />
-                        VIP
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Language Selector */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      {t('languageLabel')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <UniversalLanguageSelector variant="default" />
-                  </CardContent>
-                </Card>
-
-                {/* Notification Settings */}
-                <NotificationSettingsPanel language={language === 'TR' ? 'TR' : 'EN'} />
-
-                {/* WhatsApp Support */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50"
-                  onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank')}
-                >
-                  <span className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                    <MessageCircle className="h-4 w-4" />
-                    {t('whatsAppSupport')}
-                  </span>
-                  <ChevronRight className="h-4 w-4 text-green-600 dark:text-green-400" />
-                </Button>
-
-                {/* Emergency Call */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50"
-                  onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
-                >
-                  <span className="flex items-center gap-2 text-red-700 dark:text-red-300">
-                    <PhoneCall className="h-4 w-4" />
-                    {t('emergencyHotline')}
-                  </span>
-                  <span className="text-xs text-red-600 dark:text-red-400 font-mono">{EMERGENCY_PHONE.replace('+90', '+90 ')}</span>
-                </Button>
-
-                {/* Edit Profile */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between"
-                  onClick={() => navigate('/customer/profile')}
-                >
-                  <span className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    {t('editProfile')}
-                  </span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-
-                {/* Security Settings */}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between"
-                  onClick={() => navigate('/security-settings')}
-                >
-                  <span className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    {t('securitySettingsMenu')}
-                  </span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-
-                {/* Logout */}
-                <Button 
-                  variant="destructive" 
-                  className="w-full"
-                  onClick={signOut}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  {t('logoutBtn')}
-                </Button>
-              </div>
+            <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto p-0 flex flex-col">
+              <CustomerNavSheet
+                onOpenChange={setMenuOpen}
+                profileData={profileData}
+                onProfileUpdate={setProfileData}
+              />
             </SheetContent>
           </Sheet>
           </div>
@@ -1592,95 +1459,57 @@ const CustomerHome = () => {
           isPulling={isPulling}
           language={language === 'TR' ? 'TR' : 'EN'}
         />
-        {/* Welcome Section */}
-        <motion.div 
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="mb-4"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                className="bg-primary/20 p-2.5 rounded-full"
-              >
-                <Sparkles className="h-5 w-5 text-primary" />
-              </motion.div>
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {greeting}
-                </p>
-                <h1 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
-                  {displayName}
-                </h1>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={fetchData}
-              disabled={isRefreshing}
-              className="h-10 w-10 rounded-full bg-muted/50 hover:bg-muted"
+        {/* AI Destekli Hero Bölümü - Eski Karşılama Mesajı Yerine */}
+        <CustomerHeroWelcomePanel
+          destinationCity={nextTransfer?.dropoff || null}
+          t={t}
+          language={language === 'TR' ? 'TR' : 'EN'}
+          onBookNowClick={() => {
+            setIsBookingFormOpen(true);
+            setTimeout(() => {
+              bookingFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+          }}
+          activeReservationsSlot={undefined}
+        />
+
+        {/* Ödeme Özeti */}
+        {paymentStats.totalReservations > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4"
+          >
+            <Card 
+              className="cursor-pointer hover:shadow-md transition-all border-primary/20 overflow-hidden"
+              onClick={() => navigate('/customer/payments')}
             >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </motion.div>
-
-        {/* Dashboard Summary Cards */}
-        <motion.div
-          initial={false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-3 gap-2 sm:gap-3 mb-4"
-        >
-          {/* Active Reservations */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20"
-            onClick={() => navigate('/customer/bookings')}
-          >
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-2">
-                <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-primary">{activeBookingsCount}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('activeCount')}</p>
-            </CardContent>
-          </Card>
-
-          {/* Completed Transfers */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20"
-            onClick={() => navigate('/customer/bookings#past-reservations')}
-          >
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-green-500/20 flex items-center justify-center mb-2">
-                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-green-600">{completedReservations.length}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('completedCount')}</p>
-            </CardContent>
-          </Card>
-
-          {/* Favorite Routes */}
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-all bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20"
-            onClick={() => {
-              const favSection = document.getElementById('favorite-routes-section');
-              favSection?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            <CardContent className="p-3 sm:p-4 text-center">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 mx-auto rounded-full bg-accent/20 flex items-center justify-center mb-2">
-                <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
-              </div>
-              <p className="text-2xl sm:text-3xl font-bold text-accent">{favoriteRoutes.length}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">{t('favoritesCount') || t('favorites')}</p>
-            </CardContent>
-          </Card>
-        </motion.div>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {language === 'TR' ? 'Ödeme Özeti' : 'Payment Summary'}
+                      </p>
+                      <p className="text-lg font-bold">
+                        {language === 'TR' ? 'Ödenen' : 'Paid'}: {formatCurrency(paymentStats.totalPaid, 'EUR')}
+                        {(paymentStats.totalUnpaid > 0) && (
+                          <span className="text-amber-600 font-normal text-base ml-1">
+                            | {language === 'TR' ? 'Bekleyen' : 'Pending'}: {formatCurrency(paymentStats.totalUnpaid, 'EUR')}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
 
         {/* Missing Phone Warning */}
@@ -1792,8 +1621,7 @@ const CustomerHome = () => {
               onClick={() => {
                 setIsBookingFormOpen(true);
                 setTimeout(() => {
-                  const formElement = document.getElementById('booking-form');
-                  formElement?.scrollIntoView({ behavior: 'smooth' });
+                  bookingFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
               }}
             >
@@ -1844,84 +1672,6 @@ const CustomerHome = () => {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
-        </motion.div>
-
-        {/* Quick Support & Navigation Actions - More compact on mobile */}
-        <motion.div 
-          initial={false}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-5 gap-1.5 sm:gap-2 mb-4 sm:mb-6"
-        >
-          {/* Home */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 hover:border-primary/40"
-              onClick={() => navigate('/')}
-            >
-              <Home className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span className="text-[9px] sm:text-xs font-medium">
-                {t('homeBtn')}
-              </span>
-            </Button>
-          </motion.div>
-          
-          {/* Payments */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 hover:border-blue-500/40"
-              onClick={() => navigate('/customer/payments')}
-            >
-              <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
-                {language === 'TR' ? 'Ödemeler' : 'Payments'}
-              </span>
-            </Button>
-          </motion.div>
-          
-          {/* WhatsApp */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 hover:border-green-500/40"
-              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=` + encodeURIComponent(t('helloSupportMsg')), '_blank')}
-            >
-              <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
-              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
-                WhatsApp
-              </span>
-            </Button>
-          </motion.div>
-          
-          {/* Emergency Call */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-red-500/5 to-red-500/10 border-red-500/20 hover:border-red-500/40"
-              onClick={() => window.open(`tel:${EMERGENCY_PHONE}`, '_self')}
-            >
-              <PhoneCall className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
-              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
-                {t('emergencyBtn')}
-              </span>
-            </Button>
-          </motion.div>
-          
-          {/* Security */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              className="h-auto py-2 sm:py-3 w-full flex flex-col items-center gap-0.5 sm:gap-1 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border-emerald-500/20 hover:border-emerald-500/40"
-              onClick={() => navigate('/security-settings')}
-            >
-              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
-              <span className="text-[9px] sm:text-xs font-medium truncate max-w-full">
-                {t('securityBtn')}
-              </span>
-            </Button>
           </motion.div>
         </motion.div>
 
@@ -2480,7 +2230,7 @@ const CustomerHome = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
+          <Card ref={bookingFormRef} id="booking-form" className="scroll-mt-20 shadow-lg border-border/50">
           <CardHeader 
             className="cursor-pointer hover:bg-muted/30 transition-colors rounded-t-lg"
             onClick={() => setIsBookingFormOpen(!isBookingFormOpen)}
@@ -2763,10 +2513,10 @@ const CustomerHome = () => {
                       {formData.hasReturnTrip && vehiclePrices[formData.vehicleType] && (
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-xs line-through text-muted-foreground">
-                            {vehiclePrices[formData.vehicleType]} {selectedCurrency}
+                            {getDisplayPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
                           </span>
                           <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                            {getReturnPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
+                            {getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType]))} {selectedCurrency}
                           </span>
                           <span className="text-[10px] text-green-600 dark:text-green-400">
                             ({language === 'TR' ? 'Dönüş fiyatı' : 'Return price'})
@@ -2961,7 +2711,7 @@ const CustomerHome = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  {t('contactPhone')}
+                  {t('contactPhone')} <span className="text-destructive">*</span>
                 </Label>
                 <PhoneInput
                   value={formData.passengerPhone}
@@ -3008,6 +2758,70 @@ const CustomerHome = () => {
                 </div>
               </div>
 
+              {/* Currency Selector */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Coins className="h-4 w-4" />
+                  {t('preferredCurrency') || 'Currency'}
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {CURRENCY_OPTIONS.map((currency) => (
+                    <button
+                      key={currency.value}
+                      type="button"
+                      onClick={() => {
+                        setSelectedCurrency(currency.value);
+                        // Refetch prices when currency changes
+                        if (formData.pickup && formData.dropoff) {
+                          setIsRefetchingPrices(true);
+                          // Trigger price refetch by calling the same function
+                          supabase.functions.invoke("get-all-vehicle-prices", {
+                            body: {
+                              pickup: formData.pickup,
+                              dropoff: formData.dropoff,
+                              customerCurrency: currency.value,
+                              pickup_date: formData.date || undefined,
+                              distance_km: distanceKm,
+                            },
+                          })
+                          .then(({ data, error }) => {
+                            if (error) throw error;
+                            if (data?.prices && data.prices.length > 0) {
+                              const pricesMap: Record<string, number> = {};
+                              data.prices.forEach((p: any) => {
+                                if (p.price) {
+                                  pricesMap[p.vehicleType] = p.price;
+                                }
+                              });
+                              setVehiclePrices(pricesMap);
+                            }
+                          })
+                          .catch((error) => {
+                            console.error("Error refetching prices:", error);
+                          })
+                          .finally(() => {
+                            setIsRefetchingPrices(false);
+                          });
+                        }
+                      }}
+                      className={cn(
+                        "px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all",
+                        selectedCurrency === currency.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background hover:border-primary/50 hover:bg-primary/5"
+                      )}
+                      disabled={isLoadingExchangeRate || isRefetchingPrices}
+                    >
+                      <span className="mr-1">{currency.flag}</span>
+                      {currency.value}
+                      {isLoadingExchangeRate && selectedCurrency === currency.value && (
+                        <Loader2 className="ml-1 h-3 w-3 animate-spin inline" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Vehicle Type - Visual Cards */}
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
@@ -3025,6 +2839,7 @@ const CustomerHome = () => {
                   availableVehicles.length === 1 ? "grid-cols-1" : "grid-cols-2"
                 )}>
                   {availableVehicles.map((v) => (
+                    <div key={v.value} className="space-y-2">
                     <button
                       key={v.value}
                       type="button"
@@ -3060,14 +2875,19 @@ const CustomerHome = () => {
                           {v.label}
                         </h3>
                         {/* Price badge on vehicle card */}
-                        {vehiclePrices[v.value] ? (
+                        {isRefetchingPrices ? (
+                          <div className="flex items-center gap-1">
+                            <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                            <span className="text-xs text-muted-foreground">{t('updating') || 'Güncelleniyor'}</span>
+                          </div>
+                        ) : vehiclePrices[v.value] ? (
                           <span className={cn(
                             "text-sm font-bold px-2 py-0.5 rounded-full",
                             formData.vehicleType === v.value 
                               ? "bg-primary text-primary-foreground" 
                               : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                           )}>
-                            {vehiclePrices[v.value]} {selectedCurrency}
+                            {formatCurrency(getDisplayPrice(vehiclePrices[v.value]), selectedCurrency)}
                           </span>
                         ) : isPricesLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -3108,6 +2928,28 @@ const CustomerHome = () => {
                         )}
                       </div>
                     </button>
+                    {canConfirm && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="w-full h-12 sm:h-14 mt-2 gap-2 font-semibold rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white hover:opacity-95 hover:scale-[1.02] transition-all shadow-md"
+                        disabled={isLoading || isConfirming}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setConfirmingVehicle(v.value);
+                          await createReservationForVehicle(v.value);
+                          setConfirmingVehicle(null);
+                        }}
+                      >
+                        {isConfirming ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4" />
+                        )}
+                        {language === 'TR' ? 'Onayla' : 'Confirm'}
+                      </Button>
+                    )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -3163,7 +3005,7 @@ const CustomerHome = () => {
                         </span>
                       </div>
                     </div>
-                  ) : vehiclePrices[formData.vehicleType] ? (
+                  ) : getDisplayPrice(vehiclePrices[formData.vehicleType]) ? (
                     <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 p-4 rounded-xl border border-green-500/30">
                       {/* Outbound Price */}
                       <div className="flex items-center justify-between mb-2">
@@ -3176,7 +3018,7 @@ const CustomerHome = () => {
                           </span>
                         </div>
                         <span className="font-bold text-lg text-foreground">
-                          {vehiclePrices[formData.vehicleType]} {selectedCurrency}
+                          {getDisplayPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
                         </span>
                       </div>
 
@@ -3203,10 +3045,10 @@ const CustomerHome = () => {
                             </div>
                             <div className="text-right">
                               <span className="text-xs line-through text-muted-foreground mr-2">
-                                {vehiclePrices[formData.vehicleType]} {selectedCurrency}
+                                {getDisplayPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
                               </span>
                               <span className="font-bold text-lg text-green-600 dark:text-green-400">
-                                {getReturnPrice(vehiclePrices[formData.vehicleType])} {selectedCurrency}
+                                {getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType]))} {selectedCurrency}
                               </span>
                             </div>
                           </div>
@@ -3225,15 +3067,15 @@ const CustomerHome = () => {
                           <div className="text-right">
                             <span className="font-bold text-xl text-green-700 dark:text-green-400">
                               {formData.hasReturnTrip 
-                                ? (vehiclePrices[formData.vehicleType] + getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)
-                                : vehiclePrices[formData.vehicleType]
+                                ? (getDisplayPrice(vehiclePrices[formData.vehicleType]) ?? 0) + (getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType])) ?? 0)
+                                : getDisplayPrice(vehiclePrices[formData.vehicleType])
                               } {selectedCurrency}
                             </span>
                             {formData.hasReturnTrip && (
                               <p className="text-xs text-green-600 dark:text-green-400">
                                 {language === 'TR' 
-                                  ? `${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${selectedCurrency} tasarruf!`
-                                  : `Save ${(vehiclePrices[formData.vehicleType] - getReturnPrice(vehiclePrices[formData.vehicleType])).toFixed(0)} ${selectedCurrency}!`
+                                  ? `${Math.max(0, (getDisplayPrice(vehiclePrices[formData.vehicleType]) ?? 0) - (getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType])) ?? 0))} ${selectedCurrency} tasarruf!`
+                                  : `Save ${Math.max(0, (getDisplayPrice(vehiclePrices[formData.vehicleType]) ?? 0) - (getDisplayPrice(getReturnPrice(vehiclePrices[formData.vehicleType])) ?? 0))} ${selectedCurrency}!`
                                 }
                               </p>
                             )}
@@ -3298,13 +3140,17 @@ const CustomerHome = () => {
         </motion.div>
 
         {/* Sticky FABs - Smaller on mobile */}
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col gap-2 sm:gap-3">
-          {/* WhatsApp Support Button */}
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2 sm:gap-3">
+          {/* WhatsApp Chat Button */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+            className="flex flex-col items-center gap-1"
           >
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">
+              {language === 'TR' ? 'Sohbet' : 'Chat'}
+            </span>
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
                 type="button"
@@ -3321,21 +3167,22 @@ const CustomerHome = () => {
             </motion.div>
           </motion.div>
 
-          {/* My Bookings Button */}
+          {/* Reservations Button */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+            className="flex flex-col items-center gap-1"
           >
             <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <Button
                 type="button"
                 onClick={() => navigate('/customer/bookings')}
                 size="lg"
-                className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-gradient-to-br from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground"
+                className="h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-xl bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-neutral-950 dark:hover:bg-neutral-900"
                 title={t('myBookingsTooltip')}
               >
-                <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6" />
+                <CalendarCheck className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
             </motion.div>
           </motion.div>
@@ -3539,6 +3386,20 @@ const CustomerHome = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* @SOLO BUILDER */}
+      <GeminiHolidayAssistant
+        reservationContext={
+          nextTransfer
+            ? {
+                customer_name: profileData.full_name,
+                dropoff: nextTransfer.dropoff,
+                pickup_date: nextTransfer.date,
+                pickup_time: nextTransfer.time,
+              }
+            : null
+        }
+        language={language === 'TR' ? 'TR' : 'EN'}
+      />
     </div>
   );
 };

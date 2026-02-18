@@ -139,7 +139,7 @@ export const DriverPaymentsTable = ({
   return (
     <>
       <div className="overflow-x-auto">
-        <Table>
+        <Table className="min-w-[680px]">
           <TableHeader>
             <TableRow>
               <TableHead>Tarih</TableHead>

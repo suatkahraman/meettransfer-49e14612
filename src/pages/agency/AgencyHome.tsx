@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAgencyTranslations } from '@/hooks/useAgencyTranslations';
 import { supabase } from '@/integrations/supabase/client';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -155,6 +156,9 @@ const AgencyHome = () => {
   const fetchData = useCallback(async (showToast = false) => {
     if (!agencyId) return;
 
+    // iOS Safari: Ajans paneli yükleme hızını artır
+    const isIOS = isIOSDevice();
+    
     // Fetch agency info
     const { data: agencyData } = await supabase
       .from('agencies')
@@ -170,12 +174,14 @@ const AgencyHome = () => {
     const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
     const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
 
-    // Get completed reservations with agency details and passenger cash
+    // Get completed reservations with agency details and passenger cash - iOS için optimize edilmiş
     const { data: completedRes } = await supabase
       .from('reservations')
       .select('id, status, passenger_cash_amount, passenger_cash_currency, agency_reservation_details!inner(customer_price, company_amount, agency_price_currency)')
       .eq('agency_id', agencyId)
-      .eq('status', 'completed');
+      .eq('status', 'completed')
+      .order('pickup_date', { ascending: false })
+      .limit(isIOS ? 50 : 200); // iOS için daha az veri
 
     // Get monthly reservations
     const { data: monthlyRes } = await supabase
@@ -211,7 +217,7 @@ const AgencyHome = () => {
       completedReservations: completedRes?.length || 0
     });
 
-    // Fetch reservations with driver info and cash payment details
+    // Fetch reservations with driver info and cash payment details - iOS için optimize edilmiş
     const { data, error } = await supabase
       .from('reservations')
       .select(`
@@ -224,7 +230,8 @@ const AgencyHome = () => {
       `)
       .eq('agency_id', agencyId)
       .order('pickup_date', { ascending: true })
-      .order('pickup_time', { ascending: true });
+      .order('pickup_time', { ascending: true })
+      .limit(isIOS ? 100 : 500); // iOS için daha az veri
 
     if (error) {
       console.error('Error:', error);
@@ -250,9 +257,58 @@ const AgencyHome = () => {
 
   useEffect(() => {
     if (agencyId) {
-      fetchData();
+      // iOS Safari: Ajans paneli yükleme hızını artır
+      if (isIOSDevice()) {
+        // iOS için optimize edilmiş yükleme: hemen başla ama daha az veri ile
+        fetchData();
+      } else {
+        fetchData();
+      }
     }
   }, [agencyId, fetchData]);
+
+  // iOS Safari: İlk yükleme sonrası ek verileri zamanla yükle
+  useEffect(() => {
+    if (isIOSDevice() && !loading && agencyId) {
+      // iOS için: İlk render'dan sonra ek verileri yükle
+      const timer = setTimeout(() => {
+        loadAdditionalAgencyData();
+      }, 1500); // 1.5 saniye gecikme - daha fazla veri için
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading, agencyId]);
+  
+  // Ek veri yükleme fonksiyonu - iOS için ajans
+  const loadAdditionalAgencyData = async () => {
+    if (!agencyId) return;
+    
+    try {
+      // Sadece iOS'ta eksik verileri tamamla - daha fazla tamamlanmış rezervasyon
+      const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+      const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
+      
+      const { data: additionalCompleted } = await supabase
+        .from('reservations')
+        .select('id, status, passenger_cash_amount, passenger_cash_currency, agency_reservation_details!inner(customer_price, company_amount, agency_price_currency)')
+        .eq('agency_id', agencyId)
+        .eq('status', 'completed')
+        .order('pickup_date', { ascending: false })
+        .range(50, 150); // İlk 50'den sonraki 100 kayıt
+        
+      if (additionalCompleted && additionalCompleted.length > 0) {
+        // Mevcut verileri güncelle
+        const updatedBalances = calculateCurrencyBalances(additionalCompleted, []);
+        setAccountingSummary(prev => ({
+          ...prev,
+          completedReservations: prev.completedReservations + additionalCompleted.length,
+          currencyBalances: updatedBalances
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading additional agency data:', error);
+    }
+  };
 
   // Real-time subscription
   useEffect(() => {
@@ -596,7 +652,7 @@ const AgencyHome = () => {
 
   return (
     <div 
-      className="min-h-screen bg-background pb-safe"
+      className="min-h-[100dvh] bg-background pb-safe"
       {...pullHandlers}
     >
       {/* Pull to Refresh Indicator */}
@@ -703,18 +759,39 @@ const AgencyHome = () => {
 
       <main className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 max-w-2xl">
         {loading ? (
-          <div className="space-y-4 sm:space-y-6">
-            {/* Skeleton for search/filters */}
-            <div className="space-y-3">
-              <div className="h-10 bg-muted animate-pulse rounded-lg" />
+          // iOS için optimize edilmiş yükleme ekranı
+          isIOSDevice() ? (
+            <div className="space-y-4 p-4 animate-pulse">
+              {/* Header */}
+              <div className="h-16 bg-muted rounded-lg"></div>
+              {/* Stats cards */}
+              <div className="grid grid-cols-3 gap-2">
+                {[1,2,3].map(i => <div key={i} className="h-20 bg-muted rounded-lg"></div>)}
+              </div>
+              {/* Search/filter area */}
+              <div className="h-10 bg-muted rounded-lg"></div>
+              {/* Content areas */}
+              <div className="space-y-2">
+                <div className="h-4 bg-muted rounded w-1/3"></div>
+                <div className="h-16 bg-muted rounded-lg"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-20 bg-muted rounded-lg"></div>
+              </div>
             </div>
-            
-            {/* Skeleton for upcoming section */}
-            <SectionSkeleton count={2} />
-            
-            {/* Skeleton for active section */}
-            <SectionSkeleton count={1} />
-          </div>
+          ) : (
+            <div className="space-y-4 sm:space-y-6">
+              {/* Skeleton for search/filters */}
+              <div className="space-y-3">
+                <div className="h-10 bg-muted animate-pulse rounded-lg" />
+              </div>
+              
+              {/* Skeleton for upcoming section */}
+              <SectionSkeleton count={2} />
+              
+              {/* Skeleton for active section */}
+              <SectionSkeleton count={1} />
+            </div>
+          )
         ) : (
           <div className="space-y-4 sm:space-y-6">
             {/* Notification Settings Panel */}

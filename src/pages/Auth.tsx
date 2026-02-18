@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -49,7 +49,7 @@ const newPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
-type ViewMode = 'auth' | 'forgot' | 'reset-sent' | 'reset' | 'reset-success' | 'reset-error';
+type ViewMode = 'auth' | 'forgot' | 'reset-sent' | 'reset' | 'update_password' | 'reset-success' | 'reset-error';
 
 // Password strength indicator component
 const PasswordStrengthIndicator = ({ password }: { password: string }) => {
@@ -133,6 +133,8 @@ const PasswordStrengthIndicator = ({ password }: { password: string }) => {
 };
 
 const Auth = () => {
+  const isResetting = typeof window !== 'undefined' && window.location.href.includes('type=recovery');
+
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>('auth');
@@ -143,11 +145,28 @@ const Auth = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRecoverySession, setIsRecoverySession] = useState(false);
   const [recoveryChecked, setRecoveryChecked] = useState(false);
-  const { signIn, signUp, user, session } = useAuth();
+  const { signIn, signUp, user, session, loading: authLoading, signOut } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // URL'de recovery var mı – hem search params hem hash kontrol edilir (şifre sıfırlama koruması)
+  const isRecoveryUrl = useMemo(() => {
+    const search = location.search ?? '';
+    const hash = location.hash ?? (typeof window !== 'undefined' ? window.location.hash : '');
+    const fromSearch = search.includes('type=recovery') || search.includes('recovery');
+    const fromHash = hash.includes('type=recovery') || hash.includes('recovery');
+    return fromSearch || fromHash;
+  }, [location.search, location.hash]);
+
+  useEffect(() => {
+    if (isResetting) {
+      setViewMode('update_password');
+      setIsRecoverySession(true);
+      setRecoveryChecked(true);
+    }
+  }, [isResetting]);
 
   // Check for password recovery in URL and auth state
   useEffect(() => {
@@ -286,39 +305,68 @@ const Auth = () => {
     };
   }, []);
 
-  // Role-based redirect after login (only if not in recovery mode)
+  // Role-based redirect – isResetting true ise ASLA yönlendirme yapma (Maps/customer vb.)
   useEffect(() => {
-    if (isRecoverySession || viewMode === 'reset') {
-      // Don't redirect during recovery
+    if (isResetting) return;
+
+    if (isRecoveryUrl || isRecoverySession || viewMode === 'reset' || viewMode === 'update_password') {
       return;
     }
-    
-    if (user && !roleLoading && role && recoveryChecked) {
-      // Check for pending booking from quick booking flow
-      const pendingBookingToken = safeLocalGet('pending_booking_token');
-      const pendingBookingData = safeLocalGet('pending_booking_data');
-      
-      if (pendingBookingToken || pendingBookingData) {
-        console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
-        navigate('/customer', { replace: true });
-        return;
-      }
-      
-      switch (role) {
-        case 'admin':
-          navigate('/admin', { replace: true });
-          break;
-        case 'driver':
-          navigate('/driver', { replace: true });
-          break;
-        case 'agency':
-          navigate('/agency', { replace: true });
-          break;
-        default:
-          navigate('/customer', { replace: true });
-      }
+
+    // Yükleme sırasında kullanıcıya geri bildirim vermek için return etmiyoruz,
+    // aşağıda loader göstereceğiz.
+    if (authLoading || roleLoading) {
+      return;
     }
-  }, [user, role, roleLoading, navigate, isRecoverySession, viewMode, recoveryChecked]);
+
+    // Tüm yüklemeler bitti; giriş yapmış kullanıcıyı rolüne göre yönlendir (rol yoksa varsayılan customer)
+    if (!user || !recoveryChecked) {
+      return;
+    }
+
+    // Admin kontrolü: Eğer /auth sayfasındaysak ve rol admin değilse uyarı ver
+    if (location.pathname === '/auth' && role && role !== 'admin') {
+      toast.error('Bu panel sadece yöneticiler içindir.');
+      signOut();
+      return;
+    }
+
+    // Check for pending booking from quick booking flow
+    const pendingBookingToken = safeLocalGet('pending_booking_token');
+    const pendingBookingData = safeLocalGet('pending_booking_data');
+
+    if (pendingBookingToken || pendingBookingData) {
+      console.log('[Auth] Found pending booking, redirecting to /customer to complete reservation');
+      navigate('/customer', { replace: true });
+      return;
+    }
+
+    // Rol bazlı yönlendirme (role null ise Google/yeni kullanıcı → varsayılan customer)
+    switch (role ?? 'customer') {
+      case 'admin':
+        navigate('/admin', { replace: true });
+        break;
+      case 'driver':
+        navigate('/driver', { replace: true });
+        break;
+      case 'agency':
+        navigate('/agency', { replace: true });
+        break;
+      default:
+        navigate('/customer', { replace: true });
+    }
+  }, [
+    isResetting,
+    user,
+    role,
+    authLoading,
+    roleLoading,
+    navigate,
+    isRecoveryUrl,
+    isRecoverySession,
+    viewMode,
+    recoveryChecked,
+  ]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -477,22 +525,24 @@ const Auth = () => {
       }
 
       console.log('Password updated successfully');
-      
-      // Show success state
-      setViewMode('reset-success');
-      setIsRecoverySession(false);
-      
-      // Clear URL params
-      window.history.replaceState(null, '', '/auth');
-      
-      toast.success('Password updated successfully!');
-      
-      // Redirect to login after delay
-      setTimeout(() => {
-        setViewMode('auth');
-        setNewPassword('');
-        setConfirmPassword('');
-      }, 3000);
+      toast.success('Şifre güncellendi. Yönlendiriliyorsunuz...');
+
+      await supabase.auth.refreshSession();
+      const { data: session } = await supabase.auth.getSession();
+      const token = session?.session?.access_token;
+      let path = '/customer';
+      if (token) {
+        const { data } = await supabase.functions.invoke('get-user-role', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (data?.success && data?.role) {
+          const paths: Record<string, string> = {
+            driver: '/driver', agency: '/agency', admin: '/admin', customer: '/customer',
+          };
+          path = paths[data.role as string] ?? '/customer';
+        }
+      }
+      window.location.replace(path);
       
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -517,20 +567,98 @@ const Auth = () => {
     return confirmPassword.length > 0 && newPassword !== confirmPassword;
   }, [newPassword, confirmPassword]);
 
-  // Loading state while checking recovery
-  if (!recoveryChecked) {
+  if (!recoveryChecked && !isResetting || (authLoading || roleLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60">
         <Card className="w-full max-w-md">
           <CardContent className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Reset Error View
+  if (isResetting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <KeyRound className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl font-serif">Şifre Güncelleme</CardTitle>
+            <CardDescription>Yeni şifrenizi aşağıya girin</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password-reset">Yeni Şifre</Label>
+                <div className="relative">
+                  <Input
+                    id="new-password-reset"
+                    name="password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <PasswordStrengthIndicator password={newPassword} />
+                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password-reset">Şifre Tekrar</Label>
+                <div className="relative">
+                  <Input
+                    id="confirm-password-reset"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`pr-10 ${passwordsDontMatch ? 'border-destructive focus-visible:ring-destructive' : passwordsMatch ? 'border-green-500 focus-visible:ring-green-500' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
+              </div>
+              <Button type="submit" variant="accent" className="w-full" disabled={isLoading || !passwordsMatch}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Güncelleniyor...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    Kaydet
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (viewMode === 'reset-error') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
@@ -678,7 +806,7 @@ const Auth = () => {
     );
   }
 
-  if (viewMode === 'reset') {
+  if (viewMode === 'reset' || viewMode === 'update_password') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
         <Card className="w-full max-w-md">
@@ -810,29 +938,39 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-serif">Meet Transfer</CardTitle>
-          <CardDescription>Sign in to manage your bookings</CardDescription>
+          <CardTitle className="text-3xl font-serif">
+            {location.pathname === '/auth' ? 'Yönetici Girişi' : 'Meet Transfer'}
+          </CardTitle>
+          <CardDescription>
+            {location.pathname === '/auth' 
+              ? 'Yönetim paneline erişmek için giriş yapın' 
+              : 'Sign in to manage your bookings'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              {location.pathname !== '/auth' && <TabsTrigger value="signup">Sign Up</TabsTrigger>}
             </TabsList>
 
-            {/* Social Sign-In Buttons */}
-            <div className="mt-4 mb-4">
-              <SocialAuthButtons disabled={isLoading} mode="login" />
-            </div>
+            {/* Social Sign-In Buttons - Hide on Admin Auth */}
+            {location.pathname !== '/auth' && (
+              <div className="mt-4 mb-4">
+                <SocialAuthButtons disabled={isLoading} mode="login" />
+              </div>
+            )}
 
-            <div className="relative mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
+            {location.pathname !== '/auth' && (
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">or</span>
-              </div>
-            </div>
+            )}
 
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
@@ -861,38 +999,51 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
-                  <Input id="signup-name" name="fullName" type="text" placeholder="John Doe" required />
-                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-phone">Phone</Label>
-                  <Input id="signup-phone" name="phone" type="tel" placeholder="+90 5XX XXX XXXX" required />
-                  {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input id="signup-email" name="email" type="email" placeholder="your@email.com" required />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input id="signup-password" name="password" type="password" placeholder="Ab2215" required />
-                  <p className="text-xs text-muted-foreground">
-                    1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
-                  </p>
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Creating account...' : 'Create Account'}
-                </Button>
-              </form>
-            </TabsContent>
+            {location.pathname !== '/auth' && (
+              <TabsContent value="signup">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Input id="signup-name" name="fullName" type="text" placeholder="John Doe" required />
+                    {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-phone">Phone</Label>
+                    <Input id="signup-phone" name="phone" type="tel" placeholder="+90 5XX XXX XXXX" required />
+                    {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input id="signup-email" name="email" type="email" placeholder="your@email.com" required />
+                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input id="signup-password" name="password" type="password" placeholder="Ab2215" required />
+                    <p className="text-xs text-muted-foreground">
+                      1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
+                    </p>
+                    {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Creating account...' : 'Create Account'}
+                  </Button>
+                </form>
+              </TabsContent>
+            )}
           </Tabs>
         </CardContent>
+        {location.pathname !== '/auth' && (
+          <CardFooter className="flex flex-col gap-2 pt-0">
+            <p className="text-center text-xs text-muted-foreground">
+              <Link to="/login" className="text-accent hover:underline">Customer login</Link>
+              {' · '}
+              <Link to="/login/driver" className="text-accent hover:underline">Driver</Link>
+              {' · '}
+              <Link to="/login/agency" className="text-accent hover:underline">Agency</Link>
+            </p>
+          </CardFooter>
+        )}
       </Card>
     </div>
   );

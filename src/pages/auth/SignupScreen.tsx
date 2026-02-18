@@ -17,6 +17,7 @@ import AuthLanguageSelector from '@/components/auth/AuthLanguageSelector';
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { scrollToFirstError } from '@/lib/formValidation';
+import { safeLocalGet } from '@/lib/safeStorage';
 
 // Password format: 1 uppercase, 1 lowercase, at least 4 digits (e.g., Ab2215)
 const passwordSchema = z.string()
@@ -73,31 +74,57 @@ const SignupScreen = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Role-based redirect if already logged in
-  useEffect(() => {
-    if (user && !roleLoading && role) {
-      switch (role) {
-        case 'admin':
-          navigate('/admin', { replace: true });
-          break;
-        case 'driver':
-          navigate('/driver', { replace: true });
-          break;
-        default:
-          navigate('/customer', { replace: true });
-      }
-    }
-  }, [user, role, roleLoading, navigate]);
+useEffect(() => {
+  // 1. Recovery Mode Detection: Prevent redirect if user is resetting password
+  const isActualRecovery = 
+    window.location.search.includes('type=recovery') || 
+    window.location.hash.includes('type=recovery') ||
+    window.location.href.includes('recovery');
 
-  // If already logged in, show loading
-  if (authLoading || (user && roleLoading)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-secondary p-4">
-        <Loader2 className="h-8 w-8 animate-spin text-accent" />
-      </div>
-    );
+  if (isActualRecovery) {
+    console.log('[Auth] Recovery mode detected: Redirect suspended to allow password reset.');
+    return;
   }
 
+  // 2. Wait for Authentication and Role Data
+  // Stop if we don't have a user, or if we are still loading the role
+  if (!user || roleLoading) {
+    return;
+  }
+
+  // 3. Handle Pending Bookings (if any)
+  const pendingBookingToken = safeLocalGet('pending_booking_token');
+  const pendingBookingData = safeLocalGet('pending_booking_data');
+  
+  if (pendingBookingToken || pendingBookingData) {
+    console.log('[Auth] Pending booking found, redirecting to /customer');
+    navigate('/customer', { replace: true });
+    return;
+  }
+
+  // 4. Role-Based Routing Logic
+  if (role) {
+    console.log('[Auth] Login successful, redirecting to role path:', role);
+    switch (role) {
+      case 'admin':
+        navigate('/admin', { replace: true });
+        break;
+      case 'driver':
+        navigate('/driver', { replace: true });
+        break;
+      case 'agency':
+        navigate('/agency', { replace: true });
+        break;
+      default:
+        navigate('/customer', { replace: true });
+    }
+  } else {
+    // 5. Fallback for New Users (Google Sign-in / Guest)
+    // If user exists but role is not found in database yet
+    console.log('[Auth] User exists but no role found, redirecting to /customer as default');
+    navigate('/customer', { replace: true });
+  }
+}, [user, role, roleLoading, navigate]);
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
@@ -132,9 +159,14 @@ const SignupScreen = () => {
       });
 
       if (signUpError) {
-        if (signUpError.message.includes('already registered')) {
+        const msg = (signUpError.message || '').toLowerCase();
+        if (msg.includes('already registered') || msg.includes('user already registered')) {
           toast.error(t('emailAlreadyRegistered'));
           navigate('/login');
+        } else if (msg.includes('weak') || msg.includes('pwned') || msg.includes('easy to guess')) {
+          toast.error(language === 'TR' ? 'Bu şifre güvenli değil. Daha benzersiz bir şifre seçin (örn. özel karakterler ekleyin).' : 'This password is not secure. Choose a more unique password.');
+        } else if (msg.includes('rate limit') || msg.includes('too many')) {
+          toast.error(language === 'TR' ? 'Çok fazla deneme. Lütfen biraz sonra tekrar deneyin.' : 'Too many attempts. Please try again later.');
         } else {
           toast.error(signUpError.message);
         }
@@ -168,7 +200,12 @@ const SignupScreen = () => {
         });
 
         if (signInError) {
-          toast.error(signInError.message);
+          const msg = (signInError.message || '').toLowerCase();
+          if (msg.includes('email not confirmed')) {
+            toast.info(language === 'TR' ? 'E-posta adresinizi kontrol edin ve hesabınızı onaylayın.' : 'Please check your email and confirm your account.');
+          } else {
+            toast.error(signInError.message);
+          }
           return;
         }
 
@@ -207,7 +244,8 @@ const SignupScreen = () => {
           toast.error(Object.values(fieldErrors)[0]);
         }
       } else {
-        toast.error(t('loginFailed'));
+        const errMsg = error instanceof Error ? error.message : t('loginFailed');
+        toast.error(errMsg);
       }
     } finally {
       setIsLoading(false);
@@ -245,6 +283,9 @@ const SignupScreen = () => {
       <div className="flex-1 flex items-center justify-center p-4 py-8">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-2">
+            <div className="rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-sm font-medium text-primary">
+              {t('loginWelcomeFeature')}
+            </div>
             <CardTitle className="text-2xl md:text-3xl font-serif">{t('createAccount')}</CardTitle>
             <CardDescription>{t('joinMeetTransfer')}</CardDescription>
           </CardHeader>
@@ -295,7 +336,7 @@ const SignupScreen = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone">{t('phone')}</Label>
+                <Label htmlFor="phone">{t('phone')} <span className="text-destructive">*</span></Label>
                 <Input 
                   id="phone" 
                   name="phone" 

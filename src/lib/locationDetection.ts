@@ -13,6 +13,7 @@ export function isTurkeyLocation(location: string): boolean {
     'ist', 'istanbul airport', 'istanbul havalimanı', 'istanbul havalimani',
     'saw', 'sabiha', 'sabiha gökçen', 'sabiha gokcen',
     'ayt', 'antalya airport', 'antalya havalimanı',
+    'gzp', 'gazipasa airport', 'gazipaşa airport', 'gazipasa-alanya airport',
     'bjv', 'bodrum', 'milas', 'bodrum airport',
     'dlm', 'dalaman', 'dalaman airport',
     'adb', 'izmir airport', 'adnan menderes',

@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePromo } from '@/contexts/PromoContext';
 import { validatePromoCode } from '@/hooks/useActivePromoCode';
 import { useEmailNotifications } from '@/hooks/useEmailNotifications';
+import { safeLocalGet, safeLocalSet, safeLocalRemove, safeSessionGet, safeSessionRemove } from '@/lib/safeStorage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,12 +18,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2, Baby, Luggage, Minus, Plus, ThumbsDown, Gift } from 'lucide-react';
+import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, ClipboardList, Users, Trash2, UserPlus, CreditCard, Banknote, ArrowLeftRight, ArrowLeft, X, Tag, CheckCircle2, Clock, Coins, Sparkles, Loader2, Baby, Luggage, Minus, Plus, ThumbsDown, Gift } from 'lucide-react';
 import { VehicleSelectionCard } from '@/components/VehicleSelectionCard';
 import { cn } from '@/lib/utils';
 import { CURRENCY_OPTIONS } from '@/lib/currency';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
+import { getDirections, geocodeAddress, loadGoogleMapsScript } from '@/utils/googleMapsLoader';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -88,6 +90,8 @@ const defaultFormData = {
   dropoff_lat: null as number | null,
   dropoff_lng: null as number | null,
 };
+
+const PRICE_LOOKUP_TIMEOUT_MS = 12000;
 
 const ReservationForm = () => {
   const navigate = useNavigate();
@@ -179,6 +183,82 @@ const ReservationForm = () => {
   // State for vehicle prices and loading
   const [vehiclePrices, setVehiclePrices] = useState<Record<string, number>>({});
   const [isPricesLoading, setIsPricesLoading] = useState(false);
+  const [priceLookupMessage, setPriceLookupMessage] = useState<string | null>(null);
+
+  const getPriceNotFoundMessage = useCallback(
+    () => (language === 'TR' ? 'Fiyat Bulunamadı' : 'Price Not Found'),
+    [language]
+  );
+
+  const fetchVehiclePricesSafely = useCallback(
+    async (pickup: string, dropoff: string, customerCurrency: string, pickupDate?: string) => {
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+      try {
+        // Calculate distance client-side to ensure KM-based pricing works
+        let distanceKm: number | undefined;
+        try {
+          await loadGoogleMapsScript(); // Ensure maps are loaded
+          // Attempt to geocode addresses
+          const [pRes, dRes] = await Promise.all([
+            geocodeAddress(pickup),
+            geocodeAddress(dropoff)
+          ]);
+          
+          if (pRes && dRes) {
+            const directions = await getDirections(pRes, dRes);
+            if (directions?.distanceKm) {
+              distanceKm = directions.distanceKm;
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to calculate distance for pricing:", e);
+        }
+
+        const result = await Promise.race([
+          supabase.functions.invoke("get-all-vehicle-prices", {
+            body: {
+              pickup,
+              dropoff,
+              customerCurrency,
+              pickup_date: pickupDate || undefined,
+              distance_km: distanceKm,
+            },
+          }),
+          new Promise<never>((_, reject) => {
+            timeoutId = setTimeout(() => reject(new Error("PRICE_LOOKUP_TIMEOUT")), PRICE_LOOKUP_TIMEOUT_MS);
+          }),
+        ]) as { data: any; error: any };
+
+        if (result.error) {
+          throw result.error;
+        }
+
+        const prices = Array.isArray(result.data?.prices) ? result.data.prices : [];
+        const hasAvailablePrice = prices.some(
+          (row: any) =>
+            typeof row?.price === 'number' &&
+            Number.isFinite(row.price) &&
+            row.price > 0 &&
+            !!row?.available
+        );
+        const backendMessage =
+          typeof result.data?.message === 'string' && result.data.message.trim().length > 0
+            ? result.data.message.trim()
+            : null;
+
+        return {
+          data: result.data,
+          prices,
+          hasAvailablePrice,
+          message: backendMessage ?? (hasAvailablePrice ? null : getPriceNotFoundMessage()),
+        };
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+      }
+    },
+    [getPriceNotFoundMessage]
+  );
   
   // Parse all vehicle prices from URL (JSON encoded) on mount
   useEffect(() => {
@@ -269,26 +349,22 @@ const ReservationForm = () => {
       
       setShowPricePreparation(true);
       setIsLoading(true);
+      setPriceLookupMessage(null);
       
       try {
-        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: {
-            pickup: urlPickup,
-            dropoff: urlDropoff,
-            customerCurrency: urlCurrency,
-          },
-        });
+        const { prices, hasAvailablePrice, message } = await fetchVehiclePricesSafely(
+          urlPickup,
+          urlDropoff,
+          "EUR",
+          urlDate || undefined,
+        );
         
         // Wait for animation
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        if (data?.prices && data.prices.length > 0) {
-          setFetchedVehiclePrices(data.prices);
-          setSelectedVehicleForConfirm(urlVehicleType || 'mercedes-vito');
-        } else {
-          setFetchedVehiclePrices([]);
-          setSelectedVehicleForConfirm(urlVehicleType || 'mercedes-vito');
-        }
+        setFetchedVehiclePrices(prices);
+        setSelectedVehicleForConfirm(urlVehicleType || 'mercedes-vito');
+        setPriceLookupMessage(hasAvailablePrice ? null : (message || getPriceNotFoundMessage()));
         
         // Set pending form data
         setPendingFormData({
@@ -308,16 +384,18 @@ const ReservationForm = () => {
       } catch (error) {
         console.error("Error fetching prices:", error);
         setFetchedVehiclePrices([]);
+        setPriceLookupMessage(getPriceNotFoundMessage());
         setSelectedVehicleForConfirm(urlVehicleType || 'mercedes-vito');
         setShowPricePreparation(false);
         setShowVehicleSelection(true);
+        toast.error(getPriceNotFoundMessage());
       } finally {
         setIsLoading(false);
       }
     };
     
     fetchAndShowVehicleSelection();
-  }, [urlShowVehicleSelection, user, urlPickup, urlDropoff, showVehicleSelection, showPricePreparation]);
+  }, [urlShowVehicleSelection, user, urlPickup, urlDropoff, showVehicleSelection, showPricePreparation, urlCurrency, urlDate, urlVehicleType, urlCustomerNotes, passengerNames, fetchVehiclePricesSafely, getPriceNotFoundMessage]);
   
   // Fetch prices when pickup/dropoff change (only for logged-in users without pre-loaded prices)
   useEffect(() => {
@@ -330,33 +408,44 @@ const ReservationForm = () => {
       if (urlShowVehicleSelection) return; // Handled by the above effect
       
       setIsPricesLoading(true);
+      setPriceLookupMessage(null);
       try {
-        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: {
-            pickup: urlPickup,
-            dropoff: urlDropoff,
-            customerCurrency: urlCurrency,
-          },
-        });
+        const { prices, hasAvailablePrice, message } = await fetchVehiclePricesSafely(
+          urlPickup,
+          urlDropoff,
+          "EUR",
+          urlDate || undefined,
+        );
         
-        if (data?.prices) {
+        if (prices.length > 0) {
           const pricesMap: Record<string, number> = {};
-          data.prices.forEach((p: any) => {
-            if (p.price) {
-              pricesMap[p.vehicleType] = p.price;
+          prices.forEach((p: any) => {
+            const numericPrice = typeof p?.price === 'number' ? p.price : Number(p?.price);
+            if (Number.isFinite(numericPrice) && numericPrice > 0) {
+              pricesMap[p.vehicleType] = numericPrice;
             }
           });
-          setVehiclePrices(pricesMap);
+          if (Object.keys(pricesMap).length > 0) {
+            setVehiclePrices(pricesMap);
+          } else {
+            setVehiclePrices(prev => (Object.keys(prev).length === 0 ? prev : {}));
+          }
+          setPriceLookupMessage(hasAvailablePrice ? null : (message || getPriceNotFoundMessage()));
+        } else {
+          setVehiclePrices(prev => (Object.keys(prev).length === 0 ? prev : {}));
+          setPriceLookupMessage(message || getPriceNotFoundMessage());
         }
       } catch (error) {
         console.error("Error fetching vehicle prices:", error);
+        setVehiclePrices(prev => (Object.keys(prev).length === 0 ? prev : {}));
+        setPriceLookupMessage(getPriceNotFoundMessage());
       } finally {
         setIsPricesLoading(false);
       }
     };
     
     fetchPrices();
-  }, [user, urlPickup, urlDropoff, urlCurrency, urlAllVehiclePrices, vehiclePrices, pricesPreFetched, urlShowVehicleSelection]);
+  }, [user, urlPickup, urlDropoff, urlCurrency, urlDate, urlAllVehiclePrices, vehiclePrices, pricesPreFetched, urlShowVehicleSelection, fetchVehiclePricesSafely, getPriceNotFoundMessage]);
   
   const [hasReturnTrip, setHasReturnTrip] = useState(urlHasReturn);
   const [promoCode, setPromoCode] = useState(urlPromoCode);
@@ -379,10 +468,33 @@ const ReservationForm = () => {
   const prefilledCurrency = urlCurrency;
   const prefilledReturnPrice = urlReturnPrice ? parseFloat(urlReturnPrice) : null;
   
-  // Currency selection
+  // Currency selection - Baz fiyat EUR, seçilen para biriminde o günün kuruyla göster
   const [preferredCurrency, setPreferredCurrency] = useState(urlCurrency || 'EUR');
+  const [eurToPreferredRate, setEurToPreferredRate] = useState<number>(1);
   
   const currencyOptions = CURRENCY_OPTIONS;
+
+  // Fiyatlar EUR - para birimi değiştiğinde hemen o günün kuruyla dönüştür
+  useEffect(() => {
+    if (preferredCurrency === "EUR") {
+      setEurToPreferredRate(1);
+      return;
+    }
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: preferredCurrency },
+    })
+      .then(({ data }) => { if (data?.rate) setEurToPreferredRate(data.rate); })
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToPreferredRate(fallback[preferredCurrency] ?? 1);
+      });
+  }, [preferredCurrency]);
+
+  const getDisplayPrice = useCallback((priceEur: number | null | undefined): number | null => {
+    if (priceEur == null || !Number.isFinite(priceEur)) return null;
+    if (preferredCurrency === "EUR") return Math.round(priceEur);
+    return Math.round(priceEur * eurToPreferredRate);
+  }, [preferredCurrency, eurToPreferredRate]);
 
   
   const [formData, setFormData] = useState(() => ({
@@ -439,8 +551,8 @@ const ReservationForm = () => {
   // Also check for data from CustomerHome sessionStorage
   useEffect(() => {
     // Check for customer data from CustomerHome form
-    const savedPassengerNames = sessionStorage.getItem('customerPassengerNames');
-    const savedPhone = sessionStorage.getItem('customerPhone');
+    const savedPassengerNames = safeSessionGet('customerPassengerNames');
+    const savedPhone = safeSessionGet('customerPhone');
     
     if (savedPassengerNames) {
       try {
@@ -616,30 +728,28 @@ const ReservationForm = () => {
     if (isLoggedIn && !isFromQuickBooking && !hasPendingReservation) {
       setIsLoading(true);
       setShowPricePreparation(true);
+      setPriceLookupMessage(null);
       setPendingFormData({ ...formData });
       setPendingPassengerNames([...validPassengerNames]);
       
       try {
         // Fetch all vehicle prices
-        const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: {
-            pickup: formData.pickup,
-            dropoff: formData.dropoff,
-            customerCurrency: preferredCurrency,
-          },
-        });
+        const { prices, hasAvailablePrice, message } = await fetchVehiclePricesSafely(
+          formData.pickup,
+          formData.dropoff,
+          "EUR",
+          formData.date || undefined,
+        );
 
         // Wait 3 seconds for animation
         await new Promise(resolve => setTimeout(resolve, 3000));
         
-        if (data?.prices && data.prices.length > 0) {
-          setFetchedVehiclePrices(data.prices);
-          // Set initial selection to the form's vehicle type
-          setSelectedVehicleForConfirm(formData.vehicleType);
-        } else {
-          // No prices found - set empty array
-          setFetchedVehiclePrices([]);
-          setSelectedVehicleForConfirm(formData.vehicleType);
+        setFetchedVehiclePrices(prices);
+        setSelectedVehicleForConfirm(formData.vehicleType);
+        if (!hasAvailablePrice) {
+          const noPriceMessage = message || getPriceNotFoundMessage();
+          setPriceLookupMessage(noPriceMessage);
+          toast.error(noPriceMessage);
         }
         
         setShowPricePreparation(false);
@@ -651,9 +761,11 @@ const ReservationForm = () => {
         // Continue with normal flow if price fetching fails
         setShowPricePreparation(false);
         setFetchedVehiclePrices([]);
+        setPriceLookupMessage(getPriceNotFoundMessage());
         setSelectedVehicleForConfirm(formData.vehicleType);
         setShowVehicleSelection(true);
         setIsLoading(false);
+        toast.error(getPriceNotFoundMessage());
         return;
       }
     }
@@ -710,7 +822,16 @@ const ReservationForm = () => {
 
             userId = signInData.user.id;
           } else {
-            throw signUpError;
+            const msg = (signUpError.message || '').toLowerCase();
+            if (msg.includes('weak') || msg.includes('pwned') || msg.includes('easy to guess')) {
+              toast.error(language === 'TR' ? 'Bu şifre güvenli değil. Daha benzersiz bir şifre seçin.' : 'This password is not secure. Choose a more unique password.');
+            } else if (msg.includes('rate limit') || msg.includes('too many')) {
+              toast.error(language === 'TR' ? 'Çok fazla deneme. Lütfen biraz sonra tekrar deneyin.' : 'Too many attempts. Please try again later.');
+            } else {
+              toast.error(signUpError.message || (language === 'TR' ? 'Hesap oluşturulamadı. Lütfen tekrar deneyin.' : 'Failed to create account. Please try again.'));
+            }
+            setIsLoading(false);
+            return;
           }
         } else {
           if (!signUpData.user) {
@@ -729,12 +850,15 @@ const ReservationForm = () => {
             });
 
             if (signInError) {
-              if (signInError.message.includes('Email not confirmed')) {
-                toast.info('Please check your email to confirm your account, then try again.');
+              const sm = (signInError.message || '').toLowerCase();
+              if (sm.includes('email not confirmed')) {
+                toast.info(language === 'TR' ? 'E-posta adresinizi kontrol edin ve hesabınızı onaylayın.' : 'Please check your email to confirm your account.');
                 setIsLoading(false);
                 return;
               }
-              throw signInError;
+              toast.error(signInError.message || (language === 'TR' ? 'Giriş yapılamadı. Lütfen tekrar deneyin.' : 'Sign in failed. Please try again.'));
+              setIsLoading(false);
+              return;
             }
           }
         }
@@ -976,10 +1100,13 @@ const ReservationForm = () => {
         .update({ phone: pendingFormData.phone.trim(), full_name: primaryPassengerName })
         .eq('id', userId);
       
-      // Get selected vehicle's price
+      // Baz fiyat EUR - müşteri para biriminde kaydet (kuruyla dönüştürülmüş)
       const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
-      const reservationPrice = selectedPriceInfo?.price || null;
-      const reservationCurrency = selectedPriceInfo?.currency || preferredCurrency;
+      const priceEur = selectedPriceInfo?.price ?? null;
+      const reservationPrice = preferredCurrency === 'EUR' 
+        ? priceEur 
+        : (priceEur != null ? getDisplayPrice(priceEur) : null);
+      const reservationCurrency = preferredCurrency;
       const hasPrice = reservationPrice !== null;
       
       // Create reservation
@@ -1049,7 +1176,8 @@ const ReservationForm = () => {
 
       // Create return trip if enabled
       if (hasReturnTrip && returnTripData.date && returnTripData.time) {
-        const returnPrice = isPromoCodeValid && reservationPrice ? Math.round(reservationPrice * 0.7) : reservationPrice;
+        // Apply 25% discount for return trip automatically
+        const returnPrice = reservationPrice ? Math.round(reservationPrice * 0.75) : reservationPrice;
         
         const { data: returnReservation, error: returnError } = await supabase
           .from('reservations')
@@ -1104,7 +1232,7 @@ const ReservationForm = () => {
         ? 'Both reservations submitted successfully!'
         : 'Reservation submitted successfully!');
       
-      localStorage.removeItem(FORM_STORAGE_KEY);
+      safeLocalRemove(FORM_STORAGE_KEY);
       trackConversion(CONVERSION_LABELS.RESERVATION_SUBMIT);
       
       // Reset states
@@ -1135,7 +1263,11 @@ const ReservationForm = () => {
     setIsRejecting(true);
     try {
       const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
-      if (!selectedPriceInfo?.price) {
+      if (
+        typeof selectedPriceInfo?.price !== 'number' ||
+        !Number.isFinite(selectedPriceInfo.price) ||
+        selectedPriceInfo.price <= 0
+      ) {
         toast.error(t('language') === 'TR' ? 'Fiyat bulunamadı' : 'Price not found');
         setIsRejecting(false);
         return;
@@ -1144,7 +1276,9 @@ const ReservationForm = () => {
       // Store previous prices for animation
       const oldPricesMap: Record<string, number> = {};
       fetchedVehiclePrices.forEach(v => {
-        if (v.price) oldPricesMap[v.vehicleType] = v.price;
+        if (typeof v.price === 'number' && Number.isFinite(v.price) && v.price > 0) {
+          oldPricesMap[v.vehicleType] = v.price;
+        }
       });
       setPreviousVehiclePrices(oldPricesMap);
 
@@ -1153,7 +1287,7 @@ const ReservationForm = () => {
       const minDiscount: Record<string, number> = { EUR: 2, USD: 2, GBP: 2, TRY: 80, AED: 8 };
       const maxDiscount: Record<string, number> = { EUR: 8, USD: 9, GBP: 7, TRY: 300, AED: 35 };
       
-      const currency = selectedPriceInfo.currency;
+      const currency = 'EUR'; // Fiyatlar her zaman EUR
       const calculatedDiscount = Math.round(selectedPriceInfo.price * discountPercentage);
       const discountAmount = Math.max(
         minDiscount[currency] || 2,
@@ -1164,13 +1298,14 @@ const ReservationForm = () => {
       setFetchedVehiclePrices(prevPrices => 
         prevPrices.map(v => ({
           ...v,
-          price: v.price ? Math.max(v.price - discountAmount, 1) : null,
+          price: typeof v.price === 'number' && Number.isFinite(v.price) ? Math.max(v.price - discountAmount, 1) : null,
         }))
       );
 
-      // Store discount info for badge display
+      // Store discount info for badge display (convert for display)
       const actualPercentage = Math.round((discountAmount / selectedPriceInfo.price) * 100);
-      setAppliedDiscountInfo({ amount: discountAmount, percentage: actualPercentage, currency });
+      const displayDiscountAmount = preferredCurrency === 'EUR' ? discountAmount : (getDisplayPrice(discountAmount) ?? discountAmount);
+      setAppliedDiscountInfo({ amount: displayDiscountAmount, percentage: actualPercentage, currency: preferredCurrency });
       
       setDiscountJustApplied(true);
       setIsDiscountedOffer(true);
@@ -1283,29 +1418,30 @@ const ReservationForm = () => {
   }
 
   // Vehicle selection screen after price preparation
+  // Tüm fiyatlar EUR (API) - preferredCurrency ile o günün kuruyla göster
   if (showVehicleSelection && pendingFormData) {
     const recommendedVehicle = getRecommendedVehicle(pendingPassengerNames.length);
     const selectedPriceInfo = fetchedVehiclePrices.find(v => v.vehicleType === selectedVehicleForConfirm);
-    const selectedPrice = selectedPriceInfo?.price || null;
-    const selectedCurrency = selectedPriceInfo?.currency || preferredCurrency;
+    const selectedPriceEur = selectedPriceInfo?.price ?? null;
+    const selectedPrice = getDisplayPrice(selectedPriceEur);
+    const selectedCurrency = preferredCurrency;
     
     // Calculate return price - always discounted for return trips
-    const RETURN_DISCOUNT_PERCENTAGE = 10; // 10% discount for return trip by default
-    const PROMO_DISCOUNT_PERCENTAGE = 25; // 25% discount with promo code
+    const RETURN_DISCOUNT_PERCENTAGE = 25; // 25% discount for return trip
     
     const getReturnPrice = () => {
-      if (!hasReturnTrip || !selectedPrice) return null;
-      // Promo code gives 25% off, otherwise 10% default return discount
-      const discountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
-      return Math.round(selectedPrice * (100 - discountPercent) / 100);
+      if (!hasReturnTrip || selectedPriceEur == null) return null;
+      const discountPercent = RETURN_DISCOUNT_PERCENTAGE;
+      const returnPriceEur = Math.round(selectedPriceEur * (100 - discountPercent) / 100);
+      return getDisplayPrice(returnPriceEur);
     };
     
     const returnPrice = getReturnPrice();
-    const returnOriginalPrice = selectedPrice; // Original return price (same as outbound)
-    const returnDiscountPercent = isPromoCodeValid ? PROMO_DISCOUNT_PERCENTAGE : RETURN_DISCOUNT_PERCENTAGE;
-    const returnDiscountAmount = hasReturnTrip && selectedPrice ? Math.round(selectedPrice * returnDiscountPercent / 100) : null;
-    const totalPrice = selectedPrice ? selectedPrice + (returnPrice || 0) : null;
-    const totalWithoutDiscount = hasReturnTrip && selectedPrice ? selectedPrice * 2 : selectedPrice;
+    const returnOriginalPrice = selectedPrice;
+    const returnDiscountPercent = RETURN_DISCOUNT_PERCENTAGE;
+    const returnDiscountAmount = hasReturnTrip && selectedPrice ? Math.round((selectedPrice ?? 0) * returnDiscountPercent / 100) : null;
+    const totalPrice = selectedPrice ? (selectedPrice ?? 0) + (returnPrice ?? 0) : null;
+    const totalWithoutDiscount = hasReturnTrip && selectedPrice ? (selectedPrice ?? 0) * 2 : selectedPrice;
     const totalSavings = hasReturnTrip && returnDiscountAmount ? returnDiscountAmount : null;
     
     return (
@@ -1414,7 +1550,13 @@ const ReservationForm = () => {
               
               {/* Check if all vehicles have sanity failed or no available vehicles */}
               {(() => {
-                const hasAnyAvailable = fetchedVehiclePrices.some(v => v.available && v.price);
+                const hasAnyAvailable = fetchedVehiclePrices.some(
+                  v =>
+                    v.available &&
+                    typeof v.price === 'number' &&
+                    Number.isFinite(v.price) &&
+                    v.price > 0
+                );
                 const hasSanityFailed = fetchedVehiclePrices.some(v => v.sanityFailed);
                 
                 // All sanity failed - show preparing price message
@@ -1499,7 +1641,7 @@ const ReservationForm = () => {
                             {hasDiscount && discountJustApplied && (
                               <div className="absolute -top-2 right-2 sm:right-4 z-10">
                                 <span className="bg-red-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full line-through">
-                                  {previousPrice} {vehicle.currency}
+                                  {getDisplayPrice(previousPrice)} {preferredCurrency}
                                 </span>
                               </div>
                             )}
@@ -1508,8 +1650,8 @@ const ReservationForm = () => {
                               vehicleType={vehicle.vehicleType}
                               isSelected={isSelected}
                               onSelect={(v) => setSelectedVehicleForConfirm(v)}
-                              price={vehicle.price}
-                              currency={vehicle.currency}
+                              price={getDisplayPrice(vehicle.price)}
+                              currency={preferredCurrency}
                               showPrice={true}
                               isRecommended={isRecommended}
                               available={vehicle.available}
@@ -1529,9 +1671,7 @@ const ReservationForm = () => {
                       <Coins className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
                       <div className="text-xs sm:text-sm">
                         <p className="font-medium">
-                          {t('language') === 'TR' 
-                            ? 'Otomatik fiyat bulunamadı' 
-                            : 'No automatic pricing found'}
+                          {priceLookupMessage || (t('language') === 'TR' ? 'Fiyat Bulunamadı' : 'Price Not Found')}
                         </p>
                         <p className="text-amber-700 dark:text-amber-300 mt-0.5 sm:mt-1">
                           {t('language') === 'TR'
@@ -1709,7 +1849,7 @@ const ReservationForm = () => {
                     {isPromoCodeValid === true && (
                       <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 flex items-center gap-1 bg-green-50 dark:bg-green-950/30 px-2 py-1 rounded">
                         <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                        {language === 'TR' ? `Dönüşte %${PROMO_DISCOUNT_PERCENTAGE} indirim kazandınız!` : `${PROMO_DISCOUNT_PERCENTAGE}% off on return transfer!`}
+                        {language === 'TR' ? `Dönüşte %${RETURN_DISCOUNT_PERCENTAGE} indirim kazandınız!` : `${RETURN_DISCOUNT_PERCENTAGE}% off on return transfer!`}
                       </p>
                     )}
                     {isPromoCodeValid === false && promoCodeError && (
@@ -1721,8 +1861,8 @@ const ReservationForm = () => {
                     {!isPromoCodeValid && !promoCodeError && (
                       <p className="text-xs text-muted-foreground">
                         {language === 'TR' 
-                          ? 'Kod olmadan da %10 dönüş indirimi otomatik uygulanır' 
-                          : '10% return discount is applied automatically without a code'}
+                          ? 'Kod olmadan da %25 dönüş indirimi otomatik uygulanır' 
+                          : '25% return discount is applied automatically without a code'}
                       </p>
                     )}
                     {activePromo?.validUntil && (
@@ -1785,7 +1925,7 @@ const ReservationForm = () => {
                               : (t('language') === 'TR' ? 'Dönüş İndirimi' : 'Return Discount')}
                           </span>
                           <span className="font-bold">
-                            ({isPromoCodeValid ? `${PROMO_DISCOUNT_PERCENTAGE}%` : `${RETURN_DISCOUNT_PERCENTAGE}%`})
+                            ({RETURN_DISCOUNT_PERCENTAGE}%)
                           </span>
                         </span>
                         <span className="font-semibold text-xs sm:text-sm text-green-600 dark:text-green-400">
@@ -1848,7 +1988,9 @@ const ReservationForm = () => {
               </Button>
               
               {/* Reject Price Button - Only show if prices exist and can reject */}
-              {fetchedVehiclePrices.some(v => v.price) && canReject && !isDiscountedOffer && (
+              {fetchedVehiclePrices.some(
+                v => typeof v.price === 'number' && Number.isFinite(v.price) && v.price > 0
+              ) && canReject && !isDiscountedOffer && (
                 <Button 
                   variant="outline"
                   onClick={handleRejectPrice}
@@ -2023,6 +2165,13 @@ const ReservationForm = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/80 to-primary/60 py-8 px-4">
+      <RoleBasedRedirect />
+      <div className="max-w-2xl mx-auto mb-4">
+        <Button variant="ghost" size="sm" onClick={() => navigate(getLocalizedPath('/book'))} className="text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {t('back') || 'Back'}
+        </Button>
+      </div>
       <Card className="max-w-2xl mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-serif">Meet Transfer</CardTitle>
@@ -2402,7 +2551,7 @@ const ReservationForm = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  {t('phone')}
+                  {t('phone')} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   placeholder={t('phonePlaceholder')}
@@ -2542,19 +2691,18 @@ const ReservationForm = () => {
                 <div className="grid gap-4">
                   {vehicleTypes.map(vehicle => {
                     // For logged-in users NOT coming from QuickBooking, don't show prices in main form
-                    // Price will be shown after form submission in vehicle selection screen
                     const showPriceInMainForm = isFromQuickBooking;
-                    const vehiclePrice = showPriceInMainForm ? (vehiclePrices[vehicle.value] || null) : null;
+                    const vehiclePriceEur = showPriceInMainForm ? (vehiclePrices[vehicle.value] || null) : null;
                     return (
                       <VehicleSelectionCard
                         key={vehicle.value}
                         vehicleType={vehicle.value}
                         isSelected={formData.vehicleType === vehicle.value}
                         onSelect={(v) => setFormData({...formData, vehicleType: v})}
-                        price={vehiclePrice}
-                        currency={prefilledCurrency}
+                        price={getDisplayPrice(vehiclePriceEur)}
+                        currency={preferredCurrency}
                         showPrice={showPriceInMainForm}
-                        isRecommended={isFromQuickBooking && vehicle.value === formData.vehicleType && !!vehiclePrice}
+                        isRecommended={isFromQuickBooking && vehicle.value === formData.vehicleType && !!vehiclePriceEur}
                         isLoading={isFromQuickBooking && isPricesLoading}
                       />
                     );

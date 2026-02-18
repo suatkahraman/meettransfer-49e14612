@@ -51,27 +51,28 @@ export function useRegionPricesPublic({ city, alternativeCityNames = [], pickupD
       
       if (error) throw error;
 
-      // Filter prices based on date - prefer seasonal prices over base prices
+      // Strict monthly/seasonal: pickup_date must fall within valid_from..valid_to for that price
       const dateToCheck = pickupDate || new Date();
-      const dateStr = dateToCheck.toISOString().split('T')[0];
+      const dateStr = dateToCheck.toISOString().split("T")[0];
 
-      // Group by route (airport + district + vehicle_type)
       const priceMap = new Map<string, RegionPricePublic>();
 
+      // First pass: add seasonal prices that apply to this exact date
       data?.forEach((price) => {
-        const key = `${price.airport || ''}-${price.district}-${price.vehicle_type}`;
-        
-        // Check if this is a seasonal price that applies to the date
         if (price.valid_from && price.valid_to) {
-          if (dateStr >= price.valid_from && dateStr <= price.valid_to) {
-            // Seasonal price applies - use it (overrides base price)
+          const from = price.valid_from.split("T")[0];
+          const to = price.valid_to.split("T")[0];
+          if (dateStr >= from && dateStr <= to) {
+            const key = `${price.airport || ""}-${price.district}-${price.vehicle_type}`;
             priceMap.set(key, price);
           }
-        } else {
-          // Base price - only add if no seasonal price exists for this route
-          if (!priceMap.has(key)) {
-            priceMap.set(key, price);
-          }
+        }
+      });
+      // Second pass: add base prices (no valid_from/valid_to) only when no seasonal exists for that route
+      data?.forEach((price) => {
+        if (!price.valid_from && !price.valid_to) {
+          const key = `${price.airport || ""}-${price.district}-${price.vehicle_type}`;
+          if (!priceMap.has(key)) priceMap.set(key, price);
         }
       });
 

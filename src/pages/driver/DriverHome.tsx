@@ -1,27 +1,22 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { useDriverTranslations } from '@/hooks/useDriverTranslations';
+import { readDriverBootstrapCache, writeDriverBootstrapCache } from '@/lib/driverBootstrapCache';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { LogOut, Car, AlertCircle, CheckCircle2, Loader2, Bell, Calculator, RefreshCw, History, Settings, Volume2, Search, Shield, Globe, UserX } from 'lucide-react';
-import UniversalLanguageSelector from '@/components/UniversalLanguageSelector';
-import NotificationBell from '@/components/NotificationBell';
-import { PushNotificationToggle } from '@/components/PushNotificationToggle';
-import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
+import { Car, AlertCircle, CheckCircle2, Bell, Calculator, History } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
-import ReservationSearch from '@/components/ReservationSearch';
-import DriverInfoEditor from '@/components/driver/DriverInfoEditor';
-import DriverStatsCard from '@/components/driver/DriverStatsCard';
+import { motion } from 'framer-motion';
 import JobCategoryCard from '@/components/driver/JobCategoryCard';
-import FutureMonthCard from '@/components/driver/FutureMonthCard';
 import DayJobCard from '@/components/driver/DayJobCard';
+import { DashboardSkeleton } from '@/components/driver/DashboardSkeleton';
+import type { DriverHeaderExtras } from '@/components/driver/DriverLayout';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefreshIndicator } from '@/components/agency/PullToRefreshIndicator';
 
 interface Reservation {
   id: string;
@@ -49,94 +44,202 @@ interface Reservation {
   // Place details
   pickup_place_name: string | null;
   dropoff_place_name: string | null;
-  // Agency details
-  agencies?: {
-    id: string;
-    agency_name: string;
-  } | null;
 }
 
-const PULL_THRESHOLD = 80;
+// Lean select: only list-relevant columns (no agencies join)
+const LIST_RESERVATION_SELECT = `
+  id,
+  customer_id,
+  customer_name,
+  customer_phone,
+  pickup,
+  dropoff,
+  pickup_date,
+  pickup_time,
+  flight_number,
+  vehicle_type,
+  payment_type,
+  payment_status,
+  price,
+  price_currency,
+  passenger_cash_amount,
+  passenger_cash_currency,
+  driver_cash_amount,
+  reservation_code,
+  status,
+  driver_confirmed,
+  agency_id,
+  luggage_count,
+  baby_seat_count,
+  pickup_place_name,
+  dropoff_place_name
+`;
+const ACTIONABLE_LIMIT = 20;
+const COMPLETED_LIMIT = 10;
+const ACTIONABLE_LIMIT_IOS = 10; // iOS için daha az
+const COMPLETED_LIMIT_IOS = 5;  // iOS için daha az
+
+const sortByPickupDateTime = (items: Reservation[]) =>
+  [...items].sort((a, b) => {
+    // iOS Safari safe date parsing
+    const dateStrA = a.pickup_date.includes('T') ? a.pickup_date : `${a.pickup_date}T${a.pickup_time}`;
+    const dateStrB = b.pickup_date.includes('T') ? b.pickup_date : `${b.pickup_date}T${b.pickup_time}`;
+    const dateTimeA = new Date(dateStrA);
+    const dateTimeB = new Date(dateStrB);
+    return dateTimeA.getTime() - dateTimeB.getTime();
+  });
+
+type DayJobGroup = {
+  pickupDate: string;
+  date: Date;
+  jobs: Reservation[];
+  firstJob: Reservation;
+  activeJobs: number;
+};
+
+const buildDayGroups = (jobs: Reservation[]): DayJobGroup[] => {
+  const grouped: Record<string, { date: Date; jobs: Reservation[] }> = {};
+
+  jobs.forEach((job) => {
+    const key = job.pickup_date;
+    if (!grouped[key]) {
+      grouped[key] = {
+        date: new Date(job.pickup_date),
+        jobs: [],
+      };
+    }
+    grouped[key].jobs.push(job);
+  });
+
+  return Object.entries(grouped)
+    .map(([pickupDate, group]) => {
+      const sortedJobs = [...group.jobs].sort((a, b) => a.pickup_time.localeCompare(b.pickup_time));
+      return {
+        pickupDate,
+        date: group.date,
+        jobs: sortedJobs,
+        firstJob: sortedJobs[0],
+        activeJobs: sortedJobs.filter((item) => item.status === 'active').length,
+      };
+    })
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+};
+
+interface DriverHomeContext {
+  setHeaderExtras: (extras: DriverHeaderExtras) => void;
+}
 
 const DriverHome = () => {
-  const { signOut } = useAuth();
+  const { user } = useAuth();
   const { driverId } = useUserRole();
+  const userId = user?.id ?? null;
   const navigate = useNavigate();
   const { t } = useDriverTranslations();
+  const context = useOutletContext<DriverHomeContext>();
+  const setHeaderExtras = context?.setHeaderExtras ?? (() => {});
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [adminNotesMap, setAdminNotesMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { playSound } = useNotificationSound();
-  const [expandedSections, setExpandedSections] = useState({
-    settings: false,
-    notificationSettings: false,
-    search: false
-  });
   
-  const pullY = useMotionValue(0);
-  const pullProgress = useTransform(pullY, [0, PULL_THRESHOLD], [0, 1]);
-  const pullRotation = useTransform(pullY, [0, PULL_THRESHOLD], [0, 180]);
-  const pullOpacity = useTransform(pullY, [0, 40, PULL_THRESHOLD], [0, 0.5, 1]);
+  // Pull to refresh handler
+  const handlePullRefresh = useCallback(async () => {
+    await fetchReservations(true);
+  }, [fetchReservations]);
+
+  const { pullDistance, isRefreshing: isPullRefreshing, isPulling, handlers } = usePullToRefresh({
+    onRefresh: handlePullRefresh,
+    threshold: 80,
+    disabled: loading,
+  });
+
+  const { playSound } = useNotificationSound();
+  const cacheHydratedRef = useRef(false);
 
   const fetchReservations = useCallback(async (showToast = false) => {
-    if (!driverId) return;
+    if (!driverId) {
+      setReservations([]);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
 
-    const { data, error } = await supabase
-      .from('reservations')
-      .select('*, agencies (id, agency_name)')
-      .eq('driver_id', driverId)
-      .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed', 'cancelled', 'cancelled_by_customer', 'cancelled_by_agency', 'no_show'])
-      .order('pickup_date', { ascending: true })
-      .order('pickup_time', { ascending: true });
+    const now = new Date();
+    const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const lastDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
 
-    if (error) {
-      console.error('Error:', error);
+    // iOS Safari: Daha az veri ile daha hızlı yükleme
+    const isIOS = isIOSDevice();
+    const actionableLimit = isIOS ? ACTIONABLE_LIMIT_IOS : ACTIONABLE_LIMIT;
+    const completedLimit = isIOS ? COMPLETED_LIMIT_IOS : COMPLETED_LIMIT;
+
+    // Limit rows for fast dashboard load - actionable + last 10 completed
+    const [actionableQuery, completedQuery] = await Promise.all([
+      supabase
+        .from('reservations')
+        .select(LIST_RESERVATION_SELECT)
+        .eq('driver_id', driverId)
+        .in('status', ['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active'])
+        .order('pickup_date', { ascending: true })
+        .order('pickup_time', { ascending: true })
+        .limit(actionableLimit), // iOS için optimize edilmiş limit
+      supabase
+        .from('reservations')
+        .select(LIST_RESERVATION_SELECT)
+        .eq('driver_id', driverId)
+        .eq('status', 'completed')
+        .gte('pickup_date', firstDayOfCurrentMonth)
+        .lte('pickup_date', lastDayOfCurrentMonth)
+        .order('pickup_date', { ascending: false })
+        .order('pickup_time', { ascending: false })
+        .limit(completedLimit), // iOS için optimize edilmiş limit
+    ]);
+
+    if (actionableQuery.error || completedQuery.error) {
+      console.error('Error:', actionableQuery.error || completedQuery.error);
       if (showToast) toast.error(t('failedToRefresh'));
     } else {
-      // Sort by combined date and time for accurate ordering
-      const sortedData = (data || []).sort((a, b) => {
-        const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-        const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
-        return dateTimeA.getTime() - dateTimeB.getTime();
-      });
+      const mergedRows = [...(actionableQuery.data || []), ...(completedQuery.data || [])];
+      const sortedData = sortByPickupDateTime(mergedRows as Reservation[]);
       setReservations(sortedData);
-      
-      // Fetch admin notes for all reservations
-      if (sortedData.length > 0) {
-        const ids = sortedData.map(r => r.id);
-        const { data: notesData } = await supabase
-          .from('reservation_admin_notes')
-          .select('reservation_id, notes')
-          .in('reservation_id', ids);
-        
-        if (notesData) {
-          const notesObj: Record<string, string> = {};
-          notesData.forEach(n => {
-            if (n.notes) notesObj[n.reservation_id] = n.notes;
-          });
-          setAdminNotesMap(notesObj);
-        }
+
+      if (userId && driverId) {
+        writeDriverBootstrapCache({
+          userId,
+          driverId,
+          reservations: sortedData,
+          adminNotesMap: {},
+        });
       }
       
       if (showToast) toast.success(t('jobsRefreshed'));
     }
     setLoading(false);
     setRefreshing(false);
-  }, [driverId]);
-
-  const handlePullEnd = async (_: any, info: PanInfo) => {
-    if (info.offset.y > PULL_THRESHOLD && !refreshing) {
-      setRefreshing(true);
-      await fetchReservations(true);
-    }
-  };
+  }, [driverId, t, userId]);
 
   useEffect(() => {
-    if (driverId) {
+    cacheHydratedRef.current = false;
+  }, [driverId, userId]);
+
+  useEffect(() => {
+    if (!driverId || !userId || cacheHydratedRef.current) return;
+    const cached = readDriverBootstrapCache(userId, driverId);
+    if (!cached) return;
+
+    cacheHydratedRef.current = true;
+    setReservations(sortByPickupDateTime(cached.reservations as Reservation[]));
+    setLoading(false);
+  }, [driverId, userId]);
+
+  useEffect(() => {
+    // iOS Safari: Sürücü paneli yükleme hızını artır
+    if (isIOSDevice()) {
+      // iOS için optimize edilmiş yükleme: hemen başla ama daha az veri ile
+      fetchReservations();
+    } else {
       fetchReservations();
     }
-  }, [driverId]);
+  }, [driverId, fetchReservations]);
 
   // Real-time subscription for new job assignments
   useEffect(() => {
@@ -153,19 +256,12 @@ const DriverHome = () => {
           filter: `driver_id=eq.${driverId}`
         },
         (payload) => {
-          console.log('Realtime update:', payload);
-          
           if (payload.eventType === 'INSERT') {
             const newReservation = payload.new as Reservation;
-            if (['sent_to_driver', 'assigned', 'active', 'completed'].includes(newReservation.status)) {
+            if (['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed'].includes(newReservation.status)) {
               setReservations(prev => {
                 const updated = [...prev, newReservation];
-                // Re-sort by date/time
-                return updated.sort((a, b) => {
-                  const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-                  const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
-                  return dateTimeA.getTime() - dateTimeB.getTime();
-                });
+                return sortByPickupDateTime(updated);
               });
               playSound();
               toast.success(t('newJobAssigned'), {
@@ -176,15 +272,10 @@ const DriverHome = () => {
           } else if (payload.eventType === 'UPDATE') {
             const updatedReservation = payload.new as Reservation;
             // Keep the reservation visible if it's in valid statuses
-            if (['sent_to_driver', 'assigned', 'active', 'completed'].includes(updatedReservation.status)) {
+            if (['pending', 'pending_admin_review', 'sent_to_driver', 'assigned', 'confirmed', 'active', 'completed'].includes(updatedReservation.status)) {
               setReservations(prev => {
                 const updated = prev.map(r => r.id === updatedReservation.id ? updatedReservation : r);
-                // Re-sort after update
-                return updated.sort((a, b) => {
-                  const dateTimeA = new Date(`${a.pickup_date}T${a.pickup_time}`);
-                  const dateTimeB = new Date(`${b.pickup_date}T${b.pickup_time}`);
-                  return dateTimeA.getTime() - dateTimeB.getTime();
-                });
+                return sortByPickupDateTime(updated);
               });
             } else {
               // Remove if status changed to something we don't track
@@ -203,13 +294,8 @@ const DriverHome = () => {
     };
   }, [driverId]);
 
-  const toggleSection = (section: 'settings' | 'notificationSettings' | 'search') => {
-    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
-  };
-
   // Get current date/time for separating upcoming vs past
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
@@ -265,28 +351,10 @@ const DriverHome = () => {
   };
 
   // Group current month confirmed jobs by day
-  const currentMonthDayCards = useMemo(() => {
-    const grouped: Record<string, { date: Date; jobs: Reservation[] }> = {};
-    
-    confirmedCurrentMonthJobs.forEach(job => {
-      const pickupDate = new Date(job.pickup_date);
-      const key = job.pickup_date; // YYYY-MM-DD format
-      
-      if (!grouped[key]) {
-        grouped[key] = {
-          date: pickupDate,
-          jobs: []
-        };
-      }
-      grouped[key].jobs.push(job);
-    });
+  const currentMonthDayCards = useMemo(() => buildDayGroups(confirmedCurrentMonthJobs), [confirmedCurrentMonthJobs]);
 
-    // Convert to array and sort by date
-    return Object.values(grouped).sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [confirmedCurrentMonthJobs]);
-
-  // Future months reservations (active/confirmed jobs for months after current month)
-  const futureMonthsData = useMemo(() => {
+  // Future reservations grouped by month, then by day
+  const futureMonthDayGroups = useMemo(() => {
     const futureJobs = reservations.filter(r => {
       if (r.status !== 'active' && !(r.status === 'confirmed' && r.driver_confirmed === true)) return false;
       const pickupDate = new Date(r.pickup_date);
@@ -299,7 +367,6 @@ const DriverHome = () => {
       return false;
     });
 
-    // Group by month-year
     const grouped: Record<string, { month: number; year: number; jobs: Reservation[] }> = {};
     
     futureJobs.forEach(job => {
@@ -316,218 +383,96 @@ const DriverHome = () => {
       grouped[key].jobs.push(job);
     });
 
-    // Sort by date and convert to array
     return Object.values(grouped).sort((a, b) => {
       if (a.year !== b.year) return a.year - b.year;
       return a.month - b.month;
-    });
+    }).map((monthGroup) => ({
+      month: monthGroup.month,
+      year: monthGroup.year,
+      totalJobs: monthGroup.jobs.length,
+      days: buildDayGroups(sortByPickupDateTime(monthGroup.jobs)),
+    }));
   }, [reservations, currentMonth, currentYear]);
 
   // Count for header badges
   const activeJobsCount = confirmedCurrentMonthJobs.length;
+  const completedJobsCount = completedJobs.length;
+
+  // Pass header extras to DriverLayout
+  useEffect(() => {
+    setHeaderExtras({
+      onRefresh: () => {
+        setRefreshing(true);
+        fetchReservations(true);
+      },
+      refreshing,
+      pendingCount: pendingJobs.length,
+      activeCount: activeJobsCount,
+    });
+  }, [setHeaderExtras, refreshing, pendingJobs.length, activeJobsCount, fetchReservations]);
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Compact mobile-optimized header */}
-      <header className="bg-primary text-primary-foreground py-2.5 px-3 sm:py-3 sm:px-4 flex justify-between items-center flex-shrink-0 z-20 shadow-lg safe-area-inset-top">
-        <div className="flex items-center gap-2 min-w-0">
-          <h1 className="text-base sm:text-lg font-serif font-bold truncate">{t('driverPanel')}</h1>
-          {activeJobsCount > 0 && (
-            <Badge variant="secondary" className="bg-green-500 text-white hover:bg-green-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
-              {activeJobsCount}
-            </Badge>
-          )}
-          {pendingJobs.length > 0 && (
-            <Badge variant="secondary" className="bg-amber-500 text-white hover:bg-amber-600 h-5 sm:h-6 px-1.5 sm:px-2 text-xs flex-shrink-0">
-              {pendingJobs.length}
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => {
-              setRefreshing(true);
-              fetchReservations(true);
-            }}
-            disabled={refreshing}
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-          >
-            <RefreshCw className={cn("h-4.5 w-4.5 sm:h-5 sm:w-5", refreshing && "animate-spin")} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => toggleSection('search')} 
-            className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10",
-              expandedSections.search && "bg-primary-foreground/20"
-            )}
-          >
-            <Search className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <PushNotificationToggle compact />
-          <NotificationBell />
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/driver/history')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-          >
-            <History className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => toggleSection('notificationSettings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-            title="Bildirim Ayarları"
-          >
-            <Volume2 className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => toggleSection('settings')} 
-            className={cn(
-              "text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10",
-              expandedSections.settings && "bg-primary-foreground/20"
-            )}
-            title={t('updateInfo')}
-          >
-            <Settings className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          {/* Language Selector */}
-          <UniversalLanguageSelector variant="header" />
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/security-settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-            title={t('securitySettings') || 'Güvenlik Ayarları'}
-          >
-            <Shield className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/driver/settings')} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-            title={t('accountSettings') || 'Hesap Ayarları'}
-          >
-            <UserX className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={signOut} 
-            className="text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:h-10 sm:w-10"
-          >
-            <LogOut className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
-          </Button>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto relative">
-        <div className="pb-8 px-4 max-w-lg mx-auto">
-        {/* Pull to refresh indicator */}
-        <motion.div 
-          className="absolute left-1/2 -translate-x-1/2 -top-12 flex flex-col items-center gap-1"
-          style={{ opacity: pullOpacity }}
+    <div 
+      className="h-full min-h-0 w-full max-w-[100vw] flex flex-col items-center overflow-x-hidden overflow-y-auto"
+      {...handlers}
+    >
+      <PullToRefreshIndicator 
+        pullDistance={pullDistance}
+        isRefreshing={isPullRefreshing}
+        isPulling={isPulling}
+      />
+      <div className="pb-8 px-3 sm:px-4 w-full max-w-lg mx-auto flex-1 overflow-x-hidden">
+        {/* Hero Section */}
+        <motion.section
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 w-full rounded-2xl overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-lg"
         >
-          <motion.div style={{ rotate: pullRotation }}>
-            <RefreshCw className={cn("h-6 w-6 text-primary", refreshing && "animate-spin")} />
-          </motion.div>
-          <span className="text-xs text-muted-foreground">
-            {refreshing ? t('loading') : t('refresh')}
-          </span>
-        </motion.div>
-        {/* Notification Settings Section */}
-        <AnimatePresence>
-          {expandedSections.notificationSettings && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden mb-4"
-            >
-              <NotificationSettingsPanel language="TR" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Settings Section - Driver Info Editor */}
-        <AnimatePresence>
-          {expandedSections.settings && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden mb-4 mt-4"
-            >
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleSection('settings')}
-                  className="absolute top-2 right-2 z-10 h-8 w-8 p-0"
-                >
-                  ✕
-                </Button>
-                <DriverInfoEditor onClose={() => toggleSection('settings')} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Search Section */}
-        <AnimatePresence>
-          {expandedSections.search && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden mb-4 mt-4"
-            >
-              <Card>
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs text-muted-foreground">{t('searchByCode') || 'Kod ile Ara'}</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleSection('search')}
-                      className="h-6 w-6 p-0 text-muted-foreground"
-                    >
-                      ✕
-                    </Button>
-                  </div>
-                  <ReservationSearch userType="driver" driverId={driverId || undefined} placeholder="MT123456" />
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <div className="px-5 py-6">
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1.5 text-sm font-medium">
+                <CheckCircle2 className="h-4 w-4" />
+                {t('active')}: {activeJobsCount}
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-emerald-500/30 rounded-full px-3 py-1.5 text-sm font-medium">
+                <CheckCircle2 className="h-4 w-4" />
+                {t('completed')}: {completedJobsCount}
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-amber-500/30 rounded-full px-3 py-1.5 text-sm font-medium">
+                <AlertCircle className="h-4 w-4" />
+                {t('pending')}: {pendingJobs.length}
+              </span>
+            </div>
+          </div>
+        </motion.section>
 
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+          // iOS için optimize edilmiş yükleme ekranı
+          isIOSDevice() ? (
+            <div className="space-y-4 p-4 animate-pulse">
+              {/* Header */}
+              <div className="h-16 bg-muted rounded-lg"></div>
+              {/* Stats cards */}
+              <div className="grid grid-cols-3 gap-2">
+                {[1,2,3].map(i => <div key={i} className="h-20 bg-muted rounded-lg"></div>)}
+              </div>
+              {/* Content areas */}
+              <div className="space-y-2">
+                <div className="h-4 bg-muted rounded w-1/3"></div>
+                <div className="h-16 bg-muted rounded-lg"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-20 bg-muted rounded-lg"></div>
+              </div>
+            </div>
+          ) : (
+            <DashboardSkeleton />
+          )
         ) : reservations.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-16 space-y-6"
           >
-            {/* Stats Card even when no jobs */}
-            {driverId && (
-              <div className="mb-6">
-                <DriverStatsCard driverId={driverId} />
-              </div>
-            )}
             <Car className="h-16 w-16 mx-auto text-muted-foreground" />
             <div>
               <p className="text-lg text-muted-foreground">{t('noJobsAssigned')}</p>
@@ -555,16 +500,11 @@ const DriverHome = () => {
           </motion.div>
         ) : (
           <div className="space-y-4 pt-4">
-            {/* Driver Stats Card */}
-            {driverId && (
-              <DriverStatsCard driverId={driverId} />
-            )}
-
             {/* Quick Actions Row */}
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
-                className="flex-1 h-10 gap-2 text-sm"
+                className="w-full flex-1 h-10 gap-2 text-sm"
                 onClick={() => navigate('/driver/monthly-accounting')}
               >
                 <Calculator className="h-4 w-4" />
@@ -572,7 +512,7 @@ const DriverHome = () => {
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 h-10 gap-2 text-sm"
+                className="w-full flex-1 h-10 gap-2 text-sm"
                 onClick={() => navigate('/driver/history')}
               >
                 <History className="h-4 w-4" />
@@ -619,20 +559,17 @@ const DriverHome = () => {
                 </h3>
                 <div className="space-y-2">
                   {currentMonthDayCards.map((dayData) => {
-                    const firstJob = dayData.jobs.sort((a, b) => a.pickup_time.localeCompare(b.pickup_time))[0];
-                    const activeCount = dayData.jobs.filter(j => j.status === 'active').length;
-                    
                     return (
                       <DayJobCard
-                        key={dayData.date.toISOString()}
+                        key={dayData.pickupDate}
                         dayNumber={dayData.date.getDate()}
                         monthName={getMonthName(dayData.date.getMonth())}
                         dayName={getDayName(dayData.date)}
                         totalJobs={dayData.jobs.length}
-                        activeJobs={activeCount}
-                        firstJobTime={firstJob.pickup_time.slice(0, 5)}
-                        firstJobRoute={`${firstJob.pickup_place_name || firstJob.pickup.slice(0, 15)} → ${firstJob.dropoff_place_name || firstJob.dropoff.slice(0, 15)}`}
-                        onClick={() => navigate(`/driver/jobs/active?date=${dayData.jobs[0].pickup_date}`)}
+                        activeJobs={dayData.activeJobs}
+                        firstJobTime={dayData.firstJob.pickup_time.slice(0, 5)}
+                        firstJobRoute={`${dayData.firstJob.pickup_place_name || dayData.firstJob.pickup.slice(0, 15)} → ${dayData.firstJob.dropoff_place_name || dayData.firstJob.dropoff.slice(0, 15)}`}
+                        onClick={() => navigate(`/driver/jobs/active?date=${dayData.pickupDate}`)}
                       />
                     );
                   })}
@@ -640,36 +577,39 @@ const DriverHome = () => {
               </div>
             )}
 
-            {/* 4. Future Months Section */}
-            {futureMonthsData.length > 0 && (
-              <div className="mt-4 space-y-3">
+            {/* 4. Future Reservations grouped by month/day */}
+            {futureMonthDayGroups.length > 0 && (
+              <div className="mt-4 space-y-4">
                 <h3 className="text-sm font-semibold text-muted-foreground px-1">
                   {t('futureReservations') || 'İleri Tarihli Rezervasyonlar'}
                 </h3>
-                <div className="space-y-2">
-                  {futureMonthsData.map((monthData) => {
-                    const firstJob = monthData.jobs[0];
-                    const firstJobDate = firstJob ? new Date(firstJob.pickup_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : undefined;
-                    const firstJobRoute = firstJob ? `${firstJob.pickup_place_name || firstJob.pickup.slice(0, 15)} → ${firstJob.dropoff_place_name || firstJob.dropoff.slice(0, 15)}` : undefined;
-                    
-                    return (
-                      <FutureMonthCard
-                        key={`${monthData.year}-${monthData.month}`}
-                        monthName={getMonthName(monthData.month)}
-                        year={monthData.year}
-                        count={monthData.jobs.length}
-                        firstJobDate={firstJobDate}
-                        firstJobRoute={firstJobRoute}
-                        onClick={() => navigate(`/driver/jobs/active?month=${monthData.month + 1}&year=${monthData.year}`)}
-                      />
-                    );
-                  })}
-                </div>
+                {futureMonthDayGroups.map((monthData) => (
+                  <div key={`${monthData.year}-${monthData.month}`} className="space-y-2">
+                    <h4 className="text-sm font-semibold text-muted-foreground/90 px-1">
+                      {getMonthName(monthData.month)} {monthData.year} ({monthData.totalJobs})
+                    </h4>
+                    <div className="space-y-2">
+                      {monthData.days.map((dayData) => (
+                        <DayJobCard
+                          key={`${monthData.year}-${monthData.month}-${dayData.pickupDate}`}
+                          dayNumber={dayData.date.getDate()}
+                          monthName={getMonthName(dayData.date.getMonth())}
+                          dayName={getDayName(dayData.date)}
+                          totalJobs={dayData.jobs.length}
+                          activeJobs={dayData.activeJobs}
+                          firstJobTime={dayData.firstJob.pickup_time.slice(0, 5)}
+                          firstJobRoute={`${dayData.firstJob.pickup_place_name || dayData.firstJob.pickup.slice(0, 15)} → ${dayData.firstJob.dropoff_place_name || dayData.firstJob.dropoff.slice(0, 15)}`}
+                          onClick={() => navigate(`/driver/jobs/active?date=${dayData.pickupDate}`)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
             {/* Empty state when no jobs at all */}
-            {pendingJobs.length === 0 && completedJobs.length === 0 && currentMonthDayCards.length === 0 && futureMonthsData.length === 0 && (
+            {pendingJobs.length === 0 && completedJobs.length === 0 && currentMonthDayCards.length === 0 && futureMonthDayGroups.length === 0 && (
               <div className="text-center py-8">
                 <Car className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
                 <p className="text-sm text-muted-foreground">{t('noJobsAssigned')}</p>
@@ -678,8 +618,7 @@ const DriverHome = () => {
 
           </div>
         )}
-        </div>
-      </main>
+      </div>
     </div>
   );
 };

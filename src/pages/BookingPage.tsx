@@ -10,6 +10,7 @@ import { validatePromoCode } from "@/hooks/useActivePromoCode";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePWADetect } from "@/hooks/usePWADetect";
 import { PendingBookingStorage } from "@/hooks/usePendingBookingStorage";
+import { safeLocalGet, safeLocalSet, safeLocalRemove, safeSessionGet, safeSessionSet, safeSessionRemove } from "@/lib/safeStorage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,15 +23,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TimePickerGrid } from "@/components/ui/time-picker-grid";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
+import { getDirections, geocodeAddress, loadGoogleMapsScript } from "@/utils/googleMapsLoader";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { 
   MapPin, Navigation, Calendar, Clock, Users, Briefcase, Baby, 
   ArrowRight, Loader2, CheckCircle, ArrowLeftRight, Tag, Mail, 
-  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus, Share2, Copy, Check
+  Phone, MessageSquare, Car, Coins, CreditCard, Banknote, User, Shield, Timer, ChevronLeft, ChevronRight, Percent, Sparkles, Eye, EyeOff, Lock, Plane, UserPlus, Share2, Copy, Check, ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VEHICLE_TYPE_MAP, getAvailableVehicles, isMinibusRequired, VehicleTypeInfo } from "@/lib/vehicleTypes";
+import { VEHICLE_TYPE_MAP, getAvailableVehicles, VehicleTypeInfo } from "@/lib/vehicleTypes";
 import { DUBAI_VEHICLE_TYPES, DUBAI_VEHICLE_TYPE_MAP } from "@/lib/dubaiVehicleTypes";
 import { isDubaiLocation, isTurkeyLocation } from "@/lib/locationDetection";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
@@ -46,9 +48,11 @@ import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";
 import { CompactRouteMap } from "@/components/ui/compact-route-map";
 import { z } from "zod";
+import { RoleBasedRedirect } from "@/components/RoleBasedRedirect";
 
 // Session storage key for caching booking form state during Google OAuth
 const GOOGLE_AUTH_CACHE_KEY = 'google_auth_booking_cache';
+const GOOGLE_AUTH_CACHE_BACKUP_KEY = 'google_auth_booking_cache_backup';
 
 interface VehiclePrice {
   vehicleType: string;
@@ -75,10 +79,10 @@ const passwordSchema = z.string()
   .regex(/\d.*\d.*\d.*\d/, 'Password must contain at least 4 digits');
 
 const getSessionId = () => {
-  let sessionId = localStorage.getItem('quick_booking_session_id');
+  let sessionId = safeLocalGet('quick_booking_session_id');
   if (!sessionId) {
     sessionId = crypto.randomUUID();
-    localStorage.setItem('quick_booking_session_id', sessionId);
+    safeLocalSet('quick_booking_session_id', sessionId);
   }
   return sessionId;
 };
@@ -121,8 +125,6 @@ const BookingPage = () => {
   const urlDate = searchParams.get("date") || "";
   const urlTime = searchParams.get("time") || "";
   const urlPassengers = searchParams.get("passengers");
-  const urlVehicleType = searchParams.get("vehicleType");
-  
   // Hourly-specific params
   const urlCity = searchParams.get("city") || "";
   const urlDuration = searchParams.get("duration") || "4h";
@@ -134,6 +136,7 @@ const BookingPage = () => {
   const urlBabySeatCount = searchParams.get("babySeatCount");
   const urlLuggageCount = searchParams.get("luggageCount");
   const urlPromoCode = searchParams.get("promoCode") || "";
+  const urlCurrency = searchParams.get("currency") || "";
   
   // Token booking data state
   const [tokenBookingData, setTokenBookingData] = useState<{
@@ -163,14 +166,18 @@ const BookingPage = () => {
   } | null>(null);
   const [tokenLoading, setTokenLoading] = useState(!!urlToken);
 
-  // Form state - initialize from URL params if available
-  const [vehicleType, setVehicleType] = useState(urlVehicleType || "mercedes-vito");
+  // Form state - Araç her zaman seçilisiz başlar (fiyat sorgusu, Hero, token dahil)
+  const [vehicleType, setVehicleType] = useState("");
   const [showManualForm, setShowManualForm] = useState(false);
   const [showLoginWarning, setShowLoginWarning] = useState(false);
   const [passengers, setPassengers] = useState(urlPassengers ? parseInt(urlPassengers) : 1);
   const [luggageCount, setLuggageCount] = useState(urlLuggageCount ? parseInt(urlLuggageCount) : 1);
   const [babySeatCount, setBabySeatCount] = useState(urlBabySeatCount ? parseInt(urlBabySeatCount) : 0);
-  const [preferredCurrency, setPreferredCurrency] = useState("EUR");
+  const [preferredCurrency, setPreferredCurrency] = useState(() => 
+    ["EUR","TRY","USD","GBP","AED","RUB","UAH","JPY","AUD"].includes(urlCurrency) ? urlCurrency : "EUR"
+  );
+  const [eurToPreferredRate, setEurToPreferredRate] = useState<number>(1);
+  const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
@@ -202,6 +209,17 @@ const BookingPage = () => {
   const [originalPrice, setOriginalPrice] = useState<number | null>(null);
   const [rejectingPrice, setRejectingPrice] = useState(false);
   const [justSelectedVehicle, setJustSelectedVehicle] = useState<string | null>(null);
+  const [distanceKm, setDistanceKm] = useState<number | undefined>(undefined);
+
+  // Section highlight for "Seçim yapın" flow (auto-advance UX)
+  const [highlightSection, setHighlightSection] = useState<string | null>(null);
+  const scrollToSection = useCallback((sectionId: string) => {
+    setHighlightSection(sectionId);
+    setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+    setTimeout(() => setHighlightSection(null), 4000);
+  }, []);
 
   // Logged-in user state
   const [customerName, setCustomerName] = useState("");
@@ -214,7 +232,6 @@ const BookingPage = () => {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [appleLoading, setAppleLoading] = useState(false);
   
   // Flight and passenger details
   const [flightNumber, setFlightNumber] = useState("");
@@ -248,6 +265,8 @@ const BookingPage = () => {
   // Editable location state - initialized from URL/token data
   const [editablePickup, setEditablePickup] = useState("");
   const [editableDropoff, setEditableDropoff] = useState("");
+  const [pickupPlaceId, setPickupPlaceId] = useState<string | null>(null);
+  const [dropoffPlaceId, setDropoffPlaceId] = useState<string | null>(null);
   
   // Initialize editable locations from URL params on mount
   useEffect(() => {
@@ -277,20 +296,23 @@ const BookingPage = () => {
   const effectiveCity = tokenBookingData?.city || urlCity;
   const effectiveIsHourly = tokenBookingData?.service_type === 'hourly' || isHourlyBooking;
 
-  // Place selection handlers
+  // Place selection handlers - store address and Place ID for accurate price matching
   const handlePickupSelected = useCallback((value: string, details?: PlaceDetails) => {
     if (details?.formattedAddress) {
       setEditablePickup(details.formattedAddress);
+      setPickupPlaceId(details.place_id || null);
     } else if (value) {
       setEditablePickup(value);
+      setPickupPlaceId(null);
     }
   }, []);
-  
   const handleDropoffSelected = useCallback((value: string, details?: PlaceDetails) => {
     if (details?.formattedAddress) {
       setEditableDropoff(details.formattedAddress);
+      setDropoffPlaceId(details.place_id || null);
     } else if (value) {
       setEditableDropoff(value);
+      setDropoffPlaceId(null);
     }
   }, []);
 
@@ -302,39 +324,10 @@ const BookingPage = () => {
   const availableVehicles = isDubai 
     ? DUBAI_VEHICLE_TYPES.map(v => ({ value: v.value, label: v.label }))
     : getAvailableVehicles(passengers, luggageCount);
-  const minibusRequired = isDubai ? false : isMinibusRequired(passengers, luggageCount);
-  
   // Get the correct vehicle map based on location
   const vehicleTypeMap = isDubai ? DUBAI_VEHICLE_TYPE_MAP : VEHICLE_TYPE_MAP;
 
-  // Auto-select appropriate vehicle based on location and availability
-  useEffect(() => {
-    if (isDubai) {
-      // For Dubai, auto-select first Dubai vehicle if current vehicle is not a Dubai type
-      const isDubaiVehicle = vehicleType.startsWith('dubai-');
-      if (!isDubaiVehicle && DUBAI_VEHICLE_TYPES.length > 0) {
-        setVehicleType(DUBAI_VEHICLE_TYPES[0].value);
-      }
-    } else if (minibusRequired && vehicleType !== 'minibus') {
-      setVehicleType('minibus');
-    } else if (!minibusRequired && availableVehicles.length > 0) {
-      // Ensure mercedes-vito is selected if available, otherwise select first available
-      const mercedesVitoAvailable = availableVehicles.some(v => v.value === 'mercedes-vito');
-      const currentVehicleAvailable = availableVehicles.some(v => v.value === vehicleType);
-      
-      if (!currentVehicleAvailable) {
-        // Current vehicle not in list, select mercedes-vito if available, otherwise first
-        if (mercedesVitoAvailable) {
-          setVehicleType('mercedes-vito');
-        } else {
-          setVehicleType(availableVehicles[0].value);
-        }
-      } else if (!vehicleType && mercedesVitoAvailable) {
-        // No vehicle selected, default to mercedes-vito
-        setVehicleType('mercedes-vito');
-      }
-    }
-  }, [minibusRequired, vehicleType, isDubai, availableVehicles]);
+  // Araç otomatik seçimi yok - kullanıcı her zaman kendisi seçer
 
   // Load booking data from token (AI assistant flow)
   useEffect(() => {
@@ -360,8 +353,8 @@ const BookingPage = () => {
         const data = result.data;
         setTokenBookingData(data);
         
-        // Pre-fill form with booking data
-        setVehicleType(data.vehicle_type || "mercedes-vito");
+        // Pre-fill form - araç her zaman seçilisiz başlar
+        setVehicleType("");
         setPassengers(data.passengers || 1);
         setLuggageCount(data.luggage_count || 1);
         setBabySeatCount(data.baby_seat_count || 0);
@@ -482,7 +475,8 @@ const BookingPage = () => {
           let cachedPaymentType: 'cash' | 'credit_card' | 'online' = 'cash';
           
           try {
-            const cachedData = sessionStorage.getItem(GOOGLE_AUTH_CACHE_KEY);
+            let cachedData = sessionStorage.getItem(GOOGLE_AUTH_CACHE_KEY);
+            if (!cachedData) cachedData = localStorage.getItem(GOOGLE_AUTH_CACHE_BACKUP_KEY);
             if (cachedData) {
               const parsed = JSON.parse(cachedData);
               console.log('[GoogleAuth] Found cached booking data:', parsed);
@@ -528,6 +522,7 @@ const BookingPage = () => {
               
               // Clear the cache after restoring
               sessionStorage.removeItem(GOOGLE_AUTH_CACHE_KEY);
+              try { localStorage.removeItem(GOOGLE_AUTH_CACHE_BACKUP_KEY); } catch {}
             }
           } catch (e) {
             console.error('[GoogleAuth] Error reading cached data:', e);
@@ -599,12 +594,35 @@ const BookingPage = () => {
       const minLoadingTime = isInitialFetch ? 5000 : 800;
       
       try {
+        // Calculate distance client-side for KM pricing
+        let calculatedDistanceKm: number | undefined;
+        try {
+          await loadGoogleMapsScript();
+          const [pRes, dRes] = await Promise.all([
+            geocodeAddress(effectivePickup),
+            geocodeAddress(effectiveDropoff)
+          ]);
+          
+          if (pRes && dRes) {
+            const directions = await getDirections(pRes, dRes);
+            if (directions?.distanceKm) {
+              calculatedDistanceKm = directions.distanceKm;
+              setDistanceKm(calculatedDistanceKm);
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to calculate distance:", e);
+        }
+
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: {
             pickup: effectivePickup,
             dropoff: effectiveDropoff,
-            customerCurrency: preferredCurrency,
-            pickupDate: effectiveDate || undefined,
+            pickup_place_id: pickupPlaceId || undefined,
+            dropoff_place_id: dropoffPlaceId || undefined,
+            customerCurrency: "EUR",
+            pickup_date: effectiveDate || undefined,
+            distance_km: calculatedDistanceKm,
           },
         });
 
@@ -639,7 +657,33 @@ const BookingPage = () => {
     fetchPrices();
     
     return () => { cancelled = true; };
-  }, [effectivePickup, effectiveDropoff, effectiveDate, preferredCurrency, isHourlyBooking]);
+  }, [effectivePickup, effectiveDropoff, pickupPlaceId, dropoffPlaceId, effectiveDate, isHourlyBooking]);
+
+  // Fiyatlar her zaman EUR - para birimi değişince hemen o günün kuruyla dönüştür
+  useEffect(() => {
+    if (preferredCurrency === "EUR") {
+      setEurToPreferredRate(1);
+      return;
+    }
+    setIsLoadingExchangeRate(true);
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: preferredCurrency },
+    })
+      .then(({ data }) => {
+        if (data?.rate) setEurToPreferredRate(data.rate);
+      })
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToPreferredRate(fallback[preferredCurrency] ?? 1);
+      })
+      .finally(() => setIsLoadingExchangeRate(false));
+  }, [preferredCurrency]);
+
+  const getDisplayPrice = (priceEur: number | null): number | null => {
+    if (priceEur == null) return null;
+    if (preferredCurrency === "EUR") return Math.round(priceEur);
+    return Math.round(priceEur * eurToPreferredRate);
+  };
 
   // Extract city from address for hourly pricing
   const extractCityFromAddress = (address: string): string | null => {
@@ -1030,13 +1074,20 @@ const BookingPage = () => {
       paymentType,
       preferredCurrency,
     };
-    sessionStorage.setItem(GOOGLE_AUTH_CACHE_KEY, JSON.stringify(cacheData));
+    const json = JSON.stringify(cacheData);
+    safeSessionSet(GOOGLE_AUTH_CACHE_KEY, json);
+    safeLocalSet(GOOGLE_AUTH_CACHE_BACKUP_KEY, json);
     console.log('[OAuth] Saved COMPLETE form cache before OAuth redirect:', cacheData);
     return cacheData;
   };
 
   // Handle Google Sign In
   const handleGoogleSignIn = async () => {
+    if (!vehicleType) {
+      toast.error(language === 'TR' ? 'Lütfen önce bir araç seçin' : 'Please select a vehicle first');
+      scrollToSection('section-vehicle');
+      return;
+    }
     setGoogleLoading(true);
     try {
       saveOAuthFormCache();
@@ -1062,31 +1113,7 @@ const BookingPage = () => {
     }
   };
 
-  // Handle Apple Sign In
-  const handleAppleSignIn = async () => {
-    setAppleLoading(true);
-    try {
-      saveOAuthFormCache();
-      
-      const currentUrl = new URL(window.location.href);
-      currentUrl.searchParams.set('googleAuth', 'true');
-      setPostOAuthRedirect(currentUrl.toString());
-
-      // IMPORTANT (iOS PWA): Do NOT open OAuth in a new Safari tab/window.
-      // Keep the flow in the same PWA window so the auth session persists.
-      if (isIOS && isStandalone) {
-        toast.info(t('redirectingApple') || 'Yönlendiriliyor...');
-      }
-      
-      const { error } = await startOAuthSignIn('apple');
-      
-      if (error) throw error;
-    } catch (err: any) {
-      console.error("Apple sign-in error:", err);
-      toast.error(t("appleSignInError") || "Failed to sign in with Apple");
-      setAppleLoading(false);
-    }
-  };
+  // Apple Sign-In - geçici olarak kaldırıldı
 
   // Handle form submission for guests (create account + reservation)
   const handleGuestSubmit = async () => {
@@ -1632,6 +1659,11 @@ const BookingPage = () => {
     <WebsiteLayout>
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-28 lg:pb-8">
+          {/* Back Button */}
+          <Button variant="ghost" size="sm" onClick={() => navigate(getLocalizedPath("/"))} className="mb-4 -ml-1 text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            {t("back") || "Back"}
+          </Button>
           {/* Compact Hero with Route Info */}
           <div className="bg-gradient-to-r from-primary via-primary/90 to-primary/80 rounded-xl sm:rounded-2xl p-3 sm:p-6 text-white mb-4 sm:mb-8 shadow-2xl relative">
             {/* Share Button */}
@@ -1736,7 +1768,13 @@ const BookingPage = () => {
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Duration Selection - Only for hourly */}
               {isHourlyBooking && (
-                <Card className="border-2">
+                <Card id="section-duration" className={cn("border-2 transition-all duration-300", highlightSection === 'section-duration' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                  {highlightSection === 'section-duration' && (
+                    <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                      <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                    </div>
+                  )}
                   <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1751,7 +1789,10 @@ const BookingPage = () => {
                           <button
                             key={duration.value}
                             type="button"
-                            onClick={() => setSelectedDuration(duration.value)}
+                            onClick={() => {
+                              setSelectedDuration(duration.value);
+                              scrollToSection('section-vehicle');
+                            }}
                             className={cn(
                               "px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-semibold transition-all border-2 text-sm sm:text-base",
                               isSelected
@@ -1769,7 +1810,13 @@ const BookingPage = () => {
               )}
 
               {/* Vehicle Selection */}
-              <Card className="border-2">
+              <Card id="section-vehicle" className={cn("border-2 transition-all duration-300", highlightSection === 'section-vehicle' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                {highlightSection === 'section-vehicle' && (
+                  <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                  </div>
+                )}
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <Car className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1816,6 +1863,7 @@ const BookingPage = () => {
                                 scalar: 0.8,
                                 zIndex: 9999,
                               });
+                              scrollToSection('section-currency');
                             }
                           }}
                           className={cn(
@@ -1911,10 +1959,37 @@ const BookingPage = () => {
                                 <span className="text-xs sm:text-sm text-muted-foreground">{t("updatingPrice") || "Updating..."}</span>
                               </div>
                             ) : price ? (
-                              <p className="text-base sm:text-lg font-bold text-primary">
-                                {price} {preferredCurrency}
-                                {isHourlyBooking && <span className="text-xs sm:text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
-                              </p>
+                              <div className="space-y-1">
+                                {hasReturnTrip && !isHourlyBooking && isPromoCodeValid && promoDiscountPercent ? (
+                                  <>
+                                    <div className="flex items-center justify-between text-xs gap-2">
+                                      <span className="text-muted-foreground">{language === 'TR' ? 'Gidiş' : 'Outbound'}</span>
+                                      <span className="font-medium">{price} {preferredCurrency}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs gap-2">
+                                      <span className="text-muted-foreground flex items-center gap-1">
+                                        {language === 'TR' ? 'Dönüş' : 'Return'}
+                                        <span className="bg-green-500/20 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded font-semibold">-{promoDiscountPercent}%</span>
+                                      </span>
+                                      <span className="font-medium">
+                                        <span className="line-through text-muted-foreground mr-1">{price}</span>
+                                        {Math.round(price * (100 - promoDiscountPercent) / 100)} {preferredCurrency}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-1 border-t border-border">
+                                      <span className="text-sm font-semibold">{t("grandTotal") || "Total"}</span>
+                                      <span className="text-base font-bold text-primary">
+                                        {price + Math.round(price * (100 - promoDiscountPercent) / 100)} {preferredCurrency}
+                                      </span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <p className="text-base sm:text-lg font-bold text-primary">
+                                    {price} {preferredCurrency}
+                                    {isHourlyBooking && <span className="text-xs sm:text-sm font-normal text-muted-foreground"> / {selectedDuration}</span>}
+                                  </p>
+                                )}
+                              </div>
                             ) : (
                               <p className="text-xs sm:text-sm text-muted-foreground">
                                 {t("priceOnRequest") || "Price on request"}
@@ -1929,7 +2004,13 @@ const BookingPage = () => {
               </Card>
 
               {/* Currency Selection - Below Vehicle List */}
-              <Card className="border-2">
+              <Card id="section-currency" className={cn("border-2 transition-all duration-300", highlightSection === 'section-currency' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                {highlightSection === 'section-currency' && (
+                  <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                  </div>
+                )}
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
                     <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -1947,6 +2028,8 @@ const BookingPage = () => {
                         type="button"
                         onClick={() => {
                           setPreferredCurrency(currency.value);
+                          const nextSection = !isHourlyBooking && isTurkey ? 'section-return' : 'section-payment';
+                          scrollToSection(nextSection);
                           // Refetch prices with new currency
                           if (isHourlyBooking) {
                             // For hourly, prices are in DB currency, just update display
@@ -1956,7 +2039,11 @@ const BookingPage = () => {
                               body: {
                                 pickup: effectivePickup,
                                 dropoff: effectiveDropoff,
+                                pickup_place_id: pickupPlaceId || undefined,
+                                dropoff_place_id: dropoffPlaceId || undefined,
                                 customerCurrency: currency.value,
+                                pickup_date: effectiveDate || undefined,
+                                distance_km: distanceKm,
                               },
                             }).then(({ data }) => {
                               if (data?.prices) {
@@ -1985,10 +2072,17 @@ const BookingPage = () => {
 
               {/* Return Trip Option - Show discount promo ONLY for Turkey locations */}
               {!isHourlyBooking && (
-                <Card className={cn("border-2", isTurkey 
+                <Card id="section-return" className={cn("border-2 transition-all duration-300", isTurkey 
                   ? "border-green-200 bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20"
-                  : "border-muted"
+                  : "border-muted",
+                  highlightSection === 'section-return' && "ring-2 ring-primary ring-offset-2 shadow-lg"
                 )}>
+                  {highlightSection === 'section-return' && (
+                    <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                      <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                    </div>
+                  )}
                   <CardContent className="p-4 sm:p-6 space-y-4">
                     <div 
                       className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg sm:rounded-xl cursor-pointer hover:shadow-lg transition-all ${
@@ -2007,6 +2101,7 @@ const BookingPage = () => {
                         if (isTurkey && newValue && activePromo.code && !promoCode) {
                           handlePromoCodeChange(activePromo.code);
                         }
+                        if (!newValue) scrollToSection('section-payment');
                       }}
                     >
                       <Checkbox
@@ -2023,6 +2118,7 @@ const BookingPage = () => {
                           if (isTurkey && newValue && activePromo.code && !promoCode) {
                             handlePromoCodeChange(activePromo.code);
                           }
+                          if (!newValue) scrollToSection('section-payment');
                         }}
                         className="h-5 w-5"
                       />
@@ -2068,7 +2164,10 @@ const BookingPage = () => {
                           <FloatingLabelDatePicker
                             label={t("returnDate") || "Return Date"}
                             date={returnDate ? parse(returnDate, 'yyyy-MM-dd', new Date()) : undefined}
-                            onSelect={(date) => setReturnDate(date ? format(date, 'yyyy-MM-dd') : '')}
+                            onSelect={(date) => {
+                              setReturnDate(date ? format(date, 'yyyy-MM-dd') : '');
+                              if (date && returnTime) scrollToSection('section-payment');
+                            }}
                             icon={<Calendar className="h-4 w-4" />}
                             disabledDates={(date) => {
                               const pickupDate = urlDate ? parse(urlDate, 'yyyy-MM-dd', new Date()) : new Date();
@@ -2082,7 +2181,10 @@ const BookingPage = () => {
                         <div>
                           <TimePickerGrid
                             value={returnTime || "10:00"}
-                            onValueChange={setReturnTime}
+                            onValueChange={(v) => {
+                              setReturnTime(v);
+                              if (returnDate && v) scrollToSection('section-payment');
+                            }}
                             label={t("returnTime") || "Return Time"}
                             allowFullscreen
                             className="h-12"
@@ -2095,7 +2197,41 @@ const BookingPage = () => {
               )}
 
               {/* Payment Options */}
-              <Card className="border-2">
+              <Card id="section-payment" className={cn("border-2 transition-all duration-300", highlightSection === 'section-payment' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                {highlightSection === 'section-payment' && (
+                  <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                  </div>
+                )}
+                {/* Dönüş indirim detayı - Return discount summary */}
+                {hasReturnTrip && !isHourlyBooking && isPromoCodeValid && promoDiscountPercent && selectedPrice && (
+                  <div className="mx-4 mt-4 p-3 sm:p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-300 font-semibold mb-2">
+                      <Percent className="h-4 w-4" />
+                      {language === 'TR' ? 'Dönüş İndirimi' : 'Return Discount'}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{language === 'TR' ? 'Gidiş' : 'Outbound'}</span>
+                        <span className="font-medium">{selectedPrice} {preferredCurrency}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          {language === 'TR' ? 'Dönüş' : 'Return'}
+                          <span className="text-green-600 dark:text-green-400">(-{promoDiscountPercent}%)</span>
+                        </span>
+                        <span className="font-medium">
+                          {Math.round(selectedPrice * (100 - promoDiscountPercent) / 100)} {preferredCurrency}
+                        </span>
+                      </div>
+                      <div className="col-span-2 pt-2 mt-1 border-t border-green-200 dark:border-green-800 flex justify-between font-bold">
+                        <span>{t("grandTotal") || "Grand Total"}</span>
+                        <span className="text-primary">{selectedPrice + Math.round(selectedPrice * (100 - promoDiscountPercent) / 100)} {preferredCurrency}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -2105,7 +2241,10 @@ const BookingPage = () => {
                 <CardContent className="p-4 sm:p-6 pt-0">
                   <RadioGroup
                     value={paymentType}
-                    onValueChange={(value) => setPaymentType(value as "cash" | "credit_card" | "online")}
+                    onValueChange={(value) => {
+                      setPaymentType(value as "cash" | "credit_card" | "online");
+                      if (!user) scrollToSection('section-customer');
+                    }}
                     className="space-y-3"
                   >
                     <div className={cn(
@@ -2139,8 +2278,15 @@ const BookingPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Customer Information - Login Required Section */}
-              <Card className="border-2">
+              {/* Customer Information - Sadece giriş yapmamış (ilk defa) müşterilere göster */}
+              {!user && (
+              <Card id="section-customer" className={cn("border-2 transition-all duration-300", highlightSection === 'section-customer' && "ring-2 ring-primary ring-offset-2 shadow-lg")}>
+                {highlightSection === 'section-customer' && (
+                  <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center gap-2">
+                    <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-semibold text-primary">{t("makeSelection") || (language === 'TR' ? 'Seçim yapın' : 'Make your selection')}</span>
+                  </div>
+                )}
                 <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-foreground">
                     <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -2166,13 +2312,13 @@ const BookingPage = () => {
                         </div>
                       )}
                       
-                      {/* Google Sign In Button */}
+                      {/* Google Sign In - kayıt + rezervasyon onayı aynı anda */}
                       <Button
                         type="button"
                         variant="outline"
                         className="w-full h-12 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200"
                         onClick={handleGoogleSignIn}
-                        disabled={googleLoading || appleLoading}
+                        disabled={googleLoading}
                       >
                         {googleLoading ? (
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -2184,28 +2330,10 @@ const BookingPage = () => {
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                           </svg>
                         )}
-                        {t("signWithGoogle") || "Sign With Google"}
+                        {t("signWithGoogleAndConfirm") || (language === 'TR' ? "Google ile Giriş ve Onayla" : "Sign with Google and Confirm")}
                       </Button>
                       
-                      {/* Apple Sign In Button */}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full h-12 bg-black hover:bg-gray-900 text-white border-2 border-black"
-                        onClick={handleAppleSignIn}
-                        disabled={googleLoading || appleLoading}
-                      >
-                        {appleLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                          </svg>
-                        )}
-                        {t("signWithApple") || "Sign With Apple"}
-                      </Button>
-                      
-                      {/* Manual Login Button */}
+                      {/* Manuel Giriş ve Onayla */}
                       <Button
                         type="button"
                         variant="outline"
@@ -2215,7 +2343,7 @@ const BookingPage = () => {
                         <User className="h-5 w-5 mr-2" />
                         {showManualForm 
                           ? (language === 'TR' ? "Formu Gizle" : "Hide Form")
-                          : (language === 'TR' ? "Manuel Giriş" : "Manual Login")
+                          : (t("manualLoginAndConfirm") || (language === 'TR' ? "Manuel Giriş ve Onayla" : "Manual Login and Confirm"))
                         }
                       </Button>
                     </div>
@@ -2407,9 +2535,12 @@ const BookingPage = () => {
                   )}
                 </CardContent>
               </Card>
+              )}
+
             </div>
 
-            {/* Sidebar - Price Summary - Hidden on mobile */}
+            {/* Sidebar - Fiyat ve Onay - Sadece giriş yapmış misafirlere */}
+            {user && vehicleType && (
             <div className="lg:col-span-1 hidden lg:block">
               <div className="sticky top-24">
                 <Card className="shadow-xl border-2 border-primary/30">
@@ -2624,11 +2755,13 @@ const BookingPage = () => {
                 </Card>
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
       
-      {/* Mobile Sticky Footer */}
+      {/* Mobile Sticky Footer - Sadece giriş yapmış misafirlere */}
+      {user && vehicleType && (
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t-2 border-primary/20 p-3 sm:p-4 shadow-2xl z-[100]" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="flex items-center gap-3 max-w-lg mx-auto">
           <div className="flex-1 min-w-0">
@@ -2689,6 +2822,7 @@ const BookingPage = () => {
           </Button>
         </div>
       </div>
+      )}
       
       {/* Spacer for mobile sticky footer */}
       <div className="lg:hidden h-24" />

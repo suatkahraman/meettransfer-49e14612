@@ -165,6 +165,9 @@ verify_jwt = true
 [functions.get-customer-reservations]
 verify_jwt = false
 
+[functions.get-user-role]
+verify_jwt = false
+
 [functions.get-google-reviews]
 verify_jwt = false
 

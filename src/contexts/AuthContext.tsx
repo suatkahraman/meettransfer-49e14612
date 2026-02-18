@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { isIOSDevice } from '@/lib/platformDetect';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { startOAuthSignIn } from '@/lib/oauthSignIn';
@@ -25,46 +26,101 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 5;
+
+    // Enhanced iOS Safari session persistence
+    const checkSessionWithRetry = async (isRetry = false): Promise<Session | null> => {
+      try {
+        let { data: { session } } = await supabase.auth.getSession();
+        
+        // iOS Safari specific: Handle storage delays and ITP issues
+        if (!session && isIOSDevice() && retryCount < maxRetries) {
+          console.log(`[AuthContext] Session check ${retryCount + 1}/${maxRetries} - iOS Safari retry`);
+          
+          // Progressive backoff for iOS Safari
+          const delays = isRetry ? [100, 200, 400, 800, 1600] : [50, 100, 200, 400, 800];
+          
+          for (let i = 0; i < delays.length && !session && retryCount < maxRetries; i++) {
+            await new Promise(r => setTimeout(r, delays[i]));
+            retryCount++;
+            
+            try {
+              const retry = await supabase.auth.getSession();
+              session = retry.data.session;
+              if (session) {
+                console.log('[AuthContext] Session found on retry', retryCount);
+                break;
+              }
+            } catch (retryErr) {
+              console.warn(`[AuthContext] Retry ${retryCount} failed:`, retryErr);
+            }
+          }
+        }
+        
+        return session;
+      } catch (error) {
+        console.error('[AuthContext] Session check error:', error);
+        return null;
+      }
+    };
 
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         if (!isMounted) return;
-        
-        console.log('[AuthContext] onAuthStateChange event:', event);
-        
+
+        console.log('[AuthContext] Auth state change:', event);
+
         // Handle sign out - ensure clean state
         if (event === 'SIGNED_OUT') {
-          console.log('[AuthContext] User signed out, clearing state');
           setSession(null);
           setUser(null);
+          retryCount = 0; // Reset retry count on sign out
           return;
         }
-        
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        // INITIAL auth load controls loading; onAuthStateChange should not.
 
-        // Do not auto-redirect on sign-in here.
-        // Redirecting is handled by dedicated pages (OAuthCallback) and login screens.
+        // Handle sign in - update state but don't redirect
         if (event === 'SIGNED_IN') {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          retryCount = 0; // Reset retry count on successful sign in
           return;
+        }
+
+        // Handle token refresh and other events
+        if (currentSession) {
+          setSession(currentSession);
+          setUser(currentSession.user);
         }
       }
     );
 
-    // THEN check for existing session (including OAuth callback tokens in URL)
+    // Enhanced session initialization for iOS Safari
     const initializeAuth = async () => {
       try {
-        // This call will also process any access_token in the URL hash
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        const existingSession = await checkSessionWithRetry();
         
         if (isMounted) {
           setSession(existingSession);
           setUser(existingSession?.user ?? null);
+          
+          // Additional check for iOS Safari after page load
+          if (isIOSDevice() && !existingSession) {
+            setTimeout(async () => {
+              if (isMounted) {
+                const lateSession = await checkSessionWithRetry(true);
+                if (lateSession && !session) {
+                  console.log('[AuthContext] Late session discovery on iOS Safari');
+                  setSession(lateSession);
+                  setUser(lateSession.user);
+                }
+              }
+            }, 2000); // Check again after 2 seconds
+          }
         }
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        console.error('[AuthContext] Auth initialization error:', error);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -72,6 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     initializeAuth();
 
+    // Cleanup function
     return () => {
       isMounted = false;
       subscription.unsubscribe();
@@ -150,21 +207,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      console.log('[AuthContext] Signing out...');
       // Clear state immediately before calling signOut
       setUser(null);
       setSession(null);
-      
+
       // Use scope: 'global' to sign out from all tabs/windows
       const { error } = await supabase.auth.signOut({ scope: 'global' });
-      
+
       if (error) {
         console.error('[AuthContext] Sign out error:', error);
         toast.error('Error signing out');
         return;
       }
-      
-      console.log('[AuthContext] Signed out successfully');
+
       toast.success('Signed out successfully');
       navigate('/auth', { replace: true });
     } catch (error) {

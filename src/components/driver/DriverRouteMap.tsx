@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from '@/components/ui/button';
 import { Navigation, MapPin, Phone, ExternalLink, Loader2, Clock, Route } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isIOSDevice } from '@/lib/platformDetect';
 
 interface DriverRouteMapProps {
   pickup: string;
@@ -245,11 +246,8 @@ const DriverRouteMap = ({ pickup, dropoff, customerPhone, className }: DriverRou
   // Open navigation in external app
   const openNavigation = (destination: Coordinates | null, address: string) => {
     if (!destination) return;
-    
-    // Try to detect platform and open appropriate navigation
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isIOS = isIOSDevice();
     const isAndroid = /Android/.test(navigator.userAgent);
-    
     if (isIOS) {
       // Apple Maps
       window.open(`maps://maps.apple.com/?daddr=${destination.lat},${destination.lng}&dirflg=d`, '_blank');

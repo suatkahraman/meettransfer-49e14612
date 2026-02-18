@@ -3,6 +3,7 @@ import { ArrowRight, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { safeBlogSlug } from "@/utils/slug";
 import { useBlogT } from "@/components/blog/BlogLayout";
 import OptimizedBlogImage from "./OptimizedBlogImage";
 import { useCallback } from "react";
@@ -242,6 +243,16 @@ export const allBlogPosts = [
     image: "/images/ai-chat-assistant.png",
   },
   {
+    id: "travel-assistant-ai-seamless-booking",
+    titleKey: "blogTravelAsstTitle",
+    descriptionKey: "blogTravelAsstDesc",
+    category: "Technology",
+    categoryKey: "technology",
+    readTime: 8,
+    date: "2025-02-15",
+    image: "/images/ai-chat-assistant.png",
+  },
+  {
     id: "cappadocia-airport-transfer-guide",
     titleKey: "blogCappadociaTitle",
     descriptionKey: "blogCappadociaDesc",
@@ -463,7 +474,7 @@ const RelatedArticles = ({
         {relatedArticles.map((post) => (
           <Link 
             key={post.id} 
-            to={getLocalizedPath(`/blog/${post.id}`)}
+            to={getLocalizedPath(`/blog/${safeBlogSlug(post.id)}`)}
             className="group"
           >
             <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50">

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import GooglePlacesAutocomplete from "@/components/ui/google-places-autocomplete
 import { MapPin, Users, Briefcase, ArrowRight, Loader2, Car, Sparkles, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { getDirections, geocodeAddress } from "@/utils/googleMapsLoader";
 
 interface VehiclePriceInfo {
   vehicleType: string;
@@ -23,6 +24,7 @@ interface PriceResult {
   matched: boolean;
   matchedCity?: string;
   matchedAirport?: string;
+  error?: string; // v3.0.3: Error message from backend
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -39,9 +41,39 @@ const LivePriceCalculator = () => {
   
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [priceResult, setPriceResult] = useState<PriceResult | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [eurToDisplayRate, setEurToDisplayRate] = useState<number>(1);
+
+  const displayCurrency = (() => {
+    switch (language) {
+      case "TR": return "TRY";
+      case "RU": return "EUR";
+      case "DE": return "EUR";
+      case "FR": return "EUR";
+      case "AR": return "AED";
+      case "UK": return "EUR";
+      default: return "EUR";
+    }
+  })();
+
+  useEffect(() => {
+    if (displayCurrency === "EUR") {
+      setEurToDisplayRate(1);
+      return;
+    }
+    supabase.functions.invoke("get-exchange-rate", {
+      body: { from_currency: "EUR", to_currency: displayCurrency },
+    })
+      .then(({ data }) => { if (data?.rate) setEurToDisplayRate(data.rate); })
+      .catch(() => {
+        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+        setEurToDisplayRate(fallback[displayCurrency] ?? 1);
+      });
+  }, [displayCurrency]);
 
   const getCurrencyByLanguage = (): string => {
     switch (language) {
@@ -62,11 +94,33 @@ const LivePriceCalculator = () => {
     setHasSearched(true);
     
     try {
+      // Calculate distance using Google Maps
+      let distanceKm: number | null = null;
+      let pCoords = pickupCoords;
+      let dCoords = dropoffCoords;
+
+      // If coords are missing but we have addresses, try to geocode
+      if (!pCoords && pickup) {
+        pCoords = await geocodeAddress(pickup);
+      }
+      if (!dCoords && dropoff) {
+        dCoords = await geocodeAddress(dropoff);
+      }
+
+      if (pCoords && dCoords) {
+        const directions = await getDirections(pCoords, dCoords);
+        if (directions?.distanceKm) {
+          distanceKm = directions.distanceKm;
+          console.log("Calculated distance:", distanceKm, "km");
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
         body: {
           pickup,
           dropoff,
-          customerCurrency: getCurrencyByLanguage(),
+          customerCurrency: "EUR",
+          distance_km: distanceKm, // Pass calculated distance
         },
       });
 
@@ -78,16 +132,26 @@ const LivePriceCalculator = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [pickup, dropoff, language]);
+  }, [pickup, dropoff, pickupCoords, dropoffCoords, language]);
 
-  const handlePickupSelect = (value: string, details?: { formattedAddress: string }) => {
+  const handlePickupSelect = (value: string, details?: { formattedAddress: string, lat?: number | null, lng?: number | null }) => {
     setPickup(details?.formattedAddress || value);
+    if (details?.lat && details?.lng) {
+      setPickupCoords({ lat: details.lat, lng: details.lng });
+    } else {
+      setPickupCoords(null);
+    }
     setPriceResult(null);
     setHasSearched(false);
   };
 
-  const handleDropoffSelect = (value: string, details?: { formattedAddress: string }) => {
+  const handleDropoffSelect = (value: string, details?: { formattedAddress: string, lat?: number | null, lng?: number | null }) => {
     setDropoff(details?.formattedAddress || value);
+    if (details?.lat && details?.lng) {
+      setDropoffCoords({ lat: details.lat, lng: details.lng });
+    } else {
+      setDropoffCoords(null);
+    }
     setPriceResult(null);
     setHasSearched(false);
   };
@@ -98,12 +162,14 @@ const LivePriceCalculator = () => {
       dropoff,
       vehicle: vehicleType,
     });
+    if (displayCurrency !== "EUR") params.set("currency", displayCurrency);
     navigate(`/quick-booking?${params.toString()}`);
   };
 
-  const formatPrice = (price: number, currency: string) => {
-    const symbol = CURRENCY_SYMBOLS[currency] || currency;
-    return `${symbol}${price.toLocaleString()}`;
+  const formatPrice = (priceEur: number) => {
+    const displayPrice = displayCurrency === "EUR" ? Math.round(priceEur) : Math.round(priceEur * eurToDisplayRate);
+    const sym = CURRENCY_SYMBOLS[displayCurrency] || displayCurrency;
+    return `${sym}${displayPrice.toLocaleString()}`;
   };
 
   const availablePrices = priceResult?.prices.filter(v => v.available) || [];
@@ -204,7 +270,34 @@ const LivePriceCalculator = () => {
             </motion.div>
           )}
 
-          {!isLoading && hasSearched && priceResult && (
+          {!isLoading && hasSearched && priceResult?.error && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="mt-8 text-center"
+            >
+              <Card className="p-6 border-destructive/20 bg-destructive/5 inline-block max-w-md mx-auto">
+                <p className="text-destructive font-medium mb-2">
+                  {t("priceCalculationError") || "Error calculating price"}
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {priceResult.error}
+                </p>
+                 <Button
+                    onClick={() => navigate("/quick-booking")}
+                    variant="outline"
+                    className="mt-2"
+                  >
+                    {t("requestPrice") || "Request Manual Price"}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+              </Card>
+            </motion.div>
+          )}
+
+          {!isLoading && hasSearched && priceResult && !priceResult.error && (
             <motion.div
               key="results"
               initial={{ opacity: 0, y: 20 }}
@@ -245,7 +338,7 @@ const LivePriceCalculator = () => {
                             </div>
 
                             <div className="text-2xl font-bold text-primary mb-4">
-                              {formatPrice(vehicle.price!, vehicle.currency)}
+                              {formatPrice(vehicle.price!)}
                             </div>
                           </div>
 

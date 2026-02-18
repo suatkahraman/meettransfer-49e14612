@@ -218,6 +218,32 @@ export function usePendingBookingStorage() {
   };
 }
 
+// localStorage yedek - OAuth sonrasi sessionStorage kaybolabiliyor (Safari/mobil)
+function safeLocalGet(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function safeLocalSet(key: string, value: string): boolean {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function safeLocalRemove(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
+const PENDING_BOOKING_LOCAL_BACKUP = 'pending_booking_backup';
+
 /**
  * Static utility functions for use outside of React components
  */
@@ -227,11 +253,20 @@ export const PendingBookingStorage = {
       ...data,
       savedAt: new Date().toISOString(),
     };
-    return safeSessionSet(PENDING_BOOKING_KEY, JSON.stringify(dataWithTimestamp));
+    const json = JSON.stringify(dataWithTimestamp);
+    const ok = safeSessionSet(PENDING_BOOKING_KEY, json);
+    // OAuth sonrasi sessionStorage kaybina karsi localStorage yedek
+    if (ok && data.pickup && data.dropoff) {
+      safeLocalSet(PENDING_BOOKING_LOCAL_BACKUP, json);
+    }
+    return ok;
   },
   
   load: (): PendingBookingData | null => {
-    const saved = safeSessionGet(PENDING_BOOKING_KEY);
+    let saved = safeSessionGet(PENDING_BOOKING_KEY);
+    if (!saved) {
+      saved = safeLocalGet(PENDING_BOOKING_LOCAL_BACKUP);
+    }
     if (!saved) return null;
     try {
       return JSON.parse(saved);
@@ -243,6 +278,7 @@ export const PendingBookingStorage = {
   clear: (): void => {
     safeSessionRemove(PENDING_BOOKING_KEY);
     safeSessionRemove(PENDING_TOKEN_KEY);
+    safeLocalRemove(PENDING_BOOKING_LOCAL_BACKUP);
     try {
       localStorage.removeItem('pending_booking_token');
       localStorage.removeItem('pending_booking_data');

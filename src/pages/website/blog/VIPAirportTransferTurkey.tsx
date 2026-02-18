@@ -3,7 +3,7 @@ import WebsiteLayout from "@/components/website/WebsiteLayout";
 import { SEOHead, SchemaOrg } from "@/components/seo";
 import { Footer } from "@/components/Footer";
 import { Link } from "react-router-dom";
-import { ChevronRight, Shield, Clock, Crown, Users, Star, CheckCircle, Gem, Car, Sparkles, Award, Wine } from "lucide-react";
+import { ChevronRight, Shield, Clock, Crown, Users, Star, CheckCircle, Gem, Car, Sparkles, Award, Wine, ArrowLeft } from "lucide-react";
 import ReadingProgressBar from "@/components/website/ReadingProgressBar";
 import TableOfContents from "@/components/website/TableOfContents";
 import ShareButtons from "@/components/website/ShareButtons";
@@ -14,7 +14,7 @@ import OptimizedBlogImage from "@/components/website/OptimizedBlogImage";
 import heroImage from "@/assets/mercedes-maybach-interior.jpg";
 
 const VIPAirportTransferTurkey = () => {
-  const { t, language } = useLanguage();
+  const { t, language, getLocalizedPath } = useLanguage();
   const { formatBlogDate } = useBlogDate();
   const formattedDate = formatBlogDate("2025-01-16");
 
@@ -123,11 +123,14 @@ const VIPAirportTransferTurkey = () => {
       {/* Hero Section */}
       <section className="relative pt-20 pb-16 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto px-4 max-w-4xl">
-          {/* Breadcrumb */}
+          {/* Back to Blog + Breadcrumb */}
+          <Link to={getLocalizedPath("/blog")} className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Back to Blog
+          </Link>
           <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-            <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+            <Link to={getLocalizedPath("/")} className="hover:text-primary transition-colors">Home</Link>
             <ChevronRight className="h-4 w-4" />
-            <Link to="/blog" className="hover:text-primary transition-colors">Blog</Link>
+            <Link to={getLocalizedPath("/blog")} className="hover:text-primary transition-colors">Blog</Link>
             <ChevronRight className="h-4 w-4" />
             <span className="text-foreground">VIP Airport Transfer Turkey</span>
           </nav>

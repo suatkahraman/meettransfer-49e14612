@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { isIOSDevice } from '@/lib/platformDetect';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -77,11 +78,8 @@ export function usePWAInstall() {
     const userAgent = window.navigator.userAgent;
     const userAgentLower = userAgent.toLowerCase();
     
-    // iOS detection (including iPad Pro with desktop Safari)
-    const isIOSDevice = (
-      /iphone|ipad|ipod/i.test(userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-    ) && !('MSStream' in window);
+    // iOS detection (including iPad Pro with desktop Safari) - uses shared helper
+    const isIOSDeviceVal = isIOSDevice() && !('MSStream' in window);
     
     // Android detection
     const isAndroidDevice = /android/i.test(userAgent);
@@ -233,7 +231,7 @@ export function usePWAInstall() {
     
     // Log browser info for debugging
     console.log('[PWA] Browser detected:', browser);
-    console.log('[PWA] Platform:', { isIOS: isIOSDevice, isAndroid: isAndroidDevice });
+    console.log('[PWA] Platform:', { isIOS: isIOSDeviceVal, isAndroid: isAndroidDevice });
 
     // Check if running in standalone mode (already installed)
     const isIOSStandalone = (window.navigator as any).standalone === true;
@@ -246,11 +244,11 @@ export function usePWAInstall() {
 
     setIsStandalone(standalone);
     setIsInstalled(standalone);
-    setIsIOS(isIOSDevice);
+    setIsIOS(isIOSDeviceVal);
     setIsAndroid(isAndroidDevice);
 
     // For iOS, set canInstall to true if not already installed (manual install)
-    if (isIOSDevice && !standalone && browser.name === 'Safari') {
+    if (isIOSDeviceVal && !standalone && browser.name === 'Safari') {
       setCanInstall(true);
     }
 
@@ -320,7 +318,7 @@ export function usePWAInstall() {
           user_id: user?.id || null,
           device: /mobile|tablet/i.test(userAgent) ? 'mobile' : 'desktop',
           browser: browser.name,
-          platform: isIOSDevice ? 'iOS' : isAndroidDevice ? 'Android' : 'Desktop',
+          platform: isIOSDeviceVal ? 'iOS' : isAndroidDevice ? 'Android' : 'Desktop',
           country_code: geo?.countryCode || null,
           country_name: geo?.countryName || null,
           city: geo?.city || null,

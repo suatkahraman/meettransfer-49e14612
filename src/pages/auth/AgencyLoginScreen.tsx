@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
 import { ArrowLeft, Loader2, Building2, User, KeyRound, Share2, Check } from 'lucide-react';
@@ -26,6 +28,7 @@ const loginSchema = z.object({
 type ViewMode = 'login' | 'reset' | '2fa';
 
 const AgencyLoginScreen = () => {
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('login');
@@ -73,6 +76,17 @@ const AgencyLoginScreen = () => {
       return () => clearInterval(interval);
     }
   }, [rateLimitStatus.locked, rateLimitStatus.remainingSeconds]);
+
+  // OAuth role_mismatch: Google ile acenta olmayan hesap girişi denendi
+  useEffect(() => {
+    const err = searchParams.get('error');
+    if (err === 'role_mismatch') {
+      toast.error(language === 'TR'
+        ? 'Bu hesap bir acenta hesabı değil. Acenta girişi için e-posta ve şifre kullanın.'
+        : 'This is not an agency account. Use email and password for agency login.');
+      window.history.replaceState(null, '', '/login/agency');
+    }
+  }, [searchParams, language]);
 
   const handleShare = async () => {
     const shareUrl = window.location.origin + '/login/agency';
@@ -248,15 +262,6 @@ const AgencyLoginScreen = () => {
         await logLoginAttempt(validation.email, false, error.message, undefined, 'agency');
         
         if (error.message?.includes('Invalid login credentials')) {
-          // Check if failed attempts require 2FA verification
-          const updatedRateLimit = await checkRateLimit(validation.email);
-          const failedAttempts = updatedRateLimit.failedAttempts || 0;
-          
-          // After 2+ failed attempts, require 2FA on next successful login
-          if (failedAttempts >= 2) {
-            safeLocalSet(`require2FA_${validation.email}`, 'true');
-          }
-          
           setErrors({ password: t('invalidCredentials') || 'Invalid email or password' });
         } else if (error.message?.includes('Email not confirmed')) {
           toast.error(t('emailNotConfirmed') || 'Please confirm your email first');
@@ -265,25 +270,32 @@ const AgencyLoginScreen = () => {
         } else {
           toast.error(error.message || t('loginFailed') || 'Login failed');
         }
-      } else if (authData?.user) {
-        // Check user role
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', authData.user.id)
-          .single();
+      } else if (authData?.user && authData?.session) {
+        // RLS bypass: get-user-role - ayni cihaz 2. giris retry
+        const token = authData.session.access_token;
+        let userRole = 'agency';
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (attempt > 0) await new Promise((r) => setTimeout(r, 300 * attempt));
+          const { data } = await supabase.functions.invoke('get-user-role', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (data?.success && data?.role) {
+            userRole = data.role;
+            break;
+          }
+        }
+        if (userRole !== 'agency') {
+          await supabase.auth.signOut();
+          toast.error(language === 'TR' ? 'Bu hesap bir acenta hesabı değil' : 'This is not an agency account');
+          setIsLoading(false);
+          clearSuppressAuthRedirect();
+          return;
+        }
         
-        const userRole = roleData?.role || 'agency';
-        
-        // Check if 2FA is required due to previous failed attempts
-        const require2FAKey = `require2FA_${validation.email}`;
-        const require2FADueToFailedAttempts = safeLocalGet(require2FAKey) === 'true';
-        
-        // Check if device is trusted
+        // 2FA sadece güvenilmeyen (yeni) cihazdan girişte
         const isTrusted = await checkTrustedDevice(authData.user.id);
         
-        // Require 2FA if: device not trusted OR there were failed login attempts
-        if (!isTrusted || require2FADueToFailedAttempts) {
+        if (!isTrusted) {
           keepRedirectSuppressed = true;
 
           // IMPORTANT: Switch UI to 2FA immediately to avoid redirect race conditions
@@ -300,8 +312,6 @@ const AgencyLoginScreen = () => {
 
           if (result.success) {
             toast.info(language === 'TR' ? 'Doğrulama kodu email adresinize gönderildi' : 'Verification code sent to your email');
-            // Clear the flag after initiating 2FA
-            safeLocalRemove(require2FAKey);
           } else {
             // Email sending failed - revert back to login screen
             toast.error(result.error || (language === 'TR' ? 'Doğrulama kodu gönderilemedi. Lütfen tekrar deneyin.' : 'Failed to send verification code. Please try again.'));
@@ -310,8 +320,11 @@ const AgencyLoginScreen = () => {
             keepRedirectSuppressed = false;
           }
         } else {
-          // Device trusted and no suspicious activity - proceed with login
           await logLoginAttempt(validation.email, true, undefined, undefined, userRole);
+          await supabase.auth.refreshSession();
+          await new Promise((r) => setTimeout(r, 150));
+          window.location.replace('/agency');
+          return;
         }
       }
     } catch (error) {
@@ -529,6 +542,15 @@ const AgencyLoginScreen = () => {
           </CardHeader>
           
           <CardContent className="space-y-4">
+            <SocialAuthButtons disabled={isLoading} mode="login" expectedRole="agency" />
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">{t("or") || "or"}</span>
+              </div>
+            </div>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">{t("email") || "Email"}</Label>
@@ -612,7 +634,7 @@ const AgencyLoginScreen = () => {
             </Link>
             <div className="text-center text-sm text-muted-foreground">
               {t("areYouGuest") || "Are you a guest?"}{' '}
-              <Link to="/login" className="text-accent hover:underline inline-flex items-center gap-1">
+              <Link to="/login?role=customer" className="text-accent hover:underline inline-flex items-center gap-1">
                 <User className="h-3 w-3" />
                 {t("guestLogin") || "Guest Login"}
               </Link>

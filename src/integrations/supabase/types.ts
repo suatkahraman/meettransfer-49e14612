@@ -485,6 +485,51 @@ export type Database = {
         }
         Relationships: []
       }
+      distance_pricing_rules: {
+        Row: {
+          airport_code: string | null
+          base_price: number | null
+          city: string | null
+          created_at: string
+          end_date: string | null
+          extra_km_price: number | null
+          id: string
+          max_km: number | null
+          min_km: number | null
+          pricing_mode: string
+          start_date: string | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          airport_code?: string | null
+          base_price?: number | null
+          city?: string | null
+          created_at?: string
+          end_date?: string | null
+          extra_km_price?: number | null
+          id?: string
+          max_km?: number | null
+          min_km?: number | null
+          pricing_mode?: string
+          start_date?: string | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          airport_code?: string | null
+          base_price?: number | null
+          city?: string | null
+          created_at?: string
+          end_date?: string | null
+          extra_km_price?: number | null
+          id?: string
+          max_km?: number | null
+          min_km?: number | null
+          pricing_mode?: string
+          start_date?: string | null
+          vehicle_type?: string | null
+        }
+        Relationships: []
+      }
       driver_balances: {
         Row: {
           balance: number

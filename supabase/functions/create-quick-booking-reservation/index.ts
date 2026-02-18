@@ -38,8 +38,15 @@ function validateInput(data: unknown): { success: boolean; error?: string; data?
     }
   }
   
+  // Optional customerId (for OAuth - already logged-in user)
+  if (obj.customerId !== undefined && obj.customerId !== null) {
+    if (typeof obj.customerId !== 'string' || (obj.customerId as string).length !== 36) {
+      return { success: false, error: 'customerId must be a valid UUID string' };
+    }
+  }
+  
   // Optional string validations
-  const optionalStrings = ['bookingId', 'customerName', 'customerPhone', 'customerEmail', 'customerNotes', 'flightNumber', 'returnDate', 'returnTime', 'promoCode', 'customerPassword'];
+  const optionalStrings = ['bookingId', 'customerId', 'customerName', 'customerPhone', 'customerEmail', 'customerNotes', 'flightNumber', 'returnDate', 'returnTime', 'promoCode', 'customerPassword'];
   for (const field of optionalStrings) {
     if (obj[field] !== undefined && obj[field] !== null) {
       if (typeof obj[field] !== 'string') {
@@ -94,6 +101,9 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Parse Authorization for JWT verification (OAuth flow)
+    const authHeader = req.headers.get("Authorization");
+
     // Parse and validate input
     const rawData = await req.json();
     const validationResult = validateInput(rawData);
@@ -104,6 +114,7 @@ serve(async (req) => {
     
     const requestData = validationResult.data! as {
       bookingId?: string; // Now optional - only present for AI-assisted bookings
+      customerId?: string; // Optional - for OAuth users already logged in
       pickup: string;
       dropoff: string;
       pickupDate: string;
@@ -171,6 +182,11 @@ serve(async (req) => {
     const flightNumber = requestData.flightNumber || null;
     const passengerNames = requestData.passengerNames || null;
 
+    // Map payment_method: book page uses 'credit_card' but DB expects 'online'
+    const paymentType = (requestData.paymentMethod === 'credit_card' ? 'online' : requestData.paymentMethod) as string;
+    const validPaymentTypes = ['cash', 'payment_link', 'agency_pay', 'none', 'online'];
+    const safePaymentType = validPaymentTypes.includes(paymentType) ? paymentType : 'cash';
+
     // Use customer info from request (Step 2 form) - priority over quick booking data
     const finalCustomerName = requestData.customerName || "Guest";
     const finalCustomerPhone = requestData.customerPhone || "";
@@ -179,8 +195,32 @@ serve(async (req) => {
     // Handle user account - check existing first (for Google OAuth users)
     let customerId: string | null = null;
     let isExistingUser = false;
+
+    // OAuth flow: customerId provided + valid JWT => use directly (bypass listUsers)
+    if (requestData.customerId && authHeader) {
+      try {
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user } } = await supabase.auth.getUser(token);
+        if (user && user.id === requestData.customerId) {
+          customerId = requestData.customerId;
+          isExistingUser = true;
+          console.log("OAuth user verified:", customerId);
+          // Update profile with latest info
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert({
+              id: customerId,
+              full_name: finalCustomerName,
+              phone: finalCustomerPhone,
+            }, { onConflict: "id", ignoreDuplicates: false });
+          if (profileError) console.error("Error updating OAuth user profile:", profileError);
+        }
+      } catch (e) {
+        console.error("JWT verification failed:", e);
+      }
+    }
     
-    if (finalCustomerEmail) {
+    if (!customerId && finalCustomerEmail) {
       console.log("Checking for existing user:", finalCustomerEmail);
       
       // First check if user already exists (could be Google OAuth user)
@@ -280,6 +320,10 @@ serve(async (req) => {
       }
     }
 
+    // Status: awaiting-price when no price, else confirmed
+    const hasPrice = requestData.price != null && requestData.price > 0;
+    const reservationStatus = hasPrice ? "confirmed" : "awaiting-price";
+
     // Create main reservation with actual customer info
     const { data: reservation, error: reservationError } = await supabase
       .from("reservations")
@@ -292,8 +336,8 @@ serve(async (req) => {
         pickup_date: requestData.pickupDate,
         pickup_time: requestData.pickupTime,
         vehicle_type: requestData.vehicleType,
-        payment_type: requestData.paymentMethod,
-        status: "confirmed", // Now confirmed since customer info is complete
+        payment_type: safePaymentType,
+        status: reservationStatus,
         price: requestData.price,
         price_currency: requestData.priceCurrency,
         customer_notes: customerNotes,
@@ -356,8 +400,8 @@ serve(async (req) => {
           pickup_date: requestData.returnDate,
           pickup_time: requestData.returnTime,
           vehicle_type: requestData.vehicleType,
-          payment_type: requestData.paymentMethod,
-          status: "confirmed", // Now confirmed since customer info is complete
+          payment_type: safePaymentType,
+          status: reservationStatus,
           price: finalReturnPrice, // Use exact frontend price - NO FALLBACK to main price
           price_currency: requestData.priceCurrency,
           is_return_transfer: true,

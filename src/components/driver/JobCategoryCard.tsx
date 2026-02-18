@@ -53,45 +53,46 @@ const JobCategoryCard = ({
 
   return (
     <motion.button
+      type="button"
       onClick={onClick}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "w-full p-4 rounded-2xl border transition-all duration-200",
+        "w-full p-3 sm:p-4 min-h-[44px] rounded-2xl border transition-all duration-200 touch-manipulation",
         "backdrop-blur-sm shadow-lg hover:shadow-xl",
-        "flex items-center gap-4 text-left",
+        "flex items-center gap-3 sm:gap-4 text-left cursor-pointer",
         colors.bg,
         colors.border
       )}
     >
       {/* Icon */}
       <div className={cn(
-        "w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0",
+        "w-11 h-11 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center flex-shrink-0",
         "shadow-lg",
         colors.iconBg
       )}>
-        <Icon className="h-7 w-7 text-white" />
+        <Icon className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <h3 className="font-semibold text-foreground">{title}</h3>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-0.5">
+          <h3 className="font-semibold text-foreground text-sm sm:text-base">{title}</h3>
           <Badge className={cn("text-xs font-bold px-2 py-0.5", colors.badge)}>
             {count}
           </Badge>
         </div>
         
         {subtitle && (
-          <p className="text-xs text-muted-foreground">{subtitle}</p>
+          <p className="text-xs text-muted-foreground line-clamp-2">{subtitle}</p>
         )}
 
         {nextJob && count > 0 && (
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex items-center gap-1.5 sm:gap-2 min-w-0">
             <span className={cn("text-sm font-medium", colors.accent)}>
               {nextJob.time}
             </span>
-            <span className="text-xs text-muted-foreground truncate">
+            <span className="text-xs text-muted-foreground truncate min-w-0">
               {nextJob.route}
             </span>
           </div>
@@ -100,7 +101,7 @@ const JobCategoryCard = ({
 
       {/* Arrow */}
       <div className={cn(
-        "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
+        "hidden sm:flex w-8 h-8 rounded-full items-center justify-center flex-shrink-0",
         "bg-background/50"
       )}>
         <ChevronRight className="h-5 w-5 text-muted-foreground" />

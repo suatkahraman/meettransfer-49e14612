@@ -1,210 +1,48 @@
-import { Component, ReactNode } from "react";
-import { RefreshCw, AlertCircle, Wifi } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { HeroSkeleton } from "./HeroSkeleton";
+import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface State {
   hasError: boolean;
-  isRetrying: boolean;
-  retryCount: number;
-  isChunkError: boolean;
-  isRefreshing: boolean;
-  errorAt: number;
+  error?: Error;
 }
 
-function isChunkLoadError(error: Error): boolean {
-  const message = error.message?.toLowerCase() || "";
-  const name = error.name?.toLowerCase() || "";
-
-  return (
-    message.includes("loading chunk") ||
-    message.includes("loading css chunk") ||
-    message.includes("failed to fetch dynamically imported module") ||
-    message.includes("dynamically imported module") ||
-    message.includes("error loading dynamically imported module") ||
-    name.includes("chunkloaderror") ||
-    message.includes("unexpected token") ||
-    (message.includes("failed to fetch") && message.includes(".js"))
-  );
-}
-
-async function clearAllCaches(): Promise<void> {
-  if ("caches" in window) {
-    try {
-      const cacheNames = await caches.keys();
-      await Promise.all(
-        cacheNames.map((name) => {
-          // Keep push notification caches
-          if (!name.includes("push")) return caches.delete(name);
-          return Promise.resolve(false);
-        })
-      );
-    } catch (e) {
-      console.warn("[HeroErrorBoundary] Cache clear failed:", e);
-    }
-  }
-}
-
-async function unregisterServiceWorkers(): Promise<void> {
-  if ("serviceWorker" in navigator) {
-    try {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((r) => r.unregister()));
-    } catch (e) {
-      console.warn("[HeroErrorBoundary] SW unregister failed:", e);
-    }
-  }
-}
-
-class HeroErrorBoundary extends Component<Props, State> {
+export class HeroErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {
-      hasError: false,
-      isRetrying: false,
-      retryCount: 0,
-      isChunkError: false,
-      isRefreshing: false,
-      errorAt: 0,
-    };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
-    return { hasError: true, isChunkError: isChunkLoadError(error), errorAt: Date.now() };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("[HeroErrorBoundary] Error:", error);
-    console.error("[HeroErrorBoundary] Error info:", errorInfo);
-
-    // If it's a chunk error (stale cache / service worker), try a hard refresh
-    if (isChunkLoadError(error)) {
-      void this.handleHardRefresh();
-      return;
-    }
-
-    // Auto-retry once after a short delay
-    if (this.state.retryCount < 1) {
-      setTimeout(() => {
-        this.handleRetry();
-      }, 1500);
-    }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("[HeroErrorBoundary] Hero component crashed:", error, errorInfo);
   }
-
-  handleRetry = () => {
-    this.setState((prev) => ({
-      hasError: false,
-      isRetrying: true,
-      retryCount: prev.retryCount + 1,
-      isChunkError: false,
-      errorAt: 0,
-    }));
-
-    // Reset retrying state after a moment
-    setTimeout(() => {
-      this.setState({ isRetrying: false });
-    }, 500);
-  };
-
-  handleHardRefresh = async () => {
-    const lastRefreshKey = "hero_chunk_error_last_refresh";
-    const now = Date.now();
-
-    let lastRefresh: string | null = null;
-    try {
-      lastRefresh = sessionStorage.getItem(lastRefreshKey);
-    } catch {
-      // sessionStorage may be blocked in some browsers; ignore
-    }
-
-    // Prevent refresh loops (only if we can read the timestamp)
-    if (lastRefresh) {
-      const parsed = parseInt(lastRefresh, 10);
-      if (!Number.isNaN(parsed) && now - parsed < 30000) {
-        return;
-      }
-    }
-
-    try {
-      sessionStorage.setItem(lastRefreshKey, now.toString());
-    } catch {
-      // ignore
-    }
-
-    this.setState({ isRefreshing: true });
-
-    try {
-      await clearAllCaches();
-      await unregisterServiceWorkers();
-
-      // Force reload from server
-      window.location.href = window.location.href.split("?")[0] + "?_t=" + Date.now();
-    } catch (e) {
-      console.error("[HeroErrorBoundary] Hard refresh failed:", e);
-      window.location.reload();
-    }
-  };
-
-  handleRefresh = () => {
-    void this.handleHardRefresh();
-  };
 
   render() {
-    // During retry, don't swap the whole hero into a skeleton again; try rendering immediately.
-    if (this.state.isRetrying) {
-      return this.props.children;
-    }
-
     if (this.state.hasError) {
-      // Time-based skeleton (never data/locale/image-based). Keeps UX smooth without deadlocking.
-      const msSinceError = Date.now() - (this.state.errorAt || 0);
-      if (!this.state.isChunkError && msSinceError < 650) {
-        return <HeroSkeleton />;
-      }
-
       return (
-        <section className="relative overflow-hidden bg-background">
-          <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-background" />
-
-          <div className="container relative z-10 px-4 py-16 md:py-24">
-            <div className="max-w-md mx-auto text-center space-y-6">
-              {/* Icon */}
-              <div className="flex justify-center">
-                <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center">
-                  {this.state.isChunkError ? (
-                    <Wifi className="h-8 w-8 text-amber-500" />
-                  ) : (
-                    <AlertCircle className="h-8 w-8 text-amber-500" />
-                  )}
-                </div>
-              </div>
-
-              {/* Message */}
-              <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-foreground">
-                  {this.state.isChunkError ? "Yeni Sürüm Hazır" : "Yükleme Hatası"}
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {this.state.isChunkError
-                    ? "Sayfa güncellendi. Yeni sürümü yüklemek için sayfa yenilenecek."
-                    : "Rezervasyon formu yüklenirken bir sorun oluştu. Lütfen sayfayı yenileyin."}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button onClick={this.handleRetry} variant="outline" className="gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  Tekrar Dene
-                </Button>
-              </div>
-            </div>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="text-center max-w-md">
+            <h2 className="text-2xl font-bold text-destructive mb-4">
+              Oops! Something went wrong
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              We're having trouble loading the booking form. Please refresh the page.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+            >
+              Refresh Page
+            </button>
           </div>
-        </section>
+        </div>
       );
     }
 
@@ -213,4 +51,3 @@ class HeroErrorBoundary extends Component<Props, State> {
 }
 
 export default HeroErrorBoundary;
-

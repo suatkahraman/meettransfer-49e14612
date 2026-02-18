@@ -11,13 +11,13 @@ import TrustBar from "@/components/website/TrustBar";
 import LazyOnView from "@/components/performance/LazyOnView";
 import { IOSDownloadButton } from "@/components/website/IOSDownloadButton";
 
+// Eager load critical above-the-fold content to prevent "loading" issues
+import PromoBannerCarousel from "@/components/website/PromoBannerCarousel";
+import CoreServices from "@/components/website/CoreServices";
+import StatsCounter from "@/components/website/StatsCounter";
+import HowItWorks from "@/components/website/HowItWorks";
 
 // Below-the-fold components are lazy loaded with deferred imports
-// These load AFTER the critical hero section renders
-const PromoBannerCarousel = lazy(() => import("@/components/website/PromoBannerCarousel"));
-const CoreServices = lazy(() => import("@/components/website/CoreServices"));
-const StatsCounter = lazy(() => import("@/components/website/StatsCounter"));
-const HowItWorks = lazy(() => import("@/components/website/HowItWorks"));
 const FleetIconsBar = lazy(() => import("@/components/website/FleetIconsBar"));
 const Destinations = lazy(() => import("@/components/Destinations").then(m => ({ default: m.Destinations })));
 const WhyChooseUs = lazy(() => import("@/components/website/WhyChooseUs"));
@@ -59,29 +59,13 @@ const Index = () => {
       <TrustBar />
       
       {/* All below-the-fold content - deferred loading */}
-      <LazyOnView placeholder={<SectionPlaceholder />}>
-        <Suspense fallback={<SectionPlaceholder />}>
-          <PromoBannerCarousel />
-        </Suspense>
-      </LazyOnView>
+      <PromoBannerCarousel />
       
-      <LazyOnView placeholder={<SectionPlaceholder />}>
-        <Suspense fallback={<SectionPlaceholder />}>
-          <CoreServices />
-        </Suspense>
-      </LazyOnView>
+      <CoreServices />
       
-      <LazyOnView placeholder={<SectionPlaceholder />}>
-        <Suspense fallback={<SectionPlaceholder />}>
-          <StatsCounter />
-        </Suspense>
-      </LazyOnView>
+      <StatsCounter />
       
-      <LazyOnView placeholder={<SectionPlaceholder />}>
-        <Suspense fallback={<SectionPlaceholder />}>
-          <HowItWorks />
-        </Suspense>
-      </LazyOnView>
+      <HowItWorks />
       
       <LazyOnView placeholder={<SectionPlaceholder />}>
         <Suspense fallback={<SectionPlaceholder />}>

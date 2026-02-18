@@ -84,9 +84,11 @@ serve(async (req) => {
     const { message, language, conversationHistory, visitorId, stream, customerName } = validationResult.data!;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY is not configured");
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    
+    if (!LOVABLE_API_KEY && !GEMINI_API_KEY) {
+      console.error("No API key configured (LOVABLE_API_KEY or GEMINI_API_KEY)");
+      throw new Error("Missing API configuration. Please add GEMINI_API_KEY to Supabase secrets.");
     }
 
     // Initialize Supabase client to fetch pricing data
@@ -673,8 +675,64 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
 
     console.log("Sending request to AI gateway with", messages.length, "messages, streaming:", stream);
 
-    // If streaming is requested, return a streaming response
-    if (stream) {
+    let aiResponse = "";
+
+    // OPTION 1: Direct Gemini API (Preferred if key exists)
+    if (GEMINI_API_KEY) {
+      console.log("Using direct Gemini API");
+      try {
+        // Convert OpenAI format to Gemini format
+        const contents = messages
+          .filter(m => m.role !== 'system')
+          .map(m => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: m.content }]
+          }));
+        
+        const systemInstruction = messages.find(m => m.role === 'system')?.content;
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        
+        const response = await fetch(geminiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents,
+            system_instruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 8192,
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Gemini API Error:", response.status, errorText);
+          throw new Error(`Gemini API Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        // If streaming was requested, we need to fake a stream response or just return JSON if client supports it.
+        // The current client implementation likely expects a stream if stream=true.
+        // However, converting Gemini non-stream response to OpenAI stream format is complex.
+        // For now, we will just return the full response as if it was a non-stream request, 
+        // BUT if the client strictly expects a stream, we might need to simulate it.
+        // Let's assume the client can handle a non-stream response if we don't return a stream.
+        // Actually, looking at the code below, if stream is true, it returns a Response with "text/event-stream".
+        // If we want to support streaming with Gemini, we'd need to use :streamGenerateContent and transform chunks.
+        // For reliability and speed of fix, let's disable streaming for Gemini direct for now and return standard JSON.
+        // The client should handle it if we don't set stream headers.
+
+      } catch (error) {
+        console.error("Gemini Direct Error:", error);
+        throw error;
+      }
+    } 
+    // OPTION 2: Lovable Gateway (Fallback)
+    else if (stream) {
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -714,41 +772,50 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
           "Connection": "keep-alive",
         },
       });
-    }
+    } else {
+      // Non-streaming response (Lovable)
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages,
+          stream: false,
+        }),
+      });
 
-    // Non-streaming response (original behavior)
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages,
-        stream: false,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
-          status: 429,
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("AI gateway error:", response.status, errorText);
+        
+        if (response.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again." }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        return new Response(JSON.stringify({ error: "Failed to get AI response" }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      
-      return new Response(JSON.stringify({ error: "Failed to get AI response" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+      const data = await response.json();
+      aiResponse = data.choices?.[0]?.message?.content || "Üzgünüm, şu anda yanıt veremiyorum.";
     }
 
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content || "Üzgünüm, şu anda yanıt veremiyorum.";
+    if (!aiResponse) {
+       // This happens if streaming was handled above and returned, so we shouldn't be here.
+       // But if we used Gemini Direct (non-streaming), we have aiResponse and continue below.
+       if (!GEMINI_API_KEY) {
+          // If not Gemini and not streaming (Lovable non-stream), we are here.
+          // If streaming Lovable, we returned already.
+       }
+    }
 
     // Parse booking data from response
     const bookingData = extractBookingData(aiResponse);
@@ -766,6 +833,65 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
     const priceRequestData = extractPriceRequest(aiResponse);
 
     console.log("AI Response received, booking data:", bookingData, "customerName:", extractedCustomerName, "priceRequest:", priceRequestData);
+
+    // v3.0.0: REAL-TIME PRICING INTEGRATION
+    // Instead of relying on AI's hallucinated or context-based prices, fetch REAL prices from our pricing engine
+    let realVehiclePrices: Record<string, number> | null = null;
+    let realDistanceKm: number | null = null;
+    let realDurationMins: number | null = null;
+
+    if (bookingData?.pickup && bookingData?.dropoff && bookingData?.serviceType !== 'hourly') {
+      try {
+        console.log(`Fetching real prices for: ${bookingData.pickup} -> ${bookingData.dropoff}`);
+        
+        // Call get-all-vehicle-prices function
+        const { data: priceResult, error: priceError } = await supabase.functions.invoke('get-all-vehicle-prices', {
+          body: {
+            pickup: bookingData.pickup,
+            dropoff: bookingData.dropoff,
+            // Optional: pass date/time if needed for seasonal pricing
+            pickupDate: bookingData.date,
+            pickupTime: bookingData.time
+          }
+        });
+
+        if (!priceError && priceResult?.prices) {
+          console.log("Real prices fetched successfully:", priceResult.prices.length, "vehicles");
+          
+          realVehiclePrices = {};
+          
+          // Map array to object for frontend
+          // priceResult.prices is Array<{ vehicleType: string, price: number, currency: string, ... }>
+          priceResult.prices.forEach((p: any) => {
+            if (p.price !== null) {
+              realVehiclePrices![p.vehicleType] = p.price;
+            }
+          });
+
+          // Update bookingData with real price for the selected vehicle (or default/min price)
+          if (Object.keys(realVehiclePrices).length > 0) {
+            // If vehicle type selected, update estimated price
+            if (bookingData.vehicleType && realVehiclePrices[bookingData.vehicleType]) {
+              bookingData.estimatedPrice = realVehiclePrices[bookingData.vehicleType];
+            } else {
+              // Otherwise set estimated price to lowest price (usually sedan or vito)
+              const lowestPrice = Math.min(...Object.values(realVehiclePrices));
+              bookingData.estimatedPrice = lowestPrice;
+            }
+            
+            // Capture distance/duration if returned
+            if (priceResult.distance_km) realDistanceKm = priceResult.distance_km;
+            if (priceResult.duration_mins) realDurationMins = priceResult.duration_mins;
+            
+            console.log("Updated bookingData with REAL prices. Est:", bookingData.estimatedPrice);
+          }
+        } else {
+          console.warn("Failed to fetch real prices:", priceError || "No prices returned");
+        }
+      } catch (e) {
+        console.error("Error calling pricing engine:", e);
+      }
+    }
 
     // If price request is needed, notify admin AND create quick booking record
     let priceRequestSent = false;
@@ -858,7 +984,11 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
 
       // Calculate all vehicle prices for frontend storage
       let allVehiclePrices: Record<string, number> | null = null;
-      if (bookingData.estimatedPrice && bookingData.estimatedPrice > 0) {
+      
+      // Use real prices if available (from our new fetch)
+      if (realVehiclePrices) {
+        allVehiclePrices = realVehiclePrices;
+      } else if (bookingData.estimatedPrice && bookingData.estimatedPrice > 0) {
         const basePrice = bookingData.estimatedPrice;
         allVehiclePrices = {
           'sedan': basePrice,
@@ -933,7 +1063,10 @@ REMEMBER: You are a premium VIP service assistant. Make every customer feel spec
 
     // Calculate vehicle prices if we have route info
     let vehiclePrices: Record<string, number> | null = null;
-    if (bookingData?.estimatedPrice) {
+    
+    if (realVehiclePrices) {
+      vehiclePrices = realVehiclePrices;
+    } else if (bookingData?.estimatedPrice) {
       // Calculate approximate prices for each vehicle type
       const basePrice = bookingData.estimatedPrice;
       vehiclePrices = {

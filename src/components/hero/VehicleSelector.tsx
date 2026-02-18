@@ -6,85 +6,8 @@ import { getRegionVehicles, VehicleRegion } from "@/lib/vehicleRegions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { VehiclePrice } from "./types";
 
-// Vehicle images - optimized WebP 480x360
-import vitoImg from "@/assets/vehicles/vito-hero-optimized.webp";
-import vitoVipImg from "@/assets/vehicles/vito-vip-hero-optimized.webp";
-import maybachImg from "@/assets/vehicles/maybach-hero-optimized.webp";
-import sprinterImg from "@/assets/vehicles/sprinter-hero-optimized.webp";
-import sedanImg from "@/assets/vehicles/sedan-hero-optimized.webp";
-
-// Additional vehicle images for carousel
-import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
-import vipVitoStarlight from "@/assets/vehicles/vip-vito-starlight.webp";
-import maybachLuxury from "@/assets/vehicles/maybach-luxury.webp";
-import sprinterArrival from "@/assets/vehicles/sprinter-arrival.webp";
-
-// Turkey-specific sedan images (Renault Megane, Toyota Corolla)
-import sedanRenaultMegane from "@/assets/vehicles/sedan-renault-megane.webp";
-import sedanToyotaCorolla from "@/assets/vehicles/sedan-toyota-corolla.webp";
-import sedanToyotaAirport from "@/assets/vehicles/sedan-toyota-airport.webp";
-import sedanRenaultHotel from "@/assets/vehicles/sedan-renault-hotel.webp";
-import sedanInteriorPremium from "@/assets/vehicles/sedan-interior-premium.webp";
-
-// Maybach Minivan luxury images
-import maybachInteriorLuxury from "@/assets/vehicles/maybach-interior-luxury.webp";
-import maybachMinivanExterior from "@/assets/vehicles/maybach-minivan-exterior.webp";
-import maybachInteriorRear from "@/assets/vehicles/maybach-interior-rear.webp";
-
-// Sprinter Minibus images
-import sprinterInterior from "@/assets/vehicles/sprinter-interior.webp";
-import sprinterExterior from "@/assets/vehicles/sprinter-exterior.webp";
-
-// VIP Mercedes images
-import vipMercedesInterior from "@/assets/vehicles/vip-mercedes-interior.webp";
-import vipMercedesExterior from "@/assets/vehicles/vip-mercedes-exterior.webp";
-
-// Mercedes Vito images - premium optimized
-import vitoInterior from "@/assets/vehicles/vito-interior.webp";
-import vitoExterior from "@/assets/vehicles/vito-exterior.webp";
-import vitoPremiumExterior from "@/assets/vehicles/vito-premium-exterior.webp";
-import vitoPremiumInterior from "@/assets/vehicles/vito-premium-interior.webp";
-import vitoHotelArrival from "@/assets/vehicles/vito-hotel-arrival.webp";
-
-// Dubai vehicle images - WebP optimized
-import dubaiVipVanImg from "@/assets/dubai/dubai-vip-mercedes-van.webp";
-
 // Auto-rotate interval in milliseconds
 const AUTO_ROTATE_INTERVAL = 3000;
-
-// Vehicle images map with multiple images per vehicle for carousel
-const vehicleImageSets: Record<string, string[]> = {
-// Turkey sedan - Renault Megane & Toyota Corolla with interior
-  'sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanToyotaAirport, sedanRenaultHotel, sedanInteriorPremium],
-// Mercedes Vito - black Vito exterior and interior images
-  'mercedes-vito': [vitoImg, vitoInterior, vitoExterior],
-  // VIP Mercedes - luxury exterior and interior
-  'vip-mercedes': [vitoVipImg, vipMercedesExterior, vipMercedesInterior, vipVitoStarlight],
-// Maybach Minivan - luxury exterior and interior images
-  'maybach-minibus': [maybachMinivanExterior, maybachInteriorLuxury, maybachInteriorRear],
-  // Sprinter Minibus - exterior and interior
-  'sprinter-minibus': [sprinterExterior, sprinterInterior, sprinterImg, sprinterArrival],
-  'minibus': [sprinterExterior, sprinterInterior, sprinterImg, sprinterArrival],
-// Dubai vehicles
-  'dubai-private-sedan': [sedanRenaultMegane, sedanToyotaCorolla, sedanToyotaAirport, sedanRenaultHotel],
-  'dubai-premium-van': [vitoVipImg, vipMercedesExterior, vipMercedesInterior, vipVitoStarlight],
-  'dubai-suburban-suv': [vitoPremiumExterior, vitoPremiumInterior, vitoHotelArrival, vitoExterior],
-  'dubai-vip-sprinter': [dubaiVipVanImg, sprinterExterior, sprinterInterior, sprinterArrival],
-};
-
-// Single image fallback
-const vehicleImages: Record<string, string> = {
-  'sedan': sedanRenaultMegane,
-  'mercedes-vito': vitoPremiumExterior,
-  'vip-mercedes': vipMercedesExterior,
-  'maybach-minibus': maybachMinivanExterior,
-  'sprinter-minibus': sprinterExterior,
-  'minibus': sprinterExterior,
-  'dubai-private-sedan': sedanRenaultMegane,
-  'dubai-premium-van': vipMercedesExterior,
-  'dubai-suburban-suv': vitoExterior,
-  'dubai-vip-sprinter': dubaiVipVanImg,
-};
 
 interface VehicleSelectorProps {
   selectedVehicle: string;
@@ -124,7 +47,8 @@ const VehicleCard = memo(({
   const [isHovered, setIsHovered] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   
-  const images = vehicleImageSets[vehicle.value] || [vehicleImages[vehicle.value]];
+  // Use images from vehicle configuration
+  const images = vehicle.images || [];
   const hasMultipleImages = images.length > 1;
   
   // Auto-rotate images
@@ -172,19 +96,25 @@ const VehicleCard = memo(({
       >
         {/* Vehicle Image with Carousel */}
         <div className="w-full aspect-[4/3] rounded-lg overflow-hidden mb-2 bg-muted relative group">
-          <img 
-            src={images[currentImageIndex]} 
-            alt={vehicle.label}
-            className={cn(
-              "w-full h-full object-cover transition-all duration-500",
-              isHovered && "scale-110"
-            )}
-            loading={index === 0 ? "eager" : "lazy"}
-            // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
-            fetchpriority={index === 0 ? "high" : "auto"}
-            decoding={index === 0 ? "sync" : "async"}
-            draggable={false}
-          />
+          {images.length > 0 ? (
+            <img 
+              src={images[currentImageIndex].src} 
+              alt={images[currentImageIndex].alt || vehicle.label}
+              className={cn(
+                "w-full h-full object-cover transition-all duration-500",
+                isHovered && "scale-110"
+              )}
+              loading={index === 0 ? "eager" : "lazy"}
+              // @ts-expect-error - React uses fetchPriority but DOM expects fetchpriority
+              fetchpriority={index === 0 ? "high" : "auto"}
+              decoding={index === 0 ? "sync" : "async"}
+              draggable={false}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground">
+              <Briefcase className="h-8 w-8 opacity-20" />
+            </div>
+          )}
           
           {/* Carousel Navigation - only show on hover with multiple images */}
           {hasMultipleImages && isHovered && !isDisabled && (

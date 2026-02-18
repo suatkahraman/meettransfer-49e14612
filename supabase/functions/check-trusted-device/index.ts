@@ -40,10 +40,10 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Extract base fingerprint (without timestamp suffix)
-    const baseFp = deviceFingerprint.split('-')[0];
+    // Base fingerprint - ayni cihaz tanimasi (suffix cihaz ID, base hash)
+    const baseFp = (deviceFingerprint || '').split('-')[0] || '';
 
-    // Check if device is trusted using pattern matching for the base fingerprint
+    // Check if device is trusted - base fingerprint ile esnek eslestirme (cihaza guven)
     const { data: devices, error: fetchError } = await supabase
       .from('trusted_devices')
       .select('id, device_fingerprint, last_used_at')
@@ -60,10 +60,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check if any device matches the base fingerprint
+    // Base fingerprint ile eslestir (aynı cihaz = aynı base hash)
     const matchingDevice = devices?.find(d => {
-      const storedBaseFp = d.device_fingerprint.split('-')[0];
-      return storedBaseFp === baseFp;
+      const storedBaseFp = (d.device_fingerprint || '').split('-')[0] || '';
+      return storedBaseFp && baseFp && storedBaseFp === baseFp;
     });
 
     if (matchingDevice) {

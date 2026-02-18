@@ -2,74 +2,39 @@
 // Used by Hero.tsx, AdminRegionPrices.tsx, QuickBookingConfirm.tsx, and edge functions
 
 // ========== SEDAN IMAGES - Only sedan vehicles (Toyota Corolla, Renault Megane) ==========
-import sedanRenaultMegane from "@/assets/vehicles/sedan-renault-megane.webp";
-import sedanToyotaCorolla from "@/assets/vehicles/sedan-toyota-corolla.webp";
-import sedanToyotaAirport from "@/assets/vehicles/sedan-toyota-airport.webp";
-import sedanRenaultHotel from "@/assets/vehicles/sedan-renault-hotel.webp";
-import sedanInteriorPremium from "@/assets/vehicles/sedan-interior-premium.webp";
-import sedanStandardAirport from "@/assets/vehicles/sedan-standard-airport.webp";
-import sedanStandardExterior from "@/assets/vehicles/sedan-standard-exterior.webp";
-import sedanStandardInterior from "@/assets/vehicles/sedan-standard-interior.webp";
+import sedanHero from "@/assets/vehicles/sedan-hero.webp";
+import sedanInterior from "@/assets/vehicles/sedan-interior-premium.webp";
+import sedanExterior from "@/assets/vehicles/sedan-standard-exterior.webp";
+import sedanRear from "@/assets/vehicles/sedan-standard-interior.webp";
+import sedanAirport from "@/assets/vehicles/sedan-airport.webp";
 
 // ========== MERCEDES VITO IMAGES - Only Vito vehicles ==========
-import vitoPremiumExterior from "@/assets/vehicles/vito-premium-exterior.webp";
-import vitoPremiumInterior from "@/assets/vehicles/vito-premium-interior.webp";
-import vitoHotelArrival from "@/assets/vehicles/vito-hotel-arrival.webp";
-import vitoAirportPremium from "@/assets/vehicles/vito-airport-premium.webp";
+import vitoHero from "@/assets/vehicles/vito-hero.webp";
 import vitoInterior from "@/assets/vehicles/vito-interior.webp";
 import vitoExterior from "@/assets/vehicles/vito-exterior.webp";
-import vitoAirportAnime from "@/assets/vito-airport-anime.jpg";
-import vitoAirportWelcome from "@/assets/vito-airport-welcome.jpg";
-import vitoCappadociaBalloon from "@/assets/vito-cappadocia-balloon.jpg";
-import vitoFamilyInterior from "@/assets/vito-family-interior.jpg";
-import vitoInteriorLeather from "@/assets/vito-interior-leather.jpg";
-import vitoExteriorBlack from "@/assets/vito-exterior-black.jpg";
-import vitoPassengerOrange from "@/assets/vito-passenger-orange.jpg";
-import vitoExteriorOpendoor from "@/assets/vito-exterior-opendoor.jpg";
-import vitoPassengerNight from "@/assets/vito-passenger-night.jpg";
-import vitoPassengerCouple from "@/assets/vito-passenger-couple.jpg";
-import vitoLuxuryInterior from "@/assets/vito-luxury-interior.jpg";
+import vitoRear from "@/assets/vehicles/vito-premium-interior.webp";
+import vitoPremium from "@/assets/vehicles/vito-premium-exterior.webp";
 
 // ========== VIP MERCEDES IMAGES - Only VIP Vito vehicles ==========
+import vipVitoHero from "@/assets/vehicles/vito-vip-hero.webp";
+import vipVitoInterior from "@/assets/vehicles/vip-mercedes-interior.webp";
+import vipVitoExterior from "@/assets/vehicles/vip-mercedes-exterior.webp";
 import vipVitoStarlight from "@/assets/vehicles/vip-vito-starlight.webp";
-import vipMercedesInterior from "@/assets/vehicles/vip-mercedes-interior.webp";
-import vipMercedesExterior from "@/assets/vehicles/vip-mercedes-exterior.webp";
-import vitoVipPassengers1 from "@/assets/vito-vip-passengers-1.jpg";
-import vitoVipPassengers2 from "@/assets/vito-vip-passengers-2.jpg";
-import vitoVipStarlightPurple from "@/assets/vito-vip-starlight-purple.jpg";
-import vitoVipStarlightRoof from "@/assets/vito-vip-starlight-roof.jpg";
-import vitoVipLuxuryWhite from "@/assets/vito-vip-luxury-white.jpg";
-import vitoVipCoupleStarlight from "@/assets/vito-vip-couple-starlight.jpg";
-import vitoVipPassengersDay from "@/assets/vito-vip-passengers-day.jpg";
-import vipPassengerStarlight from "@/assets/vip-passenger-starlight.jpg";
-import vipInteriorStarlightTv from "@/assets/vip-interior-starlight-tv.jpg";
+import vipVitoNight from "@/assets/vehicles/vip-vito-night.jpg";
 
 // ========== MAYBACH MINIVAN IMAGES - Only Maybach vehicles ==========
-import maybachMinivanExterior from "@/assets/vehicles/maybach-minivan-exterior.webp";
-import maybachInteriorLuxury from "@/assets/vehicles/maybach-interior-luxury.webp";
-import maybachInteriorRear from "@/assets/vehicles/maybach-interior-rear.webp";
-import maybachUltraLuxury from "@/assets/vehicles/maybach-luxury.webp";
-import maybachInterior from "@/assets/maybach-interior-starlight.jpg";
-import maybachPassengersBlue from "@/assets/maybach-passengers-blue.jpg";
-import maybachInteriorPurple from "@/assets/maybach-interior-purple.jpg";
-import maybachInteriorOrange from "@/assets/maybach-interior-orange.jpg";
+import maybachHero from "@/assets/vehicles/maybach-hero.webp";
+import maybachInterior from "@/assets/vehicles/maybach-interior-luxury.webp";
+import maybachExterior from "@/assets/vehicles/maybach-minivan-exterior.webp";
+import maybachRear from "@/assets/vehicles/maybach-interior-rear.webp";
+import maybachStarlight from "@/assets/vehicles/maybach-starlight.jpg";
 
 // ========== SPRINTER MINIBUS IMAGES - Only Sprinter vehicles ==========
+import sprinterHero from "@/assets/vehicles/sprinter-hero.webp";
+import sprinterInterior from "@/assets/vehicles/sprinter-interior.webp";
 import sprinterExterior from "@/assets/vehicles/sprinter-exterior.webp";
-import sprinterInteriorWebp from "@/assets/vehicles/sprinter-interior.webp";
-import sprinterArrival from "@/assets/vehicles/sprinter-arrival.webp";
-import sprinterLuggage from "@/assets/sprinter-luggage.jpg";
-import sprinterExteriorVip from "@/assets/sprinter-exterior-vip.jpg";
-import sprinterAirportFront from "@/assets/sprinter-airport-front.jpg";
-import sprinterInteriorGrey from "@/assets/sprinter-interior-grey.jpg";
-import sprinterInteriorTv from "@/assets/sprinter-interior-tv.jpg";
-import sprinterInteriorRed from "@/assets/sprinter-interior-red.jpg";
-import sprinterInteriorStarlight from "@/assets/sprinter-interior-starlight.jpg";
-import sprinterInteriorBlue from "@/assets/sprinter-interior-blue.jpg";
-import sprinterExteriorDark from "@/assets/sprinter-exterior-dark.jpg";
-import sprinterInteriorNeon from "@/assets/sprinter-interior-neon.jpg";
-import sprinterAirportNight from "@/assets/sprinter-airport-night.jpg";
-import sprinterVipInterior from "@/assets/sprinter-vip-interior.jpg";
+import sprinterRear from "@/assets/vehicles/sprinter-arrival.webp";
+import sprinterDark from "@/assets/vehicles/sprinter-dark.jpg";
 
 export interface VehicleImage {
   src: string;
@@ -125,14 +90,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // SEDAN ONLY IMAGES - Renault Megane, Toyota Corolla - NO Mercedes, NO Vito, NO Maybach, NO Sprinter
     images: [
-      { src: sedanRenaultMegane, alt: "Renault Megane sedan airport transfer Turkey" },
-      { src: sedanToyotaCorolla, alt: "Toyota Corolla sedan professional chauffeur service" },
-      { src: sedanToyotaAirport, alt: "Toyota Corolla airport pickup transfer" },
-      { src: sedanRenaultHotel, alt: "Renault Megane hotel transfer service" },
-      { src: sedanInteriorPremium, alt: "Premium sedan interior with leather seats" },
-      { src: sedanStandardAirport, alt: "Standard sedan airport transfer with professional chauffeur" },
-      { src: sedanStandardExterior, alt: "Elegant sedan for business transfers" },
-      { src: sedanStandardInterior, alt: "Premium sedan interior comfort" },
+      { src: sedanHero, alt: "Black Standard Sedan Exterior Side View" },
+      { src: sedanInterior, alt: "Black Standard Sedan Interior" },
+      { src: sedanExterior, alt: "Black Standard Sedan Front View" },
+      { src: sedanRear, alt: "Black Standard Sedan Rear Interior" },
+      { src: sedanAirport, alt: "Black Standard Sedan Rear View" },
     ],
   },
   {
@@ -165,21 +127,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // MERCEDES VITO ONLY IMAGES - BLACK Vito only, NO grey, NO Sedan, NO Maybach, NO Sprinter, NO VIP Vito starlight
     images: [
-      { src: vitoPremiumExterior, alt: "Mercedes Vito premium exterior luxury design" },
-      { src: vitoPremiumInterior, alt: "Mercedes Vito premium interior leather seats" },
-      { src: vitoAirportPremium, alt: "Mercedes Vito VIP airport transfer with professional chauffeur" },
-      { src: vitoInterior, alt: "Mercedes Vito interior comfort seats" },
-      { src: vitoExteriorBlack, alt: "Mercedes Vito black exterior professional transfer" },
-      { src: vitoAirportAnime, alt: "Mercedes Vito private transfer at airport terminal" },
-      { src: vitoAirportWelcome, alt: "Mercedes Vito airport pickup with welcome service" },
-      { src: vitoCappadociaBalloon, alt: "Mercedes Vito transfer to Cappadocia hot air balloons" },
-      { src: vitoFamilyInterior, alt: "Mercedes Vito spacious family interior with leather seats" },
-      { src: vitoInteriorLeather, alt: "Mercedes Vito premium leather interior detail" },
-      { src: vitoPassengerOrange, alt: "Mercedes Vito passengers enjoying comfortable ride" },
-      { src: vitoExteriorOpendoor, alt: "Mercedes Vito with open door welcoming passengers" },
-      { src: vitoPassengerNight, alt: "Mercedes Vito night transfer service with ambient lighting" },
-      { src: vitoPassengerCouple, alt: "Mercedes Vito romantic transfer for couples" },
-      { src: vitoLuxuryInterior, alt: "Mercedes Vito luxury white leather interior passengers" },
+      { src: vitoHero, alt: "Black Mercedes Vito Exterior Side View" },
+      { src: vitoInterior, alt: "Black Mercedes Vito Interior" },
+      { src: vitoExterior, alt: "Black Mercedes Vito Front View" },
+      { src: vitoRear, alt: "Black Mercedes Vito Rear Interior" },
+      { src: vitoPremium, alt: "Black Mercedes Vito Rear Exterior View" },
     ],
   },
   {
@@ -200,18 +152,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // VIP MERCEDES VITO ONLY IMAGES - Starlight ceiling VIP Vito - NO Sedan, NO Maybach, NO Sprinter, NO regular Vito
     images: [
-      { src: vipVitoStarlight, alt: "Mercedes VIP Vito couple champagne starlight ceiling luxury" },
-      { src: vipMercedesInterior, alt: "VIP Mercedes interior starlight ceiling luxury" },
-      { src: vipMercedesExterior, alt: "VIP Mercedes exterior premium design" },
-      { src: vipInteriorStarlightTv, alt: "VIP interior starlight ceiling with TV entertainment system" },
-      { src: vipPassengerStarlight, alt: "VIP passenger enjoying starlight ceiling luxury interior" },
-      { src: vitoVipStarlightPurple, alt: "Mercedes VIP Vito purple starlight roof interior" },
-      { src: vitoVipStarlightRoof, alt: "Mercedes VIP Vito starlight ceiling ambient lighting" },
-      { src: vitoVipPassengers1, alt: "VIP passengers enjoying Mercedes Vito luxury transfer" },
-      { src: vitoVipLuxuryWhite, alt: "Mercedes VIP Vito white leather luxury interior" },
-      { src: vitoVipCoupleStarlight, alt: "Couple enjoying Mercedes VIP Vito starlight transfer" },
-      { src: vitoVipPassengers2, alt: "Business travelers in Mercedes VIP Vito" },
-      { src: vitoVipPassengersDay, alt: "Mercedes VIP Vito daytime luxury transfer service" },
+      { src: vipVitoHero, alt: "Black VIP Mercedes Vito Exterior" },
+      { src: vipVitoInterior, alt: "Black VIP Mercedes Vito Ultra Luxury Interior" },
+      { src: vipVitoExterior, alt: "Black VIP Mercedes Vito Front View" },
+      { src: vipVitoStarlight, alt: "Black VIP Mercedes Vito Rear Interior with TV" },
+      { src: vipVitoNight, alt: "Black VIP Mercedes Vito Rear Exterior" },
     ],
   },
   {
@@ -233,14 +178,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // MAYBACH MINIVAN ONLY IMAGES - NO Sedan, NO Vito, NO VIP Vito, NO Sprinter
     images: [
-      { src: maybachMinivanExterior, alt: "Mercedes Maybach Minivan exterior ultra luxury design" },
-      { src: maybachInteriorLuxury, alt: "Mercedes Maybach Minivan interior luxury starlight" },
-      { src: maybachInteriorRear, alt: "Mercedes Maybach Minivan rear seat first class" },
-      { src: maybachUltraLuxury, alt: "Mercedes Maybach ultra luxury orange leather galaxy starlight ceiling" },
-      { src: maybachInterior, alt: "Mercedes Maybach starlight ceiling luxury interior" },
-      { src: maybachPassengersBlue, alt: "VIP passengers in Mercedes Maybach blue ambient lighting" },
-      { src: maybachInteriorPurple, alt: "Mercedes Maybach purple starlight ceiling with TV entertainment" },
-      { src: maybachInteriorOrange, alt: "Mercedes Maybach orange leather interior with starlight roof" },
+      { src: maybachHero, alt: "Black Mercedes Maybach Exterior Side View" },
+      { src: maybachInterior, alt: "Black Mercedes Maybach First Class Interior" },
+      { src: maybachExterior, alt: "Black Mercedes Maybach Front View" },
+      { src: maybachRear, alt: "Black Mercedes Maybach Rear Interior with Screens" },
+      { src: maybachStarlight, alt: "Black Mercedes Maybach Rear Exterior" },
     ],
   },
   {
@@ -259,8 +201,8 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
       ja: 'Mercedes Sprinterまたは同等',
       pt: 'Mercedes Sprinter ou Similar',
     },
-    passengers: 16,
-    luggage: 16,
+    passengers: 20,
+    luggage: 20,
     description: 'Spacious VIP minibus perfect for large groups, corporate events, and airport transfers. Premium comfort with entertainment and ample luggage space.',
     descriptionTr: 'Büyük gruplar, kurumsal etkinlikler ve havalimanı transferleri için ideal geniş VIP minibüs. Eğlence sistemi ve bol bagaj alanı ile premium konfor.',
     features: [
@@ -275,21 +217,11 @@ export const VEHICLE_TYPES: VehicleTypeInfo[] = [
     ],
     // SPRINTER MINIBUS ONLY IMAGES - NO Sedan, NO Vito, NO VIP Vito, NO Maybach
     images: [
-      { src: sprinterExterior, alt: "Mercedes Sprinter exterior professional minibus" },
-      { src: sprinterInteriorWebp, alt: "Mercedes Sprinter interior premium seating" },
-      { src: sprinterArrival, alt: "Mercedes Sprinter VIP red carpet hotel arrival luxury" },
-      { src: sprinterVipInterior, alt: "Mercedes Sprinter VIP blue starlight interior seats" },
-      { src: sprinterExteriorVip, alt: "Mercedes Sprinter VIP exterior luxury design" },
-      { src: sprinterLuggage, alt: "Mercedes Sprinter large luggage capacity for groups" },
-      { src: sprinterAirportFront, alt: "Mercedes Sprinter airport transfer front view" },
-      { src: sprinterInteriorGrey, alt: "Mercedes Sprinter grey leather interior design" },
-      { src: sprinterInteriorTv, alt: "Mercedes Sprinter entertainment TV system" },
-      { src: sprinterInteriorRed, alt: "Mercedes Sprinter red ambient lighting interior" },
-      { src: sprinterInteriorStarlight, alt: "Mercedes Sprinter starlight ceiling luxury" },
-      { src: sprinterInteriorBlue, alt: "Mercedes Sprinter blue LED interior lighting" },
-      { src: sprinterExteriorDark, alt: "Mercedes Sprinter black exterior professional service" },
-      { src: sprinterInteriorNeon, alt: "Mercedes Sprinter neon interior party atmosphere" },
-      { src: sprinterAirportNight, alt: "Mercedes Sprinter night airport transfer service" },
+      { src: sprinterHero, alt: "Black Mercedes Sprinter Exterior Side View" },
+      { src: sprinterInterior, alt: "Black Mercedes Sprinter Ultra Luxury Interior" },
+      { src: sprinterExterior, alt: "Black Mercedes Sprinter Front View" },
+      { src: sprinterRear, alt: "Black Mercedes Sprinter Rear Interior View" },
+      { src: sprinterDark, alt: "Black Mercedes Sprinter Rear Exterior View" },
     ],
   },
 ];
