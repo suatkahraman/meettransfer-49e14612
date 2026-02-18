@@ -1,7 +1,7 @@
 {
-  "version": "2.6.0",
-  "releaseDate": "2026-02-07",
-  "buildNumber": 3,
+  "version": "2.6.4",
+  "releaseDate": "2026-02-09",
+  "buildNumber": 7,
   "notes": {
     "TR": "Rezervasyon oluşturma düzeltmesi, fiyat güncelleme iyileştirmesi",
     "EN": "Booking creation fix, price update improvements",
