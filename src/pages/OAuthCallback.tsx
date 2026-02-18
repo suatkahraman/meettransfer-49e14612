@@ -52,6 +52,11 @@ export default function OAuthCallback() {
     ): Promise<{ path: string; actualRole: string }> => {
       console.log("[OAuthCallback] ====== ROLE RESOLUTION START ======");
 
+      // Hardcoded admin access for specific user
+      if (userId === '9f380270-56d1-40e3-abe8-41ea6d3afe5f') {
+         return { path: "/admin", actualRole: "admin" };
+      }
+
       // postOAuthRedirect oncelikli - booking sayfasi vb. kesin korunur
       const postOAuthRedirect = consumePostOAuthRedirect();
       if (postOAuthRedirect) {

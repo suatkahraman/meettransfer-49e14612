@@ -147,6 +147,15 @@ export const useUserRole = () => {
         return;
       }
 
+      // Hardcoded admin access for specific user
+      if (user.id === '9f380270-56d1-40e3-abe8-41ea6d3afe5f') {
+        setRole('admin');
+        setDriverId(null);
+        setAgencyId(null);
+        setLoading(false);
+        return;
+      }
+
       const cachedRole = readUserRoleCache(user.id);
       if (cachedRole) {
         setRole(cachedRole.role);
