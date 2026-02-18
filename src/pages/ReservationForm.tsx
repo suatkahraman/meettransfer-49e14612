@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { CURRENCY_OPTIONS } from '@/lib/currency';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
+import { getDirections, geocodeAddress, loadGoogleMapsScript } from '@/utils/googleMapsLoader';
 import GoogleRouteMap from '@/components/ui/google-route-map';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import { FlightStatus } from '@/components/ui/flight-status';
@@ -194,6 +195,26 @@ const ReservationForm = () => {
       let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
       try {
+        // Calculate distance client-side to ensure KM-based pricing works
+        let distanceKm: number | undefined;
+        try {
+          await loadGoogleMapsScript(); // Ensure maps are loaded
+          // Attempt to geocode addresses
+          const [pRes, dRes] = await Promise.all([
+            geocodeAddress(pickup),
+            geocodeAddress(dropoff)
+          ]);
+          
+          if (pRes && dRes) {
+            const directions = await getDirections(pRes, dRes);
+            if (directions?.distanceKm) {
+              distanceKm = directions.distanceKm;
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to calculate distance for pricing:", e);
+        }
+
         const result = await Promise.race([
           supabase.functions.invoke("get-all-vehicle-prices", {
             body: {
@@ -201,6 +222,7 @@ const ReservationForm = () => {
               dropoff,
               customerCurrency,
               pickup_date: pickupDate || undefined,
+              distance_km: distanceKm,
             },
           }),
           new Promise<never>((_, reject) => {

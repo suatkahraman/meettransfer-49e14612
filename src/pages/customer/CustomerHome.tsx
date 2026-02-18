@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '@/components/NotificationBell';
 import { GooglePlacesAutocomplete } from '@/components/ui/google-places-autocomplete';
 import { GoogleRouteMap } from '@/components/ui/google-route-map';
+import { getDirections, geocodeAddress, loadGoogleMapsScript } from '@/utils/googleMapsLoader';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -210,6 +211,7 @@ const CustomerHome = () => {
   const [pricesError, setPricesError] = useState<string | null>(null);
   const [isLoadingExchangeRate, setIsLoadingExchangeRate] = useState(false);
   const [isRefetchingPrices, setIsRefetchingPrices] = useState(false);
+  const [distanceKm, setDistanceKm] = useState<number | undefined>(undefined);
 
   // Date picker popover state
   const [isPickupDateOpen, setIsPickupDateOpen] = useState(false);
@@ -301,12 +303,33 @@ const CustomerHome = () => {
       setPricesError(null);
 
       try {
+        // Calculate distance client-side for KM pricing
+        let calculatedDistanceKm: number | undefined;
+        try {
+          await loadGoogleMapsScript();
+          const [pRes, dRes] = await Promise.all([
+            geocodeAddress(formData.pickup),
+            geocodeAddress(formData.dropoff)
+          ]);
+          
+          if (pRes && dRes) {
+            const directions = await getDirections(pRes, dRes);
+            if (directions?.distanceKm) {
+              calculatedDistanceKm = directions.distanceKm;
+              setDistanceKm(calculatedDistanceKm);
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to calculate distance:", e);
+        }
+
         const { data, error } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: {
             pickup: formData.pickup,
             dropoff: formData.dropoff,
             customerCurrency: "EUR",
             pickup_date: formData.date || undefined,
+            distance_km: calculatedDistanceKm,
           },
         });
 
@@ -2758,6 +2781,7 @@ const CustomerHome = () => {
                               dropoff: formData.dropoff,
                               customerCurrency: currency.value,
                               pickup_date: formData.date || undefined,
+                              distance_km: distanceKm,
                             },
                           })
                           .then(({ data, error }) => {

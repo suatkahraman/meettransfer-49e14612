@@ -23,6 +23,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { TimePickerGrid } from "@/components/ui/time-picker-grid";
 import { FloatingLabelDatePicker } from "@/components/ui/floating-label-datepicker";
 import { GooglePlacesAutocomplete, PlaceDetails } from "@/components/ui/google-places-autocomplete";
+import { getDirections, geocodeAddress, loadGoogleMapsScript } from "@/utils/googleMapsLoader";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { 
@@ -208,6 +209,7 @@ const BookingPage = () => {
   const [originalPrice, setOriginalPrice] = useState<number | null>(null);
   const [rejectingPrice, setRejectingPrice] = useState(false);
   const [justSelectedVehicle, setJustSelectedVehicle] = useState<string | null>(null);
+  const [distanceKm, setDistanceKm] = useState<number | undefined>(undefined);
 
   // Section highlight for "Seçim yapın" flow (auto-advance UX)
   const [highlightSection, setHighlightSection] = useState<string | null>(null);
@@ -592,6 +594,26 @@ const BookingPage = () => {
       const minLoadingTime = isInitialFetch ? 5000 : 800;
       
       try {
+        // Calculate distance client-side for KM pricing
+        let calculatedDistanceKm: number | undefined;
+        try {
+          await loadGoogleMapsScript();
+          const [pRes, dRes] = await Promise.all([
+            geocodeAddress(effectivePickup),
+            geocodeAddress(effectiveDropoff)
+          ]);
+          
+          if (pRes && dRes) {
+            const directions = await getDirections(pRes, dRes);
+            if (directions?.distanceKm) {
+              calculatedDistanceKm = directions.distanceKm;
+              setDistanceKm(calculatedDistanceKm);
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to calculate distance:", e);
+        }
+
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
           body: {
             pickup: effectivePickup,
@@ -600,6 +622,7 @@ const BookingPage = () => {
             dropoff_place_id: dropoffPlaceId || undefined,
             customerCurrency: "EUR",
             pickup_date: effectiveDate || undefined,
+            distance_km: calculatedDistanceKm,
           },
         });
 
@@ -2020,6 +2043,7 @@ const BookingPage = () => {
                                 dropoff_place_id: dropoffPlaceId || undefined,
                                 customerCurrency: currency.value,
                                 pickup_date: effectiveDate || undefined,
+                                distance_km: distanceKm,
                               },
                             }).then(({ data }) => {
                               if (data?.prices) {

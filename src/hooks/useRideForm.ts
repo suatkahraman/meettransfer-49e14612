@@ -215,15 +215,19 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     const timer = setTimeout(async () => {
       try {
         // Calculate distance using Google Maps Directions Service
+        let distanceKm: number | undefined;
         if (pickupDetails?.lat && pickupDetails?.lng && dropoffDetails?.lat && dropoffDetails?.lng) {
-          await getDirections(
+          const directions = await getDirections(
             { lat: pickupDetails.lat, lng: pickupDetails.lng },
             { lat: dropoffDetails.lat, lng: dropoffDetails.lng }
           );
+          if (directions?.distanceKm) {
+            distanceKm = directions.distanceKm;
+          }
         }
 
         const { data } = await supabase.functions.invoke("get-all-vehicle-prices", {
-          body: { pickup, dropoff, customerCurrency: "EUR" }
+          body: { pickup, dropoff, customerCurrency: "EUR", distance_km: distanceKm }
         });
         // Edge function returns 'prices' not 'vehicles'
         if (data?.prices?.length > 0) {
