@@ -39,7 +39,7 @@ const ProtectedRoute = ({
   const allowedRolesKey = allowedRoles.join('|');
 
   // Hardcoded admin access for specific user (Bypass role checks)
-  const isSuperAdmin = userId === '7c241c37-32c2-4d60-a245-d704333874cb';
+  const isSuperAdmin = userId === '9f380270-56d1-40e3-abe8-41ea6d3afe5f';
 
   // If role lookup fails or times out, verify the currently requested area directly.
   useEffect(() => {
