@@ -313,13 +313,21 @@ const Auth = () => {
       return;
     }
 
-    // Sonsuz döngü engeli: yüklemeler bitene kadar bekle, yönlendirme tetikleme
+    // Yükleme sırasında kullanıcıya geri bildirim vermek için return etmiyoruz,
+    // aşağıda loader göstereceğiz.
     if (authLoading || roleLoading) {
       return;
     }
 
     // Tüm yüklemeler bitti; giriş yapmış kullanıcıyı rolüne göre yönlendir (rol yoksa varsayılan customer)
     if (!user || !recoveryChecked) {
+      return;
+    }
+
+    // Admin kontrolü: Eğer /auth sayfasındaysak ve rol admin değilse uyarı ver
+    if (location.pathname === '/auth' && role && role !== 'admin') {
+      toast.error('Bu panel sadece yöneticiler içindir.');
+      signOut();
       return;
     }
 
@@ -559,12 +567,12 @@ const Auth = () => {
     return confirmPassword.length > 0 && newPassword !== confirmPassword;
   }, [newPassword, confirmPassword]);
 
-  if (!recoveryChecked && !isResetting) {
+  if (!recoveryChecked && !isResetting || (authLoading || roleLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60">
         <Card className="w-full max-w-md">
           <CardContent className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
           </CardContent>
         </Card>
       </div>
@@ -930,29 +938,39 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary/80 to-primary/60 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-serif">Meet Transfer</CardTitle>
-          <CardDescription>Sign in to manage your bookings</CardDescription>
+          <CardTitle className="text-3xl font-serif">
+            {location.pathname === '/auth' ? 'Yönetici Girişi' : 'Meet Transfer'}
+          </CardTitle>
+          <CardDescription>
+            {location.pathname === '/auth' 
+              ? 'Yönetim paneline erişmek için giriş yapın' 
+              : 'Sign in to manage your bookings'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              {location.pathname !== '/auth' && <TabsTrigger value="signup">Sign Up</TabsTrigger>}
             </TabsList>
 
-            {/* Social Sign-In Buttons */}
-            <div className="mt-4 mb-4">
-              <SocialAuthButtons disabled={isLoading} mode="login" />
-            </div>
+            {/* Social Sign-In Buttons - Hide on Admin Auth */}
+            {location.pathname !== '/auth' && (
+              <div className="mt-4 mb-4">
+                <SocialAuthButtons disabled={isLoading} mode="login" />
+              </div>
+            )}
 
-            <div className="relative mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
+            {location.pathname !== '/auth' && (
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">or</span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">or</span>
-              </div>
-            </div>
+            )}
 
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
@@ -981,47 +999,51 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
-                  <Input id="signup-name" name="fullName" type="text" placeholder="John Doe" required />
-                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-phone">Phone</Label>
-                  <Input id="signup-phone" name="phone" type="tel" placeholder="+90 5XX XXX XXXX" required />
-                  {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input id="signup-email" name="email" type="email" placeholder="your@email.com" required />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input id="signup-password" name="password" type="password" placeholder="Ab2215" required />
-                  <p className="text-xs text-muted-foreground">
-                    1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
-                  </p>
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Creating account...' : 'Create Account'}
-                </Button>
-              </form>
-            </TabsContent>
+            {location.pathname !== '/auth' && (
+              <TabsContent value="signup">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Input id="signup-name" name="fullName" type="text" placeholder="John Doe" required />
+                    {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-phone">Phone</Label>
+                    <Input id="signup-phone" name="phone" type="tel" placeholder="+90 5XX XXX XXXX" required />
+                    {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
+                    <Input id="signup-email" name="email" type="email" placeholder="your@email.com" required />
+                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <Input id="signup-password" name="password" type="password" placeholder="Ab2215" required />
+                    <p className="text-xs text-muted-foreground">
+                      1 uppercase, 1 lowercase, 4+ digits (e.g., Ab2215)
+                    </p>
+                    {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Creating account...' : 'Create Account'}
+                  </Button>
+                </form>
+              </TabsContent>
+            )}
           </Tabs>
         </CardContent>
-        <CardFooter className="flex flex-col gap-2 pt-0">
-          <p className="text-center text-xs text-muted-foreground">
-            <Link to="/login" className="text-accent hover:underline">Customer login</Link>
-            {' · '}
-            <Link to="/login/driver" className="text-accent hover:underline">Driver</Link>
-            {' · '}
-            <Link to="/login/agency" className="text-accent hover:underline">Agency</Link>
-          </p>
-        </CardFooter>
+        {location.pathname !== '/auth' && (
+          <CardFooter className="flex flex-col gap-2 pt-0">
+            <p className="text-center text-xs text-muted-foreground">
+              <Link to="/login" className="text-accent hover:underline">Customer login</Link>
+              {' · '}
+              <Link to="/login/driver" className="text-accent hover:underline">Driver</Link>
+              {' · '}
+              <Link to="/login/agency" className="text-accent hover:underline">Agency</Link>
+            </p>
+          </CardFooter>
+        )}
       </Card>
     </div>
   );
