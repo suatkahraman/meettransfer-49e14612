@@ -14,7 +14,7 @@ BEGIN
   service_role_key := current_setting('app.settings.service_role_key', true);
   
   IF supabase_url IS NULL OR supabase_url = '' THEN
-    supabase_url := 'https://zqykoyugubaeealrspxm.supabase.co';
+    supabase_url := 'https://lzwwxuxwlssxutwiuxtf.supabase.co';
   END IF;
   
   -- Only trigger for new pending bookings without agency

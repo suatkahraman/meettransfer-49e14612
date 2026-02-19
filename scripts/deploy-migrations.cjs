@@ -26,7 +26,7 @@ if (fs.existsSync(envPath)) {
 
 const password = process.env.SUPABASE_DB_PASSWORD;
 const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
-const projectRef = process.env.VITE_SUPABASE_PROJECT_ID || 'zqykoyugubaeealrspxm';
+const projectRef = process.env.VITE_SUPABASE_PROJECT_ID || 'lzwwxuxwlssxutwiuxtf';
 
 function run(cmd, env = {}) {
   const fullEnv = { ...process.env, ...env };

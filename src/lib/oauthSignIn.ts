@@ -18,9 +18,8 @@ const APP_URL =
  * (Replace <YOUR_PROJECT_REF> with the ref from your VITE_SUPABASE_URL.)
  */
 export const getSupabaseAuthCallbackForGoogle = (): string => {
-  const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? "";
-  const base = url.replace(/\/$/, "");
-  return base ? `${base}/auth/v1/callback` : "";
+  // Always return the specific project callback URL for lzwwxuxwlssxutwiuxtf
+  return "https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/callback";
 };
 
 /**

@@ -1,0 +1,13 @@
+Starting script...
+Reading file from C:\Users\suat-\Documents\trae_projects\meettransfer\generate_restore_sql.py...
+File read, length: 9537
+JSON line length: 8333
+Parsing JSON...
+JSON Parsed. Tables: 4
+Processing table agency_payments, rows: 8
+Processing table driver_payments, rows: 12
+Processing table otp_settings, rows: 6
+Processing table price_thresholds, rows: 6
+Generated SQL length: 7370
+Writing to C:\Users\suat-\Documents\trae_projects\meettransfer\restore_data.sql...
+Successfully generated restore_data.sql

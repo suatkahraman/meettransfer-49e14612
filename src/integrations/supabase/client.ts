@@ -18,7 +18,7 @@ if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
 // Oturum kalıcılığı için persistSession + autoRefreshToken etkin.
 // Fallback to empty strings to prevent crash on initialization if env vars are missing
 export const supabase = createClient<Database>(
-  SUPABASE_URL || "https://missing-url.supabase.co", 
+  SUPABASE_URL || "https://lzwwxuxwlssxutwiuxtf.supabase.co", 
   SUPABASE_PUBLISHABLE_KEY || "missing-key", 
   {
   auth: {

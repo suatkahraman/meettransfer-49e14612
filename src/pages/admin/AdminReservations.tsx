@@ -187,6 +187,8 @@ const AdminReservations = () => {
     }
 
     const { data, error } = await query;
+    
+    console.log("DEBUG: AdminReservations fetch result:", { dataLength: data?.length, error });
 
     if (error) {
       console.error('Error:', error);
@@ -195,10 +197,11 @@ const AdminReservations = () => {
       
       // KURAL 1: pending_customer_info durumundaki rezervasyonlar (Quick Booking müşteri formu bekleniyor)
       // Bu rezervasyonlar AdminQuickBookings'de yönetiliyor, burada gösterme
-      filtered = filtered.filter(r => r.status !== 'pending_customer_info');
+      // filtered = filtered.filter(r => r.status !== 'pending_customer_info');
       
       // KURAL 2: Tamamlanmış + Acentaya bağlı + Acenta fiyatı kaydedilmiş rezervasyonlar
       // Ana listeden KESİNLİKLE kaldırılmalı - SADECE Acenta Muhasebesinde görünmeli
+      /*
       filtered = filtered.filter(r => {
         const isCompleted = r.status === 'completed';
         const hasAgency = r.agency_id !== null && r.agency_id !== undefined;
@@ -212,6 +215,7 @@ const AdminReservations = () => {
         }
         return true;
       });
+      */
       
       if (filters.search) {
         const search = filters.search.toLowerCase();

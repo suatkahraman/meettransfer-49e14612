@@ -10,11 +10,11 @@ With Supabase, **Google redirects to Supabase**, not directly to your app. So yo
 
 From your project’s Supabase URL (`VITE_SUPABASE_URL`):
 
-- **Supabase URL:** `https://zqykoyugubaeealrspxm.supabase.co`
+- **Supabase URL:** `https://lzwwxuxwlssxutwiuxtf.supabase.co`
 - **Redirect URI to add in Google Cloud Console:**
 
 ```text
-https://zqykoyugubaeealrspxm.supabase.co/auth/v1/callback
+https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/callback
 ```
 
 Copy that line and add it in:
@@ -41,7 +41,7 @@ After Supabase finishes the flow, it sends the user to your app. That target is 
 
 So:
 
-- **Google Cloud Console** → add: `https://zqykoyugubaeealrspxm.supabase.co/auth/v1/callback`
+- **Google Cloud Console** → add: `https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/callback`
 - **Supabase Redirect URLs** → add: `https://meettransfer.app/oauth/callback`
 
 ---

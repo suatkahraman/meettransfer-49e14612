@@ -18,7 +18,7 @@ BEGIN
   
   -- If settings not available, use hardcoded project URL
   IF supabase_url IS NULL OR supabase_url = '' THEN
-    supabase_url := 'https://zqykoyugubaeealrspxm.supabase.co';
+    supabase_url := 'https://lzwwxuxwlssxutwiuxtf.supabase.co';
   END IF;
   
   -- Only trigger for new pending bookings without agency
