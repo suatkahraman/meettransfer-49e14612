@@ -19,6 +19,10 @@
     "verify:pricing": "npx tsx scripts/verify-turkey-pricing.ts"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/ios": "^8.0.2",
     "@hookform/resolvers": "^3.10.0",
     "@lovable.dev/cloud-auth-js": "^0.0.2",
     "@playwright/test": "^1.57.0",

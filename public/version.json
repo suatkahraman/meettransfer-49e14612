@@ -1,7 +1,13 @@
 {
+<<<<<<< HEAD
+  "version": "2.6.4",
+  "releaseDate": "2026-02-09",
+  "buildNumber": 7,
+=======
   "version": "2.9.9",
   "releaseDate": "2026-02-17",
   "buildNumber": 38,
+>>>>>>> 3a6dbaa28a8d628ab16d2e540d887558c8def422
   "notes": {
     "TR": "v2.9.3: Tüm formlarda EUR baz + para birimi değişince hemen kur dönüşümü",
     "EN": "v2.9.3: EUR base + instant currency conversion across all forms",
