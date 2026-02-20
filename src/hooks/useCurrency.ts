@@ -1,8 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Currency, FALLBACK_EXCHANGE_RATES } from '@/lib/currency';
 
-export function useCurrency(preferredCurrency: Currency = 'EUR') {
+// Local fallback exchange rates in case DB/function are unavailable
+const LOCAL_FALLBACK_RATES: Record<string, number> = {
+  EUR: 1,
+  USD: 1.09,
+  GBP: 0.85,
+  TRY: 38.5,
+  AED: 4,
+  RUB: 100,
+  CNY: 7.9,
+  JPY: 165,
+  AUD: 1.65,
+};
+
+export function useCurrency(preferredCurrency: string = 'EUR') {
   const [eurToPreferredRate, setEurToPreferredRate] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -58,13 +70,13 @@ export function useCurrency(preferredCurrency: Currency = 'EUR') {
           }
 
           // Final fallback to hardcoded rates
-          setEurToPreferredRate(FALLBACK_EXCHANGE_RATES[preferredCurrency] ?? 1);
+          setEurToPreferredRate(LOCAL_FALLBACK_RATES[preferredCurrency] ?? 1);
           setLoading(false);
         }
       } catch (error) {
         if (!cancelled) {
           console.error('useCurrency: failed to fetch exchange rate', error);
-          setEurToPreferredRate(FALLBACK_EXCHANGE_RATES[preferredCurrency] ?? 1);
+          setEurToPreferredRate(LOCAL_FALLBACK_RATES[preferredCurrency] ?? 1);
           setLoading(false);
         }
       }
@@ -83,7 +95,7 @@ export function useCurrency(preferredCurrency: Currency = 'EUR') {
       if (preferredCurrency === 'EUR') return Math.round(priceEur);
 
       const rateToUse = loading
-        ? FALLBACK_EXCHANGE_RATES[preferredCurrency] ?? eurToPreferredRate
+        ? LOCAL_FALLBACK_RATES[preferredCurrency] ?? eurToPreferredRate
         : eurToPreferredRate;
 
       return Math.round(priceEur * rateToUse);
@@ -96,7 +108,7 @@ export function useCurrency(preferredCurrency: Currency = 'EUR') {
       if (price == null || !Number.isFinite(price)) return null;
       if (preferredCurrency === 'EUR') return Math.round(price);
       // avoid dividing by zero
-      const rate = eurToPreferredRate || (FALLBACK_EXCHANGE_RATES[preferredCurrency] ?? 1);
+      const rate = eurToPreferredRate || (LOCAL_FALLBACK_RATES[preferredCurrency] ?? 1);
       return Math.round(price / rate);
     },
     [preferredCurrency, eurToPreferredRate]
