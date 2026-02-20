@@ -148,6 +148,8 @@ const AdminAgencyAccounting = () => {
     }
   }, [agencyId, allAgencies]);
 
+  // AdminGuard erişim kontrolünü ve yönlendirmeyi yönetiyor. İçeride ekstra isAdmin kontrolü yok.
+
   // State for carryover balance from previous months - now currency-based
   const [carryoverBalances, setCarryoverBalances] = useState<Record<string, number>>({});
   const [carryoverPayments, setCarryoverPayments] = useState<Record<string, number>>({});

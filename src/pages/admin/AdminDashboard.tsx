@@ -58,30 +58,7 @@ const AdminDashboard = () => {
 
   const [adminLoading, setAdminLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
-    const checkAdmin = async () => {
-      setAdminLoading(true);
-      // wait until auth finishes initializing
-      if (authLoading) return;
-
-      if (!user) {
-        setAdminLoading(false);
-        navigate('/auth', { replace: true });
-        return;
-      }
-
-      const allowed = await isAdmin();
-      if (!mounted) return;
-      setAdminLoading(false);
-      if (!allowed) {
-        navigate('/', { replace: true });
-      }
-    };
-
-    checkAdmin();
-    return () => { mounted = false; };
-  }, [user, authLoading, isAdmin, navigate]);
+  // AdminGuard zaten erişim kontrolünü ve yönlendirmeyi yönetiyor.
 
   useEffect(() => {
     const fetchKPIs = async () => {
