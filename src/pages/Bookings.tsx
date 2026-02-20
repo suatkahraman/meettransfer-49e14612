@@ -49,17 +49,17 @@ const Bookings = () => {
     dateFrom: undefined,
     dateTo: undefined,
   });
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (loading) return; // Oturum yüklenmeden yönlendirme yapma
     if (!user) {
       navigate('/auth');
       return;
     }
-
     fetchBookings();
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const fetchBookings = async () => {
     try {

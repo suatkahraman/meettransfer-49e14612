@@ -109,7 +109,7 @@ const BookingPage = () => {
   const [searchParams] = useSearchParams();
   const { t, language, getLocalizedPath } = useLanguage();
   const { promoCode: activePromo } = usePromo();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { isIOS, isStandalone } = usePWADetect();
 
   // Token for existing quick booking (from AI assistant)
@@ -382,12 +382,11 @@ const BookingPage = () => {
 
   // Redirect if no URL params AND no token
   useEffect(() => {
+    if (loading) return; // Oturum yüklenmeden yönlendirme yapma
     // Skip redirect if we have a token (will be loaded separately)
     if (urlToken || tokenLoading) return;
-    
     // Skip redirect if token booking data is loaded
     if (tokenBookingData) return;
-    
     if (isHourlyBooking) {
       // For hourly booking, accept either urlCity or urlPickup (pickup is sent from HourlyFormContent)
       const hasPickupLocation = urlCity || urlPickup;
@@ -399,7 +398,7 @@ const BookingPage = () => {
         navigate(getLocalizedPath("/"));
       }
     }
-  }, [urlPickup, urlDropoff, urlDate, urlTime, urlCity, isHourlyBooking, navigate, getLocalizedPath, urlToken, tokenLoading, tokenBookingData]);
+  }, [user, loading, urlPickup, urlDropoff, urlDate, urlTime, urlCity, isHourlyBooking, navigate, getLocalizedPath, urlToken, tokenLoading, tokenBookingData]);
 
   // Pre-fill user data if logged in
   useEffect(() => {
