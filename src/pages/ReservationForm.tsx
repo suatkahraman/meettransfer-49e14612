@@ -22,6 +22,7 @@ import { Plane, MapPin, Calendar, User, Phone, Car, Mail, Lock, CheckCircle, Cli
 import { VehicleSelectionCard } from '@/components/VehicleSelectionCard';
 import { cn } from '@/lib/utils';
 import { CURRENCY_OPTIONS } from '@/lib/currency';
+import { useCurrency } from '@/hooks/useCurrency';
 import { z } from 'zod';
 import { GooglePlacesAutocomplete, PlaceDetails } from '@/components/ui/google-places-autocomplete';
 import { getDirections, geocodeAddress, loadGoogleMapsScript } from '@/utils/googleMapsLoader';
@@ -470,52 +471,15 @@ const ReservationForm = () => {
   
   // Currency selection - Baz fiyat EUR, seçilen para biriminde o günün kuruyla göster
   const [preferredCurrency, setPreferredCurrency] = useState(urlCurrency || 'EUR');
-  const [eurToPreferredRate, setEurToPreferredRate] = useState<number>(1);
-  
   const currencyOptions = CURRENCY_OPTIONS;
 
-  // Fiyatlar EUR - para birimi değiştiğinde hemen o günün kuruyla dönüştür
-  useEffect(() => {
-    if (preferredCurrency === "EUR") {
-      setEurToPreferredRate(1);
-      return;
-    }
-    
-    const fetchRate = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke("get-exchange-rate", {
-          body: { from_currency: "EUR", to_currency: preferredCurrency },
-        });
-
-        if (error || !data?.rate) {
-          console.error("Exchange rate fetch error:", error);
-          throw new Error("Rate fetch failed");
-        }
-
-        setEurToPreferredRate(data.rate);
-      } catch (err) {
-        console.warn("Using fallback exchange rates due to error:", err);
-        // Fallback rates (Approximate - Feb 2026)
-        const fallback: Record<string, number> = { 
-          TRY: 38.5, 
-          AED: 4.0, 
-          USD: 1.09, 
-          GBP: 0.85,
-          RUB: 100,
-          CNY: 7.9
-        };
-        setEurToPreferredRate(fallback[preferredCurrency] ?? 1);
-      }
-    };
-
-    fetchRate();
-  }, [preferredCurrency]);
-
-  const getDisplayPrice = useCallback((priceEur: number | null | undefined): number | null => {
-    if (priceEur == null || !Number.isFinite(priceEur)) return null;
-    if (preferredCurrency === "EUR") return Math.round(priceEur);
-    return Math.round(priceEur * eurToPreferredRate);
-  }, [preferredCurrency, eurToPreferredRate]);
+  // Use centralized currency hook (reads exchange_rates first, falls back to function/constants)
+  const {
+    eurToPreferredRate,
+    loading: currencyLoading,
+    getDisplayPrice,
+    convertToEur,
+  } = useCurrency(preferredCurrency as any);
 
   
   const [formData, setFormData] = useState(() => ({
