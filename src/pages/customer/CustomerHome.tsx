@@ -256,27 +256,40 @@ const CustomerHome = () => {
     }
     
     setIsLoadingExchangeRate(true);
-    supabase.functions.invoke("get-exchange-rate", {
-      body: { from_currency: "EUR", to_currency: selectedCurrency },
-    })
-      .then(({ data }) => { 
-        if (data?.rate) setEurToSelectedRate(data.rate); 
-      })
-      .catch(() => {
+    
+    const fetchRate = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("get-exchange-rate", {
+          body: { from_currency: "EUR", to_currency: selectedCurrency },
+        });
+
+        if (error || !data?.rate) {
+          console.error("Exchange rate fetch error:", error);
+          throw new Error("Rate fetch failed");
+        }
+
+        setEurToSelectedRate(data.rate);
+      } catch (err) {
+        console.warn("Using fallback exchange rates due to error:", err);
         // Fallback rates for common currencies - updated to current rates
         const fallback: Record<string, number> = { 
-          TRY: 35, 
-          AED: 4, 
-          USD: 1.08, 
-          GBP: 0.86,
-          RUB: 95,
-          UAH: 42,
+          TRY: 38.5, 
+          AED: 4.0, 
+          USD: 1.09, 
+          GBP: 0.85,
+          RUB: 100,
+          UAH: 45,
           JPY: 165,
-          AUD: 1.65
+          AUD: 1.65,
+          CNY: 7.9
         };
         setEurToSelectedRate(fallback[selectedCurrency] ?? 1);
-      })
-      .finally(() => setIsLoadingExchangeRate(false));
+      } finally {
+        setIsLoadingExchangeRate(false);
+      }
+    };
+
+    fetchRate();
   }, [selectedCurrency]);
 
   const getDisplayPrice = useCallback((priceEur: number | null | undefined): number | null => {

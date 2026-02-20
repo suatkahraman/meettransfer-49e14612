@@ -480,14 +480,35 @@ const ReservationForm = () => {
       setEurToPreferredRate(1);
       return;
     }
-    supabase.functions.invoke("get-exchange-rate", {
-      body: { from_currency: "EUR", to_currency: preferredCurrency },
-    })
-      .then(({ data }) => { if (data?.rate) setEurToPreferredRate(data.rate); })
-      .catch(() => {
-        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+    
+    const fetchRate = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("get-exchange-rate", {
+          body: { from_currency: "EUR", to_currency: preferredCurrency },
+        });
+
+        if (error || !data?.rate) {
+          console.error("Exchange rate fetch error:", error);
+          throw new Error("Rate fetch failed");
+        }
+
+        setEurToPreferredRate(data.rate);
+      } catch (err) {
+        console.warn("Using fallback exchange rates due to error:", err);
+        // Fallback rates (Approximate - Feb 2026)
+        const fallback: Record<string, number> = { 
+          TRY: 38.5, 
+          AED: 4.0, 
+          USD: 1.09, 
+          GBP: 0.85,
+          RUB: 100,
+          CNY: 7.9
+        };
         setEurToPreferredRate(fallback[preferredCurrency] ?? 1);
-      });
+      }
+    };
+
+    fetchRate();
   }, [preferredCurrency]);
 
   const getDisplayPrice = useCallback((priceEur: number | null | undefined): number | null => {

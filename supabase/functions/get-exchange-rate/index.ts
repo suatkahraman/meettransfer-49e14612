@@ -55,32 +55,39 @@ Deno.serve(async (req) => {
     if (!response.ok) {
       console.error('Exchange API error:', response.status, await response.text())
       
-      // Fallback rates for common currencies to TRY (approximate)
-      const fallbackRates: Record<string, number> = {
-        'EUR': 37.5,
-        'USD': 34.5,
-        'GBP': 43.5,
-        'AED': 9.4,
-        'AUD': 22.0,
+      // Fallback rates (Base: EUR) - Updated Feb 2026
+      const eurRates: Record<string, number> = {
+        'EUR': 1,
+        'TRY': 38.5,
+        'USD': 1.09,
+        'GBP': 0.85,
+        'AED': 4.0,
+        'AUD': 1.65,
+        'RUB': 100.0,
+        'CNY': 7.9,
       }
 
-      const fallbackRate = fallbackRates[from_currency]
-      if (fallbackRate && to_currency === 'TRY') {
-        console.log(`Using fallback rate for ${from_currency}: ${fallbackRate}`)
+      if (eurRates[from_currency] && eurRates[to_currency]) {
+        // Calculate cross rate via EUR
+        // Rate = (EUR -> TO) / (EUR -> FROM)
+        const rate = eurRates[to_currency] / eurRates[from_currency];
+        
+        console.log(`Using fallback rate for ${from_currency} -> ${to_currency}: ${rate}`)
+        
         return new Response(
           JSON.stringify({
-            rate: fallbackRate,
+            rate,
             from: from_currency,
             to: to_currency,
             date: new Date().toISOString().split('T')[0],
-            converted_amount: amount ? amount * fallbackRate : null,
+            converted_amount: amount ? amount * rate : null,
             is_fallback: true
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
-      throw new Error('Failed to fetch exchange rate')
+      throw new Error('Failed to fetch exchange rate and no fallback available')
     }
 
     const data = await response.json()

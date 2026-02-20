@@ -65,14 +65,33 @@ const LivePriceCalculator = () => {
       setEurToDisplayRate(1);
       return;
     }
-    supabase.functions.invoke("get-exchange-rate", {
-      body: { from_currency: "EUR", to_currency: displayCurrency },
-    })
-      .then(({ data }) => { if (data?.rate) setEurToDisplayRate(data.rate); })
-      .catch(() => {
-        const fallback: Record<string, number> = { TRY: 35, AED: 4, USD: 1.08, GBP: 0.86 };
+    const fetchRate = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("get-exchange-rate", {
+          body: { from_currency: "EUR", to_currency: displayCurrency },
+        });
+
+        if (error || !data?.rate) {
+          console.error("Exchange rate fetch error:", error);
+          throw new Error("Rate fetch failed");
+        }
+
+        setEurToDisplayRate(data.rate);
+      } catch (err) {
+        console.warn("Using fallback exchange rates due to error:", err);
+        const fallback: Record<string, number> = { 
+          TRY: 38.5, 
+          AED: 4.0, 
+          USD: 1.09, 
+          GBP: 0.85,
+          RUB: 100,
+          CNY: 7.9
+        };
         setEurToDisplayRate(fallback[displayCurrency] ?? 1);
-      });
+      }
+    };
+
+    fetchRate();
   }, [displayCurrency]);
 
   const getCurrencyByLanguage = (): string => {
