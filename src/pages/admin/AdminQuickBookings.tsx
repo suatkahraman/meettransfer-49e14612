@@ -212,7 +212,6 @@ function AdminQuickBookings() {
         .maybeSingle();
       if (data?.discount_percentage) {
         setReturnDiscountPercent(data.discount_percentage);
-  import AdminGuard from '@/components/admin/AdminGuard';
       }
     };
     fetchDiscount();

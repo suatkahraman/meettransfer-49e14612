@@ -1,23 +1,11 @@
 {
-<<<<<<< HEAD
-  "version": "2.6.4",
-  "releaseDate": "2026-02-09",
-  "buildNumber": 7,
-=======
-  "version": "2.9.9",
-  "releaseDate": "2026-02-17",
-  "buildNumber": 38,
->>>>>>> 3a6dbaa28a8d628ab16d2e540d887558c8def422
+  "version": "1.0.2",
+  "releaseDate": "2026-02-20",
+  "buildNumber": 3,
   "notes": {
-    "TR": "v2.9.3: Tüm formlarda EUR baz + para birimi değişince hemen kur dönüşümü",
-    "EN": "v2.9.3: EUR base + instant currency conversion across all forms",
-    "DE": "Buchungserstellung behoben, Preisaktualisierung verbessert",
-    "FR": "Correction de la création de réservation, amélioration des mises à jour de prix",
-    "RU": "Исправление создания бронирования, улучшение обновления цен",
-    "IT": "Correzione creazione prenotazione, miglioramento aggiornamento prezzi",
-    "ES": "Corrección de creación de reserva, mejora de actualización de precios",
-    "AR": "إصلاح إنشاء الحجز، تحسين تحديث الأسعار",
-    "UK": "Виправлення створення бронювання, покращення оновлення цін",
-    "JA": "予約作成の修正、価格更新の改善"
+    "TR": "Performans iyileştirmeleri ve hata düzeltmeleri",
+    "EN": "Performance improvements and bug fixes",
+    "DE": "Leistungsverbesserungen und Fehlerbehebungen",
+    "FR": "Améliorations des performances et corrections de bugs"
   }
 }
