@@ -11,7 +11,7 @@ interface Props {
 const AdminGuard = ({ children }: Props) => {
   const { user, loading: authLoading, isAdmin } = useAuth();
   const [checking, setChecking] = useState(true);
-  const [allowed, setAllowed] = useState(false);
+  const [allowed, setAllowed] = useState<boolean | null>(null); // null: bilinmiyor/loading
 
   useEffect(() => {
     let mounted = true;
@@ -40,17 +40,17 @@ const AdminGuard = ({ children }: Props) => {
       try {
         const ok = await isAdmin();
         if (mounted) {
-          setAllowed(Boolean(ok));
+          setAllowed(ok); // null ise loading, true/false ise karar
           setChecking(false);
           console.log('Current User ID:', user?.id);
-          console.log('Is Admin:', Boolean(ok));
+          console.log('Is Admin:', ok);
         }
       } catch (err) {
         if (mounted) {
-          setAllowed(false);
+          setAllowed(null);
           setChecking(false);
           console.log('Current User ID:', user?.id);
-          console.log('Is Admin:', false);
+          console.log('Is Admin:', null);
         }
       }
     };
@@ -59,8 +59,9 @@ const AdminGuard = ({ children }: Props) => {
     return () => { mounted = false; };
   }, [user, authLoading, isAdmin]);
 
-  // Profil veya user yüklenmeden yönlendirme yapma
-  if (authLoading || checking) {
+
+  // Profil/rol yüklenmeden yönlendirme yapma (iOS dahil)
+  if (authLoading || checking || allowed === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>Yükleniyor...</div>
@@ -68,7 +69,7 @@ const AdminGuard = ({ children }: Props) => {
     );
   }
 
-  if (!allowed) {
+  if (allowed === false) {
     return <Navigate to="/" replace />;
   }
 

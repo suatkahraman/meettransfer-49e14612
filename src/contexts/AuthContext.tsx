@@ -9,7 +9,7 @@ import { startOAuthSignIn } from '@/lib/oauthSignIn';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  isAdmin: (userId?: string) => Promise<boolean>;
+  isAdmin: (userId?: string) => Promise<boolean | null>; // null: bilinmiyor/loading
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
@@ -229,34 +229,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const isAdmin = async (userId?: string) => {
+  // isAdmin: null dönerse loading, true/false ise kesin karar
+  const isAdmin = async (userId?: string): Promise<boolean | null> => {
     const uid = userId ?? session?.user?.id ?? user?.id;
-    if (!uid) return false;
+    if (!uid || loading) return null;
 
     try {
-      // Call the RPC; the SQL side was fixed to handle ::text, so pass string safely
       const { data, error } = await supabase.rpc('is_admin', { user_id: String(uid) });
       if (error) {
         console.error('[AuthContext] is_admin RPC error:', error);
-        return false;
+        return null;
       }
-
-      // Handle different possible return shapes from RPC
-      if (data == null) return false;
-      // If RPC returns scalar boolean
+      if (data == null) return null;
       if (typeof data === 'boolean') return data as boolean;
-      // If RPC returns an array or object with is_admin key
       if (Array.isArray(data) && data.length > 0) {
         const first = data[0] as any;
         if (typeof first === 'boolean') return first;
         if (first && typeof first.is_admin === 'boolean') return first.is_admin;
       }
       if ((data as any).is_admin !== undefined) return Boolean((data as any).is_admin);
-
-      return false;
+      return null;
     } catch (err) {
       console.error('[AuthContext] isAdmin exception:', err);
-      return false;
+      return null;
     }
   };
 
