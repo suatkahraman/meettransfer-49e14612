@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import AdminGuard from '@/components/admin/AdminGuard';
 import { toast } from "sonner";
 import { format, isToday, isYesterday } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -98,7 +99,7 @@ const quickReplies = [
   { label: "Onay", text: "Rezervasyonunuz onaylandı! Detayları kısa süre içinde paylaşacağız." },
 ];
 
-export default function AdminWhatsAppChat() {
+function AdminWhatsAppChat() {
   const { session } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -1216,5 +1217,13 @@ export default function AdminWhatsAppChat() {
       {renderConversationsList()}
       {renderChatArea()}
     </div>
+  );
+}
+
+export default function AdminWhatsAppChatPage() {
+  return (
+    <AdminGuard>
+      <AdminWhatsAppChat />
+    </AdminGuard>
   );
 }

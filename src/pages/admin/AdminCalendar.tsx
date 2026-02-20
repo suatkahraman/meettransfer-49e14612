@@ -11,6 +11,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, MapPin, Clock, User } from 'lucid
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, addMonths, subMonths, isSameDay, parseISO } from 'date-fns';
 import NotificationBell from '@/components/NotificationBell';
 import { getCurrencySymbol } from '@/lib/currency';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface Reservation {
   id: string;
@@ -333,4 +334,10 @@ const AdminCalendar = () => {
   );
 };
 
-export default AdminCalendar;
+export default function AdminCalendarPage() {
+  return (
+    <AdminGuard>
+      <AdminCalendar />
+    </AdminGuard>
+  );
+}

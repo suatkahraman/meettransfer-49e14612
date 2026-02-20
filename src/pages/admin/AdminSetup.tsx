@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { toast } from 'sonner';
 import { Shield, Loader2 } from 'lucide-react';
 import { z } from 'zod';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 const adminSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -241,4 +242,10 @@ const AdminSetup = () => {
   );
 };
 
-export default AdminSetup;
+export default function AdminSetupPage() {
+  return (
+    <AdminGuard>
+      <AdminSetup />
+    </AdminGuard>
+  );
+}

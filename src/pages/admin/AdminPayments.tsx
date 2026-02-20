@@ -27,6 +27,7 @@ import { CustomerPaymentTable, AgencyPaymentTable } from '@/components/admin/pay
 
 // Utils
 import { exportPaymentsToExcel } from '@/utils/exportPayments';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 const AdminPayments = () => {
   const navigate = useNavigate();
@@ -207,4 +208,10 @@ const AdminPayments = () => {
   );
 };
 
-export default AdminPayments;
+export default function AdminPaymentsPage() {
+  return (
+    <AdminGuard>
+      <AdminPayments />
+    </AdminGuard>
+  );
+}

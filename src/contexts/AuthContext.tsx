@@ -9,6 +9,7 @@ import { startOAuthSignIn } from '@/lib/oauthSignIn';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  isAdmin: (userId?: string) => Promise<boolean>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
@@ -228,8 +229,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const isAdmin = async (userId?: string) => {
+    const uid = userId ?? session?.user?.id ?? user?.id;
+    if (!uid) return false;
+
+    try {
+      // Call the RPC; the SQL side was fixed to handle ::text, so pass string safely
+      const { data, error } = await supabase.rpc('is_admin', { user_id: String(uid) });
+      if (error) {
+        console.error('[AuthContext] is_admin RPC error:', error);
+        return false;
+      }
+
+      // Handle different possible return shapes from RPC
+      if (data == null) return false;
+      // If RPC returns scalar boolean
+      if (typeof data === 'boolean') return data as boolean;
+      // If RPC returns an array or object with is_admin key
+      if (Array.isArray(data) && data.length > 0) {
+        const first = data[0] as any;
+        if (typeof first === 'boolean') return first;
+        if (first && typeof first.is_admin === 'boolean') return first.is_admin;
+      }
+      if ((data as any).is_admin !== undefined) return Boolean((data as any).is_admin);
+
+      return false;
+    } catch (err) {
+      console.error('[AuthContext] isAdmin exception:', err);
+      return false;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, signIn, signUp, signInWithGoogle, signOut, loading }}>
+    <AuthContext.Provider value={{ user, session, isAdmin, signIn, signUp, signInWithGoogle, signOut, loading }}>
       {children}
     </AuthContext.Provider>
   );

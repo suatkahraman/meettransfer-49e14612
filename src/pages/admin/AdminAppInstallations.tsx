@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Download, Smartphone, Monitor, Apple, Chrome, Globe, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface AppInstallation {
   id: string;
@@ -332,4 +333,10 @@ const AdminAppInstallations = () => {
   );
 };
 
-export default AdminAppInstallations;
+export default function AdminAppInstallationsPage() {
+  return (
+    <AdminGuard>
+      <AdminAppInstallations />
+    </AdminGuard>
+  );
+}

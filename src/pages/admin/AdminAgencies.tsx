@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Plus, Building2, Edit, Trash2, DollarSign, Key, Mail, Phone, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { getCurrencySymbol, CURRENCY_OPTIONS } from '@/lib/currency';
 import { AgencyReservationsExportDialog } from '@/components/admin/AgencyReservationsExportDialog';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 // Fallback exchange rates
 const FALLBACK_RATES: Record<string, number> = {
@@ -843,4 +844,10 @@ const AdminAgencies = () => {
   );
 };
 
-export default AdminAgencies;
+export default function AdminAgenciesPage() {
+  return (
+    <AdminGuard>
+      <AdminAgencies />
+    </AdminGuard>
+  );
+}

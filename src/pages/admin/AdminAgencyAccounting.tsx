@@ -16,6 +16,7 @@ import { MonthNavigator } from '@/components/accounting/MonthNavigator';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 import { toast } from 'sonner';
 import { getCurrencySymbol, CURRENCY_OPTIONS } from '@/lib/currency';
+import AdminGuard from '@/components/admin/AdminGuard';
 interface Agency {
   id: string;
   agency_name: string;
@@ -1329,4 +1330,10 @@ const AdminAgencyAccounting = () => {
   );
 };
 
-export default AdminAgencyAccounting;
+export default function AdminAgencyAccountingPage() {
+  return (
+    <AdminGuard>
+      <AdminAgencyAccounting />
+    </AdminGuard>
+  );
+}

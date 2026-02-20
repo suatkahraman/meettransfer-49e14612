@@ -69,6 +69,7 @@ import {
   Bot,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import AdminGuard from '@/components/admin/AdminGuard';
 import PriceHistoryCard from "@/components/admin/PriceHistoryCard";
 import { cn } from "@/lib/utils";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -113,6 +114,14 @@ interface QuickBookingRequest {
   created_via_ai: boolean | null;
 }
 
+export default function AdminQuickBookingsPage() {
+  return (
+    <AdminGuard>
+      <AdminQuickBookings />
+    </AdminGuard>
+  );
+}
+
 // Interface for linked reservation customer status
 interface LinkedReservationInfo {
   reservation_id: string;
@@ -143,7 +152,7 @@ const statusConfig: Record<string, { color: string; bgColor: string; label: stri
 
 type TabValue = "all" | "pending" | "price_sent" | "confirmed" | "other";
 
-export default function AdminQuickBookings() {
+function AdminQuickBookings() {
   const navigate = useNavigate();
   const { thresholdsMap } = usePriceThresholds();
   const [requests, setRequests] = useState<QuickBookingRequest[]>([]);
@@ -203,6 +212,7 @@ export default function AdminQuickBookings() {
         .maybeSingle();
       if (data?.discount_percentage) {
         setReturnDiscountPercent(data.discount_percentage);
+  import AdminGuard from '@/components/admin/AdminGuard';
       }
     };
     fetchDiscount();
@@ -248,7 +258,6 @@ export default function AdminQuickBookings() {
       setRequests((data as QuickBookingRequest[]) || []);
       
       // For confirmed requests, fetch linked reservation customer status
-      const confirmedRequests = (data as QuickBookingRequest[])?.filter(r => r.status === "confirmed") || [];
       if (confirmedRequests.length > 0) {
         fetchLinkedReservations(confirmedRequests);
       }

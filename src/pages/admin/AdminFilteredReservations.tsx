@@ -12,6 +12,7 @@ import { LocationDisplay } from '@/components/ui/location-display';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { getCurrencySymbol } from '@/lib/currency';
 import { toast } from 'sonner';
+import AdminGuard from '@/components/admin/AdminGuard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -707,4 +708,10 @@ const AdminFilteredReservations = () => {
   );
 };
 
-export default AdminFilteredReservations;
+export default function AdminFilteredReservationsPage() {
+  return (
+    <AdminGuard>
+      <AdminFilteredReservations />
+    </AdminGuard>
+  );
+}

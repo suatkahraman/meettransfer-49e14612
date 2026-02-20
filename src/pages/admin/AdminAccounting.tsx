@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowLeft, Banknote, TrendingUp, Users } from 'lucide-react';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface DriverAccounting {
   id: string;
@@ -153,4 +154,10 @@ const AdminAccounting = () => {
   );
 };
 
-export default AdminAccounting;
+export default function AdminAccountingPage() {
+  return (
+    <AdminGuard>
+      <AdminAccounting />
+    </AdminGuard>
+  );
+}

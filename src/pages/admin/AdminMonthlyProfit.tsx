@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from "date-fns";
+import AdminGuard from '@/components/admin/AdminGuard';
 import { tr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Building2, Car, Calculator, ArrowLeft, User, Banknote, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -794,4 +795,10 @@ const AdminMonthlyProfit = () => {
   );
 };
 
-export default AdminMonthlyProfit;
+export default function AdminMonthlyProfitPage() {
+  return (
+    <AdminGuard>
+      <AdminMonthlyProfit />
+    </AdminGuard>
+  );
+}

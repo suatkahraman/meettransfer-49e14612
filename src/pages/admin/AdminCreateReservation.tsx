@@ -23,6 +23,7 @@ import { AddressMapSection, LocationData } from '@/components/reservation/Addres
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import { AdminPaymentLinkGenerator } from '@/components/admin/AdminPaymentLinkGenerator';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 // Airports list removed - pickup is now free text
 // Use centralized vehicle types
@@ -1190,4 +1191,10 @@ const AdminCreateReservation = () => {
   );
 };
 
-export default AdminCreateReservation;
+export default function AdminCreateReservationPage() {
+  return (
+    <AdminGuard>
+      <AdminCreateReservation />
+    </AdminGuard>
+  );
+}

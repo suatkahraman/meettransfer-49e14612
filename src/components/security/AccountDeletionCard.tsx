@@ -158,7 +158,7 @@ const AccountDeletionCard = () => {
       const [profileResult, reservationsResult, devicesResult] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('reservations').select('*').eq('customer_id', user.id),
-        supabase.from('trusted_devices').select('*').eq('user_id', user.id),
+        supabase.from('trusted_devices').select('*').eq('user_id', String(user.id)),
       ]);
 
       const exportData = {

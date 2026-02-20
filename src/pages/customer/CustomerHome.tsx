@@ -465,7 +465,7 @@ const CustomerHome = () => {
       const { data: favorites } = await supabase
         .from('favorite_routes')
         .select('id, name, pickup_location, dropoff_location, notes, usage_count')
-        .eq('user_id', user.id)
+        .eq('user_id', String(user.id))
         .order('usage_count', { ascending: false })
         .limit(isIOS ? 5 : 10); // iOS için daha az favori rota
       
@@ -1067,7 +1067,7 @@ const CustomerHome = () => {
         .from('favorite_routes')
         .delete()
         .eq('id', routeId)
-        .eq('user_id', user.id);
+        .eq('user_id', String(user.id));
 
       if (error) throw error;
 

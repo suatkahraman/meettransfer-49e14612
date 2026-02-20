@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePriceThresholds } from '@/hooks/usePriceThresholds';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 const VEHICLE_LABELS: Record<string, string> = {
   'mercedes-vito': 'Mercedes Vito',
@@ -21,7 +22,7 @@ const VEHICLE_ICONS: Record<string, string> = {
   'minibus': '🚌',
 };
 
-export default function AdminPriceThresholds() {
+function AdminPriceThresholds() {
   const navigate = useNavigate();
   const { thresholds, isLoading, updateThreshold } = usePriceThresholds();
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
@@ -182,5 +183,13 @@ export default function AdminPriceThresholds() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function AdminPriceThresholdsPage() {
+  return (
+    <AdminGuard>
+      <AdminPriceThresholds />
+    </AdminGuard>
   );
 }

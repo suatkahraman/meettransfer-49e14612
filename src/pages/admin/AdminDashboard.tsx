@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { InvoiceDialog } from '@/components/admin/InvoiceDialog';
 import PWAInstallWidget from '@/components/admin/PWAInstallWidget';
 import { supabase } from '@/integrations/supabase/client';
+import AdminGuard from '@/components/admin/AdminGuard';
 interface KPIs {
   newToday: number;
   pendingAssignment: number;
@@ -28,7 +29,7 @@ interface DriverExpenseBreakdownItem {
 }
 
 const AdminDashboard = () => {
-  const { signOut } = useAuth();
+  const { signOut, user, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [kpis, setKpis] = useState<KPIs>({
     newToday: 0,
@@ -55,8 +56,36 @@ const AdminDashboard = () => {
       maximumFractionDigits: 0,
     }).format(amount);
 
+  const [adminLoading, setAdminLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const checkAdmin = async () => {
+      setAdminLoading(true);
+      // wait until auth finishes initializing
+      if (authLoading) return;
+
+      if (!user) {
+        setAdminLoading(false);
+        navigate('/auth', { replace: true });
+        return;
+      }
+
+      const allowed = await isAdmin();
+      if (!mounted) return;
+      setAdminLoading(false);
+      if (!allowed) {
+        navigate('/', { replace: true });
+      }
+    };
+
+    checkAdmin();
+    return () => { mounted = false; };
+  }, [user, authLoading, isAdmin, navigate]);
+
   useEffect(() => {
     const fetchKPIs = async () => {
+      if (adminLoading) return;
       const today = new Date();
       const monthStart = startOfMonth(today);
       const monthEnd = endOfMonth(today);
@@ -150,7 +179,7 @@ const AdminDashboard = () => {
     };
 
     fetchKPIs();
-  }, []);
+  }, [adminLoading]);
 
   // Fetch unread WhatsApp messages count
   useEffect(() => {
@@ -473,4 +502,10 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default function AdminDashboardPage() {
+  return (
+    <AdminGuard>
+      <AdminDashboard />
+    </AdminGuard>
+  );
+}

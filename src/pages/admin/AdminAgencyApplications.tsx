@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Check, X, Building2, Clock, Mail, Phone, DollarSign, MessageSquare, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface AgencyApplication {
   id: string;
@@ -332,4 +333,10 @@ const AdminAgencyApplications = () => {
   );
 };
 
-export default AdminAgencyApplications;
+export default function AdminAgencyApplicationsPage() {
+  return (
+    <AdminGuard>
+      <AdminAgencyApplications />
+    </AdminGuard>
+  );
+}

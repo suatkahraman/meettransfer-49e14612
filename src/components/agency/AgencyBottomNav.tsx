@@ -39,7 +39,7 @@ export const AgencyBottomNav = () => {
       const { count } = await supabase
         .from('notifications')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
+        .eq('user_id', String(user.id))
         .eq('read', false);
       
       setUnreadCount(count || 0);
@@ -49,14 +49,14 @@ export const AgencyBottomNav = () => {
 
     // Real-time subscription for notifications
     const channel = supabase
-      .channel(`agency-bottom-nav-notifications-${user.id}`)
+      .channel(`agency-bottom-nav-notifications-${String(user.id)}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${String(user.id)}`
         },
         () => {
           fetchUnreadCount();

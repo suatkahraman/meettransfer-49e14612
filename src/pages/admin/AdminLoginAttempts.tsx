@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowLeft, Search, RefreshCw, Shield, ShieldAlert, ShieldCheck, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface LoginAttempt {
   id: string;
@@ -207,4 +208,10 @@ const AdminLoginAttempts = () => {
   );
 };
 
-export default AdminLoginAttempts;
+export default function AdminLoginAttemptsPage() {
+  return (
+    <AdminGuard>
+      <AdminLoginAttempts />
+    </AdminGuard>
+  );
+}

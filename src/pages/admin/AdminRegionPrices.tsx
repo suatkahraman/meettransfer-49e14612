@@ -27,6 +27,7 @@ import {
   DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
+import AdminGuard from '@/components/admin/AdminGuard';
 import { ArrowLeft, Plus, Pencil, Trash2, Search, MapPin, TestTube, CheckCircle, XCircle, AlertTriangle, ArrowRightLeft, Percent, Calendar, CalendarDays, Calculator } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -1631,4 +1632,10 @@ const AdminRegionPrices = () => {
   );
 };
 
-export default AdminRegionPrices;
+export default function AdminRegionPricesPage() {
+  return (
+    <AdminGuard>
+      <AdminRegionPrices />
+    </AdminGuard>
+  );
+}

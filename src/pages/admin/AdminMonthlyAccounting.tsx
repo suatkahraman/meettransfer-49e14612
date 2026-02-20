@@ -14,6 +14,7 @@ import { DriverPaymentsTable } from '@/components/accounting/DriverPaymentsTable
 import { DriverBalanceCard } from '@/components/accounting/DriverBalanceCard';
 import { DriverQuickPaymentDialog } from '@/components/accounting/DriverQuickPaymentDialog';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface Driver {
   id: string;
@@ -587,4 +588,10 @@ const AdminMonthlyAccounting = () => {
   );
 };
 
-export default AdminMonthlyAccounting;
+export default function AdminMonthlyAccountingPage() {
+  return (
+    <AdminGuard>
+      <AdminMonthlyAccounting />
+    </AdminGuard>
+  );
+}

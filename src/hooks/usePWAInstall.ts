@@ -258,19 +258,19 @@ export function usePWAInstall() {
       try {
         // Check if user has excluded role (admin, driver, agency)
         if (isExcludedUserRef.current === null) {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const { data: roleData } = await supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', user.id)
-              .in('role', EXCLUDED_ROLES)
-              .limit(1);
-            
-            isExcludedUserRef.current = (roleData && roleData.length > 0);
-          } else {
-            isExcludedUserRef.current = false;
-          }
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const { data: roleData } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', String(user.id))
+                .in('role', EXCLUDED_ROLES)
+                .limit(1);
+
+              isExcludedUserRef.current = (roleData && roleData.length > 0);
+            } else {
+              isExcludedUserRef.current = false;
+            }
         }
 
         // Don't track excluded users

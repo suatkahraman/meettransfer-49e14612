@@ -223,7 +223,7 @@ export const useUserRole = () => {
           const { data: roleRows, error: roleError } = await supabase
             .from('user_roles')
             .select('role')
-            .eq('user_id', user.id);
+            .eq('user_id', String(user.id));
           const driverLookup = await fetchDriverId(user.id);
           const agencyLookup = await fetchAgencyId(user.id);
           return { roleRows: roleRows ?? [], roleError, driverLookup, agencyLookup };

@@ -52,13 +52,13 @@ export const usePushNotifications = () => {
       setIsSubscribed(!!subscription);
 
       // Keep backend in sync (prevents "subscribed but no push" after stale endpoints are pruned)
-      if (user && subscription) {
+        if (user && subscription) {
         const subscriptionJson = subscription.toJSON();
         const { error } = await supabase
           .from('push_subscriptions')
           .upsert(
             {
-              user_id: user.id,
+              user_id: String(user.id),
               endpoint: subscriptionJson.endpoint!,
               p256dh: subscriptionJson.keys!.p256dh,
               auth: subscriptionJson.keys!.auth,
@@ -140,12 +140,12 @@ export const usePushNotifications = () => {
 
       const subscriptionJson = subscription.toJSON();
       
-      if (user) {
+        if (user) {
         // Save subscription to database immediately
         const { error } = await supabase
           .from('push_subscriptions')
           .upsert({
-            user_id: user.id,
+              user_id: String(user.id),
             endpoint: subscriptionJson.endpoint!,
             p256dh: subscriptionJson.keys!.p256dh,
             auth: subscriptionJson.keys!.auth
@@ -188,11 +188,11 @@ export const usePushNotifications = () => {
         await subscription.unsubscribe();
         
         // Remove from database if logged in
-        if (user) {
+          if (user) {
           await supabase
             .from('push_subscriptions')
             .delete()
-            .eq('user_id', user.id)
+              .eq('user_id', String(user.id))
             .eq('endpoint', subscription.endpoint);
         }
       }

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { ArrowLeft, Plus, Pencil, UserX, UserCheck, Phone, MapPin, Loader2, Eye, Briefcase, Car, Trash2, Star, Mail, Palette, Search, X, Filter, KeyRound } from 'lucide-react';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 // Shared constants - synchronized with DriverInfoEditor
 const vehicleTypes = [
@@ -982,4 +983,10 @@ const AdminDrivers = () => {
   );
 };
 
-export default AdminDrivers;
+export default function AdminDriversPage() {
+  return (
+    <AdminGuard>
+      <AdminDrivers />
+    </AdminGuard>
+  );
+}

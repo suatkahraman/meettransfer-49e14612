@@ -32,6 +32,7 @@ import {
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { tr } from "date-fns/locale";
 import { toast } from "sonner";
+import AdminGuard from '@/components/admin/AdminGuard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -855,4 +856,10 @@ const AdminAnalytics = () => {
   );
 };
 
-export default AdminAnalytics;
+export default function AdminAnalyticsPage() {
+  return (
+    <AdminGuard>
+      <AdminAnalytics />
+    </AdminGuard>
+  );
+}

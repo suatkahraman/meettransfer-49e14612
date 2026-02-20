@@ -32,6 +32,7 @@ import { VEHICLE_TYPE_OPTIONS as vehicleTypes } from '@/lib/vehicleTypes';
 import { getCurrencySymbol, CURRENCY_OPTIONS as currencies } from '@/lib/currency';
 import { validatePrice } from '@/lib/priceValidation';
 import { usePriceThresholds } from '@/hooks/usePriceThresholds';
+import AdminGuard from '@/components/admin/AdminGuard';
 const paymentTypes = [
   { value: 'cash', label: 'Şoföre Nakit' },
   { value: 'payment_link', label: 'Online Ödeme Linki' },
@@ -2802,4 +2803,10 @@ ${formData.admin_notes ? `\n📝 *${l.notes}:* ${formData.admin_notes}` : ''}
   );
 };
 
-export default AdminEditReservation;
+export default function AdminEditReservationPage() {
+  return (
+    <AdminGuard>
+      <AdminEditReservation />
+    </AdminGuard>
+  );
+}

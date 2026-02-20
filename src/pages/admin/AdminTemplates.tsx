@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Plus, Pencil, Trash2, MapPin, FileText } from 'lucide-react';
 import { CURRENCY_OPTIONS, getCurrencySymbol } from '@/lib/currency';
 import NotificationBell from '@/components/NotificationBell';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 const airports = ['IST', 'SAW', 'AYT', 'BJV', 'DLM', 'ASR', 'NAV', 'ADB'];
 // Use centralized vehicle types
@@ -347,4 +348,10 @@ const AdminTemplates = () => {
   );
 };
 
-export default AdminTemplates;
+export default function AdminTemplatesPage() {
+  return (
+    <AdminGuard>
+      <AdminTemplates />
+    </AdminGuard>
+  );
+}

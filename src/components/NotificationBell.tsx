@@ -67,7 +67,7 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
     const { data, error } = await supabase
       .from('notifications')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', String(user.id))
       .order('created_at', { ascending: false })
       .limit(20);
 
@@ -86,14 +86,14 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
 
     // Subscribe to real-time updates
     const channel = supabase
-      .channel(`notifications-${user.id}`)
+      .channel(`notifications-${String(user.id)}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${String(user.id)}`
         },
         (payload) => {
           const newNotification = payload.new as Notification;
@@ -112,7 +112,7 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
           event: 'UPDATE',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${String(user.id)}`
         },
         (payload) => {
           const updatedNotification = payload.new as Notification;
@@ -134,7 +134,7 @@ export const NotificationBell = ({ variant = 'light' }: NotificationBellProps) =
           event: 'DELETE',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${String(user.id)}`
         },
         (payload) => {
           const deletedId = (payload.old as any).id;

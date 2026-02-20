@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface PromoCode {
   id: string;
@@ -832,4 +833,10 @@ const AdminPromoCodes = () => {
   );
 };
 
-export default AdminPromoCodes;
+export default function AdminPromoCodesPage() {
+  return (
+    <AdminGuard>
+      <AdminPromoCodes />
+    </AdminGuard>
+  );
+}

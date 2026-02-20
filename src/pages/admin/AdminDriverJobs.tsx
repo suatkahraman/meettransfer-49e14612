@@ -11,6 +11,7 @@ import { tr } from 'date-fns/locale';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdminMonthCard from '@/components/admin/AdminMonthCard';
 import AdminDayCard from '@/components/admin/AdminDayCard';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface Reservation {
   id: string;
@@ -328,4 +329,10 @@ const AdminDriverJobs = () => {
   );
 };
 
-export default AdminDriverJobs;
+export default function AdminDriverJobsPage() {
+  return (
+    <AdminGuard>
+      <AdminDriverJobs />
+    </AdminGuard>
+  );
+}

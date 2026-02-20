@@ -6,6 +6,7 @@ import { ArrowLeft, Settings, Users, Shield, ShieldAlert, ChevronRight, Euro, St
 import { NotificationSettingsPanel } from '@/components/NotificationSettingsPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -205,4 +206,10 @@ const AdminSettings = () => {
   );
 };
 
-export default AdminSettings;
+export default function AdminSettingsPage() {
+  return (
+    <AdminGuard>
+      <AdminSettings />
+    </AdminGuard>
+  );
+}

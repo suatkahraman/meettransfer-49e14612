@@ -37,6 +37,7 @@ import BulkPriceUpdateDialog from "@/components/admin/BulkPriceUpdateDialog";
 import MonthlyPriceUpdateDialog from "@/components/admin/MonthlyPriceUpdateDialog";
 import SeasonalPricesManager from "@/components/admin/SeasonalPricesManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface HourlyRentalPrice {
   id: string;
@@ -964,4 +965,10 @@ const AdminHourlyRentalPrices = () => {
   );
 };
 
-export default AdminHourlyRentalPrices;
+export default function AdminHourlyRentalPricesPage() {
+  return (
+    <AdminGuard>
+      <AdminHourlyRentalPrices />
+    </AdminGuard>
+  );
+}

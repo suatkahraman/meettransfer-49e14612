@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, MapPin, Calendar, Clock, User, CreditCard, UserCheck, Pencil, Trash2, Plus, Copy, CheckSquare, Square, X, AlertTriangle, Building2, Banknote, CheckCircle2, Clock3, RefreshCw, Briefcase, Baby, Car, Users, Plane } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
+import AdminGuard from '@/components/admin/AdminGuard';
 import { tr } from 'date-fns/locale';
 import NotificationBell from '@/components/NotificationBell';
 import { LocationDisplay } from '@/components/ui/location-display';
@@ -1312,4 +1313,10 @@ const AdminReservations = () => {
   );
 };
 
-export default AdminReservations;
+export default function AdminReservationsPage() {
+  return (
+    <AdminGuard>
+      <AdminReservations />
+    </AdminGuard>
+  );
+}

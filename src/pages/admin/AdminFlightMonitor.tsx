@@ -13,6 +13,7 @@ import { tr } from 'date-fns/locale';
 import FlightStatus from '@/components/ui/flight-status';
 import { AirlineDisplay } from '@/components/ui/airline-display';
 import NotificationBell from '@/components/NotificationBell';
+import AdminGuard from '@/components/admin/AdminGuard';
 
 interface Reservation {
   id: string;
@@ -353,4 +354,10 @@ const AdminFlightMonitor = () => {
   );
 };
 
-export default AdminFlightMonitor;
+export default function AdminFlightMonitorPage() {
+  return (
+    <AdminGuard>
+      <AdminFlightMonitor />
+    </AdminGuard>
+  );
+}

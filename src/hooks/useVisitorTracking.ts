@@ -180,7 +180,7 @@ export function useVisitorTracking() {
         const { data: roleData, error } = await supabase
           .from('user_roles')
           .select('role')
-          .eq('user_id', user.id)
+          .eq('user_id', String(user.id))
           .in('role', EXCLUDED_ROLES)
           .limit(1);
         

@@ -53,7 +53,7 @@ export const AgencyNotificationHistory = () => {
     let query = supabase
       .from('notifications')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', String(user.id))
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -78,14 +78,14 @@ export const AgencyNotificationHistory = () => {
     if (!user) return;
 
     const channel = supabase
-      .channel(`agency-notifications-history-${user.id}`)
+      .channel(`agency-notifications-history-${String(user.id)}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${String(user.id)}`
         },
         () => {
           fetchNotifications();

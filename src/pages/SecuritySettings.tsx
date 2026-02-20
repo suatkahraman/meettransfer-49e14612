@@ -359,7 +359,7 @@ const SecuritySettings = () => {
         supabase
           .from('trusted_devices')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', String(user.id))
           .eq('is_active', true)
           .order('last_used_at', { ascending: false }),
         supabase
@@ -371,7 +371,7 @@ const SecuritySettings = () => {
         supabase
           .from('user_roles')
           .select('two_factor_enabled')
-          .eq('user_id', user.id)
+          .eq('user_id', String(user.id))
           .single()
       ]);
 
@@ -414,7 +414,7 @@ const SecuritySettings = () => {
       const { error } = await supabase
         .from('user_roles')
         .update({ two_factor_enabled: newValue })
-        .eq('user_id', user.id);
+        .eq('user_id', String(user.id));
 
       if (error) throw error;
 
@@ -458,7 +458,7 @@ const SecuritySettings = () => {
       const { error } = await supabase
         .from('trusted_devices')
         .update({ is_active: false })
-        .eq('user_id', user.id);
+        .eq('user_id', String(user.id));
 
       if (error) throw error;
 
