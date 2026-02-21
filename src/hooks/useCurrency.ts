@@ -1,12 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// 24 saatten eski mi kontrolü için yardımcı fonksiyon
+function isOlderThan24Hours(dateStr?: string) {
+  if (!dateStr) return true;
+  const date = new Date(dateStr);
+  const now = new Date();
+  return (now.getTime() - date.getTime()) > 24 * 60 * 60 * 1000;
+}
+
 // Local fallback exchange rates in case DB/function are unavailable
 const LOCAL_FALLBACK_RATES: Record<string, number> = {
   EUR: 1,
-  USD: 1.09,
-  GBP: 0.85,
-  TRY: 38.5,
+  USD: 1.08,
+  GBP: 1.2,
+  TRY: 35.5,
   AED: 4,
   RUB: 100,
   CNY: 7.9,
@@ -32,6 +40,7 @@ export function useCurrency(preferredCurrency: string = 'EUR') {
 
       try {
         // First try to read the most recent rate from the exchange_rates table
+
         const { data: dbData, error: dbError } = await supabase
           .from('exchange_rates')
           .select('rate, date')
@@ -40,6 +49,11 @@ export function useCurrency(preferredCurrency: string = 'EUR') {
           .order('date', { ascending: false })
           .limit(1)
           .maybeSingle();
+
+        // Eğer veri varsa ve 24 saatten eskiyse arka planda güncelleme tetikle
+        if (dbData && isOlderThan24Hours((dbData as any).date)) {
+          fetch('/api/update-exchange-rates').catch(() => {});
+        }
 
         if (!cancelled) {
           if (dbError) {

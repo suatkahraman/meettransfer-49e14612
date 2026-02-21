@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "overrides": {
     "archiver": "^7.0.1",
     "fast-csv": "^5.0.5",
@@ -53,7 +55,7 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
     "@radix-ui/react-tooltip": "^1.2.7",
-    "@supabase/supabase-js": "^2.86.0",
+    "@supabase/supabase-js": "^2.97.0",
     "@tanstack/react-query": "^5.83.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
@@ -70,6 +72,7 @@
     "lucide-react": "^0.462.0",
     "mapbox-gl": "^3.17.0",
     "next-themes": "^0.3.0",
+    "node-fetch": "^2.7.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",

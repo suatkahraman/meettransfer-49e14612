@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS public.distance_pricing_rules (
   place_id text,
   location_display text,
   price_amount numeric,
+  price_currency text DEFAULT 'TRY',
   base_price numeric DEFAULT 0,
   price_per_km numeric DEFAULT 0,
   min_km numeric DEFAULT 0,
@@ -49,11 +50,13 @@ DROP POLICY IF EXISTS "Service role full access to distance_pricing_rules" ON pu
 DROP POLICY IF EXISTS "Public read distance_pricing_rules" ON public.distance_pricing_rules;
 
 -- 5. Politikaları oluştur (admin panel CRUD + public read)
+CREATE POLICY "Admin full access to distance_pricing_rules"
+  ON public.distance_pricing_rules FOR ALL
+  USING (has_role(auth.uid(), 'admin'))
+  WITH CHECK (has_role(auth.uid(), 'admin'));
+
 CREATE POLICY "Public read distance_pricing_rules"
   ON public.distance_pricing_rules FOR SELECT USING (true);
-
-CREATE POLICY "Service role full access to distance_pricing_rules"
-  ON public.distance_pricing_rules FOR ALL USING (true) WITH CHECK (true);
 
 -- 6. Varsayılan kurallar (tablo boşsa - 0-50 km Türkiye)
 DO $$
