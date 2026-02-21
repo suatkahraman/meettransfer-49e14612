@@ -19,7 +19,7 @@ const APP_URL =
  */
 export const getSupabaseAuthCallbackForGoogle = (): string => {
   // Always return the specific project callback URL for lzwwxuxwlssxutwiuxtf
-  return "https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/callback";
+    return "https://lzwwxuxwlssxutwiuxtf.supabase.co/auth/v1/callback";
 };
 
 /**

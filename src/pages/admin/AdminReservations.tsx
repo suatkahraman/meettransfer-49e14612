@@ -129,7 +129,9 @@ const AdminReservations = () => {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    status: 'all',
+    status: 'all', // legacy, UI için tutuluyor
+    detailed_status: 'all',
+    is_assigned: 'all',
     date: '',
     search: '',
   });
@@ -180,6 +182,14 @@ const AdminReservations = () => {
       `)
       .order('pickup_date', { ascending: false });
 
+    // Yeni filtreler: detailed_status ve is_assigned
+    if (filters.detailed_status && filters.detailed_status !== 'all') {
+      query = query.eq('detailed_status', filters.detailed_status);
+    }
+    if (filters.is_assigned && filters.is_assigned !== 'all') {
+      query = query.eq('is_assigned', filters.is_assigned === 'true');
+    }
+    // Eski status filtresi (gerekirse)
     if (filters.status !== 'all') {
       query = query.eq('status', filters.status);
     }
@@ -458,14 +468,15 @@ const AdminReservations = () => {
 
   // Group reservations by month and day for display
   const groupedReservations = useMemo(() => {
-    // Filter out special section reservations (agency requests, pending reviews, needs assignment)
+    // Yeni filtreleme: detailed_status ve is_assigned ile
     const regularReservations = reservations.filter(r => {
-      // Exclude agency pending review
-      if (r.agency_id && r.status === 'pending_admin_review') return false;
-      // Exclude non-agency pending review
-      if (r.status === 'pending_admin_review' && !r.agency_id) return false;
-      // Exclude needs assignment (already shown in special section)
-      if ((r.status === 'confirmed' || r.status === 'customer_approved') && !r.driver_id) return false;
+      // Onay Bekleyen: detailed_status === 'pending_approval'
+      if (filters.detailed_status === 'pending_approval' && r.detailed_status !== 'pending_approval') return false;
+      // Atama Bekleyen: is_assigned === false
+      if (filters.is_assigned === 'false' && r.is_assigned !== false) return false;
+      // Atanmışlar: is_assigned === true
+      if (filters.is_assigned === 'true' && r.is_assigned !== true) return false;
+      // Tümünü göster
       return true;
     });
 
@@ -895,8 +906,9 @@ const AdminReservations = () => {
                           />
                           <div className="space-y-2">
                             <div className="flex items-center gap-3">
+                              {/* Yeni durum etiketi: detailed_status */}
                               <Badge className={statusColors[reservation.status] || 'bg-muted'}>
-                                {statusLabels[reservation.status] || reservation.status}
+                                {reservation.detailed_status ? reservation.detailed_status.replace('_', ' ').toUpperCase() : (statusLabels[reservation.status] || reservation.status)}
                               </Badge>
                               <span className="flex items-center gap-1 text-sm">
                                 <Calendar className="h-4 w-4" />

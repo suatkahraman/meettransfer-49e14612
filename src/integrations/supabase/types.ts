@@ -1529,6 +1529,9 @@ export type Database = {
       }
       reservations: {
         Row: {
+          detailed_status: string | null
+          is_assigned: boolean | null
+          child_seat_count: number | null
           admin_set_price: number | null
           agency_id: string | null
           agency_user_id: string | null
@@ -1589,11 +1592,13 @@ export type Database = {
           agency_id?: string | null
           agency_user_id?: string | null
           baby_seat_count?: number | null
+          child_seat_count?: number | null
           created_at?: string | null
           customer_id?: string | null
           customer_name: string
           customer_notes?: string | null
           customer_phone: string
+          detailed_status?: string | null
           discount_amount?: number | null
           discount_percentage?: number | null
           driver_cash?: boolean | null
@@ -1612,6 +1617,7 @@ export type Database = {
           flight_number?: string | null
           flight_status?: string | null
           id?: string
+          is_assigned?: boolean | null
           is_return_transfer?: boolean | null
           last_notified_arrival_time?: string | null
           luggage_count?: number | null

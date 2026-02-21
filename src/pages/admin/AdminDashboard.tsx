@@ -76,11 +76,11 @@ const AdminDashboard = () => {
         .gte('created_at', dayStart.toISOString())
         .lte('created_at', dayEnd.toISOString());
 
-      // Pending assignment
+      // Atama Bekleyen (is_assigned === false)
       const { count: pendingAssignment } = await supabase
         .from('reservations')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'new');
+        .eq('is_assigned', false);
 
       // Active trips
       const { count: activeTrips } = await supabase
@@ -88,11 +88,11 @@ const AdminDashboard = () => {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active');
 
-      // Completed trips this month
+      // Tamamlanan (detailed_status === 'completed')
       const { count: completedTrips } = await supabase
         .from('reservations')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'completed')
+        .eq('detailed_status', 'completed')
         .gte('updated_at', monthStart.toISOString())
         .lte('updated_at', monthEnd.toISOString());
 
@@ -102,8 +102,8 @@ const AdminDashboard = () => {
 
       const { data: expenseRows } = await supabase
         .from('reservations')
-        .select('driver_id, driver_earning')
-        .eq('status', 'completed')
+        .select('driver_id, driver_earning, vehicle_type, luggage_count, baby_seat_count, child_seat_count, payment_type, detailed_status, is_assigned')
+        .eq('detailed_status', 'completed')
         .gte('pickup_date', monthStartStr)
         .lte('pickup_date', monthEndStr)
         .not('driver_id', 'is', null)
@@ -139,6 +139,14 @@ const AdminDashboard = () => {
           driverName: driverNameMap.get(driverId) || 'Bilinmiyor',
           totalExpense: val.total,
           transferCount: val.count,
+          // Ekstra: araç tipi, valiz, koltuk, ödeme tipi, detailed_status, is_assigned
+          vehicleTypes: (expenseRows || []).filter(r => r.driver_id === driverId).map(r => r.vehicle_type),
+          luggageCounts: (expenseRows || []).filter(r => r.driver_id === driverId).map(r => r.luggage_count),
+          babySeatCounts: (expenseRows || []).filter(r => r.driver_id === driverId).map(r => r.baby_seat_count),
+          childSeatCounts: (expenseRows || []).filter(r => r.driver_id === driverId).map(r => r.child_seat_count),
+          paymentTypes: (expenseRows || []).filter(r => r.driver_id === driverId).map(r => r.payment_type),
+          detailedStatuses: (expenseRows || []).filter(r => r.driver_id === driverId).map(r => r.detailed_status),
+          isAssignedList: (expenseRows || []).filter(r => r.driver_id === driverId).map(r => r.is_assigned),
         }))
         .sort((a, b) => b.totalExpense - a.totalExpense);
 
