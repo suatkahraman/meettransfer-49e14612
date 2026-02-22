@@ -665,11 +665,11 @@ const ReservationForm = () => {
     }
   };
 
-  // Form submit işlemleri için async fonksiyon
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Yeni ve temiz handleSubmit fonksiyonu
+  const handleReservationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     // Sadece Get Quato ile yapılan fiyat sorguları için yönlendirme yapılacak
-    // Sadece giriş yapmamış ve signup olmamış kullanıcılar yönlendirilecek
     if (!isLoggedIn && !isFromQuickBooking && !signUpSuccess) {
       const params = new URLSearchParams({
         pickup: formData.pickup,
@@ -680,9 +680,58 @@ const ReservationForm = () => {
         lang: language || 'TR',
       });
       window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
+      return;
     }
-    // Eğer backend işlemi gerekiyorsa, eski kodu burada tutabilirsiniz
-    // ...existing code...
+
+    // Validasyon
+    const schemaToUse = isLoggedIn
+      ? reservationSchema.omit({ password: true })
+      : reservationSchema.extend({ password: passwordSchema });
+    const result = schemaToUse.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      toast.error('Please fix the validation errors');
+      return;
+    }
+
+    setIsLoading(true);
+    const primaryPassengerName = validPassengerNames[0].trim();
+    let userId = '';
+    let signUpError = null;
+    let signUpData = null;
+
+    try {
+      if (isLoggedIn && user) {
+        userId = user.id;
+        await supabase
+          .from('profiles')
+          .update({ phone: formData.phone.trim(), full_name: primaryPassengerName })
+          .eq('id', userId);
+      } else {
+        const signUpResult = await supabase.auth.signUp({
+          email: formData.email.trim(),
+          password: formData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/customer/bookings`,
+            data: { full_name: primaryPassengerName },
+          },
+        });
+        signUpData = signUpResult.data;
+        signUpError = signUpResult.error;
+      }
+      // Diğer işlemler ve hata yönetimi burada devam edebilir
+    } catch (error) {
+      toast.error('Bir hata oluştu, lütfen tekrar deneyin.');
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(false);
   };
 
     // Validate - password only required if not logged in
