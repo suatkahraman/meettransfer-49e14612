@@ -665,6 +665,7 @@ const ReservationForm = () => {
     }
   };
 
+  // Form submit işlemleri için async fonksiyon
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Sadece Get Quato ile yapılan fiyat sorguları için yönlendirme yapılacak
@@ -759,16 +760,15 @@ const ReservationForm = () => {
       let signUpError = null;
       let signUpData = null;
 
+      // Kullanıcı giriş yaptıysa profil güncelle
       if (isLoggedIn && user) {
-        // Already logged in, use current user
         userId = user.id;
-        // Update profile if needed
         await supabase
           .from('profiles')
           .update({ phone: formData.phone.trim(), full_name: primaryPassengerName })
           .eq('id', userId);
       } else {
-        // Try to sign up the user
+        // Giriş yapmadıysa signup işlemi
         const signUpResult = await supabase.auth.signUp({
           email: formData.email.trim(),
           password: formData.password,
