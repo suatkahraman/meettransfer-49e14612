@@ -227,7 +227,7 @@ const AgencyCreateReservation = () => {
                     dropoff: t('dropoffPoint'),
                     sectionTitle: t('transferDetails'),
                   }}
-                </div>
+                />
 
                 <div>
                   <Label htmlFor="vehicle_type">{t('vehicleType')}</Label>
