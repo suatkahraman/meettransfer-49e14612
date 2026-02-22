@@ -665,7 +665,7 @@ const ReservationForm = () => {
     }
   };
 
-  // Sadece giriş yapmamış kullanıcılar için Get Quato yönlendirmesi
+  // Sadece yönlendirme yapan, await/async içermeyen, hatasız fonksiyon
   const handleReservationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoggedIn) {
@@ -678,9 +678,7 @@ const ReservationForm = () => {
         lang: language || 'TR',
       });
       window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
-      return;
     }
-    // Giriş yapmış kullanıcılar için eski backend işlemleri veya diğer işlemler burada devam edebilir
   };
 
     // Validate - password only required if not logged in
