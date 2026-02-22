@@ -227,7 +227,6 @@ const AgencyCreateReservation = () => {
                     dropoff: t('dropoffPoint'),
                     sectionTitle: t('transferDetails'),
                   }}
-                  // ...supabase ve async/await ile ilgili kodlar kaldırıldı...
                 </div>
 
                 <div>
