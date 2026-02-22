@@ -709,42 +709,45 @@ const ReservationForm = () => {
       setPendingFormData({ ...formData });
       setPendingPassengerNames([...validPassengerNames]);
       
-      try {
-        // Fetch all vehicle prices
-        const { prices, hasAvailablePrice, message } = await fetchVehiclePricesSafely(
-          formData.pickup,
-          formData.dropoff,
-          "EUR",
-          formData.date || undefined,
-        );
+      const fetchAndShowPrices = async () => {
+        try {
+          // Fetch all vehicle prices
+          const { prices, hasAvailablePrice, message } = await fetchVehiclePricesSafely(
+            formData.pickup,
+            formData.dropoff,
+            "EUR",
+            formData.date || undefined,
+          );
 
-        // Wait 3 seconds for animation
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        setFetchedVehiclePrices(prices);
-        setSelectedVehicleForConfirm(formData.vehicleType);
-        if (!hasAvailablePrice) {
-          const noPriceMessage = message || getPriceNotFoundMessage();
-          setPriceLookupMessage(noPriceMessage);
-          toast.error(noPriceMessage);
+          // Wait 3 seconds for animation
+          await new Promise(resolve => setTimeout(resolve, 3000));
+
+          setFetchedVehiclePrices(prices);
+          setSelectedVehicleForConfirm(formData.vehicleType);
+          if (!hasAvailablePrice) {
+            const noPriceMessage = message || getPriceNotFoundMessage();
+            setPriceLookupMessage(noPriceMessage);
+            toast.error(noPriceMessage);
+          }
+
+          setShowPricePreparation(false);
+          setShowVehicleSelection(true);
+          setIsLoading(false);
+          return;
+        } catch (error) {
+          console.error("Error fetching prices:", error);
+          // Continue with normal flow if price fetching fails
+          setShowPricePreparation(false);
+          setFetchedVehiclePrices([]);
+          setPriceLookupMessage(getPriceNotFoundMessage());
+          setSelectedVehicleForConfirm(formData.vehicleType);
+          setShowVehicleSelection(true);
+          setIsLoading(false);
+          toast.error(getPriceNotFoundMessage());
+          return;
         }
-        
-        setShowPricePreparation(false);
-        setShowVehicleSelection(true);
-        setIsLoading(false);
-        return;
-      } catch (error) {
-        console.error("Error fetching prices:", error);
-        // Continue with normal flow if price fetching fails
-        setShowPricePreparation(false);
-        setFetchedVehiclePrices([]);
-        setPriceLookupMessage(getPriceNotFoundMessage());
-        setSelectedVehicleForConfirm(formData.vehicleType);
-        setShowVehicleSelection(true);
-        setIsLoading(false);
-        toast.error(getPriceNotFoundMessage());
-        return;
-      }
+      };
+      fetchAndShowPrices();
     }
 
     setIsLoading(true);
