@@ -109,28 +109,7 @@ const AgencyCreateReservation = () => {
     window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
   };
 
-    // ...supabase ve async/await ile ilgili kodlar tamamen kaldırıldı...
-        console.error('Failed to notify admins:', err);
-      }
-
-      // Send email notification to admin
-      if (reservation?.id) {
-        try {
-          await emailAdminAgencyRequest(reservation.id);
-          console.log('Agency request email sent to admin');
-        } catch (err) {
-          console.error('Failed to send agency request email:', err);
-        }
-      }
-
-      toast.success(t('reservationSent'));
-      navigate('/agency');
-    } catch (error: any) {
-      console.error('Error creating reservation:', error);
-      toast.error(error.message || t('reservationFailed'));
-    } finally {
-      setSaving(false);
-    }
+    // ...tüm eski try/catch ve async kodlar kaldırıldı, sadece yönlendirme fonksiyonu kaldı...
   };
 
   return (
