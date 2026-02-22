@@ -109,8 +109,6 @@ const AgencyCreateReservation = () => {
     window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
   };
 
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-4 px-6 flex items-center gap-4">
