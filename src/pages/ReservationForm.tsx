@@ -667,16 +667,18 @@ const ReservationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Query string ile yönlendirme
-    const params = new URLSearchParams({
-      pickup: formData.pickup,
-      dropoff: formData.dropoff,
-      date: formData.date,
-      time: formData.time,
-      passengers: String(passengerNames.length),
-      lang: language || 'TR',
-    });
-    window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
+    // Sadece Get Quato ile yapılan fiyat sorguları için yönlendirme yapılacak
+    if (!isLoggedIn && !isFromQuickBooking) {
+      const params = new URLSearchParams({
+        pickup: formData.pickup,
+        dropoff: formData.dropoff,
+        date: formData.date,
+        time: formData.time,
+        passengers: String(passengerNames.length),
+        lang: language || 'TR',
+      });
+      window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
+    }
     // Eğer backend işlemi gerekiyorsa, eski kodu burada tutabilirsiniz
     // ...existing code...
   };
