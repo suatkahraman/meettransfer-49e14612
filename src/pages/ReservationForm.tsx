@@ -754,35 +754,36 @@ const ReservationForm = () => {
     setIsLoading(true);
 
     try {
-      const handleUserProfile = async () => {
-        let userId: string;
-        const primaryPassengerName = validPassengerNames[0].trim();
+      let userId: string;
+      const primaryPassengerName = validPassengerNames[0].trim();
+      let signUpError = null;
+      let signUpData = null;
 
-        if (isLoggedIn && user) {
-          // Already logged in, use current user
-          userId = user.id;
-          // Update profile if needed
-          await supabase
-            .from('profiles')
-            .update({ phone: formData.phone.trim(), full_name: primaryPassengerName })
-            .eq('id', userId);
-        } else {
-          // Try to sign up the user
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: formData.email.trim(),
-            password: formData.password,
-            options: {
-              emailRedirectTo: `${window.location.origin}/customer/bookings`,
-              data: {
-                full_name: primaryPassengerName,
-              },
+      if (isLoggedIn && user) {
+        // Already logged in, use current user
+        userId = user.id;
+        // Update profile if needed
+        await supabase
+          .from('profiles')
+          .update({ phone: formData.phone.trim(), full_name: primaryPassengerName })
+          .eq('id', userId);
+      } else {
+        // Try to sign up the user
+        const signUpResult = await supabase.auth.signUp({
+          email: formData.email.trim(),
+          password: formData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/customer/bookings`,
+            data: {
+              full_name: primaryPassengerName,
             },
-          });
-        }
-      };
-      await handleUserProfile();
+          },
+        });
+        signUpData = signUpResult.data;
+        signUpError = signUpResult.error;
+      }
 
-        if (signUpError) {
+      if (signUpError) {
           // Handle "user already exists" - try to sign in
           if (signUpError.message.includes('already registered') || signUpError.message.includes('User already registered')) {
             // Try to sign in with provided password
