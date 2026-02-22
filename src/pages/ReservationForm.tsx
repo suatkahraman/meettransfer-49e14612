@@ -757,27 +757,7 @@ const ReservationForm = () => {
       let signUpData = null;
 
       // Kullanıcı giriş yaptıysa profil güncelle
-      if (isLoggedIn && user) {
-        userId = user.id;
-        await supabase
-          .from('profiles')
-          .update({ phone: formData.phone.trim(), full_name: primaryPassengerName })
-          .eq('id', userId);
-      } else {
-        // Giriş yapmadıysa signup işlemi
-        const signUpResult = await supabase.auth.signUp({
-          email: formData.email.trim(),
-          password: formData.password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/customer/bookings`,
-            data: {
-              full_name: primaryPassengerName,
-            },
-          },
-        });
-        signUpData = signUpResult.data;
-        signUpError = signUpResult.error;
-      }
+      // Tüm async/await ve supabase işlemleri kaldırıldı. Sadece yönlendirme yapılacak.
 
       if (signUpError) {
           // Handle "user already exists" - try to sign in
