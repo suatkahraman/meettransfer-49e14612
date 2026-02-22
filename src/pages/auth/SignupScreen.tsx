@@ -438,11 +438,18 @@ useEffect(() => {
             <div className="text-center text-sm text-muted-foreground">
               {t('alreadyHaveAccount')}
             </div>
-            <Link to="/login" className="w-full">
-              <Button variant="outline" className="w-full h-12 rounded-xl">
-                {t('login')}
-              </Button>
-            </Link>
+            {/* Müşteri Girişi */}
+            <div className="my-2">
+              <iframe src="https://meettransfer.com/login" width="100%" height="600" frameBorder="0"></iframe>
+            </div>
+            {/* Şoför Girişi */}
+            <div className="my-2">
+              <iframe src="https://meettransfer.com/login/driver" width="100%" height="600" frameBorder="0"></iframe>
+            </div>
+            {/* Acenta Girişi */}
+            <div className="my-2">
+              <iframe src="https://meettransfer.com/login/agency" width="100%" height="600" frameBorder="0"></iframe>
+            </div>
           </CardFooter>
         </Card>
       </div>

@@ -1036,11 +1036,22 @@ const Auth = () => {
         {location.pathname !== '/auth' && (
           <CardFooter className="flex flex-col gap-2 pt-0">
             <p className="text-center text-xs text-muted-foreground">
-              <Link to="/login" className="text-accent hover:underline">Customer login</Link>
-              {' · '}
-              <Link to="/login/driver" className="text-accent hover:underline">Driver</Link>
-              {' · '}
-              <Link to="/login/agency" className="text-accent hover:underline">Agency</Link>
+              {/* Müşteri Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
+              {/* Şoför Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login/driver" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
+              {/* Acenta Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login/agency" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
+              {/* Kayıt Ol */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/signup" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
             </p>
           </CardFooter>
         )}

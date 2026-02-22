@@ -97,24 +97,19 @@ const AgencyCreateReservation = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
-    if (validPassengerNames.length === 0) {
-      toast.error(t('atLeastOnePassenger'));
-      return;
-    }
-    
-    if (!formData.customer_phone || !formData.pickup || !formData.dropoff || !formData.pickup_date || !formData.pickup_time) {
-      toast.error(t('fillAllRequired'));
-      return;
-    }
-
-    if (!agencyId) {
-      toast.error(t('agencyNotFound'));
-      return;
-    }
-
-    setSaving(true);
+    // Query string ile yönlendirme
+    const params = new URLSearchParams({
+      pickup: formData.pickup,
+      dropoff: formData.dropoff,
+      date: formData.pickup_date,
+      time: formData.pickup_time,
+      passengers: String(passengerNames.length),
+      lang: 'TR',
+    });
+    window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
+    // Eğer backend işlemi gerekiyorsa, eski kodu burada tutabilirsiniz
+    // ...existing code...
+  };
 
     try {
       const primaryPassenger = validPassengerNames[0];

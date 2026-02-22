@@ -82,9 +82,22 @@ const SignupChoicePage = () => {
           <div className="text-center pt-4">
             <p className="text-sm text-muted-foreground">
               {t('alreadyHaveAccountQuestion')}{' '}
-              <Link to="/login" className="text-accent hover:underline font-medium">
-                {t('logIn')}
-              </Link>
+              {/* Müşteri Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
+              {/* Şoför Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login/driver" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
+              {/* Acenta Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login/agency" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
+              {/* Kayıt Ol */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/signup" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
             </p>
           </div>
         </div>

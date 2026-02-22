@@ -406,9 +406,18 @@ export default function AgencySignupScreen() {
             
             <div className="text-center text-sm text-muted-foreground">
               Already have an account?{' '}
-              <Link to="/login" className="text-primary hover:underline font-medium">
-                Login here
-              </Link>
+              {/* Müşteri Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
+              {/* Şoför Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login/driver" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
+              {/* Acenta Girişi */}
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login/agency" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
             </div>
             
             <div className="text-center text-sm text-muted-foreground">

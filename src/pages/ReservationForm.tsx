@@ -667,29 +667,19 @@ const ReservationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({});
-
-    // Validate passenger names
-    const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
-    if (validPassengerNames.length === 0) {
-      setErrors({ passengerNames: 'At least one passenger name is required' });
-      toast.error('Please enter at least one passenger name');
-      return;
-    }
-
-    // Validate return trip if enabled
-    if (hasReturnTrip) {
-      if (!returnTripData.date) {
-        setErrors(prev => ({ ...prev, returnDate: 'Please select a return date' }));
-        toast.error('Please select a return date');
-        return;
-      }
-      if (!returnTripData.time) {
-        setErrors(prev => ({ ...prev, returnTime: 'Please select a return time' }));
-        toast.error('Please select a return time');
-        return;
-      }
-    }
+    // Query string ile yönlendirme
+    const params = new URLSearchParams({
+      pickup: formData.pickup,
+      dropoff: formData.dropoff,
+      date: formData.date,
+      time: formData.time,
+      passengers: String(passengerNames.length),
+      lang: language || 'TR',
+    });
+    window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
+    // Eğer backend işlemi gerekiyorsa, eski kodu burada tutabilirsiniz
+    // ...existing code...
+  };
 
     // Validate - password only required if not logged in
     const schemaToUse = isLoggedIn 

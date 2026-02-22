@@ -1387,21 +1387,16 @@ const BookingPage = () => {
 
   // Main submit handler
   const handleSubmit = () => {
-    // Check if user is logged in or using manual form
-    if (!user && !isGoogleUser && !showManualForm) {
-      // Show login warning and scroll to customer information section
-      setShowLoginWarning(true);
-      toast.error(language === 'TR' ? "Lütfen önce giriş yapın" : "Please Login First");
-      // Auto-hide warning after 5 seconds
-      setTimeout(() => setShowLoginWarning(false), 5000);
-      return;
-    }
-    
-    if (user) {
-      handleLoggedInSubmit();
-    } else {
-      handleGuestSubmit();
-    }
+    // Form verilerini query string ile meettransfer.com/book'a yönlendir
+    const params = new URLSearchParams({
+      pickup: effectivePickup,
+      dropoff: effectiveDropoff,
+      date: effectiveDate,
+      time: effectiveTime,
+      passengers: String(passengers),
+      lang: language || 'TR',
+    });
+    window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
   };
 
   // Parse date for display
