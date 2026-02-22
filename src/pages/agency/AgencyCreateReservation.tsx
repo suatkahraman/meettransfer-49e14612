@@ -95,9 +95,9 @@ const AgencyCreateReservation = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Sadece acenta dashboard için: Query string ile yönlendirme, supabase işlemi yok
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Query string ile yönlendirme
     const params = new URLSearchParams({
       pickup: formData.pickup,
       dropoff: formData.dropoff,
@@ -107,8 +107,6 @@ const AgencyCreateReservation = () => {
       lang: 'TR',
     });
     window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
-    // Eğer backend işlemi gerekiyorsa, eski kodu burada tutabilirsiniz
-    // ...existing code...
   };
 
     try {

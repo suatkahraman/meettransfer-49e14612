@@ -1134,112 +1134,17 @@ const BookingPage = () => {
   // Apple Sign-In - geçici olarak kaldırıldı
 
   // Handle form submission for guests (create account + reservation)
-  const handleGuestSubmit = async () => {
-    // Validate form
-    if (!validateGuestForm()) {
-      toast.error(t("pleaseFixErrors") || "Please fix the form errors");
-      return;
-    }
-
-    setSubmitting(true);
-    
-    try {
-      const currentPrice = isHourlyBooking 
-        ? getHourlyPrice(vehicleType, selectedDuration) 
-        : selectedPrice;
-      
-      // Calculate return price with discount if applicable
-      const discountMultiplier = promoDiscountPercent ? (100 - promoDiscountPercent) / 100 : 1;
-      const returnPrice = hasReturnTrip && currentPrice
-        ? (isPromoCodeValid && promoDiscountPercent ? Math.round(currentPrice * discountMultiplier) : currentPrice)
-        : null;
-      
-      // Calculate discount amount for return trip
-      const returnDiscountAmount = hasReturnTrip && currentPrice && isPromoCodeValid && promoDiscountPercent
-        ? Math.round(currentPrice * (promoDiscountPercent / 100) * 100) / 100
-        : null;
-
-      // Call edge function to create account and reservation
-      const { data: result, error: fnError } = await supabase.functions.invoke(
-        "create-quick-booking-reservation",
-        {
-          body: {
-            // Optional bookingId - only present for AI-assisted bookings with token
-            bookingId: tokenBookingData?.id || undefined,
-            // Booking details - use effective values (editable or URL params)
-            pickup: isHourlyBooking ? (effectiveCity || urlCity) : effectivePickup,
-            dropoff: isHourlyBooking ? `${selectedDuration} ${t("hourlyRental") || "Hourly Rental"} - ${effectiveCity || urlCity}` : effectiveDropoff,
-            pickupDate: effectiveDate,
-            pickupTime: effectiveTime,
-            vehicleType,
-            passengers,
-            price: currentPrice,
-            priceCurrency: preferredCurrency,
-            paymentMethod: paymentType,
-            hasReturnTrip: hasReturnTrip && returnDate && returnTime ? true : false,
-            returnDate: hasReturnTrip && returnDate ? returnDate : null,
-            returnTime: hasReturnTrip && returnTime ? returnTime : null,
-            returnPrice: returnPrice,
-            returnDiscountPercentage: hasReturnTrip && isPromoCodeValid && promoDiscountPercent ? promoDiscountPercent : null,
-            returnDiscountAmount: returnDiscountAmount,
-            promoCode: hasReturnTrip && isPromoCodeValid && promoCode ? promoCode : null,
-            babySeatCount,
-            luggageCount,
-            customerNotes: customerNotes.trim() || null,
-            flightNumber: flightNumber.trim() || null,
-            passengerNames: passengerNames.filter(n => n.trim()).length > 0 ? passengerNames.filter(n => n.trim()) : null,
-            // Customer info
-            customerName: customerName.trim(),
-            customerPhone: customerPhone.trim() || 'N/A',
-            customerEmail: customerEmail.trim(),
-            customerPassword: isGoogleUser ? null : guestPassword,
-            isGoogleUser,
-          },
-        }
-      );
-
-      if (fnError) throw fnError;
-      if (!result?.success) throw new Error(result?.error || "Failed to create reservation");
-
-      // Sign in the user (for non-Google users) and wait for session
-      let signedInSuccessfully = false;
-      if (!isGoogleUser && guestPassword) {
-        const { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
-          email: customerEmail.trim(),
-          password: guestPassword,
-        });
-
-        if (signInError) {
-          console.error("Auto sign-in error:", signInError);
-        } else if (signInData.session) {
-          signedInSuccessfully = true;
-        }
-      }
-
-      // Trigger confetti celebration
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-
-      setBookingCompleted(true);
-      setCompletedReservationId(result.reservationId);
-      toast.success(t("bookingConfirmed") || "Booking confirmed!");
-      
-      // If signed in successfully, redirect immediately (don't wait for useEffect)
-      if (signedInSuccessfully) {
-        // Small delay to allow auth state to propagate
-        setTimeout(() => {
-          navigate('/customer', { replace: true });
-        }, 100);
-      }
-    } catch (error: unknown) {
-      console.error("Error submitting:", error);
-      toast.error((error as Error).message || "Failed to submit request");
-    } finally {
-      setSubmitting(false);
-    }
+  // Giriş yapmamış müşteri için sadece query string ile yönlendirme
+  const handleGuestSubmit = () => {
+    const params = new URLSearchParams({
+      pickup: effectivePickup,
+      dropoff: effectiveDropoff,
+      date: effectiveDate,
+      time: effectiveTime,
+      passengers: String(passengers),
+      lang: language || 'TR',
+    });
+    window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
   };
 
   // Handle form submission for logged-in users (direct reservation)
