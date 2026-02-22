@@ -177,12 +177,9 @@ const WebsiteHeader = () => {
                 </Button>
               </>
             ) : (
-              <Link to="/login">
-                <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10">
-                  <LogIn className="h-4 w-4 mr-1.5" />
-                  {t("login") || "Login"}
-                </Button>
-              </Link>
+              <div className="my-2">
+                <iframe src="https://meettransfer.com/login" width="100%" height="600" frameBorder="0"></iframe>
+              </div>
             )}
           </div>
 
@@ -280,17 +277,18 @@ const WebsiteHeader = () => {
                   </>
                 ) : (
                   <>
-                    {LOGIN_LINKS.map(({ to, label, icon: Icon }) => (
-                      <Link
-                        key={to}
-                        to={to}
-                        className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span className="font-medium">{label}</span>
-                      </Link>
-                    ))}
+                    <div className="my-2">
+                      <iframe src="https://meettransfer.com/login" width="100%" height="600" frameBorder="0"></iframe>
+                    </div>
+                    <div className="my-2">
+                      <iframe src="https://meettransfer.com/login/driver" width="100%" height="600" frameBorder="0"></iframe>
+                    </div>
+                    <div className="my-2">
+                      <iframe src="https://meettransfer.com/login/agency" width="100%" height="600" frameBorder="0"></iframe>
+                    </div>
+                    <div className="my-2">
+                      <iframe src="https://meettransfer.com/signup" width="100%" height="600" frameBorder="0"></iframe>
+                    </div>
                   </>
                 )}
               </div>

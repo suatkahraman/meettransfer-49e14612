@@ -649,17 +649,30 @@ const ReservationForm = () => {
   // Sadece yönlendirme yapan, await/async içermeyen, hatasız fonksiyon
   const handleReservationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoggedIn) {
-      const params = new URLSearchParams({
-        pickup: formData.pickup,
-        dropoff: formData.dropoff,
-        date: formData.date,
-        time: formData.time,
-        passengers: String(passengerNames.length),
-        lang: language || 'TR',
-      });
-      window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
-    }
+    // Tüm form verilerini query string olarak aktar
+    const params = new URLSearchParams({
+      pickup: formData.pickup,
+      dropoff: formData.dropoff,
+      date: formData.date,
+      time: formData.time,
+      passengers: String(passengerNames.length),
+      lang: language || 'TR',
+      vehicleType: formData.vehicleType,
+      paymentMethod: formData.paymentMethod,
+      notes: formData.notes,
+      phone: formData.phone,
+      email: formData.email,
+      flightNumber: formData.flightNumber,
+      luggageCount: String(luggageCount),
+      babySeatCount: String(babySeatCount),
+      promoCode: promoCode,
+      returnDate: returnTripData.date,
+      returnTime: returnTripData.time,
+      returnFlightNumber: returnTripData.flightNumber,
+      hasReturn: hasReturnTrip ? 'true' : 'false',
+    });
+    window.open(`https://meettransfer.com/book?${params.toString()}`, '_blank');
+    // Formu resetle veya başka bir işlem yapmaya gerek yok, sadece yönlendirme.
   };
 
     // Validate - password only required if not logged in

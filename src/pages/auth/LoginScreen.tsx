@@ -963,12 +963,9 @@ const LoginScreen = () => {
               <CardFooter className="flex flex-col gap-2">
                 <div className="text-center text-sm text-muted-foreground">{t('dontHaveAccount')}</div>
                 <div className="flex gap-2 w-full">
-                  <Link to="/signup/customer" className="flex-1">
-                    <Button variant="outline" className="w-full h-12 rounded-xl">{t('guestRegistration')}</Button>
-                  </Link>
-                  <Link to="/signup/agency" className="flex-1">
-                    <Button variant="secondary" className="w-full h-12 rounded-xl">{t('agencyRegistration')}</Button>
-                  </Link>
+                  <div className="my-2">
+                    <iframe src="https://meettransfer.com/signup" width="100%" height="600" frameBorder="0"></iframe>
+                  </div>
                 </div>
               </CardFooter>
             </Card>
