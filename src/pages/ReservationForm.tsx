@@ -668,7 +668,8 @@ const ReservationForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Sadece Get Quato ile yapılan fiyat sorguları için yönlendirme yapılacak
-    if (!isLoggedIn && !isFromQuickBooking) {
+    // Sadece giriş yapmamış ve signup olmamış kullanıcılar yönlendirilecek
+    if (!isLoggedIn && !isFromQuickBooking && !signUpSuccess) {
       const params = new URLSearchParams({
         pickup: formData.pickup,
         dropoff: formData.dropoff,
