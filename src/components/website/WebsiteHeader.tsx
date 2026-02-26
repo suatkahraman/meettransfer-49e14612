@@ -7,12 +7,14 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Menu, X, MapPin, Car, Phone, FileText, Info, LogIn, LogOut, User, UserPlus, Building2, BookOpen } from "lucide-react";
 
 const LOGIN_LINKS = [
-  { to: "/login?role=customer", labelKey: "customerLogin", label: "Müşteri Girişi", icon: User },
-  { to: "/login?role=driver", labelKey: "driverLogin", label: "Sürücü Girişi", icon: Car },
-  { to: "/login?role=agency", labelKey: "agencyLogin", label: "Acenta Girişi", icon: Building2 },
+  { href: "https://meettransfer.com/login", labelKey: "customerLogin", label: "Müşteri Girişi", icon: User },
+  { href: "https://meettransfer.com/login/driver", labelKey: "driverLogin", label: "Sürücü Girişi", icon: Car },
+  { href: "https://meettransfer.com/login/agency", labelKey: "agencyLogin", label: "Acenta Girişi", icon: Building2 },
 ] as const;
 import LanguageSelector from "./LanguageSelector";
 import meetTransferLogo from "@/assets/meet-transfer-logo-new.png";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 
 const WebsiteHeader = () => {
   const { t, getLocalizedPath } = useLanguage();
@@ -118,7 +120,7 @@ const WebsiteHeader = () => {
           
           {/* Sign Up Button - Next to brand */}
           {!user && (
-            <Link to="/signup">
+            <a href="https://meettransfer.com/signup">
               <Button 
                 size="sm" 
                 variant="accent"
@@ -128,7 +130,7 @@ const WebsiteHeader = () => {
                 <span className="hidden xs:inline">{t("signUp") || "Sign Up"}</span>
                 <span className="xs:hidden">{t("signUp")?.split(' ')[0] || "Sign"}</span>
               </Button>
-            </Link>
+            </a>
           )}
         </div>
 
@@ -177,9 +179,32 @@ const WebsiteHeader = () => {
                 </Button>
               </>
             ) : (
-              <div className="my-2">
-                <iframe src="https://meettransfer.com/login" width="100%" height="600" frameBorder="0"></iframe>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 group">
+                    <LogIn className="h-4 w-4 mr-1.5" />
+                    {t("login") || "Login"}
+                    <ChevronDown className="ml-1 h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-black border-white/10 text-white p-1">
+                  {LOGIN_LINKS.map(({ href, label, icon: Icon }) => (
+                    <DropdownMenuItem key={href} asChild className="focus:bg-white/10 focus:text-white cursor-pointer rounded-md py-2.5">
+                      <a href={href} className="flex items-center w-full">
+                        <Icon className="mr-2.5 h-4 w-4 text-accent" />
+                        <span className="font-medium text-sm">{label}</span>
+                      </a>
+                    </DropdownMenuItem>
+                  ))}
+                  <div className="h-px bg-white/10 my-1" />
+                  <DropdownMenuItem asChild className="focus:bg-accent/10 focus:text-accent cursor-pointer rounded-md py-2.5">
+                    <a href="https://meettransfer.com/signup" className="flex items-center w-full text-accent">
+                      <UserPlus className="mr-2.5 h-4 w-4" />
+                      <span className="font-bold text-sm">{t("signUp") || "Sign Up"}</span>
+                    </a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
@@ -277,32 +302,39 @@ const WebsiteHeader = () => {
                   </>
                 ) : (
                   <>
-                    <div className="my-2">
-                      <iframe src="https://meettransfer.com/login" width="100%" height="600" frameBorder="0"></iframe>
-                    </div>
-                    <div className="my-2">
-                      <iframe src="https://meettransfer.com/login/driver" width="100%" height="600" frameBorder="0"></iframe>
-                    </div>
-                    <div className="my-2">
-                      <iframe src="https://meettransfer.com/login/agency" width="100%" height="600" frameBorder="0"></iframe>
-                    </div>
-                    <div className="my-2">
-                      <iframe src="https://meettransfer.com/signup" width="100%" height="600" frameBorder="0"></iframe>
-                    </div>
+                    {LOGIN_LINKS.map(({ href, label, icon: Icon }) => (
+                      <a
+                        key={href}
+                        href={href}
+                        className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Icon className="h-5 w-5" />
+                        <span className="font-medium">{label}</span>
+                      </a>
+                    ))}
+                    <a
+                      href="https://meettransfer.com/signup"
+                      className="flex items-center gap-3 text-white/80 hover:text-white hover:bg-white/10 py-3 px-3 rounded-lg transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <UserPlus className="h-5 w-5" />
+                      <span className="font-medium">{t("signUp") || "Sign Up"}</span>
+                    </a>
                   </>
                 )}
               </div>
 
               {/* Agency Registration Link */}
               <div className="pt-3 mt-2 border-t border-white/10">
-                <Link
-                  to="/signup/agency"
+                <a
+                  href="https://meettransfer.com/signup"
                   className="flex items-center gap-3 text-accent hover:text-accent/80 hover:bg-accent/10 py-3 px-3 rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <Building2 className="h-5 w-5" />
                   <span className="font-medium">{t("agencyRegistration") || "Agency Registration"}</span>
-                </Link>
+                </a>
               </div>
 
               {/* Mobile Language Selector */}
