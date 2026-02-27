@@ -45,7 +45,7 @@ export function useHourlyForm(
   appliedPromoCode: string
 ): UseHourlyFormReturn {
   const navigate = useNavigate();
-  const { getLocalizedPath } = useLanguage();
+  const { language, getLocalizedPath } = useLanguage();
   const { loadSavedFormData } = useHeroFormStorage();
   
   // Initialize state from localStorage - optimize by loading once
@@ -291,13 +291,14 @@ export function useHourlyForm(
     
     params.set("duration", durationValue);
     params.set("passengers", hourlyPassengers);
-    // Araç book sayfasında seçilecek - Hero'dan gönderilmez
+    params.set("vehicleType", hourlyVehicleType);
     params.set("type", "hourly");
     params.set("lang", language);
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
     
-    const url = `/book?${params.toString()}`;
-    window.open(url, "_self");
+    const url = getLocalizedPath(`/book?${params.toString()}`);
+    console.log("[useHourlyForm] Navigating to:", url);
+    navigate(url);
   }, [hourlyCity, hourlyDate, hourlyTime, hourlyDuration, customHours, hourlyPassengers, hourlyVehicleType, appliedPromoCode, navigate, t, getLocalizedPath, language]);
 
   const getFormData = useCallback((): Partial<SavedFormData> => ({

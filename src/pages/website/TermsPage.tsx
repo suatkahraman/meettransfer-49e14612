@@ -254,7 +254,7 @@ const TermsPage = () => {
           <h2>{t("contactInfo")}</h2>
           <p>
             <strong>Meet Transfer</strong><br />
-            Email: info@meettransfer.app<br />
+            Email: info@meettransfer.com<br />
             {t("phoneWhatsApp")}: +1 (555) 805-1101
           </p>
 

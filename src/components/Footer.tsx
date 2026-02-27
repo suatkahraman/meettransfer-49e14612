@@ -18,7 +18,7 @@ const TripAdvisorBadge = () => (
       />
     </svg>
     <div className="flex items-center gap-1.5">
-      <span className="text-sm font-bold text-primary-foreground">4.7</span>
+      <span className="text-sm font-bold text-primary-foreground">4.8</span>
       <div className="flex">
         {[...Array(5)].map((_, i) => (
           <Star

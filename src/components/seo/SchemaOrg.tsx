@@ -82,7 +82,7 @@ const companyInfo = {
   logo: `${baseUrl}/favicon.png`,
   description: 'Premium VIP airport transfer and chauffeur service worldwide. Luxury Mercedes fleet with professional drivers.',
   telephone: '+15558051101',
-  email: 'info@meettransfer.app',
+  email: 'info@meettransfer.com',
   address: {
     '@type': 'PostalAddress',
     addressCountry: 'TR',

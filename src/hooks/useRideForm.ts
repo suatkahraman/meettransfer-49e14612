@@ -105,6 +105,8 @@ function parseFlexibleTime(timeStr: string): string | null {
   return null;
 }
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 export interface UseRideFormReturn {
   // State
   pickup: string;
@@ -150,6 +152,7 @@ export interface UseRideFormReturn {
 
 export function useRideForm(t: (key: string) => string | undefined): UseRideFormReturn {
   const navigate = useNavigate();
+  const { language, getLocalizedPath } = useLanguage();
   const { loadSavedFormData } = useHeroFormStorage();
   const { promoCode: activePromo } = usePromo();
   
@@ -329,7 +332,7 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     params.set("date", format(date!, "yyyy-MM-dd"));
     params.set("time", time);
     params.set("passengers", passengers);
-    // Araç book sayfasında seçilecek - Hero'dan gönderilmez
+    params.set("vehicleType", vehicleType);
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
     
     // Return trip params
@@ -347,9 +350,10 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     params.set("showVehicleSelection", "true");
     params.set("lang", language);
     
-    const url = `/book?${params.toString()}`;
-    window.open(url, "_self");
-  }, [pickup, dropoff, date, time, passengers, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount, language]);
+    const url = getLocalizedPath(`/book?${params.toString()}`);
+    console.log("[useRideForm] Navigating to:", url);
+    navigate(url);
+  }, [pickup, dropoff, date, time, passengers, vehicleType, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount, language, getLocalizedPath]);
 
   const handleApplyBooking = useCallback((data: BookingData) => {
     let hasChanges = false;

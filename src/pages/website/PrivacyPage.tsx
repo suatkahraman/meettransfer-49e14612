@@ -119,7 +119,7 @@ const PrivacyPage = () => {
         <p>{t("contactIntro")}</p>
         <p>
           <strong>Meet Transfer</strong><br />
-          Email: info@meettransfer.app<br />
+          Email: info@meettransfer.com<br />
           {t("phoneWhatsApp")}: +1 (555) 805-1101
         </p>
 

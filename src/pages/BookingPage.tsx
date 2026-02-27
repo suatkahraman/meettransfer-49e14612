@@ -1,8 +1,10 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const BookingPage = () => {
   const [searchParams] = useSearchParams();
+  const { t } = useLanguage();
   
   // Construct the external URL with current search params
   const externalUrl = new URL("https://meettransfer.com/book");
@@ -12,7 +14,8 @@ const BookingPage = () => {
   
   // Add language if not present
   if (!externalUrl.searchParams.has("lang")) {
-    externalUrl.searchParams.set("lang", "TR");
+    const { language } = useLanguage();
+    externalUrl.searchParams.set("lang", language);
   }
 
   return (
@@ -20,7 +23,7 @@ const BookingPage = () => {
       <header className="bg-black border-b border-white/10 h-16 flex items-center px-4">
         <Link to="/" className="text-white flex items-center gap-2 hover:text-accent transition-colors">
           <ArrowLeft className="h-5 w-5" />
-          <span className="font-medium">Geri Dön</span>
+          <span className="font-medium">{t("back") || "Geri Dön"}</span>
         </Link>
       </header>
       <div className="flex-1 w-full overflow-hidden bg-white">

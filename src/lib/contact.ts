@@ -18,7 +18,7 @@ export const EMERGENCY_PHONE = "+905321748390";
 export const EMERGENCY_PHONE_DISPLAY = "+90 532 174 83 90";
 
 // Email addresses
-export const SUPPORT_EMAIL = "info@meettransfer.app";
+export const SUPPORT_EMAIL = "info@meettransfer.com";
 
 // Global office locations
 export interface OfficeLocation {
