@@ -18,7 +18,6 @@ import FloatingWhatsApp from "@/components/website/FloatingWhatsApp";
 import GeoLanguageInitializer from "@/components/GeoLanguageInitializer";
 import { UpdateManager } from "@/components/UpdateManager";
 import { PWAInstallPrompt } from "@/components/website/PWAInstallPrompt";
-import { PWADebugPanel } from "@/components/website/PWADebugPanel";
 import AdBlockWarning from "@/components/AdBlockWarning";
 import CanonicalManager from "@/components/seo/CanonicalManager";
 import OfflineIndicator from "@/components/OfflineIndicator";
@@ -28,7 +27,6 @@ const DeferredAppShell = () => (
     <GeoLanguageInitializer />
     <UpdateManager />
     <PWAInstallPrompt />
-    <PWADebugPanel />
     <AdBlockWarning />
     <CanonicalManager />
     <OfflineIndicator />
