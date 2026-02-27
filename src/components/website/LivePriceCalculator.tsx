@@ -180,9 +180,12 @@ const LivePriceCalculator = () => {
       pickup,
       dropoff,
       vehicle: vehicleType,
+      lang: language === 'TR' ? 'TR' : 'EN'
     });
     if (displayCurrency !== "EUR") params.set("currency", displayCurrency);
-    navigate(`/quick-booking?${params.toString()}`);
+    
+    const url = `/book?${params.toString()}`;
+    window.open(url, "_self");
   };
 
   const formatPrice = (priceEur: number) => {

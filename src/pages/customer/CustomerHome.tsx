@@ -1188,201 +1188,33 @@ const CustomerHome = () => {
       localStorage.setItem(`recentSearches_${user.id}`, JSON.stringify(updatedSearches));
     }
 
-    const selectedVehiclePriceEur = vehiclePrices[vehicleType];
-    const hasPrice = selectedVehiclePriceEur && selectedVehiclePriceEur > 0;
-    const initialStatus = hasPrice ? 'confirmed' : 'awaiting-price';
-    const priceToSave = selectedCurrency === 'EUR' 
-      ? (selectedVehiclePriceEur || null) 
-      : (getDisplayPrice(selectedVehiclePriceEur) || null);
+    // Construct the external URL with current form data
+    const params = new URLSearchParams({
+      pickup: result.data.pickup.trim(),
+      dropoff: result.data.dropoff.trim(),
+      date: result.data.date,
+      time: result.data.time,
+      passengers: validPassengerNames.length.toString(),
+      lang: language === 'TR' ? 'TR' : 'EN',
+      vehicle: vehicleType,
+      luggage: formData.luggageCount,
+      babySeats: formData.babySeatCount,
+      phone: result.data.passengerPhone.trim()
+    });
 
-    try {
-      // Create main reservation directly in database
-      // MEET TRANSFER ONLİNE agency ID - auto-assign for all customer panel reservations
-      const MEET_TRANSFER_ONLINE_AGENCY_ID = "1ea14d07-f734-4fcd-b651-df2304de3d03";
-      
-      const reservationData = {
-        customer_id: user?.id,
-        customer_name: validPassengerNames[0],
-        customer_phone: result.data.passengerPhone.trim(),
-        pickup: result.data.pickup.trim(),
-        dropoff: result.data.dropoff.trim(),
-        pickup_date: result.data.date,
-        pickup_time: result.data.time,
-        vehicle_type: vehicleType,
-        price: priceToSave,
-        price_currency: selectedCurrency || 'EUR',
-        status: initialStatus,
-        payment_type: result.data.paymentType,
-        luggage_count: parseInt(formData.luggageCount) || 1,
-        baby_seat_count: parseInt(formData.babySeatCount) || 0,
-        customer_notes: formData.customerNotes.trim() || null,
-        flight_number: result.data.flightNumber?.trim() || null,
-        passenger_names: validPassengerNames,
-        agency_id: MEET_TRANSFER_ONLINE_AGENCY_ID, // Auto-assign Meet Transfer Online
-      };
-
-      const { data: reservation, error: reservationError } = await supabase
-        .from('reservations')
-        .insert([reservationData])
-        .select()
-        .single();
-
-      if (reservationError) {
-        console.error('Failed to create reservation:', reservationError);
-        toast.error(language === 'TR' 
-          ? 'Rezervasyon oluşturulamadı. Lütfen tekrar deneyin.'
-          : 'Failed to create reservation. Please try again.');
-        setIsLoading(false);
-        return;
-      }
-
-      // Create agency_reservation_details for Meet Transfer Online agency pricing
-      if (reservation?.id) {
-        try {
-          await supabase
-            .from('agency_reservation_details')
-            .insert({
-              reservation_id: reservation.id,
-              customer_price: priceToSave || 0,
-              company_amount: priceToSave || 0,
-              agency_price_currency: selectedCurrency || 'EUR',
-              agency_notes: 'Customer Panel - Direct Booking',
-              payment_status: 'not_paid',
-            });
-          console.log('Agency reservation details created for main reservation');
-        } catch (agencyDetailError) {
-          console.log('Agency detail creation skipped:', agencyDetailError);
-        }
-      }
-
-      // Create return trip if requested (with discount applied)
-      if (formData.hasReturnTrip && formData.returnDate && formData.returnTime) {
-        const returnPriceEur = selectedVehiclePriceEur ? getReturnPrice(selectedVehiclePriceEur) : null;
-        const returnPrice = returnPriceEur != null && selectedCurrency !== 'EUR' 
-          ? getDisplayPrice(returnPriceEur) 
-          : returnPriceEur;
-        
-        const returnReservationData = {
-          customer_id: user?.id,
-          customer_name: validPassengerNames[0],
-          customer_phone: result.data.passengerPhone.trim(),
-          pickup: result.data.dropoff.trim(), // Swap
-          dropoff: result.data.pickup.trim(), // Swap
-          pickup_date: formData.returnDate,
-          pickup_time: formData.returnTime,
-          vehicle_type: formData.vehicleType,
-          price: returnPrice, // Discounted price for return
-          price_currency: selectedCurrency || 'EUR',
-          status: initialStatus,
-          payment_type: result.data.paymentType,
-          luggage_count: parseInt(formData.luggageCount) || 1,
-          baby_seat_count: parseInt(formData.babySeatCount) || 0,
-          customer_notes: formData.customerNotes.trim() || null,
-          passenger_names: validPassengerNames,
-          is_return_transfer: true,
-          original_reservation_id: reservation?.id,
-          promo_code: returnPromoCode?.code || null, // Track promo code used
-          discount_percentage: returnDiscountPercentage,
-          discount_amount: priceToSave && returnPrice ? (priceToSave - returnPrice) : null,
-          agency_id: MEET_TRANSFER_ONLINE_AGENCY_ID, // Auto-assign Meet Transfer Online
-        };
-
-        const { data: returnReservation, error: returnError } = await supabase
-          .from('reservations')
-          .insert([returnReservationData])
-          .select()
-          .single();
-
-        if (returnError) {
-          console.error('Failed to create return reservation:', returnError);
-          // Main reservation was created, just notify about return
-          toast.warning(language === 'TR' 
-            ? 'Ana rezervasyon oluşturuldu ancak dönüş transferi eklenemedi.'
-            : 'Main reservation created but return trip could not be added.');
-        } else if (returnReservation?.id) {
-          // Create agency_reservation_details for return reservation
-          try {
-            await supabase
-              .from('agency_reservation_details')
-              .insert({
-                reservation_id: returnReservation.id,
-                customer_price: returnPrice || 0,
-                company_amount: returnPrice || 0,
-                agency_price_currency: selectedCurrency || 'EUR',
-                agency_notes: 'Customer Panel - Return Trip',
-                payment_status: 'not_paid',
-              });
-            console.log('Agency reservation details created for return reservation');
-          } catch (agencyDetailError) {
-            console.log('Agency detail creation for return skipped:', agencyDetailError);
-          }
-          
-          // Auto-assign driver for return reservation
-          try {
-            await supabase.functions.invoke('auto-price-reservation', {
-              body: { reservation_id: returnReservation.id }
-            });
-          } catch (autoPriceError) {
-            console.log('Auto-pricing for return reservation skipped:', autoPriceError);
-          }
-        }
-      }
-
-      // Auto-assign driver for main reservation
-      try {
-        const { data: autoPriceResult } = await supabase.functions.invoke('auto-price-reservation', {
-          body: { reservation_id: reservation.id }
-        });
-        
-        if (autoPriceResult?.driverAssigned) {
-          console.log('Driver auto-assigned:', autoPriceResult.driverName);
-        }
-      } catch (autoPriceError) {
-        console.log('Auto-pricing/assignment skipped:', autoPriceError);
-      }
-
-      // Success - show confirmation
-      toast.success(language === 'TR' 
-        ? `Rezervasyonunuz oluşturuldu! Kod: ${reservation?.reservation_code}`
-        : `Your reservation has been created! Code: ${reservation?.reservation_code}`);
-
-      // Reset form
-      setFormData({
-        pickup: '',
-        dropoff: '',
-        date: '',
-        time: '',
-        flightNumber: '',
-        passengerPhone: profileData.phone || '',
-        vehicleType: 'mercedes-vito',
-        paymentType: 'cash',
-        luggageCount: '1',
-        babySeatCount: '0',
-        customerNotes: '',
-        hasReturnTrip: false,
-        returnDate: '',
-        returnTime: '',
-      });
-      setPassengerNames(['']);
-      setVehiclePrices({});
-      setIsBookingFormOpen(false);
-
-      // Refresh data to show the new reservation
-      fetchData();
-
-      // Navigate to reservation detail
-      if (reservation?.id) {
-        navigate(`/customer/reservation/${reservation.id}`);
-      }
-
-    } catch (error) {
-      console.error('Error creating reservation:', error);
-      toast.error(language === 'TR' 
-        ? 'Bir hata oluştu. Lütfen tekrar deneyin.'
-        : 'An error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+    if (formData.hasReturnTrip) {
+      params.set("returnTrip", "true");
+      params.set("returnDate", formData.returnDate);
+      params.set("returnTime", formData.returnTime);
     }
+
+    if (formData.flightNumber) {
+      params.set("flight", formData.flightNumber.trim());
+    }
+
+    const url = `/book?${params.toString()}`;
+    window.open(url, "_self");
+    setIsLoading(false);
   };
 
   // Removed showPricePreparation animation - now reservations are created directly

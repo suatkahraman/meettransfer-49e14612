@@ -293,9 +293,12 @@ export function useHourlyForm(
     params.set("passengers", hourlyPassengers);
     // Araç book sayfasında seçilecek - Hero'dan gönderilmez
     params.set("type", "hourly");
+    params.set("lang", language);
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
-    navigate(getLocalizedPath(`/book?${params.toString()}`));
-  }, [hourlyCity, hourlyDate, hourlyTime, hourlyDuration, customHours, hourlyPassengers, hourlyVehicleType, appliedPromoCode, navigate, t, getLocalizedPath]);
+    
+    const url = `/book?${params.toString()}`;
+    window.open(url, "_self");
+  }, [hourlyCity, hourlyDate, hourlyTime, hourlyDuration, customHours, hourlyPassengers, hourlyVehicleType, appliedPromoCode, navigate, t, getLocalizedPath, language]);
 
   const getFormData = useCallback((): Partial<SavedFormData> => ({
     hourlyCity,

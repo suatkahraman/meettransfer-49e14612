@@ -345,9 +345,11 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     
     // Flag to show vehicle selection on Book page
     params.set("showVehicleSelection", "true");
+    params.set("lang", language);
     
-    navigate(`/book?${params.toString()}`);
-  }, [pickup, dropoff, date, time, passengers, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount]);
+    const url = `/book?${params.toString()}`;
+    window.open(url, "_self");
+  }, [pickup, dropoff, date, time, passengers, appliedPromoCode, navigate, t, hasReturnTrip, returnDate, returnTime, babySeatCount, luggageCount, language]);
 
   const handleApplyBooking = useCallback((data: BookingData) => {
     let hasChanges = false;

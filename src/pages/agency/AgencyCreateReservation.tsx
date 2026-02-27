@@ -95,18 +95,50 @@ const AgencyCreateReservation = () => {
     }));
   };
 
-  // Sadece acenta dashboard için: Query string ile yönlendirme, supabase işlemi yok
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validPassengerNames = passengerNames.filter(name => name.trim() !== '');
+    if (validPassengerNames.length === 0) {
+      toast.error(t('atLeastOnePassenger'));
+      return;
+    }
+    
+    if (!formData.customer_phone || !formData.pickup || !formData.dropoff || !formData.pickup_date || !formData.pickup_time) {
+      toast.error(t('fillAllRequired'));
+      return;
+    }
+
+    if (!agencyId) {
+      toast.error(t('agencyNotFound'));
+      return;
+    }
+
+    // Construct the external URL with current form data
     const params = new URLSearchParams({
-      pickup: formData.pickup,
-      dropoff: formData.dropoff,
+      pickup: formData.pickup.trim(),
+      dropoff: formData.dropoff.trim(),
       date: formData.pickup_date,
       time: formData.pickup_time,
-      passengers: String(passengerNames.length),
-      lang: 'TR',
+      passengers: validPassengerNames.length.toString(),
+      lang: language === 'TR' ? 'TR' : 'EN',
+      vehicle: formData.vehicle_type,
+      luggage: formData.luggage_count,
+      babySeats: formData.baby_seat_count,
+      phone: formData.customer_phone.trim()
     });
-    window.open(`https://meettransfer.com/book?${params.toString()}`, '_self');
+
+    if (formData.flight_number) {
+      params.set("flight", formData.flight_number.trim());
+    }
+
+    if (formData.customer_notes) {
+      params.set("notes", formData.customer_notes.trim());
+    }
+
+    const url = `/book?${params.toString()}`;
+    window.open(url, "_self");
+    setSaving(false);
   };
 
   return (
@@ -224,7 +256,48 @@ const AgencyCreateReservation = () => {
                     dropoff: t('dropoffPoint'),
                     sectionTitle: t('transferDetails'),
                   }}
+                  placeholders={{
+                    pickup: t('enterPickupPoint'),
+                    dropoff: t('enterDropoffPoint'),
+                  }}
+                  showMap={true}
+                  showNavigationButtons={false}
+                  layout="vertical"
                 />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="pickup_date">{t('date')} *</Label>
+                    <Input
+                      id="pickup_date"
+                      type="date"
+                      value={formData.pickup_date}
+                      onChange={(e) => setFormData({ ...formData, pickup_date: e.target.value })}
+                      min={new Date().toISOString().split('T')[0]}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pickup_time">{t('time')} *</Label>
+                    <Input
+                      id="pickup_time"
+                      type="time"
+                      value={formData.pickup_time}
+                      onChange={(e) => setFormData({ ...formData, pickup_time: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="flight_number">{t('flightNumber')}</Label>
+                  <Input
+                    id="flight_number"
+                    value={formData.flight_number}
+                    onChange={(e) => setFormData({ ...formData, flight_number: e.target.value.toUpperCase() })}
+                    placeholder="TK1234"
+                  />
+                </div>
 
                 <div>
                   <Label htmlFor="vehicle_type">{t('vehicleType')}</Label>
