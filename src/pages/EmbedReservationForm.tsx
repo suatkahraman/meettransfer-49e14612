@@ -239,7 +239,7 @@ const DURATION_OPTIONS = [
 ];
 
 // Base URL for redirects
-const BASE_URL = "https://meettransfer.app";
+const BASE_URL = "https://meettransfer.com";
 
 const EmbedReservationForm = () => {
   const [searchParams] = useSearchParams();

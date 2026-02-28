@@ -7,7 +7,7 @@ const BookingPage = () => {
   const { t } = useLanguage();
   
   // Construct the external URL with current search params
-  const externalUrl = new URL("https://meettransfer.com/book");
+  const externalUrl = new URL("https://reservations.meettransfer.app/");
   searchParams.forEach((value, key) => {
     externalUrl.searchParams.set(key, value);
   });

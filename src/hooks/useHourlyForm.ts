@@ -296,6 +296,16 @@ export function useHourlyForm(
     params.set("lang", language);
     if (appliedPromoCode) params.set("promoCode", appliedPromoCode);
     
+    // Check if we are already on the booking engine (standalone page or iframe)
+    const isStandalone = window.location.hostname.includes("reservations") || window.location.pathname.includes("/reserve");
+    
+    if (isStandalone) {
+      console.log("[useHourlyForm] Standalone mode: Showing vehicle selection in-place");
+      document.getElementById('vehicle-selection')?.scrollIntoView({ behavior: 'smooth' });
+      setSubmitting(false);
+      return;
+    }
+
     const url = getLocalizedPath(`/book?${params.toString()}`);
     console.log("[useHourlyForm] Navigating to:", url);
     navigate(url);

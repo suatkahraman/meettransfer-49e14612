@@ -350,6 +350,19 @@ export function useRideForm(t: (key: string) => string | undefined): UseRideForm
     params.set("showVehicleSelection", "true");
     params.set("lang", language);
     
+    // If we are already on the booking engine (standalone page or iframe), 
+    // we don't need to redirect, just show the vehicle selection.
+    // However, if we are on the homepage or embed form, we redirect to the /book page.
+    const isStandalone = window.location.hostname.includes("reservations") || window.location.pathname.includes("/reserve");
+    
+    if (isStandalone) {
+      console.log("[useRideForm] Standalone mode: Showing vehicle selection in-place");
+      // Scroll to vehicle selection if it's on the same page
+      document.getElementById('vehicle-selection')?.scrollIntoView({ behavior: 'smooth' });
+      setSubmitting(false);
+      return;
+    }
+
     const url = getLocalizedPath(`/book?${params.toString()}`);
     console.log("[useRideForm] Navigating to:", url);
     navigate(url);
